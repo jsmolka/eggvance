@@ -1,0 +1,4 @@
+# Visual Studio
+.vs/
+bin/
+*.user
