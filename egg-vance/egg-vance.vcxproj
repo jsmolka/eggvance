@@ -143,11 +143,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\arm\arm.cpp" />
+    <ClCompile Include="src\arm7\arm7.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\arm\arm.h" />
+    <ClInclude Include="src\arm7\arm7.h" />
     <ClInclude Include="src\utility\integer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

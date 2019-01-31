@@ -2,22 +2,36 @@
 
 #include "utility/integer.h"
 
-class ARM
+class ARM7
 {
 public:
-    // Ref: Datasheet p. 17
     enum Mode
     {
-        MODE_USR,  // Normal program execution state
-        MODE_FIQ,  // Support data transfer or channel process
-        MODE_IRQ,  // Generl purpose interrupt handling
-        MODE_SVC,  // Protected mode for the operating system
-        MODE_ABT,  // Entered after data or insruction prefetch abort
-        MODE_SYS,  // Privileged user mode for the operating system
-        MODE_UND   // Entered when an undefined instruction is executed
+        MODE_USR = 0b10000,  // Normal program execution state
+        MODE_FIQ = 0b10001,  // Support data transfer or channel process
+        MODE_IRQ = 0b10010,  // Generl purpose interrupt handling
+        MODE_SVC = 0b10011,  // Protected mode for the operating system
+        MODE_ABT = 0b10111,  // Entered after data or insruction prefetch abort
+        MODE_SYS = 0b11111,  // Privileged user mode for the operating system
+        MODE_UND = 0b11011   // Entered when an undefined instruction is executed
     } mode;
 
-    // Ref: Datasheet p. 17
+    enum Control
+    {
+        CTRL_MODE  = 0b11111,   // 5 Mode bits
+        CTRL_STATE = (1 << 5),  // State bit (1 = THUMB mode)
+        CTRL_FIQ   = (1 << 6),  // FIQ disable
+        CTRL_IRQ   = (1 << 7)   // IRQ disable
+    };
+
+    enum Flags
+    {
+        FLAG_V = (1 << 28),  // Overflow
+        FLAG_C = (1 << 29),  // Underflow
+        FLAG_Z = (1 << 30),  // Zero
+        FLAG_N = (1 << 31)   // Negative / less than
+    };
+
     struct Registers
     {
         // General purpose registers
@@ -38,7 +52,7 @@ public:
         // Stack Pointer (SP)
         u32 r13;
 
-        // Subroutine Link Register (SLR)
+        // Link Register (LR)
         // Receives a copy of R15 when a Branch and Link instruction is 
         // executed
         u32 r14;
@@ -52,6 +66,10 @@ public:
         // Contains condition code flags and current mode bits
         u32 cpsr; 
 
+        // Banked USR registers
+        u32 r13_usr;
+        u32 r14_usr;
+
         // Banked FIQ registers
         u32 r8_fiq;
         u32 r9_fiq;
@@ -60,36 +78,37 @@ public:
         u32 r12_fiq;
         u32 r13_fiq;
         u32 r14_fiq;
-
-        // Banked USR registers
-        u32 r13_usr;
-        u32 r14_usr;
-
-        // Banked IRQ registers
-        u32 r13_irq;
-        u32 r14_irq;
+        u32 spsr_fiq;
 
         // Banked SVC registers
         u32 r13_svc;
         u32 r14_svc;
+        u32 spsr_svc;
 
         // Banked ABT registers
         u32 r13_abt;
         u32 r14_abt;
+        u32 spsr_abt;
+
+        // Banked IRQ registers
+        u32 r13_irq;
+        u32 r14_irq;
+        u32 spsr_irq;
 
         // Banked UND registers
         u32 r13_und;
         u32 r14_und;
+        u32 spsr_und;
     } regs;
 
-    ARM();
+    ARM7();
 
     void reset();
 
-    // Ref: Datasheet p. 18
     u32 reg(u8 number) const;
     void setReg(u8 number, u32 value);
 
-    // Todo: State Program Status Registers
+    u32 spsr(u8 number) const;
+    void setSpsr(u8 number, u32 value);
 };
 

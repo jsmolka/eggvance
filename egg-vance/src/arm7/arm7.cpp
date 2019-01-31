@@ -1,18 +1,18 @@
-#include "arm.h"
+#include "arm7.h"
 
 #include <iostream>
 
-ARM::ARM()
+ARM7::ARM7()
 {
 
 }
 
-void ARM::reset()
+void ARM7::reset()
 {
     mode = MODE_USR;
 }
 
-u32 ARM::reg(u8 number) const
+u32 ARM7::reg(u8 number) const
 {
     switch (number)
     {
@@ -59,9 +59,10 @@ u32 ARM::reg(u8 number) const
     default:
         std::cout << __FUNCTION__ << " - Tried accessing invalid register " << (int)number << "\n";
     }
+    return 0;
 }
 
-void ARM::setReg(u8 number, u32 value)
+void ARM7::setReg(u8 number, u32 value)
 {
     switch (number)
     {
@@ -138,5 +139,36 @@ void ARM::setReg(u8 number, u32 value)
 
     default:
         std::cout << __FUNCTION__ << " - Tried setting invalid register " << (int)number << "\n";
+    }
+}
+
+u32 ARM7::spsr(u8 number) const
+{
+    switch (mode)
+    {
+    case MODE_FIQ: return regs.spsr_fiq;
+    case MODE_SVC: return regs.spsr_svc;
+    case MODE_ABT: return regs.spsr_abt;
+    case MODE_IRQ: return regs.spsr_fiq;
+    case MODE_UND: return regs.spsr_und;
+
+    default:
+        std::cout << __FUNCTION__ << " - Tried accessing invalid spsr " << (int)number << "\n";
+    }
+    return 0;
+}
+
+void ARM7::setSpsr(u8 number, u32 value)
+{
+    switch (mode)
+    {
+    case MODE_FIQ: regs.spsr_fiq = value; break;
+    case MODE_SVC: regs.spsr_svc = value; break;
+    case MODE_ABT: regs.spsr_abt = value; break;
+    case MODE_IRQ: regs.spsr_fiq = value; break;
+    case MODE_UND: regs.spsr_und = value; break;
+
+    default:
+        std::cout << __FUNCTION__ << " - Tried setting invalid spsr " << (int)number << "\n";
     }
 }
