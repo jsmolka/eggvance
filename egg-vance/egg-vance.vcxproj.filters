@@ -18,15 +18,21 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\arm7\arm7.cpp">
+    <ClCompile Include="src\arm7.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mmu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\utility\integer.h">
+    <ClInclude Include="src\arm7.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\arm7\arm7.h">
+    <ClInclude Include="src\integer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

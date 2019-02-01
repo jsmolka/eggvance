@@ -1,6 +1,6 @@
 #pragma once
 
-#include "utility/integer.h"
+#include "integer.h"
 
 class ARM7
 {
@@ -26,10 +26,31 @@ public:
 
     enum Flags
     {
+        FLAG_Q = (1 << 27),  // Sticky overflow
         FLAG_V = (1 << 28),  // Overflow
         FLAG_C = (1 << 29),  // Underflow
         FLAG_Z = (1 << 30),  // Zero
         FLAG_N = (1 << 31)   // Negative / less than
+    };
+
+    enum Condition
+    {
+        EQ = 0x0,  // Z = 1, equal (zero)
+        NE = 0x1,  // Z = 0, not equal (nonzero)
+        CS = 0x2,  // C = 1, carry set (unsigned higher or same)
+        CC = 0x3,  // C = 0, carry cleared (carry cleared)
+        MI = 0x4,  // N = 1, minus (negative)
+        PL = 0x5,  // N = 0, plus (positive)
+        VS = 0x6,  // V = 1, V set (overflow)
+        VC = 0x7,  // V = 0, V cleared (no overflow)
+        HI = 0x8,  // C = 1 and Z = 0, unsigned higher
+        LS = 0x9,  // C = 0 or Z = 1, unsigned lower or same
+        GE = 0xA,  // N = V, greater or equal
+        LT = 0xB,  // N <> V, less than
+        GT = 0xC,  // Z = 1 and N = V, greater than
+        LE = 0xD,  // Z = 1 or N <> V, less or equal
+        AL = 0xE,  // Always
+        NV = 0xF,  // Never
     };
 
     struct Registers
@@ -110,5 +131,7 @@ public:
 
     u32 spsr(u8 number) const;
     void setSpsr(u8 number, u32 value);
+
+    u32 pipeline[3];
 };
 

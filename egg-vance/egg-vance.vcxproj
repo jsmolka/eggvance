@@ -143,12 +143,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\arm7\arm7.cpp" />
+    <ClCompile Include="src\mmu.cpp" />
+    <ClCompile Include="src\arm7.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\arm7\arm7.h" />
-    <ClInclude Include="src\utility\integer.h" />
+    <ClInclude Include="src\mmu.h" />
+    <ClInclude Include="src\arm7.h" />
+    <ClInclude Include="src\integer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
