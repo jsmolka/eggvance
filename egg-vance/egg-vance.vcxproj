@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\instr-thumb.cpp" />
     <ClCompile Include="src\mmu.cpp" />
     <ClCompile Include="src\arm7.cpp" />
     <ClCompile Include="src\main.cpp" />

@@ -10,6 +10,7 @@ ARM7::ARM7()
 void ARM7::reset()
 {
     mode = MODE_USR;
+    state = STATE_ARM;
 }
 
 u32 ARM7::reg(u8 number) const
@@ -74,40 +75,11 @@ void ARM7::setReg(u8 number, u32 value)
     case 5: regs.r5 = value; break;
     case 6: regs.r6 = value; break;
     case 7: regs.r7 = value; break;
-    case 8: 
-        if (mode == MODE_FIQ)
-            regs.r8_fiq = value;
-        else
-            regs.r8 = value;
-        break;    
-    
-    case 9: 
-        if (mode == MODE_FIQ)
-            regs.r9_fiq = value;
-        else
-            regs.r9 = value;
-        break;    
-
-    case 10: 
-        if (mode == MODE_FIQ)
-            regs.r10_fiq = value;
-        else
-            regs.r10 = value;
-        break;    
-
-    case 11: 
-        if (mode == MODE_FIQ)
-            regs.r11_fiq = value;
-        else
-            regs.r11 = value;
-        break;    
-
-    case 12: 
-        if (mode == MODE_FIQ)
-            regs.r12_fiq = value;
-        else
-            regs.r12 = value;
-        break;
+    case 8: (mode == MODE_FIQ ? regs.r8_fiq : regs.r8) = value; break;
+    case 9: (mode == MODE_FIQ ? regs.r9_fiq : regs.r9) = value; break;
+    case 10: (mode == MODE_FIQ ? regs.r10_fiq : regs.r10) = value; break;
+    case 11: (mode == MODE_FIQ ? regs.r11_fiq : regs.r11) = value; break;
+    case 12: (mode == MODE_FIQ ? regs.r12_fiq : regs.r12) = value; break;
 
     case 13:
         switch (mode)
@@ -171,4 +143,97 @@ void ARM7::setSpsr(u8 number, u32 value)
     default:
         std::cout << __FUNCTION__ << " - Tried setting invalid spsr " << (int)number << "\n";
     }
+}
+
+void ARM7::fetch()
+{
+    if (state == STATE_ARM)
+    {
+        pipeline[0] = mmu->read32(regs.r15);
+    }
+    else  // THUMB
+    {
+        pipeline[0] = mmu->read16(regs.r15);
+    }
+}
+
+void ARM7::decode()
+{
+    if (state == STATE_ARM)
+    {
+
+    }
+    else  // THUMB
+    {
+        u16 value = pipeline[0] & 0xFFFF;
+
+        switch (value >> 14)
+        {
+        case 0b00:
+        {
+            break;
+        }
+
+        case 0b01:
+            if ((value >> 13) & 0b1)
+            {
+                loadStoreWithImmediateOffset(value);
+            }
+            else
+            {
+                if ((value >> 10) & 0b0000)
+                    aluOperations(value);
+                else if ((value >> 10) & 0b0001)
+                    highRegisterBranchExchange(value);
+                else if ((value >> 11) & 0b001)
+                    pcRelativeLoad(value);
+                else if ((value >> 9) & 0b1)
+                    loadStoreSignExtendedByteHalfword(value);
+                else
+                    loadStoreWithRegisterOffset(value);
+            }
+            break;
+
+        case 0b10:
+            switch ((value >> 12) & 0b11)
+            {
+            case 0b00: loadStoreHalfword(value); break;
+            case 0b01: spRelativeLoadStore(value); break;
+            case 0b10: loadAddress(value); break;
+            case 0b11:
+                if ((value >> 10) & 0b1)
+                    pushPopRegisters(value);
+                else
+                    addOffsetToSp(value);
+                break;
+            }
+            break;
+
+        case 0b11:
+            switch ((value >> 12) & 0b11)
+            {
+            case 0b00: multipleLoadStore(value); break;
+            case 0b01: 
+                if ((value >> 8) & 0b1111)
+                    softwareInterrupt(value);
+                else
+                    // Condition cannot be 0b1111
+                    conditionalBranch(value);
+                break;
+            case 0b10: unconditionalBranch(value); break;
+            case 0b11: longBranchWithLink(value); break;
+            }
+            break;
+        }
+    }
+}
+
+void ARM7::execute()
+{
+
+}
+
+void ARM7::step()
+{
+    execute();
 }

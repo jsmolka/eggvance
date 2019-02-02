@@ -1,10 +1,18 @@
 #pragma once
 
 #include "integer.h"
+#include "mmu.h"
 
 class ARM7
 {
 public:
+    #pragma region Enums
+    enum State
+    {
+        STATE_ARM   = 0,
+        STATE_THUMB = 1
+    } state;
+
     enum Mode
     {
         MODE_USR = 0b10000,  // Normal program execution state
@@ -35,24 +43,26 @@ public:
 
     enum Condition
     {
-        EQ = 0x0,  // Z = 1, equal (zero)
-        NE = 0x1,  // Z = 0, not equal (nonzero)
-        CS = 0x2,  // C = 1, carry set (unsigned higher or same)
-        CC = 0x3,  // C = 0, carry cleared (carry cleared)
-        MI = 0x4,  // N = 1, minus (negative)
-        PL = 0x5,  // N = 0, plus (positive)
-        VS = 0x6,  // V = 1, V set (overflow)
-        VC = 0x7,  // V = 0, V cleared (no overflow)
-        HI = 0x8,  // C = 1 and Z = 0, unsigned higher
-        LS = 0x9,  // C = 0 or Z = 1, unsigned lower or same
-        GE = 0xA,  // N = V, greater or equal
-        LT = 0xB,  // N <> V, less than
-        GT = 0xC,  // Z = 1 and N = V, greater than
-        LE = 0xD,  // Z = 1 or N <> V, less or equal
-        AL = 0xE,  // Always
-        NV = 0xF,  // Never
+        COND_EQ = 0x0,  // Z = 1, equal (zero)
+        COND_NE = 0x1,  // Z = 0, not equal (nonzero)
+        COND_CS = 0x2,  // C = 1, carry set (unsigned higher or same)
+        COND_CC = 0x3,  // C = 0, carry cleared (carry cleared)
+        COND_MI = 0x4,  // N = 1, minus (negative)
+        COND_PL = 0x5,  // N = 0, plus (positive)
+        COND_VS = 0x6,  // V = 1, V set (overflow)
+        COND_VC = 0x7,  // V = 0, V cleared (no overflow)
+        COND_HI = 0x8,  // C = 1 and Z = 0, unsigned higher
+        COND_LS = 0x9,  // C = 0 or Z = 1, unsigned lower or same
+        COND_GE = 0xA,  // N = V, greater or equal
+        COND_LT = 0xB,  // N <> V, less than
+        COND_GT = 0xC,  // Z = 1 and N = V, greater than
+        COND_LE = 0xD,  // Z = 1 or N <> V, less or equal
+        COND_AL = 0xE,  // Always
+        COND_NV = 0xF,  // Never
     };
+    #pragma endregion
 
+    #pragma region Registers
     struct Registers
     {
         // General purpose registers
@@ -121,6 +131,7 @@ public:
         u32 r14_und;
         u32 spsr_und;
     } regs;
+    #pragma endregion
 
     ARM7();
 
@@ -132,6 +143,30 @@ public:
     u32 spsr(u8 number) const;
     void setSpsr(u8 number, u32 value);
 
-    u32 pipeline[3];
-};
+    void fetch();
+    void decode();
+    void execute();
 
+    void step();
+
+    MMU* mmu;
+    
+    u32 pipeline[3];
+
+    void aluOperations(u16 instruction);
+    void highRegisterBranchExchange(u16 instruction);
+    void pcRelativeLoad(u16 instruction);
+    void loadStoreWithRegisterOffset(u16 instruction);
+    void loadStoreSignExtendedByteHalfword(u16 instruction);
+    void loadStoreWithImmediateOffset(u16 instruction);
+    void loadStoreHalfword(u16 instruction);
+    void spRelativeLoadStore(u16 instruction);
+    void loadAddress(u16 instruction);
+    void addOffsetToSp(u16 instruction);
+    void pushPopRegisters(u16 instruction);
+    void multipleLoadStore(u16 instruction);
+    void conditionalBranch(u16 instruction);
+    void softwareInterrupt(u16 instruction);
+    void unconditionalBranch(u16 instruction);
+    void longBranchWithLink(u16 instrution);
+};
