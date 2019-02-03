@@ -7,40 +7,40 @@ MMU::MMU()
 
 void MMU::reset()
 {
-    memory_map.clear();
-    memory_map.resize(0x10000000, 0);
+    memory.clear();
+    memory.resize(0x10000000, 0);
 }
 
-u8 MMU::read8(u32 address) const
+u8 MMU::readByte(u32 addr) const
 {
-    return memory_map[address];
+    return memory[addr];
 }
 
-u16 MMU::read16(u32 address) const
+u16 MMU::readHalf(u32 addr) const
 {
-    return (read8(address + 1) << 8) | read8(address);
+    return (readByte(addr + 1) << 8) | readByte(addr);
 }
 
-u32 MMU::read32(u32 address) const
+u32 MMU::readWord(u32 addr) const
 {
-    return (read8(address + 3) << 24) | (read8(address + 2) << 16) | (read8(address + 1) << 8) | read8(address);
+    return (readByte(addr + 3) << 24) | (readByte(addr + 2) << 16) | (readByte(addr + 1) << 8) | readByte(addr);
 }
 
-void MMU::write8(u32 address, u8 value)
+void MMU::writeByte(u32 addr, u8 byte)
 {
-    memory_map[address] = value;
+    memory[addr] = byte;
 }
 
-void MMU::write16(u32 address, u16 value)
+void MMU::writeHalf(u32 addr, u16 half)
 {
-    write8(address, value & 0xFF);
-    write8(address + 1, (value >> 8) & 0xFF);
+    writeByte(addr, half & 0xFF);
+    writeByte(addr + 1, half >> 8);
 }
 
-void MMU::write32(u32 address, u32 value)
+void MMU::writeWord(u32 addr, u32 word)
 {
-    write8(address, value & 0xFF);
-    write8(address + 1, (value >> 8) & 0xFF);
-    write8(address + 2, (value >> 16) & 0xFF);
-    write8(address + 3, (value >> 24) & 0xFF);
+    writeByte(addr, word & 0xFF);
+    writeByte(addr + 1, (word >> 8) & 0xFF);
+    writeByte(addr + 2, (word >> 16) & 0xFF);
+    writeByte(addr + 3, (word >> 24) & 0xFF);
 }

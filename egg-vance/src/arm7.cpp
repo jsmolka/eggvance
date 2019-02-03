@@ -10,9 +10,6 @@ ARM7::ARM7()
 
 void ARM7::reset()
 {
-    mode = MODE_USR;
-    state = STATE_ARM;
-
     pipe[0] = 0;
     pipe[1] = 0;
     pipe[2] = 0;
@@ -24,6 +21,8 @@ void ARM7::reset()
 
 u32 ARM7::reg(u8 number) const
 {
+    Mode mode = static_cast<Mode>(regs.cpsr & CPSR_M);
+
     switch (number)
     {
     case 0: return regs.r0;
@@ -74,6 +73,8 @@ u32 ARM7::reg(u8 number) const
 
 void ARM7::setReg(u8 number, u32 value)
 {
+    Mode mode = static_cast<Mode>(regs.cpsr & CPSR_M);
+
     switch (number)
     {
     case 0: regs.r0 = value; break;
@@ -125,7 +126,7 @@ void ARM7::setReg(u8 number, u32 value)
 
 u32 ARM7::spsr(u8 number) const
 {
-    switch (mode)
+    switch (static_cast<Mode>(regs.cpsr & CPSR_M))
     {
     case MODE_FIQ: return regs.spsr_fiq;
     case MODE_SVC: return regs.spsr_svc;
@@ -141,7 +142,7 @@ u32 ARM7::spsr(u8 number) const
 
 void ARM7::setSpsr(u8 number, u32 value)
 {
-    switch (mode)
+    switch (static_cast<Mode>(regs.cpsr & CPSR_M))
     {
     case MODE_FIQ: regs.spsr_fiq = value; break;
     case MODE_SVC: regs.spsr_svc = value; break;
@@ -156,10 +157,10 @@ void ARM7::setSpsr(u8 number, u32 value)
 
 void ARM7::fetch()
 {
-    if (state == STATE_ARM)
-        pipe[0] = mmu->read32(regs.r15);
+    if (regs.cpsr & CPSR_T)
+        pipe[0] = mmu->readHalf(regs.r15);
     else
-        pipe[0] = mmu->read16(regs.r15);
+        pipe[0] = mmu->readWord(regs.r15);
 
     pipe_instr[0] = UNDEFINED;
 }
@@ -169,11 +170,7 @@ void ARM7::decode()
     if (pipe_instr[1] == REFILL_PIPE)
         return;
 
-    if (state == STATE_ARM)
-    {
-
-    }
-    else
+    if (regs.cpsr & CPSR_T)
     {
         u16 instr = static_cast<u16>(pipe[1]);
 
@@ -255,99 +252,126 @@ void ARM7::decode()
             std::cout << __FUNCTION__ << " - Cannot decode THUMB instruction " << (int)instr << "\n";
         }
     }
+    else
+    {
+        // Todo: Decode ARM
+    }
 }
-
+ 
 void ARM7::execute()
 {
     if (pipe_instr[2] == REFILL_PIPE)
         return; 
 
-    u32 instr = pipe[2];
-
-    switch (pipe_instr[2])
+    if (regs.cpsr & CPSR_T)
     {
-    case THUMB_1: 
-        moveShiftedRegister(instr);
-        break;
+        u16 instr = static_cast<u16>(pipe[2]);
 
-    case THUMB_2:
-        addSubtract(instr);
-        break;
+        switch (pipe_instr[2])
+        {
+        case THUMB_1:
+            moveShiftedRegister(instr);
+            break;
 
-    case THUMB_3:
-        moveCompareAddSubtractAddImmediate(instr);
-        break;
+        case THUMB_2:
+            addSubtract(instr);
+            break;
 
-    case THUMB_4:
-        aluOperations(instr);
-        break;
+        case THUMB_3:
+            moveCompareAddSubtractAddImmediate(instr);
+            break;
 
-    case THUMB_5:
-        highRegisterBranchExchange(instr);
-        break;
+        case THUMB_4:
+            aluOperations(instr);
+            break;
 
-    case THUMB_6:
-        pcRelativeLoad(instr);
-        break;
+        case THUMB_5:
+            highRegisterBranchExchange(instr);
+            break;
 
-    case THUMB_7:
-        loadStoreWithRegisterOffset(instr);
-        break;
+        case THUMB_6:
+            pcRelativeLoad(instr);
+            break;
 
-    case THUMB_8:
-        loadStoreSignExtendedByteHalfword(instr);
-        break;
+        case THUMB_7:
+            loadStoreWithRegisterOffset(instr);
+            break;
 
-    case THUMB_9:
-        loadStoreWithImmediateOffset(instr);
-        break;
+        case THUMB_8:
+            loadStoreSignExtendedByteHalfword(instr);
+            break;
 
-    case THUMB_10:
-        loadStoreHalfword(instr);
-        break;
+        case THUMB_9:
+            loadStoreWithImmediateOffset(instr);
+            break;
 
-    case THUMB_11:
-        spRelativeLoadStore(instr);
-        break;
+        case THUMB_10:
+            loadStoreHalfword(instr);
+            break;
 
-    case THUMB_12:
-        loadAddress(instr);
-        break;
+        case THUMB_11:
+            spRelativeLoadStore(instr);
+            break;
 
-    case THUMB_13:
-        addOffsetToSp(instr);
-        break;
+        case THUMB_12:
+            loadAddress(instr);
+            break;
 
-    case THUMB_14:
-        pushPopRegisters(instr);
-        break;
+        case THUMB_13:
+            addOffsetToSp(instr);
+            break;
 
-    case THUMB_15:
-        multipleLoadStore(instr);
-        break;
+        case THUMB_14:
+            pushPopRegisters(instr);
+            break;
 
-    case THUMB_16:
-        conditionalBranch(instr);
-        break;
+        case THUMB_15:
+            multipleLoadStore(instr);
+            break;
 
-    case THUMB_17:
-        softwareInterrupt(instr);
-        break;
+        case THUMB_16:
+            conditionalBranch(instr);
+            break;
 
-    case THUMB_18:
-        unconditionalBranch(instr);
-        break;
+        case THUMB_17:
+            softwareInterrupt(instr);
+            break;
 
-    case THUMB_19:
-        longBranchWithLink(instr);
-        break;
+        case THUMB_18:
+            unconditionalBranch(instr);
+            break;
 
-    default:
-        std::cout << __FUNCTION__ << " - Tried executing unknown instruction " << (int)pipe_instr[2] << "\n";
+        case THUMB_19:
+            longBranchWithLink(instr);
+            break;
+
+        default:
+            std::cout << __FUNCTION__ << " - Tried executing unknown instruction " << (int)pipe_instr[2] << "\n";
+        }
     }
+    else
+    {
+        // Todo: Execute ARM
+    }
+}
+
+void ARM7::advance()
+{
+    pipe[2] = pipe[1];
+    pipe[1] = pipe[0];
+
+    pipe_instr[2] = pipe_instr[1];
+    pipe_instr[1] = pipe_instr[0];
 }
 
 void ARM7::step()
 {
+    fetch();
+    decode();
+    execute();
+    advance();
 
+    // Todo: check if this is correct
+    // Advance PC depending on state
+    regs.r15 += (regs.cpsr & CPSR_T) ? 2 : 4;
 }

@@ -7,12 +7,6 @@ class ARM7
 {
 public:
     #pragma region Enums
-    enum State
-    {
-        STATE_ARM   = 0,  // CPU is operating in ARM mode
-        STATE_THUMB = 1   // CPU is operating in THUMB mode
-    } state;
-
     enum Mode
     {
         MODE_USR = 0b10000,  // Normal program execution state
@@ -22,23 +16,18 @@ public:
         MODE_ABT = 0b10111,  // Entered after data or insruction prefetch abort
         MODE_SYS = 0b11111,  // Privileged user mode for the operating system
         MODE_UND = 0b11011   // Entered when an undefined instruction is executed
-    } mode;
-
-    enum Control
-    {
-        CTRL_MODE  = 0b11111,   // 5 Mode bits
-        CTRL_STATE = (1 << 5),  // State bit (1 = THUMB mode)
-        CTRL_FIQ   = (1 << 6),  // FIQ disable
-        CTRL_IRQ   = (1 << 7)   // IRQ disable
     };
 
-    enum Flags
+    enum CPSR
     {
-        FLAG_Q = (1 << 27),  // Sticky overflow
-        FLAG_V = (1 << 28),  // Overflow
-        FLAG_C = (1 << 29),  // Underflow
-        FLAG_Z = (1 << 30),  // Zero
-        FLAG_N = (1 << 31)   // Negative / less than
+        CPSR_M = 0b11111,    // Mode
+        CPSR_T = (1 << 5),   // THUMB enable
+        CPSR_F = (1 << 6),   // FIQ disable
+        CPSR_I = (1 << 7),   // IRQ disable
+        CPSR_V = (1 << 28),  // Overflow
+        CPSR_C = (1 << 29),  // Underflow
+        CPSR_Z = (1 << 30),  // Zero
+        CPSR_N = (1 << 31)   // Negative / less than
     };
 
     enum Condition
@@ -63,34 +52,34 @@ public:
 
     enum Instruction
     {
-        UNDEFINED,   // Undefined instruction
-        REFILL_PIPE, // Refill the pipeline
-        THUMB_1,     // Move shifted register
-        THUMB_2,     // Add / subtract
-        THUMB_3,     // Move / compare / add / subtract immediate
-        THUMB_4,     // ALU operations
-        THUMB_5,     // Hi register operations / branch exchange
-        THUMB_6,     // PC-relative load
-        THUMB_7,     // Load / store with register offset
-        THUMB_8,     // Load / store sign-extended byte / halfword
-        THUMB_9,     // Load / store with immediate offset
-        THUMB_10,    // Load / store halfword
-        THUMB_11,    // SP-relative load / store
-        THUMB_12,    // Load address
-        THUMB_13,    // Add offset to stack pointer
-        THUMB_14,    // Push / pop registers
-        THUMB_15,    // Mutiple load / store
-        THUMB_16,    // Conditional branch
-        THUMB_17,    // Software interrupt
-        THUMB_18,    // Unconditional branch
-        THUMB_19     // Long branch with link
+        UNDEFINED,    // Undefined instruction
+        REFILL_PIPE,  // Refill the pipe
+        THUMB_1,      // Move shifted register
+        THUMB_2,      // Add / subtract
+        THUMB_3,      // Move / compare / add / subtract immediate
+        THUMB_4,      // ALU operations
+        THUMB_5,      // Hi register operations / branch exchange
+        THUMB_6,      // PC-relative load
+        THUMB_7,      // Load / store with register offset
+        THUMB_8,      // Load / store sign-extended byte / halfword
+        THUMB_9,      // Load / store with immediate offset
+        THUMB_10,     // Load / store halfword
+        THUMB_11,     // SP-relative load / store
+        THUMB_12,     // Load address
+        THUMB_13,     // Add offset to stack pointer
+        THUMB_14,     // Push / pop registers
+        THUMB_15,     // Mutiple load / store
+        THUMB_16,     // Conditional branch
+        THUMB_17,     // Software interrupt
+        THUMB_18,     // Unconditional branch
+        THUMB_19      // Long branch with link
     };
     #pragma endregion
 
     #pragma region Registers
     struct Registers
     {
-        // General purpose registers
+        // General Purpose Registers
         u32 r0;
         u32 r1;
         u32 r2;
@@ -105,21 +94,16 @@ public:
         u32 r11;
         u32 r12;
 
-        // Stack Pointer (SP)
+        // Stack Pointer
         u32 r13;
 
-        // Link Register (LR)
-        // Receives a copy of R15 when a Branch and Link instruction is 
-        // executed
+        // Link Register
         u32 r14;
 
-        // Program Counter (PC)
-        // In ARM state: bits [0:1] are 0 and bits [2:31] contain the PC
-        // in THUMB state: bit [0] is 0 and bits [1:31] contain PC
+        // Program Counter
         u32 r15;
 
-        // Current Program Status Register (CPSR)
-        // Contains condition code flags and current mode bits
+        // Current Program Status Register
         u32 cpsr; 
 
         // Banked USR registers
@@ -171,6 +155,7 @@ public:
     void fetch();
     void decode();
     void execute();
+    void advance();
 
     void step();
 
