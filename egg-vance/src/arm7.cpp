@@ -3,6 +3,7 @@
 #include <iostream>
 
 ARM7::ARM7()
+    : mmu(nullptr)
 {
 
 }
@@ -11,6 +12,14 @@ void ARM7::reset()
 {
     mode = MODE_USR;
     state = STATE_ARM;
+
+    pipe[0] = 0;
+    pipe[1] = 0;
+    pipe[2] = 0;
+
+    pipe_instr[0] = REFILL_PIPE;
+    pipe_instr[1] = REFILL_PIPE;
+    pipe_instr[2] = REFILL_PIPE;
 }
 
 u32 ARM7::reg(u8 number) const
@@ -148,92 +157,197 @@ void ARM7::setSpsr(u8 number, u32 value)
 void ARM7::fetch()
 {
     if (state == STATE_ARM)
-    {
-        pipeline[0] = mmu->read32(regs.r15);
-    }
-    else  // THUMB
-    {
-        pipeline[0] = mmu->read16(regs.r15);
-    }
+        pipe[0] = mmu->read32(regs.r15);
+    else
+        pipe[0] = mmu->read16(regs.r15);
+
+    pipe_instr[0] = UNDEFINED;
 }
 
 void ARM7::decode()
 {
+    if (pipe_instr[1] == REFILL_PIPE)
+        return;
+
     if (state == STATE_ARM)
     {
 
     }
-    else  // THUMB
+    else
     {
-        u16 value = pipeline[0] & 0xFFFF;
+        u16 instr = static_cast<u16>(pipe[1]);
 
-        switch (value >> 14)
+        if ((instr >> 11) == 0b00011)
         {
-        case 0b00:
-        {
-            break;
+            pipe_instr[1] = THUMB_2;
         }
-
-        case 0b01:
-            if ((value >> 13) & 0b1)
-            {
-                loadStoreWithImmediateOffset(value);
-            }
+        else if ((instr >> 13) == 0b000)
+        {
+            pipe_instr[1] = THUMB_1;
+        }
+        else if ((instr >> 13) == 0b001)
+        {
+            pipe_instr[1] = THUMB_3;
+        }
+        else if ((instr >> 10) == 0b010000)
+        {
+            pipe_instr[1] = THUMB_4;
+        }
+        else if ((instr >> 10) == 0b010001)
+        {
+            pipe_instr[1] = THUMB_5;
+        }
+        else if ((instr >> 11) == 0b01001)
+        {
+            pipe_instr[1] = THUMB_6;
+        }
+        else if ((instr >> 12) == 0b0101)
+        {
+            if ((instr >> 9) & 0b1)
+                pipe_instr[1] = THUMB_8;
             else
-            {
-                if ((value >> 10) & 0b0000)
-                    aluOperations(value);
-                else if ((value >> 10) & 0b0001)
-                    highRegisterBranchExchange(value);
-                else if ((value >> 11) & 0b001)
-                    pcRelativeLoad(value);
-                else if ((value >> 9) & 0b1)
-                    loadStoreSignExtendedByteHalfword(value);
-                else
-                    loadStoreWithRegisterOffset(value);
-            }
-            break;
-
-        case 0b10:
-            switch ((value >> 12) & 0b11)
-            {
-            case 0b00: loadStoreHalfword(value); break;
-            case 0b01: spRelativeLoadStore(value); break;
-            case 0b10: loadAddress(value); break;
-            case 0b11:
-                if ((value >> 10) & 0b1)
-                    pushPopRegisters(value);
-                else
-                    addOffsetToSp(value);
-                break;
-            }
-            break;
-
-        case 0b11:
-            switch ((value >> 12) & 0b11)
-            {
-            case 0b00: multipleLoadStore(value); break;
-            case 0b01: 
-                if ((value >> 8) & 0b1111)
-                    softwareInterrupt(value);
-                else
-                    // Condition cannot be 0b1111
-                    conditionalBranch(value);
-                break;
-            case 0b10: unconditionalBranch(value); break;
-            case 0b11: longBranchWithLink(value); break;
-            }
-            break;
+                pipe_instr[1] = THUMB_7;
+        }
+        else if ((instr >> 13) == 0b011)
+        {
+            pipe_instr[1] = THUMB_9;
+        }
+        else if ((instr >> 12) == 0b1000)
+        {
+            pipe_instr[1] = THUMB_10;
+        }
+        else if ((instr >> 12) == 0b1001)
+        {
+            pipe_instr[1] = THUMB_11;
+        }
+        else if ((instr >> 12) == 0b1010)
+        {
+            pipe_instr[1] = THUMB_12;
+        }
+        else if ((instr >> 12) == 0b1011)
+        {
+            if ((instr >> 10) & 0b1)
+                pipe_instr[1] = THUMB_14;
+            else
+                pipe_instr[1] = THUMB_13;
+        }
+        else if ((instr >> 12) == 0b1100)
+        {
+            pipe_instr[1] = THUMB_15;
+        }
+        else if ((instr >> 12) == 0b1101)
+        {
+            if (((instr >> 8) & 0b1111) == 0b1111)
+                pipe_instr[1] = THUMB_17;
+            else
+                pipe_instr[1] = THUMB_16;
+        }
+        else if ((instr >> 12) == 0b1110)
+        {
+            pipe_instr[1] = THUMB_18;
+        }
+        else if ((instr >> 12) == 0b1111)
+        {
+            pipe_instr[1] = THUMB_19;
+        }
+        else
+        {
+            std::cout << __FUNCTION__ << " - Cannot decode THUMB instruction " << (int)instr << "\n";
         }
     }
 }
 
 void ARM7::execute()
 {
+    if (pipe_instr[2] == REFILL_PIPE)
+        return; 
 
+    u32 instr = pipe[2];
+
+    switch (pipe_instr[2])
+    {
+    case THUMB_1: 
+        moveShiftedRegister(instr);
+        break;
+
+    case THUMB_2:
+        addSubtract(instr);
+        break;
+
+    case THUMB_3:
+        moveCompareAddSubtractAddImmediate(instr);
+        break;
+
+    case THUMB_4:
+        aluOperations(instr);
+        break;
+
+    case THUMB_5:
+        highRegisterBranchExchange(instr);
+        break;
+
+    case THUMB_6:
+        pcRelativeLoad(instr);
+        break;
+
+    case THUMB_7:
+        loadStoreWithRegisterOffset(instr);
+        break;
+
+    case THUMB_8:
+        loadStoreSignExtendedByteHalfword(instr);
+        break;
+
+    case THUMB_9:
+        loadStoreWithImmediateOffset(instr);
+        break;
+
+    case THUMB_10:
+        loadStoreHalfword(instr);
+        break;
+
+    case THUMB_11:
+        spRelativeLoadStore(instr);
+        break;
+
+    case THUMB_12:
+        loadAddress(instr);
+        break;
+
+    case THUMB_13:
+        addOffsetToSp(instr);
+        break;
+
+    case THUMB_14:
+        pushPopRegisters(instr);
+        break;
+
+    case THUMB_15:
+        multipleLoadStore(instr);
+        break;
+
+    case THUMB_16:
+        conditionalBranch(instr);
+        break;
+
+    case THUMB_17:
+        softwareInterrupt(instr);
+        break;
+
+    case THUMB_18:
+        unconditionalBranch(instr);
+        break;
+
+    case THUMB_19:
+        longBranchWithLink(instr);
+        break;
+
+    default:
+        std::cout << __FUNCTION__ << " - Tried executing unknown instruction " << (int)pipe_instr[2] << "\n";
+    }
 }
 
 void ARM7::step()
 {
-    execute();
+
 }

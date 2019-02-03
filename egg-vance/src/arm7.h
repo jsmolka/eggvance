@@ -9,8 +9,8 @@ public:
     #pragma region Enums
     enum State
     {
-        STATE_ARM   = 0,
-        STATE_THUMB = 1
+        STATE_ARM   = 0,  // CPU is operating in ARM mode
+        STATE_THUMB = 1   // CPU is operating in THUMB mode
     } state;
 
     enum Mode
@@ -59,6 +59,31 @@ public:
         COND_LE = 0xD,  // Z = 1 or N <> V, less or equal
         COND_AL = 0xE,  // Always
         COND_NV = 0xF,  // Never
+    };
+
+    enum Instruction
+    {
+        UNDEFINED,   // Undefined instruction
+        REFILL_PIPE, // Refill the pipeline
+        THUMB_1,     // Move shifted register
+        THUMB_2,     // Add / subtract
+        THUMB_3,     // Move / compare / add / subtract immediate
+        THUMB_4,     // ALU operations
+        THUMB_5,     // Hi register operations / branch exchange
+        THUMB_6,     // PC-relative load
+        THUMB_7,     // Load / store with register offset
+        THUMB_8,     // Load / store sign-extended byte / halfword
+        THUMB_9,     // Load / store with immediate offset
+        THUMB_10,    // Load / store halfword
+        THUMB_11,    // SP-relative load / store
+        THUMB_12,    // Load address
+        THUMB_13,    // Add offset to stack pointer
+        THUMB_14,    // Push / pop registers
+        THUMB_15,    // Mutiple load / store
+        THUMB_16,    // Conditional branch
+        THUMB_17,    // Software interrupt
+        THUMB_18,    // Unconditional branch
+        THUMB_19     // Long branch with link
     };
     #pragma endregion
 
@@ -151,22 +176,28 @@ public:
 
     MMU* mmu;
     
-    u32 pipeline[3];
+    // Contains memory values
+    u32 pipe[3];
+    // Contains decoded instructions
+    Instruction pipe_instr[3];
 
-    void aluOperations(u16 instruction);
-    void highRegisterBranchExchange(u16 instruction);
-    void pcRelativeLoad(u16 instruction);
-    void loadStoreWithRegisterOffset(u16 instruction);
-    void loadStoreSignExtendedByteHalfword(u16 instruction);
-    void loadStoreWithImmediateOffset(u16 instruction);
-    void loadStoreHalfword(u16 instruction);
-    void spRelativeLoadStore(u16 instruction);
-    void loadAddress(u16 instruction);
-    void addOffsetToSp(u16 instruction);
-    void pushPopRegisters(u16 instruction);
-    void multipleLoadStore(u16 instruction);
-    void conditionalBranch(u16 instruction);
-    void softwareInterrupt(u16 instruction);
-    void unconditionalBranch(u16 instruction);
-    void longBranchWithLink(u16 instrution);
+    void moveShiftedRegister(u16 instr);
+    void addSubtract(u16 instr);
+    void moveCompareAddSubtractAddImmediate(u16 instr);
+    void aluOperations(u16 instr);
+    void highRegisterBranchExchange(u16 instr);
+    void pcRelativeLoad(u16 instr);
+    void loadStoreWithRegisterOffset(u16 instr);
+    void loadStoreSignExtendedByteHalfword(u16 instr);
+    void loadStoreWithImmediateOffset(u16 instr);
+    void loadStoreHalfword(u16 instr);
+    void spRelativeLoadStore(u16 instr);
+    void loadAddress(u16 instr);
+    void addOffsetToSp(u16 instr);
+    void pushPopRegisters(u16 instr);
+    void multipleLoadStore(u16 instr);
+    void conditionalBranch(u16 instr);
+    void softwareInterrupt(u16 instr);
+    void unconditionalBranch(u16 instr);
+    void longBranchWithLink(u16 instr);
 };
