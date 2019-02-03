@@ -375,3 +375,85 @@ void ARM7::step()
     // Advance PC depending on state
     regs.r15 += (regs.cpsr & CPSR_T) ? 2 : 4;
 }
+
+void ARM7::updateZero(u32 result)
+{
+    if (result == 0)
+        regs.cpsr |= CPSR_Z;
+    else
+        regs.cpsr &= ~CPSR_Z;
+}
+
+void ARM7::updateSign(u32 result)
+{
+    if (result >> 31)
+        regs.cpsr |= CPSR_N;
+    else
+        regs.cpsr &= ~CPSR_N;
+}
+
+void ARM7::updateCarry(bool carry)
+{
+    if (carry)
+        regs.cpsr |= CPSR_C;
+    else
+        regs.cpsr &= ~CPSR_C;
+}
+
+void ARM7::updateOverflow(u32 value, u32 operand, u32 result, bool addition)
+{
+    u8 msb_value = value >> 31;
+    u8 msb_operand = operand >> 31;
+    u8 msb_result = result >> 31;
+
+    bool overflown = false;
+    if (addition)
+    {
+        if (msb_value == msb_operand)
+            overflown = msb_result != msb_operand;
+    }
+    else
+    {
+        if (msb_value != msb_operand)
+            overflown = msb_result == msb_operand;
+    }
+
+    if (overflown)
+        regs.cpsr |= CPSR_V;
+    else
+        regs.cpsr &= ~CPSR_V;
+}
+
+u8 ARM7::logicalShiftLeft(u32& value, u8 offset)
+{
+    // Save the last bit shifted out in the carry
+    u8 carry = (value << (offset - 1)) >> 31;
+
+    value <<= offset;
+
+    return carry;
+}
+
+u8 ARM7::logicalShiftRight(u32& value, u8 offset)
+{
+    // Save the last bit shifted out in the carry
+    u8 carry = value >> (offset - 1);
+
+    value >>= offset;
+
+    return carry;
+}
+
+u8 ARM7::arithmeticShiftRight(u32& value, u8 offset)
+{
+    // Save the last bit shifted out in the carry
+    u8 carry = value >> (offset - 1);
+
+    u32 msb = value & (1 << 31);
+    for (int i = 0; i < offset; ++i)
+    {
+        value >>= 1;
+        value |= msb;
+    }
+    return carry;
+}

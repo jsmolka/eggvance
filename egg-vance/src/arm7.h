@@ -27,7 +27,7 @@ public:
         CPSR_V = (1 << 28),  // Overflow
         CPSR_C = (1 << 29),  // Underflow
         CPSR_Z = (1 << 30),  // Zero
-        CPSR_N = (1 << 31)   // Negative / less than
+        CPSR_N = (1 << 31)   // Negative / sign
     };
 
     enum Condition
@@ -165,6 +165,16 @@ public:
     u32 pipe[3];
     // Contains decoded instructions
     Instruction pipe_instr[3];
+
+    // Functions for updating flags
+    void updateZero(u32 result);
+    void updateSign(u32 result);
+    void updateCarry(bool carry);
+    void updateOverflow(u32 value, u32 operand, u32 result, bool addition);
+
+    static u8 logicalShiftLeft(u32& value, u8 offset);
+    static u8 logicalShiftRight(u32& value, u8 offset);
+    static u8 arithmeticShiftRight(u32& value, u8 offset);
 
     void moveShiftedRegister(u16 instr);
     void addSubtract(u16 instr);
