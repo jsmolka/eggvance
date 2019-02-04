@@ -172,13 +172,14 @@ public:
     void updateCarry(bool carry);
     void updateOverflow(u32 value, u32 operand, u32 result, bool addition);
 
-    static u8 logicalShiftLeft(u32& value, u8 offset);
-    static u8 logicalShiftRight(u32& value, u8 offset);
-    static u8 arithmeticShiftRight(u32& value, u8 offset);
+    u8 logicalShiftLeft(u32& value, u8 offset);
+    u8 logicalShiftRight(u32& value, u8 offset);
+    u8 arithmeticShiftRight(u32& value, u8 offset);
+    u8 rotateRight(u32& value, u8 offset);
 
     void moveShiftedRegister(u16 instr);
     void addSubtract(u16 instr);
-    void moveCompareAddSubtractAddImmediate(u16 instr);
+    void moveCmpAddSubImmediate(u16 instr);
     void aluOperations(u16 instr);
     void highRegisterBranchExchange(u16 instr);
     void pcRelativeLoad(u16 instr);

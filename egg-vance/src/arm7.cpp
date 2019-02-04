@@ -278,7 +278,7 @@ void ARM7::execute()
             break;
 
         case THUMB_3:
-            moveCompareAddSubtractAddImmediate(instr);
+            moveCmpAddSubImmediate(instr);
             break;
 
         case THUMB_4:
@@ -362,6 +362,11 @@ void ARM7::advance()
 
     pipe_instr[2] = pipe_instr[1];
     pipe_instr[1] = pipe_instr[0];
+
+    // Todo: check if this is correct
+    // Advance PC depending on state
+    regs.r15 += (regs.cpsr & CPSR_T) ? 2 : 4;
+
 }
 
 void ARM7::step()
@@ -370,10 +375,6 @@ void ARM7::step()
     decode();
     execute();
     advance();
-
-    // Todo: check if this is correct
-    // Advance PC depending on state
-    regs.r15 += (regs.cpsr & CPSR_T) ? 2 : 4;
 }
 
 void ARM7::updateZero(u32 result)
@@ -426,34 +427,97 @@ void ARM7::updateOverflow(u32 value, u32 operand, u32 result, bool addition)
 
 u8 ARM7::logicalShiftLeft(u32& value, u8 offset)
 {
-    // Save the last bit shifted out in the carry
-    u8 carry = (value << (offset - 1)) >> 31;
+    u8 carry = 0;
 
-    value <<= offset;
+    if (offset > 0)
+    {
+        // Save the last bit shifted out in the carry
+        carry = (value << (offset - 1)) >> 31;
 
+        value <<= offset;
+
+    }
+    // Special case LSL #0
+    else
+    {
+        // Todo: "the shifter carry out is the old value of the CPSR C flag"?
+        carry = (regs.cpsr & CPSR_C) ? 1 : 0;
+    }
     return carry;
 }
 
 u8 ARM7::logicalShiftRight(u32& value, u8 offset)
 {
-    // Save the last bit shifted out in the carry
-    u8 carry = value >> (offset - 1);
+    u8 carry = 0;
 
-    value >>= offset;
+    if (offset > 0)
+    {
+        // Save the last bit shifted out in the carry
+        carry = value >> (offset - 1);
 
+        value >>= offset;
+    }
+    // Special case LSR #32 / #0
+    else
+    {
+        // Store the MSB in the carry
+        carry = value >> 31;
+        // Reset the result
+        value = 0;
+    }
     return carry;
 }
 
 u8 ARM7::arithmeticShiftRight(u32& value, u8 offset)
 {
-    // Save the last bit shifted out in the carry
-    u8 carry = value >> (offset - 1);
+    u8 carry = 0;
 
-    u32 msb = value & (1 << 31);
-    for (int i = 0; i < offset; ++i)
+    if (offset > 0)
     {
+        // Save the last bit shifted out in the carry
+        carry = value >> (offset - 1);
+
+        u32 msb = value & (1 << 31);
+        for (int i = 0; i < offset; ++i)
+        {
+            value >>= 1;
+            value |= msb;
+        }
+
+    }
+    // Special case LSR #32 / #0
+    else
+    {
+        // Store the MSB in the carry
+        carry = value >> 31;
+        // Apply carry bit to whole result
+        value = carry ? 0xFFFFFFFF : 0;
+    }
+    return carry;
+}
+
+u8 ARM7::rotateRight(u32 &value, u8 offset)
+{
+    u8 carry = 0;
+
+    if (offset > 0)
+    {
+        for (int i = 0; i < offset; ++i)
+        {
+            carry = value & 0b1;
+            value >>= 1;
+            value |= (carry << 31);
+        }
+    }
+    // Special case ROR #0
+    else
+    {
+        // Save the first bit in the carry
+        carry = value & 0b1;
+        // Rotate by one
         value >>= 1;
-        value |= msb;
+        // Change MSB to current carry
+        value |= (((regs.cpsr & CPSR_C) ? 1 : 0) << 31);
     }
     return carry;
 }
