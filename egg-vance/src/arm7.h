@@ -154,6 +154,7 @@ public:
 
     void fetch();
     void decode();
+    // Todo: own functions for arm / thumb decoding?
     void execute();
     void advance();
 
@@ -161,16 +162,29 @@ public:
 
     MMU* mmu;
     
-    // Contains memory values
     u32 pipe[3];
-    // Contains decoded instructions
     Instruction pipe_instr[3];
 
-    // Functions for updating flags
-    void updateZero(u32 result);
-    void updateSign(u32 result);
-    void updateCarry(bool carry);
-    void updateOverflow(u32 value, u32 operand, u32 result, bool addition);
+    Mode currentMode() const;
+
+    bool isArm() const;
+    bool isThumb() const;
+
+    u8 flagZ() const;
+    u8 flagN() const;
+    u8 flagC() const;
+    u8 flagV() const;
+
+    void setFlag(CPSR flag, bool set);
+    void setFlagZ(bool set);
+    void setFlagN(bool set);
+    void setFlagC(bool set);
+    void setFlagV(bool set);
+
+    void updateFlagsZN(u32 result);
+    void updateFlagsZNC(u32 result, bool carry);
+    void updateFlagsZNC(u32 value, u32 operand, u32 result, bool addition);
+    void updateFlagsZNCV(u32 value, u32 operand, u32 result, bool addition);
 
     u8 logicalShiftLeft(u32& value, u8 offset);
     u8 logicalShiftRight(u32& value, u8 offset);

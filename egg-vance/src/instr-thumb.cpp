@@ -30,9 +30,7 @@ void ARM7::moveShiftedRegister(u16 instr)
         std::cout << __FUNCTION__ << " - Invalid operation\n";
     }
 
-    updateZero(result);
-    updateSign(result);
-    updateCarry(carry);
+    updateFlagsZNC(result, carry);
 
     setReg(dst, result);
 }
@@ -57,18 +55,14 @@ void ARM7::addSubtract(u16 instr)
     {
     case 0b0:  // ADD
         result += operand;
-        updateCarry(result != (src_reg + operand));
         break;
 
     case 0b1:  // SUB
         result -= operand;
-        updateCarry(result != (src_reg - operand));
         break;
     }
 
-    updateZero(result);
-    updateSign(result);
-    updateOverflow(src_reg, operand, result, opcode == 0);
+    updateFlagsZNCV(src_reg, operand, result, opcode == 0b0);
 
     setReg(dst, result);
 }
@@ -86,26 +80,22 @@ void ARM7::moveCmpAddSubImmediate(u16 instr)
     {
     case 0b00:  // MOV
         result = offset;
+        updateFlagsZN(result);
         break;
 
     case 0b01:  // CMP
     case 0b11:  // SUB
         result -= offset;
-        updateCarry(result != (dst_reg - offset));
-        updateOverflow(dst_reg, offset, result, false);
+        updateFlagsZNCV(dst_reg, offset, result, false);
         break;
 
     case 0b10:  // ADD
         result += offset;
-        updateCarry(result != (dst_reg - offset));
-        updateOverflow(dst_reg, offset, result, true);
+        updateFlagsZNCV(dst_reg, offset, result, true);
         break;
     }
 
-    updateZero(result);
-    updateSign(result);
-
-    // No writeback when comparing
+    // No writeback for CMP
     if (opcode != 0b01)
         setReg(dst, result);
 }
@@ -125,91 +115,85 @@ void ARM7::aluOperations(u16 instr)
     case 0b0000:  // AND
     case 0b1000:  // TST
         result &= src_reg;
+        updateFlagsZN(result);
         break;
 
     case 0b0001:  // EOR
         result ^= src_reg;
+        updateFlagsZN(result);
         break;
 
     case 0b0010:  // LSL
     {
         u8 carry = logicalShiftLeft(result, src_reg);
-        updateCarry(carry);
+        updateFlagsZNC(result, carry);
         break;
     }
 
     case 0b0011:  // LSR
     {
         u8 carry = logicalShiftLeft(result, src_reg);
-        updateCarry(carry);
+        updateFlagsZNC(result, carry);
         break;
     }
 
     case 0b0100:  // ASR
     {
         u8 carry = arithmeticShiftRight(result, src_reg);
-        updateCarry(carry);
+        updateFlagsZNC(result, carry);
         break;
     }
 
     case 0b0101:  // ADC
-    {
-        u8 carry = (regs.cpsr & CPSR_C) ? 1 : 0;
-        result += (src_reg + carry);
-        updateCarry(result != (dst_reg + src_reg + carry));
-        updateOverflow(dst_reg, src_reg + carry, result, true);
+        result += (src_reg + flagC());
+        updateFlagsZNCV(dst_reg, src_reg + flagC(), result, true);
         break;
-    }
 
     case 0b0110:  // SBC
-    {
         // NOT carry
-        u8 carry = (regs.cpsr & CPSR_C) ? 0 : 1;
-        result -= (src_reg + carry);
-        updateCarry(result != (dst_reg - src_reg - carry));
-        updateOverflow(dst_reg, src_reg + carry, result, false);
+        result -= (src_reg + !flagC());
+        updateFlagsZNCV(dst_reg, src_reg + !flagC(), result, false);
         break;
-    }
 
     case 0b0111:  // ROR
     {
         u8 carry = rotateRight(result, src_reg);
-        updateCarry(carry);
+        updateFlagsZNC(result, carry);
         break;
     }
 
     case 0b1010:  // CMP
         result -= src_reg;
-        updateCarry(result != (dst_reg - src_reg));
-        updateOverflow(dst_reg, src_reg, result, true);
+        updateFlagsZNCV(dst_reg, src_reg, result, false);
         break;
 
     case 0b1011:  // CMN
         result += src_reg;
-        updateCarry(result != (dst_reg - src_reg));
+        updateFlagsZNCV(dst_reg, src_reg, result, true);
         break;
 
     case 0b1100:  // ORR
         result |= src_reg;
+        updateFlagsZN(result);
         break;
 
     case 0b1101:  // MUL
         result *= src_reg;
-        updateCarry(result != (dst_reg * src_reg));
+        updateFlagsZN(result);
+        setFlagC(result != (dst_reg * src_reg));
         // Todo: overflow?
         break;
 
     case 0b1110:  // BIC
         result &= ~src_reg;
+        updateFlagsZN(result);
         break;
 
     case 0b1111:  // MVN
         result = ~src_reg;
+        updateFlagsZN(result);
         break;
     }
-
-    updateZero(result);
-    updateSign(result);
 
     // Writeback for almost all opcodes
     if (opcode != 0b1000
@@ -220,9 +204,6 @@ void ARM7::aluOperations(u16 instr)
 
 void ARM7::highRegisterBranchExchange(u16 instr)
 {
-    // Todo:
-    // updateArithmetic (C, O)
-    // updateLogical (Z, S)
 }
 
 void ARM7::pcRelativeLoad(u16 instr)

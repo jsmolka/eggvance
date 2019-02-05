@@ -21,7 +21,7 @@ void ARM7::reset()
 
 u32 ARM7::reg(u8 number) const
 {
-    Mode mode = static_cast<Mode>(regs.cpsr & CPSR_M);
+    Mode mode = currentMode();
 
     switch (number)
     {
@@ -73,7 +73,7 @@ u32 ARM7::reg(u8 number) const
 
 void ARM7::setReg(u8 number, u32 value)
 {
-    Mode mode = static_cast<Mode>(regs.cpsr & CPSR_M);
+    Mode mode = currentMode();
 
     switch (number)
     {
@@ -126,7 +126,7 @@ void ARM7::setReg(u8 number, u32 value)
 
 u32 ARM7::spsr(u8 number) const
 {
-    switch (static_cast<Mode>(regs.cpsr & CPSR_M))
+    switch (currentMode())
     {
     case MODE_FIQ: return regs.spsr_fiq;
     case MODE_SVC: return regs.spsr_svc;
@@ -142,7 +142,7 @@ u32 ARM7::spsr(u8 number) const
 
 void ARM7::setSpsr(u8 number, u32 value)
 {
-    switch (static_cast<Mode>(regs.cpsr & CPSR_M))
+    switch (currentMode())
     {
     case MODE_FIQ: regs.spsr_fiq = value; break;
     case MODE_SVC: regs.spsr_svc = value; break;
@@ -157,10 +157,10 @@ void ARM7::setSpsr(u8 number, u32 value)
 
 void ARM7::fetch()
 {
-    if (regs.cpsr & CPSR_T)
-        pipe[0] = mmu->readHalf(regs.r15);
-    else
+    if (isArm())
         pipe[0] = mmu->readWord(regs.r15);
+    else
+        pipe[0] = mmu->readHalf(regs.r15);
 
     pipe_instr[0] = UNDEFINED;
 }
@@ -169,8 +169,12 @@ void ARM7::decode()
 {
     if (pipe_instr[1] == REFILL_PIPE)
         return;
-
-    if (regs.cpsr & CPSR_T)
+    
+    if (isArm())
+    {
+        // Todo: decode ARM
+    }
+    else
     {
         u16 instr = static_cast<u16>(pipe[1]);
 
@@ -252,10 +256,6 @@ void ARM7::decode()
             std::cout << __FUNCTION__ << " - Cannot decode THUMB instruction " << (int)instr << "\n";
         }
     }
-    else
-    {
-        // Todo: Decode ARM
-    }
 }
  
 void ARM7::execute()
@@ -263,7 +263,11 @@ void ARM7::execute()
     if (pipe_instr[2] == REFILL_PIPE)
         return; 
 
-    if (regs.cpsr & CPSR_T)
+    if (isArm())
+    {
+        // Todo: execute ARM
+    }
+    else
     {
         u16 instr = static_cast<u16>(pipe[2]);
 
@@ -349,10 +353,6 @@ void ARM7::execute()
             std::cout << __FUNCTION__ << " - Tried executing unknown instruction " << (int)pipe_instr[2] << "\n";
         }
     }
-    else
-    {
-        // Todo: Execute ARM
-    }
 }
 
 void ARM7::advance()
@@ -365,7 +365,7 @@ void ARM7::advance()
 
     // Todo: check if this is correct
     // Advance PC depending on state
-    regs.r15 += (regs.cpsr & CPSR_T) ? 2 : 4;
+    regs.r15 += isThumb() ? 2 : 4;
 
 }
 
@@ -377,52 +377,113 @@ void ARM7::step()
     advance();
 }
 
-void ARM7::updateZero(u32 result)
+ARM7::Mode ARM7::currentMode() const
 {
-    if (result == 0)
-        regs.cpsr |= CPSR_Z;
-    else
-        regs.cpsr &= ~CPSR_Z;
+    return static_cast<Mode>(regs.cpsr & CPSR_M);
 }
 
-void ARM7::updateSign(u32 result)
+bool ARM7::isArm() const
 {
-    if (result >> 31)
-        regs.cpsr |= CPSR_N;
-    else
-        regs.cpsr &= ~CPSR_N;
+    return !isThumb();
 }
 
-void ARM7::updateCarry(bool carry)
+bool ARM7::isThumb() const
 {
-    if (carry)
-        regs.cpsr |= CPSR_C;
-    else
-        regs.cpsr &= ~CPSR_C;
+    return regs.cpsr & CPSR_T;
 }
 
-void ARM7::updateOverflow(u32 value, u32 operand, u32 result, bool addition)
+u8 ARM7::flagZ() const
 {
+    return (regs.cpsr & CPSR_Z) ? 1 : 0;
+}
+
+u8 ARM7::flagN() const
+{
+    return (regs.cpsr & CPSR_N) ? 1 : 0;
+}
+
+u8 ARM7::flagC() const
+{
+    return (regs.cpsr & CPSR_C) ? 1 : 0;
+}
+
+u8 ARM7::flagV() const
+{
+    return (regs.cpsr & CPSR_V) ? 1 : 0;
+}
+
+void ARM7::setFlag(CPSR flag, bool set)
+{
+    if (set)
+        regs.cpsr |= flag;
+    else
+        regs.cpsr &= ~flag;
+}
+
+void ARM7::setFlagZ(bool set)
+{
+    setFlag(CPSR_Z, set);
+}
+
+void ARM7::setFlagN(bool set)
+{
+    setFlag(CPSR_N, set);
+}
+
+void ARM7::setFlagC(bool set)
+{
+    setFlag(CPSR_C, set);
+}
+
+void ARM7::setFlagV(bool set)
+{
+    setFlag(CPSR_V, set);
+}
+
+void ARM7::updateFlagsZN(u32 result)
+{
+    setFlagZ(result == 0);
+    setFlagN(result >> 31);
+}
+
+void ARM7::updateFlagsZNC(u32 result, bool carry)
+{
+    updateFlagsZN(result);
+
+    setFlagC(carry);
+}
+
+void ARM7::updateFlagsZNC(u32 value, u32 operand, u32 result, bool addition)
+{
+    bool carry = false;
+    if (addition)
+        carry = result != (value + operand);
+    else
+        carry = result != (value - operand);
+
+    updateFlagsZNC(value, carry);
+}
+
+void ARM7::updateFlagsZNCV(u32 value, u32 operand, u32 result, bool addition)
+{
+    updateFlagsZNC(value, operand, result, addition);
+
     u8 msb_value = value >> 31;
     u8 msb_operand = operand >> 31;
     u8 msb_result = result >> 31;
 
-    bool overflown = false;
+    bool overflow = false;
     if (addition)
     {
         if (msb_value == msb_operand)
-            overflown = msb_result != msb_operand;
+            overflow = msb_result != msb_operand;
     }
     else
     {
         if (msb_value != msb_operand)
-            overflown = msb_result == msb_operand;
+            overflow = msb_result == msb_operand;
     }
-
-    if (overflown)
-        regs.cpsr |= CPSR_V;
-    else
-        regs.cpsr &= ~CPSR_V;
+    setFlagV(overflow);
 }
 
 u8 ARM7::logicalShiftLeft(u32& value, u8 offset)
@@ -435,13 +496,12 @@ u8 ARM7::logicalShiftLeft(u32& value, u8 offset)
         carry = (value << (offset - 1)) >> 31;
 
         value <<= offset;
-
     }
     // Special case LSL #0
     else
     {
         // Todo: "the shifter carry out is the old value of the CPSR C flag"?
-        carry = (regs.cpsr & CPSR_C) ? 1 : 0;
+        carry = flagC();
     }
     return carry;
 }
@@ -453,7 +513,7 @@ u8 ARM7::logicalShiftRight(u32& value, u8 offset)
     if (offset > 0)
     {
         // Save the last bit shifted out in the carry
-        carry = value >> (offset - 1);
+        carry = (value >> (offset - 1)) & 0b1;
 
         value >>= offset;
     }
@@ -475,7 +535,7 @@ u8 ARM7::arithmeticShiftRight(u32& value, u8 offset)
     if (offset > 0)
     {
         // Save the last bit shifted out in the carry
-        carry = value >> (offset - 1);
+        carry = (value >> (offset - 1)) & 0b1;
 
         u32 msb = value & (1 << 31);
         for (int i = 0; i < offset; ++i)
@@ -483,7 +543,6 @@ u8 ARM7::arithmeticShiftRight(u32& value, u8 offset)
             value >>= 1;
             value |= msb;
         }
-
     }
     // Special case LSR #32 / #0
     else
@@ -517,7 +576,7 @@ u8 ARM7::rotateRight(u32 &value, u8 offset)
         // Rotate by one
         value >>= 1;
         // Change MSB to current carry
-        value |= (((regs.cpsr & CPSR_C) ? 1 : 0) << 31);
+        value |= (flagC() << 31);
     }
     return carry;
 }
