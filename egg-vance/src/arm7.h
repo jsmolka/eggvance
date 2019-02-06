@@ -53,7 +53,7 @@ public:
     enum Instruction
     {
         UNDEFINED,    // Undefined instruction
-        REFILL_PIPE,  // Refill the pipe
+        REFILL_PIPE,  // Refill the pipeline
         THUMB_1,      // Move shifted register
         THUMB_2,      // Add / subtract
         THUMB_3,      // Move / compare / add / subtract immediate
@@ -145,7 +145,7 @@ public:
     ARM7();
 
     void reset();
-
+    
     u32 reg(u8 number) const;
     void setReg(u8 number, u32 value);
 
@@ -154,16 +154,20 @@ public:
 
     void fetch();
     void decode();
-    // Todo: own functions for arm / thumb decoding?
     void execute();
     void advance();
 
     void step();
 
     MMU* mmu;
-    
-    u32 pipe[3];
-    Instruction pipe_instr[3];
+
+    struct PipeItem
+    {
+        u32 instr;
+        Instruction decoded;
+    } pipe[3];
+
+    bool flush;
 
     Mode currentMode() const;
 
@@ -181,10 +185,11 @@ public:
     void setFlagC(bool set);
     void setFlagV(bool set);
 
-    void updateFlagsZN(u32 result);
-    void updateFlagsZNC(u32 result, bool carry);
-    void updateFlagsZNC(u32 value, u32 operand, u32 result, bool addition);
-    void updateFlagsZNCV(u32 value, u32 operand, u32 result, bool addition);
+    void updateFlagZ(u32 result);
+    void updateFlagN(u32 result);
+    void updateFlagC(u8 carry);
+    void updateFlagC(u32 input, u32 operand, bool addition);
+    void updateFlagV(u32 input, u32 operand, bool addition);
 
     u8 logicalShiftLeft(u32& value, u8 offset);
     u8 logicalShiftRight(u32& value, u8 offset);

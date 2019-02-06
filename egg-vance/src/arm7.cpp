@@ -10,13 +10,11 @@ ARM7::ARM7()
 
 void ARM7::reset()
 {
-    pipe[0] = 0;
-    pipe[1] = 0;
-    pipe[2] = 0;
+    pipe[0] = { 0, REFILL_PIPE };
+    pipe[1] = { 0, REFILL_PIPE };
+    pipe[2] = { 0, REFILL_PIPE };
 
-    pipe_instr[0] = REFILL_PIPE;
-    pipe_instr[1] = REFILL_PIPE;
-    pipe_instr[2] = REFILL_PIPE;
+    flush = false;
 }
 
 u32 ARM7::reg(u8 number) const
@@ -158,98 +156,98 @@ void ARM7::setSpsr(u8 number, u32 value)
 void ARM7::fetch()
 {
     if (isArm())
-        pipe[0] = mmu->readWord(regs.r15);
+        pipe[0].instr = mmu->readWord(regs.r15);
     else
-        pipe[0] = mmu->readHalf(regs.r15);
+        pipe[0].instr = mmu->readHalf(regs.r15);
 
-    pipe_instr[0] = UNDEFINED;
+    pipe[0].decoded = UNDEFINED;
 }
 
 void ARM7::decode()
 {
-    if (pipe_instr[1] == REFILL_PIPE)
+    if (pipe[1].decoded == REFILL_PIPE)
         return;
     
     if (isArm())
     {
-        // Todo: decode ARM
+
     }
     else
     {
-        u16 instr = static_cast<u16>(pipe[1]);
+        u16 instr = static_cast<u16>(pipe[1].instr);
 
         if ((instr >> 11) == 0b00011)
         {
-            pipe_instr[1] = THUMB_2;
+            pipe[1].decoded = THUMB_2;
         }
         else if ((instr >> 13) == 0b000)
         {
-            pipe_instr[1] = THUMB_1;
+            pipe[1].decoded = THUMB_1;
         }
         else if ((instr >> 13) == 0b001)
         {
-            pipe_instr[1] = THUMB_3;
+            pipe[1].decoded = THUMB_3;
         }
         else if ((instr >> 10) == 0b010000)
         {
-            pipe_instr[1] = THUMB_4;
+            pipe[1].decoded = THUMB_4;
         }
         else if ((instr >> 10) == 0b010001)
         {
-            pipe_instr[1] = THUMB_5;
+            pipe[1].decoded = THUMB_5;
         }
         else if ((instr >> 11) == 0b01001)
         {
-            pipe_instr[1] = THUMB_6;
+            pipe[1].decoded = THUMB_6;
         }
         else if ((instr >> 12) == 0b0101)
         {
             if ((instr >> 9) & 0b1)
-                pipe_instr[1] = THUMB_8;
+                pipe[1].decoded = THUMB_8;
             else
-                pipe_instr[1] = THUMB_7;
+                pipe[1].decoded = THUMB_7;
         }
         else if ((instr >> 13) == 0b011)
         {
-            pipe_instr[1] = THUMB_9;
+            pipe[1].decoded = THUMB_9;
         }
         else if ((instr >> 12) == 0b1000)
         {
-            pipe_instr[1] = THUMB_10;
+            pipe[1].decoded = THUMB_10;
         }
         else if ((instr >> 12) == 0b1001)
         {
-            pipe_instr[1] = THUMB_11;
+            pipe[1].decoded = THUMB_11;
         }
         else if ((instr >> 12) == 0b1010)
         {
-            pipe_instr[1] = THUMB_12;
+            pipe[1].decoded = THUMB_12;
         }
         else if ((instr >> 12) == 0b1011)
         {
             if ((instr >> 10) & 0b1)
-                pipe_instr[1] = THUMB_14;
+                pipe[1].decoded = THUMB_14;
             else
-                pipe_instr[1] = THUMB_13;
+                pipe[1].decoded = THUMB_13;
         }
         else if ((instr >> 12) == 0b1100)
         {
-            pipe_instr[1] = THUMB_15;
+            pipe[1].decoded = THUMB_15;
         }
         else if ((instr >> 12) == 0b1101)
         {
             if (((instr >> 8) & 0b1111) == 0b1111)
-                pipe_instr[1] = THUMB_17;
+                pipe[1].decoded = THUMB_17;
             else
-                pipe_instr[1] = THUMB_16;
+                pipe[1].decoded = THUMB_16;
         }
         else if ((instr >> 12) == 0b1110)
         {
-            pipe_instr[1] = THUMB_18;
+            pipe[1].decoded = THUMB_18;
         }
         else if ((instr >> 12) == 0b1111)
         {
-            pipe_instr[1] = THUMB_19;
+            pipe[1].decoded = THUMB_19;
         }
         else
         {
@@ -260,18 +258,18 @@ void ARM7::decode()
  
 void ARM7::execute()
 {
-    if (pipe_instr[2] == REFILL_PIPE)
+    if (pipe[2].decoded == REFILL_PIPE)
         return; 
 
     if (isArm())
     {
-        // Todo: execute ARM
+
     }
     else
     {
-        u16 instr = static_cast<u16>(pipe[2]);
+        u16 instr = static_cast<u16>(pipe[2].instr);
 
-        switch (pipe_instr[2])
+        switch (pipe[2].decoded)
         {
         case THUMB_1:
             moveShiftedRegister(instr);
@@ -350,7 +348,7 @@ void ARM7::execute()
             break;
 
         default:
-            std::cout << __FUNCTION__ << " - Tried executing unknown instruction " << (int)pipe_instr[2] << "\n";
+            std::cout << __FUNCTION__ << " - Tried executing unknown instruction " << (int)pipe[2].decoded << "\n";
         }
     }
 }
@@ -360,11 +358,6 @@ void ARM7::advance()
     pipe[2] = pipe[1];
     pipe[1] = pipe[0];
 
-    pipe_instr[2] = pipe_instr[1];
-    pipe_instr[1] = pipe_instr[0];
-
-    // Todo: check if this is correct
-    // Advance PC depending on state
     regs.r15 += isThumb() ? 2 : 4;
 
 }
@@ -375,6 +368,15 @@ void ARM7::step()
     decode();
     execute();
     advance();
+
+    if (flush)
+    {
+        pipe[0] = { 0, REFILL_PIPE };
+        pipe[1] = { 0, REFILL_PIPE };
+        pipe[2] = { 0, REFILL_PIPE };
+
+        flush = false;
+    }
 }
 
 ARM7::Mode ARM7::currentMode() const
@@ -440,49 +442,53 @@ void ARM7::setFlagV(bool set)
     setFlag(CPSR_V, set);
 }
 
-void ARM7::updateFlagsZN(u32 result)
+void ARM7::updateFlagZ(u32 res)
 {
-    setFlagZ(result == 0);
-    setFlagN(result >> 31);
+    setFlagZ(res == 0);
 }
 
-void ARM7::updateFlagsZNC(u32 result, bool carry)
+void ARM7::updateFlagN(u32 res)
 {
-    updateFlagsZN(result);
+    setFlagN(res >> 31);
+}
+
+void ARM7::updateFlagC(u8 carry)
+{
+    setFlagC(carry == 1);
+}
+
+void ARM7::updateFlagC(u32 input, u32 operand, bool addition)
+{
+    bool carry;
+
+    if (addition)
+        carry = operand > (0xFFFFFFFF - input);
+    else
+        carry = operand > input;
 
     setFlagC(carry);
 }
 
-void ARM7::updateFlagsZNC(u32 value, u32 operand, u32 result, bool addition)
+void ARM7::updateFlagV(u32 input, u32 operand, bool addition)
 {
-    bool carry = false;
-    if (addition)
-        carry = result != (value + operand);
-    else
-        carry = result != (value - operand);
-
-    updateFlagsZNC(value, carry);
-}
-
-void ARM7::updateFlagsZNCV(u32 value, u32 operand, u32 result, bool addition)
-{
-    updateFlagsZNC(value, operand, result, addition);
-
-    u8 msb_value = value >> 31;
+    u8 msb_input = input >> 31;
     u8 msb_operand = operand >> 31;
-    u8 msb_result = result >> 31;
 
     bool overflow = false;
+
     if (addition)
     {
-        if (msb_value == msb_operand)
-            overflow = msb_result != msb_operand;
+        u8 msb_result = (input + operand) >> 31;
+        if (msb_input == msb_operand)
+            overflow = msb_result != msb_input;
     }
     else
     {
-        if (msb_value != msb_operand)
-            overflow = msb_result == msb_operand;
+        u8 msb_result = (input - operand) >> 31;
+        if (msb_input != msb_operand)
+            overflow = msb_result == msb_input;
     }
+
     setFlagV(overflow);
 }
 

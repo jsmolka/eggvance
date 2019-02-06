@@ -14,15 +14,18 @@ void ARM7::moveShiftedRegister(u16 instr)
 
     switch (opcode)
     {
-    case 0b00:  // LSL
+    // LSL
+    case 0b00:
         carry = logicalShiftLeft(result, offset); 
         break;
 
-    case 0b01:  // LSR
+    // LSR
+    case 0b01:
         carry = logicalShiftRight(result, offset); 
         break;
 
-    case 0b10:  // ASR
+    // ASR
+    case 0b10:
         carry = arithmeticShiftRight(result, offset); 
         break;
 
@@ -30,7 +33,9 @@ void ARM7::moveShiftedRegister(u16 instr)
         std::cout << __FUNCTION__ << " - Invalid operation\n";
     }
 
-    updateFlagsZNC(result, carry);
+    updateFlagZ(result);
+    updateFlagN(result);
+    updateFlagC(carry);
 
     setReg(dst, result);
 }
@@ -48,21 +53,26 @@ void ARM7::addSubtract(u16 instr)
         // Get the register for the immediate value
         operand = reg(operand);
 
-    u32 src_reg = reg(src);
-    u32 result = src_reg;
+    u32 input = reg(src);
+    u32 result = input;
     
     switch (opcode)
     {
-    case 0b0:  // ADD
+    // ADD
+    case 0b0:
         result += operand;
         break;
 
-    case 0b1:  // SUB
+    // SUB
+    case 0b1:
         result -= operand;
         break;
     }
 
-    updateFlagsZNCV(src_reg, operand, result, opcode == 0b0);
+    updateFlagZ(result);
+    updateFlagN(result);
+    updateFlagC(input, operand, opcode == 0b0);
+    updateFlagV(input, operand, opcode == 0b0);
 
     setReg(dst, result);
 }
@@ -73,30 +83,42 @@ void ARM7::moveCmpAddSubImmediate(u16 instr)
     u8 dst = (instr >> 8) & 0b111;
     u8 offset = instr & 0xFF;
 
-    u32 dst_reg = reg(dst);
-    u32 result = dst_reg;
+    u32 input = reg(dst);
+    u32 result = input;
+
+    bool writeback = true;
 
     switch (opcode)
     {
-    case 0b00:  // MOV
+    // MOV
+    case 0b00:
         result = offset;
-        updateFlagsZN(result);
         break;
 
-    case 0b01:  // CMP
-    case 0b11:  // SUB
+    // CMP
+    case 0b01:  
+        // CMP is the same as SUB but without writeback
+        writeback = false;
+
+    // SUB
+    case 0b11:
         result -= offset;
-        updateFlagsZNCV(dst_reg, offset, result, false);
+        updateFlagC(input, offset, false);
+        updateFlagV(input, offset, false);
         break;
-
-    case 0b10:  // ADD
+    
+    // ADD
+    case 0b10:
         result += offset;
-        updateFlagsZNCV(dst_reg, offset, result, true);
+        updateFlagC(input, offset, true);
+        updateFlagV(input, offset, true);
         break;
     }
 
-    // No writeback for CMP
-    if (opcode != 0b01)
+    updateFlagZ(result);
+    updateFlagN(result);
+
+    if (writeback)
         setReg(dst, result);
 }
 
@@ -106,99 +128,120 @@ void ARM7::aluOperations(u16 instr)
     u8 src = (instr >> 3) & 0b111;
     u8 dst = instr & 0b111;
 
-    u32 src_reg = reg(src);
-    u32 dst_reg = reg(dst);
-    u32 result = dst_reg;
+    u32 input = reg(dst);
+    u32 operand = reg(src);
+    u32 result = input;
+
+    bool writeback = true;
 
     switch (opcode)
     {
-    case 0b0000:  // AND
-    case 0b1000:  // TST
-        result &= src_reg;
-        updateFlagsZN(result);
+    // TST
+    case 0b1000:
+        // TST is same as AND but without writeback
+        writeback = false;
+
+    // AND
+    case 0b0000:
+        result &= operand;
         break;
 
-    case 0b0001:  // EOR
-        result ^= src_reg;
-        updateFlagsZN(result);
+    // EOR
+    case 0b0001:
+        result ^= operand;
         break;
 
-    case 0b0010:  // LSL
+    // LSL
+    case 0b0010:
     {
-        u8 carry = logicalShiftLeft(result, src_reg);
-        updateFlagsZNC(result, carry);
+        u8 carry = logicalShiftLeft(result, operand);
+        updateFlagC(carry);
         break;
     }
 
-    case 0b0011:  // LSR
+    // LSR
+    case 0b0011:
     {
-        u8 carry = logicalShiftLeft(result, src_reg);
-        updateFlagsZNC(result, carry);
+        u8 carry = logicalShiftLeft(result, operand);
+        updateFlagC(carry);
         break;
     }
 
-    case 0b0100:  // ASR
+    // ASR
+    case 0b0100:
     {
-        u8 carry = arithmeticShiftRight(result, src_reg);
-        updateFlagsZNC(result, carry);
+        u8 carry = arithmeticShiftRight(result, operand);
+        updateFlagC(carry);
         break;
     }
 
-    case 0b0101:  // ADC
-        result += (src_reg + flagC());
-        updateFlagsZNCV(dst_reg, src_reg + flagC(), result, true);
+    // ADC
+    case 0b0101:
+        operand += flagC();
+        result += operand;
+        updateFlagC(input, operand, true);
+        updateFlagV(input, operand, true);
         break;
 
-    case 0b0110:  // SBC
+    // SBC
+    case 0b0110:
         // NOT carry
-        result -= (src_reg + !flagC());
-        updateFlagsZNCV(dst_reg, src_reg + !flagC(), result, false);
+        operand += !flagC();
+        result -= operand;
+        updateFlagC(input, operand, false);
+        updateFlagV(input, operand, false);
         break;
 
-    case 0b0111:  // ROR
+    // ROR
+    case 0b0111:
     {
-        u8 carry = rotateRight(result, src_reg);
-        updateFlagsZNC(result, carry);
+        u8 carry = rotateRight(result, operand);
+        updateFlagC(carry);
         break;
     }
 
-    case 0b1010:  // CMP
-        result -= src_reg;
-        updateFlagsZNCV(dst_reg, src_reg, result, false);
+    // CMP
+    case 0b1010:
+        result -= operand;
+        updateFlagC(input, operand, false);
+        updateFlagV(input, operand, false);
+        writeback = false;
         break;
 
-    case 0b1011:  // CMN
-        result += src_reg;
-        updateFlagsZNCV(dst_reg, src_reg, result, true);
+    // CMN
+    case 0b1011:
+        result += operand;
+        updateFlagC(input, operand, true);
+        updateFlagV(input, operand, true);
+        writeback = false;
         break;
 
-    case 0b1100:  // ORR
-        result |= src_reg;
-        updateFlagsZN(result);
+    // ORR
+    case 0b1100:
+        result |= operand;
         break;
 
-    case 0b1101:  // MUL
-        result *= src_reg;
-        updateFlagsZN(result);
-        setFlagC(result != (dst_reg * src_reg));
-        // Todo: overflow?
+    // MUL
+    case 0b1101:
+        // Todo: check if MUL sets the C / V flags
+        result *= operand;
         break;
 
-    case 0b1110:  // BIC
-        result &= ~src_reg;
-        updateFlagsZN(result);
+    // BIC
+    case 0b1110:
+        result &= ~operand;
         break;
 
-    case 0b1111:  // MVN
-        result = ~src_reg;
-        updateFlagsZN(result);
+    // MVN
+    case 0b1111:
+        result = ~operand;
         break;
     }
 
-    // Writeback for almost all opcodes
-    if (opcode != 0b1000
-            && opcode != 0b1010
-            && opcode != 0b1011)
+    updateFlagZ(result);
+    updateFlagN(result);
+
+    if (writeback)
         setReg(dst, result);
 }
 
