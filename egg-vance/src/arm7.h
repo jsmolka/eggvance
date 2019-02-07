@@ -32,20 +32,20 @@ public:
 
     enum Condition
     {
-        COND_EQ = 0x0,  // Z = 1, equal (zero)
-        COND_NE = 0x1,  // Z = 0, not equal (nonzero)
-        COND_CS = 0x2,  // C = 1, carry set (unsigned higher or same)
-        COND_CC = 0x3,  // C = 0, carry cleared (carry cleared)
-        COND_MI = 0x4,  // N = 1, minus (negative)
-        COND_PL = 0x5,  // N = 0, plus (positive)
-        COND_VS = 0x6,  // V = 1, V set (overflow)
-        COND_VC = 0x7,  // V = 0, V cleared (no overflow)
-        COND_HI = 0x8,  // C = 1 and Z = 0, unsigned higher
-        COND_LS = 0x9,  // C = 0 or Z = 1, unsigned lower or same
-        COND_GE = 0xA,  // N = V, greater or equal
-        COND_LT = 0xB,  // N <> V, less than
-        COND_GT = 0xC,  // Z = 1 and N = V, greater than
-        COND_LE = 0xD,  // Z = 1 or N <> V, less or equal
+        COND_EQ = 0x0,  // Equal (zero)
+        COND_NE = 0x1,  // Not equal (nonzero)
+        COND_CS = 0x2,  // Carry set (unsigned higher or same)
+        COND_CC = 0x3,  // Carry cleared (unsigned lower)
+        COND_MI = 0x4,  // Minus (negative)
+        COND_PL = 0x5,  // Plus (positive)
+        COND_VS = 0x6,  // V set (overflow)
+        COND_VC = 0x7,  // V cleared (no overflow)
+        COND_HI = 0x8,  // Unsigned higher
+        COND_LS = 0x9,  // Unsigned lower or same
+        COND_GE = 0xA,  // Greater or equal
+        COND_LT = 0xB,  // Less than
+        COND_GT = 0xC,  // Greater than
+        COND_LE = 0xD,  // Less or equal
         COND_AL = 0xE,  // Always
         COND_NV = 0xF,  // Never
     };
@@ -54,6 +54,21 @@ public:
     {
         UNDEFINED,    // Undefined instruction
         REFILL_PIPE,  // Refill the pipeline
+        ARM_1,        // Data processing / PSR transfer
+        ARM_2,        // Multiply
+        ARM_3,        // Multiply long
+        ARM_4,        // Single data swap
+        ARM_5,        // Branch and exchange
+        ARM_6,        // Halfword data transfer (register offset)
+        ARM_7,        // Halfword data transfer (immediate offset)
+        ARM_8,        // Single data transfer
+        ARM_9,        // Undefined
+        ARM_10,       // Block data transfer
+        ARM_11,       // Branch
+        ARM_12,       // Coprocessor data transfer
+        ARM_13,       // Coprocessor data operation
+        ARM_14,       // Coprocessor register transfer
+        ARM_15,       // Software interrupt
         THUMB_1,      // Move shifted register
         THUMB_2,      // Add / subtract
         THUMB_3,      // Move / compare / add / subtract immediate
@@ -167,7 +182,7 @@ public:
         Instruction decoded;
     } pipe[3];
 
-    bool flush;
+    bool needs_flush;
 
     Mode currentMode() const;
 
@@ -215,4 +230,22 @@ public:
     void softwareInterrupt(u16 instr);
     void unconditionalBranch(u16 instr);
     void longBranchWithLink(u16 instr);
+
+    bool checkCondition(Condition condition) const;
+
+    void dataProcessingPsrTransfer(u32 instr);
+    void multiply(u32 instr);
+    void multiplyLong(u32 instr);
+    void singleDataSwap(u32 instr);
+    void branchAndExchange(u32 instr);
+    void halfDataTransferRegisterOffset(u32 instr);
+    void halfDataTransferImmediateOffset(u32 instr);
+    void singleDataTransfer(u32 instr);
+    void undefined(u32 instr);
+    void blockDataTransfer(u32 instr);
+    void branch(u32 instr);
+    void coprocessorDataTransfer(u32 instr);
+    void coprocessorDataOperation(u32 instr);
+    void coprocessorRegisterTransfer(u32 instr);
+    void softwareInterrupt(u32 instr);
 };

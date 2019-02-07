@@ -14,7 +14,7 @@ void ARM7::reset()
     pipe[1] = { 0, REFILL_PIPE };
     pipe[2] = { 0, REFILL_PIPE };
 
-    flush = false;
+    needs_flush = false;
 }
 
 u32 ARM7::reg(u8 number) const
@@ -170,82 +170,94 @@ void ARM7::decode()
     
     if (isArm())
     {
+        u32 instr = pipe[1].instr;
 
+        if ((instr >> 25) & 0b001)
+        {
+            pipe[1].decoded = ARM_1;
+        }
+        else if ((instr >> 23) & 0b00000)
+        {
+            pipe[1].decoded = ARM_2;
+        }
+        else if ((instr >> 23) & 0b00001)
+        {
+            pipe[1].decoded = ARM_3;
+        }
+        else if ((instr >> 23) & 0b00010)
+        {
+            pipe[1].decoded = ((instr >> 31) & 0b0) ? ARM_4 : ARM_5;
+        }
+        else if ((instr >> 25) & 0b000)
+        {
+            pipe[1].decoded = ((instr >> 22) & 0b0) ? ARM_6 : ARM_7;
+        }
     }
     else
     {
         u16 instr = static_cast<u16>(pipe[1].instr);
 
-        if ((instr >> 11) == 0b00011)
+        if ((instr >> 11) & 0b00011)
         {
             pipe[1].decoded = THUMB_2;
         }
-        else if ((instr >> 13) == 0b000)
+        else if ((instr >> 13) & 0b000)
         {
             pipe[1].decoded = THUMB_1;
         }
-        else if ((instr >> 13) == 0b001)
+        else if ((instr >> 13) & 0b001)
         {
             pipe[1].decoded = THUMB_3;
         }
-        else if ((instr >> 10) == 0b010000)
+        else if ((instr >> 10) & 0b010000)
         {
             pipe[1].decoded = THUMB_4;
         }
-        else if ((instr >> 10) == 0b010001)
+        else if ((instr >> 10) & 0b010001)
         {
             pipe[1].decoded = THUMB_5;
         }
-        else if ((instr >> 11) == 0b01001)
+        else if ((instr >> 11) & 0b01001)
         {
             pipe[1].decoded = THUMB_6;
         }
-        else if ((instr >> 12) == 0b0101)
+        else if ((instr >> 12) & 0b0101)
         {
-            if ((instr >> 9) & 0b1)
-                pipe[1].decoded = THUMB_8;
-            else
-                pipe[1].decoded = THUMB_7;
+            pipe[1].decoded = ((instr >> 9) & 0b0) ? THUMB_7 : THUMB_8;
         }
-        else if ((instr >> 13) == 0b011)
+        else if ((instr >> 13) & 0b011)
         {
             pipe[1].decoded = THUMB_9;
         }
-        else if ((instr >> 12) == 0b1000)
+        else if ((instr >> 12) & 0b1000)
         {
             pipe[1].decoded = THUMB_10;
         }
-        else if ((instr >> 12) == 0b1001)
+        else if ((instr >> 12) & 0b1001)
         {
             pipe[1].decoded = THUMB_11;
         }
-        else if ((instr >> 12) == 0b1010)
+        else if ((instr >> 12) & 0b1010)
         {
             pipe[1].decoded = THUMB_12;
         }
-        else if ((instr >> 12) == 0b1011)
+        else if ((instr >> 12) & 0b1011)
         {
-            if ((instr >> 10) & 0b1)
-                pipe[1].decoded = THUMB_14;
-            else
-                pipe[1].decoded = THUMB_13;
+            pipe[1].decoded = ((instr >> 10) & 0b0) ? THUMB_13 : THUMB_14;
         }
-        else if ((instr >> 12) == 0b1100)
+        else if ((instr >> 12) & 0b1100)
         {
             pipe[1].decoded = THUMB_15;
         }
-        else if ((instr >> 12) == 0b1101)
+        else if ((instr >> 12) & 0b1101)
         {
-            if (((instr >> 8) & 0b1111) == 0b1111)
-                pipe[1].decoded = THUMB_17;
-            else
-                pipe[1].decoded = THUMB_16;
+            pipe[1].decoded = ((instr >> 8) & 0b1111) ? THUMB_17 : THUMB_16;
         }
-        else if ((instr >> 12) == 0b1110)
+        else if ((instr >> 12) & 0b1110)
         {
             pipe[1].decoded = THUMB_18;
         }
-        else if ((instr >> 12) == 0b1111)
+        else if ((instr >> 12) & 0b1111)
         {
             pipe[1].decoded = THUMB_19;
         }
@@ -263,7 +275,78 @@ void ARM7::execute()
 
     if (isArm())
     {
+        u32 instr = pipe[2].instr;
 
+        Condition condition = static_cast<Condition>(instr >> 28);
+
+        if (checkCondition(condition))
+        {
+            switch (pipe[2].decoded)
+            {
+            case ARM_1:
+                dataProcessingPsrTransfer(instr);
+                break;
+
+            case ARM_2:
+                multiply(instr);
+                break;
+        
+            case ARM_3:
+                multiplyLong(instr);
+                break;
+
+            case ARM_4:
+                singleDataSwap(instr);
+                break;
+
+            case ARM_5:
+                branchAndExchange(instr);
+                break;
+
+            case ARM_6:
+                halfDataTransferRegisterOffset(instr);
+                break;
+
+            case ARM_7:
+                halfDataTransferImmediateOffset(instr);
+                break;
+
+            case ARM_8:
+                singleDataTransfer(instr);
+                break;
+
+            case ARM_9:
+                undefined(instr);
+                break;
+
+            case ARM_10:
+                blockDataTransfer(instr);
+                break;
+
+            case ARM_11:
+                branch(instr);
+                break;
+
+            case ARM_12:
+                coprocessorDataTransfer(instr);
+                break;
+
+            case ARM_13:
+                coprocessorDataOperation(instr);
+                break;
+
+            case ARM_14:
+                coprocessorRegisterTransfer(instr);
+                break;
+
+            case ARM_15:
+                softwareInterrupt(instr);
+                break;
+
+            default:
+                std::cout << __FUNCTION__ << " - Tried executing unknown thumb instruction " << (int)pipe[2].decoded << "\n";
+            }
+        }
     }
     else
     {
@@ -348,7 +431,7 @@ void ARM7::execute()
             break;
 
         default:
-            std::cout << __FUNCTION__ << " - Tried executing unknown instruction " << (int)pipe[2].decoded << "\n";
+            std::cout << __FUNCTION__ << " - Tried executing unknown thumb instruction " << (int)pipe[2].decoded << "\n";
         }
     }
 }
@@ -359,7 +442,6 @@ void ARM7::advance()
     pipe[1] = pipe[0];
 
     regs.r15 += isThumb() ? 2 : 4;
-
 }
 
 void ARM7::step()
@@ -369,13 +451,13 @@ void ARM7::step()
     execute();
     advance();
 
-    if (flush)
+    if (needs_flush)
     {
         pipe[0] = { 0, REFILL_PIPE };
         pipe[1] = { 0, REFILL_PIPE };
         pipe[2] = { 0, REFILL_PIPE };
 
-        flush = false;
+        needs_flush = false;
     }
 }
 
@@ -585,4 +667,82 @@ u8 ARM7::rotateRight(u32 &value, u8 offset)
         value |= (flagC() << 31);
     }
     return carry;
+}
+
+bool ARM7::checkCondition(Condition condition) const
+{
+    if (condition == COND_AL)
+        return true;
+
+    u8 z = flagZ();
+    u8 n = flagN();
+    u8 c = flagC();
+    u8 v = flagV();
+
+    switch (condition)
+    {
+    // EQ - Z set
+    case COND_EQ: 
+        return z;
+
+    // NE - Z clear
+    case COND_NE:
+        return !z;
+
+    // CS - C set
+    case COND_CS:
+        return c;
+
+    // CC - C clear
+    case COND_CC:
+        return !c;
+
+    // MI - N set
+    case COND_MI:
+        return n;
+
+    // PL - N clear
+    case COND_PL:
+        return !n;
+
+    // VS - V set
+    case COND_VS:
+        return v;
+
+    // VC - V clear
+    case COND_VC:
+        return !v;
+
+    // HI - C set and Z clear
+    case COND_HI:
+        return c && !z;
+
+    // LS - C clear or Z set
+    case COND_LS:
+        return !c || z;
+
+    // GE - N equals V
+    case COND_GE:
+        return n == v;
+
+    // LT - N not equal to V
+    case COND_LT:
+        return n != v;
+
+    // GT - Z clear and (N equals V)
+    case COND_GT:
+        return !z && (n == v);
+
+    // LE - Z set or (N not equal to V)
+    case COND_LE:
+        return z || (n != v);
+
+    // AL - always true
+    case COND_AL:
+        return true;
+
+    default:
+        std::cout << __FUNCTION__ << " - Invalid condition " << (int)condition << "\n";
+    }
+    return true;
 }
