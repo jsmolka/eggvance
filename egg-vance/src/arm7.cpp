@@ -172,93 +172,210 @@ void ARM7::decode()
     {
         u32 instr = pipe[1].instr;
 
-        if ((instr >> 25) & 0b001)
+        if ((instr >> 26 & 0x3) == 0b00)
         {
-            pipe[1].decoded = ARM_1;
+            if ((instr >> 22 & 0x3F) == 0b000000
+                && (instr >> 4 & 0xF) == 0b1001)
+            {
+                // Multiply
+                pipe[1].decoded = ARM_2;
+            }
+            else if ((instr >> 23 & 0x1F) == 0b00001
+                && (instr >> 4 & 0xF) == 0b1001)
+            {
+                // Multiply long
+                pipe[1].decoded = ARM_3;
+            }
+            else if ((instr >> 23 & 0x1F) == 0b00010
+                && (instr >> 20 & 0x3) == 0b00
+                && (instr >> 4 & 0xFF) == 0b00001001)
+            {
+                // Single data swap
+                pipe[1].decoded = ARM_4;
+            }
+            else if ((instr >> 4 & 0xFFFFFF) == 0b000100101111111111110001)
+            {
+                // Branch and exchange
+                pipe[1].decoded = ARM_5;
+            }
+            else if ((instr >> 25 & 0x7) == 0b000
+                && (instr >> 22 & 0x1) == 0b0
+                && (instr >> 7 & 0x1F) == 0b00001
+                && (instr >> 4 & 0x1) == 0b1)
+            {
+                // Halfword data transfer (register offset)
+                pipe[1].decoded = ARM_6;
+            }
+            else if ((instr >> 25 & 0x7) == 0b000
+                && (instr >> 22 & 0x1) == 0b1
+                && (instr >> 7 & 0x1) == 0b1
+                && (instr >> 4 & 0x1) == 0b1)
+            {
+                // Halfword data transfer (immediate offset)
+                pipe[1].decoded = ARM_7;
+            }
+            else
+            {
+                // Data processing / PSR transfer
+                pipe[1].decoded = ARM_1;
+            }
         }
-        else if ((instr >> 23) & 0b00000)
+        else if ((instr >> 25 & 0x7) == 0b011
+            && (instr >> 4 & 0x1) == 0b1)
         {
-            pipe[1].decoded = ARM_2;
+            // Undefined
+            pipe[1].decoded = ARM_9;
         }
-        else if ((instr >> 23) & 0b00001)
+        else if ((instr >> 25 & 0x3) == 0b01)
         {
-            pipe[1].decoded = ARM_3;
+            // Single data transfer
+            pipe[1].decoded = ARM_8;
         }
-        else if ((instr >> 23) & 0b00010)
+        else if ((instr >> 25 & 0x7) == 0b100)
         {
-            pipe[1].decoded = ((instr >> 31) & 0b0) ? ARM_4 : ARM_5;
+            // Block data transfer
+            pipe[1].decoded = ARM_10;
         }
-        else if ((instr >> 25) & 0b000)
+        else if ((instr >> 25 & 0x7) == 0b101)
         {
-            pipe[1].decoded = ((instr >> 22) & 0b0) ? ARM_6 : ARM_7;
+            // Branch
+            pipe[1].decoded = ARM_11;
+        }
+        else if ((instr >> 25 & 0x7) == 0b110)
+        {
+            // Coprocessor data transfer
+            pipe[1].decoded = ARM_12;
+        }
+        else if ((instr >> 24 & 0xF) == 0b1110)
+        {
+            if ((instr >> 4 & 0x1) == 0b0)
+            {
+                // Coprocessor data operation
+                pipe[1].decoded = ARM_13;
+            }
+            else
+            {
+                // Coprocessor register transfer
+                pipe[1].decoded = ARM_14;
+            }
+        }
+        else if ((instr >> 24 & 0xF) == 0b1111)
+        {
+            // Softrware interrupt
+            pipe[1].decoded = ARM_15;
+        }
+        else
+        {
+            std::cout << __FUNCTION__ << " - Cannot decode ARM instruction " << (int)instr << "\n";
         }
     }
     else
     {
         u16 instr = static_cast<u16>(pipe[1].instr);
 
-        if ((instr >> 11) & 0b00011)
+        if ((instr >> 11 & 0x1F) == 0b00011)
         {
+            // Move shifted register
             pipe[1].decoded = THUMB_2;
         }
-        else if ((instr >> 13) & 0b000)
+        else if ((instr >> 13 & 0x7) == 0b000)
         {
+            // Add / subtract
             pipe[1].decoded = THUMB_1;
         }
-        else if ((instr >> 13) & 0b001)
+        else if ((instr >> 13 & 0x7) == 0b001)
         {
+            // Move / compare / add / subtract immediate
             pipe[1].decoded = THUMB_3;
         }
-        else if ((instr >> 10) & 0b010000)
+
+        else if ((instr >> 10 & 0x3F) == 0b010000)
         {
+            // ALU operations
             pipe[1].decoded = THUMB_4;
         }
-        else if ((instr >> 10) & 0b010001)
+        else if ((instr >> 10 & 0x3F) == 0b010001)
         {
+            // High register operations / branch exchange
             pipe[1].decoded = THUMB_5;
         }
-        else if ((instr >> 11) & 0b01001)
+        else if ((instr >> 11 & 0x1F) == 0b01001)
         {
+            // PC-relative load
             pipe[1].decoded = THUMB_6;
         }
-        else if ((instr >> 12) & 0b0101)
+        else if ((instr >> 12 & 0xF) == 0b0101)
         {
-            pipe[1].decoded = ((instr >> 9) & 0b0) ? THUMB_7 : THUMB_8;
+            if ((instr >> 9 & 0x1) == 0b0)
+            {
+                // Load / store with register offset
+                pipe[1].decoded = THUMB_7;
+            }
+            else
+            {
+                // Load / store with sign extended byte / halfowrd
+                pipe[1].decoded = THUMB_8;
+            }
         }
-        else if ((instr >> 13) & 0b011)
+        else if ((instr >> 13 & 0x7) == 0b011)
         {
+            // Load / store with immediate offset
             pipe[1].decoded = THUMB_9;
         }
-        else if ((instr >> 12) & 0b1000)
+        else if ((instr >> 12 & 0xF) == 0b1000)
         {
+            // Load / store halfword
             pipe[1].decoded = THUMB_10;
         }
-        else if ((instr >> 12) & 0b1001)
+        else if ((instr >> 12 & 0xF) == 0b1001)
         {
+            // SP-relative load / store
             pipe[1].decoded = THUMB_11;
         }
-        else if ((instr >> 12) & 0b1010)
+        else if ((instr >> 12 & 0xF) == 0b1010)
         {
+            // Load address
             pipe[1].decoded = THUMB_12;
         }
-        else if ((instr >> 12) & 0b1011)
+        else if ((instr >> 12 & 0xF) == 0b1011)
         {
-            pipe[1].decoded = ((instr >> 10) & 0b0) ? THUMB_13 : THUMB_14;
+            if ((instr >> 10 & 0x1) == 0b0)
+            {
+                // Add offset to stack pointer
+                pipe[1].decoded = THUMB_13;
+            }
+            else
+            {
+                // Push / pop registers
+                pipe[1].decoded = THUMB_14;
+            }
         }
-        else if ((instr >> 12) & 0b1100)
+        else if ((instr >> 12 & 0xF) == 0b1100)
         {
+            // Multiple load / store
             pipe[1].decoded = THUMB_15;
         }
-        else if ((instr >> 12) & 0b1101)
+        else if ((instr >> 12 & 0xF) == 0b1101)
         {
-            pipe[1].decoded = ((instr >> 8) & 0b1111) ? THUMB_17 : THUMB_16;
+            if ((instr >> 8 & 0xF) == 0b1111)
+            {
+                // Software interrupt
+                pipe[1].decoded = THUMB_17;
+            }
+            else
+            {
+                // Conditional branch
+                pipe[1].decoded = THUMB_16;
+            }
         }
-        else if ((instr >> 12) & 0b1110)
+        else if ((instr >> 12 & 0xF) == 0b1110)
         {
+            // Unconditional branch
             pipe[1].decoded = THUMB_18;
         }
-        else if ((instr >> 12) & 0b1111)
+        else if ((instr >> 12 & 0xF) == 0b1111)
         {
+        // Long branch with link
             pipe[1].decoded = THUMB_19;
         }
         else

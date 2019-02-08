@@ -4,10 +4,10 @@
 
 void ARM7::moveShiftedRegister(u16 instr)
 {
-    u8 opcode = (instr >> 11) & 0b11;
-    u8 offset = (instr >> 6) & 0b11111;
-    u8 src = (instr >> 3) & 0b111;
-    u8 dst = instr & 0b111;
+    u8 opcode = (instr >> 11) & 0x3;
+    u8 offset = (instr >> 6) & 0x1F;
+    u8 src = (instr >> 3) & 0x7;
+    u8 dst = instr & 0x7;
 
     u8 carry = 0;
     u32 result = reg(src);
@@ -42,14 +42,14 @@ void ARM7::moveShiftedRegister(u16 instr)
 
 void ARM7::addSubtract(u16 instr)
 {
-    u8 opcode = (instr >> 9) & 0b1;
-    u32 src = (instr >> 3) & 0b111;
-    u32 dst = instr & 0b111;
+    u8 opcode = (instr >> 9) & 0x1;
+    u32 src = (instr >> 3) & 0x7;
+    u32 dst = instr & 0x7;
 
     // Get the immediate operand value
-    u32 operand = (instr >> 6) & 0b111;
+    u32 operand = (instr >> 6) & 0x7;
     // Check if a register should be used instead
-    if ((instr >> 10) & 0b0)
+    if ((instr >> 10) & 0x0)
         // Get the register for the immediate value
         operand = reg(operand);
 
@@ -79,8 +79,8 @@ void ARM7::addSubtract(u16 instr)
 
 void ARM7::moveCmpAddSubImmediate(u16 instr)
 {
-    u8 opcode = (instr >> 11) & 0b11;
-    u8 dst = (instr >> 8) & 0b111;
+    u8 opcode = (instr >> 11) & 0x3;
+    u8 dst = (instr >> 8) & 0x7;
     u8 offset = instr & 0xFF;
 
     u32 input = reg(dst);
@@ -125,8 +125,8 @@ void ARM7::moveCmpAddSubImmediate(u16 instr)
 void ARM7::aluOperations(u16 instr)
 {
     u8 opcode = (instr >> 6) & 0xF;
-    u8 src = (instr >> 3) & 0b111;
-    u8 dst = instr & 0b111;
+    u8 src = (instr >> 3) & 0x7;
+    u8 dst = instr & 0x7;
 
     u32 input = reg(dst);
     u32 operand = reg(src);
