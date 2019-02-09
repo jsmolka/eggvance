@@ -54,32 +54,19 @@ public:
     {
         UNDEFINED,    // Undefined instruction
         REFILL_PIPE,  // Refill the pipeline
-        ARM_1,        // Data processing / PSR transfer
-        ARM_2,        // Multiply
-        ARM_3,        // Multiply long
-        ARM_4,        // Single data swap
-        ARM_5,        // Branch and exchange
-        ARM_6,        // Halfword data transfer (register offset)
-        ARM_7,        // Halfword data transfer (immediate offset)
-        ARM_8,        // Single data transfer
-        ARM_9,        // Undefined
-        ARM_10,       // Block data transfer
-        ARM_11,       // Branch
-        ARM_12,       // Coprocessor data transfer
-        ARM_13,       // Coprocessor data operation
-        ARM_14,       // Coprocessor register transfer
-        ARM_15,       // Software interrupt
+        ARM_BX,       // Branch and exchange
+        ARM_B_BL,     // Branch and branch with link
         THUMB_1,      // Move shifted register
         THUMB_2,      // Add / subtract
         THUMB_3,      // Move / compare / add / subtract immediate
         THUMB_4,      // ALU operations
-        THUMB_5,      // Hi register operations / branch exchange
-        THUMB_6,      // PC-relative load
+        THUMB_5,      // High register operations / branch exchange
+        THUMB_6,      // Load PC-relative
         THUMB_7,      // Load / store with register offset
         THUMB_8,      // Load / store sign-extended byte / halfword
         THUMB_9,      // Load / store with immediate offset
         THUMB_10,     // Load / store halfword
-        THUMB_11,     // SP-relative load / store
+        THUMB_11,     // Load / store SP-relative
         THUMB_12,     // Load address
         THUMB_13,     // Add offset to stack pointer
         THUMB_14,     // Push / pop registers
@@ -211,41 +198,28 @@ public:
     u8 arithmeticShiftRight(u32& value, u8 offset);
     u8 rotateRight(u32& value, u8 offset);
 
+    bool checkCondition(Condition condition) const;
+
     void moveShiftedRegister(u16 instr);
-    void addSubtract(u16 instr);
+    void addSubImmediate(u16 instr);
     void moveCmpAddSubImmediate(u16 instr);
     void aluOperations(u16 instr);
     void highRegisterBranchExchange(u16 instr);
-    void pcRelativeLoad(u16 instr);
-    void loadStoreWithRegisterOffset(u16 instr);
-    void loadStoreSignExtendedByteHalfword(u16 instr);
+    void loadPcRelative(u16 instr);
+    void loadStoreRegisterOffset(u16 instr);
+    void loadStoreSignExtended(u16 instr);
     void loadStoreImmediateOffset(u16 instr);
     void loadStoreHalfword(u16 instr);
-    void spRelativeLoadStore(u16 instr);
+    void loadStoreSpRelative(u16 instr);
     void loadAddress(u16 instr);
-    void addOffsetToSp(u16 instr);
+    void addOffsetSp(u16 instr);
     void pushPopRegisters(u16 instr);
     void multipleLoadStore(u16 instr);
     void conditionalBranch(u16 instr);
-    void softwareInterrupt(u16 instr);
+    void softwareInterruptThumb(u16 instr);
     void unconditionalBranch(u16 instr);
-    void longBranchWithLink(u16 instr);
+    void longBranchLink(u16 instr);
 
-    bool checkCondition(Condition condition) const;
-
-    void dataProcessingPsrTransfer(u32 instr);
-    void multiply(u32 instr);
-    void multiplyLong(u32 instr);
-    void singleDataSwap(u32 instr);
-    void branchAndExchange(u32 instr);
-    void halfDataTransferRegisterOffset(u32 instr);
-    void halfDataTransferImmediateOffset(u32 instr);
-    void singleDataTransfer(u32 instr);
-    void undefined(u32 instr);
-    void blockDataTransfer(u32 instr);
-    void branch(u32 instr);
-    void coprocessorDataTransfer(u32 instr);
-    void coprocessorDataOperation(u32 instr);
-    void coprocessorRegisterTransfer(u32 instr);
-    void softwareInterrupt(u32 instr);
+    void branchExchange(u32 instr);
+    void branchLink(u32 instr);
 };

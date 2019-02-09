@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <vector>
 
 #include "integer.h"
@@ -10,6 +11,8 @@ public:
     MMU();
 
     void reset();
+
+    bool loadRom(const std::string& filepath);
 
     u8 readByte(u32 addr) const;
     u16 readHalf(u32 addr) const;

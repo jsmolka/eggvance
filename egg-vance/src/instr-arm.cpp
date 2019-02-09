@@ -1,62 +1,65 @@
 #include "arm7.h"
 
-void ARM7::dataProcessingPsrTransfer(u32 instr)
-{
+#include <iostream>
 
+// BX
+void ARM7::branchExchange(u32 instr)
+{
+    u8 rn = instr & 0xF;
+
+    // This operation is undefined for R15
+    if (rn <= 14)
+    {
+        u32 operand = reg(rn);
+
+        // Exchange instruction set
+        if (operand & 0b1)
+        {
+            regs.cpsr |= CPSR_T;
+
+            // Clear THUMB bit
+            operand &= ~0b1;
+        }
+
+        regs.r15 = operand;
+        needs_flush = true;
+    }
+    else
+    {
+        std::cout << __FUNCTION__ << " - Invalid register " << (int)rn << "\n";
+    }
 }
 
-void ARM7::multiply(u32 instr)
+// B, BL
+void ARM7::branchLink(u32 instr)
 {
-}
+    // Link flag
+    u8 l = instr >> 24 & 0x1;
+    u32 offset = instr & 0xFFFFFF;
 
-void ARM7::multiplyLong(u32 instr)
-{
-}
+    // Shift left by two bits
+    offset <<= 2;
 
-void ARM7::singleDataSwap(u32 instr)
-{
-}
+    s32 signed_offset = offset;
 
-void ARM7::branchAndExchange(u32 instr)
-{
-}
+    // Convert two's complement
+    if (offset & 1 << 25)
+    {
+        offset = ~offset;
+        offset++;
 
-void ARM7::halfDataTransferRegisterOffset(u32 instr)
-{
-}
+        // Sign extend
+        offset |= 1 << 31;
 
-void ARM7::halfDataTransferImmediateOffset(u32 instr)
-{
-}
+        signed_offset = offset;
+    }
 
-void ARM7::singleDataTransfer(u32 instr)
-{
-}
+    if (l & 0b1)
+    {
+        // Save old PC in link register
+        setReg(14, regs.r15 - 4);
+    }
 
-void ARM7::undefined(u32 instr)
-{
-}
-
-void ARM7::blockDataTransfer(u32 instr)
-{
-}
-
-void ARM7::branch(u32 instr)
-{
-}
-
-void ARM7::coprocessorDataTransfer(u32 instr)
-{
-}
-
-void ARM7::coprocessorDataOperation(u32 instr)
-{
-}
-
-void ARM7::coprocessorRegisterTransfer(u32 instr)
-{
-}
-
-void ARM7::softwareInterrupt(u32 instr)
-{
+    regs.r15 += signed_offset;
+    needs_flush = true;
 }
