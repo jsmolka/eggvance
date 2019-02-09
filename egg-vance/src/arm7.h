@@ -219,7 +219,7 @@ public:
     void pcRelativeLoad(u16 instr);
     void loadStoreWithRegisterOffset(u16 instr);
     void loadStoreSignExtendedByteHalfword(u16 instr);
-    void loadStoreWithImmediateOffset(u16 instr);
+    void loadStoreImmediateOffset(u16 instr);
     void loadStoreHalfword(u16 instr);
     void spRelativeLoadStore(u16 instr);
     void loadAddress(u16 instr);

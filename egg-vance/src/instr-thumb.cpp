@@ -79,11 +79,11 @@ void ARM7::addSubtract(u16 instr)
 
 void ARM7::moveCmpAddSubImmediate(u16 instr)
 {
-    u8 opcode = (instr >> 11) & 0x3;
-    u8 dst = (instr >> 8) & 0x7;
+    u8 opcode = instr >> 11 & 0x3;
+    u8 rd = instr >> 8 & 0x7;
     u8 offset = instr & 0xFF;
 
-    u32 input = reg(dst);
+    u32 input = reg(rd);
     u32 result = input;
 
     bool writeback = true;
@@ -119,7 +119,7 @@ void ARM7::moveCmpAddSubImmediate(u16 instr)
     updateFlagN(result);
 
     if (writeback)
-        setReg(dst, result);
+        setReg(rd, result);
 }
 
 void ARM7::aluOperations(u16 instr)
@@ -261,12 +261,70 @@ void ARM7::loadStoreSignExtendedByteHalfword(u16 instr)
 {
 }
 
-void ARM7::loadStoreWithImmediateOffset(u16 instr)
+void ARM7::loadStoreImmediateOffset(u16 instr)
 {
+    // Byte / word flag
+    u8 b = instr >> 12 & 0x1;
+    // Load / store flag
+    u8 l = instr >> 11 & 0x1;
+    u8 offset = instr >> 6 & 0x1F;
+    u8 rb = instr >> 3 & 0x7;
+    u8 rd = instr & 0x7;
+
+    if (b == 0b0)
+        // Word access uses a 7-bit offset
+        offset <<= 2;
+
+    // Calculate address
+    u32 addr = reg(rb) + offset;
+
+    switch (l << 1 | b)
+    {
+    // Store word
+    case 0b00:
+        mmu->writeWord(addr, reg(rd));
+        break;
+
+    // Load word
+    case 0b01:
+        setReg(rd, mmu->readWord(addr));
+        break;
+
+    // Store byte
+    case 0b10:
+        mmu->writeByte(addr, reg(rd) & 0xFF);
+        break;
+
+    // Load byte
+    case 0b11:
+        setReg(rd, mmu->readByte(addr));
+        break;
+    }
 }
 
 void ARM7::loadStoreHalfword(u16 instr)
 {
+    // Load / store flag
+    u8 l = instr >> 11 & 0x1;
+    u8 offset = instr >> 6 & 0x1F;
+    u8 rb = instr >> 3 & 0x7;
+    u8 rd = instr & 0x7;
+
+    // Calculate address
+    u32 addr = reg(rb) + offset;
+
+    switch (l)
+    {
+    // Store
+    case 0b0:
+        mmu->writeHalf(addr, reg(rd) & 0xFFFF);
+        break;
+
+    // Load
+    case 0b1:
+        setReg(rd, mmu->readHalf(addr));
+        break;
+    }
 }
 
 void ARM7::spRelativeLoadStore(u16 instr)
@@ -291,6 +349,40 @@ void ARM7::multipleLoadStore(u16 instr)
 
 void ARM7::conditionalBranch(u16 instr)
 {
+    Condition cond = static_cast<Condition>(instr >> 8 & 0xF);
+    u8 offset = instr & 0xFF;
+
+    if (checkCondition(cond))
+    {
+        if (cond == COND_AL)
+        {
+            std::cout << __FUNCTION__ << " - Undefined condition\n";
+        }
+        else if (cond == COND_NV)
+        {
+            // Todo: process SWI
+        }
+        else
+        {
+            s16 signed_offset = offset;
+
+            // Convert two's complement
+            if (offset & 1 << 7)
+            {
+                offset = ~offset;
+                offset++;
+
+                signed_offset = -1 * offset;
+            }
+
+            // Offset needs to be 9-bit with bit 0 set to 0
+            signed_offset <<= 1;
+
+            regs.r15 += signed_offset;
+
+            needs_flush = true;
+        }
+    }
 }
 
 void ARM7::softwareInterrupt(u16 instr)
