@@ -286,7 +286,7 @@ void ARM7::loadStoreImmediateOffset(u16 instr)
     {
     // Store word
     case 0b00:
-        mmu->writeWord(addr, reg(rd));
+        mmu->writeWordFast(addr, reg(rd));
         break;
 
     // Load word
@@ -296,7 +296,7 @@ void ARM7::loadStoreImmediateOffset(u16 instr)
 
     // Store byte
     case 0b10:
-        mmu->writeByte(addr, reg(rd) & 0xFF);
+        mmu->writeByteFast(addr, reg(rd) & 0xFF);
         break;
 
     // Load byte
@@ -321,7 +321,7 @@ void ARM7::loadStoreHalfword(u16 instr)
     {
     // Store
     case 0b0:
-        mmu->writeHalf(addr, reg(rd) & 0xFFFF);
+        mmu->writeHalfFast(addr, reg(rd) & 0xFFFF);
         break;
 
     // Load

@@ -3,7 +3,7 @@
 #include <fstream>
 #include <iterator>
 
-#define GAMEPAK_0 0x8000000
+#include "memory_map.h"
 
 MMU::MMU()
 {
@@ -28,7 +28,7 @@ bool MMU::loadRom(const std::string& filepath)
     std::streampos size = stream.tellg();
     stream.seekg(0, std::ios::beg);
 
-    std::copy(std::istream_iterator<u8>(stream), std::istream_iterator<u8>(), memory.begin() + GAMEPAK_0);
+    std::copy(std::istream_iterator<u8>(stream), std::istream_iterator<u8>(), memory.begin() + MAP_GAMEPAK_0);
 
     return true;
 }
@@ -48,21 +48,36 @@ u32 MMU::readWord(u32 addr) const
     return (readByte(addr + 3) << 24) | (readByte(addr + 2) << 16) | (readByte(addr + 1) << 8) | readByte(addr);
 }
 
-void MMU::writeByte(u32 addr, u8 byte)
+void MMU::writeByteFast(u32 addr, u8 byte)
 {
     memory[addr] = byte;
 }
 
+void MMU::writeHalfFast(u32 addr, u16 half)
+{
+    writeByteFast(addr, half & 0xFF);
+    writeByteFast(addr + 1, half >> 8);
+}
+
+void MMU::writeWordFast(u32 addr, u32 word)
+{
+    writeByteFast(addr, word & 0xFF);
+    writeByteFast(addr + 1, (word >> 8) & 0xFF);
+    writeByteFast(addr + 2, (word >> 16) & 0xFF);
+    writeByteFast(addr + 3, (word >> 24) & 0xFF);
+}
+
+void MMU::writeByte(u32 addr, u8 byte)
+{
+    writeByteFast(addr, byte);
+}
+
 void MMU::writeHalf(u32 addr, u16 half)
 {
-    writeByte(addr, half & 0xFF);
-    writeByte(addr + 1, half >> 8);
+    writeHalfFast(addr, half);
 }
 
 void MMU::writeWord(u32 addr, u32 word)
 {
-    writeByte(addr, word & 0xFF);
-    writeByte(addr + 1, (word >> 8) & 0xFF);
-    writeByte(addr + 2, (word >> 16) & 0xFF);
-    writeByte(addr + 3, (word >> 24) & 0xFF);
+    writeWordFast(addr, word);
 }

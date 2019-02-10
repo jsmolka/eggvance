@@ -24,13 +24,13 @@
     <ClCompile Include="src\mmu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\instr-thumb.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\instr-arm.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\gba.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\instr_thumb.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\instr_arm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -45,6 +45,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\gba.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\memory_map.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
