@@ -310,14 +310,17 @@ void ARM7::execute()
         switch (pipe[2].decoded)
         {
         case THUMB_1:
+            std::cout << "THUMB_1\n";
             moveShiftedRegister(instr);
             break;
 
         case THUMB_2:
+            std::cout << "THUMB_2\n";
             addSubImmediate(instr);
             break;
 
         case THUMB_3:
+            std::cout << "THUMB_3\n";
             moveCmpAddSubImmediate(instr);
             break;
 
@@ -342,10 +345,12 @@ void ARM7::execute()
             break;
 
         case THUMB_9:
+            std::cout << "THUMB_9\n";
             loadStoreImmediateOffset(instr);
             break;
 
         case THUMB_10:
+            std::cout << "THUMB_10\n";
             loadStoreHalfword(instr);
             break;
 
@@ -370,6 +375,7 @@ void ARM7::execute()
             break;
 
         case THUMB_16:
+            std::cout << "THUMB_16\n";
             conditionalBranch(instr);
             break;
 
@@ -404,7 +410,6 @@ void ARM7::step()
     fetch();
     decode();
     execute();
-    advance();
 
     if (needs_flush)
     {
@@ -413,6 +418,10 @@ void ARM7::step()
         pipe[2] = { 0, REFILL_PIPE };
 
         needs_flush = false;
+    }
+    else
+    {
+        advance();
     }
 }
 
@@ -695,6 +704,11 @@ bool ARM7::checkCondition(Condition condition) const
     // AL - always true
     case COND_AL:
         return true;
+
+    // Todo: should this be handled??? - watch out for THUMB 19
+    // NV - never true
+    case COND_NV:
+        return false;
 
     default:
         std::cout << __FUNCTION__ << " - Invalid condition " << (int)condition << "\n";

@@ -265,6 +265,7 @@ void ARM7::loadStoreSignExtended(u16 instr)
 
 }
 
+// THUMB 9 - STR, LDR, STRB, LDRB
 void ARM7::loadStoreImmediateOffset(u16 instr)
 {
     // Byte / word flag
@@ -275,7 +276,7 @@ void ARM7::loadStoreImmediateOffset(u16 instr)
     u8 rb = instr >> 3 & 0x7;
     u8 rd = instr & 0x7;
 
-    if (b == 0b0)
+    if (!b)
         // Word access uses a 7-bit offset
         offset <<= 2;
 
@@ -284,22 +285,22 @@ void ARM7::loadStoreImmediateOffset(u16 instr)
 
     switch (l << 1 | b)
     {
-    // Store word
+    // STR - store word
     case 0b00:
         mmu->writeWordFast(addr, reg(rd));
         break;
 
-    // Load word
-    case 0b01:
+    // LDR - load word
+    case 0b10:
         setReg(rd, mmu->readWord(addr));
         break;
 
-    // Store byte
-    case 0b10:
+    // STRB - store byte
+    case 0b01:
         mmu->writeByteFast(addr, reg(rd) & 0xFF);
         break;
 
-    // Load byte
+    // LDRB - load byte
     case 0b11:
         setReg(rd, mmu->readByte(addr));
         break;
@@ -356,6 +357,7 @@ void ARM7::multipleLoadStore(u16 instr)
 
 }
 
+// THUMB 16 - B(cond)
 void ARM7::conditionalBranch(u16 instr)
 {
     Condition cond = static_cast<Condition>(instr >> 8 & 0xF);
