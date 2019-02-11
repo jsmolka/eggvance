@@ -7,10 +7,8 @@
 GBA::GBA()
     : running(true)
 {
-    // Link components
     arm.mmu = &mmu;
 
-    // Reset components
     reset();
 
     SDL_Init(SDL_INIT_VIDEO);
@@ -45,7 +43,7 @@ void GBA::run(const std::string& filepath)
 
     while (running)
     {
-        for (int i = 0; i < 10000; ++i)
+        for (int i = 0; i < 4096; ++i)
             arm.step(); 
 
         drawTiles();
@@ -67,38 +65,50 @@ void GBA::reset()
 
 void GBA::drawTiles()
 {
+    // Control register for background 0
+    u16 bg0cnt = mmu.readHalf(REG_BG0CNT);
+
+    // Map offset bits * 0x800 for the used map
+    u32 bg_map_offset = 0x800 * (bg0cnt >> 8 & 0xFF);
+
+    // 32 x 32 tiles (each 1 word)
+    u32 bg_map = MAP_VRAM + bg_map_offset;
+
+    // 20 vertical tiles
     for (int y = 0; y < 20; ++y)
     {
+        // 30 horizontal tiles
         for (int x = 0; x < 30; ++x)
         {
-            const u32 bg_map = MAP_VRAM + 0x800;
-
-            // 32 x 32 tiles (each 1 word)
-
+            // Each tile takes up 32 words in memory
             u16 tile = mmu.readHalf(bg_map + 32 * 2 * y + 2 * x);
 
-            std::cout << "tile: " << (int)tile << "\n";
-
             u16 tile_number = tile & 0x3FF;
-            u8 palette_number = tile >> 12 & 0xFF;
+            u8 palette_number = tile >> 12 & 0xF;
 
-            drawTile(x, y, tile_number, palette_number);
+            drawTile(8 * x, 8 * y, tile_number, palette_number);
         }
     }
 }
 
 void GBA::drawTile(int x, int y, u16 tile_number, u8 palette_number)
 {
+    // Control register for background 0
+    u16 bg0cnt = mmu.readHalf(REG_BG0CNT);
+
+    // Tile data offset bits * 0x4000
+    u32 bg_tiles_offset = 0x4000 * (bg0cnt >> 2 & 0x3);
+
+    u32 bg_tiles = MAP_VRAM + bg_tiles_offset;
+
     int x_off = 0;
     int y_off = 0;
 
     // 8 x 8 tiles at address of tile number
     for (int i = 0; i < 32; ++i)
     {
-        const u32 tile_base = MAP_VRAM + 0x4000;
-
         // Each tile takes up 32 bytes, one byte contains two pixels
-        u8 byte = mmu.readByte(tile_base + 32 * tile_number + i);
+        u8 byte = mmu.readByte(bg_tiles + 32 * tile_number + i);
 
         if (x_off == 8)
         {
@@ -106,22 +116,24 @@ void GBA::drawTile(int x, int y, u16 tile_number, u8 palette_number)
             y_off++;
         }
 
-        mmu.readHalf(0x05000000 + palette_number * 32 + tile_number * 2);
+        u16 c1 = mmu.readHalf(MAP_PALETTE + palette_number * 32 + 2 * (byte & 0xF));
+        u16 c2 = mmu.readHalf(MAP_PALETTE + palette_number * 32 + 2 * (byte >> 4 & 0xF));
 
-        int c1 = (byte & 0xF) != 0 ? 255 : 0;
-        int c2 = (byte >> 8 & 0xF) != 0 ? 255 : 0;
-
-        drawPixel(8 * x + x_off, 8 * y + y_off, c1);
-        drawPixel(8 * x + x_off + 1, 8 * y + y_off, c2);
+        drawPixel(x + x_off, y + y_off, c1);
+        drawPixel(x + x_off + 1, y + y_off, c2);
 
         x_off += 2;
     }
     SDL_UpdateWindowSurface(window);
 }
 
-void GBA::drawPixel(int x, int y, int c)
+void GBA::drawPixel(int x, int y, u16 c)
 {
+    u8 r = 8 * (c & 0x1F);
+    u8 g = 8 * (c >> 5 & 0x1F);
+    u8 b = 8 * (c >> 10 & 0x1F);
+
     SDL_Rect rect = { x, y, 1, 1 };
-    SDL_FillRect(surface, &rect, SDL_MapRGB(surface->format, c, c, c));
+    SDL_FillRect(surface, &rect, SDL_MapRGB(surface->format, r, g, b));
     SDL_RenderDrawRect(renderer, &rect);
 }

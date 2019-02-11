@@ -20,7 +20,7 @@ private:
 
     void drawTiles();
     void drawTile(int x, int y, u16 tile_number, u8 palette_number);
-    void drawPixel(int x, int y, int c);
+    void drawPixel(int x, int y, u16 c);
 
     ARM7 arm;
     MMU mmu;

@@ -55,16 +55,16 @@ void MMU::writeByteFast(u32 addr, u8 byte)
 
 void MMU::writeHalfFast(u32 addr, u16 half)
 {
-    writeByteFast(addr, half & 0xFF);
-    writeByteFast(addr + 1, half >> 8);
+    memory[addr] = half & 0xFF;
+    memory[addr + 1] = half >> 8 & 0xFF;
 }
 
 void MMU::writeWordFast(u32 addr, u32 word)
 {
-    writeByteFast(addr, word & 0xFF);
-    writeByteFast(addr + 1, (word >> 8) & 0xFF);
-    writeByteFast(addr + 2, (word >> 16) & 0xFF);
-    writeByteFast(addr + 3, (word >> 24) & 0xFF);
+    memory[addr] = word & 0xFF;
+    memory[addr + 1] = word >> 8 & 0xFF;
+    memory[addr + 2] = word >> 16 & 0xFF;
+    memory[addr + 3] = word >> 24 & 0xFF;
 }
 
 void MMU::writeByte(u32 addr, u8 byte)
