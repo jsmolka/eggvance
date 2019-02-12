@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\lcd.cpp" />
     <ClCompile Include="src\gba.cpp" />
     <ClCompile Include="src\instr_arm.cpp" />
     <ClCompile Include="src\instr_thumb.cpp" />
@@ -159,7 +160,9 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\lcd.h" />
     <ClInclude Include="src\gba.h" />
+    <ClInclude Include="src\lcd_stat.h" />
     <ClInclude Include="src\memory_map.h" />
     <ClInclude Include="src\mmu.h" />
     <ClInclude Include="src\arm7.h" />

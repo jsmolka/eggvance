@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "integer.h"
+#include "lcd_stat.h"
 
 class MMU
 {
@@ -25,6 +26,8 @@ public:
     void writeByte(u32 addr, u8 byte);
     void writeHalf(u32 addr, u16 half);
     void writeWord(u32 addr, u32 word);
+
+    lcd_stat* lcd_stat;
 
 private:
     std::vector<u8> memory;

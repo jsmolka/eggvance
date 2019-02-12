@@ -4,6 +4,7 @@
 
 ARM7::ARM7()
     : mmu(nullptr)
+    , running(true)
 {
 
 }
@@ -24,7 +25,6 @@ void ARM7::reset()
     regs.cpsr = 0x5F;
 
     // For test ROM
-    // Todo: remove
     regs.cpsr |= CPSR_T;
     regs.r15 = 0x8000108;
 
@@ -34,6 +34,7 @@ void ARM7::reset()
     pipe[2] = { 0, REFILL_PIPE };
 
     needs_flush = false;
+    running = true;
 }
 
 u32 ARM7::reg(u8 number) const
@@ -191,14 +192,97 @@ void ARM7::decode()
     {
         u32 instr = pipe[1].instr;
 
-        // Todo: just for demo
-        if ((instr >> 4 & 0xFFFFFF) == 0b000100101111111111110001)
+        if ((instr >> 26 & 0x3) == 0b00)
         {
-            pipe[1].instr = ARM_BX;
+            if ((instr >> 22 & 0x3F) == 0b000000
+                && (instr >> 4 & 0xF) == 0b1001)
+            {
+                // Multiply
+                pipe[1].decoded = ARM_2;
+            }
+            else if ((instr >> 23 & 0x1F) == 0b00001
+                && (instr >> 4 & 0xF) == 0b1001)
+            {
+                // Multiply long
+                pipe[1].decoded = ARM_3;
+            }
+            else if ((instr >> 23 & 0x1F) == 0b00010
+                && (instr >> 20 & 0x3) == 0b00
+                && (instr >> 4 & 0xFF) == 0b00001001)
+            {
+                // Single data swap
+                pipe[1].decoded = ARM_4;
+            }
+            else if ((instr >> 4 & 0xFFFFFF) == 0b000100101111111111110001)
+            {
+                // Branch and exchange
+                pipe[1].decoded = ARM_5;
+            }
+            else if ((instr >> 25 & 0x7) == 0b000
+                && (instr >> 22 & 0x1) == 0b0
+                && (instr >> 7 & 0x1F) == 0b00001
+                && (instr >> 4 & 0x1) == 0b1)
+            {
+                // Halfword data transfer (register offset)
+                pipe[1].decoded = ARM_6;
+            }
+            else if ((instr >> 25 & 0x7) == 0b000
+                && (instr >> 22 & 0x1) == 0b1
+                && (instr >> 7 & 0x1) == 0b1
+                && (instr >> 4 & 0x1) == 0b1)
+            {
+                // Halfword data transfer (immediate offset)
+                pipe[1].decoded = ARM_7;
+            }
+            else
+            {
+                // Data processing / PSR transfer
+                pipe[1].decoded = ARM_1;
+            }
         }
-        else
+        else if ((instr >> 25 & 0x7) == 0b011
+            && (instr >> 4 & 0x1) == 0b1)
         {
-            pipe[1].instr = ARM_B_BL;
+            // Undefined
+            pipe[1].decoded = ARM_9;
+        }
+        else if ((instr >> 25 & 0x3) == 0b01)
+        {
+            // Single data transfer
+            pipe[1].decoded = ARM_8;
+        }
+        else if ((instr >> 25 & 0x7) == 0b100)
+        {
+            // Block data transfer
+            pipe[1].decoded = ARM_10;
+        }
+        else if ((instr >> 25 & 0x7) == 0b101)
+        {
+            // Branch
+            pipe[1].decoded = ARM_11;
+        }
+        else if ((instr >> 25 & 0x7) == 0b110)
+        {
+            // Coprocessor data transfer
+            pipe[1].decoded = ARM_12;
+        }
+        else if ((instr >> 24 & 0xF) == 0b1110)
+        {
+            if ((instr >> 4 & 0x1) == 0b0)
+            {
+                // Coprocessor data operation
+                pipe[1].decoded = ARM_13;
+            }
+            else
+            {
+                // Coprocessor register transfer
+                pipe[1].decoded = ARM_14;
+            }
+        }
+        else if ((instr >> 24 & 0xF) == 0b1111)
+        {
+            // Softrware interrupt
+            pipe[1].decoded = ARM_15;
         }
     }
     else
@@ -291,12 +375,15 @@ void ARM7::execute()
         {
             switch (pipe[2].decoded)
             {
-            case ARM_BX:
+            case ARM_5:
+                std::cout << "ARM_5\n";
                 branchExchange(instr);
                 break;
 
-            case ARM_B_BL:
+            case ARM_11:
+                std::cout << "ARM_11\n";
                 branchLink(instr);
+                break;
 
             default:
                 std::cout << __FUNCTION__ << " - Tried executing unknown thumb instruction " << (int)pipe[2].decoded << "\n";
@@ -538,16 +625,16 @@ void ARM7::updateFlagV(u32 input, u32 operand, bool addition)
     setFlagV(overflow);
 }
 
-u8 ARM7::logicalShiftLeft(u32& value, u8 offset)
+u8 ARM7::logicalShiftLeft(u32& result, u8 offset)
 {
     u8 carry = 0;
 
     if (offset > 0)
     {
         // Save the last bit shifted out in the carry
-        carry = (value << (offset - 1)) >> 31;
+        carry = (result << (offset - 1)) >> 31;
 
-        value <<= offset;
+        result <<= offset;
     }
     // Special case LSL #0
     else
@@ -558,56 +645,56 @@ u8 ARM7::logicalShiftLeft(u32& value, u8 offset)
     return carry;
 }
 
-u8 ARM7::logicalShiftRight(u32& value, u8 offset)
+u8 ARM7::logicalShiftRight(u32& result, u8 offset)
 {
     u8 carry = 0;
 
     if (offset > 0)
     {
         // Save the last bit shifted out in the carry
-        carry = (value >> (offset - 1)) & 0b1;
+        carry = (result >> (offset - 1)) & 0b1;
 
-        value >>= offset;
+        result >>= offset;
     }
     // Special case LSR #32 / #0
     else
     {
         // Store the MSB in the carry
-        carry = value >> 31;
+        carry = result >> 31;
         // Reset the result
-        value = 0;
+        result = 0;
     }
     return carry;
 }
 
-u8 ARM7::arithmeticShiftRight(u32& value, u8 offset)
+u8 ARM7::arithmeticShiftRight(u32& result, u8 offset)
 {
     u8 carry = 0;
 
     if (offset > 0)
     {
         // Save the last bit shifted out in the carry
-        carry = (value >> (offset - 1)) & 0b1;
+        carry = (result >> (offset - 1)) & 0b1;
 
-        u32 msb = value & (1 << 31);
+        u32 msb = result & (1 << 31);
         for (int i = 0; i < offset; ++i)
         {
-            value >>= 1;
-            value |= msb;
+            result >>= 1;
+            result |= msb;
         }
     }
     // Special case LSR #32 / #0
     else
     {
         // Store the MSB in the carry
-        carry = value >> 31;
+        carry = result >> 31;
         // Apply carry bit to whole result
-        value = carry ? 0xFFFFFFFF : 0;
+        result = carry ? 0xFFFFFFFF : 0;
     }
     return carry;
 }
 
-u8 ARM7::rotateRight(u32 &value, u8 offset)
+u8 ARM7::rotateRight(u32& result, u8 offset)
 {
     u8 carry = 0;
 
@@ -615,20 +702,20 @@ u8 ARM7::rotateRight(u32 &value, u8 offset)
     {
         for (int i = 0; i < offset; ++i)
         {
-            carry = value & 0b1;
-            value >>= 1;
-            value |= (carry << 31);
+            carry = result & 0b1;
+            result >>= 1;
+            result |= (carry << 31);
         }
     }
     // Special case ROR #0
     else
     {
         // Save the first bit in the carry
-        carry = value & 0b1;
+        carry = result & 0b1;
         // Rotate by one
-        value >>= 1;
+        result >>= 1;
         // Change MSB to current carry
-        value |= (flagC() << 31);
+        result |= (flagC() << 31);
     }
     return carry;
 }
@@ -705,7 +792,6 @@ bool ARM7::checkCondition(Condition condition) const
     case COND_AL:
         return true;
 
-    // Todo: should this be handled??? - watch out for THUMB 19
     // NV - never true
     case COND_NV:
         return false;

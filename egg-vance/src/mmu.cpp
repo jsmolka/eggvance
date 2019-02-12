@@ -1,11 +1,11 @@
 #include "mmu.h"
 
 #include <fstream>
-#include <iterator>
 
 #include "memory_map.h"
 
 MMU::MMU()
+    : lcd_stat(nullptr)
 {
 
 }
@@ -22,13 +22,12 @@ bool MMU::loadRom(const std::string& filepath)
     if (!stream.is_open())
         return false;
 
-    stream.unsetf(std::ios::skipws);
-
     stream.seekg(0, std::ios::end);
     std::streampos size = stream.tellg();
     stream.seekg(0, std::ios::beg);
 
-    std::copy(std::istream_iterator<u8>(stream), std::istream_iterator<u8>(), memory.begin() + MAP_GAMEPAK_0);
+    u8* memory_ptr = &memory[MAP_GAMEPAK_0];
+    stream.read((char*)memory_ptr, size);
 
     return true;
 }
@@ -69,15 +68,67 @@ void MMU::writeWordFast(u32 addr, u32 word)
 
 void MMU::writeByte(u32 addr, u8 byte)
 {
-    writeByteFast(addr, byte);
+    memory[addr] = byte;
+
+    switch (addr)
+    {
+    case REG_DISPCNT:
+    case REG_DISPCNT + 1:
+        lcd_stat->display_control = readHalf(REG_DISPCNT);
+        break;
+
+    case REG_DISPSTAT:
+    case REG_DISPSTAT + 1:
+        lcd_stat->display_stat = readHalf(REG_DISPSTAT);
+        break;
+
+    case REG_VCOUNT:
+    case REG_VCOUNT + 1:
+        lcd_stat->vcount = readHalf(REG_VCOUNT);
+        break;
+
+    case REG_BG0CNT:
+    case REG_BG0CNT + 1:
+    case REG_BG1CNT:
+    case REG_BG1CNT + 1:
+    case REG_BG2CNT:
+    case REG_BG2CNT + 1:
+    case REG_BG3CNT:
+    case REG_BG3CNT + 1:
+    {
+        u8 index = 0;
+        switch (addr)
+        {
+        case REG_BG0CNT: case REG_BG0CNT + 1: index = 0; break;
+        case REG_BG1CNT: case REG_BG1CNT + 1: index = 1; break;
+        case REG_BG2CNT: case REG_BG2CNT + 1: index = 2; break;
+        case REG_BG3CNT: case REG_BG3CNT + 1: index = 3; break;
+        }
+
+        u16 half = readHalf(REG_BG0CNT + 2 * index);
+
+        lcd_stat->bg_priority[index] = half & 0x3;
+        lcd_stat->bg_tile_data_addr[index] = MAP_VRAM + 0x4000 * (half >> 2 & 0x3);
+        lcd_stat->bg_mosaic[index] = half >> 6 & 0x1;
+        lcd_stat->bg_palette_type[index] = half >> 7 & 0x1;
+        lcd_stat->bg_tile_map_addr[index] = MAP_VRAM + 0x800 * (half >> 8 & 0xF);
+        lcd_stat->bg_tile_map_size[index] = half >> 14 & 0x3;
+
+        break;
+    }
+    }
 }
 
 void MMU::writeHalf(u32 addr, u16 half)
 {
-    writeHalfFast(addr, half);
+    writeByte(addr, half & 0xFF);
+    writeByte(addr + 1, half >> 8 & 0xFF);
 }
 
 void MMU::writeWord(u32 addr, u32 word)
 {
-    writeWordFast(addr, word);
+    writeByte(addr, word & 0xFF);
+    writeByte(addr + 1, word >> 8 & 0xFF);
+    writeByte(addr + 2, word >> 16 & 0xFF);
+    writeByte(addr + 3, word >> 24 & 0xFF);
 }

@@ -54,8 +54,21 @@ public:
     {
         UNDEFINED,    // Undefined instruction
         REFILL_PIPE,  // Refill the pipeline
-        ARM_BX,       // Branch and exchange
-        ARM_B_BL,     // Branch and branch with link
+        ARM_1,        // Data processing / PSR transfer
+        ARM_2,        // Multiply
+        ARM_3,        // Multiply long
+        ARM_4,        // Single data swap
+        ARM_5,        // Branch and exchange
+        ARM_6,        // Halfword data transfer (register offset)
+        ARM_7,        // Halfword data transfer (immediate offset)
+        ARM_8,        // Single data transfer
+        ARM_9,        // Undefined
+        ARM_10,       // Block data transfer
+        ARM_11,       // Branch with link
+        ARM_12,       // Coprocessor data transfer
+        ARM_13,       // Coprocessor data operation
+        ARM_14,       // Coprocessor register transfer
+        ARM_15,       // Software interrupt
         THUMB_1,      // Move shifted register
         THUMB_2,      // Add / subtract
         THUMB_3,      // Move / compare / add / subtract immediate
@@ -170,6 +183,7 @@ public:
     } pipe[3];
 
     bool needs_flush;
+    bool running;
 
     Mode currentMode() const;
 
@@ -193,10 +207,10 @@ public:
     void updateFlagC(u32 input, u32 operand, bool addition);
     void updateFlagV(u32 input, u32 operand, bool addition);
 
-    u8 logicalShiftLeft(u32& value, u8 offset);
-    u8 logicalShiftRight(u32& value, u8 offset);
-    u8 arithmeticShiftRight(u32& value, u8 offset);
-    u8 rotateRight(u32& value, u8 offset);
+    u8 logicalShiftLeft(u32& result, u8 offset);
+    u8 logicalShiftRight(u32& result, u8 offset);
+    u8 arithmeticShiftRight(u32& result, u8 offset);
+    u8 rotateRight(u32& result, u8 offset);
 
     bool checkCondition(Condition condition) const;
 

@@ -2,15 +2,16 @@
 
 #include <iostream>
 
+// THUMB 1
 void ARM7::moveShiftedRegister(u16 instr)
 {
-    u8 opcode = (instr >> 11) & 0x3;
-    u8 offset = (instr >> 6) & 0x1F;
-    u8 src = (instr >> 3) & 0x7;
-    u8 dst = instr & 0x7;
+    u8 opcode = instr >> 11 & 0x3;
+    u8 offset = instr >> 6 & 0x1F;
+    u8 rs = instr >> 3 & 0x7;
+    u8 rd = instr & 0x7;
 
+    u32 result = reg(rs);
     u8 carry = 0;
-    u32 result = reg(src);
 
     switch (opcode)
     {
@@ -30,30 +31,36 @@ void ARM7::moveShiftedRegister(u16 instr)
         break;
 
     default:
-        std::cout << __FUNCTION__ << " - Invalid operation\n";
+        std::cout << __FUNCTION__ << " - Invalid operation " << (int)opcode << "\n";
+        running = false;
     }
 
     updateFlagZ(result);
     updateFlagN(result);
     updateFlagC(carry);
 
-    setReg(dst, result);
+    setReg(rd, result);
 }
 
+// THUMB 2
 void ARM7::addSubImmediate(u16 instr)
 {
-    u8 opcode = (instr >> 9) & 0x1;
-    u32 src = (instr >> 3) & 0x7;
-    u32 dst = instr & 0x7;
+    // Immediate flag
+    u8 i = instr >> 10 & 0x1;
+    u8 opcode = instr >> 9 & 0x1;
+    u8 offset = instr >> 6 & 0x7;
+    u32 rs = instr >> 3 & 0x7;
+    u32 rd = instr & 0x7;
 
-    // Get the immediate operand value
-    u32 operand = (instr >> 6) & 0x7;
-    // Check if a register should be used instead
-    if ((instr >> 10) & 0x0)
-        // Get the register for the immediate value
-        operand = reg(operand);
+    u32 operand;
+    if (i)
+        // Use immediate value as operand
+        operand = offset;
+    else
+        // Use register as operand
+        operand = reg(offset);
 
-    u32 input = reg(src);
+    u32 input = reg(rs);
     u32 result = input;
     
     switch (opcode)
@@ -74,9 +81,10 @@ void ARM7::addSubImmediate(u16 instr)
     updateFlagC(input, operand, opcode == 0b0);
     updateFlagV(input, operand, opcode == 0b0);
 
-    setReg(dst, result);
+    setReg(rd, result);
 }
 
+// THUMB 3
 void ARM7::moveCmpAddSubImmediate(u16 instr)
 {
     u8 opcode = instr >> 11 & 0x3;
@@ -122,6 +130,7 @@ void ARM7::moveCmpAddSubImmediate(u16 instr)
         setReg(rd, result);
 }
 
+// THUMB 4
 void ARM7::aluOperations(u16 instr)
 {
     u8 opcode = (instr >> 6) & 0xF;
@@ -287,7 +296,7 @@ void ARM7::loadStoreImmediateOffset(u16 instr)
     {
     // STR - store word
     case 0b00:
-        mmu->writeWordFast(addr, reg(rd));
+        mmu->writeWord(addr, reg(rd));
         break;
 
     // LDR - load word
@@ -297,7 +306,7 @@ void ARM7::loadStoreImmediateOffset(u16 instr)
 
     // STRB - store byte
     case 0b01:
-        mmu->writeByteFast(addr, reg(rd) & 0xFF);
+        mmu->writeByte(addr, reg(rd) & 0xFF);
         break;
 
     // LDRB - load byte
@@ -322,7 +331,7 @@ void ARM7::loadStoreHalfword(u16 instr)
     {
     // Store
     case 0b0:
-        mmu->writeHalfFast(addr, reg(rd) & 0xFFFF);
+        mmu->writeHalf(addr, reg(rd) & 0xFFFF);
         break;
 
     // Load
