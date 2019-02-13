@@ -6,18 +6,18 @@
 #include "lcd.h"
 #include "mmu.h"
 
-class GBA
+class Core
 {
 public:
-    GBA();
+    Core();
 
-    void run(const std::string &filepath);
+    void run(const std::string &file);
 
 private:
     void reset();
 
-    ARM7 arm;
-    MMU mmu;
-    LCD lcd;
+    Arm7 arm;
+    Mmu mmu;
+    Lcd lcd;
 };
 

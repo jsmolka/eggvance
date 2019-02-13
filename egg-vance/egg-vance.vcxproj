@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -152,7 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\lcd.cpp" />
-    <ClCompile Include="src\gba.cpp" />
+    <ClCompile Include="src\core.cpp" />
     <ClCompile Include="src\instr_arm.cpp" />
     <ClCompile Include="src\instr_thumb.cpp" />
     <ClCompile Include="src\mmu.cpp" />
@@ -160,9 +160,11 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\internal.h" />
     <ClInclude Include="src\lcd.h" />
-    <ClInclude Include="src\gba.h" />
-    <ClInclude Include="src\lcd_stat.h" />
+    <ClInclude Include="src\core.h" />
+    <ClInclude Include="src\lcdstat.h" />
+    <ClInclude Include="src\common.h" />
     <ClInclude Include="src\memory_map.h" />
     <ClInclude Include="src\mmu.h" />
     <ClInclude Include="src\arm7.h" />

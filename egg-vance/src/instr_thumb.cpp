@@ -1,9 +1,9 @@
 #include "arm7.h"
 
-#include <iostream>
+#include "common.h"
 
 // THUMB 1
-void ARM7::moveShiftedRegister(u16 instr)
+void Arm7::moveShiftedRegister(u16 instr)
 {
     u8 opcode = instr >> 11 & 0x3;
     u8 offset = instr >> 6 & 0x1F;
@@ -31,8 +31,7 @@ void ARM7::moveShiftedRegister(u16 instr)
         break;
 
     default:
-        std::cout << __FUNCTION__ << " - Invalid operation " << (int)opcode << "\n";
-        running = false;
+        fcout() << "Invalid operation " << (int)opcode;
     }
 
     updateFlagZ(result);
@@ -43,7 +42,7 @@ void ARM7::moveShiftedRegister(u16 instr)
 }
 
 // THUMB 2
-void ARM7::addSubImmediate(u16 instr)
+void Arm7::addSubImmediate(u16 instr)
 {
     // Immediate flag
     u8 i = instr >> 10 & 0x1;
@@ -85,7 +84,7 @@ void ARM7::addSubImmediate(u16 instr)
 }
 
 // THUMB 3
-void ARM7::moveCmpAddSubImmediate(u16 instr)
+void Arm7::moveCmpAddSubImmediate(u16 instr)
 {
     u8 opcode = instr >> 11 & 0x3;
     u8 rd = instr >> 8 & 0x7;
@@ -131,7 +130,7 @@ void ARM7::moveCmpAddSubImmediate(u16 instr)
 }
 
 // THUMB 4
-void ARM7::aluOperations(u16 instr)
+void Arm7::aluOperations(u16 instr)
 {
     u8 opcode = (instr >> 6) & 0xF;
     u8 src = (instr >> 3) & 0x7;
@@ -254,28 +253,28 @@ void ARM7::aluOperations(u16 instr)
         setReg(dst, result);
 }
 
-void ARM7::highRegisterBranchExchange(u16 instr)
+void Arm7::highRegisterBranchExchange(u16 instr)
 {
 
 }
 
-void ARM7::loadPcRelative(u16 instr)
+void Arm7::loadPcRelative(u16 instr)
 {
 
 }
 
-void ARM7::loadStoreRegisterOffset(u16 instr)
+void Arm7::loadStoreRegisterOffset(u16 instr)
 {
 
 }
 
-void ARM7::loadStoreSignExtended(u16 instr)
+void Arm7::loadStoreSignExtended(u16 instr)
 {
 
 }
 
 // THUMB 9 - STR, LDR, STRB, LDRB
-void ARM7::loadStoreImmediateOffset(u16 instr)
+void Arm7::loadStoreImmediateOffset(u16 instr)
 {
     // Byte / word flag
     u8 b = instr >> 12 & 0x1;
@@ -316,7 +315,7 @@ void ARM7::loadStoreImmediateOffset(u16 instr)
     }
 }
 
-void ARM7::loadStoreHalfword(u16 instr)
+void Arm7::loadStoreHalfword(u16 instr)
 {
     // Load / store flag
     u8 l = instr >> 11 & 0x1;
@@ -341,33 +340,33 @@ void ARM7::loadStoreHalfword(u16 instr)
     }
 }
 
-void ARM7::loadStoreSpRelative(u16 instr)
+void Arm7::loadStoreSpRelative(u16 instr)
 {
 
 }
 
-void ARM7::loadAddress(u16 instr)
+void Arm7::loadAddress(u16 instr)
 {
 
 }
 
-void ARM7::addOffsetSp(u16 instr)
+void Arm7::addOffsetSp(u16 instr)
 {
 
 }
 
-void ARM7::pushPopRegisters(u16 instr)
+void Arm7::pushPopRegisters(u16 instr)
 {
 
 }
 
-void ARM7::multipleLoadStore(u16 instr)
+void Arm7::multipleLoadStore(u16 instr)
 {
 
 }
 
 // THUMB 16 - B(cond)
-void ARM7::conditionalBranch(u16 instr)
+void Arm7::conditionalBranch(u16 instr)
 {
     Condition cond = static_cast<Condition>(instr >> 8 & 0xF);
     u8 offset = instr & 0xFF;
@@ -376,7 +375,7 @@ void ARM7::conditionalBranch(u16 instr)
     {
         if (cond == COND_AL)
         {
-            std::cout << __FUNCTION__ << " - Undefined condition\n";
+            fcout() << "Undefined condition";
         }
         else if (cond == COND_NV)
         {
@@ -405,17 +404,17 @@ void ARM7::conditionalBranch(u16 instr)
     }
 }
 
-void ARM7::softwareInterruptThumb(u16 instr)
+void Arm7::softwareInterruptThumb(u16 instr)
 {
 
 }
 
-void ARM7::unconditionalBranch(u16 instr)
+void Arm7::unconditionalBranch(u16 instr)
 {
 
 }
 
-void ARM7::longBranchLink(u16 instr)
+void Arm7::longBranchLink(u16 instr)
 {
 
 }

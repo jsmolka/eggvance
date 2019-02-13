@@ -2,7 +2,7 @@
 
 #include "memory_map.h"
 
-LCD::LCD()
+Lcd::Lcd()
 {
     SDL_Init(SDL_INIT_VIDEO);
 
@@ -18,7 +18,7 @@ LCD::LCD()
     surface = SDL_GetWindowSurface(window);
 }
 
-LCD::~LCD()
+Lcd::~Lcd()
 {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
@@ -26,19 +26,19 @@ LCD::~LCD()
     SDL_Quit();
 }
 
-void LCD::reset()
+void Lcd::reset()
 {
     stat = {};
 }
 
-void LCD::drawBg0()
+void Lcd::drawBg0()
 {
     for (int y = 0; y < 20; ++y)
     {
         for (int x = 0; x < 30; ++x)
         {
             // Each tile takes up 32 words in memory
-            u16 tile = mmu->readHalf(stat.bg_tile_map_addr[0] + 32 * 2 * y + 2 * x);
+            u16 tile = mmu->readHalf(stat.bg_map_addr[0] + 32 * 2 * y + 2 * x);
 
             u16 tile_number = tile & 0x3FF;
             u16 palette_number = tile >> 12 & 0xF;
@@ -49,7 +49,7 @@ void LCD::drawBg0()
             // 8x8 tiles at address of tile number
             for (int i = 0; i < 32; ++i)
             {
-                u8 tile_data = mmu->readByte(stat.bg_tile_data_addr[0] + 32 * tile_number + i);
+                u8 tile_data = mmu->readByte(stat.bg_data_addr[0] + 32 * tile_number + i);
 
                 if (x_off == 8)
                 {
@@ -70,26 +70,18 @@ void LCD::drawBg0()
     redraw();
 }
 
-LCD::Rgb LCD::decodeColor(u16 color)
+void Lcd::draw(int x, int y, u16 color)
 {
-    return Rgb 
-    {
-        static_cast<u8>(8 * (color & 0x1F)),
-        static_cast<u8>(8 * (color >> 5 & 0x1F)),
-        static_cast<u8>(8 * (color >> 10 & 0x1F))
-    };
-}
-
-void LCD::draw(int x, int y, u16 color)
-{
-    Rgb rgb = decodeColor(color);
+    u8 r = 8 * (color & 0x1F);
+    u8 g = 8 * (color >> 5 & 0x1F);
+    u8 b = 8 * (color >> 10 & 0x1F);
 
     SDL_Rect rect = { x, y, 1, 1 };
-    SDL_FillRect(surface, &rect, SDL_MapRGB(surface->format, rgb.r, rgb.g, rgb.b));
+    SDL_FillRect(surface, &rect, SDL_MapRGB(surface->format, r, g, b));
     SDL_RenderDrawRect(renderer, &rect);
 }
 
-void LCD::redraw()
+void Lcd::redraw()
 {
     SDL_UpdateWindowSurface(window);
 }

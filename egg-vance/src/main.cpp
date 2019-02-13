@@ -1,8 +1,17 @@
-#include "gba.h"
+#include <iostream>
+#include <memory>
+
+#include "core.h"
 
 int main(int argc, char* argv[])
 {
-    GBA().run("C:/Users/Julian/OneDrive/Code/resources/gba/Test ROMs/checker_board.gba");
+    if (argc != 2)
+    {
+        std::cout << "Invalid number of arguments\n";
+        return 0;
+    }
+
+    std::make_shared<Core>()->run(argv[1]);
 
     return 0;
 }

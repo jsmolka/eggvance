@@ -2,33 +2,25 @@
 
 #include <SDL.h>
 
-#include "lcd_stat.h"
+#include "internal.h"
+#include "lcdstat.h"
 #include "mmu.h"
 
-class LCD
+class Lcd : public Internal
 {
 public:
-    LCD();
-    ~LCD();
+    Lcd();
+    ~Lcd();
 
-    void reset();
+    void reset() final;
 
     void drawBg0();
 
-    lcd_stat stat;
+    LcdStat stat;
 
-    MMU* mmu;
+    Mmu* mmu;
 
 private:
-    struct Rgb
-    {
-        u8 r;
-        u8 g;
-        u8 b;
-    };
-
-    static Rgb decodeColor(u16 color);
-
     void draw(int x, int y, u16 color);
     void redraw();
 

@@ -1,15 +1,14 @@
 #include "arm7.h"
 
-#include <iostream>
+#include "common.h"
 
-ARM7::ARM7()
+Arm7::Arm7()
     : mmu(nullptr)
-    , running(true)
 {
 
 }
 
-void ARM7::reset()
+void Arm7::reset()
 {
     regs = {};
 
@@ -28,16 +27,31 @@ void ARM7::reset()
     regs.cpsr |= CPSR_T;
     regs.r15 = 0x8000108;
 
-
-    pipe[0] = { 0, REFILL_PIPE };
-    pipe[1] = { 0, REFILL_PIPE };
-    pipe[2] = { 0, REFILL_PIPE };
+    flushPipe();
 
     needs_flush = false;
     running = true;
 }
 
-u32 ARM7::reg(u8 number) const
+void Arm7::step()
+{
+    fetch();
+    decode();
+    execute();
+
+    if (needs_flush)
+    {
+        flushPipe();
+
+        needs_flush = false;
+    }
+    else
+    {
+        advance();
+    }
+}
+
+u32 Arm7::reg(u8 number) const
 {
     Mode mode = currentMode();
 
@@ -84,12 +98,12 @@ u32 ARM7::reg(u8 number) const
     case 15: return regs.r15;
 
     default:
-        std::cout << __FUNCTION__ << " - Tried accessing invalid register " << (int)number << "\n";
+        fcout() << "Tried accessing invalid register " << (int)number;
     }
     return 0;
 }
 
-void ARM7::setReg(u8 number, u32 value)
+void Arm7::setReg(u8 number, u32 value)
 {
     Mode mode = currentMode();
 
@@ -138,11 +152,11 @@ void ARM7::setReg(u8 number, u32 value)
     case 15: regs.r15 = value; break;
 
     default:
-        std::cout << __FUNCTION__ << " - Tried setting invalid register " << (int)number << "\n";
+        fcout() << "Tried setting invalid register " << (int)number;
     }
 }
 
-u32 ARM7::spsr(u8 number) const
+u32 Arm7::spsr(u8 number) const
 {
     switch (currentMode())
     {
@@ -153,12 +167,12 @@ u32 ARM7::spsr(u8 number) const
     case MODE_UND: return regs.spsr_und;
 
     default:
-        std::cout << __FUNCTION__ << " - Tried accessing invalid spsr " << (int)number << "\n";
+        fcout() << "Tried accessing invalid spsr " << (int)number;
     }
     return 0;
 }
 
-void ARM7::setSpsr(u8 number, u32 value)
+void Arm7::setSpsr(u8 number, u32 value)
 {
     switch (currentMode())
     {
@@ -169,11 +183,11 @@ void ARM7::setSpsr(u8 number, u32 value)
     case MODE_UND: regs.spsr_und = value; break;
 
     default:
-        std::cout << __FUNCTION__ << " - Tried setting invalid spsr " << (int)number << "\n";
+        fcout() << "Tried setting invalid spsr " << (int)number;
     }
 }
 
-void ARM7::fetch()
+void Arm7::fetch()
 {
     if (isArm())
         pipe[0].instr = mmu->readWord(regs.r15);
@@ -183,7 +197,7 @@ void ARM7::fetch()
     pipe[0].decoded = UNDEFINED;
 }
 
-void ARM7::decode()
+void Arm7::decode()
 {
     if (pipe[1].decoded == REFILL_PIPE)
         return;
@@ -355,12 +369,12 @@ void ARM7::decode()
         }
         else
         {
-            std::cout << __FUNCTION__ << " - Cannot decode THUMB instruction " << (int)instr << "\n";
+            fcout() << "Cannot decode THUMB instruction " << (int)instr;
         }
     }
 }
  
-void ARM7::execute()
+void Arm7::execute()
 {
     if (pipe[2].decoded == REFILL_PIPE)
         return; 
@@ -376,17 +390,15 @@ void ARM7::execute()
             switch (pipe[2].decoded)
             {
             case ARM_5:
-                std::cout << "ARM_5\n";
                 branchExchange(instr);
                 break;
 
             case ARM_11:
-                std::cout << "ARM_11\n";
                 branchLink(instr);
                 break;
 
             default:
-                std::cout << __FUNCTION__ << " - Tried executing unknown thumb instruction " << (int)pipe[2].decoded << "\n";
+                fcout() << "Tried executing unknown THUMB instruction " << (int)pipe[2].decoded;
             }
         }
     }
@@ -397,17 +409,14 @@ void ARM7::execute()
         switch (pipe[2].decoded)
         {
         case THUMB_1:
-            std::cout << "THUMB_1\n";
             moveShiftedRegister(instr);
             break;
 
         case THUMB_2:
-            std::cout << "THUMB_2\n";
             addSubImmediate(instr);
             break;
 
         case THUMB_3:
-            std::cout << "THUMB_3\n";
             moveCmpAddSubImmediate(instr);
             break;
 
@@ -432,12 +441,10 @@ void ARM7::execute()
             break;
 
         case THUMB_9:
-            std::cout << "THUMB_9\n";
             loadStoreImmediateOffset(instr);
             break;
 
         case THUMB_10:
-            std::cout << "THUMB_10\n";
             loadStoreHalfword(instr);
             break;
 
@@ -462,7 +469,6 @@ void ARM7::execute()
             break;
 
         case THUMB_16:
-            std::cout << "THUMB_16\n";
             conditionalBranch(instr);
             break;
 
@@ -479,12 +485,12 @@ void ARM7::execute()
             break;
 
         default:
-            std::cout << __FUNCTION__ << " - Tried executing unknown thumb instruction " << (int)pipe[2].decoded << "\n";
+            fcout() << "Tried executing unknown THUMB instruction " << (int)pipe[2].decoded;
         }
     }
 }
 
-void ARM7::advance()
+void Arm7::advance()
 {
     pipe[2] = pipe[1];
     pipe[1] = pipe[0];
@@ -492,62 +498,49 @@ void ARM7::advance()
     regs.r15 += isThumb() ? 2 : 4;
 }
 
-void ARM7::step()
+void Arm7::flushPipe()
 {
-    fetch();
-    decode();
-    execute();
-
-    if (needs_flush)
-    {
-        pipe[0] = { 0, REFILL_PIPE };
-        pipe[1] = { 0, REFILL_PIPE };
-        pipe[2] = { 0, REFILL_PIPE };
-
-        needs_flush = false;
-    }
-    else
-    {
-        advance();
-    }
+    pipe[0] = { 0, REFILL_PIPE };
+    pipe[1] = { 0, REFILL_PIPE };
+    pipe[2] = { 0, REFILL_PIPE };
 }
 
-ARM7::Mode ARM7::currentMode() const
+Arm7::Mode Arm7::currentMode() const
 {
     return static_cast<Mode>(regs.cpsr & CPSR_M);
 }
 
-bool ARM7::isArm() const
+bool Arm7::isArm() const
 {
     return !isThumb();
 }
 
-bool ARM7::isThumb() const
+bool Arm7::isThumb() const
 {
     return regs.cpsr & CPSR_T;
 }
 
-u8 ARM7::flagZ() const
+u8 Arm7::flagZ() const
 {
     return (regs.cpsr & CPSR_Z) ? 1 : 0;
 }
 
-u8 ARM7::flagN() const
+u8 Arm7::flagN() const
 {
     return (regs.cpsr & CPSR_N) ? 1 : 0;
 }
 
-u8 ARM7::flagC() const
+u8 Arm7::flagC() const
 {
     return (regs.cpsr & CPSR_C) ? 1 : 0;
 }
 
-u8 ARM7::flagV() const
+u8 Arm7::flagV() const
 {
     return (regs.cpsr & CPSR_V) ? 1 : 0;
 }
 
-void ARM7::setFlag(CPSR flag, bool set)
+void Arm7::setFlag(CPSR flag, bool set)
 {
     if (set)
         regs.cpsr |= flag;
@@ -555,42 +548,42 @@ void ARM7::setFlag(CPSR flag, bool set)
         regs.cpsr &= ~flag;
 }
 
-void ARM7::setFlagZ(bool set)
+void Arm7::setFlagZ(bool set)
 {
     setFlag(CPSR_Z, set);
 }
 
-void ARM7::setFlagN(bool set)
+void Arm7::setFlagN(bool set)
 {
     setFlag(CPSR_N, set);
 }
 
-void ARM7::setFlagC(bool set)
+void Arm7::setFlagC(bool set)
 {
     setFlag(CPSR_C, set);
 }
 
-void ARM7::setFlagV(bool set)
+void Arm7::setFlagV(bool set)
 {
     setFlag(CPSR_V, set);
 }
 
-void ARM7::updateFlagZ(u32 res)
+void Arm7::updateFlagZ(u32 res)
 {
     setFlagZ(res == 0);
 }
 
-void ARM7::updateFlagN(u32 res)
+void Arm7::updateFlagN(u32 res)
 {
     setFlagN(res >> 31);
 }
 
-void ARM7::updateFlagC(u8 carry)
+void Arm7::updateFlagC(u8 carry)
 {
     setFlagC(carry == 1);
 }
 
-void ARM7::updateFlagC(u32 input, u32 operand, bool addition)
+void Arm7::updateFlagC(u32 input, u32 operand, bool addition)
 {
     bool carry;
 
@@ -602,7 +595,7 @@ void ARM7::updateFlagC(u32 input, u32 operand, bool addition)
     setFlagC(carry);
 }
 
-void ARM7::updateFlagV(u32 input, u32 operand, bool addition)
+void Arm7::updateFlagV(u32 input, u32 operand, bool addition)
 {
     u8 msb_input = input >> 31;
     u8 msb_operand = operand >> 31;
@@ -625,7 +618,7 @@ void ARM7::updateFlagV(u32 input, u32 operand, bool addition)
     setFlagV(overflow);
 }
 
-u8 ARM7::logicalShiftLeft(u32& result, u8 offset)
+u8 Arm7::logicalShiftLeft(u32& result, u8 offset)
 {
     u8 carry = 0;
 
@@ -645,7 +638,7 @@ u8 ARM7::logicalShiftLeft(u32& result, u8 offset)
     return carry;
 }
 
-u8 ARM7::logicalShiftRight(u32& result, u8 offset)
+u8 Arm7::logicalShiftRight(u32& result, u8 offset)
 {
     u8 carry = 0;
 
@@ -667,7 +660,7 @@ u8 ARM7::logicalShiftRight(u32& result, u8 offset)
     return carry;
 }
 
-u8 ARM7::arithmeticShiftRight(u32& result, u8 offset)
+u8 Arm7::arithmeticShiftRight(u32& result, u8 offset)
 {
     u8 carry = 0;
 
@@ -694,7 +687,7 @@ u8 ARM7::arithmeticShiftRight(u32& result, u8 offset)
     return carry;
 }
 
-u8 ARM7::rotateRight(u32& result, u8 offset)
+u8 Arm7::rotateRight(u32& result, u8 offset)
 {
     u8 carry = 0;
 
@@ -720,7 +713,7 @@ u8 ARM7::rotateRight(u32& result, u8 offset)
     return carry;
 }
 
-bool ARM7::checkCondition(Condition condition) const
+bool Arm7::checkCondition(Condition condition) const
 {
     if (condition == COND_AL)
         return true;
@@ -797,7 +790,7 @@ bool ARM7::checkCondition(Condition condition) const
         return false;
 
     default:
-        std::cout << __FUNCTION__ << " - Invalid condition " << (int)condition << "\n";
+        fcout() << "Invalid condition " << (int)condition;
     }
     return true;
 }

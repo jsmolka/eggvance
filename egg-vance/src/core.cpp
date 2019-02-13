@@ -1,10 +1,9 @@
-#include "gba.h"
+#include "core.h"
 
-#include <iostream>
-
+#include "common.h"
 #include "memory_map.h"
 
-GBA::GBA()
+Core::Core()
 {
     mmu.lcd_stat = &lcd.stat;
 
@@ -14,11 +13,11 @@ GBA::GBA()
     reset();
 }
 
-void GBA::run(const std::string& filepath)
+void Core::run(const std::string& file)
 {
-    if (!mmu.loadRom(filepath))
+    if (!mmu.loadRom(file))
     {
-        std::cout << __FUNCTION__ << " - Could not load ROM " << filepath << "\n";
+        fcout() << "Could not load ROM " << file;
         return;
     }
 
@@ -38,7 +37,7 @@ void GBA::run(const std::string& filepath)
     }
 }
 
-void GBA::reset()
+void Core::reset()
 {
     arm.reset();
     mmu.reset();

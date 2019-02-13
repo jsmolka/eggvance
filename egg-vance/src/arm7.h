@@ -1,11 +1,23 @@
 #pragma once
 
 #include "integer.h"
+#include "internal.h"
 #include "mmu.h"
 
-class ARM7
+class Arm7 : public Internal
 {
 public:
+    Arm7();
+
+    void reset() final;
+
+    void step();
+
+    bool running;
+
+    Mmu* mmu;
+
+private:
     #pragma region Enums
     enum Mode
     {
@@ -119,7 +131,7 @@ public:
         u32 r15;
 
         // Current Program Status Register
-        u32 cpsr; 
+        u32 cpsr;
 
         // Banked USR registers
         u32 r13_usr;
@@ -157,10 +169,6 @@ public:
     } regs;
     #pragma endregion
 
-    ARM7();
-
-    void reset();
-    
     u32 reg(u8 number) const;
     void setReg(u8 number, u32 value);
 
@@ -172,10 +180,6 @@ public:
     void execute();
     void advance();
 
-    void step();
-
-    MMU* mmu;
-
     struct PipeItem
     {
         u32 instr;
@@ -183,7 +187,8 @@ public:
     } pipe[3];
 
     bool needs_flush;
-    bool running;
+
+    void flushPipe();
 
     Mode currentMode() const;
 

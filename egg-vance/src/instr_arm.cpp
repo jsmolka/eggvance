@@ -1,9 +1,9 @@
 #include "arm7.h"
 
-#include <iostream>
+#include "common.h"
 
 // BX
-void ARM7::branchExchange(u32 instr)
+void Arm7::branchExchange(u32 instr)
 {
     u8 rn = instr & 0xF;
 
@@ -26,12 +26,12 @@ void ARM7::branchExchange(u32 instr)
     }
     else
     {
-        std::cout << __FUNCTION__ << " - Invalid register " << (int)rn << "\n";
+        fcout() << "Invalid register " << (int)rn;
     }
 }
 
 // B, BL
-void ARM7::branchLink(u32 instr)
+void Arm7::branchLink(u32 instr)
 {
     // Link flag
     u8 l = instr >> 24 & 0x1;
