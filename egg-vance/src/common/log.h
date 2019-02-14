@@ -1,0 +1,19 @@
+#pragma once
+
+#include <iostream>
+
+#define log() Log(__FUNCTION__)
+
+struct Log
+{
+    Log(const char* function);
+    ~Log();
+
+    template<typename T>
+    Log& operator<<(const T& value)
+    {
+        std::cout << value;
+
+        return *this;
+    }
+};

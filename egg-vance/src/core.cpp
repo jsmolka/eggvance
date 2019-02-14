@@ -1,32 +1,29 @@
 #include "core.h"
 
-#include "common.h"
-#include "memory_map.h"
+#include "common/log.h"
+#include "common/memory_map.h"
 
 Core::Core()
 {
-    mmu.lcd_stat = &lcd.stat;
-
     arm.mmu = &mmu;
-    lcd.mmu = &mmu;
+    ppu.mmu = &mmu;
 
-    reset();
+    arm.reset();
+    mmu.reset();
+    ppu.reset();
 }
 
 void Core::run(const std::string& file)
 {
     if (!mmu.loadRom(file))
-    {
-        fcout() << "Could not load ROM " << file;
         return;
-    }
 
     while (arm.running)
     {
         for (int i = 0; i < 4096; ++i)
             arm.step(); 
 
-        lcd.drawBg0();
+        ppu.renderText();
 
         SDL_Event event;
         while (SDL_PollEvent(&event))
@@ -35,11 +32,4 @@ void Core::run(const std::string& file)
                 arm.running = false;
         }
     }
-}
-
-void Core::reset()
-{
-    arm.reset();
-    mmu.reset();
-    lcd.reset();
 }

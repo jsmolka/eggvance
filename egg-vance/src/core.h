@@ -2,9 +2,9 @@
 
 #include <string>
 
-#include "arm7.h"
-#include "lcd.h"
-#include "mmu.h"
+#include "arm/arm.h"
+#include "mmu/mmu.h"
+#include "ppu/ppu.h"
 
 class Core
 {
@@ -14,10 +14,8 @@ public:
     void run(const std::string &file);
 
 private:
-    void reset();
-
-    Arm7 arm;
-    Mmu mmu;
-    Lcd lcd;
+    ARM arm;
+    MMU mmu;
+    PPU ppu;
 };
 

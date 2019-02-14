@@ -1,14 +1,14 @@
-#include "arm7.h"
+#include "arm.h"
 
-#include "common.h"
+#include "common/log.h"
 
-Arm7::Arm7()
+ARM::ARM()
     : mmu(nullptr)
 {
 
 }
 
-void Arm7::reset()
+void ARM::reset()
 {
     regs = {};
 
@@ -33,7 +33,7 @@ void Arm7::reset()
     running = true;
 }
 
-void Arm7::step()
+void ARM::step()
 {
     fetch();
     decode();
@@ -51,7 +51,7 @@ void Arm7::step()
     }
 }
 
-u32 Arm7::reg(u8 number) const
+u32 ARM::reg(u8 number) const
 {
     Mode mode = currentMode();
 
@@ -98,12 +98,12 @@ u32 Arm7::reg(u8 number) const
     case 15: return regs.r15;
 
     default:
-        fcout() << "Tried accessing invalid register " << (int)number;
+        log() << "Tried accessing invalid register " << (int)number;
     }
     return 0;
 }
 
-void Arm7::setReg(u8 number, u32 value)
+void ARM::setReg(u8 number, u32 value)
 {
     Mode mode = currentMode();
 
@@ -152,11 +152,11 @@ void Arm7::setReg(u8 number, u32 value)
     case 15: regs.r15 = value; break;
 
     default:
-        fcout() << "Tried setting invalid register " << (int)number;
+        log() << "Tried setting invalid register " << (int)number;
     }
 }
 
-u32 Arm7::spsr(u8 number) const
+u32 ARM::spsr(u8 number) const
 {
     switch (currentMode())
     {
@@ -167,12 +167,12 @@ u32 Arm7::spsr(u8 number) const
     case MODE_UND: return regs.spsr_und;
 
     default:
-        fcout() << "Tried accessing invalid spsr " << (int)number;
+        log() << "Tried accessing invalid spsr " << (int)number;
     }
     return 0;
 }
 
-void Arm7::setSpsr(u8 number, u32 value)
+void ARM::setSpsr(u8 number, u32 value)
 {
     switch (currentMode())
     {
@@ -183,11 +183,11 @@ void Arm7::setSpsr(u8 number, u32 value)
     case MODE_UND: regs.spsr_und = value; break;
 
     default:
-        fcout() << "Tried setting invalid spsr " << (int)number;
+        log() << "Tried setting invalid spsr " << (int)number;
     }
 }
 
-void Arm7::fetch()
+void ARM::fetch()
 {
     if (isArm())
         pipe[0].instr = mmu->readWord(regs.r15);
@@ -197,7 +197,7 @@ void Arm7::fetch()
     pipe[0].decoded = UNDEFINED;
 }
 
-void Arm7::decode()
+void ARM::decode()
 {
     if (pipe[1].decoded == REFILL_PIPE)
         return;
@@ -369,12 +369,12 @@ void Arm7::decode()
         }
         else
         {
-            fcout() << "Cannot decode THUMB instruction " << (int)instr;
+            log() << "Cannot decode THUMB instruction " << (int)instr;
         }
     }
 }
  
-void Arm7::execute()
+void ARM::execute()
 {
     if (pipe[2].decoded == REFILL_PIPE)
         return; 
@@ -398,7 +398,7 @@ void Arm7::execute()
                 break;
 
             default:
-                fcout() << "Tried executing unknown THUMB instruction " << (int)pipe[2].decoded;
+                log() << "Tried executing unknown THUMB instruction " << (int)pipe[2].decoded;
             }
         }
     }
@@ -485,12 +485,12 @@ void Arm7::execute()
             break;
 
         default:
-            fcout() << "Tried executing unknown THUMB instruction " << (int)pipe[2].decoded;
+            log() << "Tried executing unknown THUMB instruction " << (int)pipe[2].decoded;
         }
     }
 }
 
-void Arm7::advance()
+void ARM::advance()
 {
     pipe[2] = pipe[1];
     pipe[1] = pipe[0];
@@ -498,49 +498,49 @@ void Arm7::advance()
     regs.r15 += isThumb() ? 2 : 4;
 }
 
-void Arm7::flushPipe()
+void ARM::flushPipe()
 {
     pipe[0] = { 0, REFILL_PIPE };
     pipe[1] = { 0, REFILL_PIPE };
     pipe[2] = { 0, REFILL_PIPE };
 }
 
-Arm7::Mode Arm7::currentMode() const
+Mode ARM::currentMode() const
 {
     return static_cast<Mode>(regs.cpsr & CPSR_M);
 }
 
-bool Arm7::isArm() const
+bool ARM::isArm() const
 {
     return !isThumb();
 }
 
-bool Arm7::isThumb() const
+bool ARM::isThumb() const
 {
     return regs.cpsr & CPSR_T;
 }
 
-u8 Arm7::flagZ() const
+u8 ARM::flagZ() const
 {
     return (regs.cpsr & CPSR_Z) ? 1 : 0;
 }
 
-u8 Arm7::flagN() const
+u8 ARM::flagN() const
 {
     return (regs.cpsr & CPSR_N) ? 1 : 0;
 }
 
-u8 Arm7::flagC() const
+u8 ARM::flagC() const
 {
     return (regs.cpsr & CPSR_C) ? 1 : 0;
 }
 
-u8 Arm7::flagV() const
+u8 ARM::flagV() const
 {
     return (regs.cpsr & CPSR_V) ? 1 : 0;
 }
 
-void Arm7::setFlag(CPSR flag, bool set)
+void ARM::setFlag(CPSR flag, bool set)
 {
     if (set)
         regs.cpsr |= flag;
@@ -548,42 +548,42 @@ void Arm7::setFlag(CPSR flag, bool set)
         regs.cpsr &= ~flag;
 }
 
-void Arm7::setFlagZ(bool set)
+void ARM::setFlagZ(bool set)
 {
     setFlag(CPSR_Z, set);
 }
 
-void Arm7::setFlagN(bool set)
+void ARM::setFlagN(bool set)
 {
     setFlag(CPSR_N, set);
 }
 
-void Arm7::setFlagC(bool set)
+void ARM::setFlagC(bool set)
 {
     setFlag(CPSR_C, set);
 }
 
-void Arm7::setFlagV(bool set)
+void ARM::setFlagV(bool set)
 {
     setFlag(CPSR_V, set);
 }
 
-void Arm7::updateFlagZ(u32 res)
+void ARM::updateFlagZ(u32 res)
 {
     setFlagZ(res == 0);
 }
 
-void Arm7::updateFlagN(u32 res)
+void ARM::updateFlagN(u32 res)
 {
     setFlagN(res >> 31);
 }
 
-void Arm7::updateFlagC(u8 carry)
+void ARM::updateFlagC(u8 carry)
 {
     setFlagC(carry == 1);
 }
 
-void Arm7::updateFlagC(u32 input, u32 operand, bool addition)
+void ARM::updateFlagC(u32 input, u32 operand, bool addition)
 {
     bool carry;
 
@@ -595,7 +595,7 @@ void Arm7::updateFlagC(u32 input, u32 operand, bool addition)
     setFlagC(carry);
 }
 
-void Arm7::updateFlagV(u32 input, u32 operand, bool addition)
+void ARM::updateFlagV(u32 input, u32 operand, bool addition)
 {
     u8 msb_input = input >> 31;
     u8 msb_operand = operand >> 31;
@@ -618,102 +618,7 @@ void Arm7::updateFlagV(u32 input, u32 operand, bool addition)
     setFlagV(overflow);
 }
 
-u8 Arm7::logicalShiftLeft(u32& result, u8 offset)
-{
-    u8 carry = 0;
-
-    if (offset > 0)
-    {
-        // Save the last bit shifted out in the carry
-        carry = (result << (offset - 1)) >> 31;
-
-        result <<= offset;
-    }
-    // Special case LSL #0
-    else
-    {
-        // Todo: "the shifter carry out is the old value of the CPSR C flag"?
-        carry = flagC();
-    }
-    return carry;
-}
-
-u8 Arm7::logicalShiftRight(u32& result, u8 offset)
-{
-    u8 carry = 0;
-
-    if (offset > 0)
-    {
-        // Save the last bit shifted out in the carry
-        carry = (result >> (offset - 1)) & 0b1;
-
-        result >>= offset;
-    }
-    // Special case LSR #32 / #0
-    else
-    {
-        // Store the MSB in the carry
-        carry = result >> 31;
-        // Reset the result
-        result = 0;
-    }
-    return carry;
-}
-
-u8 Arm7::arithmeticShiftRight(u32& result, u8 offset)
-{
-    u8 carry = 0;
-
-    if (offset > 0)
-    {
-        // Save the last bit shifted out in the carry
-        carry = (result >> (offset - 1)) & 0b1;
-
-        u32 msb = result & (1 << 31);
-        for (int i = 0; i < offset; ++i)
-        {
-            result >>= 1;
-            result |= msb;
-        }
-    }
-    // Special case LSR #32 / #0
-    else
-    {
-        // Store the MSB in the carry
-        carry = result >> 31;
-        // Apply carry bit to whole result
-        result = carry ? 0xFFFFFFFF : 0;
-    }
-    return carry;
-}
-
-u8 Arm7::rotateRight(u32& result, u8 offset)
-{
-    u8 carry = 0;
-
-    if (offset > 0)
-    {
-        for (int i = 0; i < offset; ++i)
-        {
-            carry = result & 0b1;
-            result >>= 1;
-            result |= (carry << 31);
-        }
-    }
-    // Special case ROR #0
-    else
-    {
-        // Save the first bit in the carry
-        carry = result & 0b1;
-        // Rotate by one
-        result >>= 1;
-        // Change MSB to current carry
-        result |= (flagC() << 31);
-    }
-    return carry;
-}
-
-bool Arm7::checkCondition(Condition condition) const
+bool ARM::checkCondition(Condition condition) const
 {
     if (condition == COND_AL)
         return true;
@@ -790,7 +695,7 @@ bool Arm7::checkCondition(Condition condition) const
         return false;
 
     default:
-        fcout() << "Invalid condition " << (int)condition;
+        log() << "Invalid condition " << (int)condition;
     }
     return true;
 }

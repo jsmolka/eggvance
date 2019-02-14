@@ -2,23 +2,20 @@
 
 #include <SDL.h>
 
-#include "internal.h"
-#include "lcdstat.h"
-#include "mmu.h"
+#include "common/internal.h"
+#include "mmu/mmu.h"
 
-class Lcd : public Internal
+class PPU : public Internal
 {
 public:
-    Lcd();
-    ~Lcd();
+    PPU();
+    ~PPU();
 
     void reset() final;
 
-    void drawBg0();
+    void renderText();
 
-    LcdStat stat;
-
-    Mmu* mmu;
+    MMU* mmu;
 
 private:
     void draw(int x, int y, u16 color);

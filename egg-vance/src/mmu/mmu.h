@@ -3,14 +3,14 @@
 #include <string>
 #include <vector>
 
-#include "integer.h"
-#include "internal.h"
-#include "lcdstat.h"
+#include "common/integer.h"
+#include "common/internal.h"
+#include "registers.h"
 
-class Mmu : public Internal
+class MMU : public Internal
 {
 public:
-    Mmu();
+    MMU();
 
     void reset() final;
 
@@ -24,7 +24,9 @@ public:
     void writeHalf(u32 addr, u16 half);
     void writeWord(u32 addr, u32 word);
 
-    LcdStat* lcd_stat;
+    DisplayControl dispcnt;
+    DisplayStatus dispstat;
+    BackgroundControl bgcnt[4];
 
 private:
     std::vector<u8> memory;
