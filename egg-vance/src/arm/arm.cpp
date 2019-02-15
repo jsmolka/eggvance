@@ -51,7 +51,7 @@ void ARM::step()
     }
 }
 
-u32 ARM::reg(u8 number) const
+u32& ARM::reg(int number)
 {
     Mode mode = currentMode();
 
@@ -100,63 +100,12 @@ u32 ARM::reg(u8 number) const
     default:
         log() << "Tried accessing invalid register " << (int)number;
     }
-    return 0;
+
+    static u32 dummy = 0;
+    return dummy;
 }
 
-void ARM::setReg(u8 number, u32 value)
-{
-    Mode mode = currentMode();
-
-    switch (number)
-    {
-    case 0: regs.r0 = value; break;
-    case 1: regs.r1 = value; break;
-    case 2: regs.r2 = value; break;
-    case 3: regs.r3 = value; break;
-    case 4: regs.r4 = value; break;
-    case 5: regs.r5 = value; break;
-    case 6: regs.r6 = value; break;
-    case 7: regs.r7 = value; break;
-    case 8: (mode == MODE_FIQ ? regs.r8_fiq : regs.r8) = value; break;
-    case 9: (mode == MODE_FIQ ? regs.r9_fiq : regs.r9) = value; break;
-    case 10: (mode == MODE_FIQ ? regs.r10_fiq : regs.r10) = value; break;
-    case 11: (mode == MODE_FIQ ? regs.r11_fiq : regs.r11) = value; break;
-    case 12: (mode == MODE_FIQ ? regs.r12_fiq : regs.r12) = value; break;
-
-    case 13:
-        switch (mode)
-        {
-        case MODE_USR:
-        case MODE_SYS: regs.r13 = value; break;
-        case MODE_FIQ: regs.r13_fiq = value; break;
-        case MODE_SVC: regs.r13_svc = value; break;
-        case MODE_ABT: regs.r13_abt = value; break;
-        case MODE_IRQ: regs.r13_irq = value; break;
-        case MODE_UND: regs.r13_und = value; break;
-        }
-        break;
-
-    case 14:
-        switch (mode)
-        {
-        case MODE_USR:
-        case MODE_SYS: regs.r14 = value; break;
-        case MODE_FIQ: regs.r14_fiq = value; break;
-        case MODE_SVC: regs.r14_svc = value; break;
-        case MODE_ABT: regs.r14_abt = value; break;
-        case MODE_IRQ: regs.r14_irq = value; break;
-        case MODE_UND: regs.r14_und = value; break;
-        }
-        break;
-
-    case 15: regs.r15 = value; break;
-
-    default:
-        log() << "Tried setting invalid register " << (int)number;
-    }
-}
-
-u32 ARM::spsr(u8 number) const
+u32& ARM::spsr(int number)
 {
     switch (currentMode())
     {
@@ -169,22 +118,9 @@ u32 ARM::spsr(u8 number) const
     default:
         log() << "Tried accessing invalid spsr " << (int)number;
     }
-    return 0;
-}
 
-void ARM::setSpsr(u8 number, u32 value)
-{
-    switch (currentMode())
-    {
-    case MODE_FIQ: regs.spsr_fiq = value; break;
-    case MODE_SVC: regs.spsr_svc = value; break;
-    case MODE_ABT: regs.spsr_abt = value; break;
-    case MODE_IRQ: regs.spsr_fiq = value; break;
-    case MODE_UND: regs.spsr_und = value; break;
-
-    default:
-        log() << "Tried setting invalid spsr " << (int)number;
-    }
+    static u32 dummy = 0;
+    return dummy;
 }
 
 void ARM::fetch()
@@ -520,22 +456,22 @@ bool ARM::isThumb() const
     return regs.cpsr & CPSR_T;
 }
 
-u8 ARM::flagZ() const
+int ARM::flagZ() const
 {
     return (regs.cpsr & CPSR_Z) ? 1 : 0;
 }
 
-u8 ARM::flagN() const
+int ARM::flagN() const
 {
     return (regs.cpsr & CPSR_N) ? 1 : 0;
 }
 
-u8 ARM::flagC() const
+int ARM::flagC() const
 {
     return (regs.cpsr & CPSR_C) ? 1 : 0;
 }
 
-u8 ARM::flagV() const
+int ARM::flagV() const
 {
     return (regs.cpsr & CPSR_V) ? 1 : 0;
 }
@@ -578,7 +514,7 @@ void ARM::updateFlagN(u32 res)
     setFlagN(res >> 31);
 }
 
-void ARM::updateFlagC(u8 carry)
+void ARM::updateFlagC(int carry)
 {
     setFlagC(carry == 1);
 }

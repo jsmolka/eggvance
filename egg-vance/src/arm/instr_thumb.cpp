@@ -5,74 +5,46 @@
 // THUMB 1
 void ARM::moveShiftedRegister(u16 instr)
 {
-    u8 opcode = instr >> 11 & 0x3;
-    u8 offset = instr >> 6 & 0x1F;
-    u8 rs = instr >> 3 & 0x7;
-    u8 rd = instr & 0x7;
+    int opcode = instr >> 11 & 0x3;
+    int offset = instr >> 6 & 0x1F;
+    int rs = instr >> 3 & 0x7;
+    int rd = instr & 0x7;
 
     u32 result = reg(rs);
-    u8 carry = 0;
 
     switch (opcode)
     {
-    // LSL
-    case 0b00:
-        carry = LSL(result, offset); 
-        break;
-
-    // LSR
-    case 0b01:
-        carry = LSR(result, offset); 
-        break;
-
-    // ASR
-    case 0b10:
-        carry = ASR(result, offset); 
-        break;
+    case 0b00: result = LSL(result, offset); break;
+    case 0b01: result = LSR(result, offset); break;
+    case 0b10: result = ASR(result, offset); break;
 
     default:
-        log() << "Invalid operation " << (int)opcode;
+        log() << "Invalid operation " << opcode;
     }
 
-    updateFlagZ(result);
-    updateFlagN(result);
-    updateFlagC(carry);
-
-    setReg(rd, result);
+    reg(rd) = result;
 }
 
 // THUMB 2
 void ARM::addSubImmediate(u16 instr)
 {
     // Immediate flag
-    u8 i = instr >> 10 & 0x1;
-    u8 opcode = instr >> 9 & 0x1;
-    u8 offset = instr >> 6 & 0x7;
-    u32 rs = instr >> 3 & 0x7;
-    u32 rd = instr & 0x7;
+    int i = instr >> 10 & 0x1;
+    int opcode = instr >> 9 & 0x1;
+    int offset = instr >> 6 & 0x7;
+    int rs = instr >> 3 & 0x7;
+    int rd = instr & 0x7;
 
-    u32 operand;
-    if (i)
-        // Use immediate value as operand
-        operand = offset;
-    else
-        // Use register as operand
-        operand = reg(offset);
+    // Use immediate value or register as operand
+    u32 operand = i ? offset : reg(offset);
 
     u32 input = reg(rs);
     u32 result = input;
     
     switch (opcode)
     {
-    // ADD
-    case 0b0:
-        result += operand;
-        break;
-
-    // SUB
-    case 0b1:
-        result -= operand;
-        break;
+    case 0b0: result += operand; break;
+    case 0b1: result -= operand; break;
     }
 
     updateFlagZ(result);
@@ -80,15 +52,15 @@ void ARM::addSubImmediate(u16 instr)
     updateFlagC(input, operand, opcode == 0b0);
     updateFlagV(input, operand, opcode == 0b0);
 
-    setReg(rd, result);
+    reg(rd) = result;
 }
 
 // THUMB 3
 void ARM::moveCmpAddSubImmediate(u16 instr)
 {
-    u8 opcode = instr >> 11 & 0x3;
-    u8 rd = instr >> 8 & 0x7;
-    u8 offset = instr & 0xFF;
+    int opcode = instr >> 11 & 0x3;
+    int rd = instr >> 8 & 0x7;
+    int offset = instr & 0xFF;
 
     u32 input = reg(rd);
     u32 result = input;
@@ -126,7 +98,7 @@ void ARM::moveCmpAddSubImmediate(u16 instr)
     updateFlagN(result);
 
     if (writeback)
-        setReg(rd, result);
+        reg(rd) = result;
 }
 
 // THUMB 4
@@ -250,7 +222,7 @@ void ARM::aluOperations(u16 instr)
     updateFlagN(result);
 
     if (writeback)
-        setReg(dst, result);
+        reg(dst) = result;
 }
 
 void ARM::highRegisterBranchExchange(u16 instr)
@@ -300,7 +272,7 @@ void ARM::loadStoreImmediateOffset(u16 instr)
 
     // LDR - load word
     case 0b10:
-        setReg(rd, mmu->readWord(addr));
+        reg(rd) = mmu->readWord(addr);
         break;
 
     // STRB - store byte
@@ -310,7 +282,7 @@ void ARM::loadStoreImmediateOffset(u16 instr)
 
     // LDRB - load byte
     case 0b11:
-        setReg(rd, mmu->readByte(addr));
+        reg(rd) = mmu->readByte(addr);
         break;
     }
 }
@@ -335,7 +307,7 @@ void ARM::loadStoreHalfword(u16 instr)
 
     // Load
     case 0b1:
-        setReg(rd, mmu->readHalf(addr));
+        reg(rd) = mmu->readHalf(addr);
         break;
     }
 }

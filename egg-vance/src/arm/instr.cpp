@@ -1,16 +1,16 @@
 #include "arm.h"
 
 // Logical Shift Left
-u8 ARM::LSL(u32& result, u8 offset)
+u32 ARM::LSL(u32 value, int offset)
 {
-    u8 carry = 0;
+    int carry;
 
     if (offset > 0)
     {
         // Save the last bit shifted out in the carry
-        carry = (result << (offset - 1)) >> 31;
+        carry = (value << (offset - 1)) >> 31;
 
-        result <<= offset;
+        value <<= offset;
     }
     // Special case LSL #0
     else
@@ -18,62 +18,77 @@ u8 ARM::LSL(u32& result, u8 offset)
         // Todo: "the shifter carry out is the old value of the CPSR C flag"?
         carry = flagC();
     }
-    return carry;
+
+    updateFlagZ(value);
+    updateFlagN(value);
+    updateFlagC(carry);
+
+    return value;
 }
 
 // Logical Shift Right
-u8 ARM::LSR(u32& result, u8 offset)
+u32 ARM::LSR(u32 value, int offset)
 {
     u8 carry = 0;
 
     if (offset > 0)
     {
         // Save the last bit shifted out in the carry
-        carry = (result >> (offset - 1)) & 0b1;
+        carry = (value >> (offset - 1)) & 0b1;
 
-        result >>= offset;
+        value >>= offset;
     }
     // Special case LSR #32 / #0
     else
     {
         // Store the MSB in the carry
-        carry = result >> 31;
+        carry = value >> 31;
         // Reset the result
-        result = 0;
+        value = 0;
     }
-    return carry;
+
+    updateFlagZ(value);
+    updateFlagN(value);
+    updateFlagC(carry);
+
+    return value;
 }
 
 // Arithmetic Shift Right
-u8 ARM::ASR(u32& result, u8 offset)
+u32 ARM::ASR(u32 value, int offset)
 {
     u8 carry = 0;
 
     if (offset > 0)
     {
         // Save the last bit shifted out in the carry
-        carry = (result >> (offset - 1)) & 0b1;
+        carry = (value >> (offset - 1)) & 0b1;
 
-        u32 msb = result & (1 << 31);
+        u32 msb = value & (1 << 31);
         for (int i = 0; i < offset; ++i)
         {
-            result >>= 1;
-            result |= msb;
+            value >>= 1;
+            value |= msb;
         }
     }
     // Special case LSR #32 / #0
     else
     {
         // Store the MSB in the carry
-        carry = result >> 31;
+        carry = value >> 31;
         // Apply carry bit to whole result
-        result = carry ? 0xFFFFFFFF : 0;
+        value = carry ? 0xFFFFFFFF : 0;
     }
-    return carry;
+
+    updateFlagZ(value);
+    updateFlagN(value);
+    updateFlagC(carry);
+
+    return value;
 }
 
 // Rotate Right
-u8 ARM::ROR(u32& result, u8 offset)
+u32 ARM::ROR(u32 value, int offset)
 {
     u8 carry = 0;
 
@@ -81,20 +96,25 @@ u8 ARM::ROR(u32& result, u8 offset)
     {
         for (int i = 0; i < offset; ++i)
         {
-            carry = result & 0b1;
-            result >>= 1;
-            result |= (carry << 31);
+            carry = value & 0b1;
+            value >>= 1;
+            value |= (carry << 31);
         }
     }
     // Special case ROR #0
     else
     {
         // Save the first bit in the carry
-        carry = result & 0b1;
+        carry = value & 0b1;
         // Rotate by one
-        result >>= 1;
+        value >>= 1;
         // Change MSB to current carry
-        result |= (flagC() << 31);
+        value |= (flagC() << 31);
     }
-    return carry;
+
+    updateFlagZ(value);
+    updateFlagN(value);
+    updateFlagC(carry);
+
+    return value;
 }

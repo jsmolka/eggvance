@@ -1,5 +1,10 @@
 #pragma once
 
+/**
+ * Todo:
+ * - execute ARM instructions until one frame cane be drawn
+ */
+
 #include <string>
 
 #include "arm/arm.h"
@@ -11,7 +16,7 @@ class Core
 public:
     Core();
 
-    void run(const std::string &file);
+    void run(const std::string& file);
 
 private:
     ARM arm;

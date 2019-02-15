@@ -57,7 +57,7 @@ void ARM::branchLink(u32 instr)
     if (l)
     {
         // Save old PC in link register
-        setReg(14, regs.r15 - 4);
+        reg(14) = regs.r15 - 4;
     }
 
     regs.r15 += signed_offset;

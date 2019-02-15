@@ -2,8 +2,13 @@
 
 #include "common/integer.h"
 
-struct Registers
+class Registers
 {
+public:
+    u32& sp() { return r13; };
+    u32& lr() { return r14; };
+    u32& pc() { return r15; };
+
     // General Purpose Registers
     u32 r0;
     u32 r1;

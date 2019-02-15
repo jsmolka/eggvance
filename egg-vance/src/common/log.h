@@ -4,10 +4,18 @@
 
 #define log() Log(__FUNCTION__)
 
-struct Log
+class Log
 {
-    Log(const char* function);
-    ~Log();
+public:
+    Log(const char* function) 
+    { 
+        std::cout << function << " - "; 
+    };
+    
+    ~Log() 
+    { 
+        std::cout << "\n"; 
+    };
 
     template<typename T>
     Log& operator<<(const T& value)

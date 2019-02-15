@@ -16,10 +16,9 @@ void MMU::reset()
 
     dispcnt = {};
     dispstat = {};
-    bgcnt[0] = {};
-    bgcnt[1] = {};
-    bgcnt[2] = {};
-    bgcnt[3] = {};
+
+    for (int i = 0; i < 4; ++i)
+        bgcnt[i] = {};
 }
 
 bool MMU::loadRom(const std::string& file)

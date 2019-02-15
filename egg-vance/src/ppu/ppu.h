@@ -1,5 +1,11 @@
 #pragma once
 
+/**
+ * Todo:
+ * - possibly use an SDL texture for better performance
+ * - implement proper window scaling
+ */
+
 #include <SDL.h>
 
 #include "common/internal.h"
@@ -13,16 +19,16 @@ public:
 
     void reset() final;
 
-    void renderText();
+    void renderFrame();
 
     MMU* mmu;
 
 private:
-    void draw(int x, int y, u16 color);
-    void redraw();
+    void renderText();
+
+    void drawPixel(int x, int y, u16 color);
 
     SDL_Window* window;
     SDL_Renderer* renderer;
-    SDL_Surface* surface;
 };
 

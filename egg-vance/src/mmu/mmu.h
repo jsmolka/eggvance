@@ -1,5 +1,10 @@
 #pragma once
 
+/**
+ * Todo:
+ * - split memory into actually used parts
+ */
+
 #include <string>
 #include <vector>
 

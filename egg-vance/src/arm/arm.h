@@ -22,11 +22,8 @@ public:
 private:
     Registers regs;
 
-    u32 reg(u8 number) const;
-    void setReg(u8 number, u32 value);
-
-    u32 spsr(u8 number) const;
-    void setSpsr(u8 number, u32 value);
+    u32& reg(int number);
+    u32& spsr(int number);
 
     void fetch();
     void decode();
@@ -48,10 +45,10 @@ private:
     bool isArm() const;
     bool isThumb() const;
 
-    u8 flagZ() const;
-    u8 flagN() const;
-    u8 flagC() const;
-    u8 flagV() const;
+    int flagZ() const;
+    int flagN() const;
+    int flagC() const;
+    int flagV() const;
 
     void setFlag(CPSR flag, bool set);
     void setFlagZ(bool set);
@@ -61,14 +58,14 @@ private:
 
     void updateFlagZ(u32 result);
     void updateFlagN(u32 result);
-    void updateFlagC(u8 carry);
+    void updateFlagC(int carry);
     void updateFlagC(u32 input, u32 operand, bool addition);
     void updateFlagV(u32 input, u32 operand, bool addition);
 
-    u8 LSL(u32& result, u8 offset);
-    u8 LSR(u32& result, u8 offset);
-    u8 ASR(u32& result, u8 offset);
-    u8 ROR(u32& result, u8 offset);
+    u32 LSL(u32 value, int offset);
+    u32 LSR(u32 value, int offset);
+    u32 ASR(u32 value, int offset);
+    u32 ROR(u32 value, int offset);
 
     bool checkCondition(Condition condition) const;
 
