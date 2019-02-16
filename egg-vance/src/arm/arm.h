@@ -62,31 +62,45 @@ private:
     void updateFlagC(u32 value, u32 operand, bool addition);
     void updateFlagV(u32 value, u32 operand, bool addition);
 
-    u32 LSL(u32 value, u8 offset);
-    u32 LSR(u32 value, u8 offset);
-    u32 ASR(u32 value, u8 offset);
-    u32 ROR(u32 value, u8 offset);
-    u32 ADD(u32 value, u32 operand);
-    u32 SUB(u32 value, u32 operand);
-    u32 ADC(u32 value, u32 operand);
-    u32 SBC(u32 value, u32 operand);
-    u32 MUL(u32 value, u32 operand);
-    u32 AND(u32 value, u32 operand);
-    u32 ORR(u32 value, u32 operand);
-    u32 EOR(u32 value, u32 operand);
-    u32 NEG(u32 operand);
-    u32 BIC(u32 value, u32 operand);
-    u32 MOV(u32 operand);
-    u32 MVN(u32 operand);
+    u32 LSL(u32 value, u8 offset, bool flags = true);
+    u32 LSR(u32 value, u8 offset, bool flags = true);
+    u32 ASR(u32 value, u8 offset, bool flags = true);
+    u32 ROR(u32 value, u8 offset, bool flags = true);
+
+    u32 ADD(u32 value, u32 operand, bool flags = true);
+    u32 SUB(u32 value, u32 operand, bool flags = true);
+    u32 ADC(u32 value, u32 operand, bool flags = true);
+    u32 SBC(u32 value, u32 operand, bool flags = true);
+    u32 MUL(u32 value, u32 operand, bool flags = true);
+    u32 AND(u32 value, u32 operand, bool flags = true);
+    u32 ORR(u32 value, u32 operand, bool flags = true);
+    u32 EOR(u32 value, u32 operand, bool flags = true);
+    u32 BIC(u32 value, u32 operand, bool flags = true);
+
+    u32 NEG(u32 operand, bool flags = true);
+    u32 MOV(u32 operand, bool flags = true);
+    u32 MVN(u32 operand, bool flags = true);
+
     void CMP(u32 value, u32 operand);
     void CMN(u32 value, u32 operand);
     void TST(u32 value, u32 operand);
+
     void STRW(u32 addr, u32 value);
     void STRH(u32 addr, u32 value);
     void STRB(u32 addr, u32 value);
     u32 LDRW(u32 addr);
     u16 LDRH(u32 addr);
-    u8 LDRB(u32 addr);
+     u8 LDRB(u32 addr);
+    u32 LDSH(u32 addr);
+    u32 LDSB(u32 addr);
+
+    u32 STMIA(u32 addr, u8 rlist);
+    u32 LDMIA(u32 addr, u8 rlist);
+
+    void PUSH(u8 rlist, bool lr);
+    void POP(u8 rlist, bool pc);
+
+    void BX(u32 value);
 
     bool checkCondition(Condition cond) const;
     bool checkBranchCondition(Condition cond) const;

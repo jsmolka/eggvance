@@ -25,7 +25,7 @@ void ARM::branchExchange(u32 instr)
         operand &= ~0b1;
     }
 
-    regs.pc() = operand;
+    regs.r15 = operand;
     needs_flush = true;
 }
 
@@ -56,9 +56,9 @@ void ARM::branchLink(u32 instr)
     if (l)
     {
         // Save old PC in link register
-        regs.lr() = regs.pc() - 4;
+        reg(14) = regs.r15 - 4;
     }
 
-    regs.pc() += signed_offset;
+    regs.r15 += signed_offset;
     needs_flush = true;
 }

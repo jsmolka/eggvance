@@ -18,13 +18,13 @@ void ARM::reset()
     regs.r13_svc = 0x03007FE0;
     regs.r13_irq = 0x03007FA0;
 
-    regs.pc() = 0x8000000;
+    regs.r15 = 0x8000000;
 
     regs.cpsr = 0x5F;
 
     // For test ROM
     regs.cpsr |= CPSR_T;
-    regs.pc() = 0x8000108;
+    regs.r15 = 0x08000100;
 
     flushPipe();
 
@@ -125,9 +125,9 @@ u32& ARM::spsr(u8 number)
 void ARM::fetch()
 {
     if (isArm())
-        pipe[0].instr = mmu->readWord(regs.pc());
+        pipe[0].instr = mmu->readWord(regs.r15);
     else
-        pipe[0].instr = mmu->readHalf(regs.pc());
+        pipe[0].instr = mmu->readHalf(regs.r15);
 
     pipe[0].decoded = UNDEFINED;
 }
@@ -345,6 +345,8 @@ void ARM::execute()
     {
         u16 instr = static_cast<u16>(pipe[2].instr);
 
+        log() << "THUMB " << (int)pipe[2].decoded - 16;
+
         switch (pipe[2].decoded)
         {
         case THUMB_1:
@@ -434,7 +436,7 @@ void ARM::advance()
     pipe[2] = pipe[1];
     pipe[1] = pipe[0];
 
-    regs.pc() += isThumb() ? 2 : 4;
+    regs.r15 += isThumb() ? 2 : 4;
 }
 
 void ARM::flushPipe()

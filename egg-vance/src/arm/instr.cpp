@@ -1,7 +1,7 @@
 #include "arm.h"
 
 // Logical Shift Left
-u32 ARM::LSL(u32 value, u8 offset)
+u32 ARM::LSL(u32 value, u8 offset, bool flags)
 {
     u8 carry;
 
@@ -15,19 +15,21 @@ u32 ARM::LSL(u32 value, u8 offset)
     // Special case LSL #0
     else
     {
-        // Todo: "the shifter carry out is the old value of the CPSR C flag"?
         carry = flagC();
     }
 
-    updateFlagZ(value);
-    updateFlagN(value);
-    updateFlagC(carry);
+    if (flags)
+    {
+        updateFlagZ(value);
+        updateFlagN(value);
+        updateFlagC(carry);
+    }
 
     return value;
 }
 
 // Logical Shift Right
-u32 ARM::LSR(u32 value, u8 offset)
+u32 ARM::LSR(u32 value, u8 offset, bool flags)
 {
     u8 carry = 0;
 
@@ -47,15 +49,18 @@ u32 ARM::LSR(u32 value, u8 offset)
         value = 0;
     }
 
-    updateFlagZ(value);
-    updateFlagN(value);
-    updateFlagC(carry);
+    if (flags)
+    {
+        updateFlagZ(value);
+        updateFlagN(value);
+        updateFlagC(carry);
+    }
 
     return value;
 }
 
 // Arithmetic Shift Right
-u32 ARM::ASR(u32 value, u8 offset)
+u32 ARM::ASR(u32 value, u8 offset, bool flags)
 {
     u8 carry = 0;
 
@@ -80,15 +85,18 @@ u32 ARM::ASR(u32 value, u8 offset)
         value = carry ? 0xFFFFFFFF : 0;
     }
 
-    updateFlagZ(value);
-    updateFlagN(value);
-    updateFlagC(carry);
+    if (flags)
+    {
+        updateFlagZ(value);
+        updateFlagN(value);
+        updateFlagC(carry);
+    }
 
     return value;
 }
 
 // Rotate Right
-u32 ARM::ROR(u32 value, u8 offset)
+u32 ARM::ROR(u32 value, u8 offset, bool flags)
 {
     u8 carry = 0;
 
@@ -112,138 +120,171 @@ u32 ARM::ROR(u32 value, u8 offset)
         value |= (flagC() << 31);
     }
 
-    updateFlagZ(value);
-    updateFlagN(value);
-    updateFlagC(carry);
+    if (flags)
+    {
+        updateFlagZ(value);
+        updateFlagN(value);
+        updateFlagC(carry);
+    }
 
     return value;
 }
 
 // Add
-u32 ARM::ADD(u32 value, u32 operand)
+u32 ARM::ADD(u32 value, u32 operand, bool flags)
 {
     u32 result = value + operand;
 
-    updateFlagZ(result);
-    updateFlagN(result);
-    updateFlagC(value, operand, true);
-    updateFlagV(value, operand, true);
+    if (flags)
+    {
+        updateFlagZ(result);
+        updateFlagN(result);
+        updateFlagC(value, operand, true);
+        updateFlagV(value, operand, true);
+    }
 
     return result;
 }
 
 // Subtract
-u32 ARM::SUB(u32 value, u32 operand)
+u32 ARM::SUB(u32 value, u32 operand, bool flags)
 {
     u32 result = value - operand;
 
-    updateFlagZ(result);
-    updateFlagN(result);
-    updateFlagC(value, operand, false);
-    updateFlagV(value, operand, false);
+    if (flags)
+    {
+        updateFlagZ(result);
+        updateFlagN(result);
+        updateFlagC(value, operand, false);
+        updateFlagV(value, operand, false);
+    }
 
     return result;
 }
 
 // Add with carry
-u32 ARM::ADC(u32 value, u32 operand)
+u32 ARM::ADC(u32 value, u32 operand, bool flags)
 {
-    return ADD(value, operand + flagC());
+    return ADD(value, operand + flagC(), flags);
 }
 
 // Subtract with carry
-u32 ARM::SBC(u32 value, u32 operand)
+u32 ARM::SBC(u32 value, u32 operand, bool flags)
 {
-    return SUB(value, operand - 1 + flagC());
+    return SUB(value, operand - 1 + flagC(), flags);
 }
 
 // Multiply
-u32 ARM::MUL(u32 value, u32 operand)
+u32 ARM::MUL(u32 value, u32 operand, bool flags)
 {
     // Todo: check about C and V flag
 
     value *= operand;
 
-    updateFlagZ(value);
-    updateFlagN(value);
+    if (flags)
+    {
+        updateFlagZ(value);
+        updateFlagN(value);
+    }
 
     return value;
 }
 
 // And
-u32 ARM::AND(u32 value, u32 operand)
+u32 ARM::AND(u32 value, u32 operand, bool flags)
 {
     value &= operand;
 
-    updateFlagZ(value);
-    updateFlagN(value);
+    if (flags)
+    {
+        updateFlagZ(value);
+        updateFlagN(value);
+    }
 
     return value;
 }
 
 // Or
-u32 ARM::ORR(u32 value, u32 operand)
+u32 ARM::ORR(u32 value, u32 operand, bool flags)
 {
     value |= operand;
 
-    updateFlagZ(value);
-    updateFlagN(value);
+    if (flags)
+    {
+        updateFlagZ(value);
+        updateFlagN(value);
+    }
 
     return value;
 
 }
 
 // Exclusive or
-u32 ARM::EOR(u32 value, u32 operand)
+u32 ARM::EOR(u32 value, u32 operand, bool flags)
 {
     value ^= operand;
 
-    updateFlagZ(value);
-    updateFlagN(value);
+    if (flags)
+    {
+        updateFlagZ(value);
+        updateFlagN(value);
+    }
+
+    return value;
+}
+
+// Bit clear
+u32 ARM::BIC(u32 value, u32 operand, bool flags)
+{
+    value &= ~operand;
+
+    if (flags)
+    {
+        updateFlagZ(value);
+        updateFlagN(value);
+    }
 
     return value;
 }
 
 // Negative
-u32 ARM::NEG(u32 operand)
+u32 ARM::NEG(u32 operand, bool flags)
 {
     u32 result = (0 - operand);
 
-    updateFlagZ(result);
-    updateFlagN(result);
-    updateFlagC(0, operand, false);
-    updateFlagV(0, operand, false);
+    if (flags)
+    {
+        updateFlagZ(result);
+        updateFlagN(result);
+        updateFlagC(0, operand, false);
+        updateFlagV(0, operand, false);
+    }
 
     return result;
 }
 
-// Bit clear
-u32 ARM::BIC(u32 value, u32 operand)
-{
-    value &= ~operand;
-
-    updateFlagZ(value);
-    updateFlagN(value);
-
-    return value;
-}
-
 // Move
-u32 ARM::MOV(u32 operand)
+u32 ARM::MOV(u32 operand, bool flags)
 {
-    updateFlagZ(operand);
-    updateFlagN(operand);
+    if (flags)
+    {
+        updateFlagZ(operand);
+        updateFlagN(operand);
+    }
 
     return operand;
 }
 
 // Move negative
-u32 ARM::MVN(u32 operand)
+u32 ARM::MVN(u32 operand, bool flags)
 {
     operand = ~operand;
 
-    updateFlagZ(operand);
-    updateFlagN(operand);
+    if (flags)
+    {
+        updateFlagZ(operand);
+        updateFlagN(operand);
+    }
 
     return operand;
 }
@@ -300,4 +341,113 @@ u16 ARM::LDRH(u32 addr)
 u8 ARM::LDRB(u32 addr)
 {
     return mmu->readByte(addr);
+}
+
+// Load sign extended half
+u32 ARM::LDSH(u32 addr)
+{
+    u16 half = mmu->readHalf(addr);
+    // Extend with bit 15
+    u16 extension = (half >> 15) ? 0xFFFF : 0;
+
+    return extension << 16 | half;
+}
+
+// Load sign extended byte
+u32 ARM::LDSB(u32 addr)
+{
+    u8 byte = mmu->readByte(addr);
+    // Extend with bit 7
+    u32 extension = (byte >> 7) ? 0xFFFFFF : 0;
+
+    return extension << 24 | byte;
+}
+
+// Store multiple, increment after
+u32 ARM::STMIA(u32 addr, u8 rlist)
+{
+    for (int x = 0; x < 8; ++x)
+    {
+        if (rlist & 0x1)
+        {
+            reg(x) = mmu->readWord(addr);
+            addr += 4;
+        }
+        rlist >>= 1;
+    }
+    return addr;
+}
+
+// Load multiple, increment after
+u32 ARM::LDMIA(u32 addr, u8 rlist)
+{
+    for (int x = 0; x < 8; ++x)
+    {
+        if (rlist & 0x1)
+        {
+            mmu->writeWord(addr, reg(x));
+            addr += 4;
+        }
+        rlist >>= 1;
+    }
+    return addr;
+}
+
+// Push registers onto the stack
+void ARM::PUSH(u8 rlist, bool lr)
+{
+    u32& sp = reg(13);
+
+    // Store LR
+    if (lr)
+    {
+        sp -= 4;
+        mmu->writeWord(sp, reg(14));
+    }
+
+    // Iterate over specified registers
+    for (int x = 7; x >= 0; --x)
+    {
+        if (rlist & (1 << x))
+        {
+            sp -= 4;
+            mmu->writeWord(sp, reg(x));
+        }
+    }
+}
+
+// Pop registers from the stack
+void ARM::POP(u8 rlist, bool pc)
+{
+    u32& sp = reg(13);
+
+    // Iterate over specified registers
+    for (int x = 0; x < 8; ++x)
+    {
+        if (rlist & 0x1)
+        {
+            reg(x) = mmu->readWord(sp);
+            sp += 4;
+        }
+        rlist >>= 1;
+    }
+
+    // Load PC
+    if (pc)
+    {
+        regs.r15 = mmu->readWord(sp);
+        sp += 4;
+
+        needs_flush = true;
+    }
+}
+
+// Branch with exchange
+void ARM::BX(u32 value)
+{
+    if (value & 0x0)
+        setFlag(CPSR_T, true);
+
+    regs.r15 = value;
+    needs_flush = true;
 }
