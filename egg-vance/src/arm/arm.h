@@ -22,8 +22,8 @@ public:
 private:
     Registers regs;
 
-    u32& reg(int number);
-    u32& spsr(int number);
+    u32& reg(u8 number);
+    u32& spsr(u8 number);
 
     void fetch();
     void decode();
@@ -45,10 +45,10 @@ private:
     bool isArm() const;
     bool isThumb() const;
 
-    int flagZ() const;
-    int flagN() const;
-    int flagC() const;
-    int flagV() const;
+    u8 flagZ() const;
+    u8 flagN() const;
+    u8 flagC() const;
+    u8 flagV() const;
 
     void setFlag(CPSR flag, bool set);
     void setFlagZ(bool set);
@@ -58,16 +58,38 @@ private:
 
     void updateFlagZ(u32 result);
     void updateFlagN(u32 result);
-    void updateFlagC(int carry);
-    void updateFlagC(u32 input, u32 operand, bool addition);
-    void updateFlagV(u32 input, u32 operand, bool addition);
+    void updateFlagC(u8 carry);
+    void updateFlagC(u32 value, u32 operand, bool addition);
+    void updateFlagV(u32 value, u32 operand, bool addition);
 
-    u32 LSL(u32 value, int offset);
-    u32 LSR(u32 value, int offset);
-    u32 ASR(u32 value, int offset);
-    u32 ROR(u32 value, int offset);
+    u32 LSL(u32 value, u8 offset);
+    u32 LSR(u32 value, u8 offset);
+    u32 ASR(u32 value, u8 offset);
+    u32 ROR(u32 value, u8 offset);
+    u32 ADD(u32 value, u32 operand);
+    u32 SUB(u32 value, u32 operand);
+    u32 ADC(u32 value, u32 operand);
+    u32 SBC(u32 value, u32 operand);
+    u32 MUL(u32 value, u32 operand);
+    u32 AND(u32 value, u32 operand);
+    u32 ORR(u32 value, u32 operand);
+    u32 EOR(u32 value, u32 operand);
+    u32 NEG(u32 operand);
+    u32 BIC(u32 value, u32 operand);
+    u32 MOV(u32 operand);
+    u32 MVN(u32 operand);
+    void CMP(u32 value, u32 operand);
+    void CMN(u32 value, u32 operand);
+    void TST(u32 value, u32 operand);
+    void STRW(u32 addr, u32 value);
+    void STRH(u32 addr, u32 value);
+    void STRB(u32 addr, u32 value);
+    u32 LDRW(u32 addr);
+    u16 LDRH(u32 addr);
+    u8 LDRB(u32 addr);
 
-    bool checkCondition(Condition condition) const;
+    bool checkCondition(Condition cond) const;
+    bool checkBranchCondition(Condition cond) const;
 
     void moveShiftedRegister(u16 instr);
     void addSubImmediate(u16 instr);

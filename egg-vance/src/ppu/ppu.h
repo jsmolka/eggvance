@@ -1,11 +1,5 @@
 #pragma once
 
-/**
- * Todo:
- * - possibly use an SDL texture for better performance
- * - implement proper window scaling
- */
-
 #include <SDL.h>
 
 #include "common/internal.h"

@@ -2,35 +2,34 @@
 
 #include "common/log.h"
 
-// BX
+// ARM 5
 void ARM::branchExchange(u32 instr)
 {
     u8 rn = instr & 0xF;
-
+    
     // This operation is undefined for R15
-    if (rn <= 14)
-    {
-        u32 operand = reg(rn);
-
-        // Exchange instruction set
-        if (operand & 0b1)
-        {
-            regs.cpsr |= CPSR_T;
-
-            // Clear THUMB bit
-            operand &= ~0b1;
-        }
-
-        regs.r15 = operand;
-        needs_flush = true;
-    }
-    else
+    if (rn > 14)
     {
         log() << "Invalid register " << (int)rn;
+        return;
     }
+
+    u32 operand = reg(rn);
+
+    // Exchange instruction set
+    if (operand & 0x1)
+    {
+        regs.cpsr |= CPSR_T;
+
+        // Clear THUMB bit
+        operand &= ~0b1;
+    }
+
+    regs.pc() = operand;
+    needs_flush = true;
 }
 
-// B, BL
+// ARM 11
 void ARM::branchLink(u32 instr)
 {
     // Link flag
@@ -57,9 +56,9 @@ void ARM::branchLink(u32 instr)
     if (l)
     {
         // Save old PC in link register
-        reg(14) = regs.r15 - 4;
+        regs.lr() = regs.pc() - 4;
     }
 
-    regs.r15 += signed_offset;
+    regs.pc() += signed_offset;
     needs_flush = true;
 }

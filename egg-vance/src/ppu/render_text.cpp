@@ -14,7 +14,7 @@ void PPU::renderText()
             u16 tile = mmu->readHalf(bgcnt.map_addr + 32 * 2 * y + 2 * x);
 
             u16 tile_number = tile & 0x3FF;
-            u16 palette_number = tile >> 12 & 0xF;
+            u8 palette_number = tile >> 12 & 0xF;
 
             int x_off = 0;
             int y_off = 0;

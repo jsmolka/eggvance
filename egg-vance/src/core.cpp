@@ -18,6 +18,7 @@ void Core::run(const std::string& file)
     SDL_Event event;
     while (arm.running)
     {
+        // Todo: execute instruction until one frame can be drawn
         for (int i = 0; i < 4096; ++i)
             arm.step(); 
 

@@ -2,7 +2,7 @@
 
 #include "common/memory_map.h"
 
-void DisplayControl::write(int pos, u8 byte)
+void DisplayControl::write(u8 pos, u8 byte)
 {
     switch (pos)
     {
@@ -28,7 +28,7 @@ void DisplayControl::write(int pos, u8 byte)
     }
 }
 
-void DisplayStatus::write(int pos, u8 byte)
+void DisplayStatus::write(u8 pos, u8 byte)
 {
     switch (pos)
     {
@@ -47,7 +47,7 @@ void DisplayStatus::write(int pos, u8 byte)
     }
 }
 
-void BackgroundControl::write(int pos, u8 byte)
+void BackgroundControl::write(u8 pos, u8 byte)
 {
     switch (pos)
     {
@@ -60,7 +60,7 @@ void BackgroundControl::write(int pos, u8 byte)
 
     case 1:
         map_addr = MAP_VRAM + 0x800 * (byte & 0x1F);
-        screen_over = byte >> 5 & 0x1;
+        disp_overflow = byte >> 5 & 0x1;
         map_size = byte >> 6 & 0x3;
         break;
     }

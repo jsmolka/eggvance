@@ -3,7 +3,6 @@
 #include "common/log.h"
 
 ARM::ARM()
-    : mmu(nullptr)
 {
 
 }
@@ -19,13 +18,13 @@ void ARM::reset()
     regs.r13_svc = 0x03007FE0;
     regs.r13_irq = 0x03007FA0;
 
-    regs.r15 = 0x8000000;
+    regs.pc() = 0x8000000;
 
     regs.cpsr = 0x5F;
 
     // For test ROM
     regs.cpsr |= CPSR_T;
-    regs.r15 = 0x8000108;
+    regs.pc() = 0x8000108;
 
     flushPipe();
 
@@ -51,7 +50,7 @@ void ARM::step()
     }
 }
 
-u32& ARM::reg(int number)
+u32& ARM::reg(u8 number)
 {
     Mode mode = currentMode();
 
@@ -105,7 +104,7 @@ u32& ARM::reg(int number)
     return dummy;
 }
 
-u32& ARM::spsr(int number)
+u32& ARM::spsr(u8 number)
 {
     switch (currentMode())
     {
@@ -126,9 +125,9 @@ u32& ARM::spsr(int number)
 void ARM::fetch()
 {
     if (isArm())
-        pipe[0].instr = mmu->readWord(regs.r15);
+        pipe[0].instr = mmu->readWord(regs.pc());
     else
-        pipe[0].instr = mmu->readHalf(regs.r15);
+        pipe[0].instr = mmu->readHalf(regs.pc());
 
     pipe[0].decoded = UNDEFINED;
 }
@@ -233,6 +232,10 @@ void ARM::decode()
         {
             // Softrware interrupt
             pipe[1].decoded = ARM_15;
+        }
+        else
+        {
+            log() << "Cannot decode ARM instruction " << (int)instr;
         }
     }
     else
@@ -431,7 +434,7 @@ void ARM::advance()
     pipe[2] = pipe[1];
     pipe[1] = pipe[0];
 
-    regs.r15 += isThumb() ? 2 : 4;
+    regs.pc() += isThumb() ? 2 : 4;
 }
 
 void ARM::flushPipe()
@@ -456,22 +459,22 @@ bool ARM::isThumb() const
     return regs.cpsr & CPSR_T;
 }
 
-int ARM::flagZ() const
+u8 ARM::flagZ() const
 {
     return (regs.cpsr & CPSR_Z) ? 1 : 0;
 }
 
-int ARM::flagN() const
+u8 ARM::flagN() const
 {
     return (regs.cpsr & CPSR_N) ? 1 : 0;
 }
 
-int ARM::flagC() const
+u8 ARM::flagC() const
 {
     return (regs.cpsr & CPSR_C) ? 1 : 0;
 }
 
-int ARM::flagV() const
+u8 ARM::flagV() const
 {
     return (regs.cpsr & CPSR_V) ? 1 : 0;
 }
@@ -514,39 +517,39 @@ void ARM::updateFlagN(u32 res)
     setFlagN(res >> 31);
 }
 
-void ARM::updateFlagC(int carry)
+void ARM::updateFlagC(u8 carry)
 {
     setFlagC(carry == 1);
 }
 
-void ARM::updateFlagC(u32 input, u32 operand, bool addition)
+void ARM::updateFlagC(u32 value, u32 operand, bool addition)
 {
     bool carry;
 
     if (addition)
-        carry = operand > (0xFFFFFFFF - input);
+        carry = operand > (0xFFFFFFFF - value);
     else
-        carry = operand > input;
+        carry = operand > value;
 
     setFlagC(carry);
 }
 
-void ARM::updateFlagV(u32 input, u32 operand, bool addition)
+void ARM::updateFlagV(u32 value, u32 operand, bool addition)
 {
-    u8 msb_input = input >> 31;
+    u8 msb_input = value >> 31;
     u8 msb_operand = operand >> 31;
 
     bool overflow = false;
 
     if (addition)
     {
-        u8 msb_result = (input + operand) >> 31;
+        u8 msb_result = (value + operand) >> 31;
         if (msb_input == msb_operand)
             overflow = msb_result != msb_input;
     }
     else
     {
-        u8 msb_result = (input - operand) >> 31;
+        u8 msb_result = (value - operand) >> 31;
         if (msb_input != msb_operand)
             overflow = msb_result == msb_input;
     }
@@ -554,9 +557,9 @@ void ARM::updateFlagV(u32 input, u32 operand, bool addition)
     setFlagV(overflow);
 }
 
-bool ARM::checkCondition(Condition condition) const
+bool ARM::checkCondition(Condition cond) const
 {
-    if (condition == COND_AL)
+    if (cond == COND_AL)
         return true;
 
     u8 z = flagZ();
@@ -564,74 +567,42 @@ bool ARM::checkCondition(Condition condition) const
     u8 c = flagC();
     u8 v = flagV();
 
-    switch (condition)
+    switch (cond)
     {
-    // EQ - Z set
-    case COND_EQ: 
-        return z;
-
-    // NE - Z clear
-    case COND_NE:
-        return !z;
-
-    // CS - C set
-    case COND_CS:
-        return c;
-
-    // CC - C clear
-    case COND_CC:
-        return !c;
-
-    // MI - N set
-    case COND_MI:
-        return n;
-
-    // PL - N clear
-    case COND_PL:
-        return !n;
-
-    // VS - V set
-    case COND_VS:
-        return v;
-
-    // VC - V clear
-    case COND_VC:
-        return !v;
-
-    // HI - C set and Z clear
-    case COND_HI:
-        return c && !z;
-
-    // LS - C clear or Z set
-    case COND_LS:
-        return !c || z;
-
-    // GE - N equals V
-    case COND_GE:
-        return n == v;
-
-    // LT - N not equal to V
-    case COND_LT:
-        return n != v;
-
-    // GT - Z clear and (N equals V)
-    case COND_GT:
-        return !z && (n == v);
-
-    // LE - Z set or (N not equal to V)
-    case COND_LE:
-        return z || (n != v);
-
-    // AL - always true
-    case COND_AL:
-        return true;
-
-    // NV - never true
-    case COND_NV:
-        return false;
+    case COND_EQ: return z;
+    case COND_NE: return !z;
+    case COND_CS: return c;
+    case COND_CC: return !c;
+    case COND_MI: return n;
+    case COND_PL: return !n;
+    case COND_VS: return v;
+    case COND_VC: return !v;
+    case COND_HI: return c && !z;
+    case COND_LS: return !c || z;
+    case COND_GE: return n == v;
+    case COND_LT: return n != v;
+    case COND_GT: return !z && (n == v);
+    case COND_LE: return z || (n != v);
+    case COND_AL: return true;
+    case COND_NV: return false;
 
     default:
-        log() << "Invalid condition " << (int)condition;
+        log() << "Invalid condition " << (int)cond;
     }
     return true;
+}
+
+bool ARM::checkBranchCondition(Condition cond) const
+{
+    if (cond == COND_AL)
+    {
+        log() << "Undefined branch condition AL";
+        return false;
+    }
+    if (cond == COND_NV)
+    {
+        // Todo: process SWI
+        return false;
+    }
+    return checkCondition(cond);
 }

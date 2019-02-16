@@ -1,5 +1,11 @@
 #include "ppu.h"
 
+/**
+ * Todo:
+ * - possibly use an SDL texture for better performance
+ * - implement proper window scaling
+ */
+
 PPU::PPU()
 {
     SDL_Init(SDL_INIT_VIDEO);
