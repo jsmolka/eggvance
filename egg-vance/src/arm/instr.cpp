@@ -40,7 +40,7 @@ u32 ARM::LSR(u32 value, u8 offset, bool flags)
 
         value >>= offset;
     }
-    // Special case LSR #32 / #0
+    // Special case LSR #0 -> #32
     else
     {
         // Store the MSB in the carry
@@ -70,13 +70,13 @@ u32 ARM::ASR(u32 value, u8 offset, bool flags)
         carry = (value >> (offset - 1)) & 0x1;
 
         u32 msb = value & (1 << 31);
-        for (u8 i = 0; i < offset; ++i)
+        for (int x = 0; x < offset; ++x)
         {
             value >>= 1;
             value |= msb;
         }
     }
-    // Special case LSR #32 / #0
+    // Special case ASR #0 -> #32
     else
     {
         // Store the MSB in the carry
@@ -102,14 +102,15 @@ u32 ARM::ROR(u32 value, u8 offset, bool flags)
 
     if (offset > 0)
     {
-        for (int i = 0; i < offset; ++i)
+        // Todo: this can be optimized
+        for (int x = 0; x < offset; ++x)
         {
             carry = value & 0x1;
             value >>= 1;
             value |= (carry << 31);
         }
     }
-    // Special case ROR #0
+    // Special case ROR #0 (RRX)
     else
     {
         // Save the first bit in the carry
@@ -177,8 +178,6 @@ u32 ARM::SBC(u32 value, u32 operand, bool flags)
 // Multiply
 u32 ARM::MUL(u32 value, u32 operand, bool flags)
 {
-    // Todo: check about C and V flag
-
     value *= operand;
 
     if (flags)
@@ -436,6 +435,8 @@ void ARM::POP(u8 rlist, bool pc)
     if (pc)
     {
         regs.r15 = mmu->readWord(sp);
+        regs.r15 &= ~0x1;
+
         sp += 4;
 
         needs_flush = true;
@@ -445,8 +446,16 @@ void ARM::POP(u8 rlist, bool pc)
 // Branch with exchange
 void ARM::BX(u32 value)
 {
+    // Todo: is this correct?
+
     if (value & 0x0)
-        setFlag(CPSR_T, true);
+    {
+        // Switch to ARM mode
+        regs.cpsr &= ~CPSR_T;
+
+        // Align word
+        value &= ~(1 << 1);
+    }
 
     regs.r15 = value;
     needs_flush = true;

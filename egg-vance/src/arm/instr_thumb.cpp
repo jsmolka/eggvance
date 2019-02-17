@@ -105,26 +105,29 @@ void ARM::aluOperations(u16 instr)
 void ARM::highRegisterBranchExchange(u16 instr)
 {
     u8 opcode = instr >> 8 & 0x3;
-    // High operand flag 1
-    u8 h1 = instr >> 7 & 0x1;
-    // High operand flag 2
-    u8 h2 = instr >> 6 & 0x1;
+    // High operand flag for rd
+    u8 hd = instr >> 7 & 0x1;
+    // High operand flag for rs
+    u8 hs = instr >> 6 & 0x1;
     u8 rs = instr >> 3 & 0x7;
     u8 rd = instr & 0x7;
 
-    if (h1) rd += 8;
-    if (h2) rs += 8;
+    // Use high registers
+    rs |= (hs << 3);
+    rd |= (hd << 3);
 
     u32 value = reg(rd);
     u32 operand = reg(rs);
 
     switch (opcode)
     {
-    case 0b00: reg(rd) = ADD(value, operand, false); break;
+    case 0b00: value = ADD(value, operand, false); break;
     case 0b01: CMP(value, operand); return;
-    case 0b10: reg(rd) = MOV(operand, false); break;
+    case 0b10: value = MOV(operand, false); break;
     case 0b11: BX(operand); break;
     }
+
+    reg(rd) = value;
 }
 
 // THUMB 6
@@ -300,8 +303,6 @@ void ARM::pushPopRegisters(u16 instr)
     // Store LR / load PC flag
     u8 r = instr >> 8 & 0x1;
     u8 rlist = instr & 0xFF;
-
-    u32& sp = reg(13);
 
     switch (l)
     {

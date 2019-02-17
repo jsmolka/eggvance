@@ -50,7 +50,6 @@ private:
     u8 flagC() const;
     u8 flagV() const;
 
-    void setFlag(CPSR flag, bool set);
     void setFlagZ(bool set);
     void setFlagN(bool set);
     void setFlagC(bool set);

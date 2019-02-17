@@ -481,32 +481,36 @@ u8 ARM::flagV() const
     return (regs.cpsr & CPSR_V) ? 1 : 0;
 }
 
-void ARM::setFlag(CPSR flag, bool set)
-{
-    if (set)
-        regs.cpsr |= flag;
-    else
-        regs.cpsr &= ~flag;
-}
-
 void ARM::setFlagZ(bool set)
 {
-    setFlag(CPSR_Z, set);
+    if (set)
+        regs.cpsr |= CPSR_Z;
+    else
+        regs.cpsr &= ~CPSR_Z;
 }
 
 void ARM::setFlagN(bool set)
 {
-    setFlag(CPSR_N, set);
+    if (set)
+        regs.cpsr |= CPSR_N;
+    else
+        regs.cpsr &= ~CPSR_N;
 }
 
 void ARM::setFlagC(bool set)
 {
-    setFlag(CPSR_C, set);
+    if (set)
+        regs.cpsr |= CPSR_C;
+    else
+        regs.cpsr &= ~CPSR_C;
 }
 
 void ARM::setFlagV(bool set)
 {
-    setFlag(CPSR_V, set);
+    if (set)
+        regs.cpsr |= CPSR_V;
+    else
+        regs.cpsr &= ~CPSR_V;
 }
 
 void ARM::updateFlagZ(u32 res)
