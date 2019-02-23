@@ -2,3 +2,6 @@
 .vs/
 bin/
 *.user
+
+# FASMARM
+*.gba
