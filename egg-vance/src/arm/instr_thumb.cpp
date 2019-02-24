@@ -10,19 +10,15 @@ void ARM::moveShiftedRegister(u16 instr)
     u8 rs = instr >> 3 & 0x7;
     u8 rd = instr & 0x7;
 
-    u32 value = reg(rs);
-
     switch (opcode)
     {
-    case 0b00: value = LSL(value, offset); break;
-    case 0b01: value = LSR(value, offset); break;
-    case 0b10: value = ASR(value, offset); break;
+    case 0b00: reg(rd) = LSL(reg(rs), offset); break;
+    case 0b01: reg(rd) = LSR(reg(rs), offset); break;
+    case 0b10: reg(rd) = ASR(reg(rs), offset); break;
 
     default:
         log() << "Invalid operation " << (int)opcode;
     }
-
-    reg(rd) = value;
 }
 
 // THUMB 2
@@ -35,16 +31,13 @@ void ARM::addSubImmediate(u16 instr)
     u8 rs = instr >> 3 & 0x7;
     u8 rd = instr & 0x7;
 
-    u32 value = reg(rs);
     u32 operand = i ? offset : reg(offset);
     
     switch (opcode)
     {
-    case 0b0: value = ADD(value, operand); break;
-    case 0b1: value = SUB(value, operand); break;
+    case 0b0: reg(rd) = ADD(reg(rs), operand); break;
+    case 0b1: reg(rd) = SUB(reg(rs), operand); break;
     }
-
-    reg(rd) = value;
 }
 
 // THUMB 3

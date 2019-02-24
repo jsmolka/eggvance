@@ -3,7 +3,7 @@
 // Logical Shift Left
 u32 ARM::LSL(u32 value, u8 offset, bool flags)
 {
-    u8 carry;
+    u8 carry = 0;
 
     if (offset > 0)
     {
@@ -40,7 +40,7 @@ u32 ARM::LSR(u32 value, u8 offset, bool flags)
 
         value >>= offset;
     }
-    // Special case LSR #0 -> #32
+    // Special case LSR #0
     else
     {
         // Store the MSB in the carry
@@ -76,7 +76,7 @@ u32 ARM::ASR(u32 value, u8 offset, bool flags)
             value |= msb;
         }
     }
-    // Special case ASR #0 -> #32
+    // Special case ASR #0
     else
     {
         // Store the MSB in the carry

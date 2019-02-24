@@ -535,7 +535,7 @@ void ARM::updateFlagC(u32 value, u32 operand, bool addition)
     if (addition)
         carry = operand > (0xFFFFFFFF - value);
     else
-        carry = operand > value;
+        carry = operand <= value;
 
     setFlagC(carry);
 }
@@ -557,7 +557,7 @@ void ARM::updateFlagV(u32 value, u32 operand, bool addition)
     {
         u8 msb_result = (value - operand) >> 31;
         if (msb_input != msb_operand)
-            overflow = msb_result == msb_input;
+            overflow = msb_result == msb_operand;
     }
 
     setFlagV(overflow);
