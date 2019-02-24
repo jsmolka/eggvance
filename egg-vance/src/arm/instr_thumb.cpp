@@ -59,7 +59,7 @@ void ARM::moveCmpAddSubImmediate(u16 instr)
 
     switch (opcode)
     {
-    case 0b00: value = MOV(value); break;
+    case 0b00: value = MOV(operand); break;
     case 0b01: CMP(value, operand); return;
     case 0b10: value = ADD(value, operand); break;
     case 0b11: value = SUB(value, operand); break;
@@ -370,6 +370,8 @@ void ARM::unconditionalBranch(u16 instr)
     if (offset & 1 << 10)
     {
         offset = ~offset;
+        // Work with the 11-bit offset
+        offset &= 0x7FF;
         offset++;
 
         signed_offset = -1 * offset;

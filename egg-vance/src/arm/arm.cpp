@@ -24,7 +24,7 @@ void ARM::reset()
 
     // For test ROM
     regs.cpsr |= CPSR_T;
-    regs.r15 = 0x08000100;
+    regs.r15 = 0x080000C8;
 
     flushPipe();
 
