@@ -47,18 +47,15 @@ void ARM::moveCmpAddSubImmediate(u16 instr)
     u8 rd = instr >> 8 & 0x7;
     u8 offset = instr & 0xFF;
 
-    u32 value = reg(rd);
     u32 operand = offset;
 
     switch (opcode)
     {
-    case 0b00: value = MOV(operand); break;
-    case 0b01: CMP(value, operand); return;
-    case 0b10: value = ADD(value, operand); break;
-    case 0b11: value = SUB(value, operand); break;
+    case 0b00: reg(rd) = MOV(operand); break;
+    case 0b01: CMP(reg(rd), operand); break;
+    case 0b10: reg(rd) = ADD(reg(rd), operand); break;
+    case 0b11: reg(rd) = SUB(reg(rd), operand); break;
     }
-
-    reg(rd) = value;
 }
 
 // THUMB 4
