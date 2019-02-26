@@ -10,11 +10,14 @@ void ARM::moveShiftedRegister(u16 instr)
     u8 rs = instr >> 3 & 0x7;
     u8 rd = instr & 0x7;
 
+    u32& src = reg(rs);
+    u32& dst = reg(rd);
+
     switch (opcode)
     {
-    case 0b00: reg(rd) = LSL(reg(rs), offset); break;
-    case 0b01: reg(rd) = LSR(reg(rs), offset); break;
-    case 0b10: reg(rd) = ASR(reg(rs), offset); break;
+    case 0b00: dst = LSL(src, offset); break;
+    case 0b01: dst = LSR(src, offset); break;
+    case 0b10: dst = ASR(src, offset); break;
 
     default:
         log() << "Invalid operation " << (int)opcode;
@@ -31,12 +34,15 @@ void ARM::addSubImmediate(u16 instr)
     u8 rs = instr >> 3 & 0x7;
     u8 rd = instr & 0x7;
 
+    u32& src = reg(rs);
+    u32& dst = reg(rd);
+
     u32 operand = i ? offset : reg(offset);
     
     switch (opcode)
     {
-    case 0b0: reg(rd) = ADD(reg(rs), operand); break;
-    case 0b1: reg(rd) = SUB(reg(rs), operand); break;
+    case 0b0: dst = ADD(src, operand); break;
+    case 0b1: dst = SUB(src, operand); break;
     }
 }
 
@@ -47,14 +53,14 @@ void ARM::moveCmpAddSubImmediate(u16 instr)
     u8 rd = instr >> 8 & 0x7;
     u8 offset = instr & 0xFF;
 
-    u32 operand = offset;
+    u32& dst = reg(rd);
 
     switch (opcode)
     {
-    case 0b00: reg(rd) = MOV(operand); break;
-    case 0b01: CMP(reg(rd), operand); break;
-    case 0b10: reg(rd) = ADD(reg(rd), operand); break;
-    case 0b11: reg(rd) = SUB(reg(rd), operand); break;
+    case 0b00: dst = MOV(     offset); break;
+    case 0b01:       CMP(dst, offset); break;
+    case 0b10: dst = ADD(dst, offset); break;
+    case 0b11: dst = SUB(dst, offset); break;
     }
 }
 
@@ -65,30 +71,28 @@ void ARM::aluOperations(u16 instr)
     u8 rs = instr >> 3 & 0x7;
     u8 rd = instr & 0x7;
 
-    u32 value = reg(rd);
-    u32 operand = reg(rs);
+    u32& src = reg(rs);
+    u32& dst = reg(rd);
 
     switch (opcode)
     {
-    case 0b0000: value = AND(value, operand); break;
-    case 0b0001: value = EOR(value, operand); break;
-    case 0b0010: value = LSL(value, operand); break;
-    case 0b0011: value = LSR(value, operand); break;
-    case 0b0100: value = ASR(value, operand); break;
-    case 0b0101: value = ADC(value, operand); break;
-    case 0b0110: value = SBC(value, operand); break;
-    case 0b0111: value = ROR(value, operand); break;
-    case 0b1000: TST(value, operand); return;
-    case 0b1001: value = NEG(operand); break;
-    case 0b1010: CMP(value, operand); return;
-    case 0b1011: CMN(value, operand); return;
-    case 0b1100: value = ORR(value, operand); break;
-    case 0b1101: value = MUL(value, operand); break;
-    case 0b1110: value = BIC(value, operand); break;
-    case 0b1111: value = MVN(operand); break;
+    case 0b0000: dst = AND(dst, src); break;
+    case 0b0001: dst = EOR(dst, src); break;
+    case 0b0010: dst = LSL(dst, src); break;
+    case 0b0011: dst = LSR(dst, src); break;
+    case 0b0100: dst = ASR(dst, src); break;
+    case 0b0101: dst = ADC(dst, src); break;
+    case 0b0110: dst = SBC(dst, src); break;
+    case 0b0111: dst = ROR(dst, src); break;
+    case 0b1000:       TST(dst, src); break;
+    case 0b1001: dst = NEG(     src); break;
+    case 0b1010:       CMP(dst, src); break;
+    case 0b1011:       CMN(dst, src); break;
+    case 0b1100: dst = ORR(dst, src); break;
+    case 0b1101: dst = MUL(dst, src); break;
+    case 0b1110: dst = BIC(dst, src); break;
+    case 0b1111: dst = MVN(     src); break;
     }
-
-    reg(rd) = value;
 }
 
 // THUMB 5
