@@ -40,7 +40,7 @@ u32 ARM::LSR(u32 value, u8 offset, bool flags)
 
         value >>= offset;
     }
-    // Special case LSR #0
+    // Special case LSR #0 / #32
     else
     {
         // Store the MSB in the carry
@@ -76,7 +76,7 @@ u32 ARM::ASR(u32 value, u8 offset, bool flags)
             value |= msb;
         }
     }
-    // Special case ASR #0
+    // Special case ASR #0 / #32
     else
     {
         // Store the MSB in the carry
