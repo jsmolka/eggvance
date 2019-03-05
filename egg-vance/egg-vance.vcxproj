@@ -165,6 +165,7 @@
   <ItemGroup>
     <ClInclude Include="src\arm\enums.h" />
     <ClInclude Include="src\arm\registers.h" />
+    <ClInclude Include="src\common\utility.h" />
     <ClInclude Include="src\mmu\registers.h" />
     <ClInclude Include="src\common\log.h" />
     <ClInclude Include="src\common\internal.h" />

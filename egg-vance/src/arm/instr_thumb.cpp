@@ -1,6 +1,7 @@
 #include "arm.h"
 
 #include "common/log.h"
+#include "common/utility.h"
 
 // THUMB 1
 void ARM::moveShiftedRegister(u16 instr)
@@ -328,16 +329,7 @@ void ARM::conditionalBranch(u16 instr)
 
     if (checkBranchCondition(cond))
     {
-        s16 signed_offset = offset;
-
-        // Convert two's complement
-        if (offset & 1 << 7)
-        {
-            offset = ~offset;
-            offset++;
-
-            signed_offset = -1 * offset;
-        }
+        s16 signed_offset = twos<7>(offset);
 
         // Offset needs to be 9-bit with bit 0 set to 0
         signed_offset <<= 1;
@@ -358,18 +350,7 @@ void ARM::unconditionalBranch(u16 instr)
 {
     u16 offset = instr & 0x7FF;
 
-    s16 signed_offset = offset;
-
-    // Convert two's complement
-    if (offset & 1 << 10)
-    {
-        offset = ~offset;
-        // Work with the 11-bit offset
-        offset &= 0x7FF;
-        offset++;
-
-        signed_offset = -1 * offset;
-    }
+    s16 signed_offset = twos<10>(offset);
 
     // Offset needs to be 9-bit with bit 0 set to 0
     signed_offset <<= 1;
@@ -381,5 +362,29 @@ void ARM::unconditionalBranch(u16 instr)
 // THUMB 19
 void ARM::longBranchLink(u16 instr)
 {
+    // Low / high flag
+    u8 h = instr >> 11 & 0x1;
+    u16 offset = instr & 0x7FF;
 
+    // Instruction 1
+    if (!h)
+    {
+        s32 signed_offset = twos<10>(offset);
+
+        // Shift offset by 12 bits
+        signed_offset <<= 12;
+
+        reg(14) = regs.r15 + signed_offset;
+    }
+    else  // Instruction 2
+    {
+        u32 next = regs.r15 - 2 | 1;
+
+        regs.r15 = reg(14) + (offset << 1);
+        regs.r15 &= ~0x1;
+
+        reg(14) = next;
+
+        needs_flush = true;
+    }
 }
