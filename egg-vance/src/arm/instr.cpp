@@ -107,7 +107,7 @@ u32 ARM::ROR(u32 value, u8 offset, bool flags)
         {
             carry = value & 0x1;
             value >>= 1;
-            value |= (carry << 31);
+            value |= carry << 31;
         }
     }
     // Special case ROR #0 (RRX)
@@ -172,7 +172,7 @@ u32 ARM::ADC(u32 value, u32 operand, bool flags)
 // Subtract with carry
 u32 ARM::SBC(u32 value, u32 operand, bool flags)
 {
-    return SUB(value, operand - 1 + flagC(), flags);
+    return SUB(value, operand + (flagC() ? 0 : 1), flags);
 }
 
 // Multiply
@@ -249,17 +249,7 @@ u32 ARM::BIC(u32 value, u32 operand, bool flags)
 // Negative
 u32 ARM::NEG(u32 operand, bool flags)
 {
-    u32 result = (0 - operand);
-
-    if (flags)
-    {
-        updateFlagZ(result);
-        updateFlagN(result);
-        updateFlagC(0, operand, false);
-        updateFlagV(0, operand, false);
-    }
-
-    return result;
+    return SUB(0, operand, flags);
 }
 
 // Move

@@ -11,7 +11,7 @@ void ARM::reset()
 {
     regs = {};
 
-    regs.r13 = 0x03007F00;
+    regs.r13     = 0x03007F00;
     regs.r13_fiq = 0x03007F00;
     regs.r13_abt = 0x03007F00;
     regs.r13_und = 0x03007F00;
@@ -56,16 +56,16 @@ u32& ARM::reg(u8 number)
 
     switch (number)
     {
-    case 0: return regs.r0;
-    case 1: return regs.r1;
-    case 2: return regs.r2;
-    case 3: return regs.r3;
-    case 4: return regs.r4;
-    case 5: return regs.r5;
-    case 6: return regs.r6;
-    case 7: return regs.r7;
-    case 8: return mode == MODE_FIQ ? regs.r8_fiq : regs.r8;
-    case 9: return mode == MODE_FIQ ? regs.r9_fiq : regs.r9;
+    case 0:  return regs.r0;
+    case 1:  return regs.r1;
+    case 2:  return regs.r2;
+    case 3:  return regs.r3;
+    case 4:  return regs.r4;
+    case 5:  return regs.r5;
+    case 6:  return regs.r6;
+    case 7:  return regs.r7;
+    case 8:  return mode == MODE_FIQ ? regs.r8_fiq  : regs.r8;
+    case 9:  return mode == MODE_FIQ ? regs.r9_fiq  : regs.r9;
     case 10: return mode == MODE_FIQ ? regs.r10_fiq : regs.r10;
     case 11: return mode == MODE_FIQ ? regs.r11_fiq : regs.r11;
     case 12: return mode == MODE_FIQ ? regs.r12_fiq : regs.r12;
@@ -122,12 +122,27 @@ u32& ARM::spsr(u8 number)
     return dummy;
 }
 
+u32& ARM::sp()
+{
+    return reg(13);
+}
+
+u32& ARM::lr()
+{
+    return reg(14);
+}
+
+u32& ARM::pc()
+{
+    return regs.r15;
+}
+
 void ARM::fetch()
 {
     if (isArm())
-        pipe[0].instr = mmu->readWord(regs.r15);
+        pipe[0].instr = mmu->readWord(pc());
     else
-        pipe[0].instr = mmu->readHalf(regs.r15);
+        pipe[0].instr = mmu->readHalf(pc());
 
     pipe[0].decoded = UNDEFINED;
 }
@@ -349,81 +364,25 @@ void ARM::execute()
 
         switch (pipe[2].decoded)
         {
-        case THUMB_1:
-            moveShiftedRegister(instr);
-            break;
-
-        case THUMB_2:
-            addSubImmediate(instr);
-            break;
-
-        case THUMB_3:
-            moveCmpAddSubImmediate(instr);
-            break;
-
-        case THUMB_4:
-            aluOperations(instr);
-            break;
-
-        case THUMB_5:
-            highRegisterBranchExchange(instr);
-            break;
-
-        case THUMB_6:
-            loadPcRelative(instr);
-            break;
-
-        case THUMB_7:
-            loadStoreRegisterOffset(instr);
-            break;
-
-        case THUMB_8:
-            loadStoreSignExtended(instr);
-            break;
-
-        case THUMB_9:
-            loadStoreImmediateOffset(instr);
-            break;
-
-        case THUMB_10:
-            loadStoreHalfword(instr);
-            break;
-
-        case THUMB_11:
-            loadStoreSpRelative(instr);
-            break;
-
-        case THUMB_12:
-            loadAddress(instr);
-            break;
-
-        case THUMB_13:
-            addOffsetSp(instr);
-            break;
-
-        case THUMB_14:
-            pushPopRegisters(instr);
-            break;
-
-        case THUMB_15:
-            multipleLoadStore(instr);
-            break;
-
-        case THUMB_16:
-            conditionalBranch(instr);
-            break;
-
-        case THUMB_17:
-            softwareInterruptThumb(instr);
-            break;
-
-        case THUMB_18:
-            unconditionalBranch(instr);
-            break;
-
-        case THUMB_19:
-            longBranchLink(instr);
-            break;
+        case THUMB_1:  moveShiftedRegister(instr);        break;
+        case THUMB_2:  addSubImmediate(instr);            break;
+        case THUMB_3:  moveCmpAddSubImmediate(instr);     break;
+        case THUMB_4:  aluOperations(instr);              break;
+        case THUMB_5:  highRegisterBranchExchange(instr); break;
+        case THUMB_6:  loadPcRelative(instr);             break;
+        case THUMB_7:  loadStoreRegisterOffset(instr);    break;
+        case THUMB_8:  loadStoreSignExtended(instr);      break;
+        case THUMB_9:  loadStoreImmediateOffset(instr);   break;
+        case THUMB_10: loadStoreHalfword(instr);          break;
+        case THUMB_11: loadStoreSpRelative(instr);        break;
+        case THUMB_12: loadAddress(instr);                break;
+        case THUMB_13: addOffsetSp(instr);                break;
+        case THUMB_14: pushPopRegisters(instr);           break;
+        case THUMB_15: multipleLoadStore(instr);          break;
+        case THUMB_16: conditionalBranch(instr);          break;
+        case THUMB_17: softwareInterruptThumb(instr);     break;
+        case THUMB_18: unconditionalBranch(instr);        break;
+        case THUMB_19: longBranchLink(instr);             break;
 
         default:
             log() << "Tried executing unknown THUMB instruction " << (int)pipe[2].decoded;
@@ -513,14 +472,14 @@ void ARM::setFlagV(bool set)
         regs.cpsr &= ~CPSR_V;
 }
 
-void ARM::updateFlagZ(u32 res)
+void ARM::updateFlagZ(u32 value)
 {
-    setFlagZ(res == 0);
+    setFlagZ(value == 0);
 }
 
-void ARM::updateFlagN(u32 res)
+void ARM::updateFlagN(u32 value)
 {
-    setFlagN(res >> 31);
+    setFlagN(value >> 31);
 }
 
 void ARM::updateFlagC(u8 carry)

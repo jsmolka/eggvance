@@ -24,6 +24,9 @@ private:
 
     u32& reg(u8 number);
     u32& spsr(u8 number);
+    u32& sp();
+    u32& lr();
+    u32& pc();
 
     void fetch();
     void decode();
@@ -55,8 +58,8 @@ private:
     void setFlagC(bool set);
     void setFlagV(bool set);
 
-    void updateFlagZ(u32 result);
-    void updateFlagN(u32 result);
+    void updateFlagZ(u32 value);
+    void updateFlagN(u32 value);
     void updateFlagC(u8 carry);
     void updateFlagC(u32 value, u32 operand, bool addition);
     void updateFlagV(u32 value, u32 operand, bool addition);

@@ -84,7 +84,19 @@ void ARM::aluOperations(u16 instr)
     case 0b0100: dst = ASR(dst, src); break;
     case 0b0101: dst = ADC(dst, src); break;
     case 0b0110: dst = SBC(dst, src); break;
-    case 0b0111: dst = ROR(dst, src); break;
+    case 0b0111:
+        if (src != 0)
+        {
+            dst = ROR(dst, src); break;
+        }
+        else
+        {
+            // Using ROR #0 here only sets Z, N and does not change the dst
+            updateFlagZ(dst);
+            updateFlagN(dst);
+        }
+        break;
+
     case 0b1000:       TST(dst, src); break;
     case 0b1001: dst = NEG(     src); break;
     case 0b1010:       CMP(dst, src); break;
@@ -111,18 +123,16 @@ void ARM::highRegisterBranchExchange(u16 instr)
     rs |= (hs << 3);
     rd |= (hd << 3);
 
-    u32 value = reg(rd);
-    u32 operand = reg(rs);
+    u32& dst = reg(rd);
+    u32& src = reg(rs);
 
     switch (opcode)
     {
-    case 0b00: value = ADD(value, operand, false); break;
-    case 0b01: CMP(value, operand); return;
-    case 0b10: value = MOV(operand, false); break;
-    case 0b11: BX(operand); break;
+    case 0b00: dst = ADD(dst, src, false); break;
+    case 0b01:       CMP(dst, src       ); break;
+    case 0b10: dst = MOV(     src, false); break;
+    case 0b11:       BX (     src       ); break;
     }
-
-    reg(rd) = value;
 }
 
 // THUMB 6
@@ -134,9 +144,9 @@ void ARM::loadPcRelative(u16 instr)
     // Offset is a 10-bit address
     offset <<= 2;
 
-    u32 pc = regs.r15;
+    u32 pc = this->pc();
     // Bit 1 is forced to 0
-    pc &= ~(1 << 1);
+    pc &= ~0x2;
 
     reg(rd) = LDRW(pc + offset);
 }
@@ -154,12 +164,14 @@ void ARM::loadStoreRegisterOffset(u16 instr)
 
     u32 addr = reg(rb) + reg(ro);
 
+    u32& dst = reg(rd);
+
     switch (l << 1 | b)
     {
-    case 0b00: STRW(addr, reg(rd)); break;
-    case 0b01: STRB(addr, reg(rd)); break;
-    case 0b10: reg(rd) = LDRW(addr); break;
-    case 0b11: reg(rd) = LDRB(addr); break;
+    case 0b00:       STRW(addr, dst); break;
+    case 0b01:       STRB(addr, dst); break;
+    case 0b10: dst = LDRW(addr     ); break;
+    case 0b11: dst = LDRB(addr     ); break;
     }
 }
 
@@ -176,12 +188,14 @@ void ARM::loadStoreSignExtended(u16 instr)
 
     u32 addr = reg(rb) + reg(ro);
 
+    u32& dst = reg(rd);
+
     switch (s << 1 | h)
     {
-    case 0b00: STRH(addr, reg(rd)); break;
-    case 0b01: reg(rd) = LDRH(addr); break;
-    case 0b10: reg(rd) = LDSB(addr); break;
-    case 0b11: reg(rd) = LDSB(addr); break;
+    case 0b00:       STRH(addr, dst); break;
+    case 0b01: dst = LDRH(addr     ); break;
+    case 0b10: dst = LDSB(addr     ); break;
+    case 0b11: dst = LDSB(addr     ); break;
     }
 }
 
@@ -202,12 +216,14 @@ void ARM::loadStoreImmediateOffset(u16 instr)
 
     u32 addr = reg(rb) + offset;
 
+    u32& dst = reg(rd);
+
     switch (l << 1 | b)
     {
-    case 0b00: STRW(addr, reg(rd)); break;
-    case 0b01: STRB(addr, reg(rd)); break;
-    case 0b10: reg(rd) = LDRW(addr); break;
-    case 0b11: reg(rd) = LDRB(addr); break;
+    case 0b00:       STRW(addr, dst); break;
+    case 0b01:       STRB(addr, dst); break;
+    case 0b10: dst = LDRW(addr     ); break;
+    case 0b11: dst = LDRB(addr     ); break;
     }
 }
 
@@ -222,10 +238,12 @@ void ARM::loadStoreHalfword(u16 instr)
 
     u32 addr = reg(rb) + offset;
 
+    u32& dst = reg(rd);
+
     switch (l)
     {
-    case 0b0: STRH(addr, reg(rd)); break;
-    case 0b1: reg(rd) = LDRH(addr); break;
+    case 0b0:       STRH(addr, dst); break;
+    case 0b1: dst = LDRH(addr     ); break;
     }
 }
 
@@ -241,12 +259,14 @@ void ARM::loadStoreSpRelative(u16 instr)
     offset <<= 2;
 
     // Add unsigned offset to SP
-    u32 addr = reg(13) + offset;
+    u32 addr = sp() + offset;
+
+    u32& dst = reg(rd);
 
     switch (l)
     {
-    case 0b0: STRW(addr, reg(rd)); break;
-    case 0b1: reg(rd) = LDRW(addr); break;
+    case 0b0:       STRW(addr, dst); break;
+    case 0b1: dst = LDRW(addr     ); break;
     }
 }
 
@@ -261,16 +281,14 @@ void ARM::loadAddress(u16 instr)
     // Offset is a 10 bit constant
     offset <<= 2;
 
-    u32 value = 0;
+    u32& dst = reg(rd);
 
     switch (sp)
     {
     // Bit 1 of the PC is read as 0
-    case 0b0: value += regs.r15 & ~(1 << 1); break;
-    case 0b1: value += reg(13); break;
+    case 0b0: dst = offset + (this->pc() & ~0x2); break;
+    case 0b1: dst = offset + this->sp();          break;
     }
-
-    reg(rd) = value + offset;
 }
 
 // THUMB 13
@@ -285,8 +303,8 @@ void ARM::addOffsetSp(u16 instr)
     
     switch (s)
     {
-    case 0b0: reg(13) += offset; break;
-    case 0b1: reg(13) -= offset; break;
+    case 0b0: sp() += offset; break;
+    case 0b1: sp() -= offset; break;
     }
 }
 
@@ -302,7 +320,7 @@ void ARM::pushPopRegisters(u16 instr)
     switch (l)
     {
     case 0b0: PUSH(rlist, r); break;
-    case 0b1: POP(rlist, r); break;
+    case 0b1: POP (rlist, r); break;
     }
 }
 
@@ -314,10 +332,12 @@ void ARM::multipleLoadStore(u16 instr)
     u8 rb = instr >> 8 & 0x7;
     u8 rlist = instr & 0xFF;
 
+    u32& base = reg(rb);
+
     switch (l)
     {
-    case 0b0: reg(rb) = STMIA(reg(rb), rlist); break;
-    case 0b1: reg(rb) = LDMIA(reg(rb), rlist); break;
+    case 0b0: base = STMIA(base, rlist); break;
+    case 0b1: base = LDMIA(base, rlist); break;
     }
 }
 
@@ -334,7 +354,7 @@ void ARM::conditionalBranch(u16 instr)
         // Offset needs to be 9-bit with bit 0 set to 0
         signed_offset <<= 1;
 
-        regs.r15 += signed_offset;
+        pc() += signed_offset;
         needs_flush = true;
     }
 }
@@ -355,7 +375,7 @@ void ARM::unconditionalBranch(u16 instr)
     // Offset needs to be 9-bit with bit 0 set to 0
     signed_offset <<= 1;
 
-    regs.r15 += signed_offset;
+    pc() += signed_offset;
     needs_flush = true;
 }
 
@@ -366,6 +386,9 @@ void ARM::longBranchLink(u16 instr)
     u8 h = instr >> 11 & 0x1;
     u16 offset = instr & 0x7FF;
 
+    u32& pc = this->pc();
+    u32& lr = this->lr();
+
     // Instruction 1
     if (!h)
     {
@@ -374,16 +397,16 @@ void ARM::longBranchLink(u16 instr)
         // Shift offset by 12 bits
         signed_offset <<= 12;
 
-        reg(14) = regs.r15 + signed_offset;
+        lr = pc + signed_offset;
     }
     else  // Instruction 2
     {
-        u32 next = regs.r15 - 2 | 1;
+        u32 next = pc - 2 | 1;
 
-        regs.r15 = reg(14) + (offset << 1);
-        regs.r15 &= ~0x1;
+        pc = lr + (offset << 1);
+        pc &= ~0x1;
 
-        reg(14) = next;
+        lr = next;
 
         needs_flush = true;
     }
