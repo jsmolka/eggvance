@@ -2,9 +2,8 @@
 
 #include "common/integer.h"
 
-class Registers
+struct Registers
 {
-public:
     // General Purpose Registers
     u32 r0;
     u32 r1;

@@ -157,12 +157,14 @@ void ARM::loadStoreRegisterOffset(u16 instr)
     // Load / store flag
     u8 l = instr >> 11 & 0x1;
     // Byte / word flag
-    u8 b = instr >> 11 & 0x1;
+    u8 b = instr >> 10 & 0x1;
     u8 ro = instr >> 6 & 0x7;
     u8 rb = instr >> 3 & 0x7;
     u8 rd = instr & 0x7;
 
     u32 addr = reg(rb) + reg(ro);
+    
+    align16(addr);
 
     u32& dst = reg(rd);
 
@@ -188,6 +190,8 @@ void ARM::loadStoreSignExtended(u16 instr)
 
     u32 addr = reg(rb) + reg(ro);
 
+    align16(addr);
+
     u32& dst = reg(rd);
 
     switch (s << 1 | h)
@@ -195,7 +199,7 @@ void ARM::loadStoreSignExtended(u16 instr)
     case 0b00:       STRH(addr, dst); break;
     case 0b01: dst = LDRH(addr     ); break;
     case 0b10: dst = LDSB(addr     ); break;
-    case 0b11: dst = LDSB(addr     ); break;
+    case 0b11: dst = LDSH(addr     ); break;
     }
 }
 
@@ -349,7 +353,7 @@ void ARM::conditionalBranch(u16 instr)
 
     if (checkBranchCondition(cond))
     {
-        s16 signed_offset = twos<7>(offset);
+        s16 signed_offset = twos<8>(offset);
 
         // Offset needs to be 9-bit with bit 0 set to 0
         signed_offset <<= 1;
@@ -370,7 +374,7 @@ void ARM::unconditionalBranch(u16 instr)
 {
     u16 offset = instr & 0x7FF;
 
-    s16 signed_offset = twos<10>(offset);
+    s16 signed_offset = twos<11>(offset);
 
     // Offset needs to be 9-bit with bit 0 set to 0
     signed_offset <<= 1;
@@ -392,7 +396,7 @@ void ARM::longBranchLink(u16 instr)
     // Instruction 1
     if (!h)
     {
-        s32 signed_offset = twos<10>(offset);
+        s32 signed_offset = twos<11>(offset);
 
         // Shift offset by 12 bits
         signed_offset <<= 12;
