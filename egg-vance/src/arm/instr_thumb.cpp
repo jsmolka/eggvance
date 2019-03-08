@@ -1,3 +1,7 @@
+// Todo
+// ldrx / strx with odd offset behaves weirdly
+// Test for BX
+
 #include "arm.h"
 
 #include "common/log.h"
@@ -299,12 +303,12 @@ void ARM::loadAddress(u16 instr)
 void ARM::addOffsetSp(u16 instr)
 {
     // Sign flag
-    u8 s = instr >> 7;
-    u16 offset = instr & 0xFF;
+    u8 s = instr >> 7 & 0x1;
+    u16 offset = instr & 0x3F;
 
     // Offset is a 10 bit constant
     offset <<= 2;
-    
+
     switch (s)
     {
     case 0b0: sp() += offset; break;

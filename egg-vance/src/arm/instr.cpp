@@ -337,7 +337,7 @@ u32 ARM::LDSH(u32 addr)
 {
     u32 half = mmu->readHalf(addr);
 
-    // Extend with bit 15
+    // Extend with bit 16
     if (half & (1 << 15))
         half |= 0xFFFF0000;
 
@@ -349,7 +349,7 @@ u32 ARM::LDSB(u32 addr)
 {
     u32 byte = mmu->readByte(addr);
 
-    // Extend with bit 7
+    // Extend with bit 8
     if (byte & (1 << 7))
         byte |= 0xFFFFFF00;
 
@@ -363,7 +363,7 @@ u32 ARM::STMIA(u32 addr, u8 rlist)
     {
         if (rlist & 0x1)
         {
-            reg(x) = mmu->readWord(addr);
+            mmu->writeWord(addr, reg(x));
             addr += 4;
         }
         rlist >>= 1;
@@ -378,7 +378,7 @@ u32 ARM::LDMIA(u32 addr, u8 rlist)
     {
         if (rlist & 0x1)
         {
-            mmu->writeWord(addr, reg(x));
+            reg(x) = mmu->readWord(addr);
             addr += 4;
         }
         rlist >>= 1;
