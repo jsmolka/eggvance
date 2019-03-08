@@ -335,21 +335,25 @@ u8 ARM::LDRB(u32 addr)
 // Load sign extended half
 u32 ARM::LDSH(u32 addr)
 {
-    u16 half = mmu->readHalf(addr);
-    // Extend with bit 15
-    u16 extension = (half >> 15) ? 0xFFFF : 0;
+    u32 half = mmu->readHalf(addr);
 
-    return extension << 16 | half;
+    // Extend with bit 15
+    if (half & (1 << 15))
+        half |= 0xFFFF0000;
+
+    return half;
 }
 
 // Load sign extended byte
 u32 ARM::LDSB(u32 addr)
 {
-    u8 byte = mmu->readByte(addr);
-    // Extend with bit 7
-    u32 extension = (byte >> 7) ? 0xFFFFFF : 0;
+    u32 byte = mmu->readByte(addr);
 
-    return extension << 24 | byte;
+    // Extend with bit 7
+    if (byte & (1 << 7))
+        byte |= 0xFFFFFF00;
+
+    return byte;
 }
 
 // Store multiple, increment after

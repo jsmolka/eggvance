@@ -186,7 +186,7 @@ void ARM::loadStoreSignExtended(u16 instr)
     u8 s = instr >> 10 & 0x1;
     u8 ro = instr >> 6 & 0x7;
     u8 rb = instr >> 3 & 0x7;
-    u8 rd = instr >> 0x7;
+    u8 rd = instr & 0x7;
 
     u32 addr = reg(rb) + reg(ro);
 
