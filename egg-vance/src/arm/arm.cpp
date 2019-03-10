@@ -2,29 +2,9 @@
 
 #include "common/log.h"
 
-ARM::ARM()
-{
-
-}
-
 void ARM::reset()
 {
-    regs = {};
-
-    regs.r13     = 0x03007F00;
-    regs.r13_fiq = 0x03007F00;
-    regs.r13_abt = 0x03007F00;
-    regs.r13_und = 0x03007F00;
-    regs.r13_svc = 0x03007FE0;
-    regs.r13_irq = 0x03007FA0;
-
-    regs.r15 = 0x8000000;
-
-    regs.cpsr = 0x5F;
-
-    // For test ROM
-    regs.cpsr |= CPSR_T;
-    regs.r15 = 0x080000C8;
+    regs.reset();
 
     flushPipe();
 
@@ -50,99 +30,12 @@ void ARM::step()
     }
 }
 
-u32& ARM::reg(u8 number)
-{
-    Mode mode = currentMode();
-
-    switch (number)
-    {
-    case 0:  return regs.r0;
-    case 1:  return regs.r1;
-    case 2:  return regs.r2;
-    case 3:  return regs.r3;
-    case 4:  return regs.r4;
-    case 5:  return regs.r5;
-    case 6:  return regs.r6;
-    case 7:  return regs.r7;
-    case 8:  return mode == MODE_FIQ ? regs.r8_fiq  : regs.r8;
-    case 9:  return mode == MODE_FIQ ? regs.r9_fiq  : regs.r9;
-    case 10: return mode == MODE_FIQ ? regs.r10_fiq : regs.r10;
-    case 11: return mode == MODE_FIQ ? regs.r11_fiq : regs.r11;
-    case 12: return mode == MODE_FIQ ? regs.r12_fiq : regs.r12;
-
-    case 13:
-        switch (mode)
-        {
-        case MODE_USR:
-        case MODE_SYS: return regs.r13;
-        case MODE_FIQ: return regs.r13_fiq;
-        case MODE_SVC: return regs.r13_svc;
-        case MODE_ABT: return regs.r13_abt;
-        case MODE_IRQ: return regs.r13_irq;
-        case MODE_UND: return regs.r13_und;
-        }
-
-    case 14:
-        switch (mode)
-        {
-        case MODE_USR:
-        case MODE_SYS: return regs.r14;
-        case MODE_FIQ: return regs.r14_fiq;
-        case MODE_SVC: return regs.r14_svc;
-        case MODE_ABT: return regs.r14_abt;
-        case MODE_IRQ: return regs.r14_irq;
-        case MODE_UND: return regs.r14_und;
-        }
-
-    case 15: return regs.r15;
-
-    default:
-        log() << "Tried accessing invalid register " << (int)number;
-    }
-
-    static u32 dummy = 0;
-    return dummy;
-}
-
-u32& ARM::spsr(u8 number)
-{
-    switch (currentMode())
-    {
-    case MODE_FIQ: return regs.spsr_fiq;
-    case MODE_SVC: return regs.spsr_svc;
-    case MODE_ABT: return regs.spsr_abt;
-    case MODE_IRQ: return regs.spsr_fiq;
-    case MODE_UND: return regs.spsr_und;
-
-    default:
-        log() << "Tried accessing invalid spsr " << (int)number;
-    }
-
-    static u32 dummy = 0;
-    return dummy;
-}
-
-u32& ARM::sp()
-{
-    return reg(13);
-}
-
-u32& ARM::lr()
-{
-    return reg(14);
-}
-
-u32& ARM::pc()
-{
-    return regs.r15;
-}
-
 void ARM::fetch()
 {
-    if (isArm())
-        pipe[0].instr = mmu->readWord(pc());
+    if (!regs.isThumb())
+        pipe[0].instr = mmu->readWord(regs.pc);
     else
-        pipe[0].instr = mmu->readHalf(pc());
+        pipe[0].instr = mmu->readHalf(regs.pc);
 
     pipe[0].decoded = UNDEFINED;
 }
@@ -152,7 +45,7 @@ void ARM::decode()
     if (pipe[1].decoded == REFILL_PIPE)
         return;
     
-    if (isArm())
+    if (!regs.isThumb())
     {
         u32 instr = pipe[1].instr;
 
@@ -333,7 +226,7 @@ void ARM::execute()
     if (pipe[2].decoded == REFILL_PIPE)
         return; 
 
-    if (isArm())
+    if (!regs.isThumb())
     {
         u32 instr = pipe[2].instr;
 
@@ -395,7 +288,7 @@ void ARM::advance()
     pipe[2] = pipe[1];
     pipe[1] = pipe[0];
 
-    regs.r15 += isThumb() ? 2 : 4;
+    regs.pc += regs.isThumb() ? 2 : 4;
 }
 
 void ARM::flushPipe()
@@ -405,89 +298,22 @@ void ARM::flushPipe()
     pipe[2] = { 0, REFILL_PIPE };
 }
 
-Mode ARM::currentMode() const
+void ARM::updateZ(u32 value)
 {
-    return static_cast<Mode>(regs.cpsr & CPSR_M);
+    regs.setZ(value == 0);
 }
 
-bool ARM::isArm() const
+void ARM::updateN(u32 value)
 {
-    return !isThumb();
+    regs.setN(value >> 31);
 }
 
-bool ARM::isThumb() const
+void ARM::updateC(u8 carry)
 {
-    return regs.cpsr & CPSR_T;
+    regs.setC(carry == 1);
 }
 
-u8 ARM::flagZ() const
-{
-    return (regs.cpsr & CPSR_Z) ? 1 : 0;
-}
-
-u8 ARM::flagN() const
-{
-    return (regs.cpsr & CPSR_N) ? 1 : 0;
-}
-
-u8 ARM::flagC() const
-{
-    return (regs.cpsr & CPSR_C) ? 1 : 0;
-}
-
-u8 ARM::flagV() const
-{
-    return (regs.cpsr & CPSR_V) ? 1 : 0;
-}
-
-void ARM::setFlagZ(bool set)
-{
-    if (set)
-        regs.cpsr |= CPSR_Z;
-    else
-        regs.cpsr &= ~CPSR_Z;
-}
-
-void ARM::setFlagN(bool set)
-{
-    if (set)
-        regs.cpsr |= CPSR_N;
-    else
-        regs.cpsr &= ~CPSR_N;
-}
-
-void ARM::setFlagC(bool set)
-{
-    if (set)
-        regs.cpsr |= CPSR_C;
-    else
-        regs.cpsr &= ~CPSR_C;
-}
-
-void ARM::setFlagV(bool set)
-{
-    if (set)
-        regs.cpsr |= CPSR_V;
-    else
-        regs.cpsr &= ~CPSR_V;
-}
-
-void ARM::updateFlagZ(u32 value)
-{
-    setFlagZ(value == 0);
-}
-
-void ARM::updateFlagN(u32 value)
-{
-    setFlagN(value >> 31);
-}
-
-void ARM::updateFlagC(u8 carry)
-{
-    setFlagC(carry == 1);
-}
-
-void ARM::updateFlagC(u32 value, u32 operand, bool addition)
+void ARM::updateC(u32 value, u32 operand, bool addition)
 {
     bool carry;
 
@@ -496,10 +322,10 @@ void ARM::updateFlagC(u32 value, u32 operand, bool addition)
     else
         carry = operand <= value;
 
-    setFlagC(carry);
+    regs.setC(carry);
 }
 
-void ARM::updateFlagV(u32 value, u32 operand, bool addition)
+void ARM::updateV(u32 value, u32 operand, bool addition)
 {
     u8 msb_input = value >> 31;
     u8 msb_operand = operand >> 31;
@@ -519,7 +345,7 @@ void ARM::updateFlagV(u32 value, u32 operand, bool addition)
             overflow = msb_result == msb_operand;
     }
 
-    setFlagV(overflow);
+    regs.setV(overflow);
 }
 
 bool ARM::checkCondition(Condition cond) const
@@ -527,10 +353,10 @@ bool ARM::checkCondition(Condition cond) const
     if (cond == COND_AL)
         return true;
 
-    u8 z = flagZ();
-    u8 n = flagN();
-    u8 c = flagC();
-    u8 v = flagV();
+    u8 z = regs.z();
+    u8 n = regs.n();
+    u8 c = regs.c();
+    u8 v = regs.v();
 
     switch (cond)
     {

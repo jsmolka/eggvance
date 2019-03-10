@@ -14,7 +14,7 @@ void ARM::branchExchange(u32 instr)
         return;
     }
 
-    u32 operand = reg(rn);
+    u32 operand = regs.regs[rn];
 
     // Exchange instruction set
     if (operand & 0x1)
@@ -25,7 +25,7 @@ void ARM::branchExchange(u32 instr)
         operand &= ~0b1;
     }
 
-    regs.r15 = operand;
+    regs.pc = operand;
     needs_flush = true;
 }
 
@@ -56,9 +56,9 @@ void ARM::branchLink(u32 instr)
     if (l)
     {
         // Save old PC in link register
-        reg(14) = regs.r15 - 4;
+        regs.lr = regs.pc - 4;
     }
 
-    regs.r15 += signed_offset;
+    regs.pc += signed_offset;
     needs_flush = true;
 }

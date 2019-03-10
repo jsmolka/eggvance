@@ -45,15 +45,15 @@
     <ClCompile Include="src\ppu\render_text.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\arm\registerbank.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\common\log.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\common\internal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\common\integer.h">
@@ -74,13 +74,13 @@
     <ClInclude Include="src\common\memory_map.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\arm\registers.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\arm\enums.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\common\utility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\arm\registerbank.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -15,8 +15,8 @@ void ARM::moveShiftedRegister(u16 instr)
     u8 rs = instr >> 3 & 0x7;
     u8 rd = instr & 0x7;
 
-    u32& src = reg(rs);
-    u32& dst = reg(rd);
+    u32& src = regs.regs[rs];
+    u32& dst = regs.regs[rd];
 
     switch (opcode)
     {
@@ -39,10 +39,10 @@ void ARM::addSubImmediate(u16 instr)
     u8 rs = instr >> 3 & 0x7;
     u8 rd = instr & 0x7;
 
-    u32& src = reg(rs);
-    u32& dst = reg(rd);
+    u32& src = regs.regs[rs];
+    u32& dst = regs.regs[rd];
 
-    u32 operand = i ? offset : reg(offset);
+    u32 operand = i ? offset : regs.regs[offset];
     
     switch (opcode)
     {
@@ -58,7 +58,7 @@ void ARM::moveCmpAddSubImmediate(u16 instr)
     u8 rd = instr >> 8 & 0x7;
     u8 offset = instr & 0xFF;
 
-    u32& dst = reg(rd);
+    u32& dst = regs.regs[rd];
 
     switch (opcode)
     {
@@ -76,8 +76,8 @@ void ARM::aluOperations(u16 instr)
     u8 rs = instr >> 3 & 0x7;
     u8 rd = instr & 0x7;
 
-    u32& src = reg(rs);
-    u32& dst = reg(rd);
+    u32& src = regs.regs[rs];
+    u32& dst = regs.regs[rd];
 
     switch (opcode)
     {
@@ -96,8 +96,8 @@ void ARM::aluOperations(u16 instr)
         else
         {
             // Using ROR #0 here only sets Z, N and does not change the dst
-            updateFlagZ(dst);
-            updateFlagN(dst);
+            updateZ(dst);
+            updateN(dst);
         }
         break;
 
@@ -127,8 +127,8 @@ void ARM::highRegisterBranchExchange(u16 instr)
     rs |= (hs << 3);
     rd |= (hd << 3);
 
-    u32& dst = reg(rd);
-    u32& src = reg(rs);
+    u32& dst = regs.regs[rd];
+    u32& src = regs.regs[rs];
 
     switch (opcode)
     {
@@ -148,11 +148,11 @@ void ARM::loadPcRelative(u16 instr)
     // Offset is a 10-bit address
     offset <<= 2;
 
-    u32 pc = this->pc();
+    u32 addr = regs.pc;
     // Bit 1 is forced to 0
-    pc &= ~0x2;
+    addr &= ~0x2;
 
-    reg(rd) = LDRW(pc + offset);
+    regs.regs[rd] = LDRW(addr + offset);
 }
 
 // THUMB 7
@@ -166,11 +166,11 @@ void ARM::loadStoreRegisterOffset(u16 instr)
     u8 rb = instr >> 3 & 0x7;
     u8 rd = instr & 0x7;
 
-    u32 addr = reg(rb) + reg(ro);
+    u32 addr = regs.regs[rb] + regs.regs[ro];
     
     align16(addr);
 
-    u32& dst = reg(rd);
+    u32& dst = regs.regs[rd];
 
     switch (l << 1 | b)
     {
@@ -192,11 +192,11 @@ void ARM::loadStoreSignExtended(u16 instr)
     u8 rb = instr >> 3 & 0x7;
     u8 rd = instr & 0x7;
 
-    u32 addr = reg(rb) + reg(ro);
+    u32 addr = regs.regs[rb] + regs.regs[ro];
 
     align16(addr);
 
-    u32& dst = reg(rd);
+    u32& dst = regs.regs[rd];
 
     switch (s << 1 | h)
     {
@@ -222,9 +222,9 @@ void ARM::loadStoreImmediateOffset(u16 instr)
         // Word access uses a 7-bit offset
         offset <<= 2;
 
-    u32 addr = reg(rb) + offset;
+    u32 addr = regs.regs[rb] + offset;
 
-    u32& dst = reg(rd);
+    u32& dst = regs.regs[rd];
 
     switch (l << 1 | b)
     {
@@ -244,9 +244,9 @@ void ARM::loadStoreHalfword(u16 instr)
     u8 rb = instr >> 3 & 0x7;
     u8 rd = instr & 0x7;
 
-    u32 addr = reg(rb) + offset;
+    u32 addr = regs.regs[rb] + offset;
 
-    u32& dst = reg(rd);
+    u32& dst = regs.regs[rd];
 
     switch (l)
     {
@@ -267,9 +267,9 @@ void ARM::loadStoreSpRelative(u16 instr)
     offset <<= 2;
 
     // Add unsigned offset to SP
-    u32 addr = sp() + offset;
+    u32 addr = regs.sp + offset;
 
-    u32& dst = reg(rd);
+    u32& dst = regs.regs[rd];
 
     switch (l)
     {
@@ -289,13 +289,13 @@ void ARM::loadAddress(u16 instr)
     // Offset is a 10 bit constant
     offset <<= 2;
 
-    u32& dst = reg(rd);
+    u32& dst = regs.regs[rd];
 
     switch (sp)
     {
     // Bit 1 of the PC is read as 0
-    case 0b0: dst = offset + (this->pc() & ~0x2); break;
-    case 0b1: dst = offset + this->sp();          break;
+    case 0b0: dst = offset + (regs.pc & ~0x2); break;
+    case 0b1: dst = offset + regs.sp;          break;
     }
 }
 
@@ -311,8 +311,8 @@ void ARM::addOffsetSp(u16 instr)
 
     switch (s)
     {
-    case 0b0: sp() += offset; break;
-    case 0b1: sp() -= offset; break;
+    case 0b0: regs.sp += offset; break;
+    case 0b1: regs.sp -= offset; break;
     }
 }
 
@@ -340,7 +340,7 @@ void ARM::multipleLoadStore(u16 instr)
     u8 rb = instr >> 8 & 0x7;
     u8 rlist = instr & 0xFF;
 
-    u32& base = reg(rb);
+    u32& base = regs.regs[rb];
 
     switch (l)
     {
@@ -362,7 +362,7 @@ void ARM::conditionalBranch(u16 instr)
         // Offset needs to be 9-bit with bit 0 set to 0
         signed_offset <<= 1;
 
-        pc() += signed_offset;
+        regs.pc += signed_offset;
         needs_flush = true;
     }
 }
@@ -383,7 +383,7 @@ void ARM::unconditionalBranch(u16 instr)
     // Offset needs to be 9-bit with bit 0 set to 0
     signed_offset <<= 1;
 
-    pc() += signed_offset;
+    regs.pc += signed_offset;
     needs_flush = true;
 }
 
@@ -394,9 +394,6 @@ void ARM::longBranchLink(u16 instr)
     u8 h = instr >> 11 & 0x1;
     u16 offset = instr & 0x7FF;
 
-    u32& pc = this->pc();
-    u32& lr = this->lr();
-
     // Instruction 1
     if (!h)
     {
@@ -405,16 +402,16 @@ void ARM::longBranchLink(u16 instr)
         // Shift offset by 12 bits
         signed_offset <<= 12;
 
-        lr = pc + signed_offset;
+        regs.lr = regs.pc + signed_offset;
     }
     else  // Instruction 2
     {
-        u32 next = pc - 2 | 1;
+        u32 next = regs.pc - 2 | 1;
 
-        pc = lr + (offset << 1);
-        pc &= ~0x1;
+        regs.pc = regs.lr + (offset << 1);
+        regs.pc &= ~0x1;
 
-        lr = next;
+        regs.lr = next;
 
         needs_flush = true;
     }

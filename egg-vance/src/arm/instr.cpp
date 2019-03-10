@@ -15,14 +15,14 @@ u32 ARM::LSL(u32 value, u8 offset, bool flags)
     // Special case LSL #0
     else
     {
-        carry = flagC();
+        carry = regs.c();
     }
 
     if (flags)
     {
-        updateFlagZ(value);
-        updateFlagN(value);
-        updateFlagC(carry);
+        updateZ(value);
+        updateN(value);
+        updateC(carry);
     }
 
     return value;
@@ -51,9 +51,9 @@ u32 ARM::LSR(u32 value, u8 offset, bool flags)
 
     if (flags)
     {
-        updateFlagZ(value);
-        updateFlagN(value);
-        updateFlagC(carry);
+        updateZ(value);
+        updateN(value);
+        updateC(carry);
     }
 
     return value;
@@ -87,9 +87,9 @@ u32 ARM::ASR(u32 value, u8 offset, bool flags)
 
     if (flags)
     {
-        updateFlagZ(value);
-        updateFlagN(value);
-        updateFlagC(carry);
+        updateZ(value);
+        updateN(value);
+        updateC(carry);
     }
 
     return value;
@@ -118,14 +118,14 @@ u32 ARM::ROR(u32 value, u8 offset, bool flags)
         // Rotate by one
         value >>= 1;
         // Change MSB to current carry
-        value |= (flagC() << 31);
+        value |= (regs.c() << 31);
     }
 
     if (flags)
     {
-        updateFlagZ(value);
-        updateFlagN(value);
-        updateFlagC(carry);
+        updateZ(value);
+        updateN(value);
+        updateC(carry);
     }
 
     return value;
@@ -138,10 +138,10 @@ u32 ARM::ADD(u32 value, u32 operand, bool flags)
 
     if (flags)
     {
-        updateFlagZ(result);
-        updateFlagN(result);
-        updateFlagC(value, operand, true);
-        updateFlagV(value, operand, true);
+        updateZ(result);
+        updateN(result);
+        updateC(value, operand, true);
+        updateV(value, operand, true);
     }
 
     return result;
@@ -154,10 +154,10 @@ u32 ARM::SUB(u32 value, u32 operand, bool flags)
 
     if (flags)
     {
-        updateFlagZ(result);
-        updateFlagN(result);
-        updateFlagC(value, operand, false);
-        updateFlagV(value, operand, false);
+        updateZ(result);
+        updateN(result);
+        updateC(value, operand, false);
+        updateV(value, operand, false);
     }
 
     return result;
@@ -166,13 +166,13 @@ u32 ARM::SUB(u32 value, u32 operand, bool flags)
 // Add with carry
 u32 ARM::ADC(u32 value, u32 operand, bool flags)
 {
-    return ADD(value, operand + flagC(), flags);
+    return ADD(value, operand + regs.c(), flags);
 }
 
 // Subtract with carry
 u32 ARM::SBC(u32 value, u32 operand, bool flags)
 {
-    return SUB(value, operand + (flagC() ? 0 : 1), flags);
+    return SUB(value, operand + (regs.c() ? 0 : 1), flags);
 }
 
 // Multiply
@@ -182,8 +182,8 @@ u32 ARM::MUL(u32 value, u32 operand, bool flags)
 
     if (flags)
     {
-        updateFlagZ(value);
-        updateFlagN(value);
+        updateZ(value);
+        updateN(value);
     }
 
     return value;
@@ -196,8 +196,8 @@ u32 ARM::AND(u32 value, u32 operand, bool flags)
 
     if (flags)
     {
-        updateFlagZ(value);
-        updateFlagN(value);
+        updateZ(value);
+        updateN(value);
     }
 
     return value;
@@ -210,8 +210,8 @@ u32 ARM::ORR(u32 value, u32 operand, bool flags)
 
     if (flags)
     {
-        updateFlagZ(value);
-        updateFlagN(value);
+        updateZ(value);
+        updateN(value);
     }
 
     return value;
@@ -225,8 +225,8 @@ u32 ARM::EOR(u32 value, u32 operand, bool flags)
 
     if (flags)
     {
-        updateFlagZ(value);
-        updateFlagN(value);
+        updateZ(value);
+        updateN(value);
     }
 
     return value;
@@ -239,8 +239,8 @@ u32 ARM::BIC(u32 value, u32 operand, bool flags)
 
     if (flags)
     {
-        updateFlagZ(value);
-        updateFlagN(value);
+        updateZ(value);
+        updateN(value);
     }
 
     return value;
@@ -257,8 +257,8 @@ u32 ARM::MOV(u32 operand, bool flags)
 {
     if (flags)
     {
-        updateFlagZ(operand);
-        updateFlagN(operand);
+        updateZ(operand);
+        updateN(operand);
     }
 
     return operand;
@@ -271,8 +271,8 @@ u32 ARM::MVN(u32 operand, bool flags)
 
     if (flags)
     {
-        updateFlagZ(operand);
-        updateFlagN(operand);
+        updateZ(operand);
+        updateN(operand);
     }
 
     return operand;
@@ -363,7 +363,7 @@ u32 ARM::STMIA(u32 addr, u8 rlist)
     {
         if (rlist & 0x1)
         {
-            mmu->writeWord(addr, reg(x));
+            mmu->writeWord(addr, regs.regs[x]);
             addr += 4;
         }
         rlist >>= 1;
@@ -378,7 +378,7 @@ u32 ARM::LDMIA(u32 addr, u8 rlist)
     {
         if (rlist & 0x1)
         {
-            reg(x) = mmu->readWord(addr);
+            regs.regs[x] = mmu->readWord(addr);
             addr += 4;
         }
         rlist >>= 1;
@@ -389,13 +389,11 @@ u32 ARM::LDMIA(u32 addr, u8 rlist)
 // Push registers onto the stack
 void ARM::PUSH(u8 rlist, bool lr)
 {
-    u32& sp = reg(13);
-
     // Store LR
     if (lr)
     {
-        sp -= 4;
-        mmu->writeWord(sp, reg(14));
+        regs.sp -= 4;
+        mmu->writeWord(regs.sp, regs.lr);
     }
 
     // Iterate over specified registers
@@ -403,8 +401,8 @@ void ARM::PUSH(u8 rlist, bool lr)
     {
         if (rlist & (1 << x))
         {
-            sp -= 4;
-            mmu->writeWord(sp, reg(x));
+            regs.sp -= 4;
+            mmu->writeWord(regs.sp, regs.regs[x]);
         }
     }
 }
@@ -412,15 +410,13 @@ void ARM::PUSH(u8 rlist, bool lr)
 // Pop registers from the stack
 void ARM::POP(u8 rlist, bool pc)
 {
-    u32& sp = reg(13);
-
     // Iterate over specified registers
     for (int x = 0; x < 8; ++x)
     {
         if (rlist & 0x1)
         {
-            reg(x) = mmu->readWord(sp);
-            sp += 4;
+            regs.regs[x] = mmu->readWord(regs.sp);
+            regs.sp += 4;
         }
         rlist >>= 1;
     }
@@ -428,10 +424,10 @@ void ARM::POP(u8 rlist, bool pc)
     // Load PC
     if (pc)
     {
-        regs.r15 = mmu->readWord(sp);
-        regs.r15 &= ~0x1;
+        regs.pc = mmu->readWord(regs.sp);
+        regs.pc &= ~0x1;
 
-        sp += 4;
+        regs.sp += 4;
 
         needs_flush = true;
     }
@@ -451,6 +447,6 @@ void ARM::BX(u32 value)
         value &= ~(1 << 1);
     }
 
-    regs.r15 = value;
+    regs.pc = value;
     needs_flush = true;
 }

@@ -9,15 +9,14 @@
 #include <vector>
 
 #include "common/integer.h"
-#include "common/internal.h"
 #include "registers.h"
 
-class MMU : public Internal
+class MMU
 {
 public:
     MMU();
 
-    void reset() final;
+    void reset();
 
     bool loadRom(const std::string& file);
 

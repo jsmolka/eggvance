@@ -1,17 +1,14 @@
 #pragma once
 
 #include "common/integer.h"
-#include "common/internal.h"
 #include "mmu/mmu.h"
 #include "enums.h"
-#include "registers.h"
+#include "registerbank.h"
 
-class ARM : public Internal
+class ARM
 {
 public:
-    ARM();
-
-    void reset() final;
+    void reset();
 
     void step();
 
@@ -20,13 +17,7 @@ public:
     MMU* mmu;
 
 private:
-    Registers regs;
-
-    u32& reg(u8 number);
-    u32& spsr(u8 number);
-    u32& sp();
-    u32& lr();
-    u32& pc();
+    RegisterBank regs;
 
     void fetch();
     void decode();
@@ -43,26 +34,11 @@ private:
 
     void flushPipe();
 
-    Mode currentMode() const;
-
-    bool isArm() const;
-    bool isThumb() const;
-
-    u8 flagZ() const;
-    u8 flagN() const;
-    u8 flagC() const;
-    u8 flagV() const;
-
-    void setFlagZ(bool set);
-    void setFlagN(bool set);
-    void setFlagC(bool set);
-    void setFlagV(bool set);
-
-    void updateFlagZ(u32 value);
-    void updateFlagN(u32 value);
-    void updateFlagC(u8 carry);
-    void updateFlagC(u32 value, u32 operand, bool addition);
-    void updateFlagV(u32 value, u32 operand, bool addition);
+    void updateZ(u32 value);
+    void updateN(u32 value);
+    void updateC(u8 carry);
+    void updateC(u32 value, u32 operand, bool addition);
+    void updateV(u32 value, u32 operand, bool addition);
 
     u32 LSL(u32 value, u8 offset, bool flags = true);
     u32 LSR(u32 value, u8 offset, bool flags = true);

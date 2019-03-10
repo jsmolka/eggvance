@@ -13,7 +13,7 @@ enum Mode
 
 enum CPSR
 {
-    CPSR_M = 0b11111,    // Mode
+    CPSR_M = 0x1F,       // Mode
     CPSR_T = (1 << 5),   // THUMB enable
     CPSR_F = (1 << 6),   // FIQ disable
     CPSR_I = (1 << 7),   // IRQ disable

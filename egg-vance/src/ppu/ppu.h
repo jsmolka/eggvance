@@ -2,16 +2,15 @@
 
 #include <SDL.h>
 
-#include "common/internal.h"
 #include "mmu/mmu.h"
 
-class PPU : public Internal
+class PPU
 {
 public:
     PPU();
     ~PPU();
 
-    void reset() final;
+    void reset();
 
     void renderFrame();
 
