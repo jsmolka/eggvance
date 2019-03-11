@@ -14,11 +14,9 @@ void MMU::reset()
 {
     std::fill(memory.begin(), memory.end(), 0);
 
-    dispcnt = {};
-    dispstat = {};
-
-    for (int i = 0; i < 4; ++i)
-        bgcnt[i] = {};
+    dispcnt = { };
+    dispstat = { };
+    *bgcnt = { };
 }
 
 bool MMU::loadRom(const std::string& file)
@@ -61,18 +59,53 @@ void MMU::writeByte(u32 addr, u8 byte)
 
     switch (addr)
     {
-    case REG_DISPCNT: dispcnt.write(0, byte); break;
-    case REG_DISPCNT + 1: dispcnt.write(1, byte); break;
-    case REG_DISPSTAT: dispstat.write(0, byte); break;
-    case REG_DISPSTAT + 1: dispstat.write(1, byte); break; 
-    case REG_BG0CNT: bgcnt[0].write(0, byte); break;
-    case REG_BG0CNT + 1: bgcnt[0].write(1, byte); break;
-    case REG_BG1CNT: bgcnt[1].write(0, byte); break;
-    case REG_BG1CNT + 1: bgcnt[1].write(1, byte); break;
-    case REG_BG2CNT: bgcnt[2].write(0, byte); break;
-    case REG_BG2CNT + 1: bgcnt[2].write(1, byte); break;
-    case REG_BG3CNT: bgcnt[3].write(0, byte); break;
-    case REG_BG3CNT + 1: bgcnt[3].write(1, byte); break;
+    case REG_DISPCNT: 
+        dispcnt.write(0, byte); 
+        break;
+
+    case REG_DISPCNT + 1: 
+        dispcnt.write(1, byte); 
+        break;
+
+    case REG_DISPSTAT: 
+        dispstat.write(0, byte); 
+        break;
+
+    case REG_DISPSTAT + 1: 
+        dispstat.write(1, byte); 
+        break; 
+
+    case REG_BG0CNT: 
+        bgcnt[0].write(0, byte); 
+        break;
+
+    case REG_BG0CNT + 1: 
+        bgcnt[0].write(1, byte); 
+        break;
+
+    case REG_BG1CNT: 
+        bgcnt[1].write(0, byte); 
+        break;
+
+    case REG_BG1CNT + 1: 
+        bgcnt[1].write(1, byte); 
+        break;
+
+    case REG_BG2CNT: 
+        bgcnt[2].write(0, byte); 
+        break;
+
+    case REG_BG2CNT + 1: 
+        bgcnt[2].write(1, byte); 
+        break;
+
+    case REG_BG3CNT: 
+        bgcnt[3].write(0, byte); 
+        break;
+
+    case REG_BG3CNT + 1: 
+        bgcnt[3].write(1, byte); 
+        break;
     }
 }
 

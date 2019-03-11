@@ -2,8 +2,7 @@
 
 #include "common/integer.h"
 #include "mmu/mmu.h"
-#include "enums.h"
-#include "registerbank.h"
+#include "registers.h"
 
 class ARM
 {
@@ -12,12 +11,10 @@ public:
 
     void step();
 
-    bool running;
-
     MMU* mmu;
 
 private:
-    RegisterBank regs;
+    Registers regs;
 
     void fetch();
     void decode();
@@ -63,12 +60,12 @@ private:
     void CMN(u32 value, u32 operand);
     void TST(u32 value, u32 operand);
 
-    void STRW(u32 addr, u32 value);
+    void STR(u32 addr, u32 value);
     void STRH(u32 addr, u32 value);
     void STRB(u32 addr, u32 value);
-    u32 LDRW(u32 addr);
+    u32 LDR(u32 addr);
     u16 LDRH(u32 addr);
-     u8 LDRB(u32 addr);
+    u8 LDRB(u32 addr);
     u32 LDSH(u32 addr);
     u32 LDSB(u32 addr);
 
@@ -80,9 +77,6 @@ private:
 
     void BX(u32 value);
 
-    bool checkCondition(Condition cond) const;
-    bool checkBranchCondition(Condition cond) const;
-
     void moveShiftedRegister(u16 instr);
     void addSubImmediate(u16 instr);
     void moveCmpAddSubImmediate(u16 instr);
@@ -90,14 +84,14 @@ private:
     void highRegisterBranchExchange(u16 instr);
     void loadPcRelative(u16 instr);
     void loadStoreRegisterOffset(u16 instr);
-    void loadStoreSignExtended(u16 instr);
+    void loadStoreHalfSignExtended(u16 instr);
     void loadStoreImmediateOffset(u16 instr);
-    void loadStoreHalfword(u16 instr);
+    void loadStoreHalf(u16 instr);
     void loadStoreSpRelative(u16 instr);
     void loadAddress(u16 instr);
     void addOffsetSp(u16 instr);
     void pushPopRegisters(u16 instr);
-    void multipleLoadStore(u16 instr);
+    void loadStoreMultiple(u16 instr);
     void conditionalBranch(u16 instr);
     void softwareInterruptThumb(u16 instr);
     void unconditionalBranch(u16 instr);

@@ -1,5 +1,12 @@
 #include "arm.h"
 
+/**
+ * Todo
+ * - align in BX
+ */
+
+#include "common/utility.h"
+
 // Logical Shift Left
 u32 ARM::LSL(u32 value, u8 offset, bool flags)
 {
@@ -297,7 +304,7 @@ void ARM::TST(u32 value, u32 operand)
 }
 
 // Store word
-void ARM::STRW(u32 addr, u32 value)
+void ARM::STR(u32 addr, u32 value)
 {
     mmu->writeWord(addr, value);
 }
@@ -315,7 +322,7 @@ void ARM::STRB(u32 addr, u32 value)
 }
 
 // Load word
-u32 ARM::LDRW(u32 addr)
+u32 ARM::LDR(u32 addr)
 {
     return mmu->readWord(addr);
 }
@@ -363,7 +370,7 @@ u32 ARM::STMIA(u32 addr, u8 rlist)
     {
         if (rlist & 0x1)
         {
-            mmu->writeWord(addr, regs.regs[x]);
+            mmu->writeWord(addr, regs[x]);
             addr += 4;
         }
         rlist >>= 1;
@@ -378,7 +385,7 @@ u32 ARM::LDMIA(u32 addr, u8 rlist)
     {
         if (rlist & 0x1)
         {
-            regs.regs[x] = mmu->readWord(addr);
+            regs[x] = mmu->readWord(addr);
             addr += 4;
         }
         rlist >>= 1;
@@ -402,7 +409,7 @@ void ARM::PUSH(u8 rlist, bool lr)
         if (rlist & (1 << x))
         {
             regs.sp -= 4;
-            mmu->writeWord(regs.sp, regs.regs[x]);
+            mmu->writeWord(regs.sp, regs[x]);
         }
     }
 }
@@ -415,7 +422,7 @@ void ARM::POP(u8 rlist, bool pc)
     {
         if (rlist & 0x1)
         {
-            regs.regs[x] = mmu->readWord(regs.sp);
+            regs[x] = mmu->readWord(regs.sp);
             regs.sp += 4;
         }
         rlist >>= 1;
@@ -425,7 +432,8 @@ void ARM::POP(u8 rlist, bool pc)
     if (pc)
     {
         regs.pc = mmu->readWord(regs.sp);
-        regs.pc &= ~0x1;
+
+        align16(regs.pc);
 
         regs.sp += 4;
 
@@ -436,8 +444,6 @@ void ARM::POP(u8 rlist, bool pc)
 // Branch with exchange
 void ARM::BX(u32 value)
 {
-    // Todo: is this correct?
-
     if (value & 0x0)
     {
         // Switch to ARM mode

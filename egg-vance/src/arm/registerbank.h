@@ -6,24 +6,8 @@
 class RegisterBank
 {
 public:
-    void reset();
-
+    Mode mode() const;
     void switchMode(Mode mode);
-
-    void setZ(bool set);
-    void setN(bool set);
-    void setC(bool set);
-    void setV(bool set);
-
-    u8 z() const;
-    u8 n() const;
-    u8 c() const;
-    u8 v() const;
-
-    bool isThumb();
-
-    u32 operator[](int index) const;
-    u32& operator[](int index);
 
     union
     {
@@ -52,17 +36,17 @@ public:
     };
 
     u32 cpsr;  // Current Program Status Register
-    u32* spsr;  // Save Program Status Register
+    u32* spsr;  // Saved Program Status Register
 
-private:  
+protected:
     enum Bank
     {
         BANK_FIQ = 0,
         BANK_IRQ = 1,
         BANK_SVC = 2,
         BANK_ABT = 3,
-        BANK_UND = 4,
-        BANK_DEF = 5   // Default bank for USR and SYS modes
+        BANK_UND = 4, 
+        BANK_DEF = 5  // Bank for user and system modes
     };
 
     // All modes bank SP and LR
@@ -72,7 +56,7 @@ private:
         u32 lr;
     } bank[6];
 
-    // FIQ also banks registers 8-12
+    // FIQ mode also banks registers 8-12
     struct
     {
         u32 r8;
@@ -82,9 +66,9 @@ private:
         u32 r12;
     } bank_fiq[2];
 
+    // Privileged modes save the previous CPSR
     u32 bank_spsr[5];
 
+private:
     static Bank modeToBank(Mode mode);
-
-    void setFlag(CPSR flag, bool set);
 };

@@ -3,24 +3,16 @@
 enum MemoryMap
 {
     MAP_BIOS         = 0x00000000,
-    MAP_UNUSED_0     = 0x00004000,
     MAP_WRAM_BOARD   = 0x02000000,
-    MAP_UNUSED_1     = 0x02040000,
     MAP_WRAM_CHIP    = 0x03000000,
-    MAP_UNUSED_2     = 0x03008000,
     MAP_IO           = 0x04000000,
-    MAP_UNUSED_3     = 0x04000400,
     MAP_PALETTE      = 0x05000000,
-    MAP_UNUSED_4     = 0x05000400,
     MAP_VRAM         = 0x06000000,
-    MAP_UNUSED_5     = 0x06018000,
     MAP_OAM          = 0x07000000,
-    MAP_UNUSED_6     = 0x07000400,
     MAP_GAMEPAK_0    = 0x08000000,
     MAP_GAMEPAK_1    = 0x0A000000,
     MAP_GAMEPAK_2    = 0x0C000000,
-    MAP_GAMEPAK_SRAM = 0x0E000000,
-    MAP_UNUSED_7     = 0x0E010000,
+    MAP_GAMEPAK_SRAM = 0x0E000000
 };
 
 enum MemoryRegisters

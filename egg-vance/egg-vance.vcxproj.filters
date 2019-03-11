@@ -45,6 +45,9 @@
     <ClCompile Include="src\ppu\render_text.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\arm\registers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\arm\registerbank.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -77,10 +80,13 @@
     <ClInclude Include="src\arm\enums.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\common\utility.h">
+    <ClInclude Include="src\arm\registers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\arm\registerbank.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common\utility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

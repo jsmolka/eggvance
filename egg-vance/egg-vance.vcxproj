@@ -151,8 +151,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\arm\registerbank.cpp" />
-    <ClCompile Include="src\mmu\registers.cpp" />
+    <ClCompile Include="src\mmu\registers.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)$(InputName)2</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)$(InputName)2</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="src\arm\instr.cpp" />
     <ClCompile Include="src\ppu\ppu.cpp" />
     <ClCompile Include="src\core.cpp" />
@@ -164,6 +168,7 @@
     <ClCompile Include="src\ppu\render_text.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\arm\registers.h" />
     <ClInclude Include="src\arm\registerbank.h" />
     <ClInclude Include="src\arm\enums.h" />
     <ClInclude Include="src\common\utility.h" />

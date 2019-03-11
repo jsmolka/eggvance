@@ -9,7 +9,6 @@ void ARM::reset()
     flushPipe();
 
     needs_flush = false;
-    running = true;
 }
 
 void ARM::step()
@@ -232,7 +231,7 @@ void ARM::execute()
 
         Condition condition = static_cast<Condition>(instr >> 28);
 
-        if (checkCondition(condition))
+        if (regs.checkCondition(condition))
         {
             switch (pipe[2].decoded)
             {
@@ -257,25 +256,81 @@ void ARM::execute()
 
         switch (pipe[2].decoded)
         {
-        case THUMB_1:  moveShiftedRegister(instr);        break;
-        case THUMB_2:  addSubImmediate(instr);            break;
-        case THUMB_3:  moveCmpAddSubImmediate(instr);     break;
-        case THUMB_4:  aluOperations(instr);              break;
-        case THUMB_5:  highRegisterBranchExchange(instr); break;
-        case THUMB_6:  loadPcRelative(instr);             break;
-        case THUMB_7:  loadStoreRegisterOffset(instr);    break;
-        case THUMB_8:  loadStoreSignExtended(instr);      break;
-        case THUMB_9:  loadStoreImmediateOffset(instr);   break;
-        case THUMB_10: loadStoreHalfword(instr);          break;
-        case THUMB_11: loadStoreSpRelative(instr);        break;
-        case THUMB_12: loadAddress(instr);                break;
-        case THUMB_13: addOffsetSp(instr);                break;
-        case THUMB_14: pushPopRegisters(instr);           break;
-        case THUMB_15: multipleLoadStore(instr);          break;
-        case THUMB_16: conditionalBranch(instr);          break;
-        case THUMB_17: softwareInterruptThumb(instr);     break;
-        case THUMB_18: unconditionalBranch(instr);        break;
-        case THUMB_19: longBranchLink(instr);             break;
+        case THUMB_1:  
+            moveShiftedRegister(instr);        
+            break;
+
+        case THUMB_2:
+            addSubImmediate(instr);            
+            break;
+
+        case THUMB_3:
+            moveCmpAddSubImmediate(instr);     
+            break;
+
+        case THUMB_4:
+            aluOperations(instr);              
+            break;
+
+        case THUMB_5:
+            highRegisterBranchExchange(instr); 
+            break;
+
+        case THUMB_6:
+            loadPcRelative(instr);             
+            break;
+
+        case THUMB_7:
+            loadStoreRegisterOffset(instr);    
+            break;
+
+        case THUMB_8:
+            loadStoreHalfSignExtended(instr);      
+            break;
+
+        case THUMB_9:
+            loadStoreImmediateOffset(instr);   
+            break;
+
+        case THUMB_10:
+            loadStoreHalf(instr);          
+            break;
+
+        case THUMB_11:
+            loadStoreSpRelative(instr);        
+            break;
+
+        case THUMB_12:
+            loadAddress(instr);                
+            break;
+
+        case THUMB_13:
+            addOffsetSp(instr);                
+            break;
+
+        case THUMB_14:
+            pushPopRegisters(instr);           
+            break;
+
+        case THUMB_15:
+            loadStoreMultiple(instr);          
+            break;
+
+        case THUMB_16:
+            conditionalBranch(instr);          
+            break;
+
+        case THUMB_17:
+            softwareInterruptThumb(instr);     
+            break;
+
+        case THUMB_18:
+            unconditionalBranch(instr);        
+            break;
+
+        case THUMB_19:
+            longBranchLink(instr);             
+            break;
 
         default:
             log() << "Tried executing unknown THUMB instruction " << (int)pipe[2].decoded;
@@ -346,54 +401,4 @@ void ARM::updateV(u32 value, u32 operand, bool addition)
     }
 
     regs.setV(overflow);
-}
-
-bool ARM::checkCondition(Condition cond) const
-{
-    if (cond == COND_AL)
-        return true;
-
-    u8 z = regs.z();
-    u8 n = regs.n();
-    u8 c = regs.c();
-    u8 v = regs.v();
-
-    switch (cond)
-    {
-    case COND_EQ: return z;
-    case COND_NE: return !z;
-    case COND_CS: return c;
-    case COND_CC: return !c;
-    case COND_MI: return n;
-    case COND_PL: return !n;
-    case COND_VS: return v;
-    case COND_VC: return !v;
-    case COND_HI: return c && !z;
-    case COND_LS: return !c || z;
-    case COND_GE: return n == v;
-    case COND_LT: return n != v;
-    case COND_GT: return !z && (n == v);
-    case COND_LE: return z || (n != v);
-    case COND_AL: return true;
-    case COND_NV: return false;
-
-    default:
-        log() << "Invalid condition " << (int)cond;
-    }
-    return true;
-}
-
-bool ARM::checkBranchCondition(Condition cond) const
-{
-    if (cond == COND_AL)
-    {
-        log() << "Undefined branch condition AL";
-        return false;
-    }
-    if (cond == COND_NV)
-    {
-        // Todo: process SWI
-        return false;
-    }
-    return checkCondition(cond);
 }
