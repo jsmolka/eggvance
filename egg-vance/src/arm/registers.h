@@ -8,6 +8,7 @@ public:
     void reset();
 
     bool isThumb() const;
+    void setThumb(bool set);
 
     u8 z() const;
     u8 n() const;

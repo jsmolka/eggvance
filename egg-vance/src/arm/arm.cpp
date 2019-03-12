@@ -235,6 +235,10 @@ void ARM::execute()
         {
             switch (pipe[2].decoded)
             {
+            case ARM_1:
+                dataProcessing(instr);
+                break;
+
             case ARM_5:
                 branchExchange(instr);
                 break;

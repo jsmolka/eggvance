@@ -1,12 +1,15 @@
 #include "registers.h"
 
+#include <cstring>
+
 #include "common/log.h"
 
 void Registers::reset()
 {
-    *bank = { };
-    *bank_fiq = { };
-    *bank_spsr = { };
+    std::memset(regs, 0, sizeof(regs));
+    std::memset(bank, 0, sizeof(bank));
+    std::memset(bank_fiq, 0, sizeof(bank_fiq));
+    std::memset(bank_spsr, 0, sizeof(bank_spsr));
 
     pc = 0x8000000;
     
@@ -19,15 +22,16 @@ void Registers::reset()
 
     cpsr = 0x5F;
     spsr = nullptr;
-
-    // Setup values for test ROMs
-    cpsr |= CPSR_T;
-    pc = 0x080000C8;
 }
 
 bool Registers::isThumb() const
 {
     return cpsr & CPSR_T;
+}
+
+void Registers::setThumb(bool set)
+{
+    setFlag(CPSR_T, set);
 }
 
 u8 Registers::z() const

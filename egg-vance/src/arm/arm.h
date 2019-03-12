@@ -59,6 +59,7 @@ private:
     void CMP(u32 value, u32 operand);
     void CMN(u32 value, u32 operand);
     void TST(u32 value, u32 operand);
+    void TEQ(u32 value, u32 operand);
 
     void STR(u32 addr, u32 value);
     void STRH(u32 addr, u32 value);
@@ -97,6 +98,7 @@ private:
     void unconditionalBranch(u16 instr);
     void longBranchLink(u16 instr);
 
+    void dataProcessing(u32 instr);
     void branchExchange(u32 instr);
     void branchLink(u32 instr);
 };

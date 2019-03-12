@@ -303,6 +303,12 @@ void ARM::TST(u32 value, u32 operand)
     AND(value, operand);
 }
 
+// Test equal
+void ARM::TEQ(u32 value, u32 operand)
+{
+    EOR(value, operand);
+}
+
 // Store word
 void ARM::STR(u32 addr, u32 value)
 {
