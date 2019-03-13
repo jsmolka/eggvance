@@ -1,5 +1,10 @@
 #include "arm.h"
 
+/**
+ * Todo:
+ * - optimizie ROR
+ */
+
 #include "common/log.h"
 
 void ARM::reset()
@@ -367,11 +372,6 @@ void ARM::updateN(u32 value)
     regs.setN(value >> 31);
 }
 
-void ARM::updateC(u8 carry)
-{
-    regs.setC(carry == 1);
-}
-
 void ARM::updateC(u32 value, u32 operand, bool addition)
 {
     bool carry;
@@ -405,4 +405,118 @@ void ARM::updateV(u32 value, u32 operand, bool addition)
     }
 
     regs.setV(overflow);
+}
+
+void ARM::updateArithmetic(u32 op1, u32 op2, bool addition)
+{
+    u32 result = 0;
+    if (addition)
+        result = op1 + op2;
+    else
+        result = op1 - op2;
+
+    updateZ(result);
+    updateN(result);
+    updateV(op1, op2, addition);
+    updateC(op1, op2, addition);
+}
+
+void ARM::updateLogical(u32 result)
+{
+    updateZ(result);
+    updateN(result);
+}
+
+void ARM::updateShift(u32 result, bool carry)
+{
+    updateLogical(result);
+
+    regs.setC(carry);
+}
+
+u32 ARM::logicalShiftLeft(u32 value, u8 offset, bool& carry)
+{
+    if (offset > 0)
+    {
+        // Save the last bit shifted out in the carry
+        carry = (value << (offset - 1)) >> 31;
+
+        value <<= offset;
+    }
+    // Special case LSL #0
+    else
+    {
+        carry = regs.c();
+    }
+    return value;
+}
+
+u32 ARM::logicalShiftRight(u32 value, u8 offset, bool& carry)
+{
+    if (offset > 0)
+    {
+        // Save the last bit shifted out in the carry
+        carry = (value >> (offset - 1)) & 0x1;
+
+        value >>= offset;
+    }
+    // Special case LSR #0 / #32
+    else
+    {
+        // Store the MSB in the carry
+        carry = value >> 31;
+        // Reset the result
+        value = 0;
+    }
+    return value;
+}
+
+u32 ARM::arithmeticShiftRight(u32 value, u8 offset, bool& carry)
+{
+    if (offset > 0)
+    {
+        // Save the last bit shifted out in the carry
+        carry = (value >> (offset - 1)) & 0x1;
+
+        u32 msb = value & (1 << 31);
+        for (int x = 0; x < offset; ++x)
+        {
+            value >>= 1;
+            value |= msb;
+        }
+    }
+    // Special case ASR #0 / #32
+    else
+    {
+        // Store the MSB in the carry
+        carry = value >> 31;
+        // Apply carry bit to whole result
+        value = carry ? 0xFFFFFFFF : 0;
+    }
+    return value;
+}
+
+u32 ARM::rotateRight(u32 value, u8 offset, bool& carry)
+{
+    if (offset > 0)
+    {
+        // Todo: this can be optimized
+        for (int x = 0; x < offset; ++x)
+        {
+            carry = value & 0x1;
+            value >>= 1;
+            value |= carry << 31;
+        }
+    }
+    // Special case ROR #0 (RRX)
+    else
+    {
+        // Save the first bit in the carry
+        carry = value & 0x1;
+        // Rotate by one
+        value >>= 1;
+        // Change MSB to current carry
+        value |= (regs.c() << 31);
+    }
+    return value;
 }

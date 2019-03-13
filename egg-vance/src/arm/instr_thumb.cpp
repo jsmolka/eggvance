@@ -5,6 +5,8 @@
  * - LDR / STR with odd offset behave weirdly
  * - write test for BX
  * - process SWI in conditional branch
+ * - properly name operands
+ * - test ROR in Thumb 4
  */
 
 #include "common/log.h"
@@ -13,26 +15,37 @@
 // THUMB 1
 void ARM::moveShiftedRegister(u16 instr)
 {
-    u8 opcode = instr >> 11 & 0x3;
-    u8 offset = instr >> 6 & 0x1F;
-    u8 rs = instr >> 3 & 0x7;
+    // Operation code
+    u8 opcode = (instr >> 11) & 0x3;
+    // 5-bit immediate value
+    u8 offset = (instr >> 6) & 0x1F;
+    // Source register
+    u8 rs = (instr >> 3) & 0x7;
+    // Destination register
     u8 rd = instr & 0x7;
 
     u32 src = regs[rs];
     u32& dst = regs[rd];
 
+    bool carry;
     switch (opcode)
     {
+    // LSL
     case 0b00: 
-        dst = LSL(src, offset); 
+        dst = logicalShiftLeft(src, offset, carry); 
+        updateShift(dst, carry);
         break;
 
+    // LSR
     case 0b01: 
-        dst = LSR(src, offset); 
+        dst = logicalShiftRight(src, offset, carry); 
+        updateShift(dst, carry);
         break;
 
+    // ASR
     case 0b10: 
-        dst = ASR(src, offset); 
+        dst = arithmeticShiftRight(src, offset, carry); 
+        updateShift(dst, carry);
         break;
 
     default:
@@ -44,25 +57,34 @@ void ARM::moveShiftedRegister(u16 instr)
 void ARM::addSubImmediate(u16 instr)
 {
     // Immediate / register flag
-    u8 i = instr >> 10 & 0x1;
-    u8 opcode = instr >> 9 & 0x1;
-    u8 offset = instr >> 6 & 0x7;
-    u8 rs = instr >> 3 & 0x7;
+    u8 i = (instr >> 10) & 0x1;
+    // Operation code
+    u8 opcode = (instr >> 9) & 0x1;
+    // 3-bit immediate value / register
+    u8 offset = (instr >> 6) & 0x7;
+    // Source register
+    u8 rs = (instr >> 3) & 0x7;
+    // Destination register
     u8 rd = instr & 0x7;
 
     u32 src = regs[rs];
     u32& dst = regs[rd];
 
-    u32 operand = i ? offset : regs[offset];
+    // Use immediate value or register as operand
+    u32 op = i ? offset : regs[offset];
     
     switch (opcode)
     {
+    // ADD
     case 0b0: 
-        dst = ADD(src, operand); 
+        dst = src + op;
+        updateArithmetic(src, op, true);
         break;
 
+    // SUB
     case 0b1: 
-        dst = SUB(src, operand); 
+        dst = src - op; 
+        updateArithmetic(src, op, false);
         break;
     }
 }
@@ -70,28 +92,39 @@ void ARM::addSubImmediate(u16 instr)
 // THUMB 3
 void ARM::moveCmpAddSubImmediate(u16 instr)
 {
-    u8 opcode = instr >> 11 & 0x3;
-    u8 rd = instr >> 8 & 0x7;
+    // Operation code
+    u8 opcode = (instr >> 11) & 0x3;
+    // Source / destination register
+    u8 rd = (instr >> 8) & 0x7;
+    // 8-bit immediate value
     u8 offset = instr & 0xFF;
 
+    u32 src = regs[rd];
     u32& dst = regs[rd];
 
     switch (opcode)
     {
+    // MOV
     case 0b00: 
-        dst = MOV(offset); 
+        dst = offset;
+        updateLogical(dst);
         break;
 
+    // CMP
     case 0b01: 
-        CMP(dst, offset); 
+        updateArithmetic(src, offset, false);
         break;
 
+    // ADD
     case 0b10: 
-        dst = ADD(dst, offset); 
+        dst = src + offset;
+        updateArithmetic(src, offset, true);
         break;
 
+    // SUB
     case 0b11: 
-        dst = SUB(dst, offset); 
+        dst = src - offset;
+        updateArithmetic(src, offset, false);
         break;
     }
 }
@@ -99,86 +132,121 @@ void ARM::moveCmpAddSubImmediate(u16 instr)
 // THUMB 4
 void ARM::aluOperations(u16 instr)
 {
-    u8 opcode = instr >> 6 & 0xF;
-    u8 rs = instr >> 3 & 0x7;
+    // Operation code
+    u8 opcode = (instr >> 6) & 0xF;
+    // Source register
+    u8 rs = (instr >> 3) & 0x7;
+    // Source / destination register
     u8 rd = instr & 0x7;
 
     u32 src = regs[rs];
     u32& dst = regs[rd];
 
+    bool carry;
     switch (opcode)
     {
+    // AND
     case 0b0000: 
-        dst = AND(dst, src); 
+        dst &= src;
+        updateLogical(dst);
         break;
 
+    // EOR
     case 0b0001: 
-        dst = EOR(dst, src); 
+        dst ^= src;
+        updateLogical(dst);
         break;
 
+    // LSL
     case 0b0010: 
-        dst = LSL(dst, src); 
+        dst = logicalShiftLeft(dst, src, carry); 
+        updateShift(dst, carry);
         break;
 
+    // LSR
     case 0b0011: 
-        dst = LSR(dst, src); 
+        dst = logicalShiftRight(dst, src, carry); 
+        updateShift(dst, carry);
         break;
 
+    // ASR
     case 0b0100: 
-        dst = ASR(dst, src); 
+        dst = arithmeticShiftRight(dst, src, carry); 
+        updateShift(dst, carry);
         break;
 
+    // ADC
     case 0b0101: 
-        dst = ADC(dst, src); 
+        src += regs.c();
+        updateArithmetic(dst, src, true);
+        dst += src;
         break;
 
+    // SBC
     case 0b0110: 
-        dst = SBC(dst, src); 
+        src += regs.c() ? 0 : 1;
+        updateArithmetic(dst, src, false);
+        dst -= src;
         break;
 
+    // ROR
     case 0b0111:
         if (src != 0)
         {
-            dst = ROR(dst, src); break;
+            dst = rotateRight(dst, src, carry);
+            updateShift(dst, carry);
         }
         else
         {
             // Using ROR #0 only sets Z, N and does not change the dst
-            updateZ(dst);
-            updateN(dst);
+            updateLogical(dst);
         }
         break;
 
-    case 0b1000:       
-        TST(dst, src); 
+    // TST
+    case 0b1000:
+        updateLogical(dst & src);
         break;
 
-    case 0b1001: 
-        dst = NEG(src); 
+    // NEG
+    case 0b1001:
+        dst = 0 - src;
+        updateArithmetic(0, src, false);
         break;
 
+    // CMP
     case 0b1010:
-        CMP(dst, src); 
+        updateArithmetic(dst, src, false);
         break;
 
+    // CMP
     case 0b1011:       
-        CMN(dst, src); 
+        updateArithmetic(dst, src, true);
         break;
 
+    // ORR
     case 0b1100: 
-        dst = ORR(dst, src); 
+        dst |= src;
+        updateLogical(dst);
         break;
 
+    // MUL
     case 0b1101: 
-        dst = MUL(dst, src);
+        dst *= src;
+        // Multiplication does not set the V flag
+        updateLogical(dst);
         break;
 
-    case 0b1110: 
-        dst = BIC(dst, src); 
+    // BIC
+    case 0b1110:
+        dst &= ~src;
+        updateLogical(dst);
         break;
 
+    // MVN
     case 0b1111: 
-        dst = MVN(src); 
+        dst = ~src;
+        updateLogical(dst);
         break;
     }
 }
@@ -186,37 +254,54 @@ void ARM::aluOperations(u16 instr)
 // THUMB 5
 void ARM::highRegisterBranchExchange(u16 instr)
 {
-    u8 opcode = instr >> 8 & 0x3;
+    // Operation code
+    u8 opcode = (instr >> 8) & 0x3;
     // High operand flag for rd
-    u8 hd = instr >> 7 & 0x1;
+    u8 hd = (instr >> 7) & 0x1;
     // High operand flag for rs
-    u8 hs = instr >> 6 & 0x1;
-    u8 rs = instr >> 3 & 0x7;
+    u8 hs = (instr >> 6) & 0x1;
+    // Source register
+    u8 rs = (instr >> 3) & 0x7;
+    // Destination register
     u8 rd = instr & 0x7;
 
     // Use high registers
-    rs |= (hs << 3);
-    rd |= (hd << 3);
+    rs |= hs << 3;
+    rd |= hd << 3;
 
     u32 src = regs[rs];
     u32& dst = regs[rd];
 
+    // Only set flags in CMP
     switch (opcode)
     {
+    // ADD
     case 0b00: 
-        dst = ADD(dst, src, false); 
+        dst += src;
         break;
 
+    // CMP
     case 0b01:
-        CMP(dst, src); 
+        updateArithmetic(dst, src, false);
         break;
 
+    // MOV
     case 0b10: 
-        dst = MOV(src, false); 
+        dst = src;
         break;
 
+    // BX
     case 0b11:
-        BX(src); 
+        if (src & 0x0)
+        {
+            // Switch to ARM mode
+            regs.setThumb(false);
+
+            align32(src);
+        }
+
+        regs.pc = src;
+        needs_flush = true;        
         break;
     }
 }
@@ -224,7 +309,9 @@ void ARM::highRegisterBranchExchange(u16 instr)
 // THUMB 6
 void ARM::loadPcRelative(u16 instr)
 {
-    u8 rd = instr >> 8 & 0x7;
+    // Destination register
+    u8 rd = (instr >> 8) & 0x7;
+    // 8-bit immediate value
     u16 offset = instr & 0xFF;
 
     // Offset is a 10-bit address
@@ -234,42 +321,48 @@ void ARM::loadPcRelative(u16 instr)
     // Bit 1 is forced to 0
     addr &= ~0x2;
 
-    regs[rd] = LDR(addr + offset);
+    regs[rd] = mmu->readWord(addr + offset);
 }
 
 // THUMB 7
 void ARM::loadStoreRegisterOffset(u16 instr)
 {
     // Load / store flag
-    u8 l = instr >> 11 & 0x1;
+    u8 l = (instr >> 11) & 0x1;
     // Byte / word flag
-    u8 b = instr >> 10 & 0x1;
-    u8 ro = instr >> 6 & 0x7;
-    u8 rb = instr >> 3 & 0x7;
+    u8 b = (instr >> 10) & 0x1;
+    // Offset register
+    u8 ro = (instr >> 6) & 0x7;
+    // Base register
+    u8 rb = (instr >> 3) & 0x7;
+    // Source / destination register
     u8 rd = instr & 0x7;
 
     u32 addr = regs[rb] + regs[ro];
-    
     align16(addr);
 
     u32& dst = regs[rd];
 
     switch (l << 1 | b)
     {
+    // STR
     case 0b00:
-        STR(addr, dst); 
+        mmu->writeWord(addr, dst); 
         break;
 
+    // STRB
     case 0b01: 
-        STRB(addr, dst); 
+        mmu->writeByte(addr, dst & 0xFF); 
         break;
 
+    // LDR
     case 0b10: 
-        dst = LDR(addr); 
+        dst = mmu->readWord(addr); 
         break;
 
+    // LDRB
     case 0b11: 
-        dst = LDRB(addr); 
+        dst = mmu->readByte(addr); 
         break;
     }
 }
@@ -278,35 +371,47 @@ void ARM::loadStoreRegisterOffset(u16 instr)
 void ARM::loadStoreHalfSignExtended(u16 instr)
 {
     // Half / byte flag
-    u8 h = instr >> 11 & 0x1;
+    u8 h = (instr >> 11) & 0x1;
     // Sign extend flag
-    u8 s = instr >> 10 & 0x1;
-    u8 ro = instr >> 6 & 0x7;
-    u8 rb = instr >> 3 & 0x7;
+    u8 s = (instr >> 10) & 0x1;
+    // Offset register
+    u8 ro = (instr >> 6) & 0x7;
+    // Base register
+    u8 rb = (instr >> 3) & 0x7;
+    // Destination register
     u8 rd = instr & 0x7;
 
     u32 addr = regs[rb] + regs[ro];
-
     align16(addr);
 
     u32& dst = regs[rd];
 
     switch (s << 1 | h)
     {
+    // STRH
     case 0b00: 
-        STRH(addr, dst); 
+        mmu->writeHalf(addr, dst & 0xFFFF); 
         break;
 
+    // LDRH
     case 0b01: 
-        dst = LDRH(addr); 
+        dst = mmu->readHalf(addr); 
         break;
 
+    // LDSB
     case 0b10: 
-        dst = LDSB(addr); 
+        dst = mmu->readByte(addr);
+        // Extend with bit 8
+        if (dst & (1 << 7))
+            dst |= 0xFFFFFF00;
         break;
 
+    // LDSH
     case 0b11: 
-        dst = LDSH(addr); 
+        dst = mmu->readHalf(addr);
+        // Extend with bit 16
+        if (dst & (1 << 15))
+            dst |= 0xFFFF0000;
         break;
     }
 }
@@ -315,37 +420,45 @@ void ARM::loadStoreHalfSignExtended(u16 instr)
 void ARM::loadStoreImmediateOffset(u16 instr)
 {
     // Byte / word flag
-    u8 b = instr >> 12 & 0x1;
+    u8 b = (instr >> 12) & 0x1;
     // Load / store flag
-    u8 l = instr >> 11 & 0x1;
-    u8 offset = instr >> 6 & 0x1F;
-    u8 rb = instr >> 3 & 0x7;
+    u8 l = (instr >> 11) & 0x1;
+    // 5-bit immediate value
+    u8 offset = (instr >> 6) & 0x1F;
+    // Base register
+    u8 rb = (instr >> 3) & 0x7;
+    // Destination register
     u8 rd = instr & 0x7;
 
     if (!b)
-        // Word access uses a 7-bit offset
+        // Word access uses 7-bit offset
         offset <<= 2;
 
     u32 addr = regs[rb] + offset;
+    align16(addr);
 
     u32& dst = regs[rd];
 
     switch (l << 1 | b)
     {
+    // STR
     case 0b00: 
-        STR(addr, dst); 
+        mmu->writeWord(addr, dst); 
         break;
 
+    // STRB
     case 0b01: 
-        STRB(addr, dst); 
+        mmu->writeByte(addr, dst & 0xFF); 
         break;
 
+    // LDR
     case 0b10: 
-        dst = LDR(addr); 
+        dst = mmu->readWord(addr); 
         break;
 
+    // LDRB
     case 0b11: 
-        dst = LDRB(addr); 
+        dst = mmu->readByte(addr); 
         break;
     }
 }
@@ -354,23 +467,29 @@ void ARM::loadStoreImmediateOffset(u16 instr)
 void ARM::loadStoreHalf(u16 instr)
 {
     // Load / store flag
-    u8 l = instr >> 11 & 0x1;
-    u8 offset = instr >> 6 & 0x1F;
-    u8 rb = instr >> 3 & 0x7;
+    u8 l = (instr >> 11) & 0x1;
+    // 5-bit offset
+    u8 offset = (instr >> 6) & 0x1F;
+    // Base register
+    u8 rb = (instr >> 3) & 0x7;
+    // Destination register
     u8 rd = instr & 0x7;
 
     u32 addr = regs[rb] + offset;
+    align16(addr);
 
     u32& dst = regs[rd];
 
     switch (l)
     {
+    // STRH
     case 0b0: 
-        STRH(addr, dst); 
+        mmu->writeHalf(addr, dst & 0xFFFF); 
         break;
 
+    // LDRH
     case 0b1: 
-        dst = LDRH(addr); 
+        dst = mmu->readHalf(addr); 
         break;
     }
 }
@@ -379,8 +498,10 @@ void ARM::loadStoreHalf(u16 instr)
 void ARM::loadStoreSpRelative(u16 instr)
 {
     // Load / store flag
-    u8 l = instr >> 11 & 0x1;
-    u8 rd = instr >> 8 & 0x7;
+    u8 l = (instr >> 11) & 0x1;
+    // Destination register
+    u8 rd = (instr >> 8) & 0x7;
+    // 8-bit immediate value
     u16 offset = instr & 0xFF;
 
     // Offset is a 10 bit constant
@@ -388,17 +509,20 @@ void ARM::loadStoreSpRelative(u16 instr)
 
     // Add unsigned offset to SP
     u32 addr = regs.sp + offset;
+    align16(addr);
 
     u32& dst = regs[rd];
 
     switch (l)
     {
+    // STR
     case 0b0: 
-        STR(addr, dst); 
+        mmu->writeWord(addr, dst); 
         break;
 
+    // LDR
     case 0b1: 
-        dst = LDR(addr); 
+        dst = mmu->readWord(addr); 
         break;
     }
 }
@@ -407,8 +531,10 @@ void ARM::loadStoreSpRelative(u16 instr)
 void ARM::loadAddress(u16 instr)
 {
     // SP / PC flag
-    u8 sp = instr >> 11 & 0x1;
-    u8 rd = instr >> 8 & 0x7;
+    u8 sp = (instr >> 11) & 0x1;
+    // Destination register
+    u8 rd = (instr >> 8) & 0x7;
+    // 8-bit immediate value
     u16 offset = instr & 0xFF;
 
     // Offset is a 10 bit constant
@@ -420,11 +546,11 @@ void ARM::loadAddress(u16 instr)
     {
     case 0b0: 
         // Bit 1 is read as 0
-        dst = offset + (regs.pc & ~0x2); 
+        dst = (regs.pc & ~0x2) + offset;
         break;
 
     case 0b1: 
-        dst = offset + regs.sp;
+        dst = regs.sp + offset;
         break;
     }
 }
@@ -433,10 +559,11 @@ void ARM::loadAddress(u16 instr)
 void ARM::addOffsetSp(u16 instr)
 {
     // Sign flag
-    u8 s = instr >> 7 & 0x1;
+    u8 s = (instr >> 7) & 0x1;
+    // 7-bit immediate value
     u16 offset = instr & 0x3F;
 
-    // Offset is a 10 bit constant
+    // Offset is a 10-bit value
     offset <<= 2;
 
     switch (s)
@@ -455,19 +582,58 @@ void ARM::addOffsetSp(u16 instr)
 void ARM::pushPopRegisters(u16 instr)
 {
     // Load / store flag
-    u8 l = instr >> 11 & 0x1;
+    u8 l = (instr >> 11) & 0x1;
     // Store LR / load PC flag
-    u8 r = instr >> 8 & 0x1;
+    u8 r = (instr >> 8) & 0x1;
+    // Register list
     u8 rlist = instr & 0xFF;
 
     switch (l)
     {
+    // PUSH
     case 0b0: 
-        PUSH(rlist, r); 
+        // Store LR
+        if (r)
+        {
+            regs.sp -= 4;
+            mmu->writeWord(regs.sp, regs.lr);
+        }
+
+        // Iterate over specified registers
+        for (int x = 7; x >= 0; --x)
+        {
+            if (rlist & (1 << x))
+            {
+                regs.sp -= 4;
+                mmu->writeWord(regs.sp, regs[x]);
+            }
+        }
         break;
 
+    // POP
     case 0b1: 
-        POP(rlist, r); 
+        // Iterate over specified registers
+        for (int x = 0; x < 8; ++x)
+        {
+            if (rlist & 0x1)
+            {
+                regs[x] = mmu->readWord(regs.sp);
+                regs.sp += 4;
+            }
+            rlist >>= 1;
+        }
+
+        // Load PC
+        if (r)
+        {
+            regs.pc = mmu->readWord(regs.sp);
+
+            align16(regs.pc);
+
+            regs.sp += 4;
+
+            needs_flush = true;
+        }
         break;
     }
 }
@@ -476,28 +642,37 @@ void ARM::pushPopRegisters(u16 instr)
 void ARM::loadStoreMultiple(u16 instr)
 {
     // Load / store flag
-    u8 l = instr >> 11 & 0x1;
-    u8 rb = instr >> 8 & 0x7;
+    u8 l = (instr >> 11) & 0x1;
+    // Base register
+    u8 rb = (instr >> 8) & 0x7;
+    // Register list
     u8 rlist = instr & 0xFF;
 
     u32& base = regs[rb];
 
-    switch (l)
+    for (int x = 0; x < 8; ++x)
     {
-    case 0b0: 
-        base = STMIA(base, rlist); 
-        break;
+        if (rlist & 0x1)
+        {
+            if (l)
+                // Load
+                regs[x] = mmu->readWord(base);
+            else
+                // Store
+                mmu->writeWord(base, regs[x]);
 
-    case 0b1: 
-        base = LDMIA(base, rlist); 
-        break;
+            base += 4;
+        }
+        rlist >>= 1;
     }
 }
 
 // THUMB 16
 void ARM::conditionalBranch(u16 instr)
 {
-    Condition cond = static_cast<Condition>(instr >> 8 & 0xF);
+    // Condition
+    Condition cond = static_cast<Condition>((instr >> 8) & 0xF);
+    // 8-bit immediate value
     u8 offset = instr & 0xFF;
 
     if (cond == COND_AL)
@@ -516,6 +691,8 @@ void ARM::conditionalBranch(u16 instr)
         signed_offset <<= 1;
 
         regs.pc += signed_offset;
+        align16(regs.pc);
+
         needs_flush = true;
     }
 }
@@ -529,6 +706,7 @@ void ARM::softwareInterruptThumb(u16 instr)
 // THUMB 18
 void ARM::unconditionalBranch(u16 instr)
 {
+    // 11-bit immediate value
     u16 offset = instr & 0x7FF;
 
     s16 signed_offset = twos<11>(offset);
@@ -544,7 +722,8 @@ void ARM::unconditionalBranch(u16 instr)
 void ARM::longBranchLink(u16 instr)
 {
     // Low / high flag
-    u8 h = instr >> 11 & 0x1;
+    u8 h = (instr >> 11) & 0x1;
+    // 11-bit immediate value
     u16 offset = instr & 0x7FF;
 
     // Instruction 1

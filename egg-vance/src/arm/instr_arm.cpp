@@ -42,9 +42,14 @@ void ARM::dataProcessing(u32 instr)
 
         // RRX does not exist in this case
         if (rotate == 0)
+        {
             op2 = imm;
+        }
         else
-            op2 = ROR(imm, rotate, false);
+        {
+            bool carry;
+            op2 = rotateRight(imm, rotate, carry);
+        }
     }
     else
     {
@@ -69,79 +74,122 @@ void ARM::dataProcessing(u32 instr)
             offset = shift >> 3 & 0x1FF;
         }
 
+        bool carry;
         switch (shift >> 1 & 0x3)
         {
-        case 0b00: op2 = LSL(regs[rm], offset, false); break;
-        case 0b01: op2 = LSR(regs[rm], offset, false); break;
-        case 0b10: op2 = ASR(regs[rm], offset, false); break;
-        case 0b11: op2 = ROR(regs[rm], offset, false); break;
+        case 0b00: 
+            op2 = logicalShiftLeft(regs[rm], offset, carry); 
+            break;
+
+        case 0b01: 
+            op2 = logicalShiftRight(regs[rm], offset, carry); 
+            break;
+
+        case 0b10: 
+            op2 = arithmeticShiftRight(regs[rm], offset, carry); 
+            break;
+
+        case 0b11: 
+            op2 = rotateRight(regs[rm], offset, carry); 
+            break;
         }
     }
 
     switch (opcode)
     {
+    // AND
     case 0b0000:
-        dst = AND(op1, op2, s);
+        dst = op1 & op2;
+        if (s) updateLogical(dst);
         break;
 
+    // EOR
     case 0b0001:
-        dst = EOR(op1, op2, s);
+        dst = op1 ^ op2;
+        if (s) updateLogical(dst);
         break;
 
+    // SUB
     case 0b0010:
-        dst = SUB(op1, op2, s);
+        dst = op1 - op2;
+        if (s) updateArithmetic(op1, op2, false);
         break;
 
+    // RSB
     case 0b0011:
-        dst = SUB(op2, op1, s);
+        dst = op2 - op1;
+        if (s) updateArithmetic(op2, op1, false);
         break;
 
+    // ADD
     case 0b0100:
-        dst = ADD(op1, op2, s);
+        dst = op1 + op2;
+        if (s) updateArithmetic(op1, op2, true);
         break;
 
+    // ADC
     case 0b0101:
-        dst = ADC(op1, op2, s);
+        op2 += regs.c();
+        dst = op1 + op2;
+        if (s) updateArithmetic(op1, op2, true);
         break;
 
+    // SBC
     case 0b0110:
-        dst = SBC(op1, op2, s);
+        op2 += regs.c() ? 0 : 1;
+        dst = op1 - op2;
+        if (s) updateArithmetic(op1, op2, false);
         break;
 
+    // RBC
     case 0b0111:
-        dst = SBC(op2, op1, s);
+        op1 += regs.c() ? 0 : 1;
+        dst = op2 - op1;
+        if (s) updateArithmetic(op2, op1, false);
         break;
 
+    // TST
     case 0b1000:
-        TST(op1, op2);
+        updateLogical(op1 & op2);
         break;
 
+    // TEQ
     case 0b1001:
-        TEQ(op1, op2);
+        updateLogical(op1 ^ op2);
         break;
 
+    // CMP
     case 0b1010:
-        CMP(op1, op2);
+        updateArithmetic(op1, op2, false);
         break;
 
+    // CMN
     case 0b1011:
-        CMN(op1, op2);
+        updateArithmetic(op1, op2, true);
         break;
 
+    // ORR
     case 0b1100:
-        dst = ORR(op1, op2, s);
+        dst = op1 | op2;
+        if (s) updateLogical(dst);
         break;
 
+    // MOV
     case 0b1101:
-        dst = MOV(op2, s);
+        dst = op2;
+        if (s) updateLogical(dst);
         break;
 
+    // BIC
     case 0b1110:
-        dst = BIC(op1, op2, s);
+        dst = op1 & ~op2;
+        if (s) updateLogical(dst);
         break;
 
+    // MVN
     case 0b1111:
-        dst = MVN(op2, s);
+        dst = ~op2;
+        if (s) updateLogical(dst);
         break;
     }
 }

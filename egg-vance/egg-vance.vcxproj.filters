@@ -33,9 +33,6 @@
     <ClCompile Include="src\mmu\mmu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\arm\instr.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\mmu\registers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
