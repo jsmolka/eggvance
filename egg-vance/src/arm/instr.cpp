@@ -1,10 +1,5 @@
 #include "arm.h"
 
-/**
- * Todo
- * - align in BX
- */
-
 #include "common/utility.h"
 
 // Logical Shift Left
@@ -455,8 +450,7 @@ void ARM::BX(u32 value)
         // Switch to ARM mode
         regs.cpsr &= ~CPSR_T;
 
-        // Align word
-        value &= ~(1 << 1);
+        align32(value);
     }
 
     regs.pc = value;

@@ -12,42 +12,55 @@
 // ARM 1
 void ARM::dataProcessing(u32 instr)
 {
-    // Immediate flag
+    // Immediate operand flag
     u8 i = instr >> 25 & 0x1;
+    // Operation code
     u8 opcode = instr >> 21 & 0xF;
     // Set conditions flag
     u8 s = instr >> 20 & 0x1;
+    // First operand register
     u8 rn = instr >> 16 & 0xF;
+    // Destination register
     u8 rd = instr >> 12 & 0xF;
+    // Second operand
     u32 op2 = instr & 0xFFF;
 
+    // First operand
     u32 op1 = regs[rn];
+    // Destination register
     u32& dst = regs[rd];
 
     if (i)
     {
-        // Operand 2 is an immediate value with applied rotate
+        // Immediate 8-bit value
         u8 imm = op2 & 0xFF;
-        u8 rot = op2 >> 8 & 0xF;
+        // Rotation applied to the immediate value
+        u8 rotate = op2 >> 8 & 0xF;
 
-        // No RRX special case here
-        if (rot != 0)
-            op2 = ROR(imm, 2 * rot, false);
-        else
+        // Twice the rotation is applied
+        rotate *= 2;
+
+        // RRX does not exist in this case
+        if (rotate == 0)
             op2 = imm;
+        else
+            op2 = ROR(imm, rotate, false);
     }
     else
     {
-        // Operand 2 is a register with applied shift
+        // Second operator register
         u8 rm = op2 & 0xF;
+        // Shift applied to register
         u8 shift = op2 >> 4 & 0xFF;
 
+        // Shift offset
         u8 offset;
-        // Process different shift formats
+
         if (shift & 0x1)
         {
-            // Offset is stored in the lower byte of rs
+            // Shift register
             u8 rs = shift >> 4 & 0xF;
+            // Offset is stored in the lower byte
             offset = regs[rs] & 0xFF;
         }
         else
@@ -116,7 +129,7 @@ void ARM::dataProcessing(u32 instr)
         break;
 
     case 0b1100:
-        dst =ORR(op1, op2, s);
+        dst = ORR(op1, op2, s);
         break;
 
     case 0b1101:
