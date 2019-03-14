@@ -4,6 +4,7 @@
  * Todo
  * - should BX align?
  * - PC in ARM 1
+ * - process shift carry in data processing
  */
 
 #include "common/log.h"
@@ -25,11 +26,10 @@ void ARM::dataProcessing(u32 instr)
     // Second operand
     u32 op2 = instr & 0xFFF;
 
-    // First operand
     u32 op1 = regs[rn];
-    // Destination register
     u32& dst = regs[rd];
 
+    bool carry;
     if (i)
     {
         // Immediate 8-bit value
@@ -48,7 +48,7 @@ void ARM::dataProcessing(u32 instr)
         else
         {
             bool carry;
-            op2 = rotateRight(imm, rotate, carry);
+            op2 = ror(imm, rotate, carry);
         }
     }
     else
@@ -74,25 +74,23 @@ void ARM::dataProcessing(u32 instr)
             offset = shift >> 3 & 0x1FF;
         }
 
-        bool carry;
         switch (shift >> 1 & 0x3)
         {
-        case 0b00: 
-            op2 = logicalShiftLeft(regs[rm], offset, carry); 
-            break;
-
-        case 0b01: 
-            op2 = logicalShiftRight(regs[rm], offset, carry); 
-            break;
-
-        case 0b10: 
-            op2 = arithmeticShiftRight(regs[rm], offset, carry); 
-            break;
-
-        case 0b11: 
-            op2 = rotateRight(regs[rm], offset, carry); 
-            break;
+        case 0b00: op2 = lsl(regs[rm], offset, carry); break;
+        case 0b01: op2 = lsr(regs[rm], offset, carry); break;
+        case 0b10: op2 = asr(regs[rm], offset, carry); break;
+        case 0b11: op2 = ror(regs[rm], offset, carry); break;
         }
+    }
+
+    // Writing to PC
+    if (s && rd == 15)
+    {
+        // Move current SPSR into CPSR
+        if (regs.spsr)
+            regs.cpsr = *regs.spsr;
+        else
+            log() << "SPSR in null in mode " << (int)regs.mode();
     }
 
     switch (opcode)
@@ -100,96 +98,96 @@ void ARM::dataProcessing(u32 instr)
     // AND
     case 0b0000:
         dst = op1 & op2;
-        if (s) updateLogical(dst);
+        if (s) logical(dst);
         break;
 
     // EOR
     case 0b0001:
         dst = op1 ^ op2;
-        if (s) updateLogical(dst);
+        if (s) logical(dst);
         break;
 
     // SUB
     case 0b0010:
         dst = op1 - op2;
-        if (s) updateArithmetic(op1, op2, false);
+        if (s) arithmetic(op1, op2, false);
         break;
 
     // RSB
     case 0b0011:
         dst = op2 - op1;
-        if (s) updateArithmetic(op2, op1, false);
+        if (s) arithmetic(op2, op1, false);
         break;
 
     // ADD
     case 0b0100:
         dst = op1 + op2;
-        if (s) updateArithmetic(op1, op2, true);
+        if (s) arithmetic(op1, op2, true);
         break;
 
     // ADC
     case 0b0101:
         op2 += regs.c();
         dst = op1 + op2;
-        if (s) updateArithmetic(op1, op2, true);
+        if (s) arithmetic(op1, op2, true);
         break;
 
     // SBC
     case 0b0110:
         op2 += regs.c() ? 0 : 1;
         dst = op1 - op2;
-        if (s) updateArithmetic(op1, op2, false);
+        if (s) arithmetic(op1, op2, false);
         break;
 
     // RBC
     case 0b0111:
         op1 += regs.c() ? 0 : 1;
         dst = op2 - op1;
-        if (s) updateArithmetic(op2, op1, false);
+        if (s) arithmetic(op2, op1, false);
         break;
 
     // TST
     case 0b1000:
-        updateLogical(op1 & op2);
+        logical(op1 & op2);
         break;
 
     // TEQ
     case 0b1001:
-        updateLogical(op1 ^ op2);
+        logical(op1 ^ op2);
         break;
 
     // CMP
     case 0b1010:
-        updateArithmetic(op1, op2, false);
+        arithmetic(op1, op2, false);
         break;
 
     // CMN
     case 0b1011:
-        updateArithmetic(op1, op2, true);
+        arithmetic(op1, op2, true);
         break;
 
     // ORR
     case 0b1100:
         dst = op1 | op2;
-        if (s) updateLogical(dst);
+        if (s) logical(dst);
         break;
 
     // MOV
     case 0b1101:
         dst = op2;
-        if (s) updateLogical(dst);
+        if (s) logical(dst);
         break;
 
     // BIC
     case 0b1110:
         dst = op1 & ~op2;
-        if (s) updateLogical(dst);
+        if (s) logical(dst);
         break;
 
     // MVN
     case 0b1111:
         dst = ~op2;
-        if (s) updateLogical(dst);
+        if (s) logical(dst);
         break;
     }
 }

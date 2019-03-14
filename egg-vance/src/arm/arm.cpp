@@ -407,34 +407,33 @@ void ARM::updateV(u32 value, u32 operand, bool addition)
     regs.setV(overflow);
 }
 
-void ARM::updateArithmetic(u32 op1, u32 op2, bool addition)
+void ARM::arithmetic(u32 op1, u32 op2, bool addition)
 {
-    u32 result = 0;
-    if (addition)
-        result = op1 + op2;
-    else
-        result = op1 - op2;
+    u32 result = addition 
+        ? op1 + op2 
+        : op1 - op2;
 
     updateZ(result);
     updateN(result);
-    updateV(op1, op2, addition);
     updateC(op1, op2, addition);
+    updateV(op1, op2, addition);
 }
 
-void ARM::updateLogical(u32 result)
+void ARM::logical(u32 result)
 {
     updateZ(result);
     updateN(result);
 }
 
-void ARM::updateShift(u32 result, bool carry)
+void ARM::logical(u32 result, bool carry)
 {
-    updateLogical(result);
+    updateZ(result);
+    updateN(result);
 
     regs.setC(carry);
 }
 
-u32 ARM::logicalShiftLeft(u32 value, u8 offset, bool& carry)
+u32 ARM::lsl(u32 value, u8 offset, bool& carry)
 {
     if (offset > 0)
     {
@@ -451,7 +450,7 @@ u32 ARM::logicalShiftLeft(u32 value, u8 offset, bool& carry)
     return value;
 }
 
-u32 ARM::logicalShiftRight(u32 value, u8 offset, bool& carry)
+u32 ARM::lsr(u32 value, u8 offset, bool& carry)
 {
     if (offset > 0)
     {
@@ -471,7 +470,7 @@ u32 ARM::logicalShiftRight(u32 value, u8 offset, bool& carry)
     return value;
 }
 
-u32 ARM::arithmeticShiftRight(u32 value, u8 offset, bool& carry)
+u32 ARM::asr(u32 value, u8 offset, bool& carry)
 {
     if (offset > 0)
     {
@@ -496,7 +495,7 @@ u32 ARM::arithmeticShiftRight(u32 value, u8 offset, bool& carry)
     return value;
 }
 
-u32 ARM::rotateRight(u32 value, u8 offset, bool& carry)
+u32 ARM::ror(u32 value, u8 offset, bool& carry)
 {
     if (offset > 0)
     {

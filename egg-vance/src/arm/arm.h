@@ -36,14 +36,14 @@ private:
     void updateC(u32 op1, u32 op2, bool addition);
     void updateV(u32 op1, u32 op2, bool addition);
 
-    void updateArithmetic(u32 op1, u32 op2, bool addition);
-    void updateLogical(u32 result);
-    void updateShift(u32 result, bool carry);
+    void arithmetic(u32 op1, u32 op2, bool addition);
+    void logical(u32 result);
+    void logical(u32 result, bool carry);
 
-    u32 logicalShiftLeft(u32 value, u8 offset, bool& carry);
-    u32 logicalShiftRight(u32 value, u8 offset, bool& carry);
-    u32 arithmeticShiftRight(u32 value, u8 offset, bool& carry);
-    u32 rotateRight(u32 value, u8 offset, bool& carry);
+    u32 lsl(u32 value, u8 offset, bool& carry);
+    u32 lsr(u32 value, u8 offset, bool& carry);
+    u32 asr(u32 value, u8 offset, bool& carry);
+    u32 ror(u32 value, u8 offset, bool& carry);
 
     void moveShiftedRegister(u16 instr);
     void addSubImmediate(u16 instr);

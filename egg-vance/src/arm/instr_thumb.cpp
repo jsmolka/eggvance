@@ -7,6 +7,7 @@
  * - process SWI in conditional branch
  * - properly name operands
  * - test ROR in Thumb 4
+ * - check if RORs special cases are ok
  */
 
 #include "common/log.h"
@@ -30,27 +31,11 @@ void ARM::moveShiftedRegister(u16 instr)
     bool carry;
     switch (opcode)
     {
-    // LSL
-    case 0b00: 
-        dst = logicalShiftLeft(src, offset, carry); 
-        updateShift(dst, carry);
-        break;
-
-    // LSR
-    case 0b01: 
-        dst = logicalShiftRight(src, offset, carry); 
-        updateShift(dst, carry);
-        break;
-
-    // ASR
-    case 0b10: 
-        dst = arithmeticShiftRight(src, offset, carry); 
-        updateShift(dst, carry);
-        break;
-
-    default:
-        log() << "Invalid operation " << (int)opcode;
+    case 0b00: dst = lsl(src, offset, carry); break;
+    case 0b01: dst = lsr(src, offset, carry); break;
+    case 0b10: dst = asr(src, offset, carry); break;
     }
+    logical(dst, carry);
 }
 
 // THUMB 2
@@ -78,13 +63,13 @@ void ARM::addSubImmediate(u16 instr)
     // ADD
     case 0b0: 
         dst = src + op;
-        updateArithmetic(src, op, true);
+        arithmetic(src, op, true);
         break;
 
     // SUB
     case 0b1: 
         dst = src - op; 
-        updateArithmetic(src, op, false);
+        arithmetic(src, op, false);
         break;
     }
 }
@@ -107,24 +92,24 @@ void ARM::moveCmpAddSubImmediate(u16 instr)
     // MOV
     case 0b00: 
         dst = offset;
-        updateLogical(dst);
+        logical(dst);
         break;
 
     // CMP
     case 0b01: 
-        updateArithmetic(src, offset, false);
+        arithmetic(src, offset, false);
         break;
 
     // ADD
     case 0b10: 
         dst = src + offset;
-        updateArithmetic(src, offset, true);
+        arithmetic(src, offset, true);
         break;
 
     // SUB
     case 0b11: 
         dst = src - offset;
-        updateArithmetic(src, offset, false);
+        arithmetic(src, offset, false);
         break;
     }
 }
@@ -148,44 +133,44 @@ void ARM::aluOperations(u16 instr)
     // AND
     case 0b0000: 
         dst &= src;
-        updateLogical(dst);
+        logical(dst);
         break;
 
     // EOR
     case 0b0001: 
         dst ^= src;
-        updateLogical(dst);
+        logical(dst);
         break;
 
     // LSL
     case 0b0010: 
-        dst = logicalShiftLeft(dst, src, carry); 
-        updateShift(dst, carry);
+        dst = lsl(dst, src, carry); 
+        logical(dst, carry);
         break;
 
     // LSR
     case 0b0011: 
-        dst = logicalShiftRight(dst, src, carry); 
-        updateShift(dst, carry);
+        dst = lsr(dst, src, carry); 
+        logical(dst, carry);
         break;
 
     // ASR
     case 0b0100: 
-        dst = arithmeticShiftRight(dst, src, carry); 
-        updateShift(dst, carry);
+        dst = asr(dst, src, carry); 
+        logical(dst, carry);
         break;
 
     // ADC
     case 0b0101: 
         src += regs.c();
-        updateArithmetic(dst, src, true);
+        arithmetic(dst, src, true);
         dst += src;
         break;
 
     // SBC
     case 0b0110: 
         src += regs.c() ? 0 : 1;
-        updateArithmetic(dst, src, false);
+        arithmetic(dst, src, false);
         dst -= src;
         break;
 
@@ -193,60 +178,60 @@ void ARM::aluOperations(u16 instr)
     case 0b0111:
         if (src != 0)
         {
-            dst = rotateRight(dst, src, carry);
-            updateShift(dst, carry);
+            dst = ror(dst, src, carry);
+            logical(dst, carry);
         }
         else
         {
             // Using ROR #0 only sets Z, N and does not change the dst
-            updateLogical(dst);
+            logical(dst);
         }
         break;
 
     // TST
     case 0b1000:
-        updateLogical(dst & src);
+        logical(dst & src);
         break;
 
     // NEG
     case 0b1001:
         dst = 0 - src;
-        updateArithmetic(0, src, false);
+        arithmetic(0, src, false);
         break;
 
     // CMP
     case 0b1010:
-        updateArithmetic(dst, src, false);
+        arithmetic(dst, src, false);
         break;
 
     // CMP
     case 0b1011:       
-        updateArithmetic(dst, src, true);
+        arithmetic(dst, src, true);
         break;
 
     // ORR
     case 0b1100: 
         dst |= src;
-        updateLogical(dst);
+        logical(dst);
         break;
 
     // MUL
     case 0b1101: 
         dst *= src;
         // Multiplication does not set the V flag
-        updateLogical(dst);
+        logical(dst);
         break;
 
     // BIC
     case 0b1110:
         dst &= ~src;
-        updateLogical(dst);
+        logical(dst);
         break;
 
     // MVN
     case 0b1111: 
         dst = ~src;
-        updateLogical(dst);
+        logical(dst);
         break;
     }
 }
@@ -282,7 +267,7 @@ void ARM::highRegisterBranchExchange(u16 instr)
 
     // CMP
     case 0b01:
-        updateArithmetic(dst, src, false);
+        arithmetic(dst, src, false);
         break;
 
     // MOV
