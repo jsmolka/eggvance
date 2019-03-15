@@ -19,9 +19,9 @@ template<unsigned int bits>
 inline s32 twos(u32 value)
 {
     // Check if sign bit is set
-    if (value & (1 << (bits - 1)))
+    if (value & ((u64)1 << (bits - 1)))
     {
-        u32 mask = (1 << bits) - 1;
+        u64 mask = ((u64)1 << bits) - 1;
         return -1 * ((~value + 1) & mask);
     }
     return value;

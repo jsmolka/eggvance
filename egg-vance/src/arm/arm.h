@@ -65,7 +65,12 @@ private:
     void unconditionalBranch(u16 instr);
     void longBranchLink(u16 instr);
 
+    u32 dataProcessingShift(u16 value, bool& carry);
+
     void dataProcessing(u32 instr);
+    void multiply(u32 instr);
+    void multiplyLong(u32 instr);
+    void singleDataTransfer(u32 instr);
     void branchExchange(u32 instr);
     void branchLink(u32 instr);
 };

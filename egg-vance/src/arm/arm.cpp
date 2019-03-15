@@ -3,6 +3,7 @@
 /**
  * Todo:
  * - optimizie ROR
+ * - ARM runtime exception
  */
 
 #include "common/log.h"
@@ -242,6 +243,18 @@ void ARM::execute()
             {
             case ARM_1:
                 dataProcessing(instr);
+                break;
+
+            case ARM_2:
+                multiply(instr);
+                break;
+
+            case ARM_3:
+                multiplyLong(instr);
+                break;
+
+            case ARM_4:
+                singleDataTransfer(instr);
                 break;
 
             case ARM_5:
