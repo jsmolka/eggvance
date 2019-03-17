@@ -204,7 +204,7 @@ void ARM::aluOperations(u16 instr)
         arithmetic(dst, src, false);
         break;
 
-    // CMP
+    // CMN
     case 0b1011:       
         arithmetic(dst, src, true);
         break;
@@ -277,12 +277,16 @@ void ARM::highRegisterBranchExchange(u16 instr)
 
     // BX
     case 0b11:
-        if (src & 0x0)
+        if ((src & 0x1) == 0)
         {
             // Switch to ARM mode
             regs.setThumb(false);
 
             align32(src);
+        }
+        else
+        {
+            align16(src);
         }
 
         regs.pc = src;

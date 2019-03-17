@@ -472,7 +472,8 @@ u32 ARM::lsr(u32 value, u8 offset, bool& carry)
 
         value >>= offset;
     }
-    // Special case LSR #0 / #32
+    // Todo: should this happen for #0 or #32?
+    // Special case LSR #32
     else
     {
         // Store the MSB in the carry
@@ -490,6 +491,7 @@ u32 ARM::asr(u32 value, u8 offset, bool& carry)
         // Save the last bit shifted out in the carry
         carry = (value >> (offset - 1)) & 0x1;
 
+        // Todo: this can be optimized
         u32 msb = value & (1 << 31);
         for (int x = 0; x < offset; ++x)
         {
@@ -497,7 +499,8 @@ u32 ARM::asr(u32 value, u8 offset, bool& carry)
             value |= msb;
         }
     }
-    // Special case ASR #0 / #32
+    // Todo: should this happen for #0 or #32?
+    // Special case ASR #32
     else
     {
         // Store the MSB in the carry
