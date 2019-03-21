@@ -47,21 +47,21 @@ enum Instruction
 {
     UNDEFINED,    // Undefined instruction
     REFILL_PIPE,  // Refill the pipeline
-    ARM_1,        // Data processing / PSR transfer
-    ARM_2,        // Multiply
-    ARM_3,        // Multiply long
-    ARM_4,        // Single data swap
-    ARM_5,        // Branch and exchange
-    ARM_6,        // Halfword data transfer (register offset)
-    ARM_7,        // Halfword data transfer (immediate offset)
-    ARM_8,        // Single data transfer
-    ARM_9,        // Undefined
-    ARM_10,       // Block data transfer
-    ARM_11,       // Branch with link
-    ARM_12,       // Coprocessor data transfer
-    ARM_13,       // Coprocessor data operation
-    ARM_14,       // Coprocessor register transfer
-    ARM_15,       // Software interrupt
+    ARM_1,        // Branch and exchange
+    ARM_2,        // Branch and branch with link
+    ARM_3,        // Data processing
+    ARM_4,        // PSR transfer
+    ARM_5,        // Multiply and multiply-accumulate
+    ARM_6,        // Multiply long and multiply-accumulate long
+    ARM_7,        // Single data transfer
+    ARM_8,        // Halfword data transfer
+    ARM_9,        // Block data transfer
+    ARM_10,       // Single data swap
+    ARM_11,       // Software interrupt
+    ARM_12,       // Coprocessor data operations
+    ARM_13,       // Coprocessor data transfers
+    ARM_14,       // Coprocessor register transfers
+    ARM_15,       // Undefined
     THUMB_1,      // Move shifted register
     THUMB_2,      // Add / subtract
     THUMB_3,      // Move / compare / add / subtract immediate

@@ -4,6 +4,8 @@
  * Todo:
  * - optimizie ROR
  * - ARM runtime exception
+ * - should there be multiple elifs for coprocessor instructions in arm?
+ * - check arm condition in decode to increase performance
  */
 
 #include "common/log.h"
@@ -60,80 +62,72 @@ void ARM::decode()
                 && (instr >> 4 & 0xF) == 0b1001)
             {
                 // Multiply
-                pipe[1].decoded = ARM_2;
+                pipe[1].decoded = ARM_5;
             }
             else if ((instr >> 23 & 0x1F) == 0b00001
                 && (instr >> 4 & 0xF) == 0b1001)
             {
                 // Multiply long
-                pipe[1].decoded = ARM_3;
+                pipe[1].decoded = ARM_6;
             }
             else if ((instr >> 23 & 0x1F) == 0b00010
                 && (instr >> 20 & 0x3) == 0b00
                 && (instr >> 4 & 0xFF) == 0b00001001)
             {
                 // Single data swap
-                pipe[1].decoded = ARM_4;
+                pipe[1].decoded = ARM_10;
             }
             else if ((instr >> 4 & 0xFFFFFF) == 0b000100101111111111110001)
             {
                 // Branch and exchange
-                pipe[1].decoded = ARM_5;
+                pipe[1].decoded = ARM_1;
             }
             else if ((instr >> 25 & 0x7) == 0b000
-                && (instr >> 22 & 0x1) == 0b0
                 && (instr >> 7 & 0x1F) == 0b00001
                 && (instr >> 4 & 0x1) == 0b1)
             {
-                // Halfword data transfer (register offset)
-                pipe[1].decoded = ARM_6;
-            }
-            else if ((instr >> 25 & 0x7) == 0b000
-                && (instr >> 22 & 0x1) == 0b1
-                && (instr >> 7 & 0x1) == 0b1
-                && (instr >> 4 & 0x1) == 0b1)
-            {
-                // Halfword data transfer (immediate offset)
-                pipe[1].decoded = ARM_7;
+                // Halfword data transfers
+                pipe[1].decoded = ARM_8;
             }
             else
             {
-                // Data processing / PSR transfer
-                pipe[1].decoded = ARM_1;
+                // Todo: differentiate between DP and PSR
+                // Data processing
+                pipe[1].decoded = ARM_3;
             }
-        }
-        else if ((instr >> 25 & 0x7) == 0b011
-            && (instr >> 4 & 0x1) == 0b1)
-        {
-            // Undefined
-            pipe[1].decoded = ARM_9;
-        }
-        else if ((instr >> 25 & 0x3) == 0b01)
-        {
-            // Single data transfer
-            pipe[1].decoded = ARM_8;
         }
         else if ((instr >> 25 & 0x7) == 0b100)
         {
             // Block data transfer
-            pipe[1].decoded = ARM_10;
+            pipe[1].decoded = ARM_9;
         }
         else if ((instr >> 25 & 0x7) == 0b101)
         {
-            // Branch
-            pipe[1].decoded = ARM_11;
+            // Branch and branch with link
+            pipe[1].decoded = ARM_2;
         }
         else if ((instr >> 25 & 0x7) == 0b110)
         {
             // Coprocessor data transfer
-            pipe[1].decoded = ARM_12;
+            pipe[1].decoded = ARM_13;
+        }
+        else if ((instr >> 25 & 0x3) == 0b01)
+        {
+            // Single data transfer
+            pipe[1].decoded = ARM_7;
+        }
+                else if ((instr >> 25 & 0x7) == 0b011
+            && (instr >> 4 & 0x1) == 0b1)
+        {
+            // Undefined
+            pipe[1].decoded = ARM_15;
         }
         else if ((instr >> 24 & 0xF) == 0b1110)
         {
             if ((instr >> 4 & 0x1) == 0b0)
             {
                 // Coprocessor data operation
-                pipe[1].decoded = ARM_13;
+                pipe[1].decoded = ARM_12;
             }
             else
             {
@@ -144,7 +138,7 @@ void ARM::decode()
         else if ((instr >> 24 & 0xF) == 0b1111)
         {
             // Softrware interrupt
-            pipe[1].decoded = ARM_15;
+            pipe[1].decoded = ARM_11;
         }
         else
         {
@@ -242,27 +236,27 @@ void ARM::execute()
             switch (pipe[2].decoded)
             {
             case ARM_1:
-                dataProcessing(instr);
-                break;
-
-            case ARM_2:
-                multiply(instr);
-                break;
-
-            case ARM_3:
-                multiplyLong(instr);
-                break;
-
-            case ARM_4:
-                singleDataTransfer(instr);
-                break;
-
-            case ARM_5:
                 branchExchange(instr);
                 break;
 
-            case ARM_11:
+            case ARM_2:
                 branchLink(instr);
+                break;
+
+            case ARM_3:
+                dataProcessing(instr);
+                break;
+
+            case ARM_5:
+                multiply(instr);
+                break;
+
+            case ARM_6:
+                multiplyLong(instr);
+                break;
+
+            case ARM_7:
+                singleDataTransfer(instr);
                 break;
 
             default:

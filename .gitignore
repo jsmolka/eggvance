@@ -5,3 +5,6 @@ bin/
 
 # FASMARM
 *.gba
+
+# Disable early stage arm tests
+test-roms/arm/

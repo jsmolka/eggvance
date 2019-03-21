@@ -10,7 +10,7 @@
 #include "common/log.h"
 #include "common/utility.h"
 
-u32 ARM::dataProcessingShift(u16 value, bool& carry)
+u32 ARM::shiftedRegister(u16 value, bool& carry)
 {
     // Shift data
     u8 shift = (value >> 4) & 0xFF;
@@ -37,10 +37,65 @@ u32 ARM::dataProcessingShift(u16 value, bool& carry)
     case 0b01: return lsr(regs[rm], offset, carry);
     case 0b10: return asr(regs[rm], offset, carry);
     case 0b11: return ror(regs[rm], offset, carry);
+
+    default:
+        return regs[rm];
     }
 }
 
-// ARM 1
+ // ARM 1
+void ARM::branchExchange(u32 instr)
+{
+    // Operand register
+    u8 rn = instr & 0xF;
+
+    // Operation is undefined for R15
+    if (rn > 14)
+        log() << "Handle me!";
+
+    u32 addr = regs[rn];
+
+    // Exchange instruction set
+    if (addr & 0x1)
+    {
+        regs.setThumb(true);
+
+        // Align and clear thumb bit
+        align16(addr);
+    }
+    else
+    {
+        align32(addr);
+    }
+
+    regs.pc = addr;
+    needs_flush = true;
+}
+
+// ARM 2
+void ARM::branchLink(u32 instr)
+{
+    // Link flag
+    u8 l = (instr >> 24) & 0x1;
+    // 24-bit immediate value
+    u32 offset = instr & 0xFFFFFF;
+
+    s32 signed_offset = twos<24>(offset);
+
+    // Shift left by two bits
+    signed_offset <<= 2;
+
+    if (l)
+    {
+        // Save address of next instruction
+        regs.lr = regs.pc - 4;
+    }
+
+    regs.pc += signed_offset;
+    needs_flush = true;
+}
+
+// ARM 3
 void ARM::dataProcessing(u32 instr)
 {
     // Immediate operand flag
@@ -84,7 +139,7 @@ void ARM::dataProcessing(u32 instr)
     else
     {
         // Apply shift to second operand
-        op2 = dataProcessingShift(op2, carry);
+        op2 = shiftedRegister(op2, carry);
     }
 
     // Writing to PC
@@ -197,7 +252,7 @@ void ARM::dataProcessing(u32 instr)
     }
 }
 
-// ARM 2
+// ARM 5
 void ARM::multiply(u32 instr)
 {
     // Accumulate flag
@@ -230,7 +285,7 @@ void ARM::multiply(u32 instr)
         logical(dst, false);
 }
 
-// ARM 3
+// ARM 6
 void ARM::multiplyLong(u32 instr)
 {
     // Signed / unsigned flag
@@ -304,7 +359,7 @@ void ARM::multiplyLong(u32 instr)
     dst_lo = result & 0xFFFFFFFF;
 }
 
-// ARM 4
+// ARM 7
 void ARM::singleDataTransfer(u32 instr)
 {
     // Register / immediate flag
@@ -330,74 +385,11 @@ void ARM::singleDataTransfer(u32 instr)
     {
         bool carry;
         // Offset is a shifted register
-        offset = dataProcessingShift(offset, carry);
+        // Register shift amounts are not available in this instruction
+        offset = shiftedRegister(offset, carry);
     }
 
     u32 addr = u 
         ? regs[rn] + offset 
         : regs[rn] - offset;
-}
-
-// ARM 5
-void ARM::branchExchange(u32 instr)
-{
-    // Operand register
-    u8 rn = instr & 0xF;
-    
-    // Operation is undefined for R15
-    if (rn > 14)
-        log() << "Handle me!";
-
-    u32 addr = regs[rn];
-
-    // Exchange instruction set
-    if (addr & 0x1)
-    {
-        regs.setThumb(true);
-
-        // Align and clear thumb bit
-        align16(addr);
-    }
-    else
-    {
-        align32(addr);
-    }
-
-    regs.pc = addr;
-    needs_flush = true;
-}
-
-// ARM 11
-void ARM::branchLink(u32 instr)
-{
-    // Link flag
-    u8 l = (instr >> 24) & 0x1;
-    // 24-bit immediate value
-    u32 offset = instr & 0xFFFFFF;
-
-    s32 signed_offset = twos<24>(offset);
-
-    // Shift left by two bits
-    signed_offset <<= 2;
-
-    //// Convert two's complement
-    //if (offset & 1 << 25)
-    //{
-    //    offset = ~offset;
-    //    offset++;
-
-    //    // Sign extend
-    //    offset |= 1 << 31;
-
-    //    signed_offset = offset;
-    //}
-
-    if (l)
-    {
-        // Save address of next instruction
-        regs.lr = regs.pc - 4;
-    }
-
-    regs.pc += signed_offset;
-    needs_flush = true;
 }
