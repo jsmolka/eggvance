@@ -4,9 +4,8 @@
 
 #define log() Log(__FUNCTION__)
 
-class Log
+struct Log
 {
-public:
     Log(const char* function) 
     { 
         std::cout << function << " - "; 

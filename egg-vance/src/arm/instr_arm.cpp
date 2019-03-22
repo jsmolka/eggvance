@@ -61,11 +61,11 @@ void ARM::branchExchange(u32 instr)
         regs.setThumb(true);
 
         // Align and clear thumb bit
-        align16(addr);
+        align_half(addr);
     }
     else
     {
-        align32(addr);
+        align_word(addr);
     }
 
     regs.pc = addr;
@@ -256,14 +256,14 @@ void ARM::dataProcessing(u32 instr)
 void ARM::multiply(u32 instr)
 {
     // Accumulate flag
-    u8 a = (instr >> 21) & 0x1;
+    bool a = instr >> 21 & 0x1;
     // Set conditions flag
-    u8 s = (instr >> 20) & 0x1;
+    bool s = instr >> 20 & 0x1;
     // Destination register
-    u8 rd = (instr >> 16) & 0xF;
+    u8 rd = instr >> 16 & 0xF;
     // Operand registers
-    u8 rn = (instr >> 12) & 0xF;
-    u8 rs = (instr >> 8) & 0xF;
+    u8 rn = instr >> 12 & 0xF;
+    u8 rs = instr >> 8 & 0xF;
     u8 rm = instr & 0xF;
 
     if (rd == rm || rd == 15 || rm == 15)
@@ -280,7 +280,6 @@ void ARM::multiply(u32 instr)
     if (a) 
         dst += regs[rn];
 
-    // Todo: "meaningless carry value"
     if (s)
         logical(dst, false);
 }
@@ -321,20 +320,7 @@ void ARM::multiplyLong(u32 instr)
 
         // Accumulate signed (SMLAL)
         if (a)
-        {
-            u64 acc = ((u64)dst_hi << 32) | dst_lo;
-            s64 acc_signed = acc;
-
-            // Todo: most likely false
-            if (acc_signed & ((u64)1 << 63))
-            {
-                acc_signed = ~acc_signed;
-                acc_signed++;
-                acc_signed *= -1;
-            }
-
-            result_signed += acc_signed;
-        }
+            result_signed += ((s64)dst_hi << 32) | dst_lo;
 
         // Convert to two's complement
         result = ~result_signed + 1;

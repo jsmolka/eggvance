@@ -17,11 +17,11 @@
 void ARM::moveShiftedRegister(u16 instr)
 {
     // Operation code
-    u8 opcode = (instr >> 11) & 0x3;
+    u8 opcode = instr >> 11 & 0x3;
     // 5-bit immediate value
-    u8 offset = (instr >> 6) & 0x1F;
+    u8 offset = instr >> 6 & 0x1F;
     // Source register
-    u8 rs = (instr >> 3) & 0x7;
+    u8 rs = instr >> 3 & 0x7;
     // Destination register
     u8 rd = instr & 0x7;
 
@@ -42,13 +42,13 @@ void ARM::moveShiftedRegister(u16 instr)
 void ARM::addSubImmediate(u16 instr)
 {
     // Immediate / register flag
-    u8 i = (instr >> 10) & 0x1;
+    u8 i = instr >> 10 & 0x1;
     // Operation code
-    u8 opcode = (instr >> 9) & 0x1;
+    u8 opcode = instr >> 9 & 0x1;
     // 3-bit immediate value / register
-    u8 offset = (instr >> 6) & 0x7;
+    u8 offset = instr >> 6 & 0x7;
     // Source register
-    u8 rs = (instr >> 3) & 0x7;
+    u8 rs = instr >> 3 & 0x7;
     // Destination register
     u8 rd = instr & 0x7;
 
@@ -78,9 +78,9 @@ void ARM::addSubImmediate(u16 instr)
 void ARM::moveCmpAddSubImmediate(u16 instr)
 {
     // Operation code
-    u8 opcode = (instr >> 11) & 0x3;
+    u8 opcode = instr >> 11 & 0x3;
     // Source / destination register
-    u8 rd = (instr >> 8) & 0x7;
+    u8 rd = instr >> 8 & 0x7;
     // 8-bit immediate value
     u8 offset = instr & 0xFF;
 
@@ -118,9 +118,9 @@ void ARM::moveCmpAddSubImmediate(u16 instr)
 void ARM::aluOperations(u16 instr)
 {
     // Operation code
-    u8 opcode = (instr >> 6) & 0xF;
+    u8 opcode = instr >> 6 & 0xF;
     // Source register
-    u8 rs = (instr >> 3) & 0x7;
+    u8 rs = instr >> 3 & 0x7;
     // Source / destination register
     u8 rd = instr & 0x7;
 
@@ -240,13 +240,13 @@ void ARM::aluOperations(u16 instr)
 void ARM::highRegisterBranchExchange(u16 instr)
 {
     // Operation code
-    u8 opcode = (instr >> 8) & 0x3;
+    u8 opcode = instr >> 8 & 0x3;
     // High operand flag for rd
-    u8 hd = (instr >> 7) & 0x1;
+    u8 hd = instr >> 7 & 0x1;
     // High operand flag for rs
-    u8 hs = (instr >> 6) & 0x1;
+    u8 hs = instr >> 6 & 0x1;
     // Source register
-    u8 rs = (instr >> 3) & 0x7;
+    u8 rs = instr >> 3 & 0x7;
     // Destination register
     u8 rd = instr & 0x7;
 
@@ -282,11 +282,11 @@ void ARM::highRegisterBranchExchange(u16 instr)
             // Switch to ARM mode
             regs.setThumb(false);
 
-            align32(src);
+            align_word(src);
         }
         else
         {
-            align16(src);
+            align_half(src);
         }
 
         regs.pc = src;
@@ -299,7 +299,7 @@ void ARM::highRegisterBranchExchange(u16 instr)
 void ARM::loadPcRelative(u16 instr)
 {
     // Destination register
-    u8 rd = (instr >> 8) & 0x7;
+    u8 rd = instr >> 8 & 0x7;
     // 8-bit immediate value
     u16 offset = instr & 0xFF;
 
@@ -317,18 +317,18 @@ void ARM::loadPcRelative(u16 instr)
 void ARM::loadStoreRegisterOffset(u16 instr)
 {
     // Load / store flag
-    u8 l = (instr >> 11) & 0x1;
+    u8 l = instr >> 11 & 0x1;
     // Byte / word flag
-    u8 b = (instr >> 10) & 0x1;
+    u8 b = instr >> 10 & 0x1;
     // Offset register
-    u8 ro = (instr >> 6) & 0x7;
+    u8 ro = instr >> 6 & 0x7;
     // Base register
-    u8 rb = (instr >> 3) & 0x7;
+    u8 rb = instr >> 3 & 0x7;
     // Source / destination register
     u8 rd = instr & 0x7;
 
     u32 addr = regs[rb] + regs[ro];
-    align16(addr);
+    align_half(addr);
 
     u32& dst = regs[rd];
 
@@ -360,18 +360,18 @@ void ARM::loadStoreRegisterOffset(u16 instr)
 void ARM::loadStoreHalfSignExtended(u16 instr)
 {
     // Half / byte flag
-    u8 h = (instr >> 11) & 0x1;
+    u8 h = instr >> 11 & 0x1;
     // Sign extend flag
-    u8 s = (instr >> 10) & 0x1;
+    u8 s = instr >> 10 & 0x1;
     // Offset register
-    u8 ro = (instr >> 6) & 0x7;
+    u8 ro = instr >> 6 & 0x7;
     // Base register
-    u8 rb = (instr >> 3) & 0x7;
+    u8 rb = instr >> 3 & 0x7;
     // Destination register
     u8 rd = instr & 0x7;
 
     u32 addr = regs[rb] + regs[ro];
-    align16(addr);
+    align_half(addr);
 
     u32& dst = regs[rd];
 
@@ -409,13 +409,13 @@ void ARM::loadStoreHalfSignExtended(u16 instr)
 void ARM::loadStoreImmediateOffset(u16 instr)
 {
     // Byte / word flag
-    u8 b = (instr >> 12) & 0x1;
+    u8 b = instr >> 12 & 0x1;
     // Load / store flag
-    u8 l = (instr >> 11) & 0x1;
+    u8 l = instr >> 11 & 0x1;
     // 5-bit immediate value
-    u8 offset = (instr >> 6) & 0x1F;
+    u8 offset = instr >> 6 & 0x1F;
     // Base register
-    u8 rb = (instr >> 3) & 0x7;
+    u8 rb = instr >> 3 & 0x7;
     // Destination register
     u8 rd = instr & 0x7;
 
@@ -424,7 +424,7 @@ void ARM::loadStoreImmediateOffset(u16 instr)
         offset <<= 2;
 
     u32 addr = regs[rb] + offset;
-    align16(addr);
+    align_half(addr);
 
     u32& dst = regs[rd];
 
@@ -456,16 +456,16 @@ void ARM::loadStoreImmediateOffset(u16 instr)
 void ARM::loadStoreHalf(u16 instr)
 {
     // Load / store flag
-    u8 l = (instr >> 11) & 0x1;
+    u8 l = instr >> 11 & 0x1;
     // 5-bit offset
-    u8 offset = (instr >> 6) & 0x1F;
+    u8 offset = instr >> 6 & 0x1F;
     // Base register
-    u8 rb = (instr >> 3) & 0x7;
+    u8 rb = instr >> 3 & 0x7;
     // Destination register
     u8 rd = instr & 0x7;
 
     u32 addr = regs[rb] + offset;
-    align16(addr);
+    align_half(addr);
 
     u32& dst = regs[rd];
 
@@ -487,9 +487,9 @@ void ARM::loadStoreHalf(u16 instr)
 void ARM::loadStoreSpRelative(u16 instr)
 {
     // Load / store flag
-    u8 l = (instr >> 11) & 0x1;
+    u8 l = instr >> 11 & 0x1;
     // Destination register
-    u8 rd = (instr >> 8) & 0x7;
+    u8 rd = instr >> 8 & 0x7;
     // 8-bit immediate value
     u16 offset = instr & 0xFF;
 
@@ -498,7 +498,7 @@ void ARM::loadStoreSpRelative(u16 instr)
 
     // Add unsigned offset to SP
     u32 addr = regs.sp + offset;
-    align16(addr);
+    align_half(addr);
 
     u32& dst = regs[rd];
 
@@ -520,9 +520,9 @@ void ARM::loadStoreSpRelative(u16 instr)
 void ARM::loadAddress(u16 instr)
 {
     // SP / PC flag
-    u8 sp = (instr >> 11) & 0x1;
+    u8 sp = instr >> 11 & 0x1;
     // Destination register
-    u8 rd = (instr >> 8) & 0x7;
+    u8 rd = instr >> 8 & 0x7;
     // 8-bit immediate value
     u16 offset = instr & 0xFF;
 
@@ -548,7 +548,7 @@ void ARM::loadAddress(u16 instr)
 void ARM::addOffsetSp(u16 instr)
 {
     // Sign flag
-    u8 s = (instr >> 7) & 0x1;
+    u8 s = instr >> 7 & 0x1;
     // 7-bit immediate value
     u16 offset = instr & 0x3F;
 
@@ -571,9 +571,9 @@ void ARM::addOffsetSp(u16 instr)
 void ARM::pushPopRegisters(u16 instr)
 {
     // Load / store flag
-    u8 l = (instr >> 11) & 0x1;
+    u8 l = instr >> 11 & 0x1;
     // Store LR / load PC flag
-    u8 r = (instr >> 8) & 0x1;
+    u8 r = instr >> 8 & 0x1;
     // Register list
     u8 rlist = instr & 0xFF;
 
@@ -617,7 +617,7 @@ void ARM::pushPopRegisters(u16 instr)
         {
             regs.pc = mmu->readWord(regs.sp);
 
-            align16(regs.pc);
+            align_half(regs.pc);
 
             regs.sp += 4;
 
@@ -631,9 +631,9 @@ void ARM::pushPopRegisters(u16 instr)
 void ARM::loadStoreMultiple(u16 instr)
 {
     // Load / store flag
-    u8 l = (instr >> 11) & 0x1;
+    u8 l = instr >> 11 & 0x1;
     // Base register
-    u8 rb = (instr >> 8) & 0x7;
+    u8 rb = instr >> 8 & 0x7;
     // Register list
     u8 rlist = instr & 0xFF;
 
@@ -660,7 +660,7 @@ void ARM::loadStoreMultiple(u16 instr)
 void ARM::conditionalBranch(u16 instr)
 {
     // Condition
-    Condition cond = static_cast<Condition>((instr >> 8) & 0xF);
+    Condition cond = static_cast<Condition>(instr >> 8 & 0xF);
     // 8-bit immediate value
     u8 offset = instr & 0xFF;
 
@@ -680,7 +680,7 @@ void ARM::conditionalBranch(u16 instr)
         signed_offset <<= 1;
 
         regs.pc += signed_offset;
-        align16(regs.pc);
+        align_half(regs.pc);
 
         needs_flush = true;
     }
@@ -711,7 +711,7 @@ void ARM::unconditionalBranch(u16 instr)
 void ARM::longBranchLink(u16 instr)
 {
     // Low / high flag
-    u8 h = (instr >> 11) & 0x1;
+    u8 h = instr >> 11 & 0x1;
     // 11-bit immediate value
     u16 offset = instr & 0x7FF;
 
@@ -731,7 +731,7 @@ void ARM::longBranchLink(u16 instr)
 
         regs.pc = regs.lr + (offset << 1);
         
-        align16(regs.pc);
+        align_half(regs.pc);
 
         regs.lr = next;
 
