@@ -56,93 +56,58 @@ void ARM::decode()
     {
         u32 instr = pipe[1].instr;
 
-        if ((instr >> 26 & 0x3) == 0b00)
+        if ((instr >> 25 & 0x7) == 0b101)
         {
-            if ((instr >> 22 & 0x3F) == 0b000000
-                && (instr >> 4 & 0xF) == 0b1001)
-            {
-                // Multiply
-                pipe[1].decoded = ARM_5;
-            }
-            else if ((instr >> 23 & 0x1F) == 0b00001
-                && (instr >> 4 & 0xF) == 0b1001)
-            {
-                // Multiply long
-                pipe[1].decoded = ARM_6;
-            }
-            else if ((instr >> 23 & 0x1F) == 0b00010
-                && (instr >> 20 & 0x3) == 0b00
-                && (instr >> 4 & 0xFF) == 0b00001001)
-            {
-                // Single data swap
-                pipe[1].decoded = ARM_10;
-            }
-            else if ((instr >> 4 & 0xFFFFFF) == 0b000100101111111111110001)
-            {
-                // Branch and exchange
-                pipe[1].decoded = ARM_1;
-            }
-            else if ((instr >> 25 & 0x7) == 0b000
-                && (instr >> 7 & 0x1F) == 0b00001
-                && (instr >> 4 & 0x1) == 0b1)
-            {
-                // Halfword data transfers
-                pipe[1].decoded = ARM_8;
-            }
-            else
-            {
-                // Todo: differentiate between DP and PSR
-                // Data processing
-                pipe[1].decoded = ARM_3;
-            }
+            pipe[1].decoded = ARM_2;  // Branch and branch with link
         }
         else if ((instr >> 25 & 0x7) == 0b100)
         {
-            // Block data transfer
-            pipe[1].decoded = ARM_9;
+            pipe[1].decoded = ARM_9;  // Block data transfer
         }
-        else if ((instr >> 25 & 0x7) == 0b101)
+        else if ((instr >> 26 & 0x3) == 0b11)
         {
-            // Branch and branch with link
-            pipe[1].decoded = ARM_2;
+            pipe[1].decoded = ARM_11;  // Software interrupt
+
+            // Could also be coprocessor instruction, but the GBA has none
         }
-        else if ((instr >> 25 & 0x7) == 0b110)
+        else if ((instr >> 26 & 0x3) == 0b01)
         {
-            // Coprocessor data transfer
-            pipe[1].decoded = ARM_13;
+            pipe[1].decoded = ARM_7;  // Single data transfer
+
+            // Could also be the undefined instruction, but seems linked to the coprocessor
         }
-        else if ((instr >> 25 & 0x3) == 0b01)
+        else  // (instr >> 26 & 0x3) == 0b00
         {
-            // Single data transfer
-            pipe[1].decoded = ARM_7;
-        }
-                else if ((instr >> 25 & 0x7) == 0b011
-            && (instr >> 4 & 0x1) == 0b1)
-        {
-            // Undefined
-            pipe[1].decoded = ARM_15;
-        }
-        else if ((instr >> 24 & 0xF) == 0b1110)
-        {
-            if ((instr >> 4 & 0x1) == 0b0)
+            if ((instr >> 4 & 0xFFFFFF) == 0b000100101111111111110001)
             {
-                // Coprocessor data operation
-                pipe[1].decoded = ARM_12;
+                pipe[1].decoded = ARM_1;  // Branch and exchange
+            }
+            else if ((instr >> 22 & 0xF) == 0b0000
+                && (instr >> 4 & 0xF) == 0b1001)
+            {
+                pipe[1].decoded = ARM_5;  // Multiply and multiply-accumulate
+            }
+            else if ((instr >> 23 & 0x7) == 0b001
+                && (instr >> 4 & 0xF) == 0b1001)
+            {
+                pipe[1].decoded = ARM_6;  // Multiply long and multiply-accumulate long
+            }
+            else if ((instr >> 23 & 0x7) == 0b010
+                && (instr >> 20 & 0x3) == 0b00
+                && (instr >> 4 & 0xFF) == 0b00001001)
+            {
+                pipe[1].decoded = ARM_7;  // Single data transfer
+            }
+            else if ((instr >> 25 & 0x1) == 0b0
+                && (instr >> 7 & 0x1) == 0b1
+                && (instr >> 4 & 0x1) == 0b1)
+            {
+                pipe[1].decoded = ARM_8;  // Halfword data transfer
             }
             else
             {
-                // Coprocessor register transfer
-                pipe[1].decoded = ARM_14;
+                pipe[1].decoded = ARM_3;  // Data processing
             }
-        }
-        else if ((instr >> 24 & 0xF) == 0b1111)
-        {
-            // Softrware interrupt
-            pipe[1].decoded = ARM_11;
-        }
-        else
-        {
-            log() << "Cannot decode ARM instruction " << (int)instr;
         }
     }
     else
@@ -260,7 +225,7 @@ void ARM::execute()
                 break;
 
             default:
-                log() << "Tried executing unknown THUMB instruction " << (int)pipe[2].decoded;
+                log() << "Tried executing unknown ARM instruction " << (int)pipe[2].decoded;
             }
         }
     }

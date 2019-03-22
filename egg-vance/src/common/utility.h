@@ -21,6 +21,7 @@ inline s32 twos(u32 value)
     // Check if sign bit is set
     if (value & ((u64)1 << (bits - 1)))
     {
+        // Create mask of n bits
         u64 mask = ((u64)1 << bits) - 1;
         return -1 * ((~value + 1) & mask);
     }
