@@ -13,7 +13,7 @@
 u32 ARM::shiftedRegister(u16 value, bool& carry)
 {
     // Shift data
-    u8 shift = (value >> 4) & 0xFF;
+    u8 shift = value >> 4 & 0xFF;
     // Source register
     u8 rm = value & 0xF;
 
@@ -21,17 +21,17 @@ u32 ARM::shiftedRegister(u16 value, bool& carry)
     if (shift & 0x1)
     {
         // Shift register
-        u8 rs = (shift >> 4) & 0xF;
+        u8 rs = shift >> 4 & 0xF;
         // Offset is stored in the lower byte
         offset = regs[rs] & 0xFF;
     }
     else
     {
         // Offset is a 5-bit immediate value
-        offset = (shift >> 3) & 0x1F;
+        offset = shift >> 3 & 0x1F;
     }
 
-    switch ((shift >> 1) & 0x3)
+    switch (shift >> 1 & 0x3)
     {
     case 0b00: return lsl(regs[rm], offset, carry);
     case 0b01: return lsr(regs[rm], offset, carry);
@@ -51,17 +51,16 @@ void ARM::branchExchange(u32 instr)
 
     // Operation is undefined for R15
     if (rn > 14)
-        log() << "Handle me!";
+        log() << "Handle error";
 
     u32 addr = regs[rn];
 
     // Exchange instruction set
     if (addr & 0x1)
     {
-        regs.setThumb(true);
-
-        // Align and clear thumb bit
         align_half(addr);
+        // Switch to thumb
+        regs.setThumb(true);
     }
     else
     {
@@ -76,7 +75,7 @@ void ARM::branchExchange(u32 instr)
 void ARM::branchLink(u32 instr)
 {
     // Link flag
-    u8 l = (instr >> 24) & 0x1;
+    u8 l = instr >> 24 & 0x1;
     // 24-bit immediate value
     u32 offset = instr & 0xFFFFFF;
 
@@ -86,10 +85,8 @@ void ARM::branchLink(u32 instr)
     signed_offset <<= 2;
 
     if (l)
-    {
         // Save address of next instruction
         regs.lr = regs.pc - 4;
-    }
 
     regs.pc += signed_offset;
     needs_flush = true;
@@ -99,15 +96,15 @@ void ARM::branchLink(u32 instr)
 void ARM::dataProcessing(u32 instr)
 {
     // Immediate operand flag
-    u8 i = (instr >> 25) & 0x1;
+    u8 i = instr >> 25 & 0x1;
     // Operation code
-    u8 opcode = (instr >> 21) & 0xF;
+    u8 opcode = instr >> 21 & 0xF;
     // Set conditions flag
-    u8 s = (instr >> 20) & 0x1;
+    u8 s = instr >> 20 & 0x1;
     // First operand register
-    u8 rn = (instr >> 16) & 0xF;
+    u8 rn = instr >> 16 & 0xF;
     // Destination register
-    u8 rd = (instr >> 12) & 0xF;
+    u8 rd = instr >> 12 & 0xF;
     // Second operand
     u32 op2 = instr & 0xFFF;
 
@@ -120,7 +117,7 @@ void ARM::dataProcessing(u32 instr)
         // Immediate 8-bit value
         u8 imm = op2 & 0xFF;
         // Rotation applied to the immediate value
-        u8 rotate = (op2 >> 8) & 0xF;
+        u8 rotate = op2 >> 8 & 0xF;
 
         // Twice the rotation is applied
         rotate *= 2;
@@ -145,8 +142,8 @@ void ARM::dataProcessing(u32 instr)
     // Writing to PC
     if (s && rd == 15)
     {
-        // Move current SPSR into CPSR
         if (regs.spsr)
+            // Move current SPSR into CPSR
             regs.cpsr = *regs.spsr;
 
         // Do not set flags
@@ -288,20 +285,20 @@ void ARM::multiply(u32 instr)
 void ARM::multiplyLong(u32 instr)
 {
     // Signed / unsigned flag
-    u8 u = (instr >> 22) & 0x1;
+    u8 u = instr >> 22 & 0x1;
     // Accumulate flag
-    u8 a = (instr >> 21) & 0x1;
+    u8 a = instr >> 21 & 0x1;
     // Set conditions flag
-    u8 s = (instr >> 20) & 0x1;
+    u8 s = instr >> 20 & 0x1;
     // Source / destination registers
-    u8 rd_hi = (instr >> 16) & 0xF;
-    u8 rd_lo = (instr >> 12) & 0xF;
+    u8 rd_hi = instr >> 16 & 0xF;
+    u8 rd_lo = instr >> 12 & 0xF;
     // Operand registers
-    u8 rs = (instr >> 8) & 0xF;
+    u8 rs = instr >> 8 & 0xF;
     u8 rm = instr & 0xF;
 
     if (rs == 15 || rm == 15 || rd_hi == 15 || rd_lo == 15)
-        log() << "Handle me!";
+        log() << "Handle error";
 
     u32& dst_hi = regs[rd_hi];
     u32& dst_lo = regs[rd_lo];
@@ -349,33 +346,88 @@ void ARM::multiplyLong(u32 instr)
 void ARM::singleDataTransfer(u32 instr)
 {
     // Register / immediate flag
-    u8 i = (instr >> 25) & 0x1;
-    // Pre / post indexing flag
-    u8 p = (instr >> 24) & 0x1;
+    bool use_reg = instr >> 25 & 0x1;
+    // Pre- / post-indexing flag
+    bool pre_indexing = instr >> 24 & 0x1;
     // Up / down flag
-    u8 u = (instr >> 23) & 0x1;
+    bool up = instr >> 23 & 0x1;
     // Byte / word flag
-    u8 b = (instr >> 22) & 0x1;
+    int byte = instr >> 22 & 0x1;
     // Writeback flag
-    u8 w = (instr >> 21) & 0x1;
+    bool writeback = instr >> 21 & 0x1;
     // Load / store flag
-    u8 l = (instr >> 20) & 0x1;
+    int load = instr >> 20 & 0x1;
     // Base register
-    u8 rn = (instr >> 16) & 0xF;
+    u8 rn = instr >> 16 & 0xF;
     // Source / destination register
-    u8 rd = (instr >> 12) & 0xF;
+    u8 rd = instr >> 12 & 0xF;
     // 12-bit immediate value / shifted register
-    u32 offset = instr & 0x3FF;
+    u32 offset = instr & 0xFFF;
 
-    if (i)
+    if (rn == 15 && writeback)
+        // Todo: handle PC as shift offset rm
+        log() << "Handle error";
+
+    // Offset is a shifted register
+    if (use_reg)
     {
         bool carry;
-        // Offset is a shifted register
         // Register shift amounts are not available in this instruction
         offset = shiftedRegister(offset, carry);
     }
 
-    u32 addr = u 
-        ? regs[rn] + offset 
-        : regs[rn] - offset;
+    // Post-indexing always writes back (but writeback is 0)
+    writeback |= !pre_indexing;
+
+    // Get base address
+    u32 addr = regs[rn];
+    // Get destination register
+    u32& dst = regs[rd];
+
+    // Pre-index if necessary
+    if (pre_indexing)
+    {
+        if (up)
+            addr += offset;
+        else
+            addr -= offset;
+    }
+
+    switch (load << 1 | byte)
+    {
+    case 0b00:
+        // STR
+        // Stored value will be address of instruction + 12 (8 already because of pipe)
+        mmu->writeWord(addr, dst + (rd == 15) ? 4 : 0);
+        break;
+
+    case 0b01:
+        // STRB
+        mmu->writeByte(addr, dst & 0xFF);
+        break;
+
+    case 0b10:
+        // LDR
+        dst = mmu->readWord(addr);
+        break;
+
+    case 0b11:
+        // LDRB
+        dst = mmu->readByte(addr);
+        break;
+    }
+
+    // Post-index if necessary
+    if (!pre_indexing)
+    {
+        if (up)
+            addr += offset;
+        else
+            addr -= offset;
+    }
+
+    // Writeback address, 
+    if (writeback)
+        regs[rn] = addr;
+
 }
