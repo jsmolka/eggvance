@@ -384,7 +384,7 @@ void ARM::singleDataTransfer(u32 instr)
     // Get destination register
     u32& dst = regs[rd];
 
-    // Pre-index if necessary
+    // Pre-indexing
     if (pre_indexing)
     {
         if (up)
@@ -398,7 +398,7 @@ void ARM::singleDataTransfer(u32 instr)
     case 0b00:
         // STR
         // Stored value will be address of instruction + 12 (8 already because of pipe)
-        mmu->writeWord(addr, dst + (rd == 15) ? 4 : 0);
+        mmu->writeWord(addr, dst + ((rd == 15) ? 4 : 0));
         break;
 
     case 0b01:
@@ -417,7 +417,7 @@ void ARM::singleDataTransfer(u32 instr)
         break;
     }
 
-    // Post-index if necessary
+    // Post-indexing
     if (!pre_indexing)
     {
         if (up)
@@ -429,5 +429,105 @@ void ARM::singleDataTransfer(u32 instr)
     // Writeback address, 
     if (writeback)
         regs[rn] = addr;
+}
 
+// ARM 8
+void ARM::halfSignedDataTransfer(u32 instr)
+{
+    // Pre- / post-indexing flag
+    bool pre_indexing = instr >> 24 & 0x1;
+    // Up / down flag
+    bool up = instr >> 23 & 0x1;
+    // Writeback flag
+    bool writeback = instr >> 21 & 0x1;
+    // Load / store flag
+    bool load = instr >> 20 & 0x1;
+    // Base register
+    u8 rn = instr >> 16 & 0xF;
+    // Source / destination register
+    u8 rd = instr >> 12 & 0xF;
+    // Signed / unsigned flag
+    int sign = instr >> 6 & 0x1;
+    // Halfword / byte flag
+    int half = instr >> 5 & 0x1;
+
+    if (rn == 15 && writeback)
+        log() << "Handle error";
+
+    u32 offset;
+    if (instr >> 22 & 0x1)
+    {
+        // Immediate offset
+        int upper = instr >> 8 & 0xF;
+        int lower = instr & 0xF;
+        offset = upper << 4 | lower;
+    }
+    else
+    {
+        // Register offset
+        u8 rm = instr & 0xF;
+        if (rm == 15)
+            log() << "Handle error";
+        offset = regs[rm];
+    }
+
+    // Post-indexing always writes back (but writeback is 0)
+    writeback |= !pre_indexing;
+
+    // Get base address
+    u32 addr = regs[rn];
+    // Get destination register
+    u32& dst = regs[rd];
+
+    // Pre-indexing
+    if (pre_indexing)
+    {
+        if (up)
+            addr += offset;
+        else
+            addr -= offset;
+    }
+
+    switch (sign << 1 | half)
+    {
+    // SWP
+    case 0b00:
+        log() << "Wrong instruction for SWP";
+        break;
+
+    // STRH / LDRH
+    case 0b01:
+        if (load)
+            dst = mmu->readHalf(addr);
+        else
+            // Stored value will be address of instruction + 12 (8 already because of pipe)
+            mmu->writeHalf(addr, dst + ((rn == 15) ? 4 : 0));
+        break;
+
+    // LDRSB
+    case 0b10:
+        dst = mmu->readByte(addr);
+        if (dst & 1 << 7)
+            dst |= 0xFFFFFF00;
+        break;
+
+    // LDRSH
+    case 0b11:
+        dst = mmu->readHalf(addr);
+        if (dst & 1 << 15)
+            dst |= 0xFFFF0000;
+        break;
+    }
+
+    // Post-indexing
+    if (!pre_indexing)
+    {
+        if (up)
+            addr += offset;
+        else
+            addr -= offset;
+    }
+
+    if (writeback)
+        regs[rn] = addr;
 }

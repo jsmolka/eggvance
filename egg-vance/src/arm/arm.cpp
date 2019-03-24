@@ -224,6 +224,10 @@ void ARM::execute()
                 singleDataTransfer(instr);
                 break;
 
+            case ARM_8:
+                halfSignedDataTransfer(instr);
+                break;
+
             default:
                 log() << "Tried executing unknown ARM instruction " << (int)pipe[2].decoded;
             }

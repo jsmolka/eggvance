@@ -73,4 +73,5 @@ private:
     void multiply(u32 instr);
     void multiplyLong(u32 instr);
     void singleDataTransfer(u32 instr);
+    void halfSignedDataTransfer(u32 instr);
 };
