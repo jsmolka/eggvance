@@ -49,18 +49,17 @@ void ARM::branchExchange(u32 instr)
     // Operand register
     u8 rn = instr & 0xF;
 
-    // Operation is undefined for R15
-    if (rn > 14)
+    // Undefined for PC
+    if (rn == 15)
         log() << "Handle error";
 
     u32 addr = regs[rn];
 
-    // Exchange instruction set
     if (addr & 0x1)
     {
-        align_half(addr);
         // Switch to thumb
         regs.setThumb(true);
+        align_half(addr);
     }
     else
     {
@@ -75,7 +74,7 @@ void ARM::branchExchange(u32 instr)
 void ARM::branchLink(u32 instr)
 {
     // Link flag
-    u8 l = instr >> 24 & 0x1;
+    bool link = instr >> 24 & 0x1;
     // 24-bit immediate value
     u32 offset = instr & 0xFFFFFF;
 
@@ -84,7 +83,7 @@ void ARM::branchLink(u32 instr)
     // Shift left by two bits
     signed_offset <<= 2;
 
-    if (l)
+    if (link)
         // Save address of next instruction
         regs.lr = regs.pc - 4;
 
@@ -426,7 +425,7 @@ void ARM::singleDataTransfer(u32 instr)
             addr -= offset;
     }
 
-    // Writeback address, 
+    // Writeback address
     if (writeback)
         regs[rn] = addr;
 }

@@ -24,7 +24,7 @@ inline s32 twos(u32 value)
     if (value & 1 << (bits - 1))
     {
         u32 mask = (1 << bits) - 1;
-        return -1 * ((~value + 1) & mask);
+        return -static_cast<s32>((~value + 1) & mask);
     }
     return value;
 }
