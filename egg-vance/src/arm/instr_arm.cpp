@@ -95,11 +95,11 @@ void ARM::branchLink(u32 instr)
 void ARM::dataProcessing(u32 instr)
 {
     // Immediate operand flag
-    u8 i = instr >> 25 & 0x1;
+    bool use_immediate = instr >> 25 & 0x1;
     // Operation code
     u8 opcode = instr >> 21 & 0xF;
     // Set conditions flag
-    u8 s = instr >> 20 & 0x1;
+    bool set_flags = instr >> 20 & 0x1;
     // First operand register
     u8 rn = instr >> 16 & 0xF;
     // Destination register
@@ -111,7 +111,7 @@ void ARM::dataProcessing(u32 instr)
     u32& dst = regs[rd];
 
     bool carry;
-    if (i)
+    if (use_immediate)
     {
         // Immediate 8-bit value
         u8 imm = op2 & 0xFF;
@@ -139,14 +139,14 @@ void ARM::dataProcessing(u32 instr)
     }
 
     // Writing to PC
-    if (s && rd == 15)
+    if (set_flags && rd == 15)
     {
         if (regs.spsr)
             // Move current SPSR into CPSR
             regs.cpsr = *regs.spsr;
 
         // Do not set flags
-        s = 0;
+        set_flags = 0;
     }
 
     switch (opcode)
@@ -154,52 +154,60 @@ void ARM::dataProcessing(u32 instr)
     // AND
     case 0b0000:
         dst = op1 & op2;
-        if (s) logical(dst, carry);
+        if (set_flags) 
+            logical(dst, carry);
         break;
 
     // EOR
     case 0b0001:
         dst = op1 ^ op2;
-        if (s) logical(dst, carry);
+        if (set_flags) 
+            logical(dst, carry);
         break;
 
     // SUB
     case 0b0010:
         dst = op1 - op2;
-        if (s) arithmetic(op1, op2, false);
+        if (set_flags) 
+            arithmetic(op1, op2, false);
         break;
 
     // RSB
     case 0b0011:
         dst = op2 - op1;
-        if (s) arithmetic(op2, op1, false);
+        if (set_flags) 
+            arithmetic(op2, op1, false);
         break;
 
     // ADD
     case 0b0100:
         dst = op1 + op2;
-        if (s) arithmetic(op1, op2, true);
+        if (set_flags) 
+            arithmetic(op1, op2, true);
         break;
 
     // ADC
     case 0b0101:
         op2 += regs.c();
         dst = op1 + op2;
-        if (s) arithmetic(op1, op2, true);
+        if (set_flags) 
+            arithmetic(op1, op2, true);
         break;
 
     // SBC
     case 0b0110:
         op2 += regs.c() ? 0 : 1;
         dst = op1 - op2;
-        if (s) arithmetic(op1, op2, false);
+        if (set_flags) 
+            arithmetic(op1, op2, false);
         break;
 
     // RBC
     case 0b0111:
         op1 += regs.c() ? 0 : 1;
         dst = op2 - op1;
-        if (s) arithmetic(op2, op1, false);
+        if (set_flags) 
+            arithmetic(op2, op1, false);
         break;
 
     // TST
@@ -225,25 +233,29 @@ void ARM::dataProcessing(u32 instr)
     // ORR
     case 0b1100:
         dst = op1 | op2;
-        if (s) logical(dst, carry);
+        if (set_flags) 
+            logical(dst, carry);
         break;
 
     // MOV
     case 0b1101:
         dst = op2;
-        if (s) logical(dst, carry);
+        if (set_flags) 
+            logical(dst, carry);
         break;
 
     // BIC
     case 0b1110:
         dst = op1 & ~op2;
-        if (s) logical(dst, carry);
+        if (set_flags) 
+            logical(dst, carry);
         break;
 
     // MVN
     case 0b1111:
         dst = ~op2;
-        if (s) logical(dst, carry);
+        if (set_flags) 
+            logical(dst, carry);
         break;
     }
 }
@@ -252,9 +264,9 @@ void ARM::dataProcessing(u32 instr)
 void ARM::multiply(u32 instr)
 {
     // Accumulate flag
-    bool a = instr >> 21 & 0x1;
+    bool accumulate = instr >> 21 & 0x1;
     // Set conditions flag
-    bool s = instr >> 20 & 0x1;
+    bool set_flags = instr >> 20 & 0x1;
     // Destination register
     u8 rd = instr >> 16 & 0xF;
     // Operand registers
@@ -273,10 +285,10 @@ void ARM::multiply(u32 instr)
     dst = op1 * op2;
 
     // Accumulate (MLA)
-    if (a) 
+    if (accumulate) 
         dst += regs[rn];
 
-    if (s)
+    if (set_flags)
         logical(dst, false);
 }
 
@@ -284,61 +296,51 @@ void ARM::multiply(u32 instr)
 void ARM::multiplyLong(u32 instr)
 {
     // Signed / unsigned flag
-    u8 u = instr >> 22 & 0x1;
+    bool sign = instr >> 22 & 0x1;
     // Accumulate flag
-    u8 a = instr >> 21 & 0x1;
+    bool accumulate = instr >> 21 & 0x1;
     // Set conditions flag
-    u8 s = instr >> 20 & 0x1;
+    bool set_flags = instr >> 20 & 0x1;
     // Source / destination registers
-    u8 rd_hi = instr >> 16 & 0xF;
-    u8 rd_lo = instr >> 12 & 0xF;
+    u8 rdhi = instr >> 16 & 0xF;
+    u8 rdlo = instr >> 12 & 0xF;
     // Operand registers
     u8 rs = instr >> 8 & 0xF;
     u8 rm = instr & 0xF;
 
-    if (rs == 15 || rm == 15 || rd_hi == 15 || rd_lo == 15)
+    if (rs == 15 || rm == 15 || rdhi == 15 || rdlo == 15)
         log() << "Handle error";
 
-    u32& dst_hi = regs[rd_hi];
-    u32& dst_lo = regs[rd_lo];
-    u32 op1 = regs[rm];
-    u32 op2 = regs[rs];
+    u32& dsthi = regs[rdhi];
+    u32& dstlo = regs[rdlo];
+    u64 op1 = regs[rm];
+    u64 op2 = regs[rs];
 
-    u64 result;
-    if (u)
+    if (sign)
     {
-        // Treat operands as two's complement
-        s32 op1s = twos<32>(op1);
-        s32 op2s = twos<32>(op2);
-
-        // Multiply signed (SMULL)
-        s64 result_signed = op1s * op2s;
-
-        // Accumulate signed (SMLAL)
-        if (a)
-            result_signed += ((s64)dst_hi << 32) | dst_lo;
-
-        // Convert to two's complement
-        result = ~result_signed + 1;
+        // Sign extend to 64 bits if negative two's complement
+        if (op1 & 1 << 31) 
+            op1 |= 0xFFFFFFFF00000000;
+        if (op2 & 1 << 31) 
+            op2 |= 0xFFFFFFFF00000000;
     }
-    else
-    {
-        // Multiply unsigned (UMULL)
-        result = op1 * op2;
+    
+    // Multiply (UMULL / SMULL)
+    u64 result = op1 * op2;
 
-        // Accumulate unsigned (UMLAL)
-        if (a)
-            result += ((u64)dst_hi << 32) | dst_lo;
-    }
+    // Accumulate (UMLAL / SMLAL)
+    if (accumulate)
+        result += static_cast<u64>(dsthi) << 32 | dstlo;
 
-    if (s)
+    if (set_flags)
     {
         regs.setZ(result == 0);
         regs.setN(result >> 63);
+        regs.setC(false);
     }
 
-    dst_hi = result >> 32;
-    dst_lo = result & 0xFFFFFFFF;
+    dsthi = result >> 32;
+    dstlo = result & 0xFFFFFFFF;
 }
 
 // ARM 7

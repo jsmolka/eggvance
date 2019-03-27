@@ -18,6 +18,8 @@ inline void align_word(u32& addr)
 template<unsigned int bits>
 inline s32 twos(u32 value)
 {
+    // Todo: possibly improve by using sign extension (like in ARM::multiplyLong)
+
     static_assert(bits <= 32, "Invalid number of bits");
 
     // Check if sign bit is set
