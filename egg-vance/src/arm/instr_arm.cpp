@@ -317,7 +317,6 @@ void ARM::psrTransfer(u32 instr)
     else  // MRS (PSR to register)
     {
         u8 rd = instr >> 12 & 0xF;
-
         regs[rd] = spsr ? *regs.spsr : regs.cpsr;
     }
 }
@@ -591,6 +590,92 @@ void ARM::halfSignedDataTransfer(u32 instr)
             addr -= offset;
     }
 
+    if (writeback)
+        regs[rn] = addr;
+}
+
+// ARM 9
+void ARM::blockDataTransfer(u32 instr)
+{
+    // Pre- / post-indexing
+    bool pre_indexing = instr >> 24 & 0x1;
+    // Up / down
+    bool up = instr >> 23 & 0x1;
+    // Load PSR and force user
+    bool psr_user = instr >> 22 & 0x1;
+    // Writeback flag
+    bool writeback = instr >> 21 & 0x1;
+    // Load / store flag
+    bool load = instr >> 20 & 0x1;
+    // Base register
+    u8 rn = instr >> 16 & 0xF;
+    // Register list
+    u16 rlist = instr & 0xFFFF;
+
+    if (rlist == 0 || rn == 0)
+        log() << "Handle error";
+
+    // Todo: handle S bit
+    //if (psr_user)
+    //{
+    //    // Check if PC is involved
+    //    if (rlist & 1 << 15)
+    //    {
+    //        if (load)
+    //            regs.cpsr = *regs.spsr;
+    //        else
+    //            // Todo: transfer user registers
+    //    }   
+    //}
+
+    // Base address
+    // Todo: base register is included in the rlist
+    u32 addr = regs[rn];
+
+    if (up)
+    {
+        // Increment base address
+        for (int i = 0; i < 16; ++i)
+        {
+            if (rlist & 0x1)
+            {
+                if (pre_indexing)
+                    addr += 4;
+
+                if (load)
+                    regs[i] = mmu->readWord(addr);
+                else
+                    mmu->writeWord(addr, regs[i]);
+            
+                if (!pre_indexing)
+                    addr += 4;
+            }
+            rlist >>= 1;
+        }
+    }
+    else
+    {
+        // Decrement base address
+        for (int i = 15; i >= 0; --i)
+        {
+            if (rlist & 1 << 15)
+            {
+                if (pre_indexing)
+                    addr -= 4;
+
+                if (load)
+                    regs[i] = mmu->readWord(addr);
+                else
+                    mmu->writeWord(addr, regs[i]);
+
+                if (!pre_indexing)
+                    addr -= 4;
+            }
+            rlist <<= 1;
+        }
+    }
+
+    // Writeback address
     if (writeback)
         regs[rn] = addr;
 }

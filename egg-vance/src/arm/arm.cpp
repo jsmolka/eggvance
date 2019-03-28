@@ -216,6 +216,8 @@ void ARM::execute()
 
         Condition condition = static_cast<Condition>(instr >> 28);
 
+        log() << "ARM " << (int)pipe[2].decoded - 1;
+
         if (regs.checkCondition(condition))
         {
             switch (pipe[2].decoded)
@@ -250,6 +252,10 @@ void ARM::execute()
 
             case ARM_8:
                 halfSignedDataTransfer(instr);
+                break;
+
+            case ARM_9:
+                blockDataTransfer(instr);
                 break;
 
             case ARM_10:

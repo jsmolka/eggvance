@@ -75,5 +75,6 @@ private:
     void multiplyLong(u32 instr);
     void singleDataTransfer(u32 instr);
     void halfSignedDataTransfer(u32 instr);
+    void blockDataTransfer(u32 instr);
     void singleDataSwap(u32 instr);
 };
