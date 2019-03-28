@@ -532,3 +532,34 @@ void ARM::halfSignedDataTransfer(u32 instr)
     if (writeback)
         regs[rn] = addr;
 }
+
+// ARM 10
+void ARM::singleDataSwap(u32 instr)
+{
+    // Byte / word flag
+    bool byte = instr >> 22 & 0x1;
+    // Base register
+    u8 rn = instr >> 16 & 0xF;
+    // Destination register
+    u8 rd = instr >> 12 & 0xF;
+    // Source register
+    u8 rm = instr & 0xF;
+
+    if (rn == 15 || rd == 15 || rm == 15)
+        log() << "Handle error";
+
+    u32 addr = regs[rn];
+    u32& dst = regs[rd];
+    u32 src = regs[rm];
+
+    if (byte)
+    {
+        dst = mmu->readByte(addr);
+        mmu->writeByte(addr, src);
+    }
+    else
+    {
+        dst = mmu->readWord(addr);
+        mmu->writeWord(addr, src);
+    }
+}

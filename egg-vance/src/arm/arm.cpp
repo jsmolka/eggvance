@@ -96,7 +96,7 @@ void ARM::decode()
                 && (instr >> 20 & 0x3) == 0b00
                 && (instr >> 4 & 0xFF) == 0b00001001)
             {
-                pipe[1].decoded = ARM_7;  // Single data transfer
+                pipe[1].decoded = ARM_10;  // Single data swap
             }
             else if ((instr >> 25 & 0x1) == 0b0
                 && (instr >> 7 & 0x1) == 0b1
@@ -228,8 +228,20 @@ void ARM::execute()
                 halfSignedDataTransfer(instr);
                 break;
 
+            case ARM_10:
+                singleDataSwap(instr);
+                break;
+
+            case ARM_11:
+            case ARM_12:
+            case ARM_13:
+            case ARM_14:
+            case ARM_15:
+                log() << "Unimplemented instruction " << (int)pipe[2].decoded;
+                break;
+
             default:
-                log() << "Tried executing unknown ARM instruction " << (int)pipe[2].decoded;
+                log() << "Unknown ARM instruction " << (int)pipe[2].decoded;
             }
         }
     }
@@ -318,7 +330,7 @@ void ARM::execute()
             break;
 
         default:
-            log() << "Tried executing unknown THUMB instruction " << (int)pipe[2].decoded;
+            log() << "Unknown THUMB instruction " << (int)pipe[2].decoded;
         }
     }
 }
