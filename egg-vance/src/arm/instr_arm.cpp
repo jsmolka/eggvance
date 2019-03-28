@@ -5,6 +5,7 @@
  * - ARM 1: special shift cases
  * - ARM 1: using PC as operan
  * - ARM 11: sign extension still needed with new code?
+ * - RRX: am I even using this?...
  */
 
 #include "common/log.h"
@@ -257,6 +258,67 @@ void ARM::dataProcessing(u32 instr)
         if (set_flags) 
             logical(dst, carry);
         break;
+    }
+}
+
+// ARM 4
+void ARM::psrTransfer(u32 instr)
+{
+    // MSR / MRS flag
+    bool msr = instr >> 21 & 0x1;
+    // SPSR / CPSR flag
+    bool spsr = instr >> 22 & 0x1;
+
+    if (spsr && !regs.spsr)
+        log() << "Handle me";
+
+    // MSR (register / immediate to PSR)
+    if (msr)
+    {
+        // Use immediate value
+        bool use_immediate = instr >> 25 & 0x1;
+        // Affect flags only
+        bool flags = (instr >> 12 & 0x3FF) == 0b1010001111;
+
+        u32 op;
+        if (use_immediate)
+        {
+            // Immediate value
+            u8 imm = instr & 0xFF;
+            // Applied rotation
+            u8 rotate = instr >> 8 & 0xF;
+
+            if (rotate == 0)
+            {
+                // No RRX
+                // Todo: RRX???
+                op = imm;
+            }
+            else
+            {
+                bool carry;
+                op = ror(imm, rotate, carry);
+            }
+        }
+        else
+        {
+            // Source register
+            u8 rm = instr & 0xF;
+            op = regs[rm];
+        }
+
+        u32& dst = spsr ? *regs.spsr : regs.cpsr;
+
+        if (flags)
+            dst &= 0x0FFFFFFF | op;
+        else
+            dst = op;
+    }
+    else  // MRS (PSR to register)
+    {
+        u8 rd = instr >> 12 & 0xF;
+
+        regs[rd] = spsr ? *regs.spsr : regs.cpsr;
     }
 }
 

@@ -70,6 +70,7 @@ private:
     void branchExchange(u32 instr);
     void branchLink(u32 instr);
     void dataProcessing(u32 instr);
+    void psrTransfer(u32 instr);
     void multiply(u32 instr);
     void multiplyLong(u32 instr);
     void singleDataTransfer(u32 instr);

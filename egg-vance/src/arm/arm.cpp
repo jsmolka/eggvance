@@ -106,7 +106,27 @@ void ARM::decode()
             }
             else
             {
-                pipe[1].decoded = ARM_3;  // Data processing
+                u8 opcode = instr >> 21 & 0xF;
+
+                switch (opcode)
+                {
+                case 0b1000:  // TST
+                case 0b1001:  // TEQ
+                case 0b1010:  // CMP
+                case 0b1011:  // CMN
+                {
+                    bool set_flags = instr >> 20 & 0x1;
+
+                    if (set_flags)
+                        pipe[1].decoded = ARM_3;  // Data processing
+                    else
+                        pipe[1].decoded = ARM_4;  // PSR transfer
+                    break;
+                }
+
+                default:
+                    pipe[1].decoded = ARM_3;  // Data processing
+                }
             }
         }
     }
@@ -210,6 +230,10 @@ void ARM::execute()
 
             case ARM_3:
                 dataProcessing(instr);
+                break;
+
+            case ARM_4:
+                psrTransfer(instr);
                 break;
 
             case ARM_5:
