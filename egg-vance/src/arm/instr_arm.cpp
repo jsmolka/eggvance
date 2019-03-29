@@ -117,7 +117,7 @@ void ARM::branchLink(u32 instr)
 void ARM::dataProcessing(u32 instr)
 {
     // Immediate operand flag
-    bool use_immediate = instr >> 25 & 0x1;
+    bool immediate = instr >> 25 & 0x1;
     // Operation code
     u8 opcode = instr >> 21 & 0xF;
     // Set conditions flag
@@ -134,7 +134,7 @@ void ARM::dataProcessing(u32 instr)
 
     // Get second operand value
     bool carry;
-    if (use_immediate)
+    if (immediate)
         op2 = rotatedImmediate(op2, carry);
     else
         op2 = shiftedRegister(op2, carry);
@@ -243,6 +243,10 @@ void ARM::dataProcessing(u32 instr)
         dst = op2;
         if (set_flags) 
             logical(dst, carry);
+
+        // Flush when moving to the PC
+        if (rd == 15)
+            needs_flush = true;
         break;
 
     // BIC
