@@ -65,6 +65,7 @@ private:
     void unconditionalBranch(u16 instr);
     void longBranchLink(u16 instr);
 
+    u32 rotatedImmediate(u16 value, bool& carry);
     u32 shiftedRegister(u16 value, bool& carry);
 
     void branchExchange(u32 instr);

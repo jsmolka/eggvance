@@ -11,9 +11,27 @@
 #include "common/log.h"
 #include "common/utility.h"
 
+u32 ARM::rotatedImmediate(u16 value, bool& carry)
+{
+    // Immediate 8-bit value
+    u8 immediate = value & 0xFF;
+    // Rotation applied to the immediate value
+    u8 rotate = value >> 8 & 0xF;
+
+    // Twice the rotation is applied
+    rotate <<= 1;
+
+    // RRX does not exist in this case
+    if (rotate == 0)
+        // Todo: what does RRX even do...
+        return immediate;
+    else
+        return ror(immediate, rotate, carry);
+}
+
 u32 ARM::shiftedRegister(u16 value, bool& carry)
 {
-    // Shift data
+    // 8-bit shift data
     u8 shift = value >> 4 & 0xFF;
     // Source register
     u8 rm = value & 0xF;
@@ -32,7 +50,10 @@ u32 ARM::shiftedRegister(u16 value, bool& carry)
         offset = shift >> 3 & 0x1F;
     }
 
-    switch (shift >> 1 & 0x3)
+    // Type of shift applied
+    u8 shift_type = shift >> 1 & 0x3;
+
+    switch (shift_type)
     {
     case 0b00: return lsl(regs[rm], offset, carry);
     case 0b01: return lsr(regs[rm], offset, carry);
@@ -111,33 +132,12 @@ void ARM::dataProcessing(u32 instr)
     u32 op1 = regs[rn];
     u32& dst = regs[rd];
 
+    // Get second operand value
     bool carry;
     if (use_immediate)
-    {
-        // Immediate 8-bit value
-        u8 imm = op2 & 0xFF;
-        // Rotation applied to the immediate value
-        u8 rotate = op2 >> 8 & 0xF;
-
-        // Twice the rotation is applied
-        rotate *= 2;
-
-        // RRX does not exist in this case
-        if (rotate == 0)
-        {
-            op2 = imm;
-        }
-        else
-        {
-            bool carry;
-            op2 = ror(imm, rotate, carry);
-        }
-    }
+        op2 = rotatedImmediate(op2, carry);
     else
-    {
-        // Apply shift to second operand
         op2 = shiftedRegister(op2, carry);
-    }
 
     // Writing to PC
     if (set_flags && rd == 15)
@@ -275,48 +275,44 @@ void ARM::psrTransfer(u32 instr)
     // MSR (register / immediate to PSR)
     if (msr)
     {
-        // Use immediate value
-        bool use_immediate = instr >> 25 & 0x1;
-        // Affect flags only
+        // Immediate value / register flag
+        bool immediate = instr >> 25 & 0x1;
+        // Affect flag bits only
         bool flags = (instr >> 12 & 0x3FF) == 0b1010001111;
 
         u32 op;
-        if (use_immediate)
+        if (immediate)
         {
-            // Immediate value
-            u8 imm = instr & 0xFF;
-            // Applied rotation
-            u8 rotate = instr >> 8 & 0xF;
-
-            if (rotate == 0)
-            {
-                // No RRX
-                // Todo: RRX???
-                op = imm;
-            }
-            else
-            {
-                bool carry;
-                op = ror(imm, rotate, carry);
-            }
+            bool carry;
+            op = rotatedImmediate(instr, carry);
         }
         else
         {
             // Source register
             u8 rm = instr & 0xF;
+
             op = regs[rm];
         }
 
-        u32& dst = spsr ? *regs.spsr : regs.cpsr;
+        u32& dst = spsr 
+            ? *regs.spsr 
+            : regs.cpsr;
 
         if (flags)
-            dst &= 0x0FFFFFFF | op;
+        {
+            dst &= 0x0FFFFFFF;
+            dst |= op;
+        }
         else
+        {
             dst = op;
+        }
     }
     else  // MRS (PSR to register)
     {
+        // Destination register
         u8 rd = instr >> 12 & 0xF;
+
         regs[rd] = spsr ? *regs.spsr : regs.cpsr;
     }
 }
