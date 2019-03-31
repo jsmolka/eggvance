@@ -133,7 +133,7 @@ void ARM::dataProcessing(u32 instr)
     u32& dst = regs[rd];
 
     // Get second operand value
-    bool carry;
+    bool carry = false;
     if (immediate)
         op2 = rotatedImmediate(op2, carry);
     else
@@ -244,7 +244,7 @@ void ARM::dataProcessing(u32 instr)
         if (set_flags) 
             logical(dst, carry);
 
-        // Flush when moving to the PC
+        // Flush when modifying PC
         if (rd == 15)
             needs_flush = true;
         break;
