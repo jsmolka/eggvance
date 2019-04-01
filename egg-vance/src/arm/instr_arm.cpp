@@ -23,10 +23,16 @@ u32 ARM::rotatedImmediate(u16 value, bool& carry)
 
     // RRX does not exist in this case
     if (rotate == 0)
-        // Todo: what does RRX even do...
+    {
+        // Keep current carry
+        carry = regs.c();
+
         return immediate;
+    }
     else
+    {
         return ror(immediate, rotate, carry);
+    }
 }
 
 u32 ARM::shiftedRegister(u16 value, bool& carry)
@@ -43,6 +49,15 @@ u32 ARM::shiftedRegister(u16 value, bool& carry)
         u8 rs = shift >> 4 & 0xF;
         // Offset is stored in the lower byte
         offset = regs[rs] & 0xFF;
+
+        // Register shifts by zero are ignored
+        if (offset == 0)
+        {
+            // Keep current carry
+            carry = regs.c();
+
+            return regs[rm];
+        }
     }
     else
     {
@@ -50,10 +65,7 @@ u32 ARM::shiftedRegister(u16 value, bool& carry)
         offset = shift >> 3 & 0x1F;
     }
 
-    // Type of shift applied
-    u8 shift_type = shift >> 1 & 0x3;
-
-    switch (shift_type)
+    switch (shift >> 1 & 0x3)
     {
     case 0b00: return lsl(regs[rm], offset, carry);
     case 0b01: return lsr(regs[rm], offset, carry);
@@ -61,6 +73,7 @@ u32 ARM::shiftedRegister(u16 value, bool& carry)
     case 0b11: return ror(regs[rm], offset, carry);
 
     default:
+        // Just for you, Visual Studio
         return regs[rm];
     }
 }
@@ -133,7 +146,7 @@ void ARM::dataProcessing(u32 instr)
     u32& dst = regs[rd];
 
     // Get second operand value
-    bool carry = false;
+    bool carry;
     if (immediate)
         op2 = rotatedImmediate(op2, carry);
     else

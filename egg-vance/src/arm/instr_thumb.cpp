@@ -144,19 +144,28 @@ void ARM::aluOperations(u16 instr)
 
     // LSL
     case 0b0010: 
-        dst = lsl(dst, src, carry); 
+        if (src == 0)
+            carry = regs.c();
+        else
+            dst = lsl(dst, src, carry); 
         logical(dst, carry);
         break;
 
     // LSR
     case 0b0011: 
-        dst = lsr(dst, src, carry); 
+        if (src == 0)
+            carry = regs.c();
+        else
+            dst = lsr(dst, src, carry); 
         logical(dst, carry);
         break;
 
     // ASR
-    case 0b0100: 
-        dst = asr(dst, src, carry); 
+    case 0b0100:
+        if (src == 0)
+            carry = regs.c();
+        else
+            dst = asr(dst, src, carry); 
         logical(dst, carry);
         break;
 
@@ -176,16 +185,11 @@ void ARM::aluOperations(u16 instr)
 
     // ROR
     case 0b0111:
-        if (src != 0)
-        {
-            dst = ror(dst, src, carry);
-            logical(dst, carry);
-        }
+        if (src == 0)
+            carry = regs.c();
         else
-        {
-            // Using ROR #0 only sets Z, N and does not change the dst
-            logical(dst);
-        }
+            dst = ror(dst, src, carry);
+        logical(dst, carry);
         break;
 
     // TST
@@ -218,7 +222,6 @@ void ARM::aluOperations(u16 instr)
     // MUL
     case 0b1101: 
         dst *= src;
-        // Multiplication does not set the V flag
         logical(dst);
         break;
 
