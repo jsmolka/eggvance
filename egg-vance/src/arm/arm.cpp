@@ -404,7 +404,7 @@ void ARM::updateC(u32 value, u32 operand, bool addition)
 
 void ARM::updateV(u32 value, u32 operand, bool addition)
 {
-    u8 msb_input = value >> 31;
+    u8 msb_value = value >> 31;
     u8 msb_operand = operand >> 31;
 
     bool overflow = false;
@@ -412,13 +412,13 @@ void ARM::updateV(u32 value, u32 operand, bool addition)
     if (addition)
     {
         u8 msb_result = (value + operand) >> 31;
-        if (msb_input == msb_operand)
-            overflow = msb_result != msb_input;
+        if (msb_value == msb_operand)
+            overflow = msb_result != msb_value;
     }
     else
     {
         u8 msb_result = (value - operand) >> 31;
-        if (msb_input != msb_operand)
+        if (msb_value != msb_operand)
             overflow = msb_result == msb_operand;
     }
 

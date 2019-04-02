@@ -2,10 +2,9 @@
 
 /**
  * Todo
- * - ARM 1: special shift cases
- * - ARM 1: using PC as operan
+ * - ARM 1: using PC as operand
+ * - ARM 3: flush if PC is PC (in sub, add)?
  * - ARM 11: sign extension still needed with new code?
- * - RRX: am I even using this?...
  */
 
 #include "common/log.h"
@@ -16,13 +15,10 @@ u32 ARM::rotatedImmediate(u16 value, bool& carry)
     // Immediate 8-bit value
     u8 immediate = value & 0xFF;
     // Rotation applied to the immediate value
-    u8 rotate = value >> 8 & 0xF;
-
-    // Twice the rotation is applied
-    rotate <<= 1;
+    u8 rotation = value >> 8 & 0xF;
 
     // RRX does not exist in this case
-    if (rotate == 0)
+    if (rotation == 0)
     {
         // Keep current carry
         carry = regs.c();
@@ -31,7 +27,8 @@ u32 ARM::rotatedImmediate(u16 value, bool& carry)
     }
     else
     {
-        return ror(immediate, rotate, carry);
+        // Twice the rotation is applied
+        return ror(immediate, 2 * rotation, carry);
     }
 }
 
@@ -50,7 +47,11 @@ u32 ARM::shiftedRegister(u16 value, bool& carry)
         // Offset is stored in the lower byte
         offset = regs[rs] & 0xFF;
 
-        // Register shifts by zero are ignored
+        // Todo: ???
+        if (rs == 15)
+            log() << "Handle me";
+
+        // Register shifts by zero are ignored (special cases use immediate)
         if (offset == 0)
         {
             // Keep current carry
@@ -139,7 +140,7 @@ void ARM::dataProcessing(u32 instr)
     u8 rn = instr >> 16 & 0xF;
     // Destination register
     u8 rd = instr >> 12 & 0xF;
-    // Second operand
+    // Second operand data
     u32 op2 = instr & 0xFFF;
 
     u32 op1 = regs[rn];
@@ -158,6 +159,8 @@ void ARM::dataProcessing(u32 instr)
         if (regs.spsr)
             // Move current SPSR into CPSR
             regs.cpsr = *regs.spsr;
+        else
+            log() << "Handle me";
 
         // Do not set flags
         set_flags = 0;
@@ -308,6 +311,9 @@ void ARM::psrTransfer(u32 instr)
             // Source register
             u8 rm = instr & 0xF;
 
+            if (rm == 15)
+                log() << "Handle me";
+
             op = regs[rm];
         }
 
@@ -329,6 +335,9 @@ void ARM::psrTransfer(u32 instr)
     {
         // Destination register
         u8 rd = instr >> 12 & 0xF;
+
+        if (rd == 15)
+            log() << "Handle me";
 
         regs[rd] = spsr ? *regs.spsr : regs.cpsr;
     }
