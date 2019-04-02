@@ -12,6 +12,9 @@ void RegisterBank::switchMode(Mode mode)
     Bank old_bank = modeToBank(this->mode());
     Bank new_bank = modeToBank(mode);
 
+    if (old_bank == new_bank)
+        return;
+
     // Switch FIQ registers
     if (old_bank == BANK_FIQ || new_bank == BANK_FIQ)
     {

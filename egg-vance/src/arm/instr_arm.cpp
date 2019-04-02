@@ -47,7 +47,6 @@ u32 ARM::shiftedRegister(u16 value, bool& carry)
         // Offset is stored in the lower byte
         offset = regs[rs] & 0xFF;
 
-        // Todo: ???
         if (rs == 15)
             log() << "Handle me";
 
@@ -317,18 +316,30 @@ void ARM::psrTransfer(u32 instr)
             op = regs[rm];
         }
 
-        u32& dst = spsr 
-            ? *regs.spsr 
-            : regs.cpsr;
-
-        if (flags)
+        u32* dst;
+        if (spsr)
         {
-            dst &= 0x0FFFFFFF;
-            dst |= op;
+            dst = regs.spsr;
         }
         else
         {
-            dst = op;
+            if (!flags)
+            {
+                if ((op & 0x1F) != (regs.cpsr & 0x1F))
+                    // Switch mode if needed
+                    regs.switchMode(static_cast<Mode>(op & 0x1F));
+            }
+            dst = &regs.cpsr;
+        }
+
+        if (flags)
+        {
+            *dst &= 0x0FFFFFFF;
+            *dst |= op;
+        }
+        else
+        {
+            *dst = op;
         }
     }
     else  // MRS (PSR to register)
