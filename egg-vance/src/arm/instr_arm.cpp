@@ -4,6 +4,7 @@
  * Todo
  * - ARM 1: using PC as operand
  * - ARM 3: flush if PC is PC (in sub, add)?
+ * - ARM 4: rework and write proper test (SPSR and mode switching)
  * - ARM 11: sign extension still needed with new code?
  */
 
@@ -369,7 +370,7 @@ void ARM::multiply(u32 instr)
     u8 rm = instr & 0xF;
 
     if (rd == rm || rd == 15 || rm == 15)
-        log() << "Handle me!";
+        log() << "Handle me";
 
     u32& dst = regs[rd];
     u32 op1 = regs[rm];
@@ -383,7 +384,7 @@ void ARM::multiply(u32 instr)
         dst += regs[rn];
 
     if (set_flags)
-        logical(dst, false);
+        logical(dst);
 }
 
 // ARM 6
@@ -402,8 +403,9 @@ void ARM::multiplyLong(u32 instr)
     u8 rs = instr >> 8 & 0xF;
     u8 rm = instr & 0xF;
 
-    if (rs == 15 || rm == 15 || rdhi == 15 || rdlo == 15)
-        log() << "Handle error";
+    if (rs == 15 || rm == 15 || rdhi == 15 
+        || rdlo == 15 || rdlo == rdhi || rdlo == rm)
+        log() << "Handle me";
 
     u32& dsthi = regs[rdhi];
     u32& dstlo = regs[rdlo];
@@ -430,7 +432,6 @@ void ARM::multiplyLong(u32 instr)
     {
         regs.setZ(result == 0);
         regs.setN(result >> 63);
-        regs.setC(false);
     }
 
     dsthi = result >> 32;
