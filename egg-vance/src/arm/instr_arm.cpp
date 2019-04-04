@@ -441,6 +441,9 @@ void ARM::multiplyLong(u32 instr)
 // ARM 7
 void ARM::singleDataTransfer(u32 instr)
 {
+    // Todo: is address aligned???
+    // Todo: shifted register by 0
+
     // Register / immediate flag
     bool use_reg = instr >> 25 & 0x1;
     // Pre- / post-indexing flag
@@ -494,22 +497,22 @@ void ARM::singleDataTransfer(u32 instr)
     case 0b00:
         // STR
         // Stored value will be address of instruction + 12 (8 already because of pipe)
-        mmu->writeWord(addr, dst + ((rd == 15) ? 4 : 0));
+        mmu->writeWord(addr & ~0x3, dst + ((rd == 15) ? 4 : 0));
         break;
 
     case 0b01:
         // STRB
-        mmu->writeByte(addr, dst & 0xFF);
+        mmu->writeByte(addr & ~0x3, dst & 0xFF);
         break;
 
     case 0b10:
         // LDR
-        dst = mmu->readWord(addr);
+        dst = mmu->readWord(addr & ~0x3);
         break;
 
     case 0b11:
         // LDRB
-        dst = mmu->readByte(addr);
+        dst = mmu->readByte(addr & ~0x3);
         break;
     }
 
@@ -594,22 +597,22 @@ void ARM::halfSignedDataTransfer(u32 instr)
     // STRH / LDRH
     case 0b01:
         if (load)
-            dst = mmu->readHalf(addr);
+            dst = mmu->readHalf(addr & ~0x1);
         else
             // Stored value will be address of instruction + 12 (8 already because of pipe)
-            mmu->writeHalf(addr, dst + ((rn == 15) ? 4 : 0));
+            mmu->writeHalf(addr & ~0x1, dst + ((rn == 15) ? 4 : 0));
         break;
 
     // LDRSB
     case 0b10:
-        dst = mmu->readByte(addr);
+        dst = mmu->readByte(addr & ~0x1);
         if (dst & 1 << 7)
             dst |= 0xFFFFFF00;
         break;
 
     // LDRSH
     case 0b11:
-        dst = mmu->readHalf(addr);
+        dst = mmu->readHalf(addr & ~0x1);
         if (dst & 1 << 15)
             dst |= 0xFFFF0000;
         break;
@@ -717,6 +720,8 @@ void ARM::blockDataTransfer(u32 instr)
 // ARM 10
 void ARM::singleDataSwap(u32 instr)
 {
+    // Todo: fix for misaligned addresses
+
     // Byte / word flag
     bool byte = instr >> 22 & 0x1;
     // Base register
