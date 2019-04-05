@@ -14,7 +14,7 @@ void ARM::reset()
 {
     regs.reset();
 
-    flushPipe();
+    flush();
 
     needs_flush = false;
 }
@@ -27,7 +27,7 @@ void ARM::step()
 
     if (needs_flush)
     {
-        flushPipe();
+        flush();
 
         needs_flush = false;
     }
@@ -373,7 +373,7 @@ void ARM::advance()
     regs.pc += regs.isThumb() ? 2 : 4;
 }
 
-void ARM::flushPipe()
+void ARM::flush()
 {
     pipe[0] = { 0, REFILL_PIPE };
     pipe[1] = { 0, REFILL_PIPE };

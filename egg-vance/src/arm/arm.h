@@ -29,7 +29,7 @@ private:
 
     bool needs_flush;
 
-    void flushPipe();
+    void flush();
 
     void updateZ(u32 result);
     void updateN(u32 result);

@@ -634,10 +634,10 @@ void ARM::halfSignedDataTransfer(u32 instr)
 // ARM 9
 void ARM::blockDataTransfer(u32 instr)
 {
-    // Pre- / post-indexing
-    bool pre_indexing = instr >> 24 & 0x1;
-    // Up / down
-    bool up = instr >> 23 & 0x1;
+    // Full / empty stack
+    bool full_stack = instr >> 24 & 0x1;
+    // Ascending / descending stack
+    bool ascending_stack = instr >> 23 & 0x1;
     // Load PSR and force user
     bool psr_user = instr >> 22 & 0x1;
     // Writeback flag
@@ -645,107 +645,121 @@ void ARM::blockDataTransfer(u32 instr)
     // Load / store flag
     bool load = instr >> 20 & 0x1;
     // Base register
-    u8 rn = instr >> 16 & 0xF;
+    int rn = instr >> 16 & 0xF;
     // Register list
-    u16 rlist = instr & 0xFFFF;
+    int rlist = instr & 0xFFFF;
 
-    if (rlist == 0 || rn == 0)
-        log() << "Handle error";
+    if (rlist == 0 || rn == 15)
+        log() << "Handle me";
 
-    // Todo: handle S bit
-    //if (psr_user)
-    //{
-    //    // Check if PC is involved
-    //    if (rlist & 1 << 15)
-    //    {
-    //        if (load)
-    //            regs.cpsr = *regs.spsr;
-    //        else
-    //            // Todo: transfer user registers
-    //    }   
-    //}
+    // Handle S bit
+    Mode mode = regs.mode();
+
+    if (psr_user)
+        regs.switchMode(MODE_USR);
 
     // Base address
-    // Todo: base register is included in the rlist
     u32 addr = regs[rn];
 
-    if (up)
+    // Lowest register gets stored at the lowest address
+    if (ascending_stack)
     {
-        // Increment base address
-        for (int i = 0; i < 16; ++i)
+        // Start at lowest address, load / store registers in order
+        for (int x = 0; x < 16; ++x)
         {
-            if (rlist & 0x1)
+            if (rlist & 1 << x)
             {
-                if (pre_indexing)
+                if (full_stack)
                     addr += 4;
 
                 if (load)
-                    regs[i] = mmu->readWord(addr);
+                {
+                    regs[x] = mmu->readWord(addr & ~0x3);
+
+                    if (x == 15)
+                        needs_flush = true;
+                }
                 else
-                    mmu->writeWord(addr, regs[i]);
+                {
+                    mmu->writeWord(addr & ~0x3, regs[x]);
+                }
             
-                if (!pre_indexing)
+                if (!full_stack)
                     addr += 4;
             }
-            rlist >>= 1;
         }
     }
     else
     {
-        // Decrement base address
-        for (int i = 15; i >= 0; --i)
+        // Start at highest address, load / store registers in reverse order
+        for (int x = 15; x >= 0; --x)
         {
-            if (rlist & 1 << 15)
+            if (rlist & 1 << x)
             {
-                if (pre_indexing)
+                if (full_stack)
                     addr -= 4;
 
                 if (load)
-                    regs[i] = mmu->readWord(addr);
-                else
-                    mmu->writeWord(addr, regs[i]);
+                {
+                    regs[x] = mmu->readWord(addr & ~0x3);
 
-                if (!pre_indexing)
+                    if (x == 15)
+                        needs_flush = true;
+                }
+                else
+                {
+                    mmu->writeWord(addr & ~0x3, regs[x]);
+                }
+
+                if (!full_stack)
                     addr -= 4;
             }
-            rlist <<= 1;
         }
     }
 
-    // Writeback address
     if (writeback)
         regs[rn] = addr;
+
+    if (psr_user)
+        regs.switchMode(mode);
 }
 
 // ARM 10
 void ARM::singleDataSwap(u32 instr)
 {
-    // Todo: fix for misaligned addresses
-
     // Byte / word flag
-    bool byte = instr >> 22 & 0x1;
+    int byte = instr >> 22 & 0x1;
     // Base register
-    u8 rn = instr >> 16 & 0xF;
+    int rb = instr >> 16 & 0xF;
     // Destination register
-    u8 rd = instr >> 12 & 0xF;
+    int rd = instr >> 12 & 0xF;
     // Source register
-    u8 rm = instr & 0xF;
+    int rs = instr & 0xF;
 
-    if (rn == 15 || rd == 15 || rm == 15)
+    if (rb == 15 || rd == 15 || rs == 15)
         log() << "Handle error";
 
-    u32 addr = regs[rn];
+    u32 addr = regs[rb];
     u32& dst = regs[rd];
-    u32 src = regs[rm];
+    u32 src = regs[rs];
 
-    if (byte)
+    if (addr & 0x3)
     {
+        // Todo: fix for misaligned addresses
+    }
+
+    switch (byte)
+    {
+    // SWPB
+    case 0b1:
         dst = mmu->readByte(addr);
         mmu->writeByte(addr, src);
-    }
-    else
-    {
+        break;
+
+    // SWP
+    case 0b0:
         dst = mmu->readWord(addr);
         mmu->writeWord(addr, src);
+        break;
     }
 }

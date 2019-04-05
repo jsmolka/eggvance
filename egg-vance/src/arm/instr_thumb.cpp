@@ -634,28 +634,25 @@ void ARM::pushPopRegisters(u16 instr)
 void ARM::loadStoreMultiple(u16 instr)
 {
     // Load / store flag
-    u8 l = instr >> 11 & 0x1;
+    bool load = instr >> 11 & 0x1;
     // Base register
-    u8 rb = instr >> 8 & 0x7;
+    int rb = instr >> 8 & 0x7;
     // Register list
-    u8 rlist = instr & 0xFF;
+    int rlist = instr & 0xFF;
 
-    u32& base = regs[rb];
+    u32& addr = regs[rb];
 
     for (int x = 0; x < 8; ++x)
     {
-        if (rlist & 0x1)
+        if (rlist & 1 << x)
         {
-            if (l)
-                // Load
-                regs[x] = mmu->readWord(base);
+            if (load)
+                regs[x] = mmu->readWord(addr);
             else
-                // Store
-                mmu->writeWord(base, regs[x]);
+                mmu->writeWord(addr, regs[x]);
 
-            base += 4;
+            addr += 4;
         }
-        rlist >>= 1;
     }
 }
 
