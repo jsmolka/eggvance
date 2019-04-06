@@ -14,12 +14,30 @@ inline void align_word(u32& addr)
     addr &= ~0x3;
 }
 
+inline u32 alignHalf(u32 addr)
+{
+    return addr & ~0x1;
+}
+
+inline u32 alignWord(u32 addr)
+{
+    return addr & ~0x3;
+}
+
+inline bool misalignedHalf(u32 addr)
+{
+    return addr & 0x1;
+}
+
+inline bool misalignedWord(u32 addr)
+{
+    return addr & 0x3;
+}
+
 // Convert two's complement to signed value
 template<unsigned int bits>
 inline s32 twos(u32 value)
 {
-    // Todo: possibly improve by using sign extension (like in ARM::multiplyLong)
-
     static_assert(bits <= 32, "Invalid number of bits");
 
     // Check if sign bit is set

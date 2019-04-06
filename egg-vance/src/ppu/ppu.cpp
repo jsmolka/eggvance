@@ -19,9 +19,7 @@ PPU::PPU()
     );
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
 
-    #ifndef _DEBUG
-    SDL_SetRelativeMouseMode(SDL_TRUE);
-    #endif
+    // SDL_SetRelativeMouseMode(SDL_TRUE);
 }
 
 PPU::~PPU()

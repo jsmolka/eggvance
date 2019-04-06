@@ -40,10 +40,14 @@ private:
     void logical(u32 result);
     void logical(u32 result, bool carry);
 
-    u32 lsl(u32 value, u8 offset, bool& carry);
-    u32 lsr(u32 value, u8 offset, bool& carry);
-    u32 asr(u32 value, u8 offset, bool& carry);
-    u32 ror(u32 value, u8 offset, bool& carry);
+    u32 lsl(u32 value, int offset, bool& carry);
+    u32 lsr(u32 value, int offset, bool& carry);
+    u32 asr(u32 value, int offset, bool& carry);
+    u32 ror(u32 value, int offset, bool& carry);
+
+    u32 ldr(u32 addr);
+    u32 ldrh(u32 addr);
+    u32 ldrsh(u32 addr);
 
     void moveShiftedRegister(u16 instr);
     void addSubImmediate(u16 instr);

@@ -9,6 +9,7 @@
  */
 
 #include "common/log.h"
+#include "common/utility.h"
 
 void ARM::reset()
 {
@@ -451,7 +452,7 @@ void ARM::logical(u32 result, bool carry)
     regs.setC(carry);
 }
 
-u32 ARM::lsl(u32 value, u8 offset, bool& carry)
+u32 ARM::lsl(u32 value, int offset, bool& carry)
 {
     if (offset > 0)
     {
@@ -468,7 +469,7 @@ u32 ARM::lsl(u32 value, u8 offset, bool& carry)
     return value;
 }
 
-u32 ARM::lsr(u32 value, u8 offset, bool& carry)
+u32 ARM::lsr(u32 value, int offset, bool& carry)
 {
     if (offset > 0)
     {
@@ -489,7 +490,7 @@ u32 ARM::lsr(u32 value, u8 offset, bool& carry)
     return value;
 }
 
-u32 ARM::asr(u32 value, u8 offset, bool& carry)
+u32 ARM::asr(u32 value, int offset, bool& carry)
 {
     if (offset > 0)
     {
@@ -497,7 +498,7 @@ u32 ARM::asr(u32 value, u8 offset, bool& carry)
         carry = (value >> (offset - 1)) & 0x1;
 
         // Todo: this can be optimized
-        u32 msb = value & (1 << 31);
+        u32 msb = value & 1 << 31;
         for (int x = 0; x < offset; ++x)
         {
             value >>= 1;
@@ -516,7 +517,7 @@ u32 ARM::asr(u32 value, u8 offset, bool& carry)
     return value;
 }
 
-u32 ARM::ror(u32 value, u8 offset, bool& carry)
+u32 ARM::ror(u32 value, int offset, bool& carry)
 {
     if (offset > 0)
     {
@@ -536,7 +537,58 @@ u32 ARM::ror(u32 value, u8 offset, bool& carry)
         // Rotate by one
         value >>= 1;
         // Change MSB to current carry
-        value |= (regs.c() << 31);
+        value |= regs.c() << 31;
+    }
+    return value;
+}
+
+u32 ARM::ldr(u32 addr)
+{
+    u32 value;
+    if (misalignedWord(addr))
+    {
+        bool carry;
+        int rotation = (addr & 0x3) << 3;
+        value = mmu->readWord(alignWord(addr));
+        value = ror(value, rotation, carry);
+    }
+    else
+    {
+        value = mmu->readWord(addr);
+    }
+    return value;
+}
+
+u32 ARM::ldrh(u32 addr)
+{
+    u32 value;
+    if (misalignedHalf(addr))
+    {
+        bool carry;
+        value = mmu->readHalf(alignHalf(addr));
+        value = ror(value, 8, carry);
+    }
+    else
+    {
+        value = mmu->readHalf(addr);
+    }
+    return value;
+}
+
+u32 ARM::ldrsh(u32 addr)
+{
+    u32 value;
+    if (misalignedHalf(addr))
+    {
+        value = mmu->readByte(addr);
+        if (value & 1 << 7)
+            value |= 0xFFFFFF00;
+    }
+    else
+    {
+        value = mmu->readHalf(addr);
+        if (value & 1 << 15)
+            value |= 0xFFFF0000;
     }
     return value;
 }
