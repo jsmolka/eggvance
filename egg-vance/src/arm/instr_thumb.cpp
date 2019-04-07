@@ -2,6 +2,7 @@
 
 /**
  * Todo
+ * - implement SWI
  * - process SWI in conditional branch
  */
 
