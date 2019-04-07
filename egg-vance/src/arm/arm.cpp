@@ -293,7 +293,7 @@ void ARM::execute()
             break;
 
         case THUMB_3:
-            moveCmpAddSubImmediate(instr);     
+            addSubMovCmpImmediate(instr);     
             break;
 
         case THUMB_4:
@@ -349,7 +349,7 @@ void ARM::execute()
             break;
 
         case THUMB_17:
-            softwareInterruptThumb(instr);     
+            softwareInterruptBreakpoint(instr);     
             break;
 
         case THUMB_18:
@@ -405,37 +405,25 @@ void ARM::updateC(u32 value, u32 operand, bool addition)
 
 void ARM::updateV(u32 value, u32 operand, bool addition)
 {
-    u8 msb_value = value >> 31;
-    u8 msb_operand = operand >> 31;
+    int msb_value = value >> 31;
+    int msb_operand = operand >> 31;
 
     bool overflow = false;
 
     if (addition)
     {
-        u8 msb_result = (value + operand) >> 31;
+        int msb_result = (value + operand) >> 31;
         if (msb_value == msb_operand)
             overflow = msb_result != msb_value;
     }
     else
     {
-        u8 msb_result = (value - operand) >> 31;
+        int msb_result = (value - operand) >> 31;
         if (msb_value != msb_operand)
             overflow = msb_result == msb_operand;
     }
 
     regs.setV(overflow);
-}
-
-void ARM::arithmetic(u32 op1, u32 op2, bool addition)
-{
-    u32 result = addition 
-        ? op1 + op2 
-        : op1 - op2;
-
-    updateZ(result);
-    updateN(result);
-    updateC(op1, op2, addition);
-    updateV(op1, op2, addition);
 }
 
 void ARM::logical(u32 result)
@@ -450,6 +438,18 @@ void ARM::logical(u32 result, bool carry)
     updateN(result);
 
     regs.setC(carry);
+}
+
+void ARM::arithmetic(u32 op1, u32 op2, bool addition)
+{
+    u32 result = addition
+        ? op1 + op2
+        : op1 - op2;
+
+    updateZ(result);
+    updateN(result);
+    updateC(op1, op2, addition);
+    updateV(op1, op2, addition);
 }
 
 u32 ARM::lsl(u32 value, int offset, bool& carry)

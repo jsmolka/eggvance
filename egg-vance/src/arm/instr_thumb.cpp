@@ -65,7 +65,7 @@ void ARM::addSubImmediate(u16 instr)
 }
 
 // THUMB 3
-void ARM::moveCmpAddSubImmediate(u16 instr)
+void ARM::addSubMovCmpImmediate(u16 instr)
 {
     // Operation code
     int opcode = instr >> 11 & 0x3;
@@ -249,7 +249,6 @@ void ARM::highRegisterBranchExchange(u16 instr)
     u32 src = regs[rs];
     u32& dst = regs[rd];
 
-    // Only compare modifies flags
     switch (opcode)
     {
     // ADD
@@ -259,6 +258,7 @@ void ARM::highRegisterBranchExchange(u16 instr)
 
     // CMP
     case 0b01:
+        // Only operation to modify flags
         arithmetic(dst, src, false);
         break;
 
@@ -281,7 +281,7 @@ void ARM::highRegisterBranchExchange(u16 instr)
         else
         {
             src = alignWord(src);
-            // Change instruction set
+            // Switch instruction set
             regs.setThumb(false);
         }
         regs.pc = src;
@@ -500,7 +500,7 @@ void ARM::loadAddress(u16 instr)
 
     u32& dst = regs[rd];
     
-    // Offset is a 10 bit constant
+    // Offset is a 10-bit constant
     offset <<= 2;
 
     if (sp)
@@ -522,9 +522,9 @@ void ARM::addOffsetSp(u16 instr)
     offset <<= 2;
 
     if (sign)
-        offset *= -1;
-
-    regs.sp += offset; 
+        regs.sp -= offset;
+    else
+        regs.sp += offset; 
 }
 
 // THUMB 14
@@ -537,21 +537,22 @@ void ARM::pushPopRegisters(u16 instr)
     // Register list
     int rlist = instr & 0xFF;
 
-    // Assume full descending stack
+    // Full descending stack
     if (pop)
     {
         for (int x = 0; x < 8; ++x)
         {
             if (rlist & 1 << x)
             {
-                regs[x] = mmu->readWord(regs.sp);
+                regs[x] = mmu->readWord(alignWord(regs.sp));
                 regs.sp += 4;
             }
         }
 
         if (pc_lr)
         {
-            regs.pc = alignHalf(mmu->readWord(regs.sp));
+            regs.pc = mmu->readWord(alignWord(regs.sp));
+            regs.pc = alignHalf(regs.pc);
             regs.sp += 4;
 
             needs_flush = true;
@@ -562,7 +563,7 @@ void ARM::pushPopRegisters(u16 instr)
         if (pc_lr)
         {
             regs.sp -= 4;
-            mmu->writeWord(regs.sp, regs.lr);
+            mmu->writeWord(alignWord(regs.sp), regs.lr);
         }
 
         for (int x = 7; x >= 0; --x)
@@ -570,7 +571,7 @@ void ARM::pushPopRegisters(u16 instr)
             if (rlist & 1 << x)
             {
                 regs.sp -= 4;
-                mmu->writeWord(regs.sp, regs[x]);
+                mmu->writeWord(alignWord(regs.sp), regs[x]);
             }
         }
     }
@@ -587,6 +588,8 @@ void ARM::loadStoreMultiple(u16 instr)
     int rlist = instr & 0xFF;
 
     u32& addr = regs[rb];
+
+    addr = alignWord(addr);
 
     for (int x = 0; x < 8; ++x)
     {
@@ -612,7 +615,7 @@ void ARM::conditionalBranch(u16 instr)
 
     if (cond == COND_AL)
     {
-        log() << "Undefined branch condition AL";
+        log() << "Undefined condition";
     }
     else if (cond == COND_NV)
     {
@@ -620,20 +623,18 @@ void ARM::conditionalBranch(u16 instr)
     }
     else if (regs.checkCondition(cond))
     {
-        s16 signed_offset = twos<8>(offset);
+        int signed_offset = twos<8>(offset);
 
-        // Offset needs to be 9-bit with bit 0 set to 0
+        // Offset is a 9-bit constant
         signed_offset <<= 1;
 
         regs.pc += signed_offset;
-        align_half(regs.pc);
-
         needs_flush = true;
     }
 }
 
 // THUMB 17
-void ARM::softwareInterruptThumb(u16 instr)
+void ARM::softwareInterruptBreakpoint(u16 instr)
 {
 
 }
@@ -644,9 +645,9 @@ void ARM::unconditionalBranch(u16 instr)
     // 11-bit immediate value
     u16 offset = instr & 0x7FF;
 
-    s16 signed_offset = twos<11>(offset);
+    int signed_offset = twos<11>(offset);
 
-    // Offset needs to be 12-bit with bit 0 set to 0
+    // Offset is a 12-bit constant
     signed_offset <<= 1;
 
     regs.pc += signed_offset;
@@ -657,27 +658,23 @@ void ARM::unconditionalBranch(u16 instr)
 void ARM::longBranchLink(u16 instr)
 {
     // Low / high flag
-    u8 h = instr >> 11 & 0x1;
+    bool high = instr >> 11 & 0x1;
     // 11-bit immediate value
-    u16 offset = instr & 0x7FF;
+    int offset = instr & 0x7FF;
 
-    // Instruction 1
-    if (!h)
+    if (!high)
     {
-        s32 signed_offset = twos<11>(offset);
+        int signed_offset = twos<11>(offset);
 
-        // Shift offset by 12 bits
         signed_offset <<= 12;
 
         regs.lr = regs.pc + signed_offset;
     }
-    else  // Instruction 2
+    else
     {
         u32 next = regs.pc - 2 | 1;
 
         regs.pc = regs.lr + (offset << 1);
-        
-        align_half(regs.pc);
 
         regs.lr = next;
 

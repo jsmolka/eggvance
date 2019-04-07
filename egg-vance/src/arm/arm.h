@@ -36,9 +36,9 @@ private:
     void updateC(u32 op1, u32 op2, bool addition);
     void updateV(u32 op1, u32 op2, bool addition);
 
-    void arithmetic(u32 op1, u32 op2, bool addition);
     void logical(u32 result);
     void logical(u32 result, bool carry);
+    void arithmetic(u32 op1, u32 op2, bool addition);
 
     u32 lsl(u32 value, int offset, bool& carry);
     u32 lsr(u32 value, int offset, bool& carry);
@@ -51,7 +51,7 @@ private:
 
     void moveShiftedRegister(u16 instr);
     void addSubImmediate(u16 instr);
-    void moveCmpAddSubImmediate(u16 instr);
+    void addSubMovCmpImmediate(u16 instr);
     void aluOperations(u16 instr);
     void highRegisterBranchExchange(u16 instr);
     void loadPcRelative(u16 instr);
@@ -65,7 +65,7 @@ private:
     void pushPopRegisters(u16 instr);
     void loadStoreMultiple(u16 instr);
     void conditionalBranch(u16 instr);
-    void softwareInterruptThumb(u16 instr);
+    void softwareInterruptBreakpoint(u16 instr);
     void unconditionalBranch(u16 instr);
     void longBranchLink(u16 instr);
 
