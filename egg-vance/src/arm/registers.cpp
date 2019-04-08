@@ -9,7 +9,6 @@ void Registers::reset()
     std::memset(regs, 0, sizeof(regs));
     std::memset(bank, 0, sizeof(bank));
     std::memset(bank_fiq, 0, sizeof(bank_fiq));
-    std::memset(bank_spsr, 0, sizeof(bank_spsr));
 
     pc = 0x8000000;
     
@@ -21,7 +20,6 @@ void Registers::reset()
     bank[BANK_IRQ].sp = 0x03007FA0;
 
     cpsr = 0x5F;
-    spsr = nullptr;
 }
 
 bool Registers::isThumb() const

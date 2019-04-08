@@ -2,7 +2,6 @@
 
 /**
  * Todo
- * - ARM 1: using PC as operand
  * - ARM 3: flush if PC is PC (in sub, add)?
  * - ARM 4: rework and write proper test (SPSR and mode switching)
  * - ARM 11: sign extension still needed with new code?
@@ -11,17 +10,16 @@
 #include "common/log.h"
 #include "common/utility.h"
 
-u32 ARM::rotatedImmediate(u16 value, bool& carry)
+u32 ARM::rotatedImmediate(int value, bool& carry)
 {
     // Immediate 8-bit value
-    u8 immediate = value & 0xFF;
+    int immediate = value & 0xFF;
     // Rotation applied to the immediate value
-    u8 rotation = value >> 8 & 0xF;
+    int rotation = value >> 8 & 0xF;
 
     // RRX does not exist in this case
     if (rotation == 0)
     {
-        // Keep current carry
         carry = regs.c();
 
         return immediate;
@@ -33,18 +31,18 @@ u32 ARM::rotatedImmediate(u16 value, bool& carry)
     }
 }
 
-u32 ARM::shiftedRegister(u16 value, bool& carry)
+u32 ARM::shiftedRegister(int value, bool& carry)
 {
     // 8-bit shift data
-    u8 shift = value >> 4 & 0xFF;
+    int shift = value >> 4 & 0xFF;
     // Source register
-    u8 rm = value & 0xF;
+    int rm = value & 0xF;
 
-    u8 offset;
+    int offset;
     if (shift & 0x1)
     {
         // Shift register
-        u8 rs = shift >> 4 & 0xF;
+        int rs = shift >> 4 & 0xF;
         // Offset is stored in the lower byte
         offset = regs[rs] & 0xFF;
 
@@ -54,7 +52,6 @@ u32 ARM::shiftedRegister(u16 value, bool& carry)
         // Register shifts by zero are ignored (special cases use immediate)
         if (offset == 0)
         {
-            // Keep current carry
             carry = regs.c();
 
             return regs[rm];
@@ -83,7 +80,7 @@ u32 ARM::shiftedRegister(u16 value, bool& carry)
 void ARM::branchExchange(u32 instr)
 {
     // Operand register
-    u8 rn = instr & 0xF;
+    int rn = instr & 0xF;
 
     // Undefined for PC
     if (rn == 15)
@@ -93,13 +90,13 @@ void ARM::branchExchange(u32 instr)
 
     if (addr & 0x1)
     {
-        // Switch to thumb
+        addr = alignHalf(addr);
+        // Switch instruction set
         regs.setThumb(true);
-        align_half(addr);
     }
     else
     {
-        align_word(addr);
+        addr = alignWord(addr);
     }
 
     regs.pc = addr;
@@ -112,11 +109,11 @@ void ARM::branchLink(u32 instr)
     // Link flag
     bool link = instr >> 24 & 0x1;
     // 24-bit immediate value
-    u32 offset = instr & 0xFFFFFF;
+    int offset = instr & 0xFFFFFF;
 
-    s32 signed_offset = twos<24>(offset);
+    int signed_offset = twos<24>(offset);
 
-    // Shift left by two bits
+    // Offset is a 26-bit constant
     signed_offset <<= 2;
 
     if (link)
@@ -131,15 +128,15 @@ void ARM::branchLink(u32 instr)
 void ARM::dataProcessing(u32 instr)
 {
     // Immediate operand flag
-    bool immediate = instr >> 25 & 0x1;
+    bool use_imm = instr >> 25 & 0x1;
     // Operation code
-    u8 opcode = instr >> 21 & 0xF;
+    int opcode = instr >> 21 & 0xF;
     // Set conditions flag
     bool set_flags = instr >> 20 & 0x1;
     // First operand register
-    u8 rn = instr >> 16 & 0xF;
+    int rn = instr >> 16 & 0xF;
     // Destination register
-    u8 rd = instr >> 12 & 0xF;
+    int rd = instr >> 12 & 0xF;
     // Second operand data
     u32 op2 = instr & 0xFFF;
 
@@ -148,7 +145,7 @@ void ARM::dataProcessing(u32 instr)
 
     // Get second operand value
     bool carry;
-    if (immediate)
+    if (use_imm)
         op2 = rotatedImmediate(op2, carry);
     else
         op2 = shiftedRegister(op2, carry);
@@ -156,11 +153,8 @@ void ARM::dataProcessing(u32 instr)
     // Writing to PC
     if (set_flags && rd == 15)
     {
-        if (regs.spsr)
-            // Move current SPSR into CPSR
-            regs.cpsr = *regs.spsr;
-        else
-            log() << "Handle me";
+        // Move current SPSR into CPSR
+        regs.cpsr = regs.spsr;
 
         // Do not set flags
         set_flags = 0;
@@ -256,13 +250,14 @@ void ARM::dataProcessing(u32 instr)
 
     // MOV
     case 0b1101:
+        if (rd == 15)
+        {
+            op2 = alignWord(op2);
+            needs_flush = true;
+        }
         dst = op2;
         if (set_flags) 
             logical(dst, carry);
-
-        // Flush when modifying PC
-        if (rd == 15)
-            needs_flush = true;
         break;
 
     // BIC
@@ -284,102 +279,80 @@ void ARM::dataProcessing(u32 instr)
 // ARM 4
 void ARM::psrTransfer(u32 instr)
 {
-    // MSR / MRS flag
-    bool msr = instr >> 21 & 0x1;
-    // SPSR / CPSR flag
-    bool spsr = instr >> 22 & 0x1;
+    bool msr = (instr >> 21) & 0x1;
+    bool use_spsr = (instr >> 22) & 0x1;
 
-    if (spsr && !regs.spsr)
-        log() << "Handle me";
-
-    // MSR (register / immediate to PSR)
+    // MSR
     if (msr)
     {
-        // Immediate value / register flag
-        bool immediate = instr >> 25 & 0x1;
-        // Affect flag bits only
-        bool flags = (instr >> 12 & 0x3FF) == 0b1010001111;
+        bool use_imm = (instr >> 25) & 0x1;
 
         u32 op;
-        if (immediate)
+        if (use_imm)
         {
             bool carry;
-            op = rotatedImmediate(instr, carry);
+            op = rotatedImmediate(instr & 0xFFF, carry);
         }
         else
         {
-            // Source register
-            u8 rm = instr & 0xF;
-
-            if (rm == 15)
-                log() << "Handle me";
-
+            int rm = instr & 0xF;
             op = regs[rm];
         }
 
-        u32* dst;
-        if (spsr)
-        {
-            dst = regs.spsr;
-        }
-        else
-        {
-            if (!flags)
-            {
-                if ((op & 0x1F) != (regs.cpsr & 0x1F))
-                    // Switch mode if needed
-                    regs.switchMode(static_cast<Mode>(op & 0x1F));
-            }
-            dst = &regs.cpsr;
-        }
+        // Create mask based on fsxc-bits
+        u32 mask = 0;
+        if (instr & (1 << 16))
+            mask |= 0x000000FF;
+        if (instr & (1 << 17))
+            mask |= 0x0000FF00;
+        if (instr & (1 << 18))
+            mask |= 0x00FF0000;
+        if (instr & (1 << 19))
+            mask |= 0xFF000000;
 
-        if (flags)
+        op &= mask;
+
+        if (use_spsr)
         {
-            *dst &= 0x0FFFFFFF;
-            *dst |= op;
+            regs.spsr = (regs.spsr & ~mask) | op;
         }
         else
         {
-            *dst = op;
+            // Switch mode if control bit is set
+            if (mask & 0xFF)
+                regs.switchMode(static_cast<Mode>(op & 0x1F));
+
+            regs.cpsr = (regs.cpsr & ~mask) | op;
+
+            // Technically undefined behavior
+            if (regs.isThumb())
+            {
+                regs.cpsr = alignHalf(regs.cpsr);
+                needs_flush = true;
+            }
         }
     }
-    else  // MRS (PSR to register)
+    else  // MRS
     {
-        // Destination register
-        u8 rd = instr >> 12 & 0xF;
-
-        if (rd == 15)
-            log() << "Handle me";
-
-        regs[rd] = spsr ? *regs.spsr : regs.cpsr;
+        int rd = (instr >> 12) & 0xF;
+        regs[rd] = use_spsr ? regs.spsr : regs.cpsr;
     }
 }
 
 // ARM 5
 void ARM::multiply(u32 instr)
 {
-    // Accumulate flag
-    bool accumulate = instr >> 21 & 0x1;
-    // Set conditions flag
-    bool set_flags = instr >> 20 & 0x1;
-    // Destination register
-    u8 rd = instr >> 16 & 0xF;
-    // Operand registers
-    u8 rn = instr >> 12 & 0xF;
-    u8 rs = instr >> 8 & 0xF;
-    u8 rm = instr & 0xF;
-
-    if (rd == rm || rd == 15 || rm == 15)
-        log() << "Handle me";
+    bool accumulate = (instr >> 21) & 0x1;
+    bool set_flags = (instr >> 20) & 0x1;
+    int rd = (instr >> 16) & 0xF;
+    int rn = (instr >> 12) & 0xF;
+    int rs = (instr >> 8) & 0xF;
+    int rm = instr & 0xF;
 
     u32& dst = regs[rd];
-    u32 op1 = regs[rm];
-    u32 op2 = regs[rs];
 
-    // Multiply (MUL)
-    dst = op1 * op2;
+    dst = regs[rs] * regs[rm];
 
-    // Accumulate (MLA)
     if (accumulate) 
         dst += regs[rn];
 

@@ -13,7 +13,6 @@ public:
     {
         struct
         {
-            // General Purpose Registers
             u32 r0;
             u32 r1;
             u32 r2;
@@ -28,35 +27,34 @@ public:
             u32 r11;
             u32 r12;
 
-            u32 sp;  // r13 - Stack Pointer
-            u32 lr;  // r14 - Link Register
-            u32 pc;  // r15 - Program Counter
+            u32 sp;
+            u32 lr;
+            u32 pc;
         };
         u32 regs[16];
     };
 
-    u32 cpsr;  // Current Program Status Register
-    u32* spsr;  // Saved Program Status Register
+    u32 cpsr;
+    u32 spsr;
 
 protected:
     enum Bank
     {
-        BANK_FIQ = 0,
-        BANK_IRQ = 1,
-        BANK_SVC = 2,
-        BANK_ABT = 3,
-        BANK_UND = 4, 
-        BANK_DEF = 5  // Bank for user and system modes
+        BANK_DEF,
+        BANK_FIQ,
+        BANK_IRQ,
+        BANK_SVC,
+        BANK_ABT,
+        BANK_UND
     };
 
-    // All modes bank SP and LR
     struct
     {
         u32 sp;
         u32 lr;
+        u32 spsr;
     } bank[6];
 
-    // FIQ mode also banks registers 8-12
     struct
     {
         u32 r8;
@@ -65,9 +63,6 @@ protected:
         u32 r11;
         u32 r12;
     } bank_fiq[2];
-
-    // Privileged modes save the previous CPSR
-    u32 bank_spsr[5];
 
 private:
     static Bank modeToBank(Mode mode);
