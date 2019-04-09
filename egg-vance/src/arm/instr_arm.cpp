@@ -2,8 +2,6 @@
 
 /**
  * Todo
- * - ARM 3: flush if PC is PC (in sub, add)?
- * - ARM 4: rework and write proper test (SPSR and mode switching)
  * - ARM 11: sign extension still needed with new code?
  */
 
@@ -12,58 +10,49 @@
 
 u32 ARM::rotatedImmediate(int value, bool& carry)
 {
-    // Immediate 8-bit value
-    int immediate = value & 0xFF;
-    // Rotation applied to the immediate value
-    int rotation = value >> 8 & 0xF;
+    int imm8 = value & 0xFF;
+    int rotation = (value >> 8) & 0xF;
 
-    // RRX does not exist in this case
+    // No RRX in this case
     if (rotation == 0)
     {
         carry = regs.c();
-
-        return immediate;
+        return imm8;
     }
     else
     {
-        // Twice the rotation is applied
-        return ror(immediate, 2 * rotation, carry);
+        // Apply twice the rotation
+        return ror(imm8, 2 * rotation, carry);
     }
 }
 
 u32 ARM::shiftedRegister(int value, bool& carry)
 {
-    // 8-bit shift data
-    int shift = value >> 4 & 0xFF;
-    // Source register
+    int shift = (value >> 4) & 0xFF;
     int rm = value & 0xF;
 
     int offset;
     if (shift & 0x1)
     {
-        // Shift register
-        int rs = shift >> 4 & 0xF;
+        int rs = (shift >> 4) & 0xF;
         // Offset is stored in the lower byte
         offset = regs[rs] & 0xFF;
 
-        if (rs == 15)
-            log() << "Handle me";
-
-        // Register shifts by zero are ignored (special cases use immediate)
+        // No RRX in this case
         if (offset == 0)
         {
             carry = regs.c();
-
             return regs[rm];
         }
     }
     else
     {
         // Offset is a 5-bit immediate value
-        offset = shift >> 3 & 0x1F;
+        offset = (shift >> 3) & 0x1F;
     }
 
-    switch (shift >> 1 & 0x3)
+    int type = (shift >> 1) & 0x3;
+    switch (type)
     {
     case 0b00: return lsl(regs[rm], offset, carry);
     case 0b01: return lsr(regs[rm], offset, carry);
@@ -79,19 +68,14 @@ u32 ARM::shiftedRegister(int value, bool& carry)
  // ARM 1
 void ARM::branchExchange(u32 instr)
 {
-    // Operand register
     int rn = instr & 0xF;
-
-    // Undefined for PC
-    if (rn == 15)
-        log() << "Handle error";
 
     u32 addr = regs[rn];
 
     if (addr & 0x1)
     {
         addr = alignHalf(addr);
-        // Switch instruction set
+        // Change instruction set
         regs.setThumb(true);
     }
     else
@@ -106,44 +90,35 @@ void ARM::branchExchange(u32 instr)
 // ARM 2
 void ARM::branchLink(u32 instr)
 {
-    // Link flag
-    bool link = instr >> 24 & 0x1;
+    bool link = (instr >> 24) & 0x1;
     // 24-bit immediate value
-    int offset = instr & 0xFFFFFF;
+    int imm24 = instr & 0xFFFFFF;
 
-    int signed_offset = twos<24>(offset);
+    int offset = twos<24>(imm24);
 
     // Offset is a 26-bit constant
-    signed_offset <<= 2;
+    offset <<= 2;
 
     if (link)
-        // Save address of next instruction
         regs.lr = regs.pc - 4;
 
-    regs.pc += signed_offset;
+    regs.pc += offset;
     needs_flush = true;
 }
 
 // ARM 3
 void ARM::dataProcessing(u32 instr)
 {
-    // Immediate operand flag
-    bool use_imm = instr >> 25 & 0x1;
-    // Operation code
-    int opcode = instr >> 21 & 0xF;
-    // Set conditions flag
-    bool set_flags = instr >> 20 & 0x1;
-    // First operand register
-    int rn = instr >> 16 & 0xF;
-    // Destination register
-    int rd = instr >> 12 & 0xF;
-    // Second operand data
+    bool use_imm = (instr >> 25) & 0x1;
+    int opcode = (instr >> 21) & 0xF;
+    bool set_flags = (instr >> 20) & 0x1;
+    int rn = (instr >> 16) & 0xF;
+    int rd = (instr >> 12) & 0xF;
     u32 op2 = instr & 0xFFF;
 
-    u32 op1 = regs[rn];
     u32& dst = regs[rd];
+    u32 op1 = regs[rn];
 
-    // Get second operand value
     bool carry;
     if (use_imm)
         op2 = rotatedImmediate(op2, carry);
@@ -153,11 +128,12 @@ void ARM::dataProcessing(u32 instr)
     // Writing to PC
     if (set_flags && rd == 15)
     {
-        // Move current SPSR into CPSR
-        regs.cpsr = regs.spsr;
+        // Switch mode
+        u32 spsr = regs.spsr;
+        regs.switchMode(static_cast<Mode>(spsr));
+        regs.cpsr = spsr;
 
-        // Do not set flags
-        set_flags = 0;
+        set_flags = false;
     }
 
     switch (opcode)
@@ -250,11 +226,6 @@ void ARM::dataProcessing(u32 instr)
 
     // MOV
     case 0b1101:
-        if (rd == 15)
-        {
-            op2 = alignWord(op2);
-            needs_flush = true;
-        }
         dst = op2;
         if (set_flags) 
             logical(dst, carry);
@@ -273,6 +244,12 @@ void ARM::dataProcessing(u32 instr)
         if (set_flags) 
             logical(dst, carry);
         break;
+    }
+
+    if (rd == 15)
+    {
+        dst = alignWord(dst);
+        needs_flush = true;
     }
 }
 
