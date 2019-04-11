@@ -53,3 +53,21 @@ inline s32 twos<32>(u32 value)
 {
     return static_cast<s32>(value);
 }
+
+// Convert two's complement to signed value experimental
+template<unsigned int bits>
+inline s32 twosExp(u32 value)
+{
+    static_assert(bits <= 32, "Invalid number of bits");
+
+    if (value & (1 << (bits - 1)))
+        value |= (0xFFFFFFFF << bits);
+
+    return static_cast<s32>(value);
+}
+
+template<>
+inline s32 twosExp<32>(u32 value)
+{
+    return static_cast<s32>(value);
+}

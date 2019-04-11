@@ -2,6 +2,8 @@
 
 /**
  * Todo
+ * - ARM 7: Store PC + 4?
+ * - ARM 8: Store PC + 4?
  * - ARM 11: sign extension still needed with new code?
  */
 
@@ -321,6 +323,7 @@ void ARM::multiply(u32 instr)
 {
     bool accumulate = (instr >> 21) & 0x1;
     bool set_flags = (instr >> 20) & 0x1;
+
     int rd = (instr >> 16) & 0xF;
     int rn = (instr >> 12) & 0xF;
     int rs = (instr >> 8) & 0xF;
@@ -328,10 +331,14 @@ void ARM::multiply(u32 instr)
 
     u32& dst = regs[rd];
 
-    dst = regs[rs] * regs[rm];
+    u32 op1 = regs[rs];
+    u32 op2 = regs[rm];
+    u32 acc = regs[rn];
+
+    dst = op1 * op2;
 
     if (accumulate) 
-        dst += regs[rn];
+        dst += acc;
 
     if (set_flags)
         logical(dst);
@@ -340,43 +347,34 @@ void ARM::multiply(u32 instr)
 // ARM 6
 void ARM::multiplyLong(u32 instr)
 {
-    // Signed / unsigned flag
-    bool sign = instr >> 22 & 0x1;
-    // Accumulate flag
-    bool accumulate = instr >> 21 & 0x1;
-    // Set conditions flag
-    bool set_flags = instr >> 20 & 0x1;
-    // Source / destination registers
-    u8 rdhi = instr >> 16 & 0xF;
-    u8 rdlo = instr >> 12 & 0xF;
-    // Operand registers
-    u8 rs = instr >> 8 & 0xF;
-    u8 rm = instr & 0xF;
+    bool sign = (instr >> 22) & 0x1;
+    bool accumulate = (instr >> 21) & 0x1;
+    bool set_flags = (instr >> 20) & 0x1;
 
-    if (rs == 15 || rm == 15 || rdhi == 15 
-        || rdlo == 15 || rdlo == rdhi || rdlo == rm)
-        log() << "Handle me";
+    int rdhi = (instr >> 16) & 0xF;
+    int rdlo = (instr >> 12) & 0xF;
+    int rs = (instr >> 8) & 0xF;
+    int rm = instr & 0xF;
 
     u32& dsthi = regs[rdhi];
     u32& dstlo = regs[rdlo];
+
     u64 op1 = regs[rm];
     u64 op2 = regs[rs];
 
     if (sign)
     {
         // Sign extend to 64 bits if negative two's complement
-        if (op1 & 1 << 31) 
+        if (op1 & (1 << 31))
             op1 |= 0xFFFFFFFF00000000;
-        if (op2 & 1 << 31) 
+        if (op2 & (1 << 31))
             op2 |= 0xFFFFFFFF00000000;
     }
     
-    // Multiply (UMULL / SMULL)
     u64 result = op1 * op2;
 
-    // Accumulate (UMLAL / SMLAL)
     if (accumulate)
-        result += static_cast<u64>(dsthi) << 32 | dstlo;
+        result += (static_cast<u64>(dsthi) << 32) | dstlo;
 
     if (set_flags)
     {
@@ -391,52 +389,32 @@ void ARM::multiplyLong(u32 instr)
 // ARM 7
 void ARM::singleDataTransfer(u32 instr)
 {
-    // Todo: is address aligned???
-    // Todo: shifted register by 0
+    bool use_reg = (instr >> 25) & 0x1;
+    bool pre_indexing = (instr >> 24) & 0x1;
+    bool increment = (instr >> 23) & 0x1;
+    int byte = (instr >> 22) & 0x1;
+    bool writeback = (instr >> 21) & 0x1;
+    int load = (instr >> 20) & 0x1;
 
-    // Register / immediate flag
-    bool use_reg = instr >> 25 & 0x1;
-    // Pre- / post-indexing flag
-    bool pre_indexing = instr >> 24 & 0x1;
-    // Up / down flag
-    bool up = instr >> 23 & 0x1;
-    // Byte / word flag
-    int byte = instr >> 22 & 0x1;
-    // Writeback flag
-    bool writeback = instr >> 21 & 0x1;
-    // Load / store flag
-    int load = instr >> 20 & 0x1;
-    // Base register
-    u8 rn = instr >> 16 & 0xF;
-    // Source / destination register
-    u8 rd = instr >> 12 & 0xF;
-    // 12-bit immediate value / shifted register
+    int rn = (instr >> 16) & 0xF;
+    int rd = (instr >> 12) & 0xF;
+
     u32 offset = instr & 0xFFF;
-
-    if (rn == 15 && writeback)
-        // Todo: handle PC as shift offset rm
-        log() << "Handle error";
-
-    // Offset is a shifted register
     if (use_reg)
     {
         bool carry;
-        // Register shift amounts are not available in this instruction
         offset = shiftedRegister(offset, carry);
     }
 
-    // Post-indexing always writes back (but writeback is 0)
-    writeback |= !pre_indexing;
-
-    // Get base address
     u32 addr = regs[rn];
-    // Get destination register
     u32& dst = regs[rd];
 
-    // Pre-indexing
+    // Post-indexing always writes back
+    writeback |= !pre_indexing;
+
     if (pre_indexing)
     {
-        if (up)
+        if (increment)
             addr += offset;
         else
             addr -= offset;
@@ -446,36 +424,33 @@ void ARM::singleDataTransfer(u32 instr)
     {
     case 0b00:
         // STR
-        // Stored value will be address of instruction + 12 (8 already because of pipe)
-        mmu->writeWord(addr & ~0x3, dst + ((rd == 15) ? 4 : 0));
+        mmu->writeWord(alignWord(addr), dst);
         break;
 
     case 0b01:
         // STRB
-        mmu->writeByte(addr & ~0x3, dst & 0xFF);
+        mmu->writeByte(addr, dst & 0xFF);
         break;
 
     case 0b10:
         // LDR
-        dst = mmu->readWord(addr & ~0x3);
+        dst = ldr(addr);
         break;
 
     case 0b11:
         // LDRB
-        dst = mmu->readByte(addr & ~0x3);
+        dst = mmu->readByte(addr);
         break;
     }
 
-    // Post-indexing
     if (!pre_indexing)
     {
-        if (up)
+        if (increment)
             addr += offset;
         else
             addr -= offset;
     }
 
-    // Writeback address
     if (writeback)
         regs[rn] = addr;
 }
@@ -483,55 +458,39 @@ void ARM::singleDataTransfer(u32 instr)
 // ARM 8
 void ARM::halfSignedDataTransfer(u32 instr)
 {
-    // Pre- / post-indexing flag
-    bool pre_indexing = instr >> 24 & 0x1;
-    // Up / down flag
-    bool up = instr >> 23 & 0x1;
-    // Writeback flag
-    bool writeback = instr >> 21 & 0x1;
-    // Load / store flag
-    bool load = instr >> 20 & 0x1;
-    // Base register
-    u8 rn = instr >> 16 & 0xF;
-    // Source / destination register
-    u8 rd = instr >> 12 & 0xF;
-    // Signed / unsigned flag
-    int sign = instr >> 6 & 0x1;
-    // Halfword / byte flag
-    int half = instr >> 5 & 0x1;
+    bool pre_indexing = (instr >> 24) & 0x1;
+    bool use_imm = (instr >> 22) & 0x1;
+    bool increment = (instr >> 23) & 0x1;
+    bool writeback = (instr >> 21) & 0x1;
+    bool load = (instr >> 20) & 0x1;
 
-    if (rn == 15 && writeback)
-        log() << "Handle error";
+    int rn = (instr >> 16) & 0xF;
+    int rd = (instr >> 12) & 0xF;
+    int sign = (instr >> 6) & 0x1;
+    int half = (instr >> 5) & 0x1;
 
     u32 offset;
-    if (instr >> 22 & 0x1)
+    if (use_imm)
     {
-        // Immediate offset
-        int upper = instr >> 8 & 0xF;
+        int upper = (instr >> 8) & 0xF;
         int lower = instr & 0xF;
         offset = upper << 4 | lower;
     }
     else
     {
-        // Register offset
-        u8 rm = instr & 0xF;
-        if (rm == 15)
-            log() << "Handle error";
+        int rm = instr & 0xF;
         offset = regs[rm];
     }
 
-    // Post-indexing always writes back (but writeback is 0)
-    writeback |= !pre_indexing;
-
-    // Get base address
     u32 addr = regs[rn];
-    // Get destination register
     u32& dst = regs[rd];
 
-    // Pre-indexing
+    // Post-indexing always writes back
+    writeback |= !pre_indexing;
+
     if (pre_indexing)
     {
-        if (up)
+        if (increment)
             addr += offset;
         else
             addr -= offset;
@@ -541,37 +500,32 @@ void ARM::halfSignedDataTransfer(u32 instr)
     {
     // SWP
     case 0b00:
-        log() << "Wrong instruction for SWP";
         break;
 
     // STRH / LDRH
     case 0b01:
         if (load)
-            dst = mmu->readHalf(addr & ~0x1);
+            dst = ldrh(addr);
         else
-            // Stored value will be address of instruction + 12 (8 already because of pipe)
-            mmu->writeHalf(addr & ~0x1, dst + ((rn == 15) ? 4 : 0));
+            mmu->writeHalf(alignHalf(addr), dst & 0xFFFF);
         break;
 
     // LDRSB
     case 0b10:
-        dst = mmu->readByte(addr & ~0x1);
-        if (dst & 1 << 7)
+        dst = mmu->readByte(addr);
+        if (dst & (1 << 7))
             dst |= 0xFFFFFF00;
         break;
 
     // LDRSH
     case 0b11:
-        dst = mmu->readHalf(addr & ~0x1);
-        if (dst & 1 << 15)
-            dst |= 0xFFFF0000;
+        dst = ldrsh(addr);
         break;
     }
 
-    // Post-indexing
     if (!pre_indexing)
     {
-        if (up)
+        if (increment)
             addr += offset;
         else
             addr -= offset;
@@ -677,39 +631,24 @@ void ARM::blockDataTransfer(u32 instr)
 // ARM 10
 void ARM::singleDataSwap(u32 instr)
 {
-    // Byte / word flag
-    int byte = instr >> 22 & 0x1;
-    // Base register
-    int rb = instr >> 16 & 0xF;
-    // Destination register
-    int rd = instr >> 12 & 0xF;
-    // Source register
-    int rs = instr & 0xF;
+    bool byte = (instr >> 22) & 0x1;
 
-    if (rb == 15 || rd == 15 || rs == 15)
-        log() << "Handle error";
+    int rb = (instr >> 16) & 0xF;
+    int rd = (instr >> 12) & 0xF;
+    int rs = instr & 0xF;
 
     u32 addr = regs[rb];
     u32& dst = regs[rd];
     u32 src = regs[rs];
 
-    if (addr & 0x3)
+    if (byte)
     {
-        // Todo: fix for misaligned addresses
-    }
-
-    switch (byte)
-    {
-    // SWPB
-    case 0b1:
         dst = mmu->readByte(addr);
-        mmu->writeByte(addr, src);
-        break;
-
-    // SWP
-    case 0b0:
-        dst = mmu->readWord(addr);
-        mmu->writeWord(addr, src);
-        break;
+        mmu->writeByte(addr, src & 0xFF);
+    }
+    else
+    {
+        dst = ldr(addr);
+        mmu->writeWord(alignWord(addr), src);
     }
 }

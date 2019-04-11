@@ -580,13 +580,13 @@ u32 ARM::ldrsh(u32 addr)
     if (misalignedHalf(addr))
     {
         value = mmu->readByte(addr);
-        if (value & 1 << 7)
+        if (value & (1 << 7))
             value |= 0xFFFFFF00;
     }
     else
     {
         value = mmu->readHalf(addr);
-        if (value & 1 << 15)
+        if (value & (1 << 15))
             value |= 0xFFFF0000;
     }
     return value;
