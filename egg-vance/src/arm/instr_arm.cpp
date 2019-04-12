@@ -77,7 +77,6 @@ void ARM::branchExchange(u32 instr)
     if (addr & 0x1)
     {
         addr = alignHalf(addr);
-        // Change instruction set
         regs.setThumb(true);
     }
     else
@@ -93,49 +92,46 @@ void ARM::branchExchange(u32 instr)
 void ARM::branchLink(u32 instr)
 {
     bool link = (instr >> 24) & 0x1;
-    // 24-bit immediate value
+
     int imm24 = instr & 0xFFFFFF;
-
-    int offset = twos<24>(imm24);
-
-    // Offset is a 26-bit constant
-    offset <<= 2;
+    // Immediate is a 26-bit constant
+    int imm26 = twos2<24>(imm24) << 2;
 
     if (link)
         regs.lr = regs.pc - 4;
 
-    regs.pc += offset;
+    regs.pc += imm26;
     needs_flush = true;
 }
 
 // ARM 3
 void ARM::dataProcessing(u32 instr)
 {
-    bool use_imm = (instr >> 25) & 0x1;
+    bool immediate = (instr >> 25) & 0x1;
     int opcode = (instr >> 21) & 0xF;
-    bool set_flags = (instr >> 20) & 0x1;
+    bool flags = (instr >> 20) & 0x1;
+
     int rn = (instr >> 16) & 0xF;
     int rd = (instr >> 12) & 0xF;
-    u32 op2 = instr & 0xFFF;
 
     u32& dst = regs[rd];
     u32 op1 = regs[rn];
 
+    u32 op2;
     bool carry;
-    if (use_imm)
-        op2 = rotatedImmediate(op2, carry);
+    if (immediate)
+        op2 = rotatedImmediate(instr & 0xFFF, carry);
     else
-        op2 = shiftedRegister(op2, carry);
+        op2 = shiftedRegister(instr & 0xFFF, carry);
 
-    // Writing to PC
-    if (set_flags && rd == 15)
+    if (flags && rd == 15)
     {
-        // Switch mode
+        // Change mode and copy SPSR
         u32 spsr = regs.spsr;
         regs.switchMode(static_cast<Mode>(spsr));
         regs.cpsr = spsr;
 
-        set_flags = false;
+        flags = false;
     }
 
     switch (opcode)
@@ -143,35 +139,35 @@ void ARM::dataProcessing(u32 instr)
     // AND
     case 0b0000:
         dst = op1 & op2;
-        if (set_flags) 
+        if (flags) 
             logical(dst, carry);
         break;
 
     // EOR
     case 0b0001:
         dst = op1 ^ op2;
-        if (set_flags) 
+        if (flags) 
             logical(dst, carry);
         break;
 
     // SUB
     case 0b0010:
         dst = op1 - op2;
-        if (set_flags) 
+        if (flags) 
             arithmetic(op1, op2, false);
         break;
 
     // RSB
     case 0b0011:
         dst = op2 - op1;
-        if (set_flags) 
+        if (flags) 
             arithmetic(op2, op1, false);
         break;
 
     // ADD
     case 0b0100:
         dst = op1 + op2;
-        if (set_flags) 
+        if (flags) 
             arithmetic(op1, op2, true);
         break;
 
@@ -179,23 +175,23 @@ void ARM::dataProcessing(u32 instr)
     case 0b0101:
         op2 += regs.c();
         dst = op1 + op2;
-        if (set_flags) 
+        if (flags) 
             arithmetic(op1, op2, true);
         break;
 
     // SBC
     case 0b0110:
-        op2 += regs.c() ? 0 : 1;
+        op2 += 1 - regs.c();
         dst = op1 - op2;
-        if (set_flags) 
+        if (flags) 
             arithmetic(op1, op2, false);
         break;
 
     // RBC
     case 0b0111:
-        op1 += regs.c() ? 0 : 1;
+        op1 += 1 - regs.c();
         dst = op2 - op1;
-        if (set_flags) 
+        if (flags) 
             arithmetic(op2, op1, false);
         break;
 
@@ -222,28 +218,28 @@ void ARM::dataProcessing(u32 instr)
     // ORR
     case 0b1100:
         dst = op1 | op2;
-        if (set_flags) 
+        if (flags) 
             logical(dst, carry);
         break;
 
     // MOV
     case 0b1101:
         dst = op2;
-        if (set_flags) 
+        if (flags) 
             logical(dst, carry);
         break;
 
     // BIC
     case 0b1110:
         dst = op1 & ~op2;
-        if (set_flags) 
+        if (flags) 
             logical(dst, carry);
         break;
 
     // MVN
     case 0b1111:
         dst = ~op2;
-        if (set_flags) 
+        if (flags) 
             logical(dst, carry);
         break;
     }
@@ -306,7 +302,7 @@ void ARM::psrTransfer(u32 instr)
             // Technically undefined behavior
             if (regs.isThumb())
             {
-                regs.cpsr = alignHalf(regs.cpsr);
+                regs.pc = alignHalf(regs.pc);
                 needs_flush = true;
             }
         }
@@ -538,57 +534,46 @@ void ARM::halfSignedDataTransfer(u32 instr)
 // ARM 9
 void ARM::blockDataTransfer(u32 instr)
 {
-    // Full / empty stack
-    bool full_stack = instr >> 24 & 0x1;
-    // Ascending / descending stack
-    bool ascending_stack = instr >> 23 & 0x1;
-    // Load PSR and force user
-    bool psr_user = instr >> 22 & 0x1;
-    // Writeback flag
-    bool writeback = instr >> 21 & 0x1;
-    // Load / store flag
-    bool load = instr >> 20 & 0x1;
-    // Base register
-    int rn = instr >> 16 & 0xF;
-    // Register list
+    bool full = (instr >> 24) & 0x1;
+    bool ascending = (instr >> 23) & 0x1;
+    bool user_transfer = (instr >> 22) & 0x1;
+    bool writeback = (instr >> 21) & 0x1;
+    bool load = (instr >> 20) & 0x1;
+
+    int rn = (instr >> 16) & 0xF;
     int rlist = instr & 0xFFFF;
 
-    if (rlist == 0 || rn == 15)
-        log() << "Handle me";
-
-    // Handle S bit
-    Mode mode = regs.mode();
-
-    if (psr_user)
-        regs.switchMode(MODE_USR);
-
-    // Base address
     u32 addr = regs[rn];
 
+    // Handle user transfer
+    Mode mode = regs.mode();
+    if (user_transfer)
+        regs.switchMode(MODE_USR);
+
     // Lowest register gets stored at the lowest address
-    if (ascending_stack)
+    if (ascending)
     {
         // Start at lowest address, load / store registers in order
         for (int x = 0; x < 16; ++x)
         {
             if (rlist & 1 << x)
             {
-                if (full_stack)
+                if (full)
                     addr += 4;
 
                 if (load)
                 {
-                    regs[x] = mmu->readWord(addr & ~0x3);
+                    regs[x] = mmu->readWord(alignWord(addr));
 
                     if (x == 15)
                         needs_flush = true;
                 }
                 else
                 {
-                    mmu->writeWord(addr & ~0x3, regs[x]);
+                    mmu->writeWord(alignWord(addr), regs[x]);
                 }
             
-                if (!full_stack)
+                if (!full)
                     addr += 4;
             }
         }
@@ -600,22 +585,22 @@ void ARM::blockDataTransfer(u32 instr)
         {
             if (rlist & 1 << x)
             {
-                if (full_stack)
+                if (full)
                     addr -= 4;
 
                 if (load)
                 {
-                    regs[x] = mmu->readWord(addr & ~0x3);
+                    regs[x] = mmu->readWord(alignWord(addr));
 
                     if (x == 15)
                         needs_flush = true;
                 }
                 else
                 {
-                    mmu->writeWord(addr & ~0x3, regs[x]);
+                    mmu->writeWord(alignWord(addr), regs[x]);
                 }
 
-                if (!full_stack)
+                if (!full)
                     addr -= 4;
             }
         }
@@ -624,7 +609,7 @@ void ARM::blockDataTransfer(u32 instr)
     if (writeback)
         regs[rn] = addr;
 
-    if (psr_user)
+    if (user_transfer)
         regs.switchMode(mode);
 }
 

@@ -32,22 +32,22 @@ void Registers::setThumb(bool set)
     setFlag(CPSR_T, set);
 }
 
-u8 Registers::z() const
+int Registers::z() const
 {
     return (cpsr & CPSR_Z) ? 1 : 0;
 }
 
-u8 Registers::n() const
+int Registers::n() const
 {
     return (cpsr & CPSR_N) ? 1 : 0;
 }
 
-u8 Registers::c() const
+int Registers::c() const
 {
     return (cpsr & CPSR_C) ? 1 : 0;
 }
 
-u8 Registers::v() const
+int Registers::v() const
 {
     return (cpsr & CPSR_V) ? 1 : 0;
 }

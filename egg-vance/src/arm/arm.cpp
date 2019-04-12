@@ -381,46 +381,46 @@ void ARM::flush()
     pipe[2] = { 0, REFILL_PIPE };
 }
 
-void ARM::updateZ(u32 value)
+void ARM::updateZ(u32 result)
 {
-    regs.setZ(value == 0);
+    regs.setZ(result == 0);
 }
 
-void ARM::updateN(u32 value)
+void ARM::updateN(u32 result)
 {
-    regs.setN(value >> 31);
+    regs.setN(result >> 31);
 }
 
-void ARM::updateC(u32 value, u32 operand, bool addition)
+void ARM::updateC(u32 op1, u32 op2, bool addition)
 {
     bool carry;
 
     if (addition)
-        carry = operand > (0xFFFFFFFF - value);
+        carry = op2 > (0xFFFFFFFF - op1);
     else
-        carry = operand <= value;
+        carry = op2 <= op1;
 
     regs.setC(carry);
 }
 
-void ARM::updateV(u32 value, u32 operand, bool addition)
+void ARM::updateV(u32 op1, u32 op2, bool addition)
 {
-    int msb_value = value >> 31;
-    int msb_operand = operand >> 31;
+    int msb_op1 = op1 >> 31;
+    int msb_op2 = op2 >> 31;
 
     bool overflow = false;
 
     if (addition)
     {
-        int msb_result = (value + operand) >> 31;
-        if (msb_value == msb_operand)
-            overflow = msb_result != msb_value;
+        int msb_result = (op1 + op2) >> 31;
+        if (msb_op1 == msb_op2)
+            overflow = msb_result != msb_op1;
     }
     else
     {
-        int msb_result = (value - operand) >> 31;
-        if (msb_value != msb_operand)
-            overflow = msb_result == msb_operand;
+        int msb_result = (op1 - op2) >> 31;
+        if (msb_op1 != msb_op2)
+            overflow = msb_result == msb_op2;
     }
 
     regs.setV(overflow);

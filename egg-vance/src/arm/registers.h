@@ -10,10 +10,10 @@ public:
     bool isThumb() const;
     void setThumb(bool set);
 
-    u8 z() const;
-    u8 n() const;
-    u8 c() const;
-    u8 v() const;
+    int z() const;
+    int n() const;
+    int c() const;
+    int v() const;
 
     void setZ(bool set);
     void setN(bool set);
