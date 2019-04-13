@@ -128,7 +128,7 @@ void ARM::dataProcessing(u32 instr)
     {
         // Change mode and copy SPSR
         u32 spsr = regs.spsr;
-        regs.switchMode(static_cast<Mode>(spsr));
+        regs.switchMode(static_cast<Mode>(spsr & 0x1F));
         regs.cpsr = spsr;
 
         flags = false;
