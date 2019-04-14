@@ -32,6 +32,11 @@ void Registers::setThumb(bool set)
     setFlag(CPSR_T, set);
 }
 
+bool Registers::isArm() const
+{
+    return (cpsr & CPSR_T) == 0;
+}
+
 int Registers::z() const
 {
     return (cpsr & CPSR_Z) ? 1 : 0;

@@ -10,6 +10,8 @@ public:
     bool isThumb() const;
     void setThumb(bool set);
 
+    bool isArm() const;
+
     int z() const;
     int n() const;
     int c() const;

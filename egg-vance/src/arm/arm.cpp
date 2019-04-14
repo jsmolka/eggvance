@@ -10,6 +10,8 @@
 
 #include "common/log.h"
 #include "common/utility.h"
+#include "decoder.h"
+#include "disassembler.h"
 
 void ARM::reset()
 {
@@ -24,6 +26,7 @@ void ARM::step()
 {
     fetch();
     decode();
+    debug();
     execute();
 
     if (needs_flush)
@@ -40,175 +43,25 @@ void ARM::step()
 
 void ARM::fetch()
 {
-    if (!regs.isThumb())
+    if (regs.isArm())
         pipe[0].instr = mmu->readWord(regs.pc);
     else
         pipe[0].instr = mmu->readHalf(regs.pc);
 
-    pipe[0].decoded = UNDEFINED;
+    pipe[0].format = FMT_NONE;
 }
 
 void ARM::decode()
 {
-    if (pipe[1].decoded == REFILL_PIPE)
+    if (pipe[1].format == FMT_PIPE)
         return;
-    
-    if (!regs.isThumb())
-    {
-        u32 instr = pipe[1].instr;
 
-        if ((instr >> 25 & 0x7) == 0b101)
-        {
-            pipe[1].decoded = ARM_2;  // Branch and branch with link
-        }
-        else if ((instr >> 25 & 0x7) == 0b100)
-        {
-            pipe[1].decoded = ARM_9;  // Block data transfer
-        }
-        else if ((instr >> 26 & 0x3) == 0b11)
-        {
-            pipe[1].decoded = ARM_11;  // Software interrupt
-
-            // Could also be coprocessor instruction, but the GBA has none
-        }
-        else if ((instr >> 26 & 0x3) == 0b01)
-        {
-            pipe[1].decoded = ARM_7;  // Single data transfer
-
-            // Could also be the undefined instruction, but seems linked to the coprocessor
-        }
-        else  // (instr >> 26 & 0x3) == 0b00
-        {
-            if ((instr >> 4 & 0xFFFFFF) == 0b000100101111111111110001)
-            {
-                pipe[1].decoded = ARM_1;  // Branch and exchange
-            }
-            else if ((instr >> 22 & 0xF) == 0b0000
-                && (instr >> 4 & 0xF) == 0b1001)
-            {
-                pipe[1].decoded = ARM_5;  // Multiply and multiply-accumulate
-            }
-            else if ((instr >> 23 & 0x7) == 0b001
-                && (instr >> 4 & 0xF) == 0b1001)
-            {
-                pipe[1].decoded = ARM_6;  // Multiply long and multiply-accumulate long
-            }
-            else if ((instr >> 23 & 0x7) == 0b010
-                && (instr >> 20 & 0x3) == 0b00
-                && (instr >> 4 & 0xFF) == 0b00001001)
-            {
-                pipe[1].decoded = ARM_10;  // Single data swap
-            }
-            else if ((instr >> 25 & 0x1) == 0b0
-                && (instr >> 7 & 0x1) == 0b1
-                && (instr >> 4 & 0x1) == 0b1)
-            {
-                pipe[1].decoded = ARM_8;  // Halfword data transfer
-            }
-            else
-            {
-                u8 opcode = instr >> 21 & 0xF;
-
-                switch (opcode)
-                {
-                case 0b1000:  // TST
-                case 0b1001:  // TEQ
-                case 0b1010:  // CMP
-                case 0b1011:  // CMN
-                {
-                    bool set_flags = instr >> 20 & 0x1;
-
-                    if (set_flags)
-                        pipe[1].decoded = ARM_3;  // Data processing
-                    else
-                        pipe[1].decoded = ARM_4;  // PSR transfer
-                    break;
-                }
-
-                default:
-                    pipe[1].decoded = ARM_3;  // Data processing
-                }
-            }
-        }
-    }
-    else
-    {
-        u16 instr = static_cast<u16>(pipe[1].instr);
-
-        if ((instr >> 11 & 0x1F) == 0b00011)
-        {
-            pipe[1].decoded = THUMB_2;
-        }
-        else if ((instr >> 13 & 0x7) == 0b000)
-        {
-            pipe[1].decoded = THUMB_1;
-        }
-        else if ((instr >> 13 & 0x7) == 0b001)
-        {
-            pipe[1].decoded = THUMB_3;
-        }
-        else if ((instr >> 10 & 0x3F) == 0b010000)
-        {
-            pipe[1].decoded = THUMB_4;
-        }
-        else if ((instr >> 10 & 0x3F) == 0b010001)
-        {
-            pipe[1].decoded = THUMB_5;
-        }
-        else if ((instr >> 11 & 0x1F) == 0b01001)
-        {
-            pipe[1].decoded = THUMB_6;
-        }
-        else if ((instr >> 12 & 0xF) == 0b0101)
-        {
-            pipe[1].decoded = ((instr >> 9 & 0x1) == 0b0) ? THUMB_7 : THUMB_8;
-        }
-        else if ((instr >> 13 & 0x7) == 0b011)
-        {
-            pipe[1].decoded = THUMB_9;
-        }
-        else if ((instr >> 12 & 0xF) == 0b1000)
-        {
-            pipe[1].decoded = THUMB_10;
-        }
-        else if ((instr >> 12 & 0xF) == 0b1001)
-        {
-            pipe[1].decoded = THUMB_11;
-        }
-        else if ((instr >> 12 & 0xF) == 0b1010)
-        {
-            pipe[1].decoded = THUMB_12;
-        }
-        else if ((instr >> 12 & 0xF) == 0b1011)
-        {
-            pipe[1].decoded = ((instr >> 10 & 0x1) == 0b0) ? THUMB_13 : THUMB_14;
-        }
-        else if ((instr >> 12 & 0xF) == 0b1100)
-        {
-            pipe[1].decoded = THUMB_15;
-        }
-        else if ((instr >> 12 & 0xF) == 0b1101)
-        {
-            pipe[1].decoded = ((instr >> 8 & 0xF) == 0b1111) ? THUMB_17 : THUMB_16;
-        }
-        else if ((instr >> 12 & 0xF) == 0b1110)
-        {
-            pipe[1].decoded = THUMB_18;
-        }
-        else if ((instr >> 12 & 0xF) == 0b1111)
-        {
-            pipe[1].decoded = THUMB_19;
-        }
-        else
-        {
-            log() << "Cannot decode THUMB instruction " << (int)instr;
-        }
-    }
+    pipe[1].format = Decoder::decode(pipe[1].instr, regs.isArm());
 }
  
 void ARM::execute()
 {
-    if (pipe[2].decoded == REFILL_PIPE)
+    if (pipe[2].format == FMT_PIPE)
         return; 
 
     if (!regs.isThumb())
@@ -217,11 +70,9 @@ void ARM::execute()
 
         Condition condition = static_cast<Condition>(instr >> 28);
 
-        log() << "ARM " << (int)pipe[2].decoded - 1;
-
         if (regs.checkCondition(condition))
         {
-            switch (pipe[2].decoded)
+            switch (pipe[2].format)
             {
             case ARM_1:
                 branchExchange(instr);
@@ -268,11 +119,11 @@ void ARM::execute()
             case ARM_13:
             case ARM_14:
             case ARM_15:
-                log() << "Unimplemented instruction " << (int)pipe[2].decoded;
+                log() << "Unimplemented instruction " << (int)pipe[2].format;
                 break;
 
             default:
-                log() << "Unknown ARM instruction " << (int)pipe[2].decoded;
+                log() << "Unknown ARM instruction " << (int)pipe[2].format;
             }
         }
     }
@@ -280,9 +131,7 @@ void ARM::execute()
     {
         u16 instr = static_cast<u16>(pipe[2].instr);
 
-        log() << "THUMB " << (int)pipe[2].decoded - 16;
-
-        switch (pipe[2].decoded)
+        switch (pipe[2].format)
         {
         case THUMB_1:  
             moveShiftedRegister(instr);        
@@ -361,7 +210,7 @@ void ARM::execute()
             break;
 
         default:
-            log() << "Unknown THUMB instruction " << (int)pipe[2].decoded;
+            log() << "Unknown THUMB instruction " << (int)pipe[2].format;
         }
     }
 }
@@ -374,11 +223,19 @@ void ARM::advance()
     regs.pc += regs.isThumb() ? 2 : 4;
 }
 
+void ARM::debug()
+{
+    if (pipe[2].format == FMT_PIPE)
+        return;
+
+    std::cout << hex(regs.pc - 4) << "  " << Disassembler::disassemble(pipe[2].instr, pipe[2].format) << "\n";
+}
+
 void ARM::flush()
 {
-    pipe[0] = { 0, REFILL_PIPE };
-    pipe[1] = { 0, REFILL_PIPE };
-    pipe[2] = { 0, REFILL_PIPE };
+    pipe[0] = { 0, FMT_PIPE };
+    pipe[1] = { 0, FMT_PIPE };
+    pipe[2] = { 0, FMT_PIPE };
 }
 
 void ARM::updateZ(u32 result)

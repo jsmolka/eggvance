@@ -20,11 +20,12 @@ private:
     void decode();
     void execute();
     void advance();
+    void debug();
 
     struct PipeItem
     {
         u32 instr;
-        Instruction decoded;
+        Format format;
     } pipe[3];
 
     bool needs_flush;

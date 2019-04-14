@@ -1,6 +1,29 @@
 #pragma once
 
+#include <iomanip>
+#include <sstream>
+
 #include "integer.h"
+
+template<typename T>
+inline std::string hex(const T& value)
+{
+    static_assert(std::is_convertible<T, int>::value, "Type must be convertable to int");
+
+    std::stringstream stream;
+
+    int intValue = static_cast<int>(value);
+    if (intValue < 0)
+    {
+        intValue = abs(intValue);
+        stream << "-";
+    }
+
+    stream << "0x" << std::setw(2 * sizeof(T)) << std::setfill('0')
+        << std::uppercase << std::hex << intValue;
+
+    return stream.str();
+}
 
 inline u32 alignHalf(u32 addr)
 {
