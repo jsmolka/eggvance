@@ -2,8 +2,6 @@
 
 #include <cstring>
 
-#include "common/log.h"
-
 void Registers::reset()
 {
     std::memset(regs, 0, sizeof(regs));
@@ -22,7 +20,12 @@ void Registers::reset()
     cpsr = 0x5F;
 }
 
-bool Registers::isThumb() const
+bool Registers::arm() const
+{
+    return (cpsr & CPSR_T) == 0;
+}
+
+bool Registers::thumb() const
 {
     return cpsr & CPSR_T;
 }
@@ -30,11 +33,6 @@ bool Registers::isThumb() const
 void Registers::setThumb(bool set)
 {
     setFlag(CPSR_T, set);
-}
-
-bool Registers::isArm() const
-{
-    return (cpsr & CPSR_T) == 0;
 }
 
 int Registers::z() const
@@ -77,12 +75,12 @@ void Registers::setV(bool set)
     setFlag(CPSR_V, set);
 }
 
-bool Registers::checkCondition(Condition cond) const
+bool Registers::check(Condition condition) const
 {
-    if (cond == COND_AL)
+    if (condition == COND_AL)
         return true;
 
-    switch (cond)
+    switch (condition)
     {
     case COND_EQ: return z();
     case COND_NE: return !z();
@@ -100,11 +98,8 @@ bool Registers::checkCondition(Condition cond) const
     case COND_LE: return z() || (n() != v());
     case COND_AL: return true;
     case COND_NV: return false;
-
-    default:
-        log() << "Invalid condition " << (int)cond;
-        return true;
     }
+    return true;
 }
 
 u32 Registers::operator[](int index) const

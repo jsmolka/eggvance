@@ -153,8 +153,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\arm\decoder.cpp" />
     <ClCompile Include="src\arm\disassembler.cpp" />
+    <ClCompile Include="src\arm\pipeline.cpp" />
     <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\arm\registerbank.cpp" />
     <ClCompile Include="src\mmu\registers.cpp" />
@@ -168,14 +168,12 @@
     <ClCompile Include="src\ppu\render_text.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\arm\decoder.h" />
     <ClInclude Include="src\arm\disassembler.h" />
     <ClInclude Include="src\arm\registers.h" />
     <ClInclude Include="src\arm\registerbank.h" />
     <ClInclude Include="src\arm\enums.h" />
-    <ClInclude Include="src\common\utility.h" />
+    <ClInclude Include="src\arm\utility.h" />
     <ClInclude Include="src\mmu\registers.h" />
-    <ClInclude Include="src\common\log.h" />
     <ClInclude Include="src\ppu\ppu.h" />
     <ClInclude Include="src\core.h" />
     <ClInclude Include="src\common\memory_map.h" />

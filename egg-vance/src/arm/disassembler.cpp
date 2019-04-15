@@ -1,30 +1,33 @@
 #include "disassembler.h"
 
-#include "common/utility.h"
+#include <iomanip>
+#include <sstream>
 
-std::string Disassembler::disassemble(u32 instr, Format format)
+#include "utility.h"
+
+std::string Disassembler::disassemble(u32 instr, Format format, u32 pc)
 {
     switch (format)
     {
     case THUMB_1:  return moveShiftedRegister(instr);
     case THUMB_2:  return addSubImmediate(instr);
-    case THUMB_3:  return addSubMovCmpImmediate(instr);
+    case THUMB_3:  return addSubCmpMovImmediate(instr);
     case THUMB_4:  return aluOperations(instr);
     case THUMB_5:  return highRegisterBranchExchange(instr);
-    case THUMB_6:  return loadPcRelative(instr);
+    case THUMB_6:  return loadPcRelative(instr, pc);
     case THUMB_7:  return loadStoreRegisterOffset(instr);
-    case THUMB_8:  return loadStoreHalfSignExtended(instr);
+    case THUMB_8:  return loadStoreHalfSigned(instr);
     case THUMB_9:  return loadStoreImmediateOffset(instr);
     case THUMB_10: return loadStoreHalf(instr);
     case THUMB_11: return loadStoreSpRelative(instr);
-    case THUMB_12: return loadAddress(instr);
+    case THUMB_12: return loadAddress(instr, pc);
     case THUMB_13: return addOffsetSp(instr);
     case THUMB_14: return pushPopRegisters(instr);
     case THUMB_15: return loadStoreMultiple(instr);
-    case THUMB_16: return conditionalBranch(instr);
-    //case THUMB_17: return softwareInterruptBreakpoint(instr);
-    //case THUMB_18: return unconditionalBranch(instr);
-    //case THUMB_19: return longBranchLink(instr);
+    case THUMB_16: return conditionalBranch(instr, pc);
+    case THUMB_17: return softwareInterruptThumb(instr);
+    case THUMB_18: return unconditionalBranch(instr, pc);
+    case THUMB_19: return longBranchLink(instr, pc);
     //case ARM_1:    return branchExchange(instr);
     //case ARM_2:    return branchLink(instr);
     //case ARM_3:    return dataProcessing(instr);
@@ -39,10 +42,26 @@ std::string Disassembler::disassemble(u32 instr, Format format)
     return "unimpl";
 }
 
-void Disassembler::padMnemonic(std::string& mnemonic)
+void Disassembler::mnemonicPad(std::string& mnemonic)
 {
     if (mnemonic.size() < 8)
         mnemonic.append(8 - mnemonic.size(), ' ');
+}
+
+void Disassembler::mnemonicRlist(std::string& mnemonic, int rlist)
+{
+    mnemonic.append("{");
+
+    for (int x = 0; x < 16; ++x)
+    {
+        if (rlist & (1 << x))
+            mnemonic.append(reg(x, true));
+    }
+
+    if (rlist == 0)
+        mnemonic.append("}");
+    else
+        mnemonic.back() = '}';
 }
 
 std::string Disassembler::reg(int number, bool comma)
@@ -71,11 +90,25 @@ std::string Disassembler::reg(int number, bool comma)
     return result;
 }
 
+std::string Disassembler::hex(int value)
+{
+    std::stringstream stream;
+
+    if (value < 0)
+    {
+        value = abs(value);
+        stream << "-";
+    }
+
+    stream << std::uppercase << std::hex << value << std::nouppercase << "h";
+
+    return stream.str();
+}
+
 std::string Disassembler::moveShiftedRegister(u16 instr)
 {
     int opcode = (instr >> 11) & 0x3;
     int offset = (instr >> 6) & 0x1F;
-
     int rs = (instr >> 3) & 0x7;
     int rd = instr & 0x7;
 
@@ -90,10 +123,10 @@ std::string Disassembler::moveShiftedRegister(u16 instr)
         mnemonic = "???";
     }
 
-    padMnemonic(mnemonic);
+    mnemonicPad(mnemonic);
     mnemonic.append(reg(rd, true));
     mnemonic.append(reg(rs, true));
-    mnemonic.append(std::to_string(offset));
+    mnemonic.append(hex(offset));
 
     return mnemonic;
 }
@@ -102,37 +135,33 @@ std::string Disassembler::addSubImmediate(u16 instr)
 {
     bool immediate = (instr >> 10) & 0x1;
     bool subtract = (instr >> 9) & 0x1;
-
-    int imm3 = (instr >> 6) & 0x7;
-
+    int rn = (instr >> 6) & 0x7;
     int rs = (instr >> 3) & 0x7;
     int rd = instr & 0x7;
 
+    bool move = immediate && rn == 0;
+
     std::string mnemonic;
-
-    bool move = immediate && imm3 == 0;
-
     if (move)
         mnemonic = "mov";
     else
         mnemonic = subtract ? "sub" : "add";
 
-    padMnemonic(mnemonic);
+    mnemonicPad(mnemonic);
     mnemonic.append(reg(rd, true));
     mnemonic.append(reg(rs, !move));
 
     if (!move)
-        mnemonic.append(immediate ? std::to_string(imm3) : reg(imm3, false));
+        mnemonic.append(immediate ? hex(rn) : reg(rn, false));
 
     return mnemonic;
 }
 
-std::string Disassembler::addSubMovCmpImmediate(u16 instr)
+std::string Disassembler::addSubCmpMovImmediate(u16 instr)
 {
     int opcode = (instr >> 11) & 0x3;
-    int offset = instr & 0xFF;
-
     int rd = (instr >> 8) & 0x7;
+    int offset = instr & 0xFF;
 
     std::string mnemonic;
     switch (opcode)
@@ -143,9 +172,9 @@ std::string Disassembler::addSubMovCmpImmediate(u16 instr)
     case 0b11: mnemonic = "sub"; break;
     }
 
-    padMnemonic(mnemonic);
+    mnemonicPad(mnemonic);
     mnemonic.append(reg(rd, true));
-    mnemonic.append(std::to_string(offset));
+    mnemonic.append(hex(offset));
 
     return mnemonic;
 }
@@ -153,7 +182,6 @@ std::string Disassembler::addSubMovCmpImmediate(u16 instr)
 std::string Disassembler::aluOperations(u16 instr)
 {
     int opcode = (instr >> 6) & 0xF;
-
     int rs = (instr >> 3) & 0x7;
     int rd = instr & 0x7;
 
@@ -178,7 +206,7 @@ std::string Disassembler::aluOperations(u16 instr)
     case 0b1111: mnemonic = "mvn"; break;
     }
 
-    padMnemonic(mnemonic);
+    mnemonicPad(mnemonic);
     mnemonic.append(reg(rd, true));
     mnemonic.append(reg(rs, false));
 
@@ -190,7 +218,6 @@ std::string Disassembler::highRegisterBranchExchange(u16 instr)
     int opcode = (instr >> 8) & 0x3;
     int hd = (instr >> 7) & 0x1;
     int hs = (instr >> 6) & 0x1;
-
     int rs = (instr >> 3) & 0x7;
     int rd = instr & 0x7;
 
@@ -206,8 +233,7 @@ std::string Disassembler::highRegisterBranchExchange(u16 instr)
     case 0b11: mnemonic = "bx";  break;
     }
 
-    padMnemonic(mnemonic);
-
+    mnemonicPad(mnemonic);
     if (opcode != 0b11)
         mnemonic.append(reg(rd, true));
     mnemonic.append(reg(rs, false));
@@ -215,19 +241,19 @@ std::string Disassembler::highRegisterBranchExchange(u16 instr)
     return mnemonic;
 }
 
-std::string Disassembler::loadPcRelative(u16 instr)
+std::string Disassembler::loadPcRelative(u16 instr, u32 pc)
 {
     int rd = (instr >> 8) & 0x7;
     int offset = instr & 0xFF;
-
+    
     offset <<= 2;
 
     std::string mnenonic = "ldr";
 
-    padMnemonic(mnenonic);
+    mnemonicPad(mnenonic);
     mnenonic.append(reg(rd, true));
-    mnenonic.append("[pc,");
-    mnenonic.append(std::to_string(offset));
+    mnenonic.append("[");
+    mnenonic.append(hex((pc & ~0x2) + offset));
     mnenonic.append("]");
 
     return mnenonic;
@@ -237,7 +263,6 @@ std::string Disassembler::loadStoreRegisterOffset(u16 instr)
 {
     int load = (instr >> 11) & 0x1;
     int byte = (instr >> 10) & 0x1;
-
     int ro = (instr >> 6) & 0x7;
     int rb = (instr >> 3) & 0x7;
     int rd = instr & 0x7;
@@ -251,7 +276,7 @@ std::string Disassembler::loadStoreRegisterOffset(u16 instr)
     case 0b11: mnemonic = "ldrb"; break;
     }
 
-    padMnemonic(mnemonic);
+    mnemonicPad(mnemonic);
     mnemonic.append(reg(rd, true));
     mnemonic.append("[");
     mnemonic.append(reg(rb, true));
@@ -261,11 +286,10 @@ std::string Disassembler::loadStoreRegisterOffset(u16 instr)
     return mnemonic;
 }
 
-std::string Disassembler::loadStoreHalfSignExtended(u16 instr)
+std::string Disassembler::loadStoreHalfSigned(u16 instr)
 {
     int half = (instr >> 11) & 0x1;
     int sign = (instr >> 10) & 0x1;
-
     int ro = (instr >> 6) & 0x7;
     int rb = (instr >> 3) & 0x7;
     int rd = instr & 0x7;
@@ -273,13 +297,13 @@ std::string Disassembler::loadStoreHalfSignExtended(u16 instr)
     std::string mnemonic;
     switch (sign << 1 | half)
     {
-    case 0b00: mnemonic = "strh"; break;
-    case 0b01: mnemonic = "ldrh"; break;
-    case 0b10: mnemonic = "ldsb"; break;
-    case 0b11: mnemonic = "ldsh"; break;
+    case 0b00: mnemonic = "strh";  break;
+    case 0b01: mnemonic = "ldrh";  break;
+    case 0b10: mnemonic = "ldrsb"; break;
+    case 0b11: mnemonic = "ldrsh"; break;
     }
 
-    padMnemonic(mnemonic);
+    mnemonicPad(mnemonic);
     mnemonic.append(reg(rd, true));
     mnemonic.append("[");
     mnemonic.append(reg(rb, true));
@@ -294,7 +318,6 @@ std::string Disassembler::loadStoreImmediateOffset(u16 instr)
     int byte = (instr >> 12) & 0x1;
     int load = (instr >> 11) & 0x1;
     int offset = (instr >> 6) & 0x1F;
-
     int rb = (instr >> 3) & 0x7;
     int rd = instr & 0x7;
 
@@ -310,11 +333,11 @@ std::string Disassembler::loadStoreImmediateOffset(u16 instr)
     case 0b11: mnemonic = "ldrb"; break;
     }
 
-    padMnemonic(mnemonic);
+    mnemonicPad(mnemonic);
     mnemonic.append(reg(rd, true));
     mnemonic.append("[");
     mnemonic.append(reg(rb, true));
-    mnemonic.append(std::to_string(offset));
+    mnemonic.append(hex(offset));
     mnemonic.append("]");
 
     return mnemonic;
@@ -324,7 +347,6 @@ std::string Disassembler::loadStoreHalf(u16 instr)
 {
     bool load = (instr >> 11) & 0x1;
     int offset = (instr >> 6) & 0x1F;
-
     int rb = (instr >> 3) & 0x7;
     int rd = instr & 0x7;
 
@@ -332,11 +354,11 @@ std::string Disassembler::loadStoreHalf(u16 instr)
 
     std::string mnemonic = load ? "ldrh" : "strh";
 
-    padMnemonic(mnemonic);
+    mnemonicPad(mnemonic);
     mnemonic.append(reg(rd, true));
     mnemonic.append("[");
     mnemonic.append(reg(rb, true));
-    mnemonic.append(std::to_string(offset));
+    mnemonic.append(hex(offset));
     mnemonic.append("]");
 
     return mnemonic;
@@ -353,74 +375,70 @@ std::string Disassembler::loadStoreSpRelative(u16 instr)
 
     std::string mnemonic = load ? "ldr" : "str";
 
-    padMnemonic(mnemonic);
+    mnemonicPad(mnemonic);
     mnemonic.append(reg(rd, true));
     mnemonic.append("[sp,");
-    mnemonic.append(std::to_string(offset));
+    mnemonic.append(hex(offset));
     mnemonic.append("]");
 
     return mnemonic;
 }
 
-std::string Disassembler::loadAddress(u16 instr)
+std::string Disassembler::loadAddress(u16 instr, u32 pc)
 {
     bool sp = (instr >> 11) & 0x1;
-    
     int rd = (instr >> 8) & 0x7;
     int offset = instr & 0xFF;
 
     offset <<= 2;
 
-    std::string mnemonic = "add";
+    std::string mnemonic = sp ? "add" : "adr";
 
-    padMnemonic(mnemonic);
+    mnemonicPad(mnemonic);
     mnemonic.append(reg(rd, true));
-    mnemonic.append("[");
-    mnemonic.append(reg(sp ? 14 : 15, true));
-    mnemonic.append(std::to_string(offset));
-    mnemonic.append("]");
-
+    if (sp)
+    {
+        mnemonic.append(reg(14, true));
+        mnemonic.append(hex(offset));
+    }
+    else
+    {
+        mnemonic.append(hex(pc + offset));
+    }
     return mnemonic;
 }
 
 std::string Disassembler::addOffsetSp(u16 instr)
 {
-    bool sign = instr >> 7 & 0x1;
-
+    bool sign = (instr >> 7) & 0x1;
     int offset = instr & 0x3F;
 
     offset <<= 2;
 
     std::string mnemonic = "add";
 
-    padMnemonic(mnemonic);
+    mnemonicPad(mnemonic);
     mnemonic.append("sp,");
     if (sign)
         mnemonic.append("-");
-    mnemonic.append(std::to_string(offset));
+    mnemonic.append(hex(offset));
 
     return mnemonic;
 }
 
 std::string Disassembler::pushPopRegisters(u16 instr)
 {
-    bool pop = instr >> 11 & 0x1;
-    bool pc_lr = instr >> 8 & 0x1;
-
+    bool pop = (instr >> 11) & 0x1;
+    bool pc_lr = (instr >> 8) & 0x1;
     int rlist = instr & 0xFF;
+
+    if (pc_lr)
+        rlist |= 1 << (pop ? 15 : 14);
 
     std::string mnemonic = pop ? "pop" : "push";
 
-    padMnemonic(mnemonic);
-    mnemonic.append("{");
-    for (int x = 0; x < 8; ++x)
-    {
-        if (rlist & (1 << x))
-            mnemonic.append(reg(x, x != 7));
-    }
-    if (pc_lr)
-        mnemonic.append(pop ? ",pc" : ",sp");
-    mnemonic.append("}");
+    mnemonicPad(mnemonic);
+    mnemonicRlist(mnemonic, rlist);
 
     return mnemonic;
 }
@@ -428,37 +446,29 @@ std::string Disassembler::pushPopRegisters(u16 instr)
 std::string Disassembler::loadStoreMultiple(u16 instr)
 {
     bool load = (instr >> 11) & 0x1;
-
     int rb = (instr >> 8) & 0x7;
     int rlist = instr & 0xFF;
 
     std::string mnemonic = load ? "ldmia" : "stmia";
 
-    padMnemonic(mnemonic);
+    mnemonicPad(mnemonic);
     mnemonic.append(reg(rb, false));
-    mnemonic.append("!,{");
-    for (int x = 0; x < 8; ++x)
-    {
-        if (rlist & (1 << x))
-            mnemonic.append(reg(x, x != 7));
-    }
-    mnemonic.append("}");
+    mnemonic.append("!,");
+    mnemonicRlist(mnemonic, rlist);
 
     return mnemonic;
 }
 
-std::string Disassembler::conditionalBranch(u16 instr)
+std::string Disassembler::conditionalBranch(u16 instr, u32 pc)
 {
-    // Todo: process SWI
-    Condition cond = static_cast<Condition>((instr >> 8) & 0xF);
-    
+    int condition = (instr >> 8) & 0xF;
     int offset = instr & 0xFF;
     
-    offset = twos2<8>(offset);
+    offset = twos<8>(offset);
     offset <<= 1;
 
     std::string mnemonic;
-    switch (cond)
+    switch (static_cast<Condition>(condition))
     {
     case COND_EQ: mnemonic = "beq"; break;
     case COND_NE: mnemonic = "bne"; break;
@@ -478,9 +488,46 @@ std::string Disassembler::conditionalBranch(u16 instr)
     case COND_NV: mnemonic = "bnv"; break;
     }
 
-    padMnemonic(mnemonic);
+    mnemonicPad(mnemonic);
 
-    mnemonic.append(std::to_string(offset));
+    mnemonic.append(hex(pc + offset));
+
+    return mnemonic;
+}
+
+std::string Disassembler::softwareInterruptThumb(u16 instr)
+{
+    return std::string();  // Todo: implement
+}
+
+std::string Disassembler::unconditionalBranch(u16 instr, u32 pc)
+{
+    int offset = instr & 0x7FF;
+
+    offset = twos<11>(offset);
+    offset <<= 1;
+
+    std::string mnemonic = "b";
+
+    mnemonicPad(mnemonic);
+    mnemonic.append(hex(pc + offset));
+
+    return mnemonic;
+}
+
+std::string Disassembler::longBranchLink(u16 instr, u32 pc)
+{
+    bool high = (instr >> 11) & 0x1;
+    int offset = instr & 0x7FF;
+
+    std::string mnemonic = "bl";
+
+    mnemonicPad(mnemonic);
+
+    if (high)
+        mnemonic.append(hex(pc));
+    else
+        mnemonic.append("<lower>");
 
     return mnemonic;
 }

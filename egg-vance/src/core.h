@@ -14,8 +14,8 @@ public:
     void run(const std::string& file);
 
 private:
-    ARM arm;
     MMU mmu;
     PPU ppu;
+    ARM arm;
 };
 

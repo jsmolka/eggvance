@@ -4,11 +4,12 @@
  * Todo
  * - ARM 7: Store PC + 4?
  * - ARM 8: Store PC + 4?
- * - ARM 11: sign extension still needed with new code?
+ * - Block Data: test pushing base register with preindexing
  */
 
-#include "common/log.h"
-#include "common/utility.h"
+#include <iostream>
+
+#include "utility.h"
 
 u32 ARM::rotatedImmediate(int value, bool& carry)
 {
@@ -95,7 +96,7 @@ void ARM::branchLink(u32 instr)
 
     int imm24 = instr & 0xFFFFFF;
     // Immediate is a 26-bit constant
-    int imm26 = twos2<24>(imm24) << 2;
+    int imm26 = twos<24>(imm24) << 2;
 
     if (link)
         regs.lr = regs.pc - 4;
@@ -300,7 +301,7 @@ void ARM::psrTransfer(u32 instr)
             regs.cpsr = (regs.cpsr & ~mask) | op;
 
             // Technically undefined behavior
-            if (regs.isThumb())
+            if (regs.thumb())
             {
                 regs.pc = alignHalf(regs.pc);
                 needs_flush = true;
@@ -420,12 +421,12 @@ void ARM::singleDataTransfer(u32 instr)
     {
     case 0b00:
         // STR
-        mmu->writeWord(alignWord(addr), dst);
+        mmu.writeWord(alignWord(addr), dst);
         break;
 
     case 0b01:
         // STRB
-        mmu->writeByte(addr, dst & 0xFF);
+        mmu.writeByte(addr, dst & 0xFF);
         break;
 
     case 0b10:
@@ -435,7 +436,7 @@ void ARM::singleDataTransfer(u32 instr)
 
     case 0b11:
         // LDRB
-        dst = mmu->readByte(addr);
+        dst = mmu.readByte(addr);
         break;
     }
 
@@ -503,12 +504,12 @@ void ARM::halfSignedDataTransfer(u32 instr)
         if (load)
             dst = ldrh(addr);
         else
-            mmu->writeHalf(alignHalf(addr), dst & 0xFFFF);
+            mmu.writeHalf(alignHalf(addr), dst & 0xFFFF);
         break;
 
     // LDRSB
     case 0b10:
-        dst = mmu->readByte(addr);
+        dst = mmu.readByte(addr);
         if (dst & (1 << 7))
             dst |= 0xFFFFFF00;
         break;
@@ -539,7 +540,6 @@ void ARM::blockDataTransfer(u32 instr)
     bool user_transfer = (instr >> 22) & 0x1;
     bool writeback = (instr >> 21) & 0x1;
     bool load = (instr >> 20) & 0x1;
-
     int rn = (instr >> 16) & 0xF;
     int rlist = instr & 0xFFFF;
 
@@ -550,60 +550,82 @@ void ARM::blockDataTransfer(u32 instr)
     if (user_transfer)
         regs.switchMode(MODE_USR);
 
-    // Lowest register gets stored at the lowest address
-    if (ascending)
+    if (rlist != 0)
     {
-        // Start at lowest address, load / store registers in order
-        for (int x = 0; x < 16; ++x)
+        // Lowest register gets stored at the lowest address
+        if (ascending)
         {
-            if (rlist & 1 << x)
+            // Start at lowest address, load / store registers in order
+            for (int x = 0; x < 16; ++x)
             {
-                if (full)
-                    addr += 4;
-
-                if (load)
+                if (rlist & 1 << x)
                 {
-                    regs[x] = mmu->readWord(alignWord(addr));
+                    if (full)
+                        addr += 4;
 
-                    if (x == 15)
-                        needs_flush = true;
-                }
-                else
-                {
-                    mmu->writeWord(alignWord(addr), regs[x]);
-                }
+                    if (load)
+                    {
+                        regs[x] = mmu.readWord(alignWord(addr));
+
+                        if (x == 15)
+                            needs_flush = true;
+                    }
+                    else
+                    {
+                        mmu.writeWord(alignWord(addr), regs[x]);
+                    }
             
-                if (!full)
-                    addr += 4;
+                    if (!full)
+                        addr += 4;
+                }
+            }
+        }
+        else
+        {
+            // Start at highest address, load / store registers in reverse order
+            for (int x = 15; x >= 0; --x)
+            {
+                if (rlist & 1 << x)
+                {
+                    if (full)
+                        addr -= 4;
+
+                    if (load)
+                    {
+                        regs[x] = mmu.readWord(alignWord(addr));
+
+                        if (x == 15)
+                            needs_flush = true;
+                    }
+                    else
+                    {
+                        mmu.writeWord(alignWord(addr), regs[x]);
+                    }
+
+                    if (!full)
+                        addr -= 4;
+                }
             }
         }
     }
-    else
+    else  // Special case with empty rlist
     {
-        // Start at highest address, load / store registers in reverse order
-        for (int x = 15; x >= 0; --x)
+        if (load)
         {
-            if (rlist & 1 << x)
-            {
-                if (full)
-                    addr -= 4;
+            regs.pc = mmu.readWord(alignWord(addr));
+            regs.pc = alignWord(regs.pc);
 
-                if (load)
-                {
-                    regs[x] = mmu->readWord(alignWord(addr));
-
-                    if (x == 15)
-                        needs_flush = true;
-                }
-                else
-                {
-                    mmu->writeWord(alignWord(addr), regs[x]);
-                }
-
-                if (!full)
-                    addr -= 4;
-            }
+            needs_flush = true;
         }
+        else
+        {
+            mmu.writeWord(alignWord(addr), regs.pc);
+        }
+
+        if (full)
+            addr += 0x40;
+        else
+            addr -= 0x40;
     }
 
     if (writeback)
@@ -628,12 +650,18 @@ void ARM::singleDataSwap(u32 instr)
 
     if (byte)
     {
-        dst = mmu->readByte(addr);
-        mmu->writeByte(addr, src & 0xFF);
+        dst = mmu.readByte(addr);
+        mmu.writeByte(addr, src & 0xFF);
     }
     else
     {
         dst = ldr(addr);
-        mmu->writeWord(alignWord(addr), src);
+        mmu.writeWord(alignWord(addr), src);
     }
+}
+
+// ARM 11
+void ARM::softwareInterruptArm(u32 instr)
+{
+    std::cout << "Unimplemented ARM SWI\n";
 }

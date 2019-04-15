@@ -7,19 +7,21 @@
 class ARM
 {
 public:
+    ARM(MMU& mmu);
+
     void reset();
 
     void step();
 
-    MMU* mmu;
-
 private:
+    MMU& mmu;
     Registers regs;
 
     void fetch();
     void decode();
     void execute();
     void advance();
+
     void debug();
 
     struct PipeItem
@@ -42,22 +44,24 @@ private:
     void arithmetic(u32 op1, u32 op2, bool addition);
 
     u32 lsl(u32 value, int offset, bool& carry);
-    u32 lsr(u32 value, int offset, bool& carry);
-    u32 asr(u32 value, int offset, bool& carry);
-    u32 ror(u32 value, int offset, bool& carry);
+    u32 lsr(u32 value, int offset, bool& carry, bool immediate = true);
+    u32 asr(u32 value, int offset, bool& carry, bool immediate = true);
+    u32 ror(u32 value, int offset, bool& carry, bool immediate = true);
 
     u32 ldr(u32 addr);
     u32 ldrh(u32 addr);
     u32 ldrsh(u32 addr);
 
+    void handleSoftwareInterrupt(int comment);
+
     void moveShiftedRegister(u16 instr);
     void addSubImmediate(u16 instr);
-    void addSubMovCmpImmediate(u16 instr);
+    void addSubCmpMovImmediate(u16 instr);
     void aluOperations(u16 instr);
     void highRegisterBranchExchange(u16 instr);
     void loadPcRelative(u16 instr);
     void loadStoreRegisterOffset(u16 instr);
-    void loadStoreHalfSignExtended(u16 instr);
+    void loadStoreHalfSigned(u16 instr);
     void loadStoreImmediateOffset(u16 instr);
     void loadStoreHalf(u16 instr);
     void loadStoreSpRelative(u16 instr);
@@ -66,7 +70,7 @@ private:
     void pushPopRegisters(u16 instr);
     void loadStoreMultiple(u16 instr);
     void conditionalBranch(u16 instr);
-    void softwareInterruptBreakpoint(u16 instr);
+    void softwareInterruptThumb(u16 instr);
     void unconditionalBranch(u16 instr);
     void longBranchLink(u16 instr);
 
@@ -83,4 +87,5 @@ private:
     void halfSignedDataTransfer(u32 instr);
     void blockDataTransfer(u32 instr);
     void singleDataSwap(u32 instr);
+    void softwareInterruptArm(u32 instr);
 };

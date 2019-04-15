@@ -1,7 +1,5 @@
 #include "registerbank.h"
 
-#include "common/log.h"
-
 Mode RegisterBank::mode() const
 {
     return static_cast<Mode>(cpsr & CPSR_M);

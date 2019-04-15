@@ -51,15 +51,12 @@
     <ClCompile Include="src\arm\disassembler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\arm\decoder.cpp">
+    <ClCompile Include="src\arm\pipeline.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\common\log.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\common\integer.h">
@@ -89,13 +86,10 @@
     <ClInclude Include="src\arm\registerbank.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\common\utility.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\arm\disassembler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\arm\decoder.h">
+    <ClInclude Include="src\arm\utility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

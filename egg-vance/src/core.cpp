@@ -1,8 +1,8 @@
 #include "core.h"
 
 Core::Core()
+    : arm(mmu)
 {
-    arm.mmu = &mmu;
     ppu.mmu = &mmu;
 
     arm.reset();

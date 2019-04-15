@@ -7,10 +7,9 @@ class Registers : public RegisterBank
 public:
     void reset();
 
-    bool isThumb() const;
+    bool arm() const;
+    bool thumb() const;
     void setThumb(bool set);
-
-    bool isArm() const;
 
     int z() const;
     int n() const;
@@ -22,7 +21,7 @@ public:
     void setC(bool set);
     void setV(bool set);
 
-    bool checkCondition(Condition cond) const;
+    bool check(Condition condition) const;
 
     u32 operator[](int index) const;
     u32& operator[](int index);

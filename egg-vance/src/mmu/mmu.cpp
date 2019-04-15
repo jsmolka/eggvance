@@ -1,8 +1,8 @@
 #include "mmu.h"
 
+#include <iostream>
 #include <fstream>
 
-#include "common/log.h"
 #include "common/memory_map.h"
 
 MMU::MMU()
@@ -24,7 +24,7 @@ bool MMU::loadRom(const std::string& file)
     std::ifstream stream(file, std::ios::binary);
     if (!stream.is_open())
     {
-        log() << "Cannot open file " << file;
+        std::cout << "Cannot open file " << file << "\n";
         return false;
     }
 
