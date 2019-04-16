@@ -171,15 +171,15 @@ void ARM::execute()
         {
             switch (pipe[2].format)
             {
-            case ARM_1: branchExchange(instr); break;
-            case ARM_2: branchLink(instr); break;
-            case ARM_3: dataProcessing(instr); break;
-            case ARM_4: psrTransfer(instr); break;
-            case ARM_5: multiply(instr); break;
-            case ARM_6: multiplyLong(instr); break;
-            case ARM_7: singleDataTransfer(instr); break;
-            case ARM_8: halfSignedDataTransfer(instr); break;
-            case ARM_9: blockDataTransfer(instr); break;
+            case ARM_1:  branchExchange(instr); break;
+            case ARM_2:  branchLink(instr); break;
+            case ARM_3:  dataProcessing(instr); break;
+            case ARM_4:  psrTransfer(instr); break;
+            case ARM_5:  multiply(instr); break;
+            case ARM_6:  multiplyLong(instr); break;
+            case ARM_7:  singleDataTransfer(instr); break;
+            case ARM_8:  halfSignedDataTransfer(instr); break;
+            case ARM_9:  blockDataTransfer(instr); break;
             case ARM_10: singleDataSwap(instr); break;
             case ARM_11: softwareInterruptArm(instr); break;
             case ARM_12:
@@ -200,15 +200,15 @@ void ARM::execute()
 
         switch (pipe[2].format)
         {
-        case THUMB_1: moveShiftedRegister(instr); break;
-        case THUMB_2: addSubImmediate(instr); break;
-        case THUMB_3: addSubCmpMovImmediate(instr); break;
-        case THUMB_4: aluOperations(instr); break;
-        case THUMB_5: highRegisterBranchExchange(instr); break;
-        case THUMB_6: loadPcRelative(instr); break;
-        case THUMB_7: loadStoreRegisterOffset(instr); break;
-        case THUMB_8: loadStoreHalfSigned(instr); break;
-        case THUMB_9: loadStoreImmediateOffset(instr); break;
+        case THUMB_1:  moveShiftedRegister(instr); break;
+        case THUMB_2:  addSubImmediate(instr); break;
+        case THUMB_3:  addSubCmpMovImmediate(instr); break;
+        case THUMB_4:  aluOperations(instr); break;
+        case THUMB_5:  highRegisterBranchExchange(instr); break;
+        case THUMB_6:  loadPcRelative(instr); break;
+        case THUMB_7:  loadStoreRegisterOffset(instr); break;
+        case THUMB_8:  loadStoreHalfSigned(instr); break;
+        case THUMB_9:  loadStoreImmediateOffset(instr); break;
         case THUMB_10: loadStoreHalf(instr); break;
         case THUMB_11: loadStoreSpRelative(instr); break;
         case THUMB_12: loadAddress(instr); break;

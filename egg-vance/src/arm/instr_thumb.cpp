@@ -461,7 +461,7 @@ void ARM::addOffsetSp(u16 instr)
 void ARM::pushPopRegisters(u16 instr)
 {
     bool pop = (instr >> 11) & 0x1;
-    bool pc_lr = (instr >> 8) & 0x1;
+    bool routine = (instr >> 8) & 0x1;
     int rlist = instr & 0xFF;
 
     // Full descending stack
@@ -476,7 +476,7 @@ void ARM::pushPopRegisters(u16 instr)
             }
         }
 
-        if (pc_lr)
+        if (routine)
         {
             regs.pc = mmu.readWord(alignWord(regs.sp));
             regs.pc = alignHalf(regs.pc);
@@ -487,7 +487,7 @@ void ARM::pushPopRegisters(u16 instr)
     }
     else
     {
-        if (pc_lr)
+        if (routine)
         {
             regs.sp -= 4;
             mmu.writeWord(alignWord(regs.sp), regs.lr);
@@ -581,7 +581,6 @@ void ARM::longBranchLink(u16 instr)
         u32 next = regs.pc - 2 | 1;
 
         regs.pc = regs.lr + (offset << 1);
-
         regs.lr = next;
 
         needs_flush = true;

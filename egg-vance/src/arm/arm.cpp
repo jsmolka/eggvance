@@ -42,10 +42,10 @@ void ARM::debug()
     if (pipe[2].format == FMT_REFILL)
         return;
 
-    std::printf("%08X  ", regs.pc - 4);
+    std::printf("%08X  ", regs.pc - (regs.arm() ? 8 : 4));
     std::printf("%08X  ", pipe[2].instr);
     
-    std::cout << Disassembler::disassemble(pipe[2].instr, pipe[2].format, regs.pc) << "\n";
+    std::cout << Disassembler::disassemble(pipe[2].instr, pipe[2].format, regs) << "\n";
 }
 
 void ARM::flush()

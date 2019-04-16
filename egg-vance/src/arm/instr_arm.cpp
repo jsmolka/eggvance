@@ -13,20 +13,11 @@
 
 u32 ARM::rotatedImmediate(int value, bool& carry)
 {
-    int imm8 = value & 0xFF;
     int rotation = (value >> 8) & 0xF;
+    int immediate = value & 0xFF;
 
-    // No RRX in this case
-    if (rotation == 0)
-    {
-        carry = regs.c();
-        return imm8;
-    }
-    else
-    {
-        // Apply twice the rotation
-        return ror(imm8, 2 * rotation, carry);
-    }
+    // Apply twice the rotation
+    return ror(immediate, 2 * rotation, carry, false);
 }
 
 u32 ARM::shiftedRegister(int value, bool& carry)
@@ -93,15 +84,15 @@ void ARM::branchExchange(u32 instr)
 void ARM::branchLink(u32 instr)
 {
     bool link = (instr >> 24) & 0x1;
+    int offset = instr & 0xFFFFFF;
 
-    int imm24 = instr & 0xFFFFFF;
-    // Immediate is a 26-bit constant
-    int imm26 = twos<24>(imm24) << 2;
+    offset = twos<24>(offset);
+    offset <<= 2;
 
     if (link)
         regs.lr = regs.pc - 4;
 
-    regs.pc += imm26;
+    regs.pc += offset;
     needs_flush = true;
 }
 
