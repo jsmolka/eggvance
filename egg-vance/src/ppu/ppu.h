@@ -18,6 +18,7 @@ public:
 
 private:
     void renderText();
+    void renderBitmap();
 
     void drawPixel(int x, int y, u16 color);
 

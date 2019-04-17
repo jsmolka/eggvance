@@ -19,6 +19,15 @@ void MMU::reset()
     *bgcnt = { };
 }
 
+void MMU::dump(u32 start, u32 size)
+{
+    std::ofstream file("dump.bin");
+    for (u32 i = start; i < (start + size); ++i)
+    {
+        file << memory[i];
+    }
+}
+
 bool MMU::loadRom(const std::string& file)
 {
     std::ifstream stream(file, std::ios::binary);

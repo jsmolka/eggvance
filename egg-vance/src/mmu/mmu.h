@@ -17,6 +17,7 @@ public:
     MMU();
 
     void reset();
+    void dump(u32 start, u32 size);
 
     bool loadRom(const std::string& file);
 

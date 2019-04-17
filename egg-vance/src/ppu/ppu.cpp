@@ -37,7 +37,8 @@ void PPU::reset()
 
 void PPU::renderFrame()
 {
-    renderText();
+    //renderText();
+    renderBitmap();
 
     SDL_RenderPresent(renderer);
 }

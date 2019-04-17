@@ -7,6 +7,8 @@
 #include "disassembler.h"
 #include "utility.h"
 
+#include "common/memory_map.h"
+
 ARM::ARM(MMU& mmu)
     : mmu(mmu)
 {
@@ -25,9 +27,15 @@ void ARM::step()
     fetch();
     decode();
 
-    #ifdef _DEBUG
+    //#ifdef _DEBUG
     debug();
-    #endif
+    //#endif
+
+	// Fake VSync
+	if ((regs.pc - (regs.arm() ? 8 : 4)) == 0x80004F4)
+		mmu.writeHalf(REG_DISPSTAT, 1);
+	else
+		mmu.writeHalf(REG_DISPSTAT, 0);
     
     execute();
 
@@ -40,6 +48,19 @@ void ARM::step()
 void ARM::debug()
 {
     if (pipe[2].format == FMT_REFILL)
+        return;
+    
+    u32 rom_start = 0x80002F0;
+    u32 draw_menu = 0x80008D8;
+    u32 draw_text = 0x8000508;
+	u32 bl_vsync = 0x80004DC;
+
+    static bool isEnabled = false;
+    u32 pc = regs.pc - (regs.arm() ? 8 : 4);
+    if (pc == rom_start)
+        isEnabled = true;
+
+    if (!isEnabled)
         return;
 
     std::printf("%08X  ", regs.pc - (regs.arm() ? 8 : 4));
