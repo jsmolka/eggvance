@@ -69,51 +69,51 @@ void MMU::writeByte(u32 addr, u8 byte)
     switch (addr)
     {
     case REG_DISPCNT: 
-        dispcnt.write(0, byte); 
+        dispcnt.writeLo(byte); 
         break;
 
     case REG_DISPCNT + 1: 
-        dispcnt.write(1, byte); 
+        dispcnt.writeHi(byte); 
         break;
 
     case REG_DISPSTAT: 
-        dispstat.write(0, byte); 
+        dispstat.writeLo(byte); 
         break;
 
     case REG_DISPSTAT + 1: 
-        dispstat.write(1, byte); 
+        dispstat.writeHi(byte); 
         break; 
 
     case REG_BG0CNT: 
-        bgcnt[0].write(0, byte); 
+        bgcnt[0].writeLo(byte); 
         break;
 
     case REG_BG0CNT + 1: 
-        bgcnt[0].write(1, byte); 
+        bgcnt[0].writeHi(byte); 
         break;
 
     case REG_BG1CNT: 
-        bgcnt[1].write(0, byte); 
+        bgcnt[1].writeLo(byte); 
         break;
 
     case REG_BG1CNT + 1: 
-        bgcnt[1].write(1, byte); 
+        bgcnt[1].writeHi(byte); 
         break;
 
     case REG_BG2CNT: 
-        bgcnt[2].write(0, byte); 
+        bgcnt[2].writeLo(byte); 
         break;
 
     case REG_BG2CNT + 1: 
-        bgcnt[2].write(1, byte); 
+        bgcnt[2].writeHi(byte); 
         break;
 
     case REG_BG3CNT: 
-        bgcnt[3].write(0, byte); 
+        bgcnt[3].writeLo(byte); 
         break;
 
     case REG_BG3CNT + 1: 
-        bgcnt[3].write(1, byte); 
+        bgcnt[3].writeHi(byte); 
         break;
     }
 }

@@ -20,7 +20,7 @@ void Core::run(const std::string& file)
     SDL_Event event;
     while (running)
     {
-        for (int i = 0; i < 4096; ++i)
+        for (int i = 0; i < 2048; ++i)
             arm.step(); 
 
         ppu.renderFrame();

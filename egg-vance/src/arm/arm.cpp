@@ -27,9 +27,9 @@ void ARM::step()
     fetch();
     decode();
 
-    //#ifdef _DEBUG
+    #ifdef _DEBUG
     debug();
-    //#endif
+    #endif
 
 	// Fake VSync
 	if ((regs.pc - (regs.arm() ? 8 : 4)) == 0x80004F4)
@@ -50,6 +50,7 @@ void ARM::debug()
     if (pipe[2].format == FMT_REFILL)
         return;
     
+	// Some Armwrestler addresses
     u32 rom_start = 0x80002F0;
     u32 draw_menu = 0x80008D8;
     u32 draw_text = 0x8000508;

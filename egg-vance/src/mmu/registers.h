@@ -7,19 +7,21 @@ class Register
 public:
     virtual ~Register() = default;
 
-    virtual void write(u8 pos, u8 byte) = 0;
+	virtual void writeHi(int byte) = 0;
+	virtual void writeLo(int byte) = 0;
 };
 
 class DisplayControl : public Register
 {
 public:
-    void write(u8 pos, u8 byte) final;
+	void writeHi(int byte) final;
+	void writeLo(int byte) final;
 
-    u8 bg_mode;
+    int bg_mode;
     bool gbc_mode;
-    u8 frame_select;
+    int frame_select;
     bool process_hblank;
-    u8 obj_mapping;
+    int obj_mapping;
     bool forced_blank;
     bool bg0_enable;
     bool bg1_enable;
@@ -34,7 +36,8 @@ public:
 class DisplayStatus : public Register
 {
 public:
-    void write(u8 pos, u8 byte) final;
+	void writeHi(int byte) final;
+	void writeLo(int byte) final;
 
     bool vblank_flag;
     bool hblank_flag;
@@ -42,19 +45,20 @@ public:
     bool vblank_irq_enable;
     bool hblank_irq_enable;
     bool vcount_irq_enable;
-    u8 vcount_trigger;
+    int vcount_trigger;
 };
 
 class BackgroundControl : public Register
 {
 public:
-    void write(u8 pos, u8 byte) final;
+	void writeHi(int byte) final;
+	void writeLo(int byte) final;
 
-    u8 priority;
+    int priority;
     u32 data_addr;
     bool mosaic;
-    u8 palette;
+    int palette;
     u32 map_addr;
-    u8 disp_overflow;
-    u8 map_size;
+    int disp_overflow;
+    int map_size;
 };
