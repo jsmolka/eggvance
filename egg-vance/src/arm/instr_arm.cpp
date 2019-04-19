@@ -5,57 +5,59 @@
  * - ARM 7: Store PC + 4?
  * - ARM 8: Store PC + 4?
  * - Block Data: test pushing base register with preindexing
+ * - Shifted register: PC 12 ahead
  */
 
 #include <iostream>
 
 #include "utility.h"
 
-u32 ARM::rotatedImmediate(int value, bool& carry)
+u32 ARM::rotatedImmediate(int data, bool& carry)
 {
-    int rotation = (value >> 8) & 0xF;
-    int immediate = value & 0xFF;
+    int rotation = (data >> 8) & 0xF;
+    int immediate = data & 0xFF;
 
     // Apply twice the rotation
     return ror(immediate, 2 * rotation, carry, false);
 }
 
-u32 ARM::shiftedRegister(int value, bool& carry)
+u32 ARM::shiftedRegister(int data, bool& carry)
 {
-    int shift = (value >> 4) & 0xFF;
-    int rm = value & 0xF;
+    int shift = (data >> 4) & 0xFF;
+    int rm = data & 0xF;
+
+    int value = regs[rm];
 
     int offset;
-    if (shift & 0x1)
+    bool immediate = (shift & 0x1) == 0b0;
+    if (immediate)
+    {
+        // Offset is a 5-bit immediate value
+        offset = (shift >> 3) & 0x1F;
+    }
+    else
     {
         int rs = (shift >> 4) & 0xF;
         // Offset is stored in the lower byte
         offset = regs[rs] & 0xFF;
 
-        // No RRX in this case
-        if (offset == 0)
-        {
-            carry = regs.c();
-            return regs[rm];
-        }
-    }
-    else
-    {
-        // Offset is a 5-bit immediate value
-        offset = (shift >> 3) & 0x1F;
+        // Also increment source register in DP if PC
+
+        if (rm == 15)
+            value += 4;
     }
 
     int type = (shift >> 1) & 0x3;
     switch (type)
     {
-    case 0b00: return lsl(regs[rm], offset, carry);
-    case 0b01: return lsr(regs[rm], offset, carry);
-    case 0b10: return asr(regs[rm], offset, carry);
-    case 0b11: return ror(regs[rm], offset, carry);
+    case 0b00: return lsl(value, offset, carry);
+    case 0b01: return lsr(value, offset, carry, immediate);
+    case 0b10: return asr(value, offset, carry, immediate);
+    case 0b11: return ror(value, offset, carry, immediate);
 
     default:
         // Just for you, Visual Studio
-        return regs[rm];
+        return value;
     }
 }
 

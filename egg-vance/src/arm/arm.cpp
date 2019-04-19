@@ -31,7 +31,7 @@ void ARM::step()
     debug();
     #endif
 
-	// Fake VSync
+	// Fake VSync for armwrestler
 	if ((regs.pc - (regs.arm() ? 8 : 4)) == 0x80004F4)
 		mmu.writeHalf(REG_DISPSTAT, 1);
 	else
@@ -54,12 +54,14 @@ void ARM::debug()
     u32 rom_start = 0x80002F0;
     u32 draw_menu = 0x80008D8;
     u32 draw_text = 0x8000508;
-	u32 bl_vsync = 0x80004DC;
+    u32 bl_vsync = 0x80004DC;
+    u32 mov_test = 0x8000B7C;
+    u32 ldr_wb = 0x80010EC;
 
     static bool isEnabled = false;
     u32 pc = regs.pc - (regs.arm() ? 8 : 4);
-    if (pc == rom_start)
-        isEnabled = true;
+    if (pc == mov_test)
+        isEnabled = false;
 
     if (!isEnabled)
         return;
@@ -156,7 +158,8 @@ u32 ARM::lsl(u32 value, int offset, bool& carry)
     {
         if (offset < 32)
         {
-            carry = value >> (32 - offset) & 0x1;
+			// Todo: carry could be shorted / easier
+            carry = (value >> (32 - offset)) & 0x1;
             value <<= offset;
         }
         else  // Shifts by 32 are undefined behavior in C++
@@ -182,7 +185,7 @@ u32 ARM::lsr(u32 value, int offset, bool& carry, bool immediate)
     {
         if (offset < 32)
         {
-            carry = value >> (offset - 1) & 0x1;
+            carry = (value >> (offset - 1)) & 0x1;
             value >>= offset;
         }
         else
@@ -208,39 +211,48 @@ u32 ARM::lsr(u32 value, int offset, bool& carry, bool immediate)
 
 u32 ARM::asr(u32 value, int offset, bool& carry, bool immediate)
 {
-    if (offset != 0 && offset < 32)
-    {
-        bool msb = value >> 31;
+	// Average case
+	if (offset != 0)
+	{
+		if (offset < 32)
+		{
+			bool msb = value >> 31;
 
-        carry = value >> (offset - 1) & 0x1;
-        value >>= offset;
+			carry = value >> (offset - 1) & 0x1;
+			value >>= offset;
 
-        if (msb)
-            value |= 0xFFFFFFFF << (31 - offset);
-    }
-    else  // Special case ASR #32 (assembles to ASR #0)
-    {
-        if (immediate)
-        {
-            carry = value >> 31;
-            value = carry ? 0xFFFFFFFF : 0;
-        }
-        else
-        {
-            carry = regs.c();
-        }
-    }
+			if (msb)
+				value |= 0xFFFFFFFF << (31 - offset);
+		}
+		else
+		{
+			carry = value >> 31;
+			value = carry ? 0xFFFFFFFF : 0;
+		}
+	}
+	else  // Special case ASR #32 (assembles to ASR #0)
+	{
+		if (immediate)
+		{
+			carry = value >> 31;
+			value = carry ? 0xFFFFFFFF : 0;
+		}
+		else
+		{
+			carry = regs.c();
+		}
+	}
     return value;
 }
 
 u32 ARM::ror(u32 value, int offset, bool& carry, bool immediate)
 {
-    if (offset > 0)
+    if (offset != 0)
     {
         offset %= 32;
 
         if (offset != 0)
-            value = value << (32 - offset) | value >> offset;
+            value = (value << (32 - offset)) | (value >> offset);
 
         carry = value >> 31;
     }

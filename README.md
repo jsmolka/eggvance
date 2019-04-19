@@ -1,5 +1,5 @@
 # egg-vance
 A Game Boy Advance emulator.
 
-# State
-The emulator only runs self written test ROMs in its current state.
+# Progression
+- 17-04-19: Starts and renders Armwrestler test ROM
