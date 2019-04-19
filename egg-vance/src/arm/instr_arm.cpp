@@ -4,8 +4,10 @@
  * Todo
  * - ARM 7: Store PC + 4?
  * - ARM 8: Store PC + 4?
- * - Block Data: test pushing base register with preindexing
- * - Shifted register: PC 12 ahead
+ * - Block Data: test pushing base register with preindexing?
+ * - Shifted register: test PC 12 ahead
+ * - Data Porcessing: test PC as source with shfited register
+ * - Load / store: tests for writeback with equal rn / rd
  */
 
 #include <iostream>
@@ -442,7 +444,12 @@ void ARM::singleDataTransfer(u32 instr)
     }
 
     if (writeback)
-        regs[rn] = addr;
+    {
+        if (rd == rn)
+            regs[rn] = dst;
+        else
+            regs[rn] = addr;
+    }
 }
 
 // ARM 8
@@ -522,7 +529,12 @@ void ARM::halfSignedDataTransfer(u32 instr)
     }
 
     if (writeback)
-        regs[rn] = addr;
+    {
+        if (rn == rd)
+            regs[rn] = dst;
+        else
+            regs[rn] = addr;
+    }
 }
 
 // ARM 9

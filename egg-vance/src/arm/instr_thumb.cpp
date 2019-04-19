@@ -4,6 +4,7 @@
  * Todo
  * - implement SWI
  * - process SWI in conditional branch
+ * - test pop aligning sp
  */
 
 #include <iostream>

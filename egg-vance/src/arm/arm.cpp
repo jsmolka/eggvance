@@ -28,15 +28,23 @@ void ARM::step()
     decode();
 
     #ifdef _DEBUG
-    debug();
+    //debug();
     #endif
 
+    u32 pc = regs.pc - (regs.arm() ? 8 : 4);
+
 	// Fake VSync for armwrestler
-	if ((regs.pc - (regs.arm() ? 8 : 4)) == 0x80004F4)
+	if (pc == 0x80004F4 || pc == 0x8004282)
 		mmu.writeHalf(REG_DISPSTAT, 1);
 	else
 		mmu.writeHalf(REG_DISPSTAT, 0);
     
+    #ifdef _DEBUG
+    u32 breakpoint = 0x80010EC;
+    if (breakpoint == pc)
+        breakpoint = breakpoint;
+    #endif
+
     execute();
 
     if (needs_flush)
@@ -50,22 +58,6 @@ void ARM::debug()
     if (pipe[2].format == FMT_REFILL)
         return;
     
-	// Some Armwrestler addresses
-    u32 rom_start = 0x80002F0;
-    u32 draw_menu = 0x80008D8;
-    u32 draw_text = 0x8000508;
-    u32 bl_vsync = 0x80004DC;
-    u32 mov_test = 0x8000B7C;
-    u32 ldr_wb = 0x80010EC;
-
-    static bool isEnabled = false;
-    u32 pc = regs.pc - (regs.arm() ? 8 : 4);
-    if (pc == mov_test)
-        isEnabled = false;
-
-    if (!isEnabled)
-        return;
-
     std::printf("%08X  ", regs.pc - (regs.arm() ? 8 : 4));
     std::printf("%08X  ", pipe[2].instr);
     
