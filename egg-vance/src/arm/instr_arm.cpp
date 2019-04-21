@@ -2,12 +2,8 @@
 
 /**
  * Todo
- * - ARM 7: Store PC + 4?
- * - ARM 8: Store PC + 4?
- * - Block Data: test pushing base register with preindexing?
- * - Shifted register: test PC 12 ahead
- * - Data Porcessing: test PC as source with shfited register
- * - Load / store: tests for writeback with equal rn / rd
+ * - Block Transfer might not be 100% corrent (with base register position in rlist)
+ * - switch to THUMB in DP???
  */
 
 #include <iostream>
@@ -42,11 +38,6 @@ u32 ARM::shiftedRegister(int data, bool& carry)
         int rs = (shift >> 4) & 0xF;
         // Offset is stored in the lower byte
         offset = regs[rs] & 0xFF;
-
-        // Also increment source register in DP if PC
-
-        if (rm == 15)
-            value += 4;
     }
 
     int type = (shift >> 1) & 0x3;
@@ -63,7 +54,7 @@ u32 ARM::shiftedRegister(int data, bool& carry)
     }
 }
 
- // ARM 1
+// ARM 1
 void ARM::branchExchange(u32 instr)
 {
     int rn = instr & 0xF;
@@ -80,8 +71,13 @@ void ARM::branchExchange(u32 instr)
         addr = alignWord(addr);
     }
 
+    nonsequential(regs.pc);
+
     regs.pc = addr;
     needs_flush = true;
+
+    sequential(regs.pc);
+    sequential(regs.pc + 4);
 }
 
 // ARM 2
@@ -96,8 +92,13 @@ void ARM::branchLink(u32 instr)
     if (link)
         regs.lr = regs.pc - 4;
 
+    nonsequential(regs.pc);
+
     regs.pc += offset;
     needs_flush = true;
+
+    sequential(regs.pc);
+    sequential(regs.pc + 4);
 }
 
 // ARM 3
@@ -106,7 +107,6 @@ void ARM::dataProcessing(u32 instr)
     bool immediate = (instr >> 25) & 0x1;
     int opcode = (instr >> 21) & 0xF;
     bool flags = (instr >> 20) & 0x1;
-
     int rn = (instr >> 16) & 0xF;
     int rd = (instr >> 12) & 0xF;
 
@@ -116,18 +116,64 @@ void ARM::dataProcessing(u32 instr)
     u32 op2;
     bool carry;
     if (immediate)
-        op2 = rotatedImmediate(instr & 0xFFF, carry);
-    else
-        op2 = shiftedRegister(instr & 0xFFF, carry);
-
-    if (flags && rd == 15)
     {
-        // Change mode and copy SPSR
-        u32 spsr = regs.spsr;
-        regs.switchMode(static_cast<Mode>(spsr & 0x1F));
-        regs.cpsr = spsr;
+        op2 = rotatedImmediate(instr & 0xFFF, carry);
+    }
+    else
+    {
+        int data = instr & 0xFFF;
+        int shift = (data >> 4) & 0xFF;
+        int rm = data & 0xF;
 
-        flags = false;
+        int value = regs[rm];
+
+        int offset;
+        bool shift_imm = (shift & 0x1) == 0b0;
+        if (shift_imm)
+        {
+            // Offset is a 5-bit immediate value
+            offset = (shift >> 3) & 0x1F;
+        }
+        else
+        {
+            int rs = (shift >> 4) & 0xF;
+            // Offset is stored in the lower byte
+            offset = regs[rs] & 0xFF;
+
+            // Prefetching
+            if (rm == 15)
+                value += 4;
+            if (rn == 15)
+                op1 += 4;
+        }
+
+        int type = (shift >> 1) & 0x3;
+        switch (type)
+        {
+        case 0b00: op2 = lsl(value, offset, carry); break;
+        case 0b01: op2 = lsr(value, offset, carry, shift_imm); break;
+        case 0b10: op2 = asr(value, offset, carry, shift_imm); break;
+        case 0b11: op2 = ror(value, offset, carry, shift_imm); break;
+        }
+
+        // Shifting a register adds an I cycle
+        internal();
+    }
+
+    if (rd == 15)
+    {
+        // Writing to PC adds an N cycle
+        nonsequential(regs.pc);
+
+        if (flags)
+        {
+            // Change mode and copy SPSR
+            u32 spsr = regs.spsr;
+            regs.switchMode(static_cast<Mode>(spsr & 0x1F));
+            regs.cpsr = spsr;
+
+            flags = false;
+        }
     }
 
     switch (opcode)
@@ -242,9 +288,14 @@ void ARM::dataProcessing(u32 instr)
 
     if (rd == 15)
     {
+        // Writing to PC adds one S cycle
+        sequential(regs.pc);
+
+        // Safety align and flush
         dst = alignWord(dst);
         needs_flush = true;
     }
+    sequential(regs.pc + 4);
 }
 
 // ARM 4
@@ -379,7 +430,7 @@ void ARM::multiplyLong(u32 instr)
 }
 
 // ARM 7
-void ARM::singleDataTransfer(u32 instr)
+void ARM::singleTransfer(u32 instr)
 {
     bool use_reg = (instr >> 25) & 0x1;
     bool pre_indexing = (instr >> 24) & 0x1;
@@ -396,6 +447,7 @@ void ARM::singleDataTransfer(u32 instr)
     {
         bool carry;
         offset = shiftedRegister(offset, carry);
+        // Do not use shifted register here, not increase if PC is used as shifted register
     }
 
     u32 addr = regs[rn];
@@ -453,7 +505,7 @@ void ARM::singleDataTransfer(u32 instr)
 }
 
 // ARM 8
-void ARM::halfSignedDataTransfer(u32 instr)
+void ARM::halfSignedTransfer(u32 instr)
 {
     bool pre_indexing = (instr >> 24) & 0x1;
     bool use_imm = (instr >> 22) & 0x1;
@@ -538,7 +590,7 @@ void ARM::halfSignedDataTransfer(u32 instr)
 }
 
 // ARM 9
-void ARM::blockDataTransfer(u32 instr)
+void ARM::blockTransfer(u32 instr)
 {
     bool full = (instr >> 24) & 0x1;
     bool ascending = (instr >> 23) & 0x1;
@@ -641,7 +693,7 @@ void ARM::blockDataTransfer(u32 instr)
 }
 
 // ARM 10
-void ARM::singleDataSwap(u32 instr)
+void ARM::singleSwap(u32 instr)
 {
     bool byte = (instr >> 22) & 0x1;
 
@@ -666,7 +718,7 @@ void ARM::singleDataSwap(u32 instr)
 }
 
 // ARM 11
-void ARM::softwareInterruptArm(u32 instr)
+void ARM::swiArm(u32 instr)
 {
     std::cout << "Unimplemented ARM SWI\n";
 }

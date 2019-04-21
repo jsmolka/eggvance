@@ -22,8 +22,11 @@ void ARM::reset()
     flush();
 }
 
-void ARM::step()
+int ARM::step()
 {
+    // Reset step cycles
+    cycles = 0;
+
     fetch();
     decode();
 
@@ -51,6 +54,8 @@ void ARM::step()
         flush();
     else
         advance();
+
+    return cycles;
 }
 
 void ARM::debug()
@@ -315,7 +320,22 @@ u32 ARM::ldrsh(u32 addr)
     return value;
 }
 
-void ARM::handleSoftwareInterrupt(int comment)
+void ARM::handleSwi(int comment)
 {
     // Todo: actually do something
+}
+
+void ARM::internal()
+{
+    cycles++;
+}
+
+void ARM::sequential(u32 addr)
+{
+    cycles++;
+}
+
+void ARM::nonsequential(u32 addr)
+{
+    cycles++;
 }

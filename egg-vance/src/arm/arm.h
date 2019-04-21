@@ -11,7 +11,7 @@ public:
 
     void reset();
 
-    void step();
+    int step();
 
 private:
     MMU& mmu;
@@ -52,7 +52,7 @@ private:
     u32 ldrh(u32 addr);
     u32 ldrsh(u32 addr);
 
-    void handleSoftwareInterrupt(int comment);
+    void handleSwi(int comment);
 
     void moveShiftedRegister(u16 instr);
     void addSubImmediate(u16 instr);
@@ -83,9 +83,16 @@ private:
     void psrTransfer(u32 instr);
     void multiply(u32 instr);
     void multiplyLong(u32 instr);
-    void singleDataTransfer(u32 instr);
-    void halfSignedDataTransfer(u32 instr);
-    void blockDataTransfer(u32 instr);
-    void singleDataSwap(u32 instr);
-    void softwareInterruptArm(u32 instr);
+    void singleTransfer(u32 instr);
+    void halfSignedTransfer(u32 instr);
+    void blockTransfer(u32 instr);
+    void singleSwap(u32 instr);
+    void swiArm(u32 instr);
+
+    // Current step cycles
+    int cycles;
+
+    void internal();
+    void sequential(u32 addr);
+    void nonsequential(u32 addr);
 };

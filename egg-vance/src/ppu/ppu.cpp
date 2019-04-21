@@ -37,9 +37,16 @@ void PPU::reset()
 
 void PPU::renderFrame()
 {
-    //renderText();
-    renderBitmap();
+    switch (mmu->dispcnt.bg_mode)
+    {
+    case 0:
+        renderText();
+        break;
 
+    case 4:
+        renderBitmap();
+        break;
+    }
     SDL_RenderPresent(renderer);
 }
 

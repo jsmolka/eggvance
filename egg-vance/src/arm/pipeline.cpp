@@ -177,11 +177,11 @@ void ARM::execute()
             case ARM_4:  psrTransfer(instr); break;
             case ARM_5:  multiply(instr); break;
             case ARM_6:  multiplyLong(instr); break;
-            case ARM_7:  singleDataTransfer(instr); break;
-            case ARM_8:  halfSignedDataTransfer(instr); break;
-            case ARM_9:  blockDataTransfer(instr); break;
-            case ARM_10: singleDataSwap(instr); break;
-            case ARM_11: softwareInterruptArm(instr); break;
+            case ARM_7:  singleTransfer(instr); break;
+            case ARM_8:  halfSignedTransfer(instr); break;
+            case ARM_9:  blockTransfer(instr); break;
+            case ARM_10: singleSwap(instr); break;
+            case ARM_11: swiArm(instr); break;
             case ARM_12:
             case ARM_13:
             case ARM_14:
