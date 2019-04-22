@@ -92,7 +92,6 @@ private:
     // Current step cycles
     int cycles;
 
-    void internal();
-    void sequential(u32 addr);
-    void nonsequential(u32 addr);
+    void cycle();
+    void cycle(u32 addr, bool first_access);
 };

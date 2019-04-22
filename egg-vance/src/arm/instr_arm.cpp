@@ -2,8 +2,10 @@
 
 /**
  * Todo
+ * - PC + 12 in transfers
  * - Block Transfer might not be 100% corrent (with base register position in rlist)
- * - switch to THUMB in DP???
+ * - PSR access rights in different modes
+ * - empty register list
  */
 
 #include <iostream>
@@ -71,13 +73,15 @@ void ARM::branchExchange(u32 instr)
         addr = alignWord(addr);
     }
 
-    nonsequential(regs.pc);
+	// 1N cycle
+    cycle(regs.pc, true);
 
     regs.pc = addr;
     needs_flush = true;
 
-    sequential(regs.pc);
-    sequential(regs.pc + 4);
+	// 2S cycles
+    cycle(regs.pc, false);
+    cycle(regs.pc + 4, false);
 }
 
 // ARM 2
@@ -92,13 +96,15 @@ void ARM::branchLink(u32 instr)
     if (link)
         regs.lr = regs.pc - 4;
 
-    nonsequential(regs.pc);
+	// 1N cycle
+    cycle(regs.pc, true);
 
     regs.pc += offset;
     needs_flush = true;
 
-    sequential(regs.pc);
-    sequential(regs.pc + 4);
+	// 2S cycles
+    cycle(regs.pc, false);
+    cycle(regs.pc + 4, false);
 }
 
 // ARM 3
@@ -121,49 +127,48 @@ void ARM::dataProcessing(u32 instr)
     }
     else
     {
-        int data = instr & 0xFFF;
-        int shift = (data >> 4) & 0xFF;
-        int rm = data & 0xF;
+        int shift = (instr >> 4) & 0xFF;
+        int rm = instr & 0xF;
 
-        int value = regs[rm];
+		int value = regs[rm];
 
         int offset;
-        bool shift_imm = (shift & 0x1) == 0b0;
-        if (shift_imm)
+        bool use_reg = shift & 0x1;
+        if (use_reg)
         {
-            // Offset is a 5-bit immediate value
-            offset = (shift >> 3) & 0x1F;
+			int rs = (shift >> 4) & 0xF;
+			// Offset is stored in the lower byte
+			offset = regs[rs] & 0xFF;
+
+			// Prefetching
+			if (rm == 15)
+				value += 4;
+			if (rn == 15)
+				op1 += 4;
         }
         else
         {
-            int rs = (shift >> 4) & 0xF;
-            // Offset is stored in the lower byte
-            offset = regs[rs] & 0xFF;
-
-            // Prefetching
-            if (rm == 15)
-                value += 4;
-            if (rn == 15)
-                op1 += 4;
+			// Offset is a 5-bit immediate value
+			offset = (shift >> 3) & 0x1F;
         }
 
         int type = (shift >> 1) & 0x3;
         switch (type)
         {
         case 0b00: op2 = lsl(value, offset, carry); break;
-        case 0b01: op2 = lsr(value, offset, carry, shift_imm); break;
-        case 0b10: op2 = asr(value, offset, carry, shift_imm); break;
-        case 0b11: op2 = ror(value, offset, carry, shift_imm); break;
+        case 0b01: op2 = lsr(value, offset, carry, !use_reg); break;
+        case 0b10: op2 = asr(value, offset, carry, !use_reg); break;
+        case 0b11: op2 = ror(value, offset, carry, !use_reg); break;
         }
 
         // Shifting a register adds an I cycle
-        internal();
+        cycle();
     }
 
     if (rd == 15)
     {
-        // Writing to PC adds an N cycle
-        nonsequential(regs.pc);
+        // 1N cycle because writing to PC
+        cycle(regs.pc, true);
 
         if (flags)
         {
@@ -288,14 +293,14 @@ void ARM::dataProcessing(u32 instr)
 
     if (rd == 15)
     {
-        // Writing to PC adds one S cycle
-        sequential(regs.pc);
-
-        // Safety align and flush
         dst = alignWord(dst);
         needs_flush = true;
+
+		// 1S cycle because writing to PC
+		cycle(regs.pc, false);
     }
-    sequential(regs.pc + 4);
+	// 1S cycle
+    cycle(regs.pc + 4, false);
 }
 
 // ARM 4
@@ -359,32 +364,56 @@ void ARM::psrTransfer(u32 instr)
         int rd = (instr >> 12) & 0xF;
         regs[rd] = use_spsr ? regs.spsr : regs.cpsr;
     }
+
+	// 1S cycle
+	cycle(regs.pc, false);
 }
 
 // ARM 5
-void ARM::multiply(u32 instr)
+void ARM::multiply(u32 instruction)
 {
-    bool accumulate = (instr >> 21) & 0x1;
-    bool set_flags = (instr >> 20) & 0x1;
+    int accumulate = (instruction & 0x00200000);
+    int set_flags  = (instruction & 0x00100000);
+	int reg_dst	   = (instruction & 0x000F0000) >> 16;
+	int reg_acc	   = (instruction & 0x0000F000) >> 12;
+	int reg_op1	   = (instruction & 0x00000F00) >> 8;
+	int reg_op2	   = (instruction & 0x0000000F) >> 0;
 
-    int rd = (instr >> 16) & 0xF;
-    int rn = (instr >> 12) & 0xF;
-    int rs = (instr >> 8) & 0xF;
-    int rm = instr & 0xF;
-
-    u32& dst = regs[rd];
-
-    u32 op1 = regs[rs];
-    u32 op2 = regs[rm];
-    u32 acc = regs[rn];
+    u32& dst = regs[reg_dst];
+    u32 op1 = regs[reg_op1];
+    u32 op2 = regs[reg_op2];
+    u32 acc = regs[reg_acc];
 
     dst = op1 * op2;
-
     if (accumulate) 
         dst += acc;
 
     if (set_flags)
         logical(dst);
+
+	// Calculate internal cycles
+	static u32 masks[3] =
+	{
+		0xFF000000,
+		0xFFFF0000,
+		0xFFFFFF00
+	};
+
+	int internal = 4;
+	for (int x = 0; x < 3; ++x)
+	{
+		int bits = op1 & masks[x];
+		if (bits == 0 || bits == masks[x])
+			internal--;
+		else
+			break;
+	}
+
+	for (int x = 0; x < internal; ++x)
+		cycle();
+
+	// 1S cycle
+	cycle(regs.pc, false);
 }
 
 // ARM 6

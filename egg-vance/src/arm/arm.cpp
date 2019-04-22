@@ -325,17 +325,14 @@ void ARM::handleSwi(int comment)
     // Todo: actually do something
 }
 
-void ARM::internal()
+void ARM::cycle()
 {
+	// Internal cycle
     cycles++;
 }
 
-void ARM::sequential(u32 addr)
+void ARM::cycle(u32 addr, bool first_access)
 {
-    cycles++;
-}
-
-void ARM::nonsequential(u32 addr)
-{
-    cycles++;
+	// Cycle with memory access (sequential / nonsequential)
+	cycles++;
 }
