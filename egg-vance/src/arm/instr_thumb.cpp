@@ -14,13 +14,13 @@
 // THUMB 1
 void ARM::moveShiftedRegister(u16 instr)
 {
-    int opcode = (instr >> 11) & 0x3;
-    int offset = (instr >> 6) & 0x1F;
-    int rs = (instr >> 3) & 0x7;
-    int rd = instr & 0x7;
+    int opcode = (instr >> 11) & 0x03;
+    int offset = (instr >>  6) & 0x1F;
+    int rs     = (instr >>  3) & 0x07;
+    int rd     = (instr >>  0) & 0x07;
 
-    u32 src = regs[rs];
     u32& dst = regs[rd];
+    u32  src = regs[rs];
 
     bool carry;
     switch (opcode)
@@ -30,36 +30,39 @@ void ARM::moveShiftedRegister(u16 instr)
     case 0b10: dst = asr(src, offset, carry); break;
     }
     logical(dst, carry);
+
+    cycle(regs.pc, false);
 }
 
 // THUMB 2
 void ARM::addSubImmediate(u16 instr)
 {
-    bool immediate = (instr >> 10) & 0x1;
-    bool subtract = (instr >> 9) & 0x1;
-    int rn = (instr >> 6) & 0x7;
-    int rs = (instr >> 3) & 0x7;
-    int rd = instr & 0x7;
+    int use_imm  = (instr >> 10) & 0x1;
+    int subtract = (instr >>  9) & 0x1;
+    int rn       = (instr >>  6) & 0x7;
+    int rs       = (instr >>  3) & 0x7;
+    int rd       = (instr >>  0) & 0x7;
 
-    u32 src = regs[rs];
     u32& dst = regs[rd];
-
-    u32 op = immediate ? rn : regs[rn];
+    u32  src = regs[rs];
+    u32  op1 = use_imm ? rn : regs[rn];
 
     if (subtract)
-        dst = src - op;
+        dst = src - op1;
     else
-        dst = src + op;
+        dst = src + op1;
 
-    arithmetic(src, op, !subtract);
+    arithmetic(src, op1, !subtract);
+
+    cycle(regs.pc, false);
 }
 
 // THUMB 3
-void ARM::addSubCmpMovImmediate(u16 instr)
+void ARM::addSubMovCmpImmediate(u16 instr)
 {
-    int opcode = (instr >> 11) & 0x3;
-    int rd = (instr >> 8) & 0x7;
-    int offset = instr & 0xFF;
+    int opcode = (instr >> 11) & 0x03;
+    int rd     = (instr >>  8) & 0x07;
+    int offset = (instr >>  0) & 0xFF;
 
     u32& dst = regs[rd];
 
@@ -88,17 +91,19 @@ void ARM::addSubCmpMovImmediate(u16 instr)
         dst -= offset;
         break;
     }
+
+    cycle(regs.pc, false);
 }
 
 // THUMB 4
 void ARM::aluOperations(u16 instr)
 {
     int opcode = (instr >> 6) & 0xF;
-    int rs = (instr >> 3) & 0x7;
-    int rd = instr & 0x7;
+    int rs     = (instr >> 3) & 0x7;
+    int rd     = (instr >> 0) & 0x7;
 
-    u32 src = regs[rs];
     u32& dst = regs[rd];
+    u32  src = regs[rs];
 
     bool carry;
     switch (opcode)
@@ -119,18 +124,21 @@ void ARM::aluOperations(u16 instr)
     case 0b0010: 
         dst = lsl(dst, src, carry); 
         logical(dst, carry);
+        cycle();
         break;
 
     // LSR
     case 0b0011: 
         dst = lsr(dst, src, carry, false); 
         logical(dst, carry);
+        cycle();
         break;
 
     // ASR
     case 0b0100:
         dst = asr(dst, src, carry, false); 
         logical(dst, carry);
+        cycle();
         break;
 
     // ADC
@@ -142,7 +150,7 @@ void ARM::aluOperations(u16 instr)
 
     // SBC
     case 0b0110: 
-        src += regs.c() ? 0 : 1;
+        src += 1 - regs.c();
         arithmetic(dst, src, false);
         dst -= src;
         break;
@@ -151,6 +159,7 @@ void ARM::aluOperations(u16 instr)
     case 0b0111:
         dst = ror(dst, src, carry, false);
         logical(dst, carry);
+        cycle();
         break;
 
     // TST
@@ -182,9 +191,23 @@ void ARM::aluOperations(u16 instr)
 
     // MUL
     case 0b1101: 
+    {
         dst *= src;
         logical(dst);
+
+        int internal = 4;
+        static u32 masks[3] = { 0xFF000000, 0xFFFF0000, 0xFFFFFF00 };
+        for (int x = 0; x < 3; ++x)
+        {
+            int bits = dst & masks[x];
+            if (bits == 0 || bits == masks[x])
+                internal--;
+            else
+                break;
+        }
+        cycles += internal;
         break;
+    }
 
     // BIC
     case 0b1110:
@@ -198,47 +221,71 @@ void ARM::aluOperations(u16 instr)
         logical(dst);
         break;
     }
+
+    cycle(regs.pc, false);
 }
 
 // THUMB 5
 void ARM::highRegisterBranchExchange(u16 instr)
 {
     int opcode = (instr >> 8) & 0x3;
-    int hd = (instr >> 7) & 0x1;
-    int hs = (instr >> 6) & 0x1;
-    int rs = (instr >> 3) & 0x7;
-    int rd = instr & 0x7;
+    int hd     = (instr >> 7) & 0x1;
+    int hs     = (instr >> 6) & 0x1;
+    int rs     = (instr >> 3) & 0x7;
+    int rd     = (instr >> 0) & 0x7;
 
     rs |= hs << 3;
     rd |= hd << 3;
 
-    u32 src = regs[rs];
     u32& dst = regs[rd];
+    u32  src = regs[rs];
 
     switch (opcode)
     {
     // ADD
     case 0b00: 
-        dst += src;
-        if (rd == 15)
+        if (rd != 15)
         {
+            dst += src;
+
+            cycle(regs.pc, false);
+        }
+        else
+        {
+            cycle(regs.pc, true);
+
+            dst += src;
             dst = alignHalf(dst);
             needs_flush = true;
+
+            cycle(regs.pc, false);
+            cycle(regs.pc + 2, false);
         }
         break;
 
     // CMP
     case 0b01:
         arithmetic(dst, src, false);
+        cycle(regs.pc, false);
         break;
 
     // MOV
     case 0b10: 
-        dst = src;
-        if (rd == 15)
+        if (rd != 15)
         {
-            dst = alignHalf(dst);
+            dst = src;
+
+            cycle(regs.pc, false);
+        }
+        else
+        {
+            cycle(regs.pc, true);
+
+            dst = alignHalf(src);
             needs_flush = true;
+
+            cycle(regs.pc, false);
+            cycle(regs.pc + 2, false);
         }
         break;
 
@@ -251,11 +298,16 @@ void ARM::highRegisterBranchExchange(u16 instr)
         else
         {
             src = alignWord(src);
-            // Switch instruction set
             regs.setThumb(false);
         }
+
+        cycle(regs.pc, true);
+
         regs.pc = src;
         needs_flush = true;        
+
+        cycle(regs.pc, false);
+        cycle(regs.pc + (regs.arm() ? 4 : 2), false);
         break;
     }
 }
@@ -263,12 +315,17 @@ void ARM::highRegisterBranchExchange(u16 instr)
 // THUMB 6
 void ARM::loadPcRelative(u16 instr)
 {
-    int rd = (instr >> 8) & 0x7;
-    int offset = instr & 0xFF;
+    int rd     = (instr >> 8) & 0x07;
+    int offset = (instr >> 0) & 0xFF;
 
     offset <<= 2;
 
-    regs[rd] = mmu.readWord((regs.pc & ~0x2) + offset);
+    cycle(regs.pc, true);
+    cycle();
+
+    regs[rd] = mmu.readWord(alignWord(regs.pc) + offset);
+
+    cycle(regs.pc, false);
 }
 
 // THUMB 7
@@ -276,9 +333,9 @@ void ARM::loadStoreRegisterOffset(u16 instr)
 {
     int load = (instr >> 11) & 0x1;
     int byte = (instr >> 10) & 0x1;
-    int ro = (instr >> 6) & 0x7;
-    int rb = (instr >> 3) & 0x7;
-    int rd = instr & 0x7;
+    int ro   = (instr >>  6) & 0x7;
+    int rb   = (instr >>  3) & 0x7;
+    int rd   = (instr >>  0) & 0x7;
 
     u32& dst = regs[rd];
 
@@ -288,22 +345,32 @@ void ARM::loadStoreRegisterOffset(u16 instr)
     {
     // STR
     case 0b00:
+        cycle(regs.pc, true);
         mmu.writeWord(alignWord(addr), dst); 
+        cycle(addr, true);
         break;
 
     // STRB
     case 0b01: 
+        cycle(regs.pc, true);
         mmu.writeByte(addr, dst & 0xFF); 
+        cycle(addr, true);
         break;
 
     // LDR
     case 0b10: 
+        cycle(regs.pc, true);
         dst = ldr(addr);
+        cycle();
+        cycle(regs.pc  + 2, false);
         break;
 
     // LDRB
     case 0b11: 
+        cycle(regs.pc, true);
         dst = mmu.readByte(addr); 
+        cycle();
+        cycle(regs.pc + 2, false);
         break;
     }
 }
@@ -313,9 +380,9 @@ void ARM::loadStoreHalfSigned(u16 instr)
 {
     int half = (instr >> 11) & 0x1;
     int sign = (instr >> 10) & 0x1;
-    int ro = (instr >> 6) & 0x7;
-    int rb = (instr >> 3) & 0x7;
-    int rd = instr & 0x7;
+    int ro   = (instr >>  6) & 0x7;
+    int rb   = (instr >>  3) & 0x7;
+    int rd   = (instr >>  0) & 0x7;
     
     u32& dst = regs[rd];
 
@@ -325,24 +392,35 @@ void ARM::loadStoreHalfSigned(u16 instr)
     {
     // STRH
     case 0b00:
-        mmu.writeHalf(alignHalf(addr), dst & 0xFFFF); 
+        cycle(regs.pc, true);
+        mmu.writeHalf(alignHalf(addr), dst & 0xFFFF);
+        cycle(addr, true);
         break;
 
     // LDRH
     case 0b01: 
+        cycle(regs.pc, true);
         dst = ldrh(addr);
+        cycle();
+        cycle(regs.pc + 2, false);
         break;
 
     // LDSB
     case 0b10: 
+        cycle(regs.pc, true);
         dst = mmu.readByte(addr);
-        if (dst & 1 << 7)
+        if (dst & (1 << 7))
             dst |= 0xFFFFFF00;
+        cycle();
+        cycle(regs.pc + 2, false);
         break;
 
     // LDSH
     case 0b11: 
+        cycle(regs.pc, true);
         dst = ldrsh(addr);
+        cycle();
+        cycle(regs.pc + 2, false);
         break;
     }
 }
@@ -350,11 +428,11 @@ void ARM::loadStoreHalfSigned(u16 instr)
 // THUMB 9
 void ARM::loadStoreImmediateOffset(u16 instr)
 {
-    int byte = (instr >> 12) & 0x1;
-    int load = (instr >> 11) & 0x1;
-    int offset = (instr >> 6) & 0x1F;
-    int rb = (instr >> 3) & 0x7;
-    int rd = instr & 0x7;
+    int byte   = (instr >> 12) & 0x01;
+    int load   = (instr >> 11) & 0x01;
+    int offset = (instr >>  6) & 0x1F;
+    int rb     = (instr >>  3) & 0x07;
+    int rd     = (instr >>  0) & 0x07;
 
     u32& dst = regs[rd];
 
@@ -366,23 +444,33 @@ void ARM::loadStoreImmediateOffset(u16 instr)
     switch (load << 1 | byte)
     {
     // STR
-    case 0b00: 
+    case 0b00:
+        cycle(regs.pc, true);
         mmu.writeWord(alignWord(addr) , dst);
+        cycle(addr, true);
         break;
 
     // STRB
     case 0b01: 
-        mmu.writeByte(addr, dst & 0xFF); 
+        cycle(regs.pc, true);
+        mmu.writeByte(addr, dst & 0xFF);
+        cycle(addr, true);
         break;
 
     // LDR
     case 0b10: 
+        cycle(regs.pc, true);
         dst = ldr(addr);
+        cycle();
+        cycle(regs.pc + 2, false);
         break;
 
     // LDRB
     case 0b11: 
+        cycle(regs.pc, true);
         dst = mmu.readByte(addr); 
+        cycle();
+        cycle(regs.pc + 2, false);
         break;
     }
 }
@@ -390,10 +478,10 @@ void ARM::loadStoreImmediateOffset(u16 instr)
 // THUMB 10
 void ARM::loadStoreHalf(u16 instr)
 {
-    bool load = (instr >> 11) & 0x1;
-    int offset = (instr >> 6) & 0x1F;
-    int rb = (instr >> 3) & 0x7;
-    int rd = instr & 0x7;
+    int load   = (instr >> 11) & 0x01;
+    int offset = (instr >>  6) & 0x1F;
+    int rb     = (instr >>  3) & 0x07;
+    int rd     = (instr >>  0) & 0x07;
 
     u32& dst = regs[rd];
 
@@ -402,17 +490,26 @@ void ARM::loadStoreHalf(u16 instr)
     u32 addr = regs[rb] + offset;
 
     if (load)
+    {
+        cycle(regs.pc, true);
         dst = ldrh(addr);
+        cycle();
+        cycle(regs.pc + 2, false);
+    }
     else
+    {
+        cycle(regs.pc, true);
         mmu.writeHalf(alignHalf(addr), dst & 0xFFFF);
+        cycle(addr, true);
+    }
 }
 
 // THUMB 11
 void ARM::loadStoreSpRelative(u16 instr)
 {
-    bool load = (instr >> 11) & 0x1;
-    int rd = (instr >> 8) & 0x7;
-    int offset = instr & 0xFF;
+    int load   = (instr >> 11) & 0x01;
+    int rd     = (instr >>  8) & 0x07;
+    int offset = (instr >>  0) & 0xFF;
 
     u32& dst = regs[rd];
     
@@ -421,9 +518,18 @@ void ARM::loadStoreSpRelative(u16 instr)
     u32 addr = regs.sp + offset;
 
     if (load)
+    {
+        cycle(regs.pc, true);
         dst = ldr(addr);
+        cycle();
+        cycle(regs.pc + 2, false);
+    }
     else
+    {
+        cycle(regs.pc, true);
         mmu.writeWord(alignWord(addr), dst);
+        cycle(addr, true);
+    }
 }
 
 // THUMB 12

@@ -56,7 +56,7 @@ private:
 
     void moveShiftedRegister(u16 instr);
     void addSubImmediate(u16 instr);
-    void addSubCmpMovImmediate(u16 instr);
+    void addSubMovCmpImmediate(u16 instr);
     void aluOperations(u16 instr);
     void highRegisterBranchExchange(u16 instr);
     void loadPcRelative(u16 instr);
@@ -74,9 +74,6 @@ private:
     void unconditionalBranch(u16 instr);
     void longBranchLink(u16 instr);
 
-    u32 rotatedImmediate(int data, bool& carry);
-    u32 shiftedRegister(int data, bool& carry);
-
     void branchExchange(u32 instr);
     void branchLink(u32 instr);
     void dataProcessing(u32 instr);
@@ -89,9 +86,7 @@ private:
     void singleSwap(u32 instr);
     void swiArm(u32 instr);
 
-    // Current step cycles
     int cycles;
-
     void cycle();
     void cycle(u32 addr, bool first_access);
 };

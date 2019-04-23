@@ -202,7 +202,7 @@ void ARM::execute()
         {
         case THUMB_1:  moveShiftedRegister(instr); break;
         case THUMB_2:  addSubImmediate(instr); break;
-        case THUMB_3:  addSubCmpMovImmediate(instr); break;
+        case THUMB_3:  addSubMovCmpImmediate(instr); break;
         case THUMB_4:  aluOperations(instr); break;
         case THUMB_5:  highRegisterBranchExchange(instr); break;
         case THUMB_6:  loadPcRelative(instr); break;

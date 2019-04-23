@@ -12,57 +12,12 @@
 
 #include "utility.h"
 
-u32 ARM::rotatedImmediate(int data, bool& carry)
-{
-    int rotation = (data >> 8) & 0xF;
-    int immediate = data & 0xFF;
-
-    // Apply twice the rotation
-    return ror(immediate, 2 * rotation, carry, false);
-}
-
-u32 ARM::shiftedRegister(int data, bool& carry)
-{
-    int shift = (data >> 4) & 0xFF;
-    int rm = data & 0xF;
-
-    int value = regs[rm];
-
-    int offset;
-    bool immediate = (shift & 0x1) == 0b0;
-    if (immediate)
-    {
-        // Offset is a 5-bit immediate value
-        offset = (shift >> 3) & 0x1F;
-    }
-    else
-    {
-        int rs = (shift >> 4) & 0xF;
-        // Offset is stored in the lower byte
-        offset = regs[rs] & 0xFF;
-    }
-
-    int type = (shift >> 1) & 0x3;
-    switch (type)
-    {
-    case 0b00: return lsl(value, offset, carry);
-    case 0b01: return lsr(value, offset, carry, immediate);
-    case 0b10: return asr(value, offset, carry, immediate);
-    case 0b11: return ror(value, offset, carry, immediate);
-
-    default:
-        // Just for you, Visual Studio
-        return value;
-    }
-}
-
 // ARM 1
 void ARM::branchExchange(u32 instr)
 {
-    int rn = instr & 0xF;
+    int reg_addr = instr & 0xF;
 
-    u32 addr = regs[rn];
-
+    u32 addr = regs[reg_addr];
     if (addr & 0x1)
     {
         addr = alignHalf(addr);
@@ -87,8 +42,8 @@ void ARM::branchExchange(u32 instr)
 // ARM 2
 void ARM::branchLink(u32 instr)
 {
-    bool link = (instr >> 24) & 0x1;
-    int offset = instr & 0xFFFFFF;
+	int link   = (instr >> 24) & 0x1;
+    int offset = (instr >>  0) & 0xFFFFFF;
 
     offset = twos<24>(offset);
     offset <<= 2;
@@ -110,50 +65,54 @@ void ARM::branchLink(u32 instr)
 // ARM 3
 void ARM::dataProcessing(u32 instr)
 {
-    bool immediate = (instr >> 25) & 0x1;
-    int opcode = (instr >> 21) & 0xF;
-    bool flags = (instr >> 20) & 0x1;
-    int rn = (instr >> 16) & 0xF;
-    int rd = (instr >> 12) & 0xF;
+    int use_imm   = (instr >> 25) & 0x1;
+    int opcode    = (instr >> 21) & 0xF;
+    int set_flags = (instr >> 20) & 0xF;
+    int reg_op1   = (instr >> 16) & 0xF;
+    int reg_dst   = (instr >> 12) & 0xF;
+    int data      = (instr >>  0) & 0xFFF;
 
-    u32& dst = regs[rd];
-    u32 op1 = regs[rn];
-
+    u32& dst = regs[reg_dst];
+    u32 op1 = regs[reg_op1];
     u32 op2;
+
     bool carry;
-    if (immediate)
+    if (use_imm)
     {
-        op2 = rotatedImmediate(instr & 0xFFF, carry);
+        int rotation = (data >> 8) & 0xF;
+        int value    = (data >> 0) & 0xFF;
+        
+        // Twice the rotation is applied
+        rotation <<= 1;
+        
+        op2 = ror(value, rotation, carry, false);
     }
     else
     {
-        int shift = (instr >> 4) & 0xFF;
-        int rm = instr & 0xF;
+        int shift_type = (data >> 5) & 0x3;
+        int use_reg    = (data >> 4) & 0x1;
+        int reg_value  = (data >> 0) & 0xF;
 
-		int value = regs[rm];
+		int value = regs[reg_value];
 
         int offset;
-        bool use_reg = shift & 0x1;
         if (use_reg)
         {
-			int rs = (shift >> 4) & 0xF;
-			// Offset is stored in the lower byte
-			offset = regs[rs] & 0xFF;
+            int reg_offset = (data >> 8) & 0xF;
 
-			// Prefetching
-			if (rm == 15)
-				value += 4;
-			if (rn == 15)
-				op1 += 4;
+            offset = regs[reg_offset];
+            offset &= 0xFF;
+
+			// Account for prefetching
+			if (reg_value == 15) value += 4;
+			if (reg_op1 == 15) op1 += 4;
         }
         else
         {
-			// Offset is a 5-bit immediate value
-			offset = (shift >> 3) & 0x1F;
+			offset = (data >> 7) & 0x1F;
         }
 
-        int type = (shift >> 1) & 0x3;
-        switch (type)
+        switch (shift_type)
         {
         case 0b00: op2 = lsl(value, offset, carry); break;
         case 0b01: op2 = lsr(value, offset, carry, !use_reg); break;
@@ -161,23 +120,22 @@ void ARM::dataProcessing(u32 instr)
         case 0b11: op2 = ror(value, offset, carry, !use_reg); break;
         }
 
-        // Shifting a register adds an I cycle
+        // 1I cycle
         cycle();
     }
 
-    if (rd == 15)
+    if (reg_dst == 15)
     {
-        // 1N cycle because writing to PC
+        // 1N cycle
         cycle(regs.pc, true);
 
-        if (flags)
+        if (set_flags)
         {
-            // Change mode and copy SPSR
             u32 spsr = regs.spsr;
             regs.switchMode(static_cast<Mode>(spsr & 0x1F));
             regs.cpsr = spsr;
 
-            flags = false;
+            set_flags = false;
         }
     }
 
@@ -186,35 +144,35 @@ void ARM::dataProcessing(u32 instr)
     // AND
     case 0b0000:
         dst = op1 & op2;
-        if (flags) 
+        if (set_flags) 
             logical(dst, carry);
         break;
 
     // EOR
     case 0b0001:
         dst = op1 ^ op2;
-        if (flags) 
+        if (set_flags) 
             logical(dst, carry);
         break;
 
     // SUB
     case 0b0010:
         dst = op1 - op2;
-        if (flags) 
+        if (set_flags) 
             arithmetic(op1, op2, false);
         break;
 
     // RSB
     case 0b0011:
         dst = op2 - op1;
-        if (flags) 
+        if (set_flags) 
             arithmetic(op2, op1, false);
         break;
 
     // ADD
     case 0b0100:
         dst = op1 + op2;
-        if (flags) 
+        if (set_flags) 
             arithmetic(op1, op2, true);
         break;
 
@@ -222,7 +180,7 @@ void ARM::dataProcessing(u32 instr)
     case 0b0101:
         op2 += regs.c();
         dst = op1 + op2;
-        if (flags) 
+        if (set_flags) 
             arithmetic(op1, op2, true);
         break;
 
@@ -230,7 +188,7 @@ void ARM::dataProcessing(u32 instr)
     case 0b0110:
         op2 += 1 - regs.c();
         dst = op1 - op2;
-        if (flags) 
+        if (set_flags) 
             arithmetic(op1, op2, false);
         break;
 
@@ -238,7 +196,7 @@ void ARM::dataProcessing(u32 instr)
     case 0b0111:
         op1 += 1 - regs.c();
         dst = op2 - op1;
-        if (flags) 
+        if (set_flags) 
             arithmetic(op2, op1, false);
         break;
 
@@ -265,38 +223,38 @@ void ARM::dataProcessing(u32 instr)
     // ORR
     case 0b1100:
         dst = op1 | op2;
-        if (flags) 
+        if (set_flags) 
             logical(dst, carry);
         break;
 
     // MOV
     case 0b1101:
         dst = op2;
-        if (flags) 
+        if (set_flags) 
             logical(dst, carry);
         break;
 
     // BIC
     case 0b1110:
         dst = op1 & ~op2;
-        if (flags) 
+        if (set_flags) 
             logical(dst, carry);
         break;
 
     // MVN
     case 0b1111:
         dst = ~op2;
-        if (flags) 
+        if (set_flags) 
             logical(dst, carry);
         break;
     }
 
-    if (rd == 15)
+    if (reg_dst == 15)
     {
         dst = alignWord(dst);
         needs_flush = true;
 
-		// 1S cycle because writing to PC
+		// 1S cycle
 		cycle(regs.pc, false);
     }
 	// 1S cycle
@@ -306,24 +264,30 @@ void ARM::dataProcessing(u32 instr)
 // ARM 4
 void ARM::psrTransfer(u32 instr)
 {
-    bool msr = (instr >> 21) & 0x1;
-    bool use_spsr = (instr >> 22) & 0x1;
+    int write    = (instr >> 21) & 0x1;
+    int use_spsr = (instr >> 22) & 0x1;
 
-    // MSR
-    if (msr)
+    if (write)
     {
-        bool use_imm = (instr >> 25) & 0x1;
+        int use_imm = (instr >> 25) & 0x1;
+		int data    = (instr >>  0) & 0xFFF;
 
         u32 op;
         if (use_imm)
         {
-            bool carry;
-            op = rotatedImmediate(instr & 0xFFF, carry);
+			int rotation = (data >> 8) & 0xF;
+			int value    = (data >> 0) & 0xFF;
+
+			// Apply twice the rotation
+			rotation <<= 1;
+			
+			bool carry;
+			op = ror(value, rotation, carry, false);
         }
         else
         {
-            int rm = instr & 0xF;
-            op = regs[rm];
+            int reg_op = instr & 0xF;
+            op = regs[reg_op];
         }
 
         // Create mask based on fsxc-bits
@@ -359,10 +323,10 @@ void ARM::psrTransfer(u32 instr)
             }
         }
     }
-    else  // MRS
+    else
     {
-        int rd = (instr >> 12) & 0xF;
-        regs[rd] = use_spsr ? regs.spsr : regs.cpsr;
+        int reg_dst = (instr >> 12) & 0xF;
+        regs[reg_dst] = use_spsr ? regs.spsr : regs.cpsr;
     }
 
 	// 1S cycle
@@ -370,14 +334,14 @@ void ARM::psrTransfer(u32 instr)
 }
 
 // ARM 5
-void ARM::multiply(u32 instruction)
+void ARM::multiply(u32 instr)
 {
-    int accumulate = (instruction & 0x00200000);
-    int set_flags  = (instruction & 0x00100000);
-	int reg_dst	   = (instruction & 0x000F0000) >> 16;
-	int reg_acc	   = (instruction & 0x0000F000) >> 12;
-	int reg_op1	   = (instruction & 0x00000F00) >> 8;
-	int reg_op2	   = (instruction & 0x0000000F) >> 0;
+    int accumulate = (instr >> 21) & 0x1;
+	int set_flags  = (instr >> 20) & 0x1;
+	int reg_dst	   = (instr >> 16) & 0xF;
+	int reg_acc    = (instr >> 12) & 0xF;
+	int reg_op1    = (instr >>  8) & 0xF;
+	int reg_op2	   = (instr >>  0) & 0xF;
 
     u32& dst = regs[reg_dst];
     u32 op1 = regs[reg_op1];
@@ -409,6 +373,9 @@ void ARM::multiply(u32 instruction)
 			break;
 	}
 
+    if (accumulate)
+        internal++;
+
 	for (int x = 0; x < internal; ++x)
 		cycle();
 
@@ -419,24 +386,22 @@ void ARM::multiply(u32 instruction)
 // ARM 6
 void ARM::multiplyLong(u32 instr)
 {
-    bool sign = (instr >> 22) & 0x1;
-    bool accumulate = (instr >> 21) & 0x1;
-    bool set_flags = (instr >> 20) & 0x1;
+	int sign       = (instr >> 22) & 0x1;
+	int accumulate = (instr >> 21) & 0x1;
+	int set_flags  = (instr >> 20) & 0x1;
+	int reg_dsthi  = (instr >> 16) & 0xF;
+    int reg_dstlo  = (instr >> 12) & 0xF;
+    int reg_op1    = (instr >>  8) & 0xF;
+    int reg_op2    = (instr >>  0) & 0xF;
 
-    int rdhi = (instr >> 16) & 0xF;
-    int rdlo = (instr >> 12) & 0xF;
-    int rs = (instr >> 8) & 0xF;
-    int rm = instr & 0xF;
-
-    u32& dsthi = regs[rdhi];
-    u32& dstlo = regs[rdlo];
-
-    u64 op1 = regs[rm];
-    u64 op2 = regs[rs];
+    u32& dsthi = regs[reg_dsthi];
+    u32& dstlo = regs[reg_dstlo];
+    u64 op1 = regs[reg_op1];
+    u64 op2 = regs[reg_op2];
 
     if (sign)
     {
-        // Sign extend to 64 bits if negative two's complement
+        // Sign extend to 64 bits
         if (op1 & (1 << 31))
             op1 |= 0xFFFFFFFF00000000;
         if (op2 & (1 << 31))
@@ -444,7 +409,6 @@ void ARM::multiplyLong(u32 instr)
     }
     
     u64 result = op1 * op2;
-
     if (accumulate)
         result += (static_cast<u64>(dsthi) << 32) | dstlo;
 
@@ -454,36 +418,104 @@ void ARM::multiplyLong(u32 instr)
         regs.setN(result >> 63);
     }
 
-    dsthi = result >> 32;
+    dsthi = (result >> 32) & 0xFFFFFFFF;
     dstlo = result & 0xFFFFFFFF;
+
+    // Calculate internal cycles
+    static u32 masks[3] =
+    {
+        0xFF000000,
+        0xFFFF0000,
+        0xFFFFFF00
+    };
+
+    int internal = 4;
+    if (sign)
+    {
+        for (int x = 0; x < 3; ++x)
+        {
+            int bits = op1 & masks[x];
+            if (bits == 0 || bits == masks[x])
+                internal--;
+            else
+                break;
+        }
+    }
+    else
+    {
+        for (int x = 0; x < 3; ++x)
+        {
+            if ((op1 & masks[x]) == 0)
+                internal--;
+            else
+                break;
+        }
+    }
+
+    if (accumulate)
+        internal += 2;
+    else
+        internal++;
+
+    for (int x = 0; x < internal; ++x)
+        cycle();
+
+    // 1S cycle
+    cycle(regs.pc, false);
 }
 
 // ARM 7
 void ARM::singleTransfer(u32 instr)
 {
-    bool use_reg = (instr >> 25) & 0x1;
-    bool pre_indexing = (instr >> 24) & 0x1;
-    bool increment = (instr >> 23) & 0x1;
-    int byte = (instr >> 22) & 0x1;
-    bool writeback = (instr >> 21) & 0x1;
-    int load = (instr >> 20) & 0x1;
+    int use_reg      = (instr >> 25) & 0x1;
+    int pre_indexing = (instr >> 24) & 0x1;
+    int increment    = (instr >> 23) & 0x1;
+    int byte         = (instr >> 22) & 0x1;
+    int writeback    = (instr >> 21) & 0x1;
+    int load         = (instr >> 20) & 0x1;
+    int reg_addr     = (instr >> 16) & 0xF;
+    int reg_dst      = (instr >> 12) & 0xF;
+    int data         = (instr >>  0) & 0xFFF;
 
-    int rn = (instr >> 16) & 0xF;
-    int rd = (instr >> 12) & 0xF;
+    u32& dst = regs[reg_dst];
+    u32 addr = regs[reg_addr];
 
-    u32 offset = instr & 0xFFF;
+    u32 offset;
     if (use_reg)
     {
+        int shift_type    = (data >> 5) & 0x3;
+        int shift_use_reg = (data >> 4) & 0x1;
+        int reg_value     = (data >> 0) & 0xF;
+
+        int value = regs[reg_value];
+
+        int shift_offset;
+        if (shift_use_reg)
+        {
+            int reg_offset = (data >> 8) & 0xF;
+
+            // Offset is stored in the lower byte
+            shift_offset = regs[reg_offset] & 0xFF;
+        }
+        else
+        {
+            // Offset is a 5-bit immediate value
+            shift_offset = (data >> 7) & 0x1F;
+        }
+
         bool carry;
-        offset = shiftedRegister(offset, carry);
-        // Do not use shifted register here, not increase if PC is used as shifted register
+        switch (shift_type)
+        {
+        case 0b00: offset = lsl(value, shift_offset, carry); break;
+        case 0b01: offset = lsr(value, shift_offset, carry, !shift_use_reg); break;
+        case 0b10: offset = asr(value, shift_offset, carry, !shift_use_reg); break;
+        case 0b11: offset = ror(value, shift_offset, carry, !shift_use_reg); break;
+        }
     }
-
-    u32 addr = regs[rn];
-    u32& dst = regs[rd];
-
-    // Post-indexing always writes back
-    writeback |= !pre_indexing;
+    else
+    {
+        offset = data;
+    }
 
     if (pre_indexing)
     {
@@ -495,23 +527,23 @@ void ARM::singleTransfer(u32 instr)
 
     switch (load << 1 | byte)
     {
+    // STR
     case 0b00:
-        // STR
-        mmu.writeWord(alignWord(addr), dst);
+        mmu.writeWord(alignWord(addr), dst + (reg_dst == 15 ? 4 : 0));
         break;
 
+    // STRB
     case 0b01:
-        // STRB
-        mmu.writeByte(addr, dst & 0xFF);
+        mmu.writeByte(addr, (dst + (reg_dst == 15 ? 4 : 0)) & 0xFF);
         break;
 
+    // LDR
     case 0b10:
-        // LDR
         dst = ldr(addr);
         break;
 
+    // LDRB
     case 0b11:
-        // LDRB
         dst = mmu.readByte(addr);
         break;
     }
@@ -524,12 +556,12 @@ void ARM::singleTransfer(u32 instr)
             addr -= offset;
     }
 
-    if (writeback)
+    if (writeback || !pre_indexing)
     {
-        if (rd == rn)
-            regs[rn] = dst;
+        if (reg_dst == reg_addr)
+            regs[reg_addr] = dst;
         else
-            regs[rn] = addr;
+            regs[reg_addr] = addr;
     }
 }
 

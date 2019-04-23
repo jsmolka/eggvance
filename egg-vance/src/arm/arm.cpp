@@ -31,7 +31,7 @@ int ARM::step()
     decode();
 
     #ifdef _DEBUG
-    //debug();
+    debug();
     #endif
 
     u32 pc = regs.pc - (regs.arm() ? 8 : 4);
@@ -155,7 +155,6 @@ u32 ARM::lsl(u32 value, int offset, bool& carry)
     {
         if (offset < 32)
         {
-			// Todo: carry could be shorted / easier
             carry = (value >> (32 - offset)) & 0x1;
             value <<= offset;
         }
@@ -208,7 +207,6 @@ u32 ARM::lsr(u32 value, int offset, bool& carry, bool immediate)
 
 u32 ARM::asr(u32 value, int offset, bool& carry, bool immediate)
 {
-	// Average case
 	if (offset != 0)
 	{
 		if (offset < 32)
