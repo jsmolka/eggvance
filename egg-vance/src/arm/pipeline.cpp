@@ -216,7 +216,7 @@ void ARM::execute()
         case THUMB_14: pushPopRegisters(instr); break;
         case THUMB_15: loadStoreMultiple(instr); break;
         case THUMB_16: conditionalBranch(instr); break;
-        case THUMB_17: softwareInterruptThumb(instr); break;
+        case THUMB_17: swiThumb(instr); break;
         case THUMB_18: unconditionalBranch(instr); break;
         case THUMB_19: longBranchLink(instr); break;
         }

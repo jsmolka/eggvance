@@ -535,26 +535,27 @@ void ARM::loadStoreSpRelative(u16 instr)
 // THUMB 12
 void ARM::loadAddress(u16 instr)
 {
-    bool sp = (instr >> 11) & 0x1;
-    int rd = (instr >> 8) & 0x7;
-    int offset = instr & 0xFF;
+    int use_sp = (instr >> 11) & 0x01;
+    int rd     = (instr >>  8) & 0x07;
+    int offset = (instr >>  0) & 0xFF;
 
     u32& dst = regs[rd];
     
     offset <<= 2;
 
-    if (sp)
+    if (use_sp)
         dst = regs.sp + offset;
     else
-        // Bit 1 is forced to 0
         dst = (regs.pc & ~0x2) + offset;
+
+    cycle(regs.pc, false);
 }
 
 // THUMB 13
 void ARM::addOffsetSp(u16 instr)
 {
-    bool sign = (instr >> 7) & 0x1;
-    int offset = instr & 0x3F;
+    int sign   = (instr >> 7) & 0x01;
+    int offset = (instr >> 0) & 0x3F;
 
     offset <<= 2;
 
@@ -562,14 +563,16 @@ void ARM::addOffsetSp(u16 instr)
         regs.sp -= offset;
     else
         regs.sp += offset; 
+
+    cycle(regs.pc, false);
 }
 
 // THUMB 14
 void ARM::pushPopRegisters(u16 instr)
 {
-    bool pop = (instr >> 11) & 0x1;
-    bool routine = (instr >> 8) & 0x1;
-    int rlist = instr & 0xFF;
+    int pop   = (instr >> 11) & 0x01;
+    int pc_lr = (instr >>  8) & 0x01;
+    int rlist = (instr >>  0) & 0xFF;
 
     // Full descending stack
     if (pop)
@@ -583,7 +586,7 @@ void ARM::pushPopRegisters(u16 instr)
             }
         }
 
-        if (routine)
+        if (pc_lr)
         {
             regs.pc = mmu.readWord(alignWord(regs.sp));
             regs.pc = alignHalf(regs.pc);
@@ -594,7 +597,7 @@ void ARM::pushPopRegisters(u16 instr)
     }
     else
     {
-        if (routine)
+        if (pc_lr)
         {
             regs.sp -= 4;
             mmu.writeWord(alignWord(regs.sp), regs.lr);
@@ -653,7 +656,7 @@ void ARM::conditionalBranch(u16 instr)
 }
 
 // THUMB 17
-void ARM::softwareInterruptThumb(u16 instr)
+void ARM::swiThumb(u16 instr)
 {
     std::cout << "Unimplemented THUMB SWI\n";
 }

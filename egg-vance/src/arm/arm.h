@@ -70,9 +70,12 @@ private:
     void pushPopRegisters(u16 instr);
     void loadStoreMultiple(u16 instr);
     void conditionalBranch(u16 instr);
-    void softwareInterruptThumb(u16 instr);
+    void swiThumb(u16 instr);
     void unconditionalBranch(u16 instr);
     void longBranchLink(u16 instr);
+
+    u32 shiftedRegister(int data, bool& carry);
+    u32 rotatedImmediate(int data, bool& carry);
 
     void branchExchange(u32 instr);
     void branchLink(u32 instr);
@@ -86,7 +89,16 @@ private:
     void singleSwap(u32 instr);
     void swiArm(u32 instr);
 
+    enum AccessType
+    {
+        SEQ,
+        NONSEQ
+    };
+
     int cycles;
+
     void cycle();
     void cycle(u32 addr, bool first_access);
+    void cycle(u32 addr, AccessType access);
+    void cycleMultiplication(u32 multiplier, bool allow_ones);
 };

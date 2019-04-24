@@ -1,7 +1,7 @@
 #include "arm.h"
 
+#include <array>
 #include <iostream>
-#include <iomanip>
 
 #include "enums.h"
 #include "disassembler.h"
@@ -333,4 +333,30 @@ void ARM::cycle(u32 addr, bool first_access)
 {
 	// Cycle with memory access (sequential / nonsequential)
 	cycles++;
+}
+
+void ARM::cycle(u32 addr, AccessType access)
+{
+    cycles++;
+}
+
+void ARM::cycleMultiplication(u32 multiplier, bool allow_ones)
+{
+    static std::array<u32, 3> masks = 
+    {
+        0xFF000000,
+        0xFFFF0000,
+        0xFFFFFF00
+    };
+
+    int internal = 4;
+    for (u32 mask : masks)
+    {
+        u32 bits = multiplier & mask;
+        if (bits == 0 || (allow_ones && bits == mask))
+            internal--;
+        else
+            break;
+    }
+    cycles += internal;
 }
