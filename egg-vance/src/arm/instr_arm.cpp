@@ -2,11 +2,12 @@
 
 /**
  * Todo
- * - PC + 12 in transfers
+ * - PC + 12 in transfers (str, strh)
  * - Block Transfer might not be 100% corrent (with base register position in rlist)
  * - PSR access rights in different modes
  * - empty register list
  * - ldr into PC (flush, align, etc)
+ * - ldr(h) into PC
  */
 
 #include <iostream>
@@ -23,7 +24,6 @@ u32 ARM::shiftedRegister(int data, bool& carry)
     if (use_reg)
     {
         int rs = (data >> 8) & 0xF;
-
         offset = regs[rs];
         offset &= 0xFF;
     }
@@ -50,6 +50,7 @@ u32 ARM::rotatedImmediate(int data, bool& carry)
     int rotation = (data >> 8) & 0x0F;
     int value    = (data >> 0) & 0xFF;
 
+    // Apply twice the rotation
     rotation <<= 1;
 
     return ror(value, rotation, carry, false);
@@ -471,7 +472,6 @@ void ARM::singleTransfer(u32 instr)
     if (load)
     {
         cycle();
-
         if (rd == 15)
             cycle(regs.pc + 4, NONSEQ);
 
@@ -522,37 +522,33 @@ void ARM::singleTransfer(u32 instr)
 // ARM 8
 void ARM::halfSignedTransfer(u32 instr)
 {
-    bool pre_indexing = (instr >> 24) & 0x1;
-    bool use_imm = (instr >> 22) & 0x1;
-    bool increment = (instr >> 23) & 0x1;
-    bool writeback = (instr >> 21) & 0x1;
-    bool load = (instr >> 20) & 0x1;
+    int pre_index = (instr >> 24) & 0x1;
+    int use_imm   = (instr >> 22) & 0x1;
+    int increment = (instr >> 23) & 0x1;
+    int writeback = (instr >> 21) & 0x1;
+    int load      = (instr >> 20) & 0x1;
+    int rn        = (instr >> 16) & 0xF;
+    int rd        = (instr >> 12) & 0xF;
+    int sign      = (instr >>  6) & 0x1;
+    int half      = (instr >>  5) & 0x1;
 
-    int rn = (instr >> 16) & 0xF;
-    int rd = (instr >> 12) & 0xF;
-    int sign = (instr >> 6) & 0x1;
-    int half = (instr >> 5) & 0x1;
+    u32 addr = regs[rn];
+    u32& dst = regs[rd];
 
     u32 offset;
     if (use_imm)
     {
         int upper = (instr >> 8) & 0xF;
-        int lower = instr & 0xF;
+        int lower = (instr >> 0) & 0xF;
         offset = upper << 4 | lower;
     }
     else
     {
-        int rm = instr & 0xF;
+        int rm = (instr >> 0) & 0xF;
         offset = regs[rm];
     }
 
-    u32 addr = regs[rn];
-    u32& dst = regs[rd];
-
-    // Post-indexing always writes back
-    writeback |= !pre_indexing;
-
-    if (pre_indexing)
+    if (pre_index)
     {
         if (increment)
             addr += offset;
@@ -560,34 +556,59 @@ void ARM::halfSignedTransfer(u32 instr)
             addr -= offset;
     }
 
-    switch (sign << 1 | half)
-    {
-    // SWP
-    case 0b00:
-        break;
+    cycle(regs.pc, NONSEQ);
 
-    // STRH / LDRH
-    case 0b01:
-        if (load)
+    if (load)
+    {
+        cycle();
+        if (rd == 15)
+            cycle(regs.pc + 4, NONSEQ);
+
+        switch (sign << 1 | half)
+        {
+        // SWP
+        case 0b00:
+            break;
+
+        // LDRH
+        case 0b01:
             dst = ldrh(addr);
-        else
-            mmu.writeHalf(alignHalf(addr), dst & 0xFFFF);
-        break;
+            break;
 
-    // LDRSB
-    case 0b10:
-        dst = mmu.readByte(addr);
-        if (dst & (1 << 7))
-            dst |= 0xFFFFFF00;
-        break;
+        // LDRSB
+        case 0b10:
+            dst = mmu.readByte(addr);
+            if (dst & (1 << 7))
+                dst |= 0xFFFFFF00;
+            break;
 
-    // LDRSH
-    case 0b11:
-        dst = ldrsh(addr);
-        break;
+        // LDRSH
+        case 0b11:
+            dst = ldrsh(addr);
+            break;
+        }
+
+        if (rd == 15)
+        {
+            dst = alignWord(dst);
+            needs_flush = true;
+
+            cycle(regs.pc, SEQ);
+        }
+        cycle(regs.pc + 4, SEQ);
+    }
+    else
+    {
+        // Account for prefetch
+        u32 value = dst + (rd == 15 ? 4 : 0);
+
+        if (half)
+            mmu.writeHalf(alignHalf(addr), static_cast<u16>(value));
+
+        cycle(addr, NONSEQ);
     }
 
-    if (!pre_indexing)
+    if (!pre_index)
     {
         if (increment)
             addr += offset;
@@ -595,7 +616,7 @@ void ARM::halfSignedTransfer(u32 instr)
             addr -= offset;
     }
 
-    if (writeback)
+    if (writeback || !pre_index)
     {
         if (rn == rd)
             regs[rn] = dst;
@@ -607,129 +628,134 @@ void ARM::halfSignedTransfer(u32 instr)
 // ARM 9
 void ARM::blockTransfer(u32 instr)
 {
-    bool full = (instr >> 24) & 0x1;
-    bool ascending = (instr >> 23) & 0x1;
-    bool user_transfer = (instr >> 22) & 0x1;
-    bool writeback = (instr >> 21) & 0x1;
-    bool load = (instr >> 20) & 0x1;
-    int rn = (instr >> 16) & 0xF;
-    int rlist = instr & 0xFFFF;
+    int full      = (instr >> 24) & 0x0001;
+    int ascending = (instr >> 23) & 0x0001;
+    int user      = (instr >> 22) & 0x0001;
+    int writeback = (instr >> 21) & 0x0001;
+    int load      = (instr >> 20) & 0x0001;
+    int rn        = (instr >> 16) & 0x000F;
+    int rlist     = (instr >>  0) & 0xFFFF;
 
     u32 addr = regs[rn];
 
-    // Handle user transfer
+    // Force user register transfer
     Mode mode = regs.mode();
-    if (user_transfer)
+    if (user)
         regs.switchMode(MODE_USR);
 
     if (rlist != 0)
     {
-        // Lowest register gets stored at the lowest address
-        if (ascending)
+        cycle(regs.pc, NONSEQ);
+
+        // Register count needed for cycles
+        int rcount = 0;
+        for (int temp = rlist; temp != 0; temp >>= 1)
+            rcount += temp & 0x1;
+
+        int init = ascending ? 0 : 15;
+        int loop = ascending ? 1 : -1;
+        int step = ascending ? 4 : -4;
+
+        // Lowest register is stored at the lowest address
+        if (load)
         {
-            // Start at lowest address, load / store registers in order
-            for (int x = 0; x < 16; ++x)
+            for (int x = init; rcount > 0; x += loop)
             {
-                if (rlist & 1 << x)
+                if (rlist & (1 << x))
                 {
-                    if (full)
-                        addr += 4;
+                    if (full) addr += step;
 
-                    if (load)
-                    {
-                        regs[x] = mmu.readWord(alignWord(addr));
-
-                        if (x == 15)
-                            needs_flush = true;
-                    }
+                    if (--rcount > 0)
+                        cycle(addr, SEQ);
                     else
+                        cycle();
+
+                    if (x == 15)
+                        cycle(regs.pc + 4, NONSEQ);
+
+                    regs[x] = mmu.readWord(alignWord(addr));
+
+                    if (x == 15)
                     {
-                        mmu.writeWord(alignWord(addr), regs[x]);
+                        regs.pc = alignWord(regs.pc);
+                        needs_flush = true;
+
+                        cycle(regs.pc, SEQ);
                     }
-            
-                    if (!full)
-                        addr += 4;
+
+                    if (!full) addr += step;
                 }
             }
         }
         else
         {
-            // Start at highest address, load / store registers in reverse order
-            for (int x = 15; x >= 0; --x)
+            for (int x = init; rcount > 0; x += loop)
             {
-                if (rlist & 1 << x)
+                if (rlist & (1 << x))
                 {
-                    if (full)
-                        addr -= 4;
+                    if (full) addr += step;
 
-                    if (load)
-                    {
-                        regs[x] = mmu.readWord(alignWord(addr));
+                    if (--rcount > 0)
+                        cycle(addr, SEQ);
 
-                        if (x == 15)
-                            needs_flush = true;
-                    }
-                    else
-                    {
-                        mmu.writeWord(alignWord(addr), regs[x]);
-                    }
+                    mmu.writeWord(alignWord(addr), regs[x]);
 
-                    if (!full)
-                        addr -= 4;
+                    if (!full) addr += step;
                 }
             }
         }
+        cycle(regs.pc + 4, SEQ);
     }
-    else  // Special case with empty rlist
+    else  // Special case empty rlist
     {
         if (load)
         {
             regs.pc = mmu.readWord(alignWord(addr));
             regs.pc = alignWord(regs.pc);
-
             needs_flush = true;
         }
         else
         {
             mmu.writeWord(alignWord(addr), regs.pc);
         }
-
-        if (full)
-            addr += 0x40;
-        else
-            addr -= 0x40;
+        addr += ascending ? 0x40 : -0x40;
     }
 
     if (writeback)
         regs[rn] = addr;
 
-    if (user_transfer)
+    if (user)
         regs.switchMode(mode);
 }
 
 // ARM 10
 void ARM::singleSwap(u32 instr)
 {
-    bool byte = (instr >> 22) & 0x1;
+    int byte = (instr >> 22) & 0x1;
+    int rn   = (instr >> 16) & 0xF;
+    int rd   = (instr >> 12) & 0xF;
+    int rm   = (instr >>  0) & 0xF;
 
-    int rb = (instr >> 16) & 0xF;
-    int rd = (instr >> 12) & 0xF;
-    int rs = instr & 0xF;
-
-    u32 addr = regs[rb];
+    u32 addr = regs[rn];
     u32& dst = regs[rd];
-    u32 src = regs[rs];
+    u32  src = regs[rm];
+
+    cycle(regs.pc, NONSEQ);
+    cycle(addr, NONSEQ);
 
     if (byte)
     {
         dst = mmu.readByte(addr);
-        mmu.writeByte(addr, src & 0xFF);
+        mmu.writeByte(addr, static_cast<u8>(src));
     }
     else
     {
         dst = ldr(addr);
         mmu.writeWord(alignWord(addr), src);
     }
+
+    cycle();
+    cycle(regs.pc + 4, SEQ);
 }
 
 // ARM 11

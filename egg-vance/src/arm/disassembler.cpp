@@ -931,6 +931,7 @@ std::string Disassembler::blockDataTransfer(u32 instr)
     std::string mnemonic = load ? "ldm" : "stm";
     switch ((full << 1) | ascending)
     {
+    // Todo: Fix me :)
     case 0b00: mnemonic += "ed"; break;
     case 0b01: mnemonic += "ea"; break;
     case 0b10: mnemonic += "fd"; break;
