@@ -4,8 +4,8 @@
 
 void Registers::reset()
 {
-    std::memset(regs, 0, sizeof(regs));
-    std::memset(bank, 0, sizeof(bank));
+    std::memset(regs,     0, sizeof(regs));
+    std::memset(bank,     0, sizeof(bank));
     std::memset(bank_fiq, 0, sizeof(bank_fiq));
 
     pc = 0x8000000;

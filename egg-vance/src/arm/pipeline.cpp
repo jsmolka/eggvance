@@ -73,7 +73,7 @@ void ARM::decode()
                 case 0b1010:  // CMP
                 case 0b1011:  // CMN
                 {
-                    bool flags = (instr >> 20) & 0x1;
+                    int flags = (instr >> 20) & 0x1;
                     if (flags)
                         pipe[1].format = ARM_3;
                     else
@@ -182,15 +182,6 @@ void ARM::execute()
             case ARM_9:  blockTransfer(instr); break;
             case ARM_10: singleSwap(instr); break;
             case ARM_11: swiArm(instr); break;
-            case ARM_12:
-            case ARM_13:
-            case ARM_14:
-                std::cout << "Unimplemented coprocessor instruction";
-                break;
-
-            case ARM_15:
-                std::cout << "Unimplemented undefined instruction";
-                break;
             }
         }
     }

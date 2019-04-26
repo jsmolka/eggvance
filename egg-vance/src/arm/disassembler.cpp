@@ -35,7 +35,7 @@ std::string Disassembler::disassemble(u32 instr, Format format, const Registers&
     case THUMB_19: return longBranchLink(instr, regs.lr);
     case ARM_1:    return branchExchange(instr);
     case ARM_2:    return branchLink(instr, regs.pc);
-    case ARM_3:    return dataProcessing(instr);
+    case ARM_3:    return dataProcessing(instr, regs.pc);
     case ARM_4:    return psrTransfer(instr);
     case ARM_5:    return multiply(instr);
     case ARM_6:    return multiplyLong(instr);
@@ -409,6 +409,8 @@ std::string Disassembler::loadStoreSpRelative(u16 instr)
 
 std::string Disassembler::loadAddress(u16 instr, u32 pc)
 {
+    // No ADR, use =newpc
+
     bool sp = (instr >> 11) & 0x1;
     int rd = (instr >> 8) & 0x7;
     int offset = instr & 0xFF;
@@ -520,7 +522,7 @@ std::string Disassembler::conditionalBranch(u16 instr, u32 pc)
 
 std::string Disassembler::softwareInterruptThumb(u16 instr)
 {
-    return std::string();  // Todo: implement
+    return "unimplemented thumb swi";
 }
 
 std::string Disassembler::unconditionalBranch(u16 instr, u32 pc)
@@ -559,36 +561,41 @@ std::string Disassembler::longBranchLink(u16 instr, u32 lr)
 
 std::string Disassembler::shiftedRegister(int data)
 {
-	int shift_type = (data >> 5) & 0x3;
-	int use_reg    = (data >> 4) & 0x1;
+    int type    = (data >> 5) & 0x3;
+    int use_reg = (data >> 4) & 0x1;
+    int rm      = (data >> 0) & 0xF;
 
     std::string result;
-
-    switch (shift_type)
+    result.reserve(15);
+    result.append(reg(rm, true));
+    switch (type)
     {
-    case 0b00: result = "lsl "; break;
-    case 0b01: result = "lsr "; break;
-    case 0b10: result = "asr "; break;
-    case 0b11: result = "ror "; break;
+    case 0b00: result.append("lsl "); break;
+    case 0b01: result.append("lsr "); break;
+    case 0b10: result.append("asr "); break;
+    case 0b11: result.append("ror "); break;
     }
 
     if (use_reg)
     {
-		int reg_offset = (data >> 8) & 0xF;
-        result.append(reg(reg_offset, false));
+		int rs = (data >> 8) & 0xF;
+        result.append(reg(rs, false));
     }
     else
     {
         int offset = (data >> 7) & 0x1F;
-        result.append(hex(offset));
+        if (offset != 0)
+            result.append(hex(offset));
+        else
+            result.pop_back();
     }
     return result;
 }
 
-std::string Disassembler::rotatedImmediate(int data)
+u32 Disassembler::rotatedImmediate(int data)
 {
-    int rotation = (data >> 8) & 0xF;
-    int value    = data & 0xFF;
+    int rotation = (data >> 8) & 0x0F;
+    u32 value    = (data >> 0) & 0xFF;
 
     rotation <<= 1;
     rotation %= 32;
@@ -596,73 +603,111 @@ std::string Disassembler::rotatedImmediate(int data)
     if (rotation != 0)
         value = (value << (32 - rotation)) | (value >> rotation);
 
-    return hex(value);
+    return value;
 }
 
 std::string Disassembler::branchExchange(u32 instr)
 {
-    int reg_addr = instr & 0xF;
+    int rn = (instr >> 0) & 0xF;
 
-    std::string mnemonic = "bx";
+    std::string cond = conditionString(instr);
+    std::string addr = reg(rn, false);
 
-    mnemonic.append(conditionString(instr));
+    std::string mnemonic;
+    mnemonic.reserve(30);
+    mnemonic.append("bx");
+    mnemonic.append(cond);
     mnemonicPad(mnemonic);
-    mnemonic.append(reg(reg_addr, false));
+    mnemonic.append(addr);
 
     return mnemonic;
 }
 
 std::string Disassembler::branchLink(u32 instr, u32 pc)
 {
-    int link   = (instr >> 24) & 0x1;
-    int offset = instr & 0xFFFFFF;
+    int link   = (instr >> 24) & 0x000001;
+    int offset = (instr >>  0) & 0xFFFFFF;
 
     offset = twos<24>(offset);
     offset <<= 2;
 
-    std::string mnemonic = link ? "bl" : "b";
+    std::string cond = conditionString(instr);
+    std::string addr = hex(pc + offset);
 
-    mnemonic.append(conditionString(instr));
+    std::string mnemonic;
+    mnemonic.reserve(30);
+    mnemonic.append(link ? "bl" : "b");
+    mnemonic.append(cond);
     mnemonicPad(mnemonic);
-    mnemonic.append(hex(pc + offset));
+    mnemonic.append(addr);
 
     return mnemonic;
 }
 
-std::string Disassembler::dataProcessing(u32 instr)
+std::string Disassembler::dataProcessing(u32 instr, u32 pc)
 {
-    int use_imm   = (instr >> 25) & 0x1;
-    int opcode	  = (instr >> 21) & 0xF;
-    int set_flags = (instr >> 20) & 0x1;
-    int reg_op1   = (instr >> 16) & 0xF;
-    int reg_dst   = (instr >> 12) & 0xF;
-    int data      = instr & 0xFFF;
+    int use_imm = (instr >> 25) & 0x001;
+    int opcode  = (instr >> 21) & 0x00F;
+    int flags   = (instr >> 20) & 0x001;
+    int rn      = (instr >> 16) & 0x00F;
+    int rd      = (instr >> 12) & 0x00F;
+    int data    = (instr >>  0) & 0xFFF;
 
+    std::string dst = reg(rd, true);
+    std::string op1 = reg(rn, true);
     std::string op2;
+
     if (use_imm)
-        op2 = rotatedImmediate(data);
+    {
+        u32 value = rotatedImmediate(data);
+
+        if (rn == 15)
+        {
+            switch (opcode)
+            {
+            case 0b0010:
+                op2 = "=" + hex(pc - value);
+                break;
+
+            case 0b0100:
+                op2 = "=" + hex(pc + value);
+                break;
+
+            default:
+                op2 = hex(value);
+                break;
+            }
+        }
+        else
+        {
+            op2 = hex(value);
+        }
+    }
     else
+    {
         op2 = shiftedRegister(data);
+    }
 
     std::string mnemonic;
+    mnemonic.reserve(30);
     switch (opcode)
     {
-    case 0b0000: mnemonic = "and"; break;
-    case 0b0001: mnemonic = "eor"; break;
-    case 0b0010: mnemonic = "sub"; break;
-    case 0b0011: mnemonic = "rsb"; break;
-    case 0b0100: mnemonic = "add"; break;
-    case 0b0101: mnemonic = "adc"; break;
-    case 0b0110: mnemonic = "sbc"; break;
-    case 0b0111: mnemonic = "rbc"; break;
-    case 0b1000: mnemonic = "tst"; break;
-    case 0b1001: mnemonic = "teq"; break;
-    case 0b1010: mnemonic = "cmp"; break;
-    case 0b1011: mnemonic = "cmn"; break;
-    case 0b1100: mnemonic = "orr"; break;
-    case 0b1101: mnemonic = "mov"; break;
-    case 0b1110: mnemonic = "bic"; break;
-    case 0b1111: mnemonic = "mvn"; break;
+    case 0b0000: mnemonic.append("and"); break;
+    case 0b0001: mnemonic.append("eor"); break;
+    case 0b0010: mnemonic.append("sub"); break;
+    case 0b0011: mnemonic.append("rsb"); break;
+    case 0b0100: mnemonic.append("add"); break;
+    case 0b0101: mnemonic.append("adc"); break;
+    case 0b0110: mnemonic.append("sbc"); break;
+    case 0b0111: mnemonic.append("rbc"); break;
+    case 0b1000: mnemonic.append("tst"); break;
+    case 0b1001: mnemonic.append("teq"); break;
+    case 0b1010: mnemonic.append("cmp"); break;
+    case 0b1011: mnemonic.append("cmn"); break;
+    case 0b1100: mnemonic.append("orr"); break;
+    case 0b1101: mnemonic.append("mov"); break;
+    case 0b1110: mnemonic.append("bic"); break;
+    case 0b1111: mnemonic.append("mvn"); break;
     }
 
     mnemonic.append(conditionString(instr));
@@ -676,7 +721,7 @@ std::string Disassembler::dataProcessing(u32 instr)
         break;
 
     default:
-        if (set_flags)
+        if (flags)
             mnemonic.append("s");
         break;
     }
@@ -685,23 +730,31 @@ std::string Disassembler::dataProcessing(u32 instr)
 
     switch (opcode)
     {
+    case 0b0010:
+    case 0b0100:
+        mnemonic.append(dst);
+        if (rn != 15 || !use_imm)
+            mnemonic.append(op1);
+        mnemonic.append(op2);
+        break;
+
     case 0b1000:
     case 0b1001:
     case 0b1010:
     case 0b1011:
-        mnemonic.append(reg(reg_op1, true));
+        mnemonic.append(reg(rn, true));
         mnemonic.append(op2);
         break;
 
     case 0b1101:
     case 0b1111:
-        mnemonic.append(reg(reg_dst, true));
+        mnemonic.append(reg(rd, true));
         mnemonic.append(op2);
         break;
 
     default:
-        mnemonic.append(reg(reg_dst, true));
-        mnemonic.append(reg(reg_op1, true));
+        mnemonic.append(reg(rd, true));
+        mnemonic.append(reg(rn, true));
         mnemonic.append(op2);
         break;
     }
@@ -740,7 +793,7 @@ std::string Disassembler::psrTransfer(u32 instr)
         if (use_imm)
         {
             int data = instr & 0xFFF;
-            mnemonic.append(rotatedImmediate(data));
+            mnemonic.append(hex(rotatedImmediate(data)));
         }
         else
         {
@@ -968,4 +1021,9 @@ std::string Disassembler::singleDataSwap(u32 instr)
     mnemonic.append("]");
 
     return mnemonic;
+}
+
+std::string Disassembler::swiArm(u32 instr)
+{
+    return "unimplemented thumb arm";
 }

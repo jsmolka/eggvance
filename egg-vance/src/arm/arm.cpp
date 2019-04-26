@@ -43,7 +43,7 @@ int ARM::step()
 		mmu.writeHalf(REG_DISPSTAT, 0);
     
     #ifdef _DEBUG
-    u32 breakpoint = 0x80010EC;
+    u32 breakpoint = 0x8000998;
     if (breakpoint == pc)
         breakpoint = breakpoint;
     #endif

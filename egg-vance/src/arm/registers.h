@@ -23,7 +23,7 @@ public:
 
     bool check(Condition condition) const;
 
-    u32 operator[](int index) const;
+    u32  operator[](int index) const;
     u32& operator[](int index);
 
 private:

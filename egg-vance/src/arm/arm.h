@@ -41,6 +41,7 @@ private:
 
     void logical(u32 result);
     void logical(u32 result, bool carry);
+    // Todo: addition and subtraction? :)
     void arithmetic(u32 op1, u32 op2, bool addition);
 
     u32 lsl(u32 value, int offset, bool& carry);

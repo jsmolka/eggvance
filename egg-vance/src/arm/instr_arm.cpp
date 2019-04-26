@@ -48,7 +48,7 @@ u32 ARM::shiftedRegister(int data, bool& carry)
 u32 ARM::rotatedImmediate(int data, bool& carry)
 {
     int rotation = (data >> 8) & 0x0F;
-    int value    = (data >> 0) & 0xFF;
+    u32 value    = (data >> 0) & 0xFF;
 
     // Apply twice the rotation
     rotation <<= 1;
@@ -65,6 +65,7 @@ void ARM::branchExchange(u32 instr)
     if (addr & 0x1)
     {
         addr = alignHalf(addr);
+        // Change instruction set
         regs.setThumb(true);
     }
     else
@@ -107,7 +108,7 @@ void ARM::dataProcessing(u32 instr)
 {
     int use_imm = (instr >> 25) & 0x001;
     int opcode  = (instr >> 21) & 0x00F;
-    int flags   = (instr >> 20) & 0x00F;
+    int flags   = (instr >> 20) & 0x001;
     int rn      = (instr >> 16) & 0x00F;
     int rd      = (instr >> 12) & 0x00F;
     int data    = (instr >>  0) & 0xFFF;
@@ -133,7 +134,6 @@ void ARM::dataProcessing(u32 instr)
         if (use_reg)
         {
             int rs = (data >> 8) & 0xF;
-
             offset = regs[rs];
             offset &= 0xFF;
 
@@ -163,8 +163,9 @@ void ARM::dataProcessing(u32 instr)
 
         if (flags)
         {
+            // Move SPSR into CPSR
             u32 spsr = regs.spsr;
-            regs.switchMode(static_cast<Mode>(spsr & 0x1F));
+            regs.switchMode(static_cast<Mode>(spsr & CPSR_M));
             regs.cpsr = spsr;
 
             flags = false;

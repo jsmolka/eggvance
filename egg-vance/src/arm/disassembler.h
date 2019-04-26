@@ -40,11 +40,11 @@ private:
     static std::string longBranchLink(u16 instr, u32 lr);
 
     static std::string shiftedRegister(int data);
-    static std::string rotatedImmediate(int data);
+    static u32 rotatedImmediate(int data);
 
     static std::string branchExchange(u32 instr);
     static std::string branchLink(u32 instr, u32 pc);
-    static std::string dataProcessing(u32 instr);
+    static std::string dataProcessing(u32 instr, u32 pc);
     static std::string psrTransfer(u32 instr);
     static std::string multiply(u32 instr);
     static std::string multiplyLong(u32 instr);
@@ -52,4 +52,5 @@ private:
     static std::string halfSignedDataTransfer(u32 instr);
     static std::string blockDataTransfer(u32 instr);
     static std::string singleDataSwap(u32 instr);
+    static std::string swiArm(u32 instr);
 };
