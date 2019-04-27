@@ -1,13 +1,13 @@
 #include "arm.h"
 
 #include <array>
-#include <iostream>
 
+#include "common/format.h"
+#include "common/memory_map.h"
 #include "enums.h"
 #include "disassembler.h"
 #include "utility.h"
 
-#include "common/memory_map.h"
 
 ARM::ARM(MMU& mmu)
     : mmu(mmu)
@@ -43,7 +43,7 @@ int ARM::step()
 		mmu.writeHalf(REG_DISPSTAT, 0);
     
     #ifdef _DEBUG
-    u32 breakpoint = 0x8000998;
+    u32 breakpoint = 0x080013C8;
     if (breakpoint == pc)
         breakpoint = breakpoint;
     #endif
@@ -63,10 +63,11 @@ void ARM::debug()
     if (pipe[2].format == FMT_REFILL)
         return;
     
-    std::printf("%08X  ", regs.pc - (regs.arm() ? 8 : 4));
-    std::printf("%08X  ", pipe[2].instr);
-    
-    std::cout << Disassembler::disassemble(pipe[2].instr, pipe[2].format, regs) << "\n";
+    fmt::printf("%08X  %08X  %s\n",
+        regs.pc - (regs.arm() ? 8 : 4),
+        pipe[2].instr,
+        Disassembler::disassemble(pipe[2].instr, pipe[2].format, regs)
+    );
 }
 
 void ARM::flush()

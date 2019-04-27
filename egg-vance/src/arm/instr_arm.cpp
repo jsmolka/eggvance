@@ -1,17 +1,6 @@
 #include "arm.h"
 
-/**
- * Todo
- * - PC + 12 in transfers (str, strh)
- * - Block Transfer might not be 100% corrent (with base register position in rlist)
- * - PSR access rights in different modes
- * - empty register list
- * - ldr into PC (flush, align, etc)
- * - ldr(h) into PC
- */
-
-#include <iostream>
-
+#include "common/format.h"
 #include "utility.h"
 
 u32 ARM::shiftedRegister(int data, bool& carry)
@@ -311,20 +300,25 @@ void ARM::psrTransfer(u32 instr)
         }
         else
         {
-            int rm = (instr >> 0) & 0xF;
+            int rm = (data >> 0) & 0xF;
             op = regs[rm];
         }
 
         // Mask based on fsxc-bits
         u32 mask = 0;
-        if (instr & (1 << 16))
-            mask |= 0x000000FF;
-        if (instr & (1 << 17))
-            mask |= 0x0000FF00;
-        if (instr & (1 << 18))
-            mask |= 0x00FF0000;
         if (instr & (1 << 19))
             mask |= 0xFF000000;
+        if (instr & (1 << 18))
+            mask |= 0x00FF0000;
+        if (instr & (1 << 17))
+            mask |= 0x0000FF00;
+
+        if (instr & (1 << 16))
+        {
+            // Control bits are protected in USR mode
+            if (regs.mode() != MODE_USR)
+                mask |= 0x000000FF;
+        }
 
         op &= mask;
 
@@ -334,13 +328,12 @@ void ARM::psrTransfer(u32 instr)
         }
         else
         {
-            // Switch mode if control bit is set
             if (mask & 0xFF)
-                regs.switchMode(static_cast<Mode>(op & 0x1F));
+                regs.switchMode(static_cast<Mode>(op & CPSR_M));
 
             regs.cpsr = (regs.cpsr & ~mask) | op;
 
-            // Technically undefined behavior
+            // Undefined behavior
             if (regs.thumb())
             {
                 regs.pc = alignHalf(regs.pc);
@@ -415,8 +408,8 @@ void ARM::multiplyLong(u32 instr)
     if (accumulate)
         result += (static_cast<u64>(dsthi) << 32) | dstlo;
 
-    dsthi = result >> 32;
-    dstlo = result & 0xFFFFFFFF;
+    dsthi = static_cast<u32>(result >> 32);
+    dstlo = static_cast<u32>(result);
 
     if (flags)
     {
@@ -492,8 +485,9 @@ void ARM::singleTransfer(u32 instr)
     }
     else
     {
+        u32 value = dst;
         // Account for prefetch
-        u32 value = dst + (rd == 15 ? 4 : 0);
+        if (rd == 15) value += 4;
 
         if (byte)
             mmu.writeByte(addr, static_cast<u8>(value));
@@ -511,11 +505,11 @@ void ARM::singleTransfer(u32 instr)
             addr -= offset;
     }
 
+    // Post-indexing always writes back
     if (writeback || !pre_index)
     {
-        if (rd == rn)
-            regs[rn] = dst;
-        else
+        // Prevent overwriting the loaded value
+        if (!load || rd != rn)
             regs[rn] = addr;
     }
 }
@@ -600,8 +594,9 @@ void ARM::halfSignedTransfer(u32 instr)
     }
     else
     {
+        u32 value = dst;
         // Account for prefetch
-        u32 value = dst + (rd == 15 ? 4 : 0);
+        if (rd == 15) value += 4;
 
         if (half)
             mmu.writeHalf(alignHalf(addr), static_cast<u16>(value));
@@ -617,11 +612,11 @@ void ARM::halfSignedTransfer(u32 instr)
             addr -= offset;
     }
 
+    // Post-indexing always writes back
     if (writeback || !pre_index)
     {
-        if (rn == rd)
-            regs[rn] = dst;
-        else
+        // Prevent overwriting the loaded value
+        if (!load || rd != rn)
             regs[rn] = addr;
     }
 }
@@ -674,6 +669,10 @@ void ARM::blockTransfer(u32 instr)
                     if (x == 15)
                         cycle(regs.pc + 4, NONSEQ);
 
+                    // No writeback if base register is also loaded
+                    if (x == rn)
+                        writeback = false;
+
                     regs[x] = mmu.readWord(alignWord(addr));
 
                     if (x == 15)
@@ -685,11 +684,27 @@ void ARM::blockTransfer(u32 instr)
                     }
 
                     if (!full) addr += step;
+
+                    if (writeback)
+                        regs[rn] = addr;
                 }
             }
         }
         else
         {
+            int first = 0;
+            for (int x = 0; x < 16; ++x)
+            {
+                if (rlist & (1 << x))
+                {
+                    first = x;
+                    break;
+                }
+            }
+
+            // Save base address for later
+            u32 base = addr;
+
             for (int x = init; rcount > 0; x += loop)
             {
                 if (rlist & (1 << x))
@@ -699,9 +714,17 @@ void ARM::blockTransfer(u32 instr)
                     if (--rcount > 0)
                         cycle(addr, SEQ);
 
-                    mmu.writeWord(alignWord(addr), regs[x]);
+                    if (x == rn && x == first)
+                        mmu.writeWord(alignWord(addr), base);
+                    else
+                        mmu.writeWord(alignWord(addr), regs[x]);
 
                     if (!full) addr += step;
+
+                    first = false;
+
+                    if (writeback)
+                        regs[rn] = addr;
                 }
             }
         }
@@ -720,10 +743,10 @@ void ARM::blockTransfer(u32 instr)
             mmu.writeWord(alignWord(addr), regs.pc);
         }
         addr += ascending ? 0x40 : -0x40;
-    }
 
-    if (writeback)
-        regs[rn] = addr;
+        if (writeback)
+            regs[rn] = addr;
+    }
 
     if (user)
         regs.switchMode(mode);
@@ -762,5 +785,5 @@ void ARM::singleSwap(u32 instr)
 // ARM 11
 void ARM::swiArm(u32 instr)
 {
-    std::cout << "Unimplemented ARM SWI\n";
+    fmt::print("Unimplemented ARM SWI\n");
 }

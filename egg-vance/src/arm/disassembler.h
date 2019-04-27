@@ -15,9 +15,10 @@ private:
     static void mnemonicPad(std::string& mnemonic);
 
     static std::string reg(int number, bool comma);
+    static std::string reg(int number);
     static std::string hex(u32 value);
-    static std::string rlistString(int rlist);
-    static std::string conditionString(u32 instr);
+    static std::string list(int rlist);
+    static std::string cond(u32 instr);
 
     static std::string moveShiftedRegister(u16 instr);
     static std::string addSubImmediate(u16 instr);
@@ -48,8 +49,8 @@ private:
     static std::string psrTransfer(u32 instr);
     static std::string multiply(u32 instr);
     static std::string multiplyLong(u32 instr);
-    static std::string singleDataTransfer(u32 instr);
-    static std::string halfSignedDataTransfer(u32 instr);
+    static std::string singleTransfer(u32 instr);
+    static std::string halfSignedTransfer(u32 instr);
     static std::string blockDataTransfer(u32 instr);
     static std::string singleDataSwap(u32 instr);
     static std::string swiArm(u32 instr);

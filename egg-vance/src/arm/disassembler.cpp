@@ -1,12 +1,6 @@
 #include "disassembler.h"
 
-/**
- * Todo
- * - adr in data processing
- */
-
-#include <iomanip>
-#include <sstream>
+#include "common/format.h"
 
 #include "utility.h"
 
@@ -39,8 +33,8 @@ std::string Disassembler::disassemble(u32 instr, Format format, const Registers&
     case ARM_4:    return psrTransfer(instr);
     case ARM_5:    return multiply(instr);
     case ARM_6:    return multiplyLong(instr);
-    case ARM_7:    return singleDataTransfer(instr);
-    case ARM_8:    return halfSignedDataTransfer(instr);
+    case ARM_7:    return singleTransfer(instr);
+    case ARM_8:    return halfSignedTransfer(instr);
     case ARM_9:    return blockDataTransfer(instr);
     case ARM_10:   return singleDataSwap(instr);
     }
@@ -79,16 +73,30 @@ std::string Disassembler::reg(int number, bool comma)
     return result;
 }
 
-std::string Disassembler::hex(u32 value)
+std::string Disassembler::reg(int number)
 {
-    std::stringstream stream;
-
-    stream << std::uppercase << std::hex << value << std::nouppercase << "h";
-
-    return stream.str();
+    if (number <= 12)
+    {
+        return fmt::format("r{}", number);
+    }
+    else
+    {
+        switch (number)
+        {
+        case 13: return "sp";
+        case 14: return "lr";
+        case 15: return "pc";
+        }
+    }
+    return "r?";
 }
 
-std::string Disassembler::rlistString(int rlist)
+std::string Disassembler::hex(u32 value)
+{
+    return fmt::format("{:X}h", value);
+}
+
+std::string Disassembler::list(int rlist)
 {
     std::string result = "{";
 
@@ -106,7 +114,7 @@ std::string Disassembler::rlistString(int rlist)
     return result;
 }
 
-std::string Disassembler::conditionString(u32 instr)
+std::string Disassembler::cond(u32 instr)
 {
     switch (static_cast<Condition>(instr >> 28))
     {
@@ -124,7 +132,7 @@ std::string Disassembler::conditionString(u32 instr)
     case COND_LT: return "lt"; break;
     case COND_GT: return "gt"; break;
     case COND_LE: return "le"; break;
-    case COND_AL: return "";   break;
+    case COND_AL: return ""  ; break;
     case COND_NV: return "nv"; break;
     }
     return "??";
@@ -463,7 +471,7 @@ std::string Disassembler::pushPopRegisters(u16 instr)
     std::string mnemonic = pop ? "pop" : "push";
 
     mnemonicPad(mnemonic);
-    mnemonic.append(rlistString(rlist));
+    mnemonic.append(list(rlist));
 
     return mnemonic;
 }
@@ -479,7 +487,7 @@ std::string Disassembler::loadStoreMultiple(u16 instr)
     mnemonicPad(mnemonic);
     mnemonic.append(reg(rb, false));
     mnemonic.append("!,");
-    mnemonic.append(rlistString(rlist));
+    mnemonic.append(list(rlist));
 
     return mnemonic;
 }
@@ -565,31 +573,34 @@ std::string Disassembler::shiftedRegister(int data)
     int use_reg = (data >> 4) & 0x1;
     int rm      = (data >> 0) & 0xF;
 
-    std::string result;
-    result.reserve(15);
-    result.append(reg(rm, true));
+    std::string shift;
     switch (type)
     {
-    case 0b00: result.append("lsl "); break;
-    case 0b01: result.append("lsr "); break;
-    case 0b10: result.append("asr "); break;
-    case 0b11: result.append("ror "); break;
+    case 0b00: shift = "lsl"; break;
+    case 0b01: shift = "lsr"; break;
+    case 0b10: shift = "asr"; break;
+    case 0b11: shift = "ror"; break;
     }
-
+    
+    std::string offset;
     if (use_reg)
     {
-		int rs = (data >> 8) & 0xF;
-        result.append(reg(rs, false));
+        int rs = (data >> 8) & 0xF;
+        offset = reg(rs);
     }
     else
     {
-        int offset = (data >> 7) & 0x1F;
-        if (offset != 0)
-            result.append(hex(offset));
-        else
-            result.pop_back();
+        int imm = (data >> 7) & 0x1F;
+        if (imm == 0)
+            return reg(rm);
+        offset = hex(imm);
     }
-    return result;
+    
+    return fmt::format("{},{} {}",
+        reg(rm),
+        shift,
+        offset
+    );
 }
 
 u32 Disassembler::rotatedImmediate(int data)
@@ -610,17 +621,10 @@ std::string Disassembler::branchExchange(u32 instr)
 {
     int rn = (instr >> 0) & 0xF;
 
-    std::string cond = conditionString(instr);
-    std::string addr = reg(rn, false);
-
-    std::string mnemonic;
-    mnemonic.reserve(30);
-    mnemonic.append("bx");
-    mnemonic.append(cond);
-    mnemonicPad(mnemonic);
-    mnemonic.append(addr);
-
-    return mnemonic;
+    return fmt::format("{:<8}{}",
+        "bx" + cond(instr),
+        reg(rn)
+    );
 }
 
 std::string Disassembler::branchLink(u32 instr, u32 pc)
@@ -631,17 +635,10 @@ std::string Disassembler::branchLink(u32 instr, u32 pc)
     offset = twos<24>(offset);
     offset <<= 2;
 
-    std::string cond = conditionString(instr);
-    std::string addr = hex(pc + offset);
-
-    std::string mnemonic;
-    mnemonic.reserve(30);
-    mnemonic.append(link ? "bl" : "b");
-    mnemonic.append(cond);
-    mnemonicPad(mnemonic);
-    mnemonic.append(addr);
-
-    return mnemonic;
+    return fmt::format("{:<8}{}",
+        (link ? "bl" : "b") + cond(instr),
+        hex(pc + offset)
+    );
 }
 
 std::string Disassembler::dataProcessing(u32 instr, u32 pc)
@@ -653,30 +650,17 @@ std::string Disassembler::dataProcessing(u32 instr, u32 pc)
     int rd      = (instr >> 12) & 0x00F;
     int data    = (instr >>  0) & 0xFFF;
 
-    std::string dst = reg(rd, true);
-    std::string op1 = reg(rn, true);
     std::string op2;
-
     if (use_imm)
     {
         u32 value = rotatedImmediate(data);
 
-        if (rn == 15)
+        if (rn == 15 && (opcode == 0b0010 || opcode == 0b0100))
         {
-            switch (opcode)
-            {
-            case 0b0010:
-                op2 = "=" + hex(pc - value);
-                break;
-
-            case 0b0100:
-                op2 = "=" + hex(pc + value);
-                break;
-
-            default:
-                op2 = hex(value);
-                break;
-            }
+            if (opcode == 0b0010)
+                op2 = hex(pc - value);
+            else
+                op2 = hex(pc + value);
         }
         else
         {
@@ -689,77 +673,93 @@ std::string Disassembler::dataProcessing(u32 instr, u32 pc)
     }
 
     std::string mnemonic;
-    mnemonic.reserve(30);
+    mnemonic.reserve(7);
     switch (opcode)
     {
-    case 0b0000: mnemonic.append("and"); break;
-    case 0b0001: mnemonic.append("eor"); break;
-    case 0b0010: mnemonic.append("sub"); break;
-    case 0b0011: mnemonic.append("rsb"); break;
-    case 0b0100: mnemonic.append("add"); break;
-    case 0b0101: mnemonic.append("adc"); break;
-    case 0b0110: mnemonic.append("sbc"); break;
-    case 0b0111: mnemonic.append("rbc"); break;
-    case 0b1000: mnemonic.append("tst"); break;
-    case 0b1001: mnemonic.append("teq"); break;
-    case 0b1010: mnemonic.append("cmp"); break;
-    case 0b1011: mnemonic.append("cmn"); break;
-    case 0b1100: mnemonic.append("orr"); break;
-    case 0b1101: mnemonic.append("mov"); break;
-    case 0b1110: mnemonic.append("bic"); break;
-    case 0b1111: mnemonic.append("mvn"); break;
+    case 0b0000: mnemonic = "and"; break;
+    case 0b0001: mnemonic = "eor"; break;
+    case 0b0010: mnemonic = "sub"; break;
+    case 0b0011: mnemonic = "rsb"; break;
+    case 0b0100: mnemonic = "add"; break;
+    case 0b0101: mnemonic = "adc"; break;
+    case 0b0110: mnemonic = "sbc"; break;
+    case 0b0111: mnemonic = "rbc"; break;
+    case 0b1000: mnemonic = "tst"; break;
+    case 0b1001: mnemonic = "teq"; break;
+    case 0b1010: mnemonic = "cmp"; break;
+    case 0b1011: mnemonic = "cmn"; break;
+    case 0b1100: mnemonic = "orr"; break;
+    case 0b1101: mnemonic = "mov"; break;
+    case 0b1110: mnemonic = "bic"; break;
+    case 0b1111: mnemonic = "mvn"; break;
     }
 
-    mnemonic.append(conditionString(instr));
+    mnemonic.append(cond(instr));
 
-    switch (opcode)
+    if (flags)
     {
-    case 0b1000:
-    case 0b1001:
-    case 0b1010:
-    case 0b1011:
-        break;
+        switch (opcode)
+        {
+        case 0b1000:  // TST
+        case 0b1001:  // TEQ
+        case 0b1010:  // CMP
+        case 0b1011:  // CMN
+            break;
 
-    default:
-        if (flags)
+        default:
             mnemonic.append("s");
-        break;
+            break;
+        }
     }
-
-    mnemonicPad(mnemonic);
 
     switch (opcode)
     {
-    case 0b0010:
-    case 0b0100:
-        mnemonic.append(dst);
-        if (rn != 15 || !use_imm)
-            mnemonic.append(op1);
-        mnemonic.append(op2);
-        break;
+    case 0b0010:  // SUB
+    case 0b0100:  // ADD
+        if (use_imm && rn == 15)
+        {
+            return fmt::format("{:<8}{},={}",
+                mnemonic,
+                reg(rd),
+                op2
+            );
+        }
+        else
+        {
+            return fmt::format("{:<8}{},{},{}",
+                mnemonic,
+                reg(rd),
+                reg(rn),
+                op2
+            );
+        }
 
-    case 0b1000:
-    case 0b1001:
-    case 0b1010:
-    case 0b1011:
-        mnemonic.append(reg(rn, true));
-        mnemonic.append(op2);
-        break;
+    case 0b1000:  // TST
+    case 0b1001:  // TEQ
+    case 0b1010:  // CMP
+    case 0b1011:  // CMN
+        return fmt::format("{:<8}{},{}",
+            mnemonic,
+            reg(rn),
+            op2
+        );
 
-    case 0b1101:
-    case 0b1111:
-        mnemonic.append(reg(rd, true));
-        mnemonic.append(op2);
-        break;
+    case 0b1101:  // MOV
+    case 0b1111:  // MVN
+        return fmt::format("{:<8}{},{}",
+            mnemonic,
+            reg(rd),
+            op2
+        );
 
     default:
-        mnemonic.append(reg(rd, true));
-        mnemonic.append(reg(rn, true));
-        mnemonic.append(op2);
-        break;
+        return fmt::format("{:<8}{},{},{}",
+            mnemonic,
+            reg(rd),
+            reg(rn),
+            op2
+        );
     }
-
-    return mnemonic;
 }
 
 std::string Disassembler::psrTransfer(u32 instr)
@@ -767,86 +767,101 @@ std::string Disassembler::psrTransfer(u32 instr)
     int write    = (instr >> 21) & 0x1;
     int use_spsr = (instr >> 22) & 0x1;
 
-    std::string mnemonic = write ? "msr" : "mrs";
-
-    mnemonic.append(conditionString(instr));
-    mnemonicPad(mnemonic);
-
     if (write)
     {
-		int use_imm = (instr >> 25) & 0x1;
-		int data    = instr & 0xFFF;
+		int use_imm = (instr >> 25) & 0x001;
+		int data    = (instr >>  0) & 0xFFF;
 
-        mnemonic.append(use_spsr ? "spsr_" : "cpsr_");
-
-        if (instr & (1 << 19))
-            mnemonic.append("f");
-        if (instr & (1 << 18))
-            mnemonic.append("s");
-        if (instr & (1 << 17))
-            mnemonic.append("x");
-        if (instr & (1 << 16))
-            mnemonic.append("c");
-
-        mnemonic.append(",");
-
+        std::string op;
         if (use_imm)
         {
-            int data = instr & 0xFFF;
-            mnemonic.append(hex(rotatedImmediate(data)));
+            op = hex(rotatedImmediate(data));
         }
         else
         {
-            int reg_op = instr & 0xF;
-            mnemonic.append(reg(reg_op, false));
+            int rm = (data >> 0) & 0xF;
+            op = reg(rm);
         }
+
+        std::string fsxc;
+        fsxc.reserve(5);
+        if (instr & (1 << 19))
+            fsxc.append("f");
+        if (instr & (1 << 18))
+            fsxc.append("s");
+        if (instr & (1 << 17))
+            fsxc.append("x");
+        if (instr & (1 << 16))
+            fsxc.append("c");
+
+        return fmt::format("{:<8}{}_{},{}",
+            "msr" + cond(instr),
+            use_spsr ? "spsr" : "cpsr",
+            fsxc,
+            op
+        );
     }
     else
     {
-        int reg_dst = (instr >> 12) & 0xF;
-        mnemonic.append(reg(reg_dst, true));
-        mnemonic.append(use_spsr ? "spsr" : "cpsr");
+        int rd = (instr >> 12) & 0xF;
+
+        return fmt::format("{:<8}{},{}", 
+            "mrs" + cond(instr),
+            reg(rd),
+            use_spsr ? "spsr" : "cpsr"
+        );
     }
-    return mnemonic;
 }
 
 std::string Disassembler::multiply(u32 instr)
 {
-	int accumulate = (instr >> 21) & 0x1;
-	int set_flags  = (instr >> 20) & 0x1;;
-	int reg_dst    = (instr >> 16) & 0xF;
-	int reg_acc    = (instr >> 12) & 0xF;
-	int reg_op1    = (instr >> 8) & 0xF;;
-	int reg_op2    = instr & 0xF;
+    int accumulate = (instr >> 21) & 0x1;
+    int flags      = (instr >> 20) & 0x1;
+    int rd         = (instr >> 16) & 0xF;
+    int rn         = (instr >> 12) & 0xF;
+    int rs         = (instr >>  8) & 0xF;
+    int rm         = (instr >>  0) & 0xF;
 
-    std::string mnemonic = accumulate ? "mla" : "mul";
-    
-    mnemonic.append(conditionString(instr));
-    if (set_flags)
+    std::string mnemonic;
+    mnemonic.reserve(7);
+    mnemonic = accumulate ? "mla" : "mul";
+    mnemonic.append(cond(instr));
+    if (flags)
         mnemonic.append("s");
-    mnemonicPad(mnemonic);
-    mnemonic.append(reg(reg_dst, true));
-    mnemonic.append(reg(reg_op1, true));
-    mnemonic.append(reg(reg_op2, accumulate));
 
     if (accumulate)
-        mnemonic.append(reg(reg_acc, false));
-
-    return mnemonic;
+    {
+        return fmt::format("{:<8}{},{},{},{}",
+            mnemonic,
+            reg(rd),
+            reg(rn),
+            reg(rs),
+            reg(rm)
+        );
+    }
+    else
+    {
+        return fmt::format("{:<8}{},{},{}",
+            mnemonic,
+            reg(rd),
+            reg(rn),
+            reg(rs)
+        );
+    }
 }
 
 std::string Disassembler::multiplyLong(u32 instr)
 {
-	int sign	   = (instr >> 22) & 0x1;
-	int accumulate = (instr >> 21) & 0x1;
-	int set_flags  = (instr >> 20) & 0x1;
-	int reg_dsthi  = (instr >> 16) & 0xF;
-	int reg_dstlo  = (instr >> 12) & 0xF;
-	int reg_op1    = (instr >> 8) & 0xF;
-	int reg_op2    = instr & 0xF;
+    int sign       = (instr >> 22) & 0x1;
+    int accumulate = (instr >> 21) & 0x1;
+    int flags      = (instr >> 20) & 0x1;
+    int rdhi       = (instr >> 16) & 0xF;
+    int rdlo       = (instr >> 12) & 0xF;
+    int rs         = (instr >> 8) & 0xF;
+    int rm         = (instr >> 0) & 0xF;
 
     std::string mnemonic;
-
+    mnemonic.reserve(9);
     switch ((sign << 1) | accumulate)
     {
     case 0b00: mnemonic = "umull"; break;
@@ -854,173 +869,182 @@ std::string Disassembler::multiplyLong(u32 instr)
     case 0b10: mnemonic = "smull"; break;
     case 0b11: mnemonic = "smlal"; break;
     }
-
-    mnemonic.append(conditionString(instr));
-    if (set_flags)
+    mnemonic.append(cond(instr));
+    if (flags)
         mnemonic.append("s");
-    mnemonicPad(mnemonic);
-    mnemonic.append(reg(reg_dstlo, true));
-    mnemonic.append(reg(reg_dsthi, true));
-    mnemonic.append(reg(reg_op1, true));
-    mnemonic.append(reg(reg_op2, false));
 
-    return mnemonic;
+    return fmt::format("{:<8}{},{},{},{}",
+        mnemonic,
+        reg(rdlo),
+        reg(rdhi),
+        reg(rs),
+        reg(rm)
+    );
 }
 
-std::string Disassembler::singleDataTransfer(u32 instr)
+std::string Disassembler::singleTransfer(u32 instr)
 {
-    bool use_reg = (instr >> 25) & 0x1;
-    bool pre_indexing = (instr >> 24) & 0x1;
-    bool increment = (instr >> 23) & 0x1;
-    int byte = (instr >> 22) & 0x1;
-    bool writeback = (instr >> 21) & 0x1;
-    int load = (instr >> 20) & 0x1;
-    int rn = (instr >> 16) & 0xF;
-    int rd = (instr >> 12) & 0xF;
+    int use_reg   = (instr >> 25) & 0x001;
+    int pre_index = (instr >> 24) & 0x001;
+    int increment = (instr >> 23) & 0x001;
+    int byte      = (instr >> 22) & 0x001;
+    int writeback = (instr >> 21) & 0x001;
+    int load      = (instr >> 20) & 0x001;
+    int rn        = (instr >> 16) & 0x00F;
+    int rd        = (instr >> 12) & 0x00F;
+    int data      = (instr >>  0) & 0xFFF;
 
     std::string offset;
     if (use_reg)
-        offset = shiftedRegister(instr & 0xFFF);
+        offset = hex(data);
     else
-        offset = hex(instr & 0xFFF);
+        offset = shiftedRegister(data);
 
-    std::string mnemonic;
+    std::string mnemonic = fmt::format("{}{}{}",
+        load ? "ldr" : "str",
+        cond(instr),
+        byte ? "b" : ""
+    );
 
-    switch (load << 1 | byte)
+    if (pre_index)
     {
-    case 0b00: mnemonic = "str";  break;
-    case 0b01: mnemonic = "strb"; break;
-    case 0b10: mnemonic = "ldr";  break;
-    case 0b11: mnemonic = "ldrb"; break;
-    }
-
-    mnemonic.append(conditionString(instr));
-    mnemonicPad(mnemonic);
-    mnemonic.append(reg(rd, true));
-    mnemonic.append("[");
-    mnemonic.append(reg(rn, pre_indexing));
-
-    if (pre_indexing)
-    {
-        mnemonic.append(offset);
-        mnemonic.append("]");
-        if (writeback)
-            mnemonic.append("!");
+        return fmt::format("{:<8}{},[{},{}]{}",
+            mnemonic,
+            reg(rd),
+            reg(rn),
+            offset,
+            writeback ? "!" : ""
+        );
     }
     else
     {
-        mnemonic.append("],");
-        mnemonic.append(offset);
+        return fmt::format("{:<8}{},[{}],{}",
+            mnemonic,
+            reg(rd),
+            reg(rn),
+            offset
+        );
     }
-    return mnemonic;
 }
 
-std::string Disassembler::halfSignedDataTransfer(u32 instr)
+std::string Disassembler::halfSignedTransfer(u32 instr)
 {
-    bool pre_indexing = (instr >> 24) & 0x1;
-    bool immediate = (instr >> 22) & 0x1;
-    bool increment = (instr >> 23) & 0x1;
-    bool writeback = (instr >> 21) & 0x1;
-    bool load = (instr >> 20) & 0x1;
-    int rn = (instr >> 16) & 0xF;
-    int rd = (instr >> 12) & 0xF;
-    int sign = (instr >> 6) & 0x1;
-    int half = (instr >> 5) & 0x1;
+    int pre_index = (instr >> 24) & 0x1;
+    int use_imm   = (instr >> 22) & 0x1;
+    int increment = (instr >> 23) & 0x1;
+    int writeback = (instr >> 21) & 0x1;
+    int load      = (instr >> 20) & 0x1;
+    int rn        = (instr >> 16) & 0xF;
+    int rd        = (instr >> 12) & 0xF;
+    int sign      = (instr >>  6) & 0x1;
+    int half      = (instr >>  5) & 0x1;
 
     std::string offset;
-    if (immediate)
+    if (use_imm)
     {
         int upper = (instr >> 8) & 0xF;
-        int lower = instr & 0xF;
+        int lower = (instr >> 0) & 0xF;
         offset = hex(upper << 4 | lower);
     }
     else
     {
-        int rm = instr & 0xF;
-        offset = reg(rm, false);
+        int rm = (instr >> 0) & 0xF;
+        offset = reg(rm);
     }
 
-    std::string mnemonic;
+    std::string mnemonic = fmt::format("{}{}{}{}",
+        load ? "ldr" : "str",
+        cond(instr),
+        sign ? "s" : "",
+        half ? "h" : "b"
+    );
 
-    switch (sign << 1 | half)
+    if (pre_index)
     {
-    case 0b00: mnemonic = "???"; break;
-    case 0b01: mnemonic = load ? "ldrh" : "strh"; break;
-    case 0b10: mnemonic = "ldrsb"; break;
-    case 0b11: mnemonic = "ldrsh"; break;
-    }
-
-    mnemonic.append(conditionString(instr));
-    mnemonicPad(mnemonic);
-    mnemonic.append(reg(rd, true));
-    mnemonic.append("[");
-    mnemonic.append(reg(rn, pre_indexing));
-
-    if (pre_indexing)
-    {
-        mnemonic.append(offset);
-        mnemonic.append("]");
-        if (writeback)
-            mnemonic.append("!");
+        return fmt::format("{:<8}{},[{},{}]{}",
+            mnemonic,
+            reg(rd),
+            reg(rn),
+            offset,
+            writeback ? "!" : ""
+        );
     }
     else
     {
-        mnemonic.append("],");
-        mnemonic.append(offset);
+        return fmt::format("{:<8}{},[{}],{}",
+            mnemonic,
+            reg(rd),
+            reg(rn),
+            offset
+        );
     }
-    return mnemonic;
 }
 
 std::string Disassembler::blockDataTransfer(u32 instr)
 {
-    int full = (instr >> 24) & 0x1;
-    int ascending = (instr >> 23) & 0x1;
-    bool user_transfer = (instr >> 22) & 0x1;
-    bool writeback = (instr >> 21) & 0x1;
-    bool load = (instr >> 20) & 0x1;
-    int rn = (instr >> 16) & 0xF;
-    int rlist = instr & 0xFFFF;
+    int full      = (instr >> 24) & 0x0001;
+    int ascending = (instr >> 23) & 0x0001;
+    int user      = (instr >> 22) & 0x0001;
+    int writeback = (instr >> 21) & 0x0001;
+    int load      = (instr >> 20) & 0x0001;
+    int rn        = (instr >> 16) & 0x000F;
+    int rlist     = (instr >>  0) & 0xFFFF;
 
-    std::string mnemonic = load ? "ldm" : "stm";
-    switch ((full << 1) | ascending)
+    std::string type;
+    if (load)
     {
-    // Todo: Fix me :)
-    case 0b00: mnemonic += "ed"; break;
-    case 0b01: mnemonic += "ea"; break;
-    case 0b10: mnemonic += "fd"; break;
-    case 0b11: mnemonic += "fa"; break;
+        switch ((full << 1) | ascending)
+        {
+        case 0b00: type = "fa"; break;
+        case 0b01: type = "fd"; break;
+        case 0b10: type = "ea"; break;
+        case 0b11: type = "ed"; break;
+        }
+    }
+    else
+    {
+        switch ((full << 1) | ascending)
+        {
+        case 0b00: type = "ed"; break;
+        case 0b01: type = "ea"; break;
+        case 0b10: type = "fd"; break;
+        case 0b11: type = "fa"; break;
+        }
     }
 
-    mnemonic.append(conditionString(instr));
-    mnemonicPad(mnemonic);
-    mnemonic.append(reg(rn, !writeback));
-    if (writeback)
-        mnemonic.append("!,");
-    mnemonic.append(rlistString(rlist));
-    if (user_transfer)
-        mnemonic.append("^");
+    std::string mnemonic = fmt::format("{}{}{}",
+        load ? "ldm" : "stm",
+        cond(instr),
+        type
+    );
 
-    return mnemonic;
+    return fmt::format("{:<8}{}{},{}{}",
+        mnemonic,
+        reg(rn),
+        writeback ? "!" : "",
+        list(rlist),
+        user ? "^" : ""
+    );
 }
 
 std::string Disassembler::singleDataSwap(u32 instr)
 {
-    bool byte = (instr >> 22) & 0x1;
-    int rb = (instr >> 16) & 0xF;
-    int rd = (instr >> 12) & 0xF;
-    int rs = instr & 0xF;
+    int byte = (instr >> 22) & 0x1;
+    int rn   = (instr >> 16) & 0xF;
+    int rd   = (instr >> 12) & 0xF;
+    int rm   = (instr >>  0) & 0xF;
 
-    std::string mnemonic = byte ? "swpb" : "swp";
+    std::string mnemonic = fmt::format("swp{}{}",
+        cond(instr),
+        byte ? "b" : ""
+    );
 
-    mnemonic.append(conditionString(instr));
-    mnemonicPad(mnemonic);
-    mnemonic.append(reg(rd, true));
-    mnemonic.append(reg(rs, true));
-    mnemonic.append("[");
-    mnemonic.append(reg(rb, false));
-    mnemonic.append("]");
-
-    return mnemonic;
+    return fmt::format("{:<8}{},{},[{}]",
+        mnemonic,
+        reg(rd),
+        reg(rm),
+        reg(rn)
+    );
 }
 
 std::string Disassembler::swiArm(u32 instr)

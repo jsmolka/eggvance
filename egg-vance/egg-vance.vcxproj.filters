@@ -95,5 +95,8 @@
     <ClInclude Include="src\arm\utility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\common\format.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
