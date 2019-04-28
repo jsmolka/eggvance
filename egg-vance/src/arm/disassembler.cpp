@@ -658,14 +658,11 @@ std::string Disassembler::dataProcessing(u32 instr, u32 pc)
         if (rn == 15 && (opcode == 0b0010 || opcode == 0b0100))
         {
             if (opcode == 0b0010)
-                op2 = hex(pc - value);
+                value = pc - value;
             else
-                op2 = hex(pc + value);
+                value = pc + value;
         }
-        else
-        {
-            op2 = hex(value);
-        }
+        op2 = hex(value);
     }
     else
     {
@@ -716,7 +713,7 @@ std::string Disassembler::dataProcessing(u32 instr, u32 pc)
     {
     case 0b0010:  // SUB
     case 0b0100:  // ADD
-        if (use_imm && rn == 15)
+        if (rn == 15 && use_imm)
         {
             return fmt::format("{:<8}{},={}",
                 mnemonic,
@@ -822,12 +819,11 @@ std::string Disassembler::multiply(u32 instr)
     int rs         = (instr >>  8) & 0xF;
     int rm         = (instr >>  0) & 0xF;
 
-    std::string mnemonic;
-    mnemonic.reserve(7);
-    mnemonic = accumulate ? "mla" : "mul";
-    mnemonic.append(cond(instr));
-    if (flags)
-        mnemonic.append("s");
+    std::string mnemonic = fmt::format("{}{}{}",
+        accumulate ? "mla" : "mul",
+        cond(instr),
+        flags ? "s" : ""
+    );
 
     if (accumulate)
     {

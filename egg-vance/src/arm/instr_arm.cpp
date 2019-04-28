@@ -442,6 +442,9 @@ void ARM::singleTransfer(u32 instr)
     u32& dst = regs[rd];
     u32 addr = regs[rn];
 
+    // Post-indexing always writes back
+    writeback |= !pre_index;
+
     u32 offset;
     if (use_reg)
     {
@@ -474,6 +477,10 @@ void ARM::singleTransfer(u32 instr)
         else
             dst = ldr(addr);
 
+        // Do not overwrite the loaded value
+        if (rd == rn)
+            writeback = false;
+
         if (rd == 15)
         {
             dst = alignWord(dst);
@@ -504,14 +511,9 @@ void ARM::singleTransfer(u32 instr)
         else
             addr -= offset;
     }
-
-    // Post-indexing always writes back
-    if (writeback || !pre_index)
-    {
-        // Prevent overwriting the loaded value
-        if (!load || rd != rn)
-            regs[rn] = addr;
-    }
+    
+    if (writeback)
+        regs[rn] = addr;
 }
 
 // ARM 8
@@ -529,6 +531,9 @@ void ARM::halfSignedTransfer(u32 instr)
 
     u32 addr = regs[rn];
     u32& dst = regs[rd];
+
+    // Post-indexing always writes back
+    writeback |= !pre_index;
 
     u32 offset;
     if (use_imm)
@@ -559,12 +564,8 @@ void ARM::halfSignedTransfer(u32 instr)
         if (rd == 15)
             cycle(regs.pc + 4, NONSEQ);
 
-        switch (sign << 1 | half)
+        switch ((sign << 1) | half)
         {
-        // SWP
-        case 0b00:
-            break;
-
         // LDRH
         case 0b01:
             dst = ldrh(addr);
@@ -582,6 +583,10 @@ void ARM::halfSignedTransfer(u32 instr)
             dst = ldrsh(addr);
             break;
         }
+
+        // Do not overwrite the loaded value
+        if (rd == rn)
+            writeback = false;
 
         if (rd == 15)
         {
@@ -612,13 +617,8 @@ void ARM::halfSignedTransfer(u32 instr)
             addr -= offset;
     }
 
-    // Post-indexing always writes back
-    if (writeback || !pre_index)
-    {
-        // Prevent overwriting the loaded value
-        if (!load || rd != rn)
-            regs[rn] = addr;
-    }
+    if (writeback)
+        regs[rn] = addr;
 }
 
 // ARM 9
@@ -630,7 +630,7 @@ void ARM::blockTransfer(u32 instr)
     int writeback = (instr >> 21) & 0x0001;
     int load      = (instr >> 20) & 0x0001;
     int rn        = (instr >> 16) & 0x000F;
-    int rlist     = (instr >>  0) & 0xFFFF;
+    int rlist     = (instr >> 0) & 0xFFFF;
 
     u32 addr = regs[rn];
 
@@ -669,10 +669,6 @@ void ARM::blockTransfer(u32 instr)
                     if (x == 15)
                         cycle(regs.pc + 4, NONSEQ);
 
-                    // No writeback if base register is also loaded
-                    if (x == rn)
-                        writeback = false;
-
                     regs[x] = mmu.readWord(alignWord(addr));
 
                     if (x == 15)
@@ -684,27 +680,11 @@ void ARM::blockTransfer(u32 instr)
                     }
 
                     if (!full) addr += step;
-
-                    if (writeback)
-                        regs[rn] = addr;
                 }
             }
         }
         else
         {
-            int first = 0;
-            for (int x = 0; x < 16; ++x)
-            {
-                if (rlist & (1 << x))
-                {
-                    first = x;
-                    break;
-                }
-            }
-
-            // Save base address for later
-            u32 base = addr;
-
             for (int x = init; rcount > 0; x += loop)
             {
                 if (rlist & (1 << x))
@@ -714,17 +694,9 @@ void ARM::blockTransfer(u32 instr)
                     if (--rcount > 0)
                         cycle(addr, SEQ);
 
-                    if (x == rn && x == first)
-                        mmu.writeWord(alignWord(addr), base);
-                    else
-                        mmu.writeWord(alignWord(addr), regs[x]);
+                    mmu.writeWord(alignWord(addr), regs[x]);
 
                     if (!full) addr += step;
-
-                    first = false;
-
-                    if (writeback)
-                        regs[rn] = addr;
                 }
             }
         }
@@ -743,10 +715,10 @@ void ARM::blockTransfer(u32 instr)
             mmu.writeWord(alignWord(addr), regs.pc);
         }
         addr += ascending ? 0x40 : -0x40;
-
-        if (writeback)
-            regs[rn] = addr;
     }
+
+    if (writeback)
+        regs[rn] = addr;
 
     if (user)
         regs.switchMode(mode);
