@@ -1,7 +1,5 @@
 #include "arm.h"
 
-#include <iostream>
-
 void ARM::fetch()
 {
     if (regs.arm())
@@ -183,6 +181,10 @@ void ARM::execute()
             case ARM_10: singleSwap(instr); break;
             case ARM_11: swiArm(instr); break;
             }
+        }
+        else
+        {
+            cycle(regs.pc + 4, SEQ);
         }
     }
     else

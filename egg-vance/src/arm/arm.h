@@ -41,7 +41,6 @@ private:
 
     void logical(u32 result);
     void logical(u32 result, bool carry);
-    // Todo: addition and subtraction? :)
     void arithmetic(u32 op1, u32 op2, bool addition);
 
     u32 lsl(u32 value, int offset, bool& carry);
@@ -92,14 +91,13 @@ private:
 
     enum AccessType
     {
-        SEQ,
-        NONSEQ
+        NONSEQ,
+        SEQ
     };
 
     int cycles;
 
     void cycle();
-    void cycle(u32 addr, bool first_access);
     void cycle(u32 addr, AccessType access);
     void cycleMultiplication(u32 multiplier, bool allow_ones);
 };

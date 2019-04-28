@@ -43,7 +43,7 @@ int ARM::step()
 		mmu.writeHalf(REG_DISPSTAT, 0);
     
     #ifdef _DEBUG
-    u32 breakpoint = 0x080013C8;
+    u32 breakpoint = 0x080003C0;
     if (breakpoint == pc)
         breakpoint = breakpoint;
     #endif
@@ -326,14 +326,7 @@ void ARM::handleSwi(int comment)
 
 void ARM::cycle()
 {
-	// Internal cycle
     cycles++;
-}
-
-void ARM::cycle(u32 addr, bool first_access)
-{
-	// Cycle with memory access (sequential / nonsequential)
-	cycles++;
 }
 
 void ARM::cycle(u32 addr, AccessType access)
@@ -343,7 +336,7 @@ void ARM::cycle(u32 addr, AccessType access)
 
 void ARM::cycleMultiplication(u32 multiplier, bool allow_ones)
 {
-    static std::array<u32, 3> masks = 
+    static const std::array<u32, 3> masks = 
     {
         0xFF000000,
         0xFFFF0000,

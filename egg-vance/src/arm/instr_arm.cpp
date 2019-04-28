@@ -477,7 +477,7 @@ void ARM::singleTransfer(u32 instr)
         else
             dst = ldr(addr);
 
-        // Do not overwrite the loaded value
+        // Prevent overwriting the loaded value
         if (rd == rn)
             writeback = false;
 
@@ -584,7 +584,7 @@ void ARM::halfSignedTransfer(u32 instr)
             break;
         }
 
-        // Do not overwrite the loaded value
+        // Prevent overwriting the loaded value
         if (rd == rn)
             writeback = false;
 
@@ -630,7 +630,7 @@ void ARM::blockTransfer(u32 instr)
     int writeback = (instr >> 21) & 0x0001;
     int load      = (instr >> 20) & 0x0001;
     int rn        = (instr >> 16) & 0x000F;
-    int rlist     = (instr >> 0) & 0xFFFF;
+    int rlist     = (instr >>  0) & 0xFFFF;
 
     u32 addr = regs[rn];
 
@@ -655,6 +655,10 @@ void ARM::blockTransfer(u32 instr)
         // Lowest register is stored at the lowest address
         if (load)
         {
+            // Prevent overwriting the loaded value
+            if (rlist & (1 << rn))
+                writeback = false;
+
             for (int x = init; rcount > 0; x += loop)
             {
                 if (rlist & (1 << x))
@@ -682,6 +686,7 @@ void ARM::blockTransfer(u32 instr)
                     if (!full) addr += step;
                 }
             }
+            cycle(regs.pc + 4, SEQ);
         }
         else
         {
@@ -699,8 +704,8 @@ void ARM::blockTransfer(u32 instr)
                     if (!full) addr += step;
                 }
             }
+            cycle(addr, NONSEQ);
         }
-        cycle(regs.pc + 4, SEQ);
     }
     else  // Special case empty rlist
     {
@@ -712,7 +717,8 @@ void ARM::blockTransfer(u32 instr)
         }
         else
         {
-            mmu.writeWord(alignWord(addr), regs.pc);
+            // Save address of next instruction
+            mmu.writeWord(alignWord(addr), regs.pc + 4);
         }
         addr += ascending ? 0x40 : -0x40;
     }

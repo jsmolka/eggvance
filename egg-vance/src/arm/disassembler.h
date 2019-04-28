@@ -14,7 +14,6 @@ public:
 private:
     static void mnemonicPad(std::string& mnemonic);
 
-    static std::string reg(int number, bool comma);
     static std::string reg(int number);
     static std::string hex(u32 value);
     static std::string list(int rlist);
@@ -22,7 +21,7 @@ private:
 
     static std::string moveShiftedRegister(u16 instr);
     static std::string addSubImmediate(u16 instr);
-    static std::string addSubCmpMovImmediate(u16 instr);
+    static std::string addSubMovCmpImmediate(u16 instr);
     static std::string aluOperations(u16 instr);
     static std::string highRegisterBranchExchange(u16 instr);
     static std::string loadPcRelative(u16 instr, u32 pc);
@@ -36,7 +35,7 @@ private:
     static std::string pushPopRegisters(u16 instr);
     static std::string loadStoreMultiple(u16 instr);
     static std::string conditionalBranch(u16 instr, u32 pc);
-    static std::string softwareInterruptThumb(u16 instr);
+    static std::string swiThumb(u16 instr);
     static std::string unconditionalBranch(u16 instr, u32 pc);
     static std::string longBranchLink(u16 instr, u32 lr);
 
@@ -51,7 +50,7 @@ private:
     static std::string multiplyLong(u32 instr);
     static std::string singleTransfer(u32 instr);
     static std::string halfSignedTransfer(u32 instr);
-    static std::string blockDataTransfer(u32 instr);
+    static std::string blockTransfer(u32 instr);
     static std::string singleDataSwap(u32 instr);
     static std::string swiArm(u32 instr);
 };
