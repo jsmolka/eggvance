@@ -7,16 +7,23 @@
 class PPU
 {
 public:
-    PPU();
+    PPU(MMU& mmu);
     ~PPU();
 
     void reset();
 
+    void scanline();
+    void hblank();
+    void vblank();
+    void next();
+
     void renderFrame();
 
-    MMU* mmu;
+    void update();
 
 private:
+    MMU& mmu;
+
     void renderText();
     void renderBitmap();
 

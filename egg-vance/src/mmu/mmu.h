@@ -1,15 +1,10 @@
 #pragma once
 
-/**
- * Todo:
- * - split memory into actually used parts
- */
-
 #include <array>
 #include <string>
 
 #include "common/integer.h"
-#include "registers/io.h"
+#include "registers/registers.h"
 
 class MMU
 {
@@ -20,16 +15,17 @@ public:
 
     bool loadRom(const std::string& file);
 
-    u8 readByte(u32 addr) const;
+    u8  readByte(u32 addr) const;
     u16 readHalf(u32 addr) const;
     u32 readWord(u32 addr) const;
 
-    void writeByte(u32 addr, u8 byte);
+    void writeByte(u32 addr, u8  byte);
     void writeHalf(u32 addr, u16 half);
     void writeWord(u32 addr, u32 word);
 
     Dispcnt dispcnt;
     Dispstat dispstat;
+    Vcount vcount;
     union
     {
         struct
@@ -41,6 +37,8 @@ public:
         };
         Bgcnt bgcnt[4];
     };
+    Keyinput keyinput;
+    Waitcnt waitcnt;
 
 private:
     u16& registerData(u32 addr);

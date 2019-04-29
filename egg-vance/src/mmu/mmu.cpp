@@ -8,11 +8,13 @@
 MMU::MMU()
     : dispcnt(registerData(REG_DISPCNT))
     , dispstat(registerData(REG_DISPSTAT))
+    , vcount(registerData(REG_VCOUNT))
     , bg0cnt(registerData(REG_BG0CNT))
     , bg1cnt(registerData(REG_BG1CNT))
     , bg2cnt(registerData(REG_BG2CNT))
     , bg3cnt(registerData(REG_BG3CNT))
-
+    , keyinput(registerData(REG_KEYINPUT))
+    , waitcnt(registerData(REG_WAITCNT))
 {
 
 }

@@ -31,20 +31,10 @@ int ARM::step()
     decode();
 
     #ifdef _DEBUG
-    debug();
-    #endif
+    //debug();
 
-    u32 pc = regs.pc - (regs.arm() ? 8 : 4);
-
-	// Fake VSync for armwrestler
-	if (pc == 0x80004F4 || pc == 0x8004282)
-		mmu.writeHalf(REG_DISPSTAT, 1);
-	else
-		mmu.writeHalf(REG_DISPSTAT, 0);
-    
-    #ifdef _DEBUG
     u32 breakpoint = 0x080003C0;
-    if (breakpoint == pc)
+    if (breakpoint == regs.pc - (regs.arm() ? 8 : 4))
         breakpoint = breakpoint;
     #endif
 
@@ -329,9 +319,43 @@ void ARM::cycle()
     cycles++;
 }
 
-void ARM::cycle(u32 addr, AccessType access)
+void ARM::cycle(u32 addr, MemoryAccess access)
 {
     cycles++;
+
+    static const int nonseq_lut[4] = { 4, 3, 2, 8 };
+
+    if (addr >= MAP_PALETTE && addr < (MAP_OAM + 0x400))
+    {
+        // Add one cycle if accessing VRAM and not in HBlank or VBlank
+        if (!mmu.dispstat.hblank || !mmu.dispstat.vblank)
+            cycles++;
+    }
+    else if (addr >= MAP_GAMEPAK_0 && addr < MAP_GAMEPAK_1)
+    {
+        if (access == NONSEQ)
+            cycles += nonseq_lut[mmu.waitcnt.nonseq0];
+        else
+            cycles += mmu.waitcnt.seq0 ? 1 : 2;
+    }
+    else if (addr >= MAP_GAMEPAK_1 && addr < MAP_GAMEPAK_2)
+    {
+        if (access == NONSEQ)
+            cycles += nonseq_lut[mmu.waitcnt.nonseq1];
+        else
+            cycles += mmu.waitcnt.seq1 ? 1 : 4;
+    }
+    else if (addr >= MAP_GAMEPAK_2 && addr < MAP_GAMEPAK_SRAM)
+    {
+        if (access == NONSEQ)
+            cycles += nonseq_lut[mmu.waitcnt.nonseq2];
+        else
+            cycles += mmu.waitcnt.seq2 ? 1 : 8;
+    }
+    else if (addr >= MAP_GAMEPAK_SRAM && addr < (MAP_GAMEPAK_SRAM + 0x10000))
+    {
+        cycles += nonseq_lut[mmu.waitcnt.sram];
+    }
 }
 
 void ARM::cycleMultiplication(u32 multiplier, bool allow_ones)

@@ -89,7 +89,7 @@ private:
     void singleSwap(u32 instr);
     void swiArm(u32 instr);
 
-    enum AccessType
+    enum MemoryAccess
     {
         NONSEQ,
         SEQ
@@ -98,6 +98,6 @@ private:
     int cycles;
 
     void cycle();
-    void cycle(u32 addr, AccessType access);
+    void cycle(u32 addr, MemoryAccess access);
     void cycleMultiplication(u32 multiplier, bool allow_ones);
 };

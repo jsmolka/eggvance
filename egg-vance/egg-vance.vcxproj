@@ -153,13 +153,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\mmu\registers\other\keyinput.cpp" />
     <ClCompile Include="src\arm\disassembler.cpp" />
     <ClCompile Include="src\arm\pipeline.cpp" />
     <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\arm\registerbank.cpp" />
-    <ClCompile Include="src\mmu\registers\io\bgcnt.cpp" />
-    <ClCompile Include="src\mmu\registers\io\dispcnt.cpp" />
-    <ClCompile Include="src\mmu\registers\io\dispstat.cpp" />
+    <ClCompile Include="src\mmu\registers\lcd\bgcnt.cpp" />
+    <ClCompile Include="src\mmu\registers\lcd\dispcnt.cpp" />
+    <ClCompile Include="src\mmu\registers\lcd\dispstat.cpp" />
     <ClCompile Include="src\ppu\ppu.cpp" />
     <ClCompile Include="src\core.cpp" />
     <ClCompile Include="src\arm\instr_arm.cpp" />
@@ -169,8 +170,11 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ppu\render_bitmap.cpp" />
     <ClCompile Include="src\ppu\render_text.cpp" />
+    <ClCompile Include="src\mmu\registers\other\waitcnt.cpp" />
+    <ClCompile Include="src\mmu\registers\lcd\vcount.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\mmu\registers\other\keyinput.h" />
     <ClInclude Include="src\arm\disassembler.h" />
     <ClInclude Include="src\arm\registers.h" />
     <ClInclude Include="src\arm\registerbank.h" />
@@ -178,16 +182,18 @@
     <ClInclude Include="src\arm\utility.h" />
     <ClInclude Include="src\common\format.h" />
     <ClInclude Include="src\mmu\registers\field.h" />
-    <ClInclude Include="src\mmu\registers\io\bgcnt.h" />
-    <ClInclude Include="src\mmu\registers\io\dispcnt.h" />
-    <ClInclude Include="src\mmu\registers\io\dispstat.h" />
-    <ClInclude Include="src\mmu\registers\io.h" />
+    <ClInclude Include="src\mmu\registers\lcd\bgcnt.h" />
+    <ClInclude Include="src\mmu\registers\lcd\dispcnt.h" />
+    <ClInclude Include="src\mmu\registers\lcd\dispstat.h" />
+    <ClInclude Include="src\mmu\registers\registers.h" />
     <ClInclude Include="src\ppu\ppu.h" />
     <ClInclude Include="src\core.h" />
     <ClInclude Include="src\common\memory_map.h" />
     <ClInclude Include="src\mmu\mmu.h" />
     <ClInclude Include="src\arm\arm.h" />
     <ClInclude Include="src\common\integer.h" />
+    <ClInclude Include="src\mmu\registers\other\waitcnt.h" />
+    <ClInclude Include="src\mmu\registers\lcd\vcount.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

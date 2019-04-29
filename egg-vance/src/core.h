@@ -18,7 +18,10 @@ public:
 private:
     void reset();
 
-    u16 keyMask(const SDL_Keycode& key);
+    void frame();
+    void runCycles(int cycles);
+
+    void processKeyEvent(SDL_Keycode key, bool down);
 
     MMU mmu;
     PPU ppu;
