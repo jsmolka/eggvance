@@ -157,7 +157,9 @@
     <ClCompile Include="src\arm\pipeline.cpp" />
     <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\arm\registerbank.cpp" />
-    <ClCompile Include="src\mmu\registers.cpp" />
+    <ClCompile Include="src\mmu\registers\io\bgcnt.cpp" />
+    <ClCompile Include="src\mmu\registers\io\dispcnt.cpp" />
+    <ClCompile Include="src\mmu\registers\io\dispstat.cpp" />
     <ClCompile Include="src\ppu\ppu.cpp" />
     <ClCompile Include="src\core.cpp" />
     <ClCompile Include="src\arm\instr_arm.cpp" />
@@ -175,7 +177,11 @@
     <ClInclude Include="src\arm\enums.h" />
     <ClInclude Include="src\arm\utility.h" />
     <ClInclude Include="src\common\format.h" />
-    <ClInclude Include="src\mmu\registers.h" />
+    <ClInclude Include="src\mmu\registers\field.h" />
+    <ClInclude Include="src\mmu\registers\io\bgcnt.h" />
+    <ClInclude Include="src\mmu\registers\io\dispcnt.h" />
+    <ClInclude Include="src\mmu\registers\io\dispstat.h" />
+    <ClInclude Include="src\mmu\registers\io.h" />
     <ClInclude Include="src\ppu\ppu.h" />
     <ClInclude Include="src\core.h" />
     <ClInclude Include="src\common\memory_map.h" />

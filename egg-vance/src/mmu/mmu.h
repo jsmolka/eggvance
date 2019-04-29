@@ -5,11 +5,11 @@
  * - split memory into actually used parts
  */
 
+#include <array>
 #include <string>
-#include <vector>
 
 #include "common/integer.h"
-#include "registers.h"
+#include "registers/io.h"
 
 class MMU
 {
@@ -17,7 +17,6 @@ public:
     MMU();
 
     void reset();
-    void dump(u32 start, u32 size);
 
     bool loadRom(const std::string& file);
 
@@ -29,10 +28,22 @@ public:
     void writeHalf(u32 addr, u16 half);
     void writeWord(u32 addr, u32 word);
 
-    DisplayControl dispcnt;
-    DisplayStatus dispstat;
-    BackgroundControl bgcnt[4];
+    Dispcnt dispcnt;
+    Dispstat dispstat;
+    union
+    {
+        struct
+        {
+            Bgcnt bg0cnt;
+            Bgcnt bg1cnt;
+            Bgcnt bg2cnt;
+            Bgcnt bg3cnt;
+        };
+        Bgcnt bgcnt[4];
+    };
 
 private:
-    std::vector<u8> memory;
+    u16& registerData(u32 addr);
+
+    std::array<u8, 0x10000000> memory;
 };

@@ -15,7 +15,7 @@ enum MemoryMap
     MAP_GAMEPAK_SRAM = 0x0E000000
 };
 
-enum MemoryRegisters
+enum MemoryRegister
 {
     REG_DISPCNT  = 0x04000000,
     REG_DISPSTAT = 0x04000004,

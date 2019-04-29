@@ -22,13 +22,13 @@ inline bool misalignedWord(u32 addr)
     return addr & 0x3;
 }
 
-template<unsigned int bits>
+template<unsigned int size>
 inline s32 twos(u32 value)
 {
-    static_assert(bits <= 32, "Unsupported number of bits");
+    static_assert(size <= 32, "Unsupported number of bits");
 
-    if (value & (1 << (bits - 1)))
-        value |= 0xFFFFFFFF << bits;
+    if (value & (1 << (size - 1)))
+        value |= 0xFFFFFFFF << size;
 
     return static_cast<s32>(value);
 }
