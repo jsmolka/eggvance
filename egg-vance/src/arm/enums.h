@@ -82,3 +82,16 @@ enum Format
     THUMB_18,    // Unconditional branch
     THUMB_19     // Long branch with link
 };
+
+enum ExceptionVector
+{
+    EXV_RESET    = 0x00,  // 1 Reset
+    EXV_UNDEF    = 0x04,  // 7 Undefined instruction
+    EXV_SWI      = 0x08,  // 6 Software interrupt
+    EXV_PREFETCH = 0x0C,  // 5 Prefetch abort
+    EXV_DATA     = 0x10,  // 2 Data abort
+    EXV_ADDR     = 0x14,  // ? Address exceeds 26bit
+    EXV_IRQ      = 0x18,  // 4 Normal interrupt
+    EXV_FIQ      = 0x1C   // 3 Fast interrupt
+ 
+};

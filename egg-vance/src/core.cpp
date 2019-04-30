@@ -14,10 +14,16 @@ void Core::run(const std::string& file)
     if (!mmu.loadRom(file))
         return;
 
+    if (!mmu.loadBios("bios.bin"))
+        return;
+
     bool running = true;
     while (running)
     {
         frame();
+
+        // Kirby progression
+        // Tested till 0x8000388
 
         SDL_Event event;
         while (SDL_PollEvent(&event))
@@ -65,7 +71,7 @@ void Core::frame()
         ppu.next();
     }
 
-    // Invisible lines
+    // Invisible lines and V-Blank
     ppu.vblank();
     for (int line = 0; line < 68; ++line)
     {
@@ -79,7 +85,6 @@ void Core::frame()
 void Core::runCycles(int cycles)
 {
     static int cycles_left = 0;
-
     cycles_left += cycles;
 
     while (cycles_left >= 0)

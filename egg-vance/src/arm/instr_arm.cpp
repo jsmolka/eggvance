@@ -273,7 +273,8 @@ void ARM::dataProcessing(u32 instr)
 
     if (rd == 15)
     {
-        dst = alignWord(dst);
+        // Interrupt return from ARM into THUMB possible
+        dst = regs.arm() ? alignWord(dst) : alignHalf(dst);
         needs_flush = true;
 
 		cycle(regs.pc, SEQ);
@@ -763,5 +764,24 @@ void ARM::singleSwap(u32 instr)
 // ARM 11
 void ARM::swiArm(u32 instr)
 {
-    fmt::print("Unimplemented ARM SWI\n");
+    cycle(regs.pc, NONSEQ);
+
+    u32 cpsr = regs.cpsr;
+    u32 next = regs.pc - 4;
+
+    // Switch mode
+    regs.switchMode(MODE_SVC);
+
+    // Save CPSR and next instruction
+    regs.spsr = cpsr;
+    regs.lr = next;
+
+    // Disable interrupts
+    regs.cpsr |= CPSR_I;
+
+    regs.pc = EXV_SWI;
+    needs_flush = true;
+
+    cycle(regs.pc, SEQ);
+    cycle(regs.pc + 4, SEQ);
 }

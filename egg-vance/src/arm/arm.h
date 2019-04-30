@@ -52,8 +52,6 @@ private:
     u32 ldrh(u32 addr);
     u32 ldrsh(u32 addr);
 
-    void handleSwi(int comment);
-
     void moveShiftedRegister(u16 instr);
     void addSubImmediate(u16 instr);
     void addSubMovCmpImmediate(u16 instr);

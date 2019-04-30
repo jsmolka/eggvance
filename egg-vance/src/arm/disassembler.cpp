@@ -484,7 +484,7 @@ std::string Disassembler::conditionalBranch(u16 instr, u32 pc)
 
 std::string Disassembler::swiThumb(u16 instr)
 {
-    return "unimplemented thumb swi";
+    return "swi";
 }
 
 std::string Disassembler::unconditionalBranch(u16 instr, u32 pc)
@@ -838,9 +838,9 @@ std::string Disassembler::singleTransfer(u32 instr)
 
     std::string offset;
     if (use_reg)
-        offset = hex(data);
-    else
         offset = shiftedRegister(data);
+    else
+        offset = hex(data);
 
     std::string mnemonic = fmt::format("{}{}{}",
         load ? "ldr" : "str",
@@ -850,20 +850,22 @@ std::string Disassembler::singleTransfer(u32 instr)
 
     if (pre_index)
     {
-        return fmt::format("{:<8}{},[{},{}]{}",
+        return fmt::format("{:<8}{},[{},{}{}]{}",
             mnemonic,
             reg(rd),
             reg(rn),
+            increment ? "" : "-",
             offset,
             writeback ? "!" : ""
         );
     }
     else
     {
-        return fmt::format("{:<8}{},[{}],{}",
+        return fmt::format("{:<8}{},[{}],{}{}",
             mnemonic,
             reg(rd),
             reg(rn),
+            increment ? "" : "-",
             offset
         );
     }

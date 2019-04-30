@@ -5,3 +5,6 @@ bin/
 
 # FASMARM
 *.gba
+
+# GBA
+bios.bin

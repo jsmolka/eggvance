@@ -14,6 +14,7 @@ public:
     void reset();
 
     bool loadRom(const std::string& file);
+    bool loadBios(const std::string& file);
 
     u8  readByte(u32 addr) const;
     u16 readHalf(u32 addr) const;

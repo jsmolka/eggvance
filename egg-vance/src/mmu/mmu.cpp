@@ -5,6 +5,8 @@
 
 #include "common/memory_map.h"
 
+// Todo: memory  mirrors
+
 MMU::MMU()
     : dispcnt(registerData(REG_DISPCNT))
     , dispstat(registerData(REG_DISPSTAT))
@@ -38,6 +40,25 @@ bool MMU::loadRom(const std::string& file)
     stream.seekg(0, std::ios::beg);
 
     u8* memory_ptr = &memory[MAP_GAMEPAK_0];
+    stream.read(reinterpret_cast<char*>(memory_ptr), size);
+
+    return true;
+}
+
+bool MMU::loadBios(const std::string& file)
+{
+    std::ifstream stream(file, std::ios::binary);
+    if (!stream.is_open())
+    {
+        std::cout << "Cannot open file " << file << "\n";
+        return false;
+    }
+
+    stream.seekg(0, std::ios::end);
+    std::streampos size = stream.tellg();
+    stream.seekg(0, std::ios::beg);
+
+    u8* memory_ptr = &memory[MAP_BIOS];
     stream.read(reinterpret_cast<char*>(memory_ptr), size);
 
     return true;

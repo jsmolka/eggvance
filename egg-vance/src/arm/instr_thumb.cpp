@@ -678,7 +678,26 @@ void ARM::conditionalBranch(u16 instr)
 // THUMB 17
 void ARM::swiThumb(u16 instr)
 {
-    fmt::printf("Unimplemented THUMB SWI\n");
+    cycle(regs.pc, NONSEQ);
+
+    u32 cpsr = regs.cpsr;
+    u32 next = regs.pc - 2;
+
+    // Switch mode
+    regs.switchMode(MODE_SVC);
+
+    // Save CPSR and next instruction
+    regs.spsr = cpsr;
+    regs.lr = next;
+
+    // Disallow interrupts and switch to ARM
+    regs.cpsr = (regs.cpsr & ~CPSR_T) | CPSR_I;
+
+    regs.pc = EXV_SWI;
+    needs_flush = true;
+
+    cycle(regs.pc, SEQ);
+    cycle(regs.pc + 4, SEQ);
 }
 
 // THUMB 18
@@ -706,11 +725,13 @@ void ARM::longBranchLink(u16 instr)
 
     if (second)
     {
+        offset <<= 1;
+
         u32 next = (regs.pc - 2) | 1;
 
         cycle(regs.pc, NONSEQ);
 
-        regs.pc = regs.lr + (offset << 1);
+        regs.pc = regs.lr + offset;
         regs.lr = next;
         needs_flush = true;
 

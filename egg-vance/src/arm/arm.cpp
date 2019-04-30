@@ -30,12 +30,19 @@ int ARM::step()
     fetch();
     decode();
 
-    #ifdef _DEBUG
-    //debug();
+    // Getting Kirby to run
+    // - 0x8009200 (branched from 0x80091AE) used to render first frames
+    // - 0x8002DB4 (branched from 0x8009284) used to render first frames
+    // - 0x8002DC0 - 2DC8 loop for drawing
 
-    u32 breakpoint = 0x080003C0;
+    #ifdef _DEBUG
+    static bool enable = false;
+    u32 breakpoint = 0x8009280;
     if (breakpoint == regs.pc - (regs.arm() ? 8 : 4))
-        breakpoint = breakpoint;
+        enable = true;
+
+    if (enable)
+        debug();
     #endif
 
     execute();
@@ -307,11 +314,6 @@ u32 ARM::ldrsh(u32 addr)
             value |= 0xFFFF0000;
     }
     return value;
-}
-
-void ARM::handleSwi(int comment)
-{
-    // Todo: actually do something
 }
 
 void ARM::cycle()
