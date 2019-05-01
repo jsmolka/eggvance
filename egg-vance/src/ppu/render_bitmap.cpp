@@ -1,19 +1,18 @@
 #include "ppu.h"
 
-#include "common/memory_map.h"
+#include "mmu/memory_map.h"
 
 void PPU::renderBitmap()
 {
-    int line = mmu.vcount.ly;
+    int y = mmu.vcount;
 
-    u32 base = 0x6000000;
-    u32 pale = 0x5000000;
+    u32 frame_addr = mmu.dispcnt.frameAddr();
 
     for (int x = 0; x < 240; ++x)
     {
-        int value = mmu.readByte(base + (240 * line + x));
-        int color = mmu.readHalf(pale + (2 * value));
+        int value = mmu.readByte(frame_addr + (y * 240 + x));
+        int color = mmu.readHalf(MAP_PALETTE + (2 * value));
 
-        drawPixel(x, line, color);
+        pixel(x, y, color);
     }
 }

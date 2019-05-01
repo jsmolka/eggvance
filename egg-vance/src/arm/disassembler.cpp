@@ -993,5 +993,5 @@ std::string Disassembler::singleDataSwap(u32 instr)
 
 std::string Disassembler::swiArm(u32 instr)
 {
-    return "unimplemented thumb arm";
+    return "swi";
 }

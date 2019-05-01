@@ -66,10 +66,10 @@
     <ClCompile Include="src\mmu\registers\other\waitcnt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\mmu\registers\lcd\vcount.cpp">
+    <ClCompile Include="src\mmu\registers\other\keyinput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\mmu\registers\other\keyinput.cpp">
+    <ClCompile Include="src\mmu\registers\lcd\vcount.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -87,9 +87,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ppu\ppu.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\common\memory_map.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\arm\enums.h">
@@ -113,9 +110,6 @@
     <ClInclude Include="src\mmu\registers\field.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\registers.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\mmu\registers\lcd\bgcnt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -132,6 +126,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\mmu\registers\other\keyinput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\register.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\all.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\memory_map.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

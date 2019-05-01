@@ -3,7 +3,7 @@
 #include <array>
 
 #include "common/format.h"
-#include "common/memory_map.h"
+#include "mmu/memory_map.h"
 #include "enums.h"
 #include "disassembler.h"
 #include "utility.h"
@@ -24,20 +24,14 @@ void ARM::reset()
 
 int ARM::step()
 {
-    // Reset step cycles
     cycles = 0;
 
     fetch();
     decode();
 
-    // Getting Kirby to run
-    // - 0x8009200 (branched from 0x80091AE) used to render first frames
-    // - 0x8002DB4 (branched from 0x8009284) used to render first frames
-    // - 0x8002DC0 - 2DC8 loop for drawing
-
     #ifdef _DEBUG
     static bool enable = false;
-    u32 breakpoint = 0x8009280;
+    u32 breakpoint = 0x8000340;
     if (breakpoint == regs.pc - (regs.arm() ? 8 : 4))
         enable = true;
 

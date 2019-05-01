@@ -17,9 +17,7 @@ public:
     void vblank();
     void next();
 
-    void renderFrame();
-
-    void update();
+    void render();
 
 private:
     MMU& mmu;
@@ -27,7 +25,7 @@ private:
     void renderText();
     void renderBitmap();
 
-    void drawPixel(int x, int y, u16 color);
+    void pixel(int x, int y, int color);
 
     SDL_Window* window;
     SDL_Renderer* renderer;

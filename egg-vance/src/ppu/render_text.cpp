@@ -1,6 +1,6 @@
 #include "ppu.h"
 
-#include "common/memory_map.h"
+#include "mmu/memory_map.h"
 
 void PPU::renderText()
 {
@@ -33,8 +33,8 @@ void PPU::renderText()
                 u16 color_lhs = mmu.readHalf(MAP_PALETTE + 32 * palette_number + 2 * (tile_data & 0xF));
                 u16 color_rhs = mmu.readHalf(MAP_PALETTE + 32 * palette_number + 2 * (tile_data >> 4 & 0xF));
 
-                drawPixel(8 * x + x_off, 8 * y + y_off, color_lhs);
-                drawPixel(8 * x + x_off + 1, 8 * y + y_off, color_rhs);
+                pixel(8 * x + x_off, 8 * y + y_off, color_lhs);
+                pixel(8 * x + x_off + 1, 8 * y + y_off, color_rhs);
 
                 x_off += 2;
             }

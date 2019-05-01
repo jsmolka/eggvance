@@ -3,9 +3,9 @@
 #include <iostream>
 #include <fstream>
 
-#include "common/memory_map.h"
+#include "memory_map.h"
 
-// Todo: memory  mirrors
+// Todo: memory mirrors
 
 MMU::MMU()
     : dispcnt(registerData(REG_DISPCNT))

@@ -1,7 +1,7 @@
 #include "waitcnt.h"
 
 Waitcnt::Waitcnt(u16& data)
-    : data(data)
+    : Register(data)
     , sram(data)
     , nonseq0(data)
     , seq0(data)

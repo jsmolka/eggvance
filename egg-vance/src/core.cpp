@@ -1,6 +1,6 @@
 #include "core.h"
 
-#include "common/memory_map.h"
+#include "mmu/memory_map.h"
 
 Core::Core()
     : arm(mmu)
@@ -22,9 +22,6 @@ void Core::run(const std::string& file)
     {
         frame();
 
-        // Kirby progression
-        // Tested till 0x8000388
-
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
@@ -35,11 +32,11 @@ void Core::run(const std::string& file)
                 break;
 
             case SDL_KEYDOWN:
-                processKeyEvent(event.key.keysym.sym, true);
+                keyEvent(event.key.keysym.sym, true);
                 break;
 
             case SDL_KEYUP:
-                processKeyEvent(event.key.keysym.sym, false);
+                keyEvent(event.key.keysym.sym, false);
                 break;
             }
         }
@@ -48,12 +45,11 @@ void Core::run(const std::string& file)
 
 void Core::reset()
 {
-    arm.reset();
     mmu.reset();
+    arm.reset();
     ppu.reset();
 
-    // Set keys to not pressed
-    mmu.keyinput.data = 0xFF;
+    mmu.keyinput = 0xFF;
 }
 
 void Core::frame()
@@ -79,23 +75,21 @@ void Core::frame()
         ppu.next();
     }
 
-    ppu.update();
+    ppu.render();
 }
 
 void Core::runCycles(int cycles)
 {
-    static int cycles_left = 0;
-    cycles_left += cycles;
+    static int remaining = 0;
+    remaining += cycles;
 
-    while (cycles_left >= 0)
-    {
-        cycles_left -= arm.step();
-    }
+    while (remaining >= 0)
+        remaining -= arm.step();
 }
 
-void Core::processKeyEvent(SDL_Keycode key, bool down)
+void Core::keyEvent(SDL_Keycode key, bool pressed)
 {
-    int state = down ? 0 : 1;
+    int state = pressed ? 0 : 1;
 
     switch (key)
     {

@@ -1,9 +1,9 @@
 #include "bgcnt.h"
 
-#include "common/memory_map.h"
+#include "mmu/memory_map.h"
 
 Bgcnt::Bgcnt(u16& data)
-    : data(data)
+    : Register(data)
     , priority(data)
     , tile_base(data)
     , mosaic(data)

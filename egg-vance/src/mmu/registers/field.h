@@ -2,13 +2,15 @@
 
 #include "common/integer.h"
 
-template<int position, int size>
+template<unsigned int position, unsigned int size>
 class Field
 {
 public:
     Field(u16& data) 
         : data(data) 
-    { };
+    {
+    
+    }
 
     inline Field& operator=(int value)
     {
@@ -16,7 +18,7 @@ public:
         return *this;
     }
 
-    inline operator unsigned() const
+    inline operator unsigned int() const
     {
         return (data >> position) & mask;
     }

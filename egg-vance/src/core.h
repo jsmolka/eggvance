@@ -21,7 +21,7 @@ private:
     void frame();
     void runCycles(int cycles);
 
-    void processKeyEvent(SDL_Keycode key, bool down);
+    void keyEvent(SDL_Keycode key, bool pressed);
 
     MMU mmu;
     PPU ppu;

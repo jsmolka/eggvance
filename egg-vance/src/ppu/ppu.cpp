@@ -1,11 +1,5 @@
 #include "ppu.h"
 
-/**
- * Todo:
- * - possibly use an SDL texture for better performance
- * - implement proper window scaling
- */
-
 PPU::PPU(MMU& mmu)
     : mmu(mmu)
 {
@@ -52,6 +46,7 @@ void PPU::scanline()
         break;
 
     case 3:
+        renderBitmap();
         break;
 
     case 4:
@@ -70,7 +65,7 @@ void PPU::hblank()
 
     if (mmu.dispstat.hblank_irq)
     {
-        // Todo: raise interrupt
+        // Todo: request interrupt
     }
 }
 
@@ -81,29 +76,29 @@ void PPU::vblank()
 
     if (mmu.dispstat.vblank_irq)
     {
-        // Todo: raise interrupt
+        // Todo: request interrupt
     }
 }
 
 void PPU::next()
 {
-    bool vcount_match = mmu.vcount.ly == mmu.dispstat.vcount_trigger;
+    bool vcount_match = mmu.vcount == mmu.dispstat.vcount_compare;
 
-    mmu.vcount.ly = (mmu.vcount.ly + 1) % 228;
+    mmu.vcount = (mmu.vcount + 1) % 228;
     mmu.dispstat.vcount_match = vcount_match;
 
     if (vcount_match && mmu.dispstat.vcount_irq)
     {
-        // Todo: raise interrupt
+        // Todo: request interrupt
     }
 }
 
-void PPU::update()
+void PPU::render()
 {
     SDL_RenderPresent(renderer);
 }
 
-void PPU::drawPixel(int x, int y, u16 color)
+void PPU::pixel(int x, int y, int color)
 {
     u8 r = 8 * ((color >>  0) & 0x1F);
     u8 g = 8 * ((color >>  5) & 0x1F);

@@ -4,7 +4,7 @@
 #include <string>
 
 #include "common/integer.h"
-#include "registers/registers.h"
+#include "registers/all.h"
 
 class MMU
 {
