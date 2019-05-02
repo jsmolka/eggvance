@@ -31,7 +31,7 @@ int ARM::step()
 
     #ifdef _DEBUG
     static bool enable = false;
-    u32 breakpoint = 0x8000340;
+    u32 breakpoint = 0;
     if (breakpoint == regs.pc - (regs.arm() ? 8 : 4))
         enable = true;
 

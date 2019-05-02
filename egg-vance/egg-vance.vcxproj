@@ -169,7 +169,9 @@
     <ClCompile Include="src\mmu\mmu.cpp" />
     <ClCompile Include="src\arm\arm.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\ppu\render_bitmap.cpp" />
+    <ClCompile Include="src\ppu\render_mode3.cpp" />
+    <ClCompile Include="src\ppu\render_mode4.cpp" />
+    <ClCompile Include="src\ppu\render_mode5.cpp" />
     <ClCompile Include="src\ppu\render_text.cpp" />
     <ClCompile Include="src\mmu\registers\other\waitcnt.cpp" />
   </ItemGroup>

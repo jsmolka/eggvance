@@ -2,11 +2,11 @@
 
 #include "common/integer.h"
 
-template<unsigned int position, unsigned int size>
+template<unsigned int position, unsigned int size, typename T = u16>
 class Field
 {
 public:
-    Field(u16& data) 
+    Field(T& data) 
         : data(data) 
     {
     
@@ -25,5 +25,5 @@ public:
 
 private:
     enum { mask = (1 << size) - 1 };
-    u16& data;
+    T& data;
 };

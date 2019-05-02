@@ -46,14 +46,21 @@ void PPU::scanline()
         break;
 
     case 3:
-        renderBitmap();
+        // Bitmap modes only use BG2
+        if (mmu.dispcnt.bg2)
+            renderMode3();
         break;
 
     case 4:
-        renderBitmap();
+        // Bitmap modes only use BG2
+        if (mmu.dispcnt.bg2)
+            renderMode4();
         break;
 
     case 5:
+        // Bitmap modes only use BG2
+        if (mmu.dispcnt.bg2)
+            renderMode5();
         break;
     }
 }

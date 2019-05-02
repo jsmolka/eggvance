@@ -23,7 +23,9 @@ private:
     MMU& mmu;
 
     void renderText();
-    void renderBitmap();
+    void renderMode3();
+    void renderMode4();
+    void renderMode5();
 
     void pixel(int x, int y, int color);
 
