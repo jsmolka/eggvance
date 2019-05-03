@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <SDL.h>
 
 #include "mmu/mmu.h"
@@ -20,6 +21,12 @@ public:
     void render();
 
 private:
+    enum Screen
+    {
+        WIDTH  = 240,
+        HEIGHT = 160
+    };
+
     MMU& mmu;
 
     void renderText();
@@ -27,9 +34,11 @@ private:
     void renderMode4();
     void renderMode5();
 
-    void pixel(int x, int y, int color);
+    void draw(int x, int y, int color);
 
     SDL_Window* window;
     SDL_Renderer* renderer;
+    SDL_Texture* texture;
+    std::array<u16, WIDTH * HEIGHT> buffer;
 };
 

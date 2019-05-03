@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-
 #include <SDL_events.h>
 
 #include "arm/arm.h"

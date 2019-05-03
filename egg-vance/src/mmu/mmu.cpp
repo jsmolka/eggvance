@@ -50,15 +50,16 @@ u8 MMU::readByte(u32 addr) const
     {
     // Waitstate 1
     case 0xA:
+    case 0xB:
         addr -= 0x2000000;
         break;
 
     // Waitstate 2
     case 0xC:
+    case 0xD:
         addr -= 0x4000000;
         break;
     }
-
     return memory[addr];
 }
 

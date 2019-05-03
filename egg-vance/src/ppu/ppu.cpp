@@ -9,15 +9,32 @@ PPU::PPU(MMU& mmu)
         "egg-vance",
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
-        480, 320,
-        SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
+        2 * WIDTH, 2 * HEIGHT,
+        SDL_WINDOW_RESIZABLE
     );
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-    SDL_RenderSetLogicalSize(renderer, 240, 160);
+    
+    renderer = SDL_CreateRenderer(
+        window, 
+        -1, 
+        SDL_RENDERER_ACCELERATED
+    );
+    
+    SDL_RenderSetLogicalSize(
+        renderer, 
+        WIDTH, HEIGHT
+    );
+
+    texture = SDL_CreateTexture(
+        renderer,
+        SDL_PIXELFORMAT_RGB555,
+        SDL_TEXTUREACCESS_STREAMING,
+        WIDTH, HEIGHT
+    );
 }
 
 PPU::~PPU()
 {
+    SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
 
@@ -26,7 +43,7 @@ PPU::~PPU()
 
 void PPU::reset()
 {
-
+    buffer.fill(0);
 }
 
 void PPU::scanline()
@@ -102,15 +119,17 @@ void PPU::next()
 
 void PPU::render()
 {
+    SDL_UpdateTexture(
+        texture,
+        0,
+        buffer.data(),
+        2 * WIDTH
+    );
+    SDL_RenderCopy(renderer, texture, 0, 0);
     SDL_RenderPresent(renderer);
 }
 
-void PPU::pixel(int x, int y, int color)
+void PPU::draw(int x, int y, int color)
 {
-    u8 r = 8 * ((color >>  0) & 0x1F);
-    u8 g = 8 * ((color >>  5) & 0x1F);
-    u8 b = 8 * ((color >> 10) & 0x1F);
-
-    SDL_SetRenderDrawColor(renderer, r, g, b, SDL_ALPHA_OPAQUE);
-    SDL_RenderDrawPoint(renderer, x, y);
+    buffer[WIDTH * y + x] = color;
 }
