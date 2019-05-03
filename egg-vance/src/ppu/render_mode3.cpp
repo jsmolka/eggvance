@@ -1,6 +1,6 @@
 #include "ppu.h"
 
-#include "mmu/memory_map.h"
+#include "mmu/map.h"
 
 void PPU::renderMode3()
 {

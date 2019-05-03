@@ -1,37 +1,36 @@
 #include "mmu.h"
 
-#include <iostream>
 #include <fstream>
 
-#include "memory_map.h"
-
-// Todo: memory mirrors
+#include "common/format.h"
+#include "map.h"
 
 MMU::MMU()
-    : dispcnt(registerData(REG_DISPCNT))
-    , dispstat(registerData(REG_DISPSTAT))
-    , vcount(registerData(REG_VCOUNT))
-    , bg0cnt(registerData(REG_BG0CNT))
-    , bg1cnt(registerData(REG_BG1CNT))
-    , bg2cnt(registerData(REG_BG2CNT))
-    , bg3cnt(registerData(REG_BG3CNT))
-    , keyinput(registerData(REG_KEYINPUT))
-    , waitcnt(registerData(REG_WAITCNT))
+    : dispcnt(ref<u16>(REG_DISPCNT))
+    , dispstat(ref<u16>(REG_DISPSTAT))
+    , vcount(ref<u16>(REG_VCOUNT))
+    , bg0cnt(ref<u16>(REG_BG0CNT))
+    , bg1cnt(ref<u16>(REG_BG1CNT))
+    , bg2cnt(ref<u16>(REG_BG2CNT))
+    , bg3cnt(ref<u16>(REG_BG3CNT))
+    , keycnt(ref<u16>(REG_KEYCNT))
+    , keyinput(ref<u16>(REG_KEYINPUT))
+    , waitcnt(ref<u16>(REG_WAITCNT))
 {
 
 }
 
 void MMU::reset()
 {
-    std::fill(memory.begin(), memory.end(), 0);
+    memory.fill(0);
 }
 
-bool MMU::loadRom(const std::string& file)
+bool MMU::readFile(const std::string& file, u32 addr)
 {
     std::ifstream stream(file, std::ios::binary);
     if (!stream.is_open())
     {
-        std::cout << "Cannot open file " << file << "\n";
+        fmt::printf("Cannot open file {}\n", file);
         return false;
     }
 
@@ -39,26 +38,7 @@ bool MMU::loadRom(const std::string& file)
     std::streampos size = stream.tellg();
     stream.seekg(0, std::ios::beg);
 
-    u8* memory_ptr = &memory[MAP_GAMEPAK_0];
-    stream.read(reinterpret_cast<char*>(memory_ptr), size);
-
-    return true;
-}
-
-bool MMU::loadBios(const std::string& file)
-{
-    std::ifstream stream(file, std::ios::binary);
-    if (!stream.is_open())
-    {
-        std::cout << "Cannot open file " << file << "\n";
-        return false;
-    }
-
-    stream.seekg(0, std::ios::end);
-    std::streampos size = stream.tellg();
-    stream.seekg(0, std::ios::beg);
-
-    u8* memory_ptr = &memory[MAP_BIOS];
+    u8* memory_ptr = &memory[addr];
     stream.read(reinterpret_cast<char*>(memory_ptr), size);
 
     return true;
@@ -66,6 +46,19 @@ bool MMU::loadBios(const std::string& file)
 
 u8 MMU::readByte(u32 addr) const
 {
+    switch ((addr >> 30) & 0x1)
+    {
+    // Waitstate 1
+    case 0xA:
+        addr -= 0x2000000;
+        break;
+
+    // Waitstate 2
+    case 0xC:
+        addr -= 0x4000000;
+        break;
+    }
+
     return memory[addr];
 }
 
@@ -76,7 +69,22 @@ u16 MMU::readHalf(u32 addr) const
 
 u32 MMU::readWord(u32 addr) const
 {
-    return (readByte(addr + 3) << 24) | (readByte(addr + 2) << 16) | (readByte(addr + 1) << 8) | readByte(addr);
+    return (readHalf(addr + 2) << 16) | readHalf(addr);
+}
+
+u8 MMU::readByteFast(u32 addr)
+{
+    return memory[addr];
+}
+
+u16 MMU::readHalfFast(u32 addr)
+{
+    return ref<u16>(addr);
+}
+
+u32 MMU::readWordFast(u32 addr)
+{
+    return ref<u32>(addr);
 }
 
 void MMU::writeByte(u32 addr, u8 byte)
@@ -86,19 +94,16 @@ void MMU::writeByte(u32 addr, u8 byte)
 
 void MMU::writeHalf(u32 addr, u16 half)
 {
-    writeByte(addr + 0, (half >> 0) & 0xFF);
-    writeByte(addr + 1, (half >> 8) & 0xFF);
+    ref<u16>(addr) = half;
 }
 
 void MMU::writeWord(u32 addr, u32 word)
 {
-    writeByte(addr + 0, (word >>  0) & 0xFF);
-    writeByte(addr + 1, (word >>  8) & 0xFF);
-    writeByte(addr + 2, (word >> 16) & 0xFF);
-    writeByte(addr + 3, (word >> 24) & 0xFF);
+    ref<u32>(addr) = word;
 }
 
-u16& MMU::registerData(u32 addr)
+template<typename T>
+T& MMU::ref(u32 addr)
 {
-    return *reinterpret_cast<u16*>(&memory[addr]);
+    return *reinterpret_cast<T*>(&memory[addr]);
 }

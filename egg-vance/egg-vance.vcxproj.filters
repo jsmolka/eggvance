@@ -78,6 +78,9 @@
     <ClCompile Include="src\ppu\render_mode5.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\mmu\registers\other\keycnt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core.h">
@@ -137,10 +140,13 @@
     <ClInclude Include="src\mmu\registers\register.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\all.h">
+    <ClInclude Include="src\mmu\registers\include.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\memory_map.h">
+    <ClInclude Include="src\mmu\registers\other\keycnt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\map.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,7 +1,7 @@
 #include "dispstat.h"
 
 Dispstat::Dispstat(u16& data)
-    : Register(data)
+    : Register<u16>(data)
     , vblank(data)
     , hblank(data)
     , vcount_match(data)

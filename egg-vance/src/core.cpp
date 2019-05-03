@@ -1,6 +1,6 @@
 #include "core.h"
 
-#include "mmu/memory_map.h"
+#include "mmu/map.h"
 
 Core::Core()
     : arm(mmu)
@@ -11,10 +11,10 @@ Core::Core()
 
 void Core::run(const std::string& file)
 {
-    if (!mmu.loadRom(file))
+    if (!mmu.readFile(file, MAP_GAMEPAK_0))
         return;
 
-    if (!mmu.loadBios("bios.bin"))
+    if (!mmu.readFile("bios.bin", MAP_BIOS))
         return;
 
     bool running = true;
@@ -48,8 +48,9 @@ void Core::reset()
     mmu.reset();
     arm.reset();
     ppu.reset();
-
-    mmu.keyinput = 0xFF;
+    
+    // Set keys to no pressed
+    mmu.keyinput = 0x3FF;
 }
 
 void Core::frame()
@@ -104,4 +105,6 @@ void Core::keyEvent(SDL_Keycode key, bool pressed)
     case SDLK_i: mmu.keyinput.r      = state; break;
     case SDLK_q: mmu.keyinput.l      = state; break;
     }
+
+    // Todo: keycnt and interrupts
 }

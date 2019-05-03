@@ -2,4 +2,5 @@
 
 #include "field.h"
 
-using Register = Field<0, 16>;
+template<typename T>
+using Register = Field<T, 0, 8 * sizeof(T)>;

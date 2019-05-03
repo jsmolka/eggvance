@@ -3,7 +3,7 @@
 #include <array>
 
 #include "common/format.h"
-#include "mmu/memory_map.h"
+#include "mmu/map.h"
 #include "enums.h"
 #include "disassembler.h"
 #include "utility.h"

@@ -1,9 +1,9 @@
 #include "dispcnt.h"
 
-#include "mmu/memory_map.h"
+#include "mmu/map.h"
 
 Dispcnt::Dispcnt(u16& data)
-    : Register(data)
+    : Register<u16>(data)
     , bg_mode(data)
     , gbc_mode(data)
     , frame(data)

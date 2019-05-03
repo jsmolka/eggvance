@@ -2,13 +2,13 @@
 
 #include "../register.h"
 
-class Vcount : public Register
+class Vcount : public Register<u16>
 {
 public:
     Vcount(u16& data);
 
-    using Register::operator=;
-    using Register::operator unsigned int;
+    using Register<u16>::operator=;
+    using Register<u16>::operator unsigned int;
 
-    Field<0, 8> line;  // Current scanline (0..227)
+    Field<u16, 0, 8> line;  // Current scanline (0..227)
 };

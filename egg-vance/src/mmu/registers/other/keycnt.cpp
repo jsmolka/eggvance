@@ -1,6 +1,6 @@
-#include "keyinput.h"
+#include "keycnt.h"
 
-Keyinput::Keyinput(u16& data)
+Keycnt::Keycnt(u16& data)
     : Register<u16>(data)
     , a(data)
     , b(data)
@@ -12,6 +12,8 @@ Keyinput::Keyinput(u16& data)
     , down(data)
     , r(data)
     , l(data)
+    , irq(data)
+    , logic(data)
 {
 
 }

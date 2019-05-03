@@ -6,4 +6,5 @@
 #include "lcd/vcount.h"
 
 #include "other/keyinput.h"
+#include "other/keycnt.h"
 #include "other/waitcnt.h"

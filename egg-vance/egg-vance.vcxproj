@@ -154,6 +154,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\mmu\registers\lcd\vcount.cpp" />
+    <ClCompile Include="src\mmu\registers\other\keycnt.cpp" />
     <ClCompile Include="src\mmu\registers\other\keyinput.cpp" />
     <ClCompile Include="src\arm\disassembler.cpp" />
     <ClCompile Include="src\arm\pipeline.cpp" />
@@ -176,6 +177,7 @@
     <ClCompile Include="src\mmu\registers\other\waitcnt.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\mmu\registers\other\keycnt.h" />
     <ClInclude Include="src\mmu\registers\other\keyinput.h" />
     <ClInclude Include="src\arm\disassembler.h" />
     <ClInclude Include="src\arm\registers.h" />
@@ -188,10 +190,10 @@
     <ClInclude Include="src\mmu\registers\lcd\dispcnt.h" />
     <ClInclude Include="src\mmu\registers\lcd\dispstat.h" />
     <ClInclude Include="src\mmu\registers\register.h" />
-    <ClInclude Include="src\mmu\registers\all.h" />
+    <ClInclude Include="src\mmu\registers\include.h" />
     <ClInclude Include="src\ppu\ppu.h" />
     <ClInclude Include="src\core.h" />
-    <ClInclude Include="src\mmu\memory_map.h" />
+    <ClInclude Include="src\mmu\map.h" />
     <ClInclude Include="src\mmu\mmu.h" />
     <ClInclude Include="src\arm\arm.h" />
     <ClInclude Include="src\common\integer.h" />

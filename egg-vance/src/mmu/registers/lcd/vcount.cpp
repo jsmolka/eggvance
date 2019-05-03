@@ -1,7 +1,7 @@
 #include "vcount.h"
 
 Vcount::Vcount(u16& data)
-    : Register(data)
+    : Register<u16>(data)
     , line(data)
 { 
 

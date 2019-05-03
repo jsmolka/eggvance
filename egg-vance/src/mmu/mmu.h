@@ -4,7 +4,7 @@
 #include <string>
 
 #include "common/integer.h"
-#include "registers/all.h"
+#include "registers/include.h"
 
 class MMU
 {
@@ -13,12 +13,15 @@ public:
 
     void reset();
 
-    bool loadRom(const std::string& file);
-    bool loadBios(const std::string& file);
+    bool readFile(const std::string& file, u32 addr);
 
     u8  readByte(u32 addr) const;
     u16 readHalf(u32 addr) const;
     u32 readWord(u32 addr) const;
+
+    u8  readByteFast(u32 addr);
+    u16 readHalfFast(u32 addr);
+    u32 readWordFast(u32 addr);
 
     void writeByte(u32 addr, u8  byte);
     void writeHalf(u32 addr, u16 half);
@@ -38,11 +41,13 @@ public:
         };
         Bgcnt bgcnt[4];
     };
+    Keycnt keycnt;
     Keyinput keyinput;
     Waitcnt waitcnt;
 
 private:
-    u16& registerData(u32 addr);
+    template<typename T>
+    T& ref(u32 addr);
 
     std::array<u8, 0x10000000> memory;
 };
