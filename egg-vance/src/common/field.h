@@ -8,8 +8,8 @@ template<typename T, unsigned int position, unsigned int size>
 class Field
 {
 public:
-    Field(T& data) 
-        : data(data) 
+    Field(T& data)
+        : data(data)
     {
         static_assert(std::is_same<T, u16>::value || std::is_same<T, u32>::value, "T must be u16 or u32");
         static_assert((position + size) <= (8 * sizeof(T)), "Invalid parameters for T");

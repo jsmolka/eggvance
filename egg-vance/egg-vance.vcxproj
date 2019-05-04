@@ -153,6 +153,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ppu\obj\attribute0.cpp" />
+    <ClCompile Include="src\ppu\obj\attribute1.cpp" />
+    <ClCompile Include="src\ppu\obj\attribute2.cpp" />
+    <ClCompile Include="src\ppu\obj\oamentry.cpp" />
     <ClCompile Include="src\mmu\registers\lcd\vcount.cpp" />
     <ClCompile Include="src\mmu\registers\other\keycnt.cpp" />
     <ClCompile Include="src\mmu\registers\other\keyinput.cpp" />
@@ -163,6 +167,7 @@
     <ClCompile Include="src\mmu\registers\lcd\bgcnt.cpp" />
     <ClCompile Include="src\mmu\registers\lcd\dispcnt.cpp" />
     <ClCompile Include="src\mmu\registers\lcd\dispstat.cpp" />
+    <ClCompile Include="src\ppu\render_obj.cpp" />
     <ClCompile Include="src\ppu\ppu.cpp" />
     <ClCompile Include="src\core.cpp" />
     <ClCompile Include="src\arm\instr_arm.cpp" />
@@ -170,13 +175,15 @@
     <ClCompile Include="src\mmu\mmu.cpp" />
     <ClCompile Include="src\arm\arm.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\ppu\render_mode3.cpp" />
-    <ClCompile Include="src\ppu\render_mode4.cpp" />
-    <ClCompile Include="src\ppu\render_mode5.cpp" />
+    <ClCompile Include="src\ppu\render_bitmap.cpp" />
     <ClCompile Include="src\ppu\render_text.cpp" />
     <ClCompile Include="src\mmu\registers\other\waitcnt.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\ppu\obj\attribute0.h" />
+    <ClInclude Include="src\ppu\obj\attribute1.h" />
+    <ClInclude Include="src\ppu\obj\attribute2.h" />
+    <ClInclude Include="src\ppu\obj\oamentry.h" />
     <ClInclude Include="src\mmu\registers\other\keycnt.h" />
     <ClInclude Include="src\mmu\registers\other\keyinput.h" />
     <ClInclude Include="src\arm\disassembler.h" />
@@ -185,7 +192,7 @@
     <ClInclude Include="src\arm\enums.h" />
     <ClInclude Include="src\arm\utility.h" />
     <ClInclude Include="src\common\format.h" />
-    <ClInclude Include="src\mmu\registers\field.h" />
+    <ClInclude Include="src\common\field.h" />
     <ClInclude Include="src\mmu\registers\lcd\bgcnt.h" />
     <ClInclude Include="src\mmu\registers\lcd\dispcnt.h" />
     <ClInclude Include="src\mmu\registers\lcd\dispstat.h" />

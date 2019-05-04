@@ -15,6 +15,8 @@ public:
 
     bool readFile(const std::string& file, u32 addr);
 
+    void dump(u32 start, u32 size);
+
     u8  readByte(u32 addr) const;
     u16 readHalf(u32 addr) const;
     u32 readWord(u32 addr) const;

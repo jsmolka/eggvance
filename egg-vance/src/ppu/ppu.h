@@ -30,11 +30,15 @@ private:
     MMU& mmu;
 
     void renderText();
-    void renderMode3();
-    void renderMode4();
-    void renderMode5();
+    void renderBitmapMode3();
+    void renderBitmapMode4();
+    void renderBitmapMode5();
+    void renderSprites();
 
     void draw(int x, int y, int color);
+
+    int readColor(int index);
+    int readSpriteColor(int index);
 
     SDL_Window* window;
     SDL_Renderer* renderer;

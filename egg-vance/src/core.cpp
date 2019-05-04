@@ -20,7 +20,15 @@ void Core::run(const std::string& file)
     bool running = true;
     while (running)
     {
+        u32 ticks = SDL_GetTicks();
+
         frame();
+
+        u32 delta = SDL_GetTicks() - ticks;
+        if (delta < 16)
+            SDL_Delay(16 - delta);
+
+        //mmu.dump(MAP_PALETTE + 0x200, 0x1000);
 
         SDL_Event event;
         while (SDL_PollEvent(&event))
@@ -40,7 +48,7 @@ void Core::run(const std::string& file)
                 break;
             }
         }
-    }
+    }   
 }
 
 void Core::reset()
@@ -84,7 +92,7 @@ void Core::runCycles(int cycles)
     static int remaining = 0;
     remaining += cycles;
 
-    while (remaining >= 0)
+    while (remaining > 0)
         remaining -= arm.step();
 }
 

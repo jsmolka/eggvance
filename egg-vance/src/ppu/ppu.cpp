@@ -1,5 +1,7 @@
 #include "ppu.h"
 
+#include "mmu/map.h"
+
 PPU::PPU(MMU& mmu)
     : mmu(mmu)
 {
@@ -18,15 +20,12 @@ PPU::PPU(MMU& mmu)
         -1, 
         SDL_RENDERER_ACCELERATED
     );
-    
-    SDL_RenderSetLogicalSize(
-        renderer, 
-        WIDTH, HEIGHT
-    );
+    SDL_RenderSetIntegerScale(renderer, SDL_TRUE);
+    SDL_RenderSetLogicalSize(renderer, WIDTH, HEIGHT);
 
     texture = SDL_CreateTexture(
         renderer,
-        SDL_PIXELFORMAT_RGB555,
+        SDL_PIXELFORMAT_BGR555,
         SDL_TEXTUREACCESS_STREAMING,
         WIDTH, HEIGHT
     );
@@ -65,21 +64,22 @@ void PPU::scanline()
     case 3:
         // Bitmap modes only use BG2
         if (mmu.dispcnt.bg2)
-            renderMode3();
+            renderBitmapMode3();
         break;
 
     case 4:
         // Bitmap modes only use BG2
         if (mmu.dispcnt.bg2)
-            renderMode4();
+            renderBitmapMode4();
         break;
 
     case 5:
         // Bitmap modes only use BG2
         if (mmu.dispcnt.bg2)
-            renderMode5();
+            renderBitmapMode5();
         break;
     }
+    renderSprites();
 }
 
 void PPU::hblank()
@@ -132,4 +132,14 @@ void PPU::render()
 void PPU::draw(int x, int y, int color)
 {
     buffer[WIDTH * y + x] = color;
+}
+
+int PPU::readColor(int index)
+{
+    return mmu.readHalfFast(MAP_PALETTE + 2 * index);
+}
+
+int PPU::readSpriteColor(int index)
+{
+    return mmu.readHalfFast(MAP_PALETTE + 0x200 + 2 * index);
 }
