@@ -117,6 +117,11 @@ void PPU::next()
     }
 }
 
+void PPU::clear()
+{
+    buffer.fill(0);
+}
+
 void PPU::render()
 {
     SDL_UpdateTexture(

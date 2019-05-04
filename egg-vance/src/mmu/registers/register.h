@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/field.h"
+#include "common/bitfield.h"
 
 template<typename T>
-using Register = Field<T, 0, 8 * sizeof(T)>;
+using Register = BitField<T, 0, 8 * sizeof(T)>;

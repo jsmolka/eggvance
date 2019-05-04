@@ -10,5 +10,5 @@ public:
     using Register<u16>::operator=;
     using Register<u16>::operator unsigned int;
 
-    Field<u16, 0, 8> line;  // Current scanline (0..227)
+    BitField<u16, 0, 8> line;  // Current scanline (0..227)
 };

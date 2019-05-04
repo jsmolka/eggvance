@@ -1,6 +1,6 @@
 #include "oamentry.h"
 
-OamEntry::OamEntry(u16 attr0, u16 attr1, u16 attr2)
+OamEntry::OamEntry(int attr0, int attr1, int attr2)
     : attr0(attr0)
     , attr1(attr1)
     , attr2(attr2)

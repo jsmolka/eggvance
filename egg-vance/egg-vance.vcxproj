@@ -180,6 +180,7 @@
     <ClCompile Include="src\mmu\registers\other\waitcnt.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\common\bitvalue.h" />
     <ClInclude Include="src\ppu\obj\attribute0.h" />
     <ClInclude Include="src\ppu\obj\attribute1.h" />
     <ClInclude Include="src\ppu\obj\attribute2.h" />
@@ -192,7 +193,7 @@
     <ClInclude Include="src\arm\enums.h" />
     <ClInclude Include="src\arm\utility.h" />
     <ClInclude Include="src\common\format.h" />
-    <ClInclude Include="src\common\field.h" />
+    <ClInclude Include="src\common\bitfield.h" />
     <ClInclude Include="src\mmu\registers\lcd\bgcnt.h" />
     <ClInclude Include="src\mmu\registers\lcd\dispcnt.h" />
     <ClInclude Include="src\mmu\registers\lcd\dispstat.h" />

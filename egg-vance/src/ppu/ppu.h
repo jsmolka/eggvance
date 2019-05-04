@@ -18,6 +18,7 @@ public:
     void vblank();
     void next();
 
+    void clear();
     void render();
 
 private:

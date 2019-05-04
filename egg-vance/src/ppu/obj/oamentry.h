@@ -7,7 +7,7 @@
 class OamEntry
 {
 public:
-    OamEntry(u16 attr0, u16 attr1, u16 attr2);
+    OamEntry(int attr0, int attr1, int attr2);
 
     int spriteWidth() const;
     int spriteHeight() const;
