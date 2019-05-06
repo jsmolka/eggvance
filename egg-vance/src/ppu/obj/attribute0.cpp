@@ -2,13 +2,13 @@
 
 Attribute0::Attribute0(int data)
     : y(data)
-    , rotation(data)
+    , affine(data)
     , double_size(data)
-    , hide(data)
+    , disabled(data)
     , gfx_mode(data)
     , mosaic(data)
     , color_mode(data)
-    , obj_shape(data)
+    , shape(data)
 {
 
 }

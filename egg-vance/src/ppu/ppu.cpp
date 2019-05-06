@@ -144,7 +144,7 @@ int PPU::readColor(int index)
     return mmu.readHalfFast(MAP_PALETTE + 2 * index);
 }
 
-int PPU::readSpriteColor(int index)
+int PPU::readSpriteColor(int index, int palette)
 {
-    return mmu.readHalfFast(MAP_PALETTE + 0x200 + 2 * index);
+    return mmu.readHalfFast(MAP_PALETTE + 0x200 + 0x20 * palette + 2 * index);
 }

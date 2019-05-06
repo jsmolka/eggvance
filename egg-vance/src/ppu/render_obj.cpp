@@ -16,8 +16,8 @@ void PPU::renderSprites()
             mmu.readHalfFast(MAP_OAM + 8 * entry + 4)   // Attribute 2
         );
 
-        // Skip sprite if hidden
-        if (!oam.attr0.rotation && oam.attr0.hide)
+        // Skip sprite if disabled
+        if (!oam.attr0.affine && oam.attr0.disabled)
             continue;
 
         int x = oam.attr1.x;
@@ -36,7 +36,9 @@ void PPU::renderSprites()
         int tile_offset = 0x20;
         int sprite_row = line - y;
 
-        u32 tile_addr = MAP_VRAM + 0x10000 + tile_offset * (width / 8) * (sprite_row / 8) + 4 * (sprite_row % 8);
+        u32 tile_addr = MAP_VRAM + 0x10000 + tile_offset * ((width / 8) * (sprite_row / 8) + oam.attr2.tile) + 4 * (sprite_row % 8);
+        
+        u32 tile_base = MAP_VRAM + 0x10000;
 
         for (int tile_x = 0; tile_x < (width / 8); ++tile_x)
         {
@@ -47,10 +49,10 @@ void PPU::renderSprites()
                 int color2 = byte >> 4;
 
                 if (x >= 0 && x < WIDTH && color1 != 0)
-                    draw(x, line, readSpriteColor(color1));
+                    draw(x, line, readSpriteColor(color1, oam.attr2.palette));
                 x++;
                 if (x >= 0 && x < WIDTH && color2 != 0)
-                    draw(x, line, readSpriteColor(color2));
+                    draw(x, line, readSpriteColor(color2, oam.attr2.palette));
                 x++;
             }
             tile_addr += tile_offset;
