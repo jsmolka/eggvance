@@ -26,7 +26,7 @@ void PPU::renderSprites()
         if (x >= WIDTH)  x -= 512;
         if (y >= HEIGHT) y -= 256;
 
-        int width  = oam.spriteWidth();
+        int width = oam.spriteWidth();
         int height = oam.spriteHeight();
 
         // Check if the current line contains the sprite
@@ -47,22 +47,47 @@ void PPU::renderSprites()
         // Go to sprite row for current line
         tile_addr += 4 * (sprite_row % 8);
 
-        for (int tile_x = 0; tile_x < (width / 8); ++tile_x)
+        if (!oam.attr1.flip_y)
         {
-            for (int i = 0; i < 4; ++i)
+            for (int tile_x = 0; tile_x < (width / 8); ++tile_x)
             {
-                int byte   = mmu.readByteFast(tile_addr + i);
-                int color1 = byte & 0xF;
-                int color2 = byte >> 4;
+                for (int i = 0; i < 4; ++i)
+                {
+                    int byte = mmu.readByteFast(tile_addr + i);
+                    int color1 = byte & 0xF;
+                    int color2 = byte >> 4;
 
-                if (x >= 0 && x < WIDTH && color1 != 0)
-                    draw(x, line, readSpriteColor(color1, oam.attr2.palette));
-                x++;
-                if (x >= 0 && x < WIDTH && color2 != 0)
-                    draw(x, line, readSpriteColor(color2, oam.attr2.palette));
-                x++;
+                    if (x >= 0 && x < WIDTH && color1 != 0)
+                        draw(x, line, readSpriteColor(color1, oam.attr2.palette));
+                    x++;
+                    if (x >= 0 && x < WIDTH && color2 != 0)
+                        draw(x, line, readSpriteColor(color2, oam.attr2.palette));
+                    x++;
+                }
+                tile_addr += tile_size;
             }
-            tile_addr += tile_size;
+        }
+        else  // Vertical flip
+        {
+            x += (width - 1);
+
+            for (int tile_x = 0; tile_x < (width / 8); ++tile_x)
+            {
+                for (int i = 0; i < 4; ++i)
+                {
+                    int byte = mmu.readByteFast(tile_addr + i);
+                    int color1 = byte & 0xF;
+                    int color2 = byte >> 4;
+
+                    if (x >= 0 && x < WIDTH && color1 != 0)
+                        draw(x, line, readSpriteColor(color1, oam.attr2.palette));
+                    x--;
+                    if (x >= 0 && x < WIDTH && color2 != 0)
+                        draw(x, line, readSpriteColor(color2, oam.attr2.palette));
+                    x--;
+                }
+                tile_addr += tile_size;
+            }
         }
     }
 }
