@@ -33,18 +33,25 @@ void PPU::renderSprites()
         if (y > line || (y + height) < line)
             continue;
 
-        int tile_offset = 0x20;
+        int tile_size = 0x20;
         int sprite_row = line - y;
 
-        u32 tile_addr = MAP_VRAM + 0x10000 + tile_offset * ((width / 8) * (sprite_row / 8) + oam.attr2.tile) + 4 * (sprite_row % 8);
-        
-        u32 tile_base = MAP_VRAM + 0x10000;
+        // Todo: wraparound for sprites if they expand over 0x3FF
+
+        // Default tile data address
+        u32 tile_addr = MAP_VRAM + 0x10000;
+        // Go to base tile of current sprite
+        tile_addr += tile_size * oam.attr2.tile;
+        // Go to tile row for current line
+        tile_addr += tile_size * (sprite_row / 8) * (mmu.dispcnt.sprite_1d ? (width / 8) : 32);
+        // Go to sprite row for current line
+        tile_addr += 4 * (sprite_row % 8);
 
         for (int tile_x = 0; tile_x < (width / 8); ++tile_x)
         {
             for (int i = 0; i < 4; ++i)
             {
-                int byte = mmu.readByteFast(tile_addr + i);
+                int byte   = mmu.readByteFast(tile_addr + i);
                 int color1 = byte & 0xF;
                 int color2 = byte >> 4;
 
@@ -55,7 +62,7 @@ void PPU::renderSprites()
                     draw(x, line, readSpriteColor(color2, oam.attr2.palette));
                 x++;
             }
-            tile_addr += tile_offset;
+            tile_addr += tile_size;
         }
     }
 }

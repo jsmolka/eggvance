@@ -14,7 +14,7 @@ public:
     BitField<u16,  3, 1> gbc_mode;     // GBC mode (0 = GBA, 1 = GBC)
     BitField<u16,  4, 1> frame;        // Frame used in BG modes 4,5 (0-1 = Frame 0-1)
     BitField<u16,  5, 1> access_oam;   // Allow access to OAM during V-Blank (1 = enabled)
-    BitField<u16,  6, 1> obj_mapping;  // OBJ character VRAM mapping (0 = 2D, 1 = 1D)
+    BitField<u16,  6, 1> sprite_1d;    // OBJ character VRAM mapping (0 = 2D, 1 = 1D)
     BitField<u16,  7, 1> force_blank;  // Forced blank (1 = allow fast access to VRAM, palette and OAM)
     BitField<u16,  8, 1> bg0;          // Display BG0 (1 = on)
     BitField<u16,  9, 1> bg1;          // Display BG1 (1 = on)
