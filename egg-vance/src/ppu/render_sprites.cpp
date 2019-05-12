@@ -3,6 +3,7 @@
 #include "mmu/map.h"
 #include "sprites/oamentry.h"
 
+// Todo: handle tile "overflow" 18000h -> 10000h
 void PPU::updateSprites()
 {
     for (int entry = 0; entry < 128; ++entry)
@@ -54,9 +55,11 @@ void PPU::updateSprites()
                     for (int x = 0; x < 4; ++x)
                     {
                         int byte = mmu.readByteFast(base_tile + offset);
+                        int value1 = byte & 0xF;
+                        int value2 = byte >> 4;
 
-                        sprite.data[sprite_y + y][sprite_x + 2 * x] = byte & 0xF;
-                        sprite.data[sprite_y + y][sprite_x + 2 * x + 1] = byte >> 4;
+                        sprite.setPixel(sprite_x + 2 * x, sprite_y + y, value1, oam.attr1.flip_x, oam.attr1.flip_y);
+                        sprite.setPixel(sprite_x + 2 * x + 1, sprite_y + y, value2, oam.attr1.flip_x, oam.attr1.flip_y);
 
                         offset++;
                     }

@@ -4,8 +4,11 @@
 
 #include "common/integer.h"
 
-struct Sprite
+class Sprite
 {
+public:
+    void setPixel(int x, int y, int value, bool flip_x, bool flip_y);
+
     bool disabled;
 
     int x;

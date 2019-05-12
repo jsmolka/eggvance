@@ -178,6 +178,7 @@
     <ClCompile Include="src\ppu\render_bitmap.cpp" />
     <ClCompile Include="src\ppu\render_text.cpp" />
     <ClCompile Include="src\mmu\registers\other\waitcnt.cpp" />
+    <ClCompile Include="src\ppu\sprites\sprite.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ppu\sprites\sprite.h" />
