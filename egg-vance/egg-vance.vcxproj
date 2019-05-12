@@ -153,10 +153,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\ppu\obj\attribute0.cpp" />
-    <ClCompile Include="src\ppu\obj\attribute1.cpp" />
-    <ClCompile Include="src\ppu\obj\attribute2.cpp" />
-    <ClCompile Include="src\ppu\obj\oamentry.cpp" />
+    <ClCompile Include="src\ppu\sprites\attribute0.cpp" />
+    <ClCompile Include="src\ppu\sprites\attribute1.cpp" />
+    <ClCompile Include="src\ppu\sprites\attribute2.cpp" />
+    <ClCompile Include="src\ppu\sprites\oamentry.cpp" />
     <ClCompile Include="src\mmu\registers\lcd\vcount.cpp" />
     <ClCompile Include="src\mmu\registers\other\keycnt.cpp" />
     <ClCompile Include="src\mmu\registers\other\keyinput.cpp" />
@@ -167,7 +167,7 @@
     <ClCompile Include="src\mmu\registers\lcd\bgcnt.cpp" />
     <ClCompile Include="src\mmu\registers\lcd\dispcnt.cpp" />
     <ClCompile Include="src\mmu\registers\lcd\dispstat.cpp" />
-    <ClCompile Include="src\ppu\render_obj.cpp" />
+    <ClCompile Include="src\ppu\render_sprites.cpp" />
     <ClCompile Include="src\ppu\ppu.cpp" />
     <ClCompile Include="src\core.cpp" />
     <ClCompile Include="src\arm\instr_arm.cpp" />
@@ -180,11 +180,12 @@
     <ClCompile Include="src\mmu\registers\other\waitcnt.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\ppu\sprites\sprite.h" />
     <ClInclude Include="src\common\bitvalue.h" />
-    <ClInclude Include="src\ppu\obj\attribute0.h" />
-    <ClInclude Include="src\ppu\obj\attribute1.h" />
-    <ClInclude Include="src\ppu\obj\attribute2.h" />
-    <ClInclude Include="src\ppu\obj\oamentry.h" />
+    <ClInclude Include="src\ppu\sprites\attribute0.h" />
+    <ClInclude Include="src\ppu\sprites\attribute1.h" />
+    <ClInclude Include="src\ppu\sprites\attribute2.h" />
+    <ClInclude Include="src\ppu\sprites\oamentry.h" />
     <ClInclude Include="src\mmu\registers\other\keycnt.h" />
     <ClInclude Include="src\mmu\registers\other\keyinput.h" />
     <ClInclude Include="src\arm\disassembler.h" />

@@ -28,8 +28,6 @@ void Core::run(const std::string& file)
         if (delta < 16)
             SDL_Delay(16 - delta);
 
-        //mmu.dump(MAP_PALETTE + 0x200, 0x1000);
-
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {

@@ -50,6 +50,12 @@ void PPU::scanline()
     mmu.dispstat.hblank = false;
     mmu.dispstat.vblank = false;
 
+    if (mmu.oam_changed)
+    {
+        updateSprites();
+        mmu.oam_changed = false;
+    }
+
     switch (mmu.dispcnt.bg_mode)
     {
     case 0:

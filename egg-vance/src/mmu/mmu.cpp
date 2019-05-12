@@ -99,17 +99,31 @@ u32 MMU::readWordFast(u32 addr)
 
 void MMU::writeByte(u32 addr, u8 byte)
 {
+    checkAddress(addr);
+
     memory[addr] = byte;
 }
 
 void MMU::writeHalf(u32 addr, u16 half)
 {
+    checkAddress(addr);
+
     ref<u16>(addr) = half;
 }
 
 void MMU::writeWord(u32 addr, u32 word)
 {
+    checkAddress(addr);
+
     ref<u32>(addr) = word;
+}
+
+void MMU::checkAddress(u32 addr)
+{
+    if (addr >= MAP_OAM && addr < (MAP_OAM + 0x400))
+    {
+        oam_changed = true;
+    }
 }
 
 template<typename T>

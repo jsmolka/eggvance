@@ -29,6 +29,8 @@ public:
     void writeHalf(u32 addr, u16 half);
     void writeWord(u32 addr, u32 word);
 
+    bool oam_changed;
+
     Dispcnt dispcnt;
     Dispstat dispstat;
     Vcount vcount;
@@ -50,6 +52,8 @@ public:
 private:
     template<typename T>
     T& ref(u32 addr);
+
+    void checkAddress(u32 addr);
 
     std::array<u8, 0x10000000> memory;
 };

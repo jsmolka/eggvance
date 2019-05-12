@@ -75,19 +75,19 @@
     <ClCompile Include="src\ppu\render_bitmap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ppu\obj\oamentry.cpp">
+    <ClCompile Include="src\ppu\sprites\attribute0.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ppu\obj\attribute0.cpp">
+    <ClCompile Include="src\ppu\sprites\attribute1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ppu\obj\attribute1.cpp">
+    <ClCompile Include="src\ppu\sprites\attribute2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ppu\obj\attribute2.cpp">
+    <ClCompile Include="src\ppu\sprites\oamentry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ppu\render_obj.cpp">
+    <ClCompile Include="src\ppu\render_sprites.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -155,22 +155,25 @@
     <ClInclude Include="src\mmu\map.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\ppu\obj\oamentry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ppu\obj\attribute0.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ppu\obj\attribute1.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ppu\obj\attribute2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\common\bitfield.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\common\bitvalue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ppu\sprites\attribute0.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ppu\sprites\attribute1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ppu\sprites\attribute2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ppu\sprites\oamentry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ppu\sprites\sprite.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

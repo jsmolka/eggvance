@@ -4,6 +4,7 @@
 #include <SDL.h>
 
 #include "mmu/mmu.h"
+#include "sprites/sprite.h"
 
 class PPU
 {
@@ -36,6 +37,8 @@ private:
     void renderBitmapMode5();
     void renderSprites();
 
+    void updateSprites();
+
     void draw(int x, int y, int color);
 
     int readColor(int index);
@@ -44,6 +47,8 @@ private:
     SDL_Window* window;
     SDL_Renderer* renderer;
     SDL_Texture* texture;
+
     std::array<u16, WIDTH * HEIGHT> buffer;
+    std::array<Sprite, 128> sprites;
 };
 
