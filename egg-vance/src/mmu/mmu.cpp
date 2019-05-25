@@ -13,6 +13,14 @@ MMU::MMU()
     , bg1cnt(ref<u16>(REG_BG1CNT))
     , bg2cnt(ref<u16>(REG_BG2CNT))
     , bg3cnt(ref<u16>(REG_BG3CNT))
+    , bg0hofs(ref<u16>(REG_BG0HOFS))
+    , bg1hofs(ref<u16>(REG_BG1HOFS))
+    , bg2hofs(ref<u16>(REG_BG2HOFS))
+    , bg3hofs(ref<u16>(REG_BG3HOFS))
+    , bg0vofs(ref<u16>(REG_BG0VOFS))
+    , bg1vofs(ref<u16>(REG_BG1VOFS))
+    , bg2vofs(ref<u16>(REG_BG2VOFS))
+    , bg3vofs(ref<u16>(REG_BG3VOFS))
     , keycnt(ref<u16>(REG_KEYCNT))
     , keyinput(ref<u16>(REG_KEYINPUT))
     , waitcnt(ref<u16>(REG_WAITCNT))
@@ -55,7 +63,7 @@ void MMU::dump(u32 start, u32 size)
 
 u8 MMU::readByte(u32 addr) const
 {
-    switch ((addr >> 30) & 0x1)
+    switch ((addr >> 30) & 0xF)
     {
     // Waitstate 1
     case 0xA:

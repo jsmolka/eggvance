@@ -1,9 +1,11 @@
 #pragma once
 
-#include "lcd/bgcnt.h"
-#include "lcd/dispcnt.h"
-#include "lcd/dispstat.h"
-#include "lcd/vcount.h"
+#include "io/bgcnt.h"
+#include "io/bghofs.h"
+#include "io/bgvofs.h"
+#include "io/dispcnt.h"
+#include "io/dispstat.h"
+#include "io/vcount.h"
 
 #include "other/keyinput.h"
 #include "other/keycnt.h"

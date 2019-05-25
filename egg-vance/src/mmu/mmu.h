@@ -45,6 +45,28 @@ public:
         };
         Bgcnt bgcnt[4];
     };
+    union
+    {
+        struct
+        {
+            Bghofs bg0hofs;
+            Bghofs bg1hofs;
+            Bghofs bg2hofs;
+            Bghofs bg3hofs;
+        };
+        Bghofs bghofs[4];
+    };
+    union
+    {
+        struct
+        {
+            Bgvofs bg0vofs;
+            Bgvofs bg1vofs;
+            Bgvofs bg2vofs;
+            Bgvofs bg3vofs;
+        };
+        Bgvofs bgvofs[4];
+    };
     Keycnt keycnt;
     Keyinput keyinput;
     Waitcnt waitcnt;

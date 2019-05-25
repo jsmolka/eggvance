@@ -153,20 +153,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\mmu\registers\io\bgvofs.cpp" />
+    <ClCompile Include="src\mmu\registers\io\bghofs.cpp" />
     <ClCompile Include="src\ppu\sprites\attribute0.cpp" />
     <ClCompile Include="src\ppu\sprites\attribute1.cpp" />
     <ClCompile Include="src\ppu\sprites\attribute2.cpp" />
     <ClCompile Include="src\ppu\sprites\oamentry.cpp" />
-    <ClCompile Include="src\mmu\registers\lcd\vcount.cpp" />
+    <ClCompile Include="src\mmu\registers\io\vcount.cpp" />
     <ClCompile Include="src\mmu\registers\other\keycnt.cpp" />
     <ClCompile Include="src\mmu\registers\other\keyinput.cpp" />
     <ClCompile Include="src\arm\disassembler.cpp" />
     <ClCompile Include="src\arm\pipeline.cpp" />
     <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\arm\registerbank.cpp" />
-    <ClCompile Include="src\mmu\registers\lcd\bgcnt.cpp" />
-    <ClCompile Include="src\mmu\registers\lcd\dispcnt.cpp" />
-    <ClCompile Include="src\mmu\registers\lcd\dispstat.cpp" />
+    <ClCompile Include="src\mmu\registers\io\bgcnt.cpp" />
+    <ClCompile Include="src\mmu\registers\io\dispcnt.cpp" />
+    <ClCompile Include="src\mmu\registers\io\dispstat.cpp" />
     <ClCompile Include="src\ppu\render_sprites.cpp" />
     <ClCompile Include="src\ppu\ppu.cpp" />
     <ClCompile Include="src\core.cpp" />
@@ -181,6 +183,8 @@
     <ClCompile Include="src\ppu\sprites\sprite.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\mmu\registers\io\bgvofs.h" />
+    <ClInclude Include="src\mmu\registers\io\bghofs.h" />
     <ClInclude Include="src\ppu\sprites\sprite.h" />
     <ClInclude Include="src\common\bitvalue.h" />
     <ClInclude Include="src\ppu\sprites\attribute0.h" />
@@ -196,9 +200,9 @@
     <ClInclude Include="src\arm\utility.h" />
     <ClInclude Include="src\common\format.h" />
     <ClInclude Include="src\common\bitfield.h" />
-    <ClInclude Include="src\mmu\registers\lcd\bgcnt.h" />
-    <ClInclude Include="src\mmu\registers\lcd\dispcnt.h" />
-    <ClInclude Include="src\mmu\registers\lcd\dispstat.h" />
+    <ClInclude Include="src\mmu\registers\io\bgcnt.h" />
+    <ClInclude Include="src\mmu\registers\io\dispcnt.h" />
+    <ClInclude Include="src\mmu\registers\io\dispstat.h" />
     <ClInclude Include="src\mmu\registers\register.h" />
     <ClInclude Include="src\mmu\registers\include.h" />
     <ClInclude Include="src\ppu\ppu.h" />
@@ -208,7 +212,7 @@
     <ClInclude Include="src\arm\arm.h" />
     <ClInclude Include="src\common\integer.h" />
     <ClInclude Include="src\mmu\registers\other\waitcnt.h" />
-    <ClInclude Include="src\mmu\registers\lcd\vcount.h" />
+    <ClInclude Include="src\mmu\registers\io\vcount.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
