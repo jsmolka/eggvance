@@ -18,7 +18,7 @@ private:
     void reset();
 
     void frame();
-    void runCycles(int cycles);
+    void emulate(int cycles);
 
     void keyEvent(SDL_Keycode key, bool pressed);
 

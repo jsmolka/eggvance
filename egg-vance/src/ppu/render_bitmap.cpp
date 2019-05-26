@@ -28,7 +28,7 @@ void PPU::renderBitmapMode4()
         int offset = WIDTH * y + x;
         int index = mmu.readByteFast(frame_addr + offset);
         // Palette stores 16-bit colors
-        int color = readColor(index);
+        int color = readBgColor(index, 0);
 
         draw(x, y, color);
     }
@@ -52,7 +52,7 @@ void PPU::renderBitmapMode5()
         else
         {
             // Color 0 seems to be used outside the bitmap
-            color = readColor(0);
+            color = readBgColor(0, 0);
         }
         draw(x, y, color);
     }

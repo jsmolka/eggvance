@@ -153,6 +153,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ppu\tiles\mapentry.cpp" />
     <ClCompile Include="src\mmu\registers\io\bgvofs.cpp" />
     <ClCompile Include="src\mmu\registers\io\bghofs.cpp" />
     <ClCompile Include="src\ppu\sprites\attribute0.cpp" />
@@ -183,6 +184,7 @@
     <ClCompile Include="src\ppu\sprites\sprite.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\ppu\tiles\mapentry.h" />
     <ClInclude Include="src\mmu\registers\io\bgvofs.h" />
     <ClInclude Include="src\mmu\registers\io\bghofs.h" />
     <ClInclude Include="src\ppu\sprites\sprite.h" />

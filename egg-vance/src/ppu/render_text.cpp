@@ -1,43 +1,30 @@
 #include "ppu.h"
 
 #include "mmu/map.h"
+#include "tiles/mapentry.h"
 
 void PPU::renderText()
 {
-    const auto& bgcnt = mmu.bgcnt[0];
+    const Bgcnt& bgcnt = mmu.bg0cnt;
 
-    for (int y = 0; y < 20; ++y)
+    u32 mapAddr = 0x0600FE1C;  // bgcnt.mapAddr();
+
+    MapEntry entry(mmu.readHalf(mapAddr));
+
+    u32 addr = bgcnt.tileAddr() + 0x20  * entry.tile;
+
+    // Iterate vertical tile pixels
+    for (int y = 0; y < 8; ++y)
     {
-        for (int x = 0; x < 30; ++x)
+        // Iterate horizontal tile pixels (2 pixels per byte)
+        for (int x = 0; x < 4; x++)
         {
-            // Each tile takes up 32 words in memory
-            u16 tile = mmu.readHalf(bgcnt.mapAddr() + 32 * 2 * y + 2 * x);
+            int byte = mmu.readByteFast(addr);
 
-            u16 tile_number = tile & 0x3FF;
-            u8 palette_number = tile >> 12 & 0xF;
+            draw(2 * x, y, readBgColor(byte & 0xF, entry.palette));
+            draw(2 * x + 1, y, readBgColor(byte >> 4, entry.palette));
 
-            int x_off = 0;
-            int y_off = 0;
-
-            // 8x8 tiles at address of tile number
-            for (int i = 0; i < 32; ++i)
-            {
-                u8 tile_data = mmu.readByte(bgcnt.tileAddr() + 32 * tile_number + i);
-
-                if (x_off == 8)
-                {
-                    x_off = 0;
-                    y_off++;
-                }
-
-                u16 color_lhs = mmu.readHalf(MAP_PALETTE + 32 * palette_number + 2 * (tile_data & 0xF));
-                u16 color_rhs = mmu.readHalf(MAP_PALETTE + 32 * palette_number + 2 * (tile_data >> 4 & 0xF));
-
-                draw(8 * x + x_off, 8 * y + y_off, color_lhs);
-                draw(8 * x + x_off + 1, 8 * y + y_off, color_rhs);
-
-                x_off += 2;
-            }
+            addr++;
         }
     }
 }

@@ -59,12 +59,15 @@ void PPU::scanline()
     switch (mmu.dispcnt.bg_mode)
     {
     case 0:
+        renderText();
         break;
 
     case 1:
+        renderText();
         break;
 
     case 2:
+        renderText();
         break;
 
     case 3:
@@ -85,7 +88,7 @@ void PPU::scanline()
             renderBitmapMode5();
         break;
     }
-    renderSprites();
+    //renderSprites();
 }
 
 void PPU::hblank()
@@ -145,12 +148,12 @@ void PPU::draw(int x, int y, int color)
     buffer[WIDTH * y + x] = color;
 }
 
-int PPU::readColor(int index)
+int PPU::readBgColor(int index, int palette)
 {
-    return mmu.readHalfFast(MAP_PALETTE + 2 * index);
+    return mmu.readHalfFast(MAP_PALETTE + 0x20 * palette + 2 * index);
 }
 
-int PPU::readSpriteColor(int index, int palette)
+int PPU::readFgColor(int index, int palette)
 {
     return mmu.readHalfFast(MAP_PALETTE + 0x200 + 0x20 * palette + 2 * index);
 }

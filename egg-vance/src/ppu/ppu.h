@@ -41,8 +41,8 @@ private:
 
     void draw(int x, int y, int color);
 
-    int readColor(int index);
-    int readSpriteColor(int index, int palette);
+    int readBgColor(int index, int palette);
+    int readFgColor(int index, int palette);
 
     SDL_Window* window;
     SDL_Renderer* renderer;

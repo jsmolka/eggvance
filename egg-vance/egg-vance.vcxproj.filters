@@ -99,6 +99,9 @@
     <ClCompile Include="src\mmu\registers\io\bgvofs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\ppu\tiles\mapentry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core.h">
@@ -189,6 +192,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\mmu\registers\io\bgvofs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ppu\tiles\mapentry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

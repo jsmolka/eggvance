@@ -9,8 +9,8 @@ class OamEntry
 public:
     OamEntry(int attr0, int attr1, int attr2);
 
-    int spriteWidth() const;
-    int spriteHeight() const;
+    int width() const;
+    int height() const;
 
     Attribute0 attr0;
     Attribute1 attr1;

@@ -67,11 +67,11 @@ void Core::frame()
     for (int line = 0; line < 160; ++line)
     {
         ppu.scanline();
-        runCycles(960);
+        emulate(960);
 
         // H-Blank
         ppu.hblank();
-        runCycles(272);
+        emulate(272);
 
         ppu.next();
     }
@@ -80,14 +80,14 @@ void Core::frame()
     ppu.vblank();
     for (int line = 0; line < 68; ++line)
     {
-        runCycles(960 + 272);
+        emulate(960 + 272);
         ppu.next();
     }
 
     ppu.render();
 }
 
-void Core::runCycles(int cycles)
+void Core::emulate(int cycles)
 {
     static int remaining = 0;
     remaining += cycles;

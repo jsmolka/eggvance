@@ -8,12 +8,12 @@ OamEntry::OamEntry(int attr0, int attr1, int attr2)
 
 }
 
-int OamEntry::spriteWidth() const
+int OamEntry::width() const
 {
     return sprite_dims[attr0.shape][attr1.size][0];
 }
 
-int OamEntry::spriteHeight() const
+int OamEntry::height() const
 {
     return sprite_dims[attr0.shape][attr1.size][1];
 }

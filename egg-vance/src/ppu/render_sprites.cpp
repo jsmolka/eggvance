@@ -3,6 +3,9 @@
 #include "mmu/map.h"
 #include "sprites/oamentry.h"
 
+// Todo:
+// 8-bit tiles
+
 void PPU::updateSprites()
 {
     for (int entry = 0; entry < 128; ++entry)
@@ -25,8 +28,8 @@ void PPU::updateSprites()
         if (sprite.x >= WIDTH)  sprite.x -= 512;
         if (sprite.y >= HEIGHT) sprite.y -= 256;
 
-        sprite.width   = oam.spriteWidth();
-        sprite.height  = oam.spriteHeight();
+        sprite.width   = oam.width();
+        sprite.height  = oam.height();
         sprite.palette = oam.attr2.palette;
 
         u32 tile_addr = MAP_VRAM + 0x10000 + 0x20 * oam.attr2.tile;
@@ -102,7 +105,7 @@ void PPU::renderSprites()
             if (color == 0)
                 continue;
 
-            draw(screen_x, line, readSpriteColor(color, sprite.palette));
+            draw(screen_x, line, readFgColor(color, sprite.palette));
         }
     }
 }
