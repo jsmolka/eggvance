@@ -73,7 +73,7 @@ void PPU::renderMode0Layer(int layer)
     //if (scroll_y < mmu.vcount)
     //    return;
 
-    u32 mapAddr = 0x0600F000; // bgcnt.mapAddr();
+    u32 mapAddr = bgcnt.mapAddr();
 
     int base_y = 0;
     for (int tile_y = 0; tile_y < 32; ++tile_y)

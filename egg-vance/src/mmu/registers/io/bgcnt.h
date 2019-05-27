@@ -17,7 +17,7 @@ public:
     BitField<u16,  2, 2> tile_block;    // BG tile base block (0-3, in units of 16kb)
     BitField<u16,  6, 1> mosaic;        // Mosaic (1 = enable)
     BitField<u16,  7, 1> palette_type;  // Palettes type (0 = 16/16, 1 = 256/1)
-    BitField<u16,  8, 4> map_block;     // BG map base block (0-31, in units of 2kb)
+    BitField<u16,  8, 5> map_block;     // BG map base block (0-31, in units of 2kb)
     BitField<u16, 13, 1> wraparound;    // Display area overflow (1 = enable)
     BitField<u16, 14, 2> screen_size;   // Screen size
 
