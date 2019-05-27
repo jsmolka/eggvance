@@ -143,6 +143,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)..\lib\fmt\include;$(SolutionDir)..\lib\SDL2\include;$(ProjectDir)src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
+      <DisableSpecificWarnings>26451</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -179,7 +180,7 @@
     <ClCompile Include="src\arm\arm.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ppu\render_bitmap.cpp" />
-    <ClCompile Include="src\ppu\render_text.cpp" />
+    <ClCompile Include="src\ppu\render_tiles.cpp" />
     <ClCompile Include="src\mmu\registers\other\waitcnt.cpp" />
     <ClCompile Include="src\ppu\sprites\sprite.cpp" />
   </ItemGroup>

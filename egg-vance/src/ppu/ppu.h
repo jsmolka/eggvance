@@ -32,10 +32,18 @@ private:
     MMU& mmu;
 
     void renderText();
-    void renderBitmapMode3();
-    void renderBitmapMode4();
-    void renderBitmapMode5();
+
+    void renderMode0();
+    void renderMode0Layer(int layer);
+
+    void renderMode1();
+    void renderMode2();
+    void renderMode3();
+    void renderMode4();
+    void renderMode5();
     void renderSprites();
+
+    void drawTileMap(int x, int y, int map_block);
 
     void updateSprites();
 

@@ -24,5 +24,5 @@ Dispcnt::Dispcnt(u16& data)
 
 u32 Dispcnt::frameAddr() const
 {
-    return  MAP_VRAM + 0xA000 * frame;
+    return  MAP_VRAM + frame_size * frame;
 }

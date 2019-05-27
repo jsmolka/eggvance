@@ -2,57 +2,76 @@
 
 #include "mmu/map.h"
 
-void PPU::renderBitmapMode3()
+// Rotate / scale: yes
+// Layers: 2
+// Size: 240x160
+// Tiles: 1
+// Colors: 32768
+// Features: mosaic, alpha blending, brightness, priority
+void PPU::renderMode3()
 {
+    if (!mmu.dispcnt.bg2)
+        return;
+
     u32 frame_addr = mmu.dispcnt.frameAddr();
 
     int y = mmu.vcount;
     for (int x = 0; x < WIDTH; ++x)
     {
-        // Each pixel is stored as a 16-bit color
-        int offset = WIDTH * 2 * y + 2 * x;
+        int offset = 2 * (WIDTH * y + x);
         int color = mmu.readHalfFast(frame_addr + offset);
 
         draw(x, y, color);
     }
 }
 
-void PPU::renderBitmapMode4()
+// Rotate / scale: yes
+// Layers: 2
+// Size: 240x160
+// Tiles: 2
+// Colors: 256/1
+// Features: mosaic, alpha blending, brightness, priority
+void PPU::renderMode4()
 {
+    if (!mmu.dispcnt.bg2)
+        return;
+
     u32 frame_addr = mmu.dispcnt.frameAddr();
 
     int y = mmu.vcount;
     for (int x = 0; x < WIDTH; ++x)
     {
-        // Each pixel is stored as a 8-bit palette indices
         int offset = WIDTH * y + x;
         int index = mmu.readByteFast(frame_addr + offset);
-        // Palette stores 16-bit colors
         int color = readBgColor(index, 0);
 
         draw(x, y, color);
     }
 }
 
-void PPU::renderBitmapMode5()
+// Rotate / scale: yes
+// Layers: 2
+// Size: 160x128
+// Tiles: 2
+// Colors: 32768
+// Features: mosaic, alpha blending, brightness, priority
+void PPU::renderMode5()
 {
+    if (!mmu.dispcnt.bg2)
+        return;
+
     u32 frame_addr = mmu.dispcnt.frameAddr();
 
-    // Like mode 3, but with dimensions 160x128
     int y = mmu.vcount;
     for (int x = 0; x < WIDTH; ++x)
     {
-        int color;
+        // Use transparent color by default
+        int color = 0x8000;
+
         if (x < 160 && y < 128)
         {
-            // Each pixel is stored as a 16-bit color
-            int offset = 160 * 2 * y + 2 * x;
+            int offset = 2 * (160 * y + x);
             color = mmu.readHalfFast(frame_addr + offset);
-        }
-        else
-        {
-            // Color 0 seems to be used outside the bitmap
-            color = readBgColor(0, 0);
         }
         draw(x, y, color);
     }

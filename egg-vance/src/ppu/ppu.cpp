@@ -4,6 +4,8 @@
 
 PPU::PPU(MMU& mmu)
     : mmu(mmu)
+    , buffer()
+    , sprites()
 {
     SDL_Init(SDL_INIT_VIDEO);
 
@@ -50,45 +52,25 @@ void PPU::scanline()
     mmu.dispstat.hblank = false;
     mmu.dispstat.vblank = false;
 
-    if (mmu.oam_changed)
-    {
-        updateSprites();
-        mmu.oam_changed = false;
-    }
-
     switch (mmu.dispcnt.bg_mode)
     {
-    case 0:
-        renderText();
-        break;
-
-    case 1:
-        renderText();
-        break;
-
-    case 2:
-        renderText();
-        break;
-
-    case 3:
-        // Bitmap modes only use BG2
-        if (mmu.dispcnt.bg2)
-            renderBitmapMode3();
-        break;
-
-    case 4:
-        // Bitmap modes only use BG2
-        if (mmu.dispcnt.bg2)
-            renderBitmapMode4();
-        break;
-
-    case 5:
-        // Bitmap modes only use BG2
-        if (mmu.dispcnt.bg2)
-            renderBitmapMode5();
-        break;
+    case 0: renderMode0(); break;
+    case 1: renderMode1(); break;
+    case 2: renderMode2(); break;
+    case 3: renderMode3(); break;
+    case 4: renderMode4(); break;
+    case 5: renderMode5(); break;
     }
-    //renderSprites();
+
+    if (mmu.dispcnt.obj)
+    {
+        if (mmu.oam_changed)
+        {
+            updateSprites();
+            mmu.oam_changed = false;
+        }
+        renderSprites();
+    }
 }
 
 void PPU::hblank()

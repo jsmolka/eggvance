@@ -5,6 +5,8 @@
 class Dispcnt : public Register<u16>
 {
 public:
+    static constexpr int frame_size = 0xA000;
+
     Dispcnt(u16& data);
 
     using Register<u16>::operator=;

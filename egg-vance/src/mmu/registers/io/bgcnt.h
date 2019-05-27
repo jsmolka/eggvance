@@ -24,12 +24,12 @@ public:
     u32 tileAddr() const;
     u32 mapAddr() const;
 
-    int tilesX() const;
-    int tilesY() const;
-    int affineTilesX() const;
-    int affineTilesY() const;
+    int width() const;
+    int height() const;
+    int affineWidth() const;
+    int affineHeight() const;
 
 private:
-    static const int tiles[4][2];
-    static const int affine_tiles[4][2];
+    static const int sizes[4][2];
+    static const int affine_sizes[4][2];
 };

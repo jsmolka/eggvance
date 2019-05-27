@@ -25,38 +25,38 @@ u32 Bgcnt::mapAddr() const
     return MAP_VRAM + map_block_size * map_block;
 }
 
-int Bgcnt::tilesX() const
+int Bgcnt::width() const
 {
-    return tiles[screen_size][0];
+    return sizes[screen_size][0];
 }
 
-int Bgcnt::tilesY() const
+int Bgcnt::height() const
 {
-    return tiles[screen_size][1];;
+    return sizes[screen_size][1];;
 }
 
-int Bgcnt::affineTilesX() const
+int Bgcnt::affineWidth() const
 {
-    return affine_tiles[screen_size][0];
+    return affine_sizes[screen_size][0];
 }
 
-int Bgcnt::affineTilesY() const
+int Bgcnt::affineHeight() const
 {
-    return affine_tiles[screen_size][1];
+    return affine_sizes[screen_size][1];
 }
 
-const int Bgcnt::tiles[4][2] =
+const int Bgcnt::sizes[4][2] =
 {
-    { 32, 32 },
-    { 64, 32 },
-    { 32, 64 },
-    { 64, 64 }
+    { 256, 256 },
+    { 512, 256 },
+    { 256, 512 },
+    { 512, 512 }
 };
 
-const int Bgcnt::affine_tiles[4][2] =
+const int Bgcnt::affine_sizes[4][2] =
 {
-    {  16,  16 },
-    {  32,  32 },
-    {  64,  64 },
-    { 128, 128 }
+    {  128,  128 },
+    {  256,  256 },
+    {  512,  512 },
+    { 1024, 1024 }
 };
