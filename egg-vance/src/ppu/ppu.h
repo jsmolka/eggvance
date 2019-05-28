@@ -31,10 +31,16 @@ private:
 
     MMU& mmu;
 
-    void renderText();
-
     void renderMode0();
     void renderMode0Layer(int layer);
+
+    enum PixelFormat
+    {
+        BPP4,  // 4 bits per pixel (16/16 palette)
+        BPP8   // 8 bits per pixel (256/1 palette)
+    };
+    template<PixelFormat format>
+    int readTilePixel(u32 addr, int x, int y, bool flip_x, bool flip_y);
 
     void renderMode1();
     void renderMode2();
@@ -42,8 +48,6 @@ private:
     void renderMode4();
     void renderMode5();
     void renderSprites();
-
-    void drawTileMap(int x, int y, int map_block);
 
     void updateSprites();
 

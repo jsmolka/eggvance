@@ -10,5 +10,5 @@ public:
     using Register<u16>::operator=;
     using Register<u16>::operator unsigned int;
 
-    BitField<u16, 0, 8> offset;  // Y offset (0..511)
+    BitField<u16, 0, 9> offset;  // Y offset (0..511)
 };

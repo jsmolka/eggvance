@@ -23,7 +23,6 @@ void PPU::renderMode0()
     }
 }
 
-#include "common/format.h"
 void PPU::renderMode0Layer(int layer)
 {
     const Bgcnt& bgcnt = mmu.bgcnt[layer];
@@ -41,8 +40,6 @@ void PPU::renderMode0Layer(int layer)
     int screen_x = 0;
     // Start x for the first tile
     int x = scroll_x % 8;
-
-    fmt::printf("X:%d, Y:%d\n", scroll_x, scroll_y);
     
     for (int block = scroll_x / 256; block < bgcnt.width() / 256; ++block)
     {
@@ -78,56 +75,6 @@ void PPU::renderMode0Layer(int layer)
         tile_x = 0;
     }
 }
-
-//const Bgcnt& bgcnt = mmu.bgcnt[layer];
-//const int scroll_x = mmu.bgvofs[layer].offset;
-//const int scroll_y = mmu.bghofs[layer].offset;
-//
-//int tile_x = scroll_x / 8;
-//int tile_y = (scroll_y + mmu.vcount) / 8;
-//int tile_size = bgcnt.palette_type ? 0x40 : 0x20;
-//
-//tile_x %= 32;
-//tile_y %= 32;
-//
-//int screen_x = 0;
-//
-//int x = scroll_x % 8;
-//
-//// Add map_base to block?
-//for (int block = scroll_x / 256; block < bgcnt.width() / 256; ++block)
-//{
-//    // Get base address for the used block
-//    u32 mapAddr = bgcnt.mapBase() + block * Bgcnt::map_block_size;
-//    // Add offset for the currently used tile
-//    mapAddr += 2 * (32 * tile_y + tile_x);
-//
-//    for (int tile = tile_x; tile < 32; ++tile)
-//    {
-//        MapEntry entry(mmu.readHalfFast(mapAddr));
-//
-//        u32 addr = bgcnt.tileBase() + tile_size * entry.tile;
-//
-//        for (; x < 8; ++x)
-//        {
-//            int index = readTilePixel<BPP4>(
-//                addr,
-//                x, (scroll_y + mmu.vcount) % 8,
-//                entry.flip_x,
-//                entry.flip_y
-//                );
-//
-//            draw(screen_x, mmu.vcount, readBgColor(index, entry.palette));
-//
-//            if (++screen_x == WIDTH)
-//                return;
-//        }
-//        x = 0;
-//        mapAddr += 2;
-//    }
-//    // Default tile_x to 0 after initial block
-//    tile_x = 0;
-//}
 
 template<PPU::PixelFormat format>
 int PPU::readTilePixel(u32 addr, int x, int y, bool flip_x, bool flip_y)

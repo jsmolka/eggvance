@@ -99,7 +99,7 @@
     <ClCompile Include="src\ppu\tiles\mapentry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ppu\render_tiles.cpp">
+    <ClCompile Include="src\ppu\render_text.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

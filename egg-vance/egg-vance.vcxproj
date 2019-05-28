@@ -180,7 +180,7 @@
     <ClCompile Include="src\arm\arm.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ppu\render_bitmap.cpp" />
-    <ClCompile Include="src\ppu\render_tiles.cpp" />
+    <ClCompile Include="src\ppu\render_text.cpp" />
     <ClCompile Include="src\mmu\registers\other\waitcnt.cpp" />
     <ClCompile Include="src\ppu\sprites\sprite.cpp" />
   </ItemGroup>

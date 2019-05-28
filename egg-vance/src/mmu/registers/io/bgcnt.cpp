@@ -5,24 +5,24 @@
 Bgcnt::Bgcnt(u16& data)
     : Register<u16>(data)
     , priority(data)
-    , tile_block(data)
+    , tile_base(data)
     , mosaic(data)
     , palette_type(data)
-    , map_block(data)
+    , map_base(data)
     , wraparound(data)
     , screen_size(data)
 {
 
 }
 
-u32 Bgcnt::tileAddr() const
+u32 Bgcnt::tileBase() const
 {
-    return MAP_VRAM + tile_block_size * tile_block;
+    return MAP_VRAM + tile_block_size * tile_base;
 }
 
-u32 Bgcnt::mapAddr() const
+u32 Bgcnt::mapBase() const
 {
-    return MAP_VRAM + map_block_size * map_block;
+    return MAP_VRAM + map_block_size * map_base;
 }
 
 int Bgcnt::width() const
