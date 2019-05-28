@@ -41,6 +41,10 @@ private:
     };
     template<PixelFormat format>
     int readTilePixel(u32 addr, int x, int y, bool flip_x, bool flip_y);
+    int initialMapBlock(const Bgcnt& bgcnt, int offset_x, int offset_y);
+    int nextHorizontalMapBlock(const Bgcnt& bgcnt, int block);
+
+
 
     void renderMode1();
     void renderMode2();

@@ -27,21 +27,18 @@ void PPU::renderMode0Layer(int layer)
 {
     const Bgcnt& bgcnt = mmu.bgcnt[layer];
     const int scroll_x = mmu.bghofs[layer].offset;
-    const int scroll_y = mmu.bgvofs[layer].offset;
+    const int scroll_y = mmu.bgvofs[layer].offset + mmu.vcount;
 
-    int tile_x = scroll_x / 8;
-    int tile_y = (scroll_y + mmu.vcount) / 8;
+    int tile_x = (scroll_x / 8) % 32;
+    int tile_y = (scroll_y / 8) % 32;
     int tile_size = bgcnt.palette_type ? 0x40 : 0x20;
 
-    tile_x %= 32;
-    tile_y %= 32;
-
-    // Actual x on the screen
     int screen_x = 0;
-    // Start x for the first tile
     int x = scroll_x % 8;
-    
-    for (int block = scroll_x / 256; block < bgcnt.width() / 256; ++block)
+
+    int block = initialMapBlock(bgcnt, scroll_x, scroll_y);
+
+    while (true)
     {
         // Get base address for the used block
         u32 mapAddr = bgcnt.mapBase() + block * Bgcnt::map_block_size;
@@ -58,7 +55,7 @@ void PPU::renderMode0Layer(int layer)
             {
                 int index = readTilePixel<BPP4>(
                     addr, 
-                    x, (scroll_y + mmu.vcount) % 8, 
+                    x, scroll_y % 8, 
                     entry.flip_x, 
                     entry.flip_y
                 );
@@ -73,6 +70,8 @@ void PPU::renderMode0Layer(int layer)
             mapAddr += 2;
         }
         tile_x = 0;
+
+        block = nextHorizontalMapBlock(bgcnt, block);
     }
 }
 
@@ -95,6 +94,62 @@ int PPU::readTilePixel(u32 addr, int x, int y, bool flip_x, bool flip_y)
             addr + 8 * y + x
         );
     }
+}
+
+int PPU::initialMapBlock(const Bgcnt& bgcnt, int offset_x, int offset_y)
+{
+    // Offset y contains vcount to get the correct line block
+
+    switch (bgcnt.screen_size)
+    {
+    // 1x1 blocks
+    case 0b00:
+        return 0;
+
+    // 2x1 blocks
+    case 0b01:
+        return offset_x / 256;
+
+    // 1x2 blocks
+    case 0b10:
+        return (offset_y < 512) ? (offset_y / 256) : 0;
+
+    // 2x2 blocks
+    case 0b11:
+        return ((offset_y < 512) ? (2 * (offset_y / 256)) : 0) + offset_x / 256;
+    }
+    return 0;
+}
+
+int PPU::nextHorizontalMapBlock(const Bgcnt& bgcnt, int block)
+{
+    // Assumes blocks starting at 0
+
+    switch (bgcnt.screen_size)
+    {
+    // 1x1 blocks
+    case 0b00:
+        return block;
+
+    // 2x1 blocks
+    case 0b01: 
+        return std::abs(block - 1);
+
+    // 1x2 blocks
+    case 0b10: 
+        return block;
+
+    // 2x2 blocks
+    case 0b11:
+        switch (block)
+        {
+        case 0: return 1;
+        case 1: return 0;
+        case 2: return 3;
+        case 3: return 2;
+        }
+    }
+    return 0;
 }
 
 // Layers: 0 - 2 (BG0, BG1 rendered as mode 0, BG2 rendered as mode 2)
