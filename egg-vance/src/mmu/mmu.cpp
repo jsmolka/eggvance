@@ -31,6 +31,7 @@ MMU::MMU()
 void MMU::reset()
 {
     memory.fill(0);
+    oam_changed = true;
 }
 
 bool MMU::readFile(const std::string& file, u32 addr)

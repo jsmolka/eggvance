@@ -47,6 +47,7 @@ void PPU::reset()
     buffer.fill(0);
 }
 
+#include "common/format.h"
 void PPU::scanline()
 {
     mmu.dispstat.hblank = false;
@@ -127,7 +128,10 @@ void PPU::render()
 
 void PPU::draw(int x, int y, int color)
 {
-    buffer[WIDTH * y + x] = color;
+    u16& pixel = buffer[WIDTH * y + x];
+
+    if (color != 0 && pixel == 0)
+        buffer[WIDTH * y + x] = color;
 }
 
 int PPU::readBgColor(int index, int palette)

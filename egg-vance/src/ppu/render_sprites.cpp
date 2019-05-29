@@ -102,9 +102,6 @@ void PPU::renderSprites()
                 continue;
 
             int color = sprite.data[line - sprite.y][x];
-            if (color == 0)
-                continue;
-
             draw(screen_x, line, readFgColor(color, sprite.palette));
         }
     }

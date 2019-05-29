@@ -65,6 +65,7 @@ void PPU::renderMode5()
     int y = mmu.vcount;
     for (int x = 0; x < WIDTH; ++x)
     {
+        // Todo: default in other emus is pinkish color
         // Use transparent color by default
         int color = 0x8000;
 

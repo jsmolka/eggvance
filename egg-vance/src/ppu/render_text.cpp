@@ -32,6 +32,7 @@ void PPU::renderMode0Layer(int layer)
     int tile_x = (scroll_x / 8) % 32;
     int tile_y = (scroll_y / 8) % 32;
     int tile_size = bgcnt.palette_type ? 0x40 : 0x20;
+    PixelFormat format = bgcnt.palette_type ? BPP8 : BPP4;
 
     int screen_x = 0;
     int x = scroll_x % 8;
@@ -51,13 +52,18 @@ void PPU::renderMode0Layer(int layer)
 
             u32 addr = bgcnt.tileBase() + tile_size * entry.tile;
 
+            // Cannot read tiles from sprite memory
+            if (addr >= MAP_VRAM + 0x10000)
+                return;
+
             for (; x < 8; ++x)
             {
-                int index = readTilePixel<BPP4>(
+                int index = readTilePixel(
                     addr, 
                     x, scroll_y % 8, 
                     entry.flip_x, 
-                    entry.flip_y
+                    entry.flip_y,
+                    format
                 );
 
                 draw(screen_x, mmu.vcount, readBgColor(index, entry.palette));
@@ -75,8 +81,7 @@ void PPU::renderMode0Layer(int layer)
     }
 }
 
-template<PPU::PixelFormat format>
-int PPU::readTilePixel(u32 addr, int x, int y, bool flip_x, bool flip_y)
+int PPU::readTilePixel(u32 addr, int x, int y, bool flip_x, bool flip_y, PixelFormat format)
 {
     if (flip_x) x = 7 - x;
     if (flip_y) y = 7 - y;

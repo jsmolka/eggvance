@@ -39,8 +39,7 @@ private:
         BPP4,  // 4 bits per pixel (16/16 palette)
         BPP8   // 8 bits per pixel (256/1 palette)
     };
-    template<PixelFormat format>
-    int readTilePixel(u32 addr, int x, int y, bool flip_x, bool flip_y);
+    int readTilePixel(u32 addr, int x, int y, bool flip_x, bool flip_y, PixelFormat format);
     int initialMapBlock(const Bgcnt& bgcnt, int offset_x, int offset_y);
     int nextHorizontalMapBlock(const Bgcnt& bgcnt, int block);
 
