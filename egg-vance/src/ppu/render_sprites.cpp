@@ -3,12 +3,11 @@
 #include "mmu/map.h"
 #include "sprites/oamentry.h"
 
-// Todo:
-// 8-bit tiles
-
-void PPU::updateSprites()
+void PPU::renderSprites()
 {
-    for (int entry = 0; entry < 128; ++entry)
+    int line = mmu.vcount.line;
+
+    for (int entry = 127; entry > -1; --entry)
     {
         OamEntry oam(
             mmu.readHalfFast(MAP_OAM + 8 * entry + 0),  // Attribute 0
@@ -16,93 +15,67 @@ void PPU::updateSprites()
             mmu.readHalfFast(MAP_OAM + 8 * entry + 4)   // Attribute 2
         );
 
-        Sprite& sprite = sprites[entry];
-
-        sprite.disabled = !oam.attr0.affine && oam.attr0.disabled;
-        if (sprite.disabled)
+        if (!oam.attr0.affine && oam.attr0.disabled)
             continue;
 
-        sprite.x = oam.attr1.x;
-        sprite.y = oam.attr0.y;
+        int x = oam.attr1.x;
+        int y = oam.attr0.y;
 
-        if (sprite.x >= WIDTH)  sprite.x -= 512;
-        if (sprite.y >= HEIGHT) sprite.y -= 256;
+        if (x >= WIDTH)  x -= 512;
+        if (y >= HEIGHT) y -= 256;
 
-        sprite.width   = oam.width();
-        sprite.height  = oam.height();
-        sprite.palette = oam.attr2.palette;
+        int width = oam.width();
+        int height = oam.height();
 
-        u32 tile_addr = MAP_VRAM + 0x10000 + 0x20 * oam.attr2.tile;
+        if (y > line || (y + height) < line)
+            continue;
 
-        int base_y = 0;
-        // Iterate vertical tiles
-        for (int tile_y = 0; tile_y < (sprite.height / 8); ++tile_y)
+        PixelFormat format = oam.attr0.color_mode ? BPP8 : BPP4;
+        int tile_size = oam.attr0.color_mode ? 0x40 : 0x20;
+
+        bool flip_x = !oam.attr0.affine && oam.attr1.flip_x;
+        bool flip_y = !oam.attr0.affine && oam.attr1.flip_y;
+
+        // Current line in the sprite
+        int sprite_y = flip_y ? (height - 1 - (line - y)) : (line - y);
+        // Current vertical tile
+        int tile_y = sprite_y / 8;
+        // Current vertical pixel in the tile
+        int pixel_y = sprite_y % 8;
+        
+        u32 addr = MAP_VRAM + 0x10000 + oam.attr2.tile * tile_size;
+        if (mmu.dispcnt.sprite_1d)
+            addr += tile_size * 8 * tile_y;
+        else
+            addr += tile_size * 32 * tile_y;
+
+        // Screen coordinates
+        int screen_x = flip_x ? (x + width - 1) : x;
+        int screen_y = line;
+
+        int offset = flip_x ? -1 : 1;
+        for (int tile_x = 0; tile_x < (width / 8); ++tile_x)
         {
-            int base_x = 0;
-            // Iterate horizontal tiles
-            for (int tile_x = 0; tile_x < (sprite.width / 8); ++tile_x)
+            for (int pixel_x = 0; pixel_x < 8; ++pixel_x)
             {
-                // Iterate vertical tile pixels
-                for (int y = 0; y < 8; ++y)
+                if (screen_x >= 0 && screen_x < WIDTH)
                 {
-                    // Iterate horizontal tile pixels (2 pixels per byte)
-                    for (int x = 0; x < 4; ++x)
+                    int color = readPixel(addr, pixel_x, pixel_y, format);
+                    if (color != 0)
                     {
-                        int byte = mmu.readByteFast(tile_addr);
+                        if (format == BPP4)
+                            color = readFgColor(color, oam.attr2.palette);
 
-                        sprite.setPixel(
-                            base_x + 2 * x,
-                            base_y + y,
-                            byte & 0xF,
-                            oam.attr1.flip_x, 
-                            oam.attr1.flip_y
-                        );
-                        sprite.setPixel(
-                            base_x + 2 * x + 1, 
-                            base_y + y, 
-                            byte >> 4,
-                            oam.attr1.flip_x, 
-                            oam.attr1.flip_y
-                        );
-
-                        tile_addr++;
+                        draw(screen_x, screen_y, color);
                     }
                 }
-                base_x += 8;
-
-                // Tiles "overflow" if the last one is reached
-                if (tile_addr > (MAP_VRAM + 0x18000))
-                    tile_addr -= 0x8000;
+                screen_x += offset;
             }
-            base_y += 8;
+            addr += tile_size;
 
-            if (!mmu.dispcnt.sprite_1d)
-                tile_addr += 0x20 * 24;
-        }
-    }
-}
-
-void PPU::renderSprites()
-{
-    int line = mmu.vcount;
-
-    for (const Sprite& sprite : sprites)
-    {
-        if (sprite.disabled)
-            continue;
-
-        if (sprite.y > line || (sprite.y + sprite.height) < line)
-            continue;
-
-        for (int x = 0; x < sprite.width; ++x)
-        {
-            int screen_x = x + sprite.x;
-
-            if (screen_x < 0 || screen_x >= WIDTH)
-                continue;
-
-            int color = sprite.data[line - sprite.y][x];
-            draw(screen_x, line, readFgColor(color, sprite.palette));
+            // Tile overflow
+            if (addr > (MAP_VRAM + 0x18000))
+                addr -= 0x8000;
         }
     }
 }

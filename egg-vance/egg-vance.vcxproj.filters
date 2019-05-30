@@ -75,9 +75,6 @@
     <ClCompile Include="src\ppu\render_sprites.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ppu\sprites\sprite.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\mmu\registers\io\bgcnt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -171,9 +168,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ppu\sprites\oamentry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ppu\sprites\sprite.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\mmu\registers\io\bgcnt.h">

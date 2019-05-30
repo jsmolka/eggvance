@@ -5,7 +5,6 @@
 PPU::PPU(MMU& mmu)
     : mmu(mmu)
     , buffer()
-    , sprites()
 {
     SDL_Init(SDL_INIT_VIDEO);
 
@@ -62,16 +61,8 @@ void PPU::scanline()
     case 4: renderMode4(); break;
     case 5: renderMode5(); break;
     }
-
     if (mmu.dispcnt.obj)
-    {
-        if (mmu.oam_changed)
-        {
-            updateSprites();
-            mmu.oam_changed = false;
-        }
         renderSprites();
-    }
 }
 
 void PPU::hblank()
@@ -128,10 +119,7 @@ void PPU::render()
 
 void PPU::draw(int x, int y, int color)
 {
-    u16& pixel = buffer[WIDTH * y + x];
-
-    if (color != 0 && pixel == 0)
-        buffer[WIDTH * y + x] = color;
+    buffer[WIDTH * y + x] = color;
 }
 
 int PPU::readBgColor(int index, int palette)
@@ -142,4 +130,29 @@ int PPU::readBgColor(int index, int palette)
 int PPU::readFgColor(int index, int palette)
 {
     return mmu.readHalfFast(MAP_PALETTE + 0x200 + 0x20 * palette + 2 * index);
+}
+
+int PPU::readPixel(u32 addr, int x, int y, PixelFormat format)
+{
+    if (format == BPP4)
+    {
+        int byte = mmu.readByteFast(
+            addr + 4 * y + x / 2
+        );
+        return (x & 0x1) ? (byte >> 4) : (byte & 0xF);
+    }
+    else
+    {
+        return mmu.readByteFast(
+            addr + 8 * y + x
+        );
+    }
+}
+
+int PPU::readTilePixel(u32 addr, int x, int y, bool flip_x, bool flip_y, PixelFormat format)
+{
+    if (flip_x) x = 7 - x;
+    if (flip_y) y = 7 - y;
+
+    return readPixel(addr, x, y, format);
 }

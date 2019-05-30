@@ -81,26 +81,6 @@ void PPU::renderMode0Layer(int layer)
     }
 }
 
-int PPU::readTilePixel(u32 addr, int x, int y, bool flip_x, bool flip_y, PixelFormat format)
-{
-    if (flip_x) x = 7 - x;
-    if (flip_y) y = 7 - y;
-
-    if (format == BPP4)
-    {
-        int byte = mmu.readByteFast(
-            addr + 4 * y + x / 2
-        );
-        return (x & 0x1) ? (byte >> 4) : (byte & 0xF);
-    }
-    else
-    {
-        return mmu.readByteFast(
-            addr + 8 * y + x
-        );
-    }
-}
-
 int PPU::initialMapBlock(const Bgcnt& bgcnt, int offset_x, int offset_y)
 {
     // Offset y contains vcount to get the correct line block
