@@ -37,12 +37,11 @@ void PPU::renderSprites()
         bool flip_x = !oam.attr0.affine && oam.attr1.flip_x;
         bool flip_y = !oam.attr0.affine && oam.attr1.flip_y;
 
-        // Initialize matrix with identity
-        s16 pa = 0x100;  // dx
-        s16 pb = 0x000;  // dmx
-        s16 pc = 0x000;  // dy
-        s16 pd = 0x100;  // dmy
-
+        // Identity matrix by default
+        s16 pa = 0x100;
+        s16 pb = 0x000;
+        s16 pc = 0x000;
+        s16 pd = 0x100;
         if (oam.attr0.affine)
         {
             pa = mmu.readHalfFast(MAP_OAM + 0x20 * oam.attr1.paramter + 0x06);  
@@ -84,7 +83,7 @@ void PPU::renderSprites()
                     addr += tile_size * 8 * tile_y;
                 else
                     addr += tile_size * 32 * tile_y;
-
+                
                 // Tile overflow
                 if (addr > (MAP_VRAM + 0x18000))
                     addr -= 0x8000;

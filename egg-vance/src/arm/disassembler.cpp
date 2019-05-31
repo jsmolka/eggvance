@@ -712,8 +712,8 @@ std::string Disassembler::psrTransfer(u32 instr)
 
     if (write)
     {
-		int use_imm = (instr >> 25) & 0x001;
-		int data    = (instr >>  0) & 0xFFF;
+        int use_imm = (instr >> 25) & 0x001;
+        int data    = (instr >>  0) & 0xFFF;
 
         std::string op;
         if (use_imm)

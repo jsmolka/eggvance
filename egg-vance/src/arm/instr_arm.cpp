@@ -74,7 +74,7 @@ void ARM::branchExchange(u32 instr)
 // ARM 2
 void ARM::branchLink(u32 instr)
 {
-	int link   = (instr >> 24) & 0x000001;
+    int link   = (instr >> 24) & 0x000001;
     int offset = (instr >>  0) & 0xFFFFFF;
 
     offset = twos<24>(offset);
@@ -117,7 +117,7 @@ void ARM::dataProcessing(u32 instr)
         int use_reg = (data >> 4) & 0x1;
         int rm      = (data >> 0) & 0xF;
 
-		u32 value = regs[rm];
+        u32 value = regs[rm];
 
         int offset;
         if (use_reg)
@@ -127,12 +127,12 @@ void ARM::dataProcessing(u32 instr)
             offset &= 0xFF;
 
             // Account for prefetch
-			if (rn == 15) op1 += 4;
-			if (rm == 15) value += 4;
+            if (rn == 15) op1 += 4;
+            if (rm == 15) value += 4;
         }
         else
         {
-			offset = (data >> 7) & 0x1F;
+            offset = (data >> 7) & 0x1F;
         }
 
         switch (type)
@@ -277,7 +277,7 @@ void ARM::dataProcessing(u32 instr)
         dst = regs.arm() ? alignWord(dst) : alignHalf(dst);
         needs_flush = true;
 
-		cycle(regs.pc, SEQ);
+        cycle(regs.pc, SEQ);
     }
     cycle(regs.pc + 4, SEQ);
 }
@@ -291,7 +291,7 @@ void ARM::psrTransfer(u32 instr)
     if (write)
     {
         int use_imm = (instr >> 25) & 0x001;
-		int data    = (instr >>  0) & 0xFFF;
+        int data    = (instr >>  0) & 0xFFF;
 
         u32 op;
         if (use_imm)
@@ -347,18 +347,18 @@ void ARM::psrTransfer(u32 instr)
         int rd = (instr >> 12) & 0xF;
         regs[rd] = use_spsr ? regs.spsr : regs.cpsr;
     }
-	cycle(regs.pc + 4, SEQ);
+    cycle(regs.pc + 4, SEQ);
 }
 
 // ARM 5
 void ARM::multiply(u32 instr)
 {
     int accumulate = (instr >> 21) & 0x1;
-	int flags      = (instr >> 20) & 0x1;
-	int rd	       = (instr >> 16) & 0xF;
-	int rn         = (instr >> 12) & 0xF;
-	int rs         = (instr >>  8) & 0xF;
-	int rm	       = (instr >>  0) & 0xF;
+    int flags      = (instr >> 20) & 0x1;
+    int rd           = (instr >> 16) & 0xF;
+    int rn         = (instr >> 12) & 0xF;
+    int rs         = (instr >>  8) & 0xF;
+    int rm           = (instr >>  0) & 0xF;
 
     u32& dst = regs[rd];
     u32  op1 = regs[rs];
@@ -377,16 +377,16 @@ void ARM::multiply(u32 instr)
     if (accumulate)
         cycle();
 
-	cycle(regs.pc + 4, SEQ);
+    cycle(regs.pc + 4, SEQ);
 }
 
 // ARM 6
 void ARM::multiplyLong(u32 instr)
 {
-	int sign       = (instr >> 22) & 0x1;
-	int accumulate = (instr >> 21) & 0x1;
-	int flags      = (instr >> 20) & 0x1;
-	int rdhi       = (instr >> 16) & 0xF;
+    int sign       = (instr >> 22) & 0x1;
+    int accumulate = (instr >> 21) & 0x1;
+    int flags      = (instr >> 20) & 0x1;
+    int rdhi       = (instr >> 16) & 0xF;
     int rdlo       = (instr >> 12) & 0xF;
     int rs         = (instr >>  8) & 0xF;
     int rm         = (instr >>  0) & 0xF;

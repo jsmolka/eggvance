@@ -46,7 +46,6 @@ void PPU::reset()
     buffer.fill(0);
 }
 
-#include "common/format.h"
 void PPU::scanline()
 {
     mmu.dispstat.hblank = false;
@@ -61,6 +60,7 @@ void PPU::scanline()
     case 4: renderMode4(); break;
     case 5: renderMode5(); break;
     }
+
     if (mmu.dispcnt.obj)
         renderSprites();
 }

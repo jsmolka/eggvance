@@ -200,36 +200,36 @@ u32 ARM::lsr(u32 value, int offset, bool& carry, bool immediate)
 // Todo: convert to s32 and use shift operator?
 u32 ARM::asr(u32 value, int offset, bool& carry, bool immediate)
 {
-	if (offset != 0)
-	{
-		if (offset < 32)
-		{
-			bool msb = value >> 31;
+    if (offset != 0)
+    {
+        if (offset < 32)
+        {
+            bool msb = value >> 31;
 
-			carry = value >> (offset - 1) & 0x1;
-			value >>= offset;
+            carry = value >> (offset - 1) & 0x1;
+            value >>= offset;
 
-			if (msb)
-				value |= 0xFFFFFFFF << (31 - offset);
-		}
-		else
-		{
-			carry = value >> 31;
-			value = carry ? 0xFFFFFFFF : 0;
-		}
-	}
-	else  // Special case ASR #32 (assembles to ASR #0)
-	{
-		if (immediate)
-		{
-			carry = value >> 31;
-			value = carry ? 0xFFFFFFFF : 0;
-		}
-		else
-		{
-			carry = regs.c();
-		}
-	}
+            if (msb)
+                value |= 0xFFFFFFFF << (31 - offset);
+        }
+        else
+        {
+            carry = value >> 31;
+            value = carry ? 0xFFFFFFFF : 0;
+        }
+    }
+    else  // Special case ASR #32 (assembles to ASR #0)
+    {
+        if (immediate)
+        {
+            carry = value >> 31;
+            value = carry ? 0xFFFFFFFF : 0;
+        }
+        else
+        {
+            carry = regs.c();
+        }
+    }
     return value;
 }
 
