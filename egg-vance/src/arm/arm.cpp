@@ -197,6 +197,7 @@ u32 ARM::lsr(u32 value, int offset, bool& carry, bool immediate)
     return value;
 }
 
+// Todo: convert to s32 and use shift operator?
 u32 ARM::asr(u32 value, int offset, bool& carry, bool immediate)
 {
 	if (offset != 0)
