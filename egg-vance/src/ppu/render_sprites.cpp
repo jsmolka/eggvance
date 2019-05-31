@@ -22,17 +22,32 @@ void PPU::renderSprites()
         int x = oam.attr1.x;
         int y = oam.attr0.y;
 
+        // Wraparound
         if (x >= WIDTH)  x -= 512;
         if (y >= HEIGHT) y -= 256;
 
+        // Sprite size
         int width = oam.width();
         int height = oam.height();
 
-        if (y > line || (y + height) < line)
+        // Affine rectangle size
+        int rect_width = width;
+        int rect_height = height;
+
+        if (oam.attr0.double_size)
+        {
+            rect_width *= 2;
+            rect_height *= 2;
+        }
+
+        if (y > line || (y + rect_height) < line)
             continue;
 
         PixelFormat format = oam.attr0.color_mode ? BPP8 : BPP4;
         int tile_size = oam.attr0.color_mode ? 0x40 : 0x20;
+        // Todo: is this correct?
+        // There are 3 other sprites in the same row when using 2D mapping
+        int tile_row_size = tile_size * (mmu.dispcnt.sprite_1d ? (width / 8) : (width / 2));
 
         bool flip_x = !oam.attr0.affine && oam.attr1.flip_x;
         bool flip_y = !oam.attr0.affine && oam.attr1.flip_y;
@@ -42,6 +57,7 @@ void PPU::renderSprites()
         s16 pb = 0x000;
         s16 pc = 0x000;
         s16 pd = 0x100;
+
         if (oam.attr0.affine)
         {
             pa = mmu.readHalfFast(MAP_OAM + 0x20 * oam.attr1.paramter + 0x06);  
@@ -50,21 +66,19 @@ void PPU::renderSprites()
             pd = mmu.readHalfFast(MAP_OAM + 0x20 * oam.attr1.paramter + 0x1E);  
         }
 
-        int rect_width = width;
-        int rect_height = height;
-        int center_x = x + width / 2;
-        int center_y = y + height / 2;
+        u32 base_addr = MAP_VRAM + 0x10000 + oam.attr2.tile * tile_size;
 
-        u32 baseAddr = MAP_VRAM + 0x10000 + oam.attr2.tile * tile_size;
+        // Rotation center
+        int center_x = x + rect_width / 2;
+        int center_y = y + rect_height / 2;
 
-        // Screen coordinates
-        int screen_x = x;
-        int screen_y = line;
-
+        // Offset from rotation center
+        int rect_x = -rect_width / 2;
         int rect_y = line - center_y;
 
-        for (int rect_x = -rect_width / 2; rect_x < rect_width / 2; ++rect_x)
+        for (; rect_x < rect_width / 2; ++rect_x)
         {
+            // Texture coordinates inside sprite
             int tex_x = ((pa * rect_x + pb * rect_y) >> 8) + width / 2;
             int tex_y = ((pc * rect_x + pd * rect_y) >> 8) + height / 2;
 
@@ -78,12 +92,8 @@ void PPU::renderSprites()
                 int pixel_x = tex_x % 8;
                 int pixel_y = tex_y % 8;
 
-                u32 addr = baseAddr + tile_size * tile_x;
-                if (mmu.dispcnt.sprite_1d)
-                    addr += tile_size * 8 * tile_y;
-                else
-                    addr += tile_size * 32 * tile_y;
-                
+                u32 addr = base_addr + tile_row_size * tile_y + tile_size * tile_x;
+
                 // Tile overflow
                 if (addr > (MAP_VRAM + 0x18000))
                     addr -= 0x8000;
@@ -93,12 +103,14 @@ void PPU::renderSprites()
                 {
                     if (format == BPP4)
                         color = readFgColor(color, oam.attr2.palette);
-
+                    else
+                        color = readFgColor(color, 0);
+                    
+                    int screen_x = center_x + rect_x;
                     if (screen_x >= 0 && screen_x < WIDTH)
-                        draw(screen_x, screen_y, color);
+                        draw(screen_x, line, color);
                 }
             }
-            screen_x++;
         }
     }
 }

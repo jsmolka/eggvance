@@ -2,10 +2,10 @@
 
 void ARM::fetch()
 {
-    if (regs.arm())
-        pipe[0].instr = mmu.readWord(regs.pc);
-    else
+    if (regs.thumb)
         pipe[0].instr = mmu.readHalf(regs.pc);
+    else
+        pipe[0].instr = mmu.readWord(regs.pc);
 
     pipe[0].format = FMT_NONE;
 }
@@ -15,7 +15,76 @@ void ARM::decode()
     if (pipe[1].format == FMT_REFILL)
         return;
 
-    if (regs.arm())
+    if (regs.thumb)
+    {
+        u16 instr = static_cast<u16>(pipe[1].instr);
+
+        if (((instr >> 11) & 0x1F) == 0b00011)
+        {
+            pipe[1].format = THUMB_2;
+        }
+        else if (((instr >> 13) & 0x7) == 0b000)
+        {
+            pipe[1].format = THUMB_1;
+        }
+        else if (((instr >> 13) & 0x7) == 0b001)
+        {
+            pipe[1].format = THUMB_3;
+        }
+        else if (((instr >> 10) & 0x3F) == 0b010000)
+        {
+            pipe[1].format = THUMB_4;
+        }
+        else if (((instr >> 10) & 0x3F) == 0b010001)
+        {
+            pipe[1].format = THUMB_5;
+        }
+        else if (((instr >> 11) & 0x1F) == 0b01001)
+        {
+            pipe[1].format = THUMB_6;
+        }
+        else if (((instr >> 12) & 0xF) == 0b0101)
+        {
+            pipe[1].format = (((instr >> 9) & 0x1) == 0b0) ? THUMB_7 : THUMB_8;
+        }
+        else if (((instr >> 13) & 0x7) == 0b011)
+        {
+            pipe[1].format = THUMB_9;
+        }
+        else if (((instr >> 12) & 0xF) == 0b1000)
+        {
+            pipe[1].format = THUMB_10;
+        }
+        else if (((instr >> 12) & 0xF) == 0b1001)
+        {
+            pipe[1].format = THUMB_11;
+        }
+        else if (((instr >> 12) & 0xF) == 0b1010)
+        {
+            pipe[1].format = THUMB_12;
+        }
+        else if (((instr >> 12) & 0xF) == 0b1011)
+        {
+            pipe[1].format = (((instr >> 10) & 0x1) == 0b0) ? THUMB_13 : THUMB_14;
+        }
+        else if (((instr >> 12) & 0xF) == 0b1100)
+        {
+            pipe[1].format = THUMB_15;
+        }
+        else if (((instr >> 12) & 0xF) == 0b1101)
+        {
+            pipe[1].format = (((instr >> 8) & 0xF) == 0b1111) ? THUMB_17 : THUMB_16;
+        }
+        else if (((instr >> 12) & 0xF) == 0b1110)
+        {
+            pipe[1].format = THUMB_18;
+        }
+        else if (((instr >> 12) & 0xF) == 0b1111)
+        {
+            pipe[1].format = THUMB_19;
+        }
+    }
+    else
     {
         u32 instr = pipe[1].instr;
 
@@ -85,75 +154,6 @@ void ARM::decode()
             }
         }
     }
-    else
-    {
-        u16 instr = static_cast<u16>(pipe[1].instr);
-
-        if (((instr >> 11) & 0x1F) == 0b00011)
-        {
-            pipe[1].format = THUMB_2;
-        }
-        else if (((instr >> 13) & 0x7) == 0b000)
-        {
-            pipe[1].format = THUMB_1;
-        }
-        else if (((instr >> 13) & 0x7) == 0b001)
-        {
-            pipe[1].format = THUMB_3;
-        }
-        else if (((instr >> 10) & 0x3F) == 0b010000)
-        {
-            pipe[1].format = THUMB_4;
-        }
-        else if (((instr >> 10) & 0x3F) == 0b010001)
-        {
-            pipe[1].format = THUMB_5;
-        }
-        else if (((instr >> 11) & 0x1F) == 0b01001)
-        {
-            pipe[1].format = THUMB_6;
-        }
-        else if (((instr >> 12) & 0xF) == 0b0101)
-        {
-            pipe[1].format = (((instr >> 9) & 0x1) == 0b0) ? THUMB_7 : THUMB_8;
-        }
-        else if (((instr >> 13) & 0x7) == 0b011)
-        {
-            pipe[1].format = THUMB_9;
-        }
-        else if (((instr >> 12) & 0xF) == 0b1000)
-        {
-            pipe[1].format = THUMB_10;
-        }
-        else if (((instr >> 12) & 0xF) == 0b1001)
-        {
-            pipe[1].format = THUMB_11;
-        }
-        else if (((instr >> 12) & 0xF) == 0b1010)
-        {
-            pipe[1].format = THUMB_12;
-        }
-        else if (((instr >> 12) & 0xF) == 0b1011)
-        {
-            pipe[1].format = (((instr >> 10) & 0x1) == 0b0) ? THUMB_13 : THUMB_14;
-        }
-        else if (((instr >> 12) & 0xF) == 0b1100)
-        {
-            pipe[1].format = THUMB_15;
-        }
-        else if (((instr >> 12) & 0xF) == 0b1101)
-        {
-            pipe[1].format = (((instr >> 8) & 0xF) == 0b1111) ? THUMB_17 : THUMB_16;
-        }
-        else if (((instr >> 12) & 0xF) == 0b1110)
-        {
-            pipe[1].format = THUMB_18;
-        }
-        else if (((instr >> 12) & 0xF) == 0b1111)
-        {
-            pipe[1].format = THUMB_19;
-        }
-    }
 }
 
 void ARM::execute()
@@ -161,33 +161,7 @@ void ARM::execute()
     if (pipe[2].format == FMT_REFILL)
         return;
 
-    if (regs.arm())
-    {
-        u32 instr = pipe[2].instr;
-
-        if (regs.check(static_cast<Condition>(instr >> 28)))
-        {
-            switch (pipe[2].format)
-            {
-            case ARM_1:  branchExchange(instr); break;
-            case ARM_2:  branchLink(instr); break;
-            case ARM_3:  dataProcessing(instr); break;
-            case ARM_4:  psrTransfer(instr); break;
-            case ARM_5:  multiply(instr); break;
-            case ARM_6:  multiplyLong(instr); break;
-            case ARM_7:  singleTransfer(instr); break;
-            case ARM_8:  halfSignedTransfer(instr); break;
-            case ARM_9:  blockTransfer(instr); break;
-            case ARM_10: singleSwap(instr); break;
-            case ARM_11: swiArm(instr); break;
-            }
-        }
-        else
-        {
-            cycle(regs.pc + 4, SEQ);
-        }
-    }
-    else
+    if (regs.thumb)
     {
         u16 instr = static_cast<u16>(pipe[2].instr);
 
@@ -214,6 +188,32 @@ void ARM::execute()
         case THUMB_19: longBranchLink(instr); break;
         }
     }
+    else
+    {
+        u32 instr = pipe[2].instr;
+
+        if (regs.check(static_cast<Condition>(instr >> 28)))
+        {
+            switch (pipe[2].format)
+            {
+            case ARM_1:  branchExchange(instr); break;
+            case ARM_2:  branchLink(instr); break;
+            case ARM_3:  dataProcessing(instr); break;
+            case ARM_4:  psrTransfer(instr); break;
+            case ARM_5:  multiply(instr); break;
+            case ARM_6:  multiplyLong(instr); break;
+            case ARM_7:  singleTransfer(instr); break;
+            case ARM_8:  halfSignedTransfer(instr); break;
+            case ARM_9:  blockTransfer(instr); break;
+            case ARM_10: singleSwap(instr); break;
+            case ARM_11: swiArm(instr); break;
+            }
+        }
+        else
+        {
+            cycle(regs.pc + 4, SEQ);
+        }
+    }
 }
 
 void ARM::advance()
@@ -221,5 +221,5 @@ void ARM::advance()
     pipe[2] = pipe[1];
     pipe[1] = pipe[0];
 
-    regs.pc += regs.arm() ? 4 : 2;
+    regs.pc += regs.thumb ? 2 : 4;
 }

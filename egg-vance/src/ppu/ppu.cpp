@@ -102,6 +102,7 @@ void PPU::next()
 
 void PPU::clear()
 {
+    // Todo: fill with backdrop? / fill at all?
     buffer.fill(0);
 }
 

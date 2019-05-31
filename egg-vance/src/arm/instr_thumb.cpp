@@ -135,14 +135,14 @@ void ARM::aluOperations(u16 instr)
 
     // ADC
     case 0b0101: 
-        src += regs.c();
+        src += regs.c;
         arithmetic(dst, src, true);
         dst += src;
         break;
 
     // SBC
     case 0b0110: 
-        src += 1 - regs.c();
+        src += 1 - regs.c;
         arithmetic(dst, src, false);
         dst -= src;
         break;
@@ -271,7 +271,7 @@ void ARM::highRegisterBranchExchange(u16 instr)
         {
             src = alignWord(src);
             // Change instruction set
-            regs.setThumb(false);
+            regs.thumb = false;
         }
 
         cycle(regs.pc, NONSEQ);
@@ -282,7 +282,7 @@ void ARM::highRegisterBranchExchange(u16 instr)
         cycle(regs.pc, SEQ);
         break;
     }
-    cycle(regs.pc + (regs.arm() ? 4 : 2), SEQ);
+    cycle(regs.pc + (regs.thumb ? 2 : 4), SEQ);
 }
 
 // THUMB 6

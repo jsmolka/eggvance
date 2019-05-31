@@ -11,8 +11,8 @@ public:
     BitField(T& data)
         : data(data)
     {
-        static_assert(std::is_same<T, u16>::value || std::is_same<T, u32>::value, "T must be u16 or u32");
-        static_assert((position + size) <= (8 * sizeof(T)), "Invalid parameters for T");
+        static_assert(std::is_same<T, u16>::value || std::is_same<T, u32>::value, "Invalid type");
+        static_assert((position + size) <= (8 * sizeof(T)), "Invalid parameters");
     }
 
     inline BitField& operator=(int value)

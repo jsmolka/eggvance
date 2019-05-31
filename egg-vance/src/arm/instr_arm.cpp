@@ -1,6 +1,5 @@
 #include "arm.h"
 
-#include "common/format.h"
 #include "utility.h"
 
 u32 ARM::shiftedRegister(int data, bool& carry)
@@ -55,7 +54,7 @@ void ARM::branchExchange(u32 instr)
     {
         addr = alignHalf(addr);
         // Change instruction set
-        regs.setThumb(true);
+        regs.thumb = true;
     }
     else
     {
@@ -68,7 +67,7 @@ void ARM::branchExchange(u32 instr)
     needs_flush = true;
 
     cycle(regs.pc, SEQ);
-    cycle(regs.pc + (regs.arm() ? 4 : 2), SEQ);
+    cycle(regs.pc + (regs.thumb ? 2 : 4), SEQ);
 }
 
 // ARM 2
@@ -200,7 +199,7 @@ void ARM::dataProcessing(u32 instr)
 
     // ADC
     case 0b0101:
-        op2 += regs.c();
+        op2 += regs.c;
         dst = op1 + op2;
         if (flags) 
             arithmetic(op1, op2, true);
@@ -208,7 +207,7 @@ void ARM::dataProcessing(u32 instr)
 
     // SBC
     case 0b0110:
-        op2 += 1 - regs.c();
+        op2 += 1 - regs.c;
         dst = op1 - op2;
         if (flags) 
             arithmetic(op1, op2, false);
@@ -216,7 +215,7 @@ void ARM::dataProcessing(u32 instr)
 
     // RBC
     case 0b0111:
-        op1 += 1 - regs.c();
+        op1 += 1 - regs.c;
         dst = op2 - op1;
         if (flags) 
             arithmetic(op2, op1, false);
@@ -274,7 +273,7 @@ void ARM::dataProcessing(u32 instr)
     if (rd == 15)
     {
         // Interrupt return from ARM into THUMB possible
-        dst = regs.arm() ? alignWord(dst) : alignHalf(dst);
+        dst = regs.thumb ? alignHalf(dst) : alignWord(dst);
         needs_flush = true;
 
         cycle(regs.pc, SEQ);
@@ -335,7 +334,7 @@ void ARM::psrTransfer(u32 instr)
             regs.cpsr = (regs.cpsr & ~mask) | op;
 
             // Undefined behavior
-            if (regs.thumb())
+            if (regs.thumb)
             {
                 regs.pc = alignHalf(regs.pc);
                 needs_flush = true;
@@ -414,8 +413,8 @@ void ARM::multiplyLong(u32 instr)
 
     if (flags)
     {
-        regs.setZ(result == 0);
-        regs.setN(result >> 63);
+        regs.z = result == 0;
+        regs.n = result >> 63;
     }
 
     cycleMultiplication(static_cast<u32>(op1), sign);

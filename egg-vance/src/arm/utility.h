@@ -25,7 +25,7 @@ inline bool misalignedWord(u32 addr)
 template<unsigned int size>
 inline s32 twos(u32 value)
 {
-    static_assert(size <= 32, "Unsupported number of bits");
+    static_assert(size <= 32, "Invalid size");
 
     if (value & (1 << (size - 1)))
         value |= 0xFFFFFFFF << size;

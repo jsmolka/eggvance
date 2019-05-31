@@ -55,7 +55,7 @@ void ARM::debug()
         return;
     
     fmt::printf("%08X  %08X  %s\n",
-        regs.pc - (regs.arm() ? 8 : 4),
+        regs.pc - (regs.thumb ? 4 : 8),
         pipe[2].instr,
         Disassembler::disassemble(pipe[2].instr, pipe[2].format, regs)
     );
@@ -72,12 +72,12 @@ void ARM::flush()
 
 void ARM::updateZ(u32 result)
 {
-    regs.setZ(result == 0);
+    regs.z = result == 0;
 }
 
 void ARM::updateN(u32 result)
 {
-    regs.setN(result >> 31);
+    regs.n = result >> 31;
 }
 
 void ARM::updateC(u32 op1, u32 op2, bool addition)
@@ -89,7 +89,7 @@ void ARM::updateC(u32 op1, u32 op2, bool addition)
     else
         carry = op2 <= op1;
 
-    regs.setC(carry);
+    regs.c = carry;
 }
 
 void ARM::updateV(u32 op1, u32 op2, bool addition)
@@ -112,7 +112,7 @@ void ARM::updateV(u32 op1, u32 op2, bool addition)
             overflow = msb_result == msb_op2;
     }
 
-    regs.setV(overflow);
+    regs.v = overflow;
 }
 
 void ARM::logical(u32 result)
@@ -126,7 +126,7 @@ void ARM::logical(u32 result, bool carry)
     updateZ(result);
     updateN(result);
 
-    regs.setC(carry);
+    regs.c = carry;
 }
 
 void ARM::arithmetic(u32 op1, u32 op2, bool addition)
@@ -162,7 +162,7 @@ u32 ARM::lsl(u32 value, int offset, bool& carry)
     }
     else  // Special case LSL #0
     {
-        carry = regs.c();
+        carry = regs.c;
     }
     return value;
 }
@@ -191,7 +191,7 @@ u32 ARM::lsr(u32 value, int offset, bool& carry, bool immediate)
         }
         else
         {
-            carry = regs.c();
+            carry = regs.c;
         }
     }
     return value;
@@ -227,7 +227,7 @@ u32 ARM::asr(u32 value, int offset, bool& carry, bool immediate)
         }
         else
         {
-            carry = regs.c();
+            carry = regs.c;
         }
     }
     return value;
@@ -250,11 +250,11 @@ u32 ARM::ror(u32 value, int offset, bool& carry, bool immediate)
         {
             carry = value & 0x1;
             value >>= 1;
-            value |= regs.c() << 31;
+            value |= regs.c << 31;
         }
         else
         {
-            carry = regs.c();
+            carry = regs.c;
         }
     }
     return value;
