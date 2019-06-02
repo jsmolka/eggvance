@@ -33,7 +33,7 @@ std::string Disassembler::disassemble(u32 data, const Registers& regs)
         case ThumbInstr::LongBranchLink: return longBranchLink(instr, regs.lr);;
 
         default:
-            return fmt::format("unknown thumb %08X", instr);
+            return fmt::format("unknown thumb instruction %08X", instr);
         }
     }
     else
@@ -55,11 +55,11 @@ std::string Disassembler::disassemble(u32 data, const Registers& regs)
         case ArmInstr::SWI: return swiArm(instr);
         case ArmInstr::CoDataOperation:
         case ArmInstr::CoDataTransfer:
-        case ArmInstr::CoRegisterTransfer:
-            return fmt::format("Coprocessor operation %08X", instr);
+        case ArmInstr::CoRegisterTransfer: return fmt::format("Coprocessor instruction %08X", instr);
+        case ArmInstr::Invalid: return fmt::format("Invalid instruction %08X", instr);
 
         default:
-            return fmt::format("unknown arm %08X", instr);
+            return fmt::format("unknown arm instruction %08X", instr);
         }
     }
 }
