@@ -62,4 +62,3 @@ private:
 
     std::array<u16, WIDTH * HEIGHT> buffer;
 };
-

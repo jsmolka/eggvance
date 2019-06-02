@@ -1,44 +1,67 @@
 #include "disassembler.h"
 
 #include "common/format.h"
+#include "decoder.h"
 #include "utility.h"
 
-std::string Disassembler::disassemble(u32 instr, Format format, const Registers& regs)
+std::string Disassembler::disassemble(u32 data, const Registers& regs)
 {
-    switch (format)
+    if (regs.thumb)
     {
-    case THUMB_1:  return moveShiftedRegister(instr);
-    case THUMB_2:  return addSubImmediate(instr);
-    case THUMB_3:  return addSubMovCmpImmediate(instr);
-    case THUMB_4:  return aluOperations(instr);
-    case THUMB_5:  return highRegisterBranchExchange(instr);
-    case THUMB_6:  return loadPcRelative(instr, regs.pc);
-    case THUMB_7:  return loadStoreRegisterOffset(instr);
-    case THUMB_8:  return loadStoreHalfSigned(instr);
-    case THUMB_9:  return loadStoreImmediateOffset(instr);
-    case THUMB_10: return loadStoreHalf(instr);
-    case THUMB_11: return loadStoreSpRelative(instr);
-    case THUMB_12: return loadAddress(instr, regs.pc);
-    case THUMB_13: return addOffsetSp(instr);
-    case THUMB_14: return pushPopRegisters(instr);
-    case THUMB_15: return loadStoreMultiple(instr);
-    case THUMB_16: return conditionalBranch(instr, regs.pc);
-    case THUMB_17: return swiThumb(instr);
-    case THUMB_18: return unconditionalBranch(instr, regs.pc);
-    case THUMB_19: return longBranchLink(instr, regs.lr);
-    case ARM_1:    return branchExchange(instr);
-    case ARM_2:    return branchLink(instr, regs.pc);
-    case ARM_3:    return dataProcessing(instr, regs.pc);
-    case ARM_4:    return psrTransfer(instr);
-    case ARM_5:    return multiply(instr);
-    case ARM_6:    return multiplyLong(instr);
-    case ARM_7:    return singleTransfer(instr);
-    case ARM_8:    return halfSignedTransfer(instr);
-    case ARM_9:    return blockTransfer(instr);
-    case ARM_10:   return singleDataSwap(instr);
-    case ARM_11:   return swiArm(instr);
+        u16 instr = static_cast<u16>(data);
+
+        switch (decoder::decodeThumb(instr))
+        {
+        case ThumbInstr::MoveShiftedRegister: return moveShiftedRegister(instr);;
+        case ThumbInstr::AddSubImmediate: return addSubImmediate(instr);;
+        case ThumbInstr::AddSubMovCmpImmediate: return addSubMovCmpImmediate(instr);;
+        case ThumbInstr::AluOperations: return aluOperations(instr);;
+        case ThumbInstr::HighRegisterBranchExchange: return highRegisterBranchExchange(instr);;
+        case ThumbInstr::LoadPcRelative: return loadPcRelative(instr, regs.pc);;
+        case ThumbInstr::LoadStoreRegisterOffset: return loadStoreRegisterOffset(instr);;
+        case ThumbInstr::LoadStoreHalfSigned: return loadStoreHalfSigned(instr);;
+        case ThumbInstr::LoadStoreImmediateOffset: return loadStoreImmediateOffset(instr);;
+        case ThumbInstr::LoadStoreHalf: return loadStoreHalf(instr);;
+        case ThumbInstr::LoadStoreSpRelative: return loadStoreSpRelative(instr);;
+        case ThumbInstr::LoadAddress: return loadAddress(instr, regs.pc);;
+        case ThumbInstr::AddOffsetSp: return addOffsetSp(instr);;
+        case ThumbInstr::PushPopRegisters: return pushPopRegisters(instr);;
+        case ThumbInstr::LoadStoreMultiple: return loadStoreMultiple(instr);;
+        case ThumbInstr::ConditionalBranch: return conditionalBranch(instr, regs.pc);;
+        case ThumbInstr::SWI: return swiThumb(instr);;
+        case ThumbInstr::UnconditionalBranch: return unconditionalBranch(instr, regs.pc);;
+        case ThumbInstr::LongBranchLink: return longBranchLink(instr, regs.lr);;
+
+        default:
+            return fmt::format("unknown thumb %08X", instr);
+        }
     }
-    return "unimpl";
+    else
+    {
+        u32 instr = data;
+
+        switch (decoder::decodeArm(instr))
+        {
+        case ArmInstr::BranchExchange: return branchExchange(instr);
+        case ArmInstr::BranchLink: return branchLink(instr, regs.pc);
+        case ArmInstr::DataProcessing: return dataProcessing(instr, regs.pc);
+        case ArmInstr::PsrTransfer: return psrTransfer(instr);
+        case ArmInstr::Multiply: return multiply(instr);
+        case ArmInstr::MultiplyLong: return multiplyLong(instr);
+        case ArmInstr::SingleTransfer: return singleTransfer(instr);
+        case ArmInstr::HalfSignedTransfer: return halfSignedTransfer(instr);
+        case ArmInstr::BlockTransfer: return blockTransfer(instr);
+        case ArmInstr::SingleSwap: return singleSwap(instr);
+        case ArmInstr::SWI: return swiArm(instr);
+        case ArmInstr::CoDataOperation:
+        case ArmInstr::CoDataTransfer:
+        case ArmInstr::CoRegisterTransfer:
+            return fmt::format("Coprocessor operation %08X", instr);
+
+        default:
+            return fmt::format("unknown arm %08X", instr);
+        }
+    }
 }
 
 void Disassembler::mnemonicPad(std::string& mnemonic)
@@ -971,7 +994,7 @@ std::string Disassembler::blockTransfer(u32 instr)
     );
 }
 
-std::string Disassembler::singleDataSwap(u32 instr)
+std::string Disassembler::singleSwap(u32 instr)
 {
     int byte = (instr >> 22) & 0x1;
     int rn   = (instr >> 16) & 0xF;

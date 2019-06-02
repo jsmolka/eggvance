@@ -225,7 +225,7 @@ void ARM::highRegisterBranchExchange(u16 instr)
     case 0b00: 
         if (rd == 15)
         {
-            cycle(regs.pc, NONSEQ);
+            cycle(regs.pc, NSEQ);
 
             dst += src;
             dst = alignHalf(dst);
@@ -248,7 +248,7 @@ void ARM::highRegisterBranchExchange(u16 instr)
     case 0b10: 
         if (rd == 15)
         {
-            cycle(regs.pc, NONSEQ);
+            cycle(regs.pc, NSEQ);
 
             dst = alignHalf(src);
             needs_flush = true;
@@ -274,7 +274,7 @@ void ARM::highRegisterBranchExchange(u16 instr)
             regs.thumb = false;
         }
 
-        cycle(regs.pc, NONSEQ);
+        cycle(regs.pc, NSEQ);
 
         regs.pc = src;
         needs_flush = true;        
@@ -293,7 +293,7 @@ void ARM::loadPcRelative(u16 instr)
 
     offset <<= 2;
 
-    cycle(regs.pc, NONSEQ);
+    cycle(regs.pc, NSEQ);
     cycle();
 
     regs[rd] = mmu.readWord(alignWord(regs.pc) + offset);
@@ -313,7 +313,7 @@ void ARM::loadStoreRegisterOffset(u16 instr)
     u32& dst = regs[rd];
     u32 addr = regs[rb] + regs[ro];
 
-    cycle(regs.pc, NONSEQ);
+    cycle(regs.pc, NSEQ);
 
     if (load)
     {
@@ -333,7 +333,7 @@ void ARM::loadStoreRegisterOffset(u16 instr)
         else
             mmu.writeWord(alignWord(addr), dst);
 
-        cycle(addr, NONSEQ);
+        cycle(addr, NSEQ);
     }
 }
 
@@ -348,13 +348,13 @@ void ARM::loadStoreHalfSigned(u16 instr)
     u32& dst = regs[rd];
     u32 addr = regs[rb] + regs[ro];
 
-    cycle(regs.pc, NONSEQ);
+    cycle(regs.pc, NSEQ);
 
     if (opcode == 0b00)
     {
         mmu.writeHalf(alignHalf(addr), static_cast<u16>(dst));
 
-        cycle(addr, NONSEQ);
+        cycle(addr, NSEQ);
     }
     else
     {
@@ -400,7 +400,7 @@ void ARM::loadStoreImmediateOffset(u16 instr)
 
     u32 addr = regs[rb] + offset;
 
-    cycle(regs.pc, NONSEQ);
+    cycle(regs.pc, NSEQ);
 
     if (load)
     {
@@ -420,7 +420,7 @@ void ARM::loadStoreImmediateOffset(u16 instr)
         else
             mmu.writeWord(alignWord(addr), dst);
 
-        cycle(addr, NONSEQ);
+        cycle(addr, NSEQ);
     }
 }
 
@@ -438,7 +438,7 @@ void ARM::loadStoreHalf(u16 instr)
 
     u32 addr = regs[rb] + offset;
 
-    cycle(regs.pc, NONSEQ);
+    cycle(regs.pc, NSEQ);
 
     if (load)
     {
@@ -449,7 +449,7 @@ void ARM::loadStoreHalf(u16 instr)
     else
     {
         mmu.writeHalf(alignHalf(addr), static_cast<u16>(dst));
-        cycle(addr, NONSEQ);
+        cycle(addr, NSEQ);
     }
 }
 
@@ -466,7 +466,7 @@ void ARM::loadStoreSpRelative(u16 instr)
 
     u32 addr = regs.sp + offset;
 
-    cycle(regs.pc, NONSEQ);
+    cycle(regs.pc, NSEQ);
 
     if (load)
     {
@@ -477,7 +477,7 @@ void ARM::loadStoreSpRelative(u16 instr)
     else
     {
         mmu.writeWord(alignWord(addr), dst);
-        cycle(addr, NONSEQ);
+        cycle(addr, NSEQ);
     }
 }
 
@@ -528,7 +528,7 @@ void ARM::pushPopRegisters(u16 instr)
     for (int temp = rlist; temp != 0; temp >>= 1)
         rcount += temp & 0x1;
 
-    cycle(regs.pc, NONSEQ);
+    cycle(regs.pc, NSEQ);
 
     // Full descending stack
     if (pop)
@@ -549,7 +549,7 @@ void ARM::pushPopRegisters(u16 instr)
 
         if (pc_lr)
         {
-            cycle(regs.pc + 2, NONSEQ);
+            cycle(regs.pc + 2, NSEQ);
 
             regs.pc = mmu.readWord(alignWord(regs.sp));
             regs.pc = alignHalf(regs.pc);
@@ -579,7 +579,7 @@ void ARM::pushPopRegisters(u16 instr)
                 mmu.writeWord(alignWord(regs.sp), regs[x]);
             }
         }
-        cycle(regs.sp, NONSEQ);
+        cycle(regs.sp, NSEQ);
     }
 }
 
@@ -595,7 +595,7 @@ void ARM::loadStoreMultiple(u16 instr)
 
     if (rlist != 0)
     {
-        cycle(regs.pc, NONSEQ);
+        cycle(regs.pc, NSEQ);
     
         // Register count needed for cycles
         int rcount = 0;
@@ -634,7 +634,7 @@ void ARM::loadStoreMultiple(u16 instr)
                     addr += 4;
                 }
             }
-            cycle(addr, NONSEQ);
+            cycle(addr, NSEQ);
         }
     }
     else  // Special case empty rlist
@@ -665,7 +665,7 @@ void ARM::conditionalBranch(u16 instr)
         offset = twos<8>(offset);
         offset <<= 1;
 
-        cycle(regs.pc, NONSEQ);
+        cycle(regs.pc, NSEQ);
 
         regs.pc += offset;
         needs_flush = true;
@@ -678,7 +678,7 @@ void ARM::conditionalBranch(u16 instr)
 // THUMB 17
 void ARM::swiThumb(u16 instr)
 {
-    cycle(regs.pc, NONSEQ);
+    cycle(regs.pc, NSEQ);
 
     u32 cpsr = regs.cpsr;
     u32 next = regs.pc - 2;
@@ -708,7 +708,7 @@ void ARM::unconditionalBranch(u16 instr)
     offset = twos<11>(offset);
     offset <<= 1;
 
-    cycle(regs.pc, NONSEQ);
+    cycle(regs.pc, NSEQ);
 
     regs.pc += offset;
     needs_flush = true;
@@ -729,7 +729,7 @@ void ARM::longBranchLink(u16 instr)
 
         u32 next = (regs.pc - 2) | 1;
 
-        cycle(regs.pc, NONSEQ);
+        cycle(regs.pc, NSEQ);
 
         regs.pc = regs.lr + offset;
         regs.lr = next;

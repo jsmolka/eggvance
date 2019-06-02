@@ -1,5 +1,51 @@
 #pragma once
 
+#include "common/integer.h"
+
+enum class ArmInstr : u8
+{
+    Invalid,
+    BranchExchange,      // ARM 1
+    BranchLink,          // ARM 2
+    DataProcessing,      // ARM 3
+    PsrTransfer,         // ARM 4
+    Multiply,            // ARM 5
+    MultiplyLong,        // ARM 6
+    SingleTransfer,      // ARM 7
+    HalfSignedTransfer,  // ARM 8
+    BlockTransfer,       // ARM 9
+    SingleSwap,          // ARM 10
+    SWI,                 // ARM 11
+    CoDataOperation,     // ARM 12
+    CoDataTransfer,      // ARM 13
+    CoRegisterTransfer,  // ARM 14
+    Undefined            // ARM 15
+};
+
+enum class ThumbInstr : u8
+{
+    Invalid,
+    MoveShiftedRegister,         // THUMB 1
+    AddSubImmediate,             // THUMB 2
+    AddSubMovCmpImmediate,       // THUMB 3
+    AluOperations,               // THUMB 4
+    HighRegisterBranchExchange,  // THUMB 5
+    LoadPcRelative,              // THUMB 6
+    LoadStoreRegisterOffset,     // THUMB 7
+    LoadStoreHalfSigned,         // THUMB 8
+    LoadStoreImmediateOffset,    // THUMB 9
+    LoadStoreHalf,               // THUMB 10
+    LoadStoreSpRelative,         // THUMB 11
+    LoadAddress,                 // THUMB 12
+    AddOffsetSp,                 // THUMB 13
+    PushPopRegisters,            // THUMB 14
+    LoadStoreMultiple,           // THUMB 15
+    ConditionalBranch,           // THUMB 16
+    SWI,                         // THUMB 17
+    UnconditionalBranch,         // THUMB 18
+    LongBranchLink               // THUMB 19
+};
+
 enum Mode
 {
     MODE_USR = 0b10000,  // User
@@ -41,46 +87,6 @@ enum CPSR
     CPSR_C = 1 << 29,  // Carry
     CPSR_Z = 1 << 30,  // Zero
     CPSR_N = 1 << 31   // Negative
-};
-
-enum Format
-{
-    FMT_NONE,    // Undefined instruction
-    FMT_REFILL,  // Refill the pipeline
-    ARM_1,       // Branch and exchange
-    ARM_2,       // Branch and branch with link
-    ARM_3,       // Data processing
-    ARM_4,       // PSR transfer
-    ARM_5,       // Multiply and multiply-accumulate
-    ARM_6,       // Multiply long and multiply-accumulate long
-    ARM_7,       // Single data transfer
-    ARM_8,       // Halfword data transfer
-    ARM_9,       // Block data transfer
-    ARM_10,      // Single data swap
-    ARM_11,      // Software interrupt
-    ARM_12,      // Coprocessor data operations
-    ARM_13,      // Coprocessor data transfers
-    ARM_14,      // Coprocessor register transfers
-    ARM_15,      // Undefined
-    THUMB_1,     // Move shifted register
-    THUMB_2,     // Add / subtract
-    THUMB_3,     // Move / compare / add / subtract immediate
-    THUMB_4,     // ALU operations
-    THUMB_5,     // High register operations / branch exchange
-    THUMB_6,     // Load PC-relative
-    THUMB_7,     // Load / store with register offset
-    THUMB_8,     // Load / store sign-extended byte / halfword
-    THUMB_9,     // Load / store with immediate offset
-    THUMB_10,    // Load / store halfword
-    THUMB_11,    // Load / store SP-relative
-    THUMB_12,    // Load address
-    THUMB_13,    // Add offset to stack pointer
-    THUMB_14,    // Push / pop registers
-    THUMB_15,    // Mutiple load / store
-    THUMB_16,    // Conditional branch
-    THUMB_17,    // Software interrupt
-    THUMB_18,    // Unconditional branch
-    THUMB_19     // Long branch with link
 };
 
 enum ExceptionVector

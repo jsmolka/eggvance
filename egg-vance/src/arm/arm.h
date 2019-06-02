@@ -2,6 +2,7 @@
 
 #include "common/integer.h"
 #include "mmu/mmu.h"
+#include "decoder.h"
 #include "registers.h"
 
 class ARM
@@ -14,24 +15,26 @@ public:
     int step();
 
 private:
+    struct PipeState
+    {
+        u32 data;
+        bool refill;
+        ArmInstr arm;
+        ThumbInstr thumb;
+    };
+
     MMU& mmu;
     Registers regs;
 
-    void fetch();
-    void decode();
-    void execute();
+    void fetch(PipeState &state);
+    void decode(PipeState &state);
+    void execute(PipeState &state);
     void advance();
 
-    void debug();
+    void debug(PipeState& state);
 
-    struct PipeItem
-    {
-        u32 instr;
-        Format format;
-    } pipe[3];
-
+    PipeState pipe[3];
     bool needs_flush;
-
     void flush();
 
     void updateZ(u32 result);
@@ -89,7 +92,7 @@ private:
 
     enum MemoryAccess
     {
-        NONSEQ,
+        NSEQ,
         SEQ
     };
 

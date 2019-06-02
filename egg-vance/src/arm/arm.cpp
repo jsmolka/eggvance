@@ -8,7 +8,6 @@
 #include "disassembler.h"
 #include "utility.h"
 
-
 ARM::ARM(MMU& mmu)
     : mmu(mmu)
 {
@@ -26,20 +25,14 @@ int ARM::step()
 {
     cycles = 0;
 
-    fetch();
-    decode();
+    fetch(pipe[0]);
+    decode(pipe[1]);
 
     #ifdef _DEBUG
-    static bool enable = false;
-    u32 breakpoint = 0;
-    if (breakpoint == regs.pc - (regs.arm() ? 8 : 4))
-        enable = true;
-
-    if (enable)
-        debug();
+    debug(pipe[2]);
     #endif
 
-    execute();
+    execute(pipe[2]);
 
     if (needs_flush)
         flush();
@@ -49,23 +42,118 @@ int ARM::step()
     return cycles;
 }
 
-void ARM::debug()
+void ARM::fetch(ARM::PipeState& state)
 {
-    if (pipe[2].format == FMT_REFILL)
+    if (regs.thumb)
+    {
+        state.data = mmu.readHalf(regs.pc);
+        state.thumb = ThumbInstr::Invalid;
+    }
+    else
+    {
+        state.data = mmu.readWord(regs.pc);
+        state.arm = ArmInstr::Invalid;
+    }
+    state.refill = false;
+}
+
+void ARM::decode(ARM::PipeState& state)
+{
+    if (state.refill)
+        return;
+
+    if (regs.thumb)
+        state.thumb = decoder::decodeThumb(static_cast<u16>(state.data));
+    else
+        state.arm = decoder::decodeArm(state.data);
+}
+
+void ARM::execute(ARM::PipeState& state)
+{
+    if (state.refill)
+        return;
+
+    if (regs.thumb)
+    {
+        u16 instr = static_cast<u16>(state.data);
+
+        switch (state.thumb)
+        {
+        case ThumbInstr::MoveShiftedRegister: moveShiftedRegister(instr); break;
+        case ThumbInstr::AddSubImmediate: addSubImmediate(instr); break;
+        case ThumbInstr::AddSubMovCmpImmediate: addSubMovCmpImmediate(instr); break;
+        case ThumbInstr::AluOperations: aluOperations(instr); break;
+        case ThumbInstr::HighRegisterBranchExchange: highRegisterBranchExchange(instr); break;
+        case ThumbInstr::LoadPcRelative: loadPcRelative(instr); break;
+        case ThumbInstr::LoadStoreRegisterOffset: loadStoreRegisterOffset(instr); break;
+        case ThumbInstr::LoadStoreHalfSigned: loadStoreHalfSigned(instr); break;
+        case ThumbInstr::LoadStoreImmediateOffset: loadStoreImmediateOffset(instr); break;
+        case ThumbInstr::LoadStoreHalf: loadStoreHalf(instr); break;
+        case ThumbInstr::LoadStoreSpRelative: loadStoreSpRelative(instr); break;
+        case ThumbInstr::LoadAddress: loadAddress(instr); break;
+        case ThumbInstr::AddOffsetSp: addOffsetSp(instr); break;
+        case ThumbInstr::PushPopRegisters: pushPopRegisters(instr); break;
+        case ThumbInstr::LoadStoreMultiple: loadStoreMultiple(instr); break;
+        case ThumbInstr::ConditionalBranch: conditionalBranch(instr); break;
+        case ThumbInstr::SWI: swiThumb(instr); break;
+        case ThumbInstr::UnconditionalBranch: unconditionalBranch(instr); break;
+        case ThumbInstr::LongBranchLink: longBranchLink(instr); break;
+        }
+    }
+    else
+    {
+        u32 instr = state.data;
+
+        if (regs.check(static_cast<Condition>(instr >> 28)))
+        {
+            switch (state.arm)
+            {
+            case ArmInstr::BranchExchange: branchExchange(instr); break;
+            case ArmInstr::BranchLink: branchLink(instr); break;
+            case ArmInstr::DataProcessing: dataProcessing(instr); break;
+            case ArmInstr::PsrTransfer: psrTransfer(instr); break;
+            case ArmInstr::Multiply: multiply(instr); break;
+            case ArmInstr::MultiplyLong: multiplyLong(instr); break;
+            case ArmInstr::SingleTransfer: singleTransfer(instr); break;
+            case ArmInstr::HalfSignedTransfer: halfSignedTransfer(instr); break;
+            case ArmInstr::BlockTransfer: blockTransfer(instr); break;
+            case ArmInstr::SingleSwap: singleSwap(instr); break;
+            case ArmInstr::SWI: swiArm(instr); break;
+            }
+        }
+        else
+        {
+            cycle(regs.pc + 4, SEQ);
+        }
+    }
+}
+
+void ARM::advance()
+{
+    pipe[2] = pipe[1];
+    pipe[1] = pipe[0];
+
+    regs.pc += regs.thumb ? 2 : 4;
+}
+
+
+void ARM::debug(ARM::PipeState& state)
+{
+    if (pipe[2].refill)
         return;
     
     fmt::printf("%08X  %08X  %s\n",
         regs.pc - (regs.thumb ? 4 : 8),
-        pipe[2].instr,
-        Disassembler::disassemble(pipe[2].instr, pipe[2].format, regs)
+        state.data,
+        Disassembler::disassemble(state.data, regs)
     );
 }
 
 void ARM::flush()
 {
-    pipe[0] = { 0, FMT_REFILL };
-    pipe[1] = { 0, FMT_REFILL };
-    pipe[2] = { 0, FMT_REFILL };
+    pipe[0].refill = true;
+    pipe[1].refill = true;
+    pipe[2].refill = true;
 
     needs_flush = false;
 }
@@ -330,21 +418,21 @@ void ARM::cycle(u32 addr, MemoryAccess access)
     }
     else if (addr >= MAP_GAMEPAK_0 && addr < MAP_GAMEPAK_1)
     {
-        if (access == NONSEQ)
+        if (access == NSEQ)
             cycles += nonseq_lut[mmu.waitcnt.nonseq0];
         else
             cycles += mmu.waitcnt.seq0 ? 1 : 2;
     }
     else if (addr >= MAP_GAMEPAK_1 && addr < MAP_GAMEPAK_2)
     {
-        if (access == NONSEQ)
+        if (access == NSEQ)
             cycles += nonseq_lut[mmu.waitcnt.nonseq1];
         else
             cycles += mmu.waitcnt.seq1 ? 1 : 4;
     }
     else if (addr >= MAP_GAMEPAK_2 && addr < MAP_GAMEPAK_SRAM)
     {
-        if (access == NONSEQ)
+        if (access == NSEQ)
             cycles += nonseq_lut[mmu.waitcnt.nonseq2];
         else
             cycles += mmu.waitcnt.seq2 ? 1 : 8;

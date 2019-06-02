@@ -9,7 +9,7 @@
 class Disassembler
 {
 public:
-    static std::string disassemble(u32 instr, Format format, const Registers& regs);
+    static std::string disassemble(u32 data, const Registers& regs);
 
 private:
     static void mnemonicPad(std::string& mnemonic);
@@ -51,6 +51,6 @@ private:
     static std::string singleTransfer(u32 instr);
     static std::string halfSignedTransfer(u32 instr);
     static std::string blockTransfer(u32 instr);
-    static std::string singleDataSwap(u32 instr);
+    static std::string singleSwap(u32 instr);
     static std::string swiArm(u32 instr);
 };

@@ -61,7 +61,7 @@ void ARM::branchExchange(u32 instr)
         addr = alignWord(addr);
     }
 
-    cycle(regs.pc, NONSEQ);
+    cycle(regs.pc, NSEQ);
 
     regs.pc = addr;
     needs_flush = true;
@@ -82,7 +82,7 @@ void ARM::branchLink(u32 instr)
     if (link)
         regs.lr = regs.pc - 4;
 
-    cycle(regs.pc, NONSEQ);
+    cycle(regs.pc, NSEQ);
 
     regs.pc += offset;
     needs_flush = true;
@@ -147,7 +147,7 @@ void ARM::dataProcessing(u32 instr)
 
     if (rd == 15)
     {
-        cycle(regs.pc, NONSEQ);
+        cycle(regs.pc, NSEQ);
 
         if (flags)
         {
@@ -464,13 +464,13 @@ void ARM::singleTransfer(u32 instr)
             addr -= offset;
     }
 
-    cycle(regs.pc, NONSEQ);
+    cycle(regs.pc, NSEQ);
 
     if (load)
     {
         cycle();
         if (rd == 15)
-            cycle(regs.pc + 4, NONSEQ);
+            cycle(regs.pc + 4, NSEQ);
 
         if (byte)
             dst = mmu.readByte(addr);
@@ -501,7 +501,7 @@ void ARM::singleTransfer(u32 instr)
         else
             mmu.writeWord(alignWord(addr), value);
 
-        cycle(addr, NONSEQ);
+        cycle(addr, NSEQ);
     }
 
     if (!pre_index)
@@ -556,13 +556,13 @@ void ARM::halfSignedTransfer(u32 instr)
             addr -= offset;
     }
 
-    cycle(regs.pc, NONSEQ);
+    cycle(regs.pc, NSEQ);
 
     if (load)
     {
         cycle();
         if (rd == 15)
-            cycle(regs.pc + 4, NONSEQ);
+            cycle(regs.pc + 4, NSEQ);
 
         switch ((sign << 1) | half)
         {
@@ -606,7 +606,7 @@ void ARM::halfSignedTransfer(u32 instr)
         if (half)
             mmu.writeHalf(alignHalf(addr), static_cast<u16>(value));
 
-        cycle(addr, NONSEQ);
+        cycle(addr, NSEQ);
     }
 
     if (!pre_index)
@@ -641,7 +641,7 @@ void ARM::blockTransfer(u32 instr)
 
     if (rlist != 0)
     {
-        cycle(regs.pc, NONSEQ);
+        cycle(regs.pc, NSEQ);
 
         // Register count needed for cycles
         int rcount = 0;
@@ -671,7 +671,7 @@ void ARM::blockTransfer(u32 instr)
                         cycle();
 
                     if (x == 15)
-                        cycle(regs.pc + 4, NONSEQ);
+                        cycle(regs.pc + 4, NSEQ);
 
                     regs[x] = mmu.readWord(alignWord(addr));
 
@@ -704,7 +704,7 @@ void ARM::blockTransfer(u32 instr)
                     if (!full) addr += step;
                 }
             }
-            cycle(addr, NONSEQ);
+            cycle(addr, NSEQ);
         }
     }
     else  // Special case empty rlist
@@ -742,8 +742,8 @@ void ARM::singleSwap(u32 instr)
     u32& dst = regs[rd];
     u32  src = regs[rm];
 
-    cycle(regs.pc, NONSEQ);
-    cycle(addr, NONSEQ);
+    cycle(regs.pc, NSEQ);
+    cycle(addr, NSEQ);
 
     if (byte)
     {
@@ -763,7 +763,7 @@ void ARM::singleSwap(u32 instr)
 // ARM 11
 void ARM::swiArm(u32 instr)
 {
-    cycle(regs.pc, NONSEQ);
+    cycle(regs.pc, NSEQ);
 
     u32 cpsr = regs.cpsr;
     u32 next = regs.pc - 4;

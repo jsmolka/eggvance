@@ -133,6 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\arm\decoder.cpp" />
     <ClCompile Include="src\ppu\tiles\mapentry.cpp" />
     <ClCompile Include="src\mmu\registers\io\bgvofs.cpp" />
     <ClCompile Include="src\mmu\registers\io\bghofs.cpp" />
@@ -144,7 +145,6 @@
     <ClCompile Include="src\mmu\registers\other\keycnt.cpp" />
     <ClCompile Include="src\mmu\registers\other\keyinput.cpp" />
     <ClCompile Include="src\arm\disassembler.cpp" />
-    <ClCompile Include="src\arm\pipeline.cpp" />
     <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\arm\registerbank.cpp" />
     <ClCompile Include="src\mmu\registers\io\bgcnt.cpp" />
@@ -163,6 +163,7 @@
     <ClCompile Include="src\mmu\registers\other\waitcnt.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\arm\decoder.h" />
     <ClInclude Include="src\ppu\tiles\mapentry.h" />
     <ClInclude Include="src\mmu\registers\io\bgvofs.h" />
     <ClInclude Include="src\mmu\registers\io\bghofs.h" />
