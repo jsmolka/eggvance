@@ -22,7 +22,7 @@ bool matches(const std::string& pattern, int bits)
     return (bits & (mask0 | mask1)) == mask1;
 }
 
-ArmInstr decodeArmHash(u16 hash)
+ArmInstr decodeArmHash(int hash)
 {
     if (matches("101xxxxxxxxx", hash)) return ArmInstr::BranchLink;
     if (matches("100xxxxxxxxx", hash)) return ArmInstr::BlockTransfer;
@@ -43,7 +43,30 @@ ArmInstr decodeArmHash(u16 hash)
     return ArmInstr::Invalid;
 }
 
-ThumbInstr decodeThumbHash(u8 hash)
+using ArmLut = std::array<ArmInstr, 4096>;
+
+const ArmLut generateArmLut()
+{
+    ArmLut lut;
+    for (int hash = 0; hash < lut.size(); ++hash)
+        lut[hash] = decodeArmHash(hash);
+
+    return lut;
+}
+
+inline int armHash(u32 instr)
+{
+    return ((instr >> 16) & 0xFF0) | ((instr >> 4) & 0xF);
+}
+
+ArmInstr decoder::decodeArm(u32 instr)
+{
+    static const ArmLut arm_lut = generateArmLut();
+
+    return arm_lut[armHash(instr)];
+}
+
+ThumbInstr decodeThumbHash(int hash)
 {
     if (matches("00011xxx", hash)) return ThumbInstr::AddSubImmediate;
     if (matches("000xxxxx", hash)) return ThumbInstr::MoveShiftedRegister;
@@ -68,42 +91,20 @@ ThumbInstr decodeThumbHash(u8 hash)
     return ThumbInstr::Invalid;
 }
 
-using ArmLut = std::array<ArmInstr, 4096>;
 using ThumbLut = std::array<ThumbInstr, 256>;
-
-const ArmLut generateArmLut()
-{
-    ArmLut lut = { ArmInstr::Invalid };
-    for (int hash = 0; hash < lut.size(); ++hash)
-        lut[hash] = decodeArmHash(static_cast<u16>(hash));
-
-    return lut;
-}
 
 const ThumbLut generateThumbLut()
 {
-    ThumbLut lut = { ThumbInstr::Invalid };
+    ThumbLut lut;
     for (int hash = 0; hash < lut.size(); ++hash)
-        lut[hash] = decodeThumbHash(static_cast<u8>(hash));
+        lut[hash] = decodeThumbHash(hash);
 
     return lut;
 }
 
-inline u16 armHash(u32 instr)
+inline int thumbHash(u16 instr)
 {
-    return static_cast<u16>(((instr >> 16) & 0xFF0) | ((instr >> 4) & 0xF));
-}
-
-inline u8 thumbHash(u16 instr)
-{
-    return static_cast<u8>(instr >> 8);
-}
-
-ArmInstr decoder::decodeArm(u32 instr)
-{
-    static const ArmLut arm_lut = generateArmLut();
-
-    return arm_lut[armHash(instr)];
+    return instr >> 8;
 }
 
 ThumbInstr decoder::decodeThumb(u16 instr)
