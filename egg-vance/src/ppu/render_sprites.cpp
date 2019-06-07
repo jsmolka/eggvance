@@ -3,9 +3,11 @@
 #include "mmu/map.h"
 #include "sprites/oamentry.h"
 
-#include "common/format.h"
 void PPU::renderSprites()
 {
+    if (!mmu.dispcnt.sprites)
+        return;
+
     int line = mmu.vcount.line;
 
     for (int entry = 127; entry > -1; --entry)
@@ -108,7 +110,7 @@ void PPU::renderSprites()
                     
                     int screen_x = center_x + rect_x;
                     if (screen_x >= 0 && screen_x < WIDTH)
-                        draw(screen_x, line, color);
+                        buffer_sprites[oam.attr2.priority][screen_x] = color;
                 }
             }
         }

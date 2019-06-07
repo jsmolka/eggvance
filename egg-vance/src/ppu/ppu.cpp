@@ -51,6 +51,16 @@ void PPU::scanline()
     mmu.dispstat.hblank = false;
     mmu.dispstat.vblank = false;
 
+    // Clear line buffers
+    if (mmu.dispcnt.bg0) buffer_bg0.fill(TRANSPARENT);
+    if (mmu.dispcnt.bg1) buffer_bg1.fill(TRANSPARENT);
+    if (mmu.dispcnt.bg2) buffer_bg2.fill(TRANSPARENT);
+    if (mmu.dispcnt.bg3) buffer_bg3.fill(TRANSPARENT);
+
+    for (auto& sprites : buffer_sprites)
+        sprites.fill(TRANSPARENT);
+
+    // Fill line buffers
     switch (mmu.dispcnt.bg_mode)
     {
     case 0: renderMode0(); break;
@@ -60,9 +70,46 @@ void PPU::scanline()
     case 4: renderMode4(); break;
     case 5: renderMode5(); break;
     }
+    renderSprites();
 
-    if (mmu.dispcnt.obj)
-        renderSprites();
+    // Generate scanline
+    int backdrop = readBgColor(0, 0);
+    u16* scanline = &buffer[mmu.vcount * WIDTH];
+    for (int x = 0; x < WIDTH; ++x)
+    {
+        u16 pixel = TRANSPARENT;
+
+        for (int priority = 3; priority > -1; --priority)
+        {
+            if (mmu.dispcnt.bg3 && mmu.bg3cnt.priority == priority)
+            {
+                if (buffer_bg3[x] != TRANSPARENT)
+                    pixel = buffer_bg3[x];
+            }
+            if (mmu.dispcnt.bg2 && mmu.bg2cnt.priority == priority)
+            {
+                if (buffer_bg2[x] != TRANSPARENT)
+                    pixel = buffer_bg2[x];
+            }
+            if (mmu.dispcnt.bg1 && mmu.bg1cnt.priority == priority)
+            {
+                if (buffer_bg1[x] != TRANSPARENT)
+                    pixel = buffer_bg1[x];
+            }
+            if (mmu.dispcnt.bg0 && mmu.bg0cnt.priority == priority)
+            {
+                if (buffer_bg0[x] != TRANSPARENT)
+                    pixel = buffer_bg0[x];
+            }
+            if (mmu.dispcnt.sprites)
+            {
+                if (buffer_sprites[priority][x] != TRANSPARENT)
+                    pixel = buffer_sprites[priority][x];
+            }
+        }
+
+        scanline[x] = (pixel != TRANSPARENT) ? pixel : backdrop;
+    }
 }
 
 void PPU::hblank()
@@ -100,12 +147,6 @@ void PPU::next()
     }
 }
 
-void PPU::clear()
-{
-    // Todo: fill with backdrop? / fill at all?
-    buffer.fill(0);
-}
-
 void PPU::render()
 {
     SDL_UpdateTexture(
@@ -116,11 +157,6 @@ void PPU::render()
     );
     SDL_RenderCopy(renderer, texture, 0, 0);
     SDL_RenderPresent(renderer);
-}
-
-void PPU::draw(int x, int y, int color)
-{
-    buffer[WIDTH * y + x] = color;
 }
 
 int PPU::readBgColor(int index, int palette)

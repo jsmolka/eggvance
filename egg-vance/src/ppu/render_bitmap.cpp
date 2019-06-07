@@ -16,12 +16,13 @@ void PPU::renderMode3()
     u32 frame_addr = mmu.dispcnt.frameAddr();
 
     int y = mmu.vcount;
+    int priority = mmu.bg2cnt.priority;
     for (int x = 0; x < WIDTH; ++x)
     {
         int offset = 2 * (WIDTH * y + x);
         int color = mmu.readHalfFast(frame_addr + offset);
 
-        draw(x, y, color);
+        buffer_bg2[x] = color;
     }
 }
 
@@ -39,13 +40,14 @@ void PPU::renderMode4()
     u32 frame_addr = mmu.dispcnt.frameAddr();
 
     int y = mmu.vcount;
+    int priority = mmu.bg2cnt.priority;
     for (int x = 0; x < WIDTH; ++x)
     {
         int offset = WIDTH * y + x;
         int index = mmu.readByteFast(frame_addr + offset);
         int color = readBgColor(index, 0);
 
-        draw(x, y, color);
+        buffer_bg2[x] = color;
     }
 }
 
@@ -63,17 +65,15 @@ void PPU::renderMode5()
     u32 frame_addr = mmu.dispcnt.frameAddr();
 
     int y = mmu.vcount;
-    for (int x = 0; x < WIDTH; ++x)
-    {
-        // Todo: default in other emus is pinkish color
-        // Use transparent color by default
-        int color = 0x8000;
+    if (y >= 128)
+        return;
 
-        if (x < 160 && y < 128)
-        {
-            int offset = 2 * (160 * y + x);
-            color = mmu.readHalfFast(frame_addr + offset);
-        }
-        draw(x, y, color);
+    int priority = mmu.bg2cnt.priority;
+    for (int x = 0; x < 160; ++x)
+    {
+        int offset = 2 * (160 * y + x);
+        int color = mmu.readHalfFast(frame_addr + offset);
+        
+        buffer_bg2[x] = color;
     }
 }

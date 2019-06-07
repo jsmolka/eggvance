@@ -14,13 +14,10 @@
 // Features: scrolling, flip, mosaic, alpha blending, brightness, priority
 void PPU::renderMode0()
 {
-    for (int priority = 3; priority > -1; --priority)
-    {
-        if (mmu.dispcnt.bg3 && mmu.bg3cnt.priority == priority) renderMode0Layer(3);
-        if (mmu.dispcnt.bg2 && mmu.bg2cnt.priority == priority) renderMode0Layer(2);
-        if (mmu.dispcnt.bg1 && mmu.bg1cnt.priority == priority) renderMode0Layer(1);
-        if (mmu.dispcnt.bg0 && mmu.bg0cnt.priority == priority) renderMode0Layer(0);
-    }
+    if (mmu.dispcnt.bg3) renderMode0Layer(3);
+    if (mmu.dispcnt.bg2) renderMode0Layer(2);
+    if (mmu.dispcnt.bg1) renderMode0Layer(1);
+    if (mmu.dispcnt.bg0) renderMode0Layer(0);
 }
 
 void PPU::renderMode0Layer(int layer)
@@ -29,6 +26,7 @@ void PPU::renderMode0Layer(int layer)
     const int scroll_x = mmu.bghofs[layer].offset;
     const int scroll_y = mmu.bgvofs[layer].offset + mmu.vcount;
 
+    int priority = bgcnt.priority;
     int tile_x = (scroll_x / 8) % 32;
     int tile_y = (scroll_y / 8) % 32;
     int tile_size = bgcnt.palette_type ? 0x40 : 0x20;
@@ -66,7 +64,7 @@ void PPU::renderMode0Layer(int layer)
                     format
                 );
 
-                draw(screen_x, mmu.vcount, readBgColor(index, entry.palette));
+                buffer_bg[layer][screen_x] = readBgColor(index, entry.palette);
 
                 if (++screen_x == WIDTH)
                     return;

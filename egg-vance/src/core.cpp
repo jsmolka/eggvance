@@ -61,8 +61,6 @@ void Core::reset()
 
 void Core::frame()
 {
-    ppu.clear();
-
     // Visible lines
     for (int line = 0; line < 160; ++line)
     {
