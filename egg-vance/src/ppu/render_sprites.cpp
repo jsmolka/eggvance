@@ -10,6 +10,9 @@ void PPU::renderSprites()
 
     int line = mmu.vcount.line;
 
+    int mosaic_x = mmu.mosaic.sprite_x + 1;
+    int mosaic_y = mmu.mosaic.sprite_y + 1;
+
     for (int entry = 127; entry > -1; --entry)
     {
         OamEntry oam(
@@ -88,6 +91,13 @@ void PPU::renderSprites()
             {
                 if (flip_x) tex_x = width  - 1 - tex_x;
                 if (flip_y) tex_y = height - 1 - tex_y;
+
+                if (oam.attr0.mosaic)
+                {
+                    // Todo: looks like in no$gba, but is sllightly different on real GBA
+                    tex_x = mosaic_x * (tex_x / mosaic_x);
+                    tex_y = mosaic_y * (tex_y / mosaic_y);
+                }
 
                 int tile_x = tex_x / 8;
                 int tile_y = tex_y / 8;

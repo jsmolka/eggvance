@@ -67,6 +67,7 @@ public:
         };
         Bgvofs bgvofs[4];
     };
+    Mosaic mosaic;
     Keycnt keycnt;
     Keyinput keyinput;
     Waitcnt waitcnt;

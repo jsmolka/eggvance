@@ -5,6 +5,7 @@
 #include "io/bgvofs.h"
 #include "io/dispcnt.h"
 #include "io/dispstat.h"
+#include "io/mosaic.h"
 #include "io/vcount.h"
 
 #include "other/keyinput.h"

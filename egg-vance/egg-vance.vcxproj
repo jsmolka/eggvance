@@ -133,6 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\mmu\registers\io\mosaic.cpp" />
     <ClCompile Include="src\arm\decoder.cpp" />
     <ClCompile Include="src\ppu\tiles\mapentry.cpp" />
     <ClCompile Include="src\mmu\registers\io\bgvofs.cpp" />
@@ -163,6 +164,7 @@
     <ClCompile Include="src\mmu\registers\other\waitcnt.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\mmu\registers\io\mosaic.h" />
     <ClInclude Include="src\arm\decoder.h" />
     <ClInclude Include="src\ppu\tiles\mapentry.h" />
     <ClInclude Include="src\mmu\registers\io\bgvofs.h" />
