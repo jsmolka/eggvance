@@ -29,8 +29,6 @@ public:
     void writeHalf(u32 addr, u16 half);
     void writeWord(u32 addr, u32 word);
 
-    bool oam_changed;
-
     Dispcnt dispcnt;
     Dispstat dispstat;
     Vcount vcount;
@@ -67,6 +65,60 @@ public:
         };
         Bgvofs bgvofs[4];
     };
+    union
+    {
+        struct
+        {
+            Bgx bg2x;
+            Bgx bg3x;
+        };
+        Bgx bgx[2];
+    };
+    union
+    {
+        struct
+        {
+            Bgy bg2y;
+            Bgy bg3y;
+        };
+        Bgy bgy[2];
+    };
+    union
+    {
+        struct
+        {
+            Bgpa bg2pa;
+            Bgpa bg3pa;
+        };
+        Bgpa bgpa[2];
+    };
+    union
+    {
+        struct
+        {
+            Bgpb bg2pb;
+            Bgpb bg3pb;
+        };
+        Bgpb bgpb[2];
+    };
+    union
+    {
+        struct
+        {
+            Bgpc bg2pc;
+            Bgpc bg3pc;
+        };
+        Bgpc bgpc[2];
+    };
+    union
+    {
+        struct
+        {
+            Bgpa bg2pd;
+            Bgpd bg3pd;
+        };
+        Bgpd bgpd[2];
+    };
     Mosaic mosaic;
     Keycnt keycnt;
     Keyinput keyinput;
@@ -75,8 +127,6 @@ public:
 private:
     template<typename T>
     T& ref(u32 addr);
-
-    void checkAddress(u32 addr);
 
     std::array<u8, 0x10000000> memory;
 };

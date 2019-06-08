@@ -21,6 +21,18 @@ MMU::MMU()
     , bg1vofs(ref<u16>(REG_BG1VOFS))
     , bg2vofs(ref<u16>(REG_BG2VOFS))
     , bg3vofs(ref<u16>(REG_BG3VOFS))
+    , bg2x(ref<u32>(REG_BG2X))
+    , bg3x(ref<u32>(REG_BG3X))
+    , bg2y(ref<u32>(REG_BG2Y))
+    , bg3y(ref<u32>(REG_BG3Y))
+    , bg2pa(ref<u16>(REG_BG2PA))
+    , bg3pa(ref<u16>(REG_BG3PA))
+    , bg2pb(ref<u16>(REG_BG2PB))
+    , bg3pb(ref<u16>(REG_BG3PB))
+    , bg2pc(ref<u16>(REG_BG2PC))
+    , bg3pc(ref<u16>(REG_BG3PC))
+    , bg2pd(ref<u16>(REG_BG2PD))
+    , bg3pd(ref<u16>(REG_BG3PD))
     , mosaic(ref<u16>(REG_MOSAIC))
     , keycnt(ref<u16>(REG_KEYCNT))
     , keyinput(ref<u16>(REG_KEYINPUT))
@@ -32,7 +44,6 @@ MMU::MMU()
 void MMU::reset()
 {
     memory.fill(0);
-    oam_changed = true;
 }
 
 bool MMU::readFile(const std::string& file, u32 addr)
@@ -109,31 +120,17 @@ u32 MMU::readWordFast(u32 addr)
 
 void MMU::writeByte(u32 addr, u8 byte)
 {
-    checkAddress(addr);
-
     memory[addr] = byte;
 }
 
 void MMU::writeHalf(u32 addr, u16 half)
 {
-    checkAddress(addr);
-
     ref<u16>(addr) = half;
 }
 
 void MMU::writeWord(u32 addr, u32 word)
 {
-    checkAddress(addr);
-
     ref<u32>(addr) = word;
-}
-
-void MMU::checkAddress(u32 addr)
-{
-    if (addr >= MAP_OAM && addr < (MAP_OAM + 0x400))
-    {
-        oam_changed = true;
-    }
 }
 
 template<typename T>

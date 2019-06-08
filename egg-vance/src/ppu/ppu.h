@@ -21,7 +21,7 @@ public:
     void render();
 
 private:
-    const int TRANSPARENT = 0x8000;
+    const int COLOR_TRANSPARENT = 0x8000;
 
     enum Screen
     {
@@ -36,18 +36,19 @@ private:
 
     MMU& mmu;
 
-    void renderMode0();
-    void renderMode0Layer(int layer);
-
     int initialMapBlock(const Bgcnt& bgcnt, int offset_x, int offset_y);
     int nextHorizontalMapBlock(const Bgcnt& bgcnt, int block);
 
+    void renderMode0();
     void renderMode1();
     void renderMode2();
     void renderMode3();
     void renderMode4();
     void renderMode5();
     void renderSprites();
+
+    void renderMode0Layer(int layer);
+    void renderMode2Layer(int layer);
 
     int readBgColor(int index, int palette);
     int readFgColor(int index, int palette);

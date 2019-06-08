@@ -27,6 +27,6 @@ public:
     }
 
 private:
-    enum { mask = (1 << size) - 1 };
+    enum { mask = (static_cast<u64>(1) << size) - 1 };
     T& data;
 };

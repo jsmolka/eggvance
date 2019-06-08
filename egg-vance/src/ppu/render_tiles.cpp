@@ -5,6 +5,7 @@
 
 // Todo:
 // 8bpp
+// Mosaic for all
 
 // Rotate / scale: no
 // Layers: 0 - 3
@@ -138,7 +139,9 @@ int PPU::nextHorizontalMapBlock(const Bgcnt& bgcnt, int block)
 // Layers: 0 - 2 (BG0, BG1 rendered as mode 0, BG2 rendered as mode 2)
 void PPU::renderMode1()
 {
-
+    if (mmu.dispcnt.bg2) renderMode2Layer(2);
+    if (mmu.dispcnt.bg1) renderMode0Layer(1);
+    if (mmu.dispcnt.bg0) renderMode0Layer(0);
 }
 
 // Rotate / scale: yes
@@ -149,5 +152,63 @@ void PPU::renderMode1()
 // Features: mosaic, alpha blending, brightness, priority
 void PPU::renderMode2()
 {
+    if (mmu.dispcnt.bg3) renderMode2Layer(3);
+    if (mmu.dispcnt.bg2) renderMode2Layer(2);
+}
 
+void PPU::renderMode2Layer(int layer)
+{
+    const auto& bgcnt = mmu.bgcnt[layer];
+
+    float ref_x = mmu.bgx[layer - 2].internal;
+    float ref_y = mmu.bgy[layer - 2].internal;
+
+    float pa = mmu.bgpa[layer - 2].value();
+    float pc = mmu.bgpc[layer - 2].value();
+
+    int size = bgcnt.affineSize();
+    int tiles_per_row = size / 8;
+
+    int mosaic_x = mmu.mosaic.bg_x + 1;
+    int mosaic_y = mmu.mosaic.bg_y + 1;
+
+    for (int screen_x = 0; screen_x < WIDTH; ++screen_x)
+    {
+        int tex_x = static_cast<int>(ref_x + static_cast<float>(screen_x) * pa);
+        int tex_y = static_cast<int>(ref_y + static_cast<float>(screen_x) * pc);
+
+        if (tex_x < 0 || tex_x >= size)
+        {
+            if (bgcnt.wraparound)
+                tex_x = (tex_x + size) % size;
+            else
+                continue;
+        }
+        if (tex_y < 0 || tex_y >= size)
+        {
+            if (bgcnt.wraparound)
+                tex_y = (tex_y + size) % size;
+            else
+                continue;
+        }
+
+        if (bgcnt.mosaic)
+        {
+            tex_x = mosaic_x * (tex_x / mosaic_x);
+            tex_y = mosaic_y * (tex_y / mosaic_y);
+        }
+
+        int tile_x = tex_x / 8;
+        int tile_y = tex_y / 8;
+        int pixel_x = tex_x % 8;
+        int pixel_y = tex_y % 8;
+
+        u32 mapAddr = bgcnt.mapBase() + tile_y * tiles_per_row + tile_x;
+
+        int tile = mmu.readByteFast(mapAddr);
+
+        u32 addr = bgcnt.tileBase() + 0x40 * tile;
+
+        buffer_bg[layer][screen_x] = readBgColor(readPixel(addr, pixel_x, pixel_y, BPP8), 0);
+    }
 }

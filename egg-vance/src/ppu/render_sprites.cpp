@@ -94,7 +94,7 @@ void PPU::renderSprites()
 
                 if (oam.attr0.mosaic)
                 {
-                    // Todo: looks like in no$gba, but is sllightly different on real GBA
+                    // Todo: looks like in no$gba, but is slightly different on real GBA
                     tex_x = mosaic_x * (tex_x / mosaic_x);
                     tex_y = mosaic_y * (tex_y / mosaic_y);
                 }

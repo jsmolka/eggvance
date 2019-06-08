@@ -52,13 +52,13 @@ void PPU::scanline()
     mmu.dispstat.vblank = false;
 
     // Clear line buffers
-    if (mmu.dispcnt.bg0) buffer_bg0.fill(TRANSPARENT);
-    if (mmu.dispcnt.bg1) buffer_bg1.fill(TRANSPARENT);
-    if (mmu.dispcnt.bg2) buffer_bg2.fill(TRANSPARENT);
-    if (mmu.dispcnt.bg3) buffer_bg3.fill(TRANSPARENT);
+    if (mmu.dispcnt.bg0) buffer_bg0.fill(COLOR_TRANSPARENT);
+    if (mmu.dispcnt.bg1) buffer_bg1.fill(COLOR_TRANSPARENT);
+    if (mmu.dispcnt.bg2) buffer_bg2.fill(COLOR_TRANSPARENT);
+    if (mmu.dispcnt.bg3) buffer_bg3.fill(COLOR_TRANSPARENT);
 
     for (auto& sprites : buffer_sprites)
-        sprites.fill(TRANSPARENT);
+        sprites.fill(COLOR_TRANSPARENT);
 
     // Fill line buffers
     switch (mmu.dispcnt.bg_mode)
@@ -77,39 +77,45 @@ void PPU::scanline()
     u16* scanline = &buffer[mmu.vcount * WIDTH];
     for (int x = 0; x < WIDTH; ++x)
     {
-        u16 pixel = TRANSPARENT;
+        u16 pixel = COLOR_TRANSPARENT;
 
         for (int priority = 3; priority > -1; --priority)
         {
             if (mmu.dispcnt.bg3 && mmu.bg3cnt.priority == priority)
             {
-                if (buffer_bg3[x] != TRANSPARENT)
+                if (buffer_bg3[x] != COLOR_TRANSPARENT)
                     pixel = buffer_bg3[x];
             }
             if (mmu.dispcnt.bg2 && mmu.bg2cnt.priority == priority)
             {
-                if (buffer_bg2[x] != TRANSPARENT)
+                if (buffer_bg2[x] != COLOR_TRANSPARENT)
                     pixel = buffer_bg2[x];
             }
             if (mmu.dispcnt.bg1 && mmu.bg1cnt.priority == priority)
             {
-                if (buffer_bg1[x] != TRANSPARENT)
+                if (buffer_bg1[x] != COLOR_TRANSPARENT)
                     pixel = buffer_bg1[x];
             }
             if (mmu.dispcnt.bg0 && mmu.bg0cnt.priority == priority)
             {
-                if (buffer_bg0[x] != TRANSPARENT)
+                if (buffer_bg0[x] != COLOR_TRANSPARENT)
                     pixel = buffer_bg0[x];
             }
             if (mmu.dispcnt.sprites)
             {
-                if (buffer_sprites[priority][x] != TRANSPARENT)
+                if (buffer_sprites[priority][x] != COLOR_TRANSPARENT)
                     pixel = buffer_sprites[priority][x];
             }
         }
 
-        scanline[x] = (pixel != TRANSPARENT) ? pixel : backdrop;
+        scanline[x] = (pixel != COLOR_TRANSPARENT) ? pixel : backdrop;
     }
+
+    // Increment reference points each scanline
+    mmu.bg2x.internal += mmu.bg2pb.value();
+    mmu.bg3x.internal += mmu.bg3pb.value();
+    mmu.bg2y.internal += mmu.bg2pd.value();
+    mmu.bg3y.internal += mmu.bg3pd.value();
 }
 
 void PPU::hblank()
@@ -127,6 +133,12 @@ void PPU::vblank()
 {
     mmu.dispstat.hblank = false;
     mmu.dispstat.vblank = true;
+
+    // Copy reference points
+    mmu.bg2x.internal = mmu.bg2x.value();
+    mmu.bg3x.internal = mmu.bg3x.value();
+    mmu.bg2y.internal = mmu.bg2y.value();
+    mmu.bg3y.internal = mmu.bg3y.value();
 
     if (mmu.dispstat.vblank_irq)
     {
@@ -161,6 +173,9 @@ void PPU::render()
 
 int PPU::readBgColor(int index, int palette)
 {
+    if (index == 0)
+        return COLOR_TRANSPARENT;
+
     return mmu.readHalfFast(MAP_PALETTE + 0x20 * palette + 2 * index);
 }
 

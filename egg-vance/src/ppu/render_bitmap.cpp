@@ -2,6 +2,8 @@
 
 #include "mmu/map.h"
 
+// Todo: mosaic for all
+
 // Rotate / scale: yes
 // Layers: 2
 // Size: 240x160

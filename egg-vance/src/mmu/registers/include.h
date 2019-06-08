@@ -1,8 +1,9 @@
 #pragma once
 
 #include "io/bgcnt.h"
-#include "io/bghofs.h"
-#include "io/bgvofs.h"
+#include "io/bghvofs.h"
+#include "io/bgpabcd.h"
+#include "io/bgxy.h"
 #include "io/dispcnt.h"
 #include "io/dispstat.h"
 #include "io/mosaic.h"

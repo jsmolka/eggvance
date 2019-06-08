@@ -35,14 +35,9 @@ int Bgcnt::height() const
     return sizes[screen_size][1];;
 }
 
-int Bgcnt::affineWidth() const
+int Bgcnt::affineSize() const
 {
-    return affine_sizes[screen_size][0];
-}
-
-int Bgcnt::affineHeight() const
-{
-    return affine_sizes[screen_size][1];
+    return affine_sizes[screen_size];
 }
 
 const int Bgcnt::sizes[4][2] =
@@ -53,10 +48,10 @@ const int Bgcnt::sizes[4][2] =
     { 512, 512 }
 };
 
-const int Bgcnt::affine_sizes[4][2] =
+const int Bgcnt::affine_sizes[4] =
 {
-    {  128,  128 },
-    {  256,  256 },
-    {  512,  512 },
-    { 1024, 1024 }
+     128,
+     256,
+     512,
+    1024
 };

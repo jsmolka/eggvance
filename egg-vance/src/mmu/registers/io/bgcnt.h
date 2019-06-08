@@ -26,10 +26,9 @@ public:
 
     int width() const;
     int height() const;
-    int affineWidth() const;
-    int affineHeight() const;
+    int affineSize() const;
 
 private:
     static const int sizes[4][2];
-    static const int affine_sizes[4][2];
+    static const int affine_sizes[4];
 };

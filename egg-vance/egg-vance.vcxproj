@@ -133,11 +133,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\mmu\registers\io\bgpabcd.cpp" />
+    <ClCompile Include="src\mmu\registers\io\bgxy.cpp" />
     <ClCompile Include="src\mmu\registers\io\mosaic.cpp" />
     <ClCompile Include="src\arm\decoder.cpp" />
     <ClCompile Include="src\ppu\tiles\mapentry.cpp" />
-    <ClCompile Include="src\mmu\registers\io\bgvofs.cpp" />
-    <ClCompile Include="src\mmu\registers\io\bghofs.cpp" />
+    <ClCompile Include="src\mmu\registers\io\bghvofs.cpp" />
     <ClCompile Include="src\ppu\sprites\attribute0.cpp" />
     <ClCompile Include="src\ppu\sprites\attribute1.cpp" />
     <ClCompile Include="src\ppu\sprites\attribute2.cpp" />
@@ -160,15 +161,16 @@
     <ClCompile Include="src\arm\arm.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ppu\render_bitmap.cpp" />
-    <ClCompile Include="src\ppu\render_text.cpp" />
+    <ClCompile Include="src\ppu\render_tiles.cpp" />
     <ClCompile Include="src\mmu\registers\other\waitcnt.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\mmu\registers\io\bgpabcd.h" />
+    <ClInclude Include="src\mmu\registers\io\bgxy.h" />
     <ClInclude Include="src\mmu\registers\io\mosaic.h" />
     <ClInclude Include="src\arm\decoder.h" />
     <ClInclude Include="src\ppu\tiles\mapentry.h" />
-    <ClInclude Include="src\mmu\registers\io\bgvofs.h" />
-    <ClInclude Include="src\mmu\registers\io\bghofs.h" />
+    <ClInclude Include="src\mmu\registers\io\bghvofs.h" />
     <ClInclude Include="src\common\bitvalue.h" />
     <ClInclude Include="src\ppu\sprites\attribute0.h" />
     <ClInclude Include="src\ppu\sprites\attribute1.h" />

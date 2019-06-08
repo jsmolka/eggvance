@@ -75,9 +75,6 @@
     <ClCompile Include="src\mmu\registers\io\bgcnt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\mmu\registers\io\bghofs.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\mmu\registers\io\dispcnt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -87,19 +84,25 @@
     <ClCompile Include="src\mmu\registers\io\vcount.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\mmu\registers\io\bgvofs.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\ppu\tiles\mapentry.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ppu\render_text.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\arm\decoder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\mmu\registers\io\mosaic.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ppu\render_tiles.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mmu\registers\io\bgxy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mmu\registers\io\bghvofs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mmu\registers\io\bgpabcd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -176,9 +179,6 @@
     <ClInclude Include="src\mmu\registers\io\bgcnt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\bghofs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\mmu\registers\io\dispcnt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -188,9 +188,6 @@
     <ClInclude Include="src\mmu\registers\io\vcount.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\bgvofs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\ppu\tiles\mapentry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -198,6 +195,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\mmu\registers\io\mosaic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\io\bgxy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\io\bghvofs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\io\bgpabcd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
