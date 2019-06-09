@@ -1,81 +1,83 @@
 #include "ppu.h"
 
 #include "mmu/map.h"
+#include "utility.h"
 
-// Todo: mosaic for all
-
-// Rotate / scale: yes
-// Layers: 2
-// Size: 240x160
-// Tiles: 1
-// Colors: 32768
-// Features: mosaic, alpha blending, brightness, priority
 void PPU::renderMode3()
 {
-    if (!mmu.dispcnt.bg2)
-        return;
-
-    u32 frame_addr = mmu.dispcnt.frameAddr();
-
-    int y = mmu.vcount;
-    int priority = mmu.bg2cnt.priority;
-    for (int x = 0; x < WIDTH; ++x)
-    {
-        int offset = 2 * (WIDTH * y + x);
-        int color = mmu.readHalfFast(frame_addr + offset);
-
-        buffer_bg2[x] = color;
-    }
+    renderBitmap(3);
 }
 
-// Rotate / scale: yes
-// Layers: 2
-// Size: 240x160
-// Tiles: 2
-// Colors: 256/1
-// Features: mosaic, alpha blending, brightness, priority
 void PPU::renderMode4()
 {
-    if (!mmu.dispcnt.bg2)
-        return;
-
-    u32 frame_addr = mmu.dispcnt.frameAddr();
-
-    int y = mmu.vcount;
-    int priority = mmu.bg2cnt.priority;
-    for (int x = 0; x < WIDTH; ++x)
-    {
-        int offset = WIDTH * y + x;
-        int index = mmu.readByteFast(frame_addr + offset);
-        int color = readBgColor(index, 0);
-
-        buffer_bg2[x] = color;
-    }
+    renderBitmap(4);
 }
 
-// Rotate / scale: yes
-// Layers: 2
-// Size: 160x128
-// Tiles: 2
-// Colors: 32768
-// Features: mosaic, alpha blending, brightness, priority
 void PPU::renderMode5()
+{
+    renderBitmap(5);
+}
+
+void PPU::renderBitmap(int mode)
 {
     if (!mmu.dispcnt.bg2)
         return;
 
-    u32 frame_addr = mmu.dispcnt.frameAddr();
+    int y = mmu.vcount.line;
 
-    int y = mmu.vcount;
-    if (y >= 128)
-        return;
+    int mosaic_x = 1;
+    int mosaic_y = 1;
 
-    int priority = mmu.bg2cnt.priority;
-    for (int x = 0; x < 160; ++x)
+    if (mmu.bg2cnt.mosaic)
     {
-        int offset = 2 * (160 * y + x);
-        int color = mmu.readHalfFast(frame_addr + offset);
-        
-        buffer_bg2[x] = color;
+        mosaic_x = mmu.mosaic.bg_x + 1;
+        mosaic_y = mmu.mosaic.bg_y + 1;
+
+        y = getMosaic(y, mosaic_y);
+    }
+
+    u32 addr = mmu.dispcnt.frameAddr();
+
+    switch (mode)
+    {
+    case 3:
+    {
+        for (int x = 0; x < WIDTH; ++x)
+        {
+            int offset = 2 * (WIDTH * y + getMosaic(x, mosaic_x));
+            int color = mmu.readHalfFast(addr + offset);
+
+            buffer_bg2[x] = color;
+        }
+        break;
+    }
+
+    case 4:
+    {
+        for (int x = 0; x < WIDTH; ++x)
+        {
+            int offset = WIDTH * y + getMosaic(x, mosaic_x);
+            int index = mmu.readByteFast(addr + offset);
+            int color = readBgColor(index, 0);
+
+            buffer_bg2[x] = color;
+        }
+        break;
+    }
+
+    case 5:
+    {
+        for (int x = 0; x < 160; ++x)
+        {
+            int color = COLOR_TRANSPARENT;
+            if (x < 160 && y < 128)
+            {
+                int offset = 2 * (160 * y + getMosaic(x, mosaic_x));
+                color = mmu.readHalfFast(addr + offset);
+            }
+            buffer_bg2[x] = color;
+        }
+        break;
+    }
     }
 }

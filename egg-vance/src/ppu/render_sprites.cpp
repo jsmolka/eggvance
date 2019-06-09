@@ -1,7 +1,7 @@
 #include "ppu.h"
 
 #include "mmu/map.h"
-#include "sprites/oamentry.h"
+#include "oamentry.h"
 
 void PPU::renderSprites()
 {
@@ -15,63 +15,61 @@ void PPU::renderSprites()
 
     for (int entry = 127; entry > -1; --entry)
     {
-        OamEntry oam(
+        OAMEntry oam(
             mmu.readHalfFast(MAP_OAM + 8 * entry + 0),  // Attribute 0
             mmu.readHalfFast(MAP_OAM + 8 * entry + 2),  // Attribute 1
             mmu.readHalfFast(MAP_OAM + 8 * entry + 4)   // Attribute 2
         );
 
-        if (!oam.attr0.affine && oam.attr0.disabled)
+        if (!oam.affine && oam.disabled)
             continue;
 
-        int x = oam.attr1.x;
-        int y = oam.attr0.y;
+        int x = oam.x;
+        int y = oam.y;
 
         // Wraparound
         if (x >= WIDTH)  x -= 512;
         if (y >= HEIGHT) y -= 256;
 
-        // Sprite size
-        int width = oam.width();
+        int width  = oam.width();
         int height = oam.height();
 
-        // Affine rectangle size
-        int rect_width = width;
+        // Bounding rectangle (invisible outside)
+        int rect_width  = width;
         int rect_height = height;
 
-        if (oam.attr0.double_size)
+        if (oam.double_size)
         {
-            rect_width *= 2;
+            rect_width  *= 2;
             rect_height *= 2;
         }
 
-        if (y > line || (y + rect_height) < line)
+        // Check if the sprite is visible
+        int sprite_line = line - y;
+        if (sprite_line < 0 || sprite_line >= rect_height)
             continue;
 
-        PixelFormat format = oam.attr0.color_mode ? BPP8 : BPP4;
-        int tile_size = oam.attr0.color_mode ? 0x40 : 0x20;
-        // Todo: is this correct?
-        // There are 3 other sprites in the same row when using 2D mapping
-        int tile_row_size = tile_size * (mmu.dispcnt.sprite_1d ? (width / 8) : (width / 2));
+        PixelFormat format = oam.color_mode ? BPP8 : BPP4;
+        int tile_size = oam.color_mode ? 0x40 : 0x20;
+        // 2D mapping arranges sprites in a 32x32 tile matrix
+        int tile_size_row = tile_size * (mmu.dispcnt.mapping_1d ? (width / 8) : 32);
 
-        bool flip_x = !oam.attr0.affine && oam.attr1.flip_x;
-        bool flip_y = !oam.attr0.affine && oam.attr1.flip_y;
+        bool flip_x = !oam.affine && oam.flip_x;
+        bool flip_y = !oam.affine && oam.flip_y;
 
-        // Identity matrix by default
+        // Initialize with identity
         s16 pa = 0x100;
         s16 pb = 0x000;
         s16 pc = 0x000;
         s16 pd = 0x100;
 
-        if (oam.attr0.affine)
+        if (oam.affine)
         {
-            pa = mmu.readHalfFast(MAP_OAM + 0x20 * oam.attr1.paramter + 0x06);  
-            pb = mmu.readHalfFast(MAP_OAM + 0x20 * oam.attr1.paramter + 0x0E);  
-            pc = mmu.readHalfFast(MAP_OAM + 0x20 * oam.attr1.paramter + 0x16);  
-            pd = mmu.readHalfFast(MAP_OAM + 0x20 * oam.attr1.paramter + 0x1E);  
+            pa = mmu.readHalfFast(MAP_OAM + 0x20 * oam.paramter + 0x06);  
+            pb = mmu.readHalfFast(MAP_OAM + 0x20 * oam.paramter + 0x0E);  
+            pc = mmu.readHalfFast(MAP_OAM + 0x20 * oam.paramter + 0x16);  
+            pd = mmu.readHalfFast(MAP_OAM + 0x20 * oam.paramter + 0x1E);  
         }
-
-        u32 base_addr = MAP_VRAM + 0x10000 + oam.attr2.tile * tile_size;
 
         // Rotation center
         int center_x = x + rect_width / 2;
@@ -81,9 +79,11 @@ void PPU::renderSprites()
         int rect_x = -rect_width / 2;
         int rect_y = line - center_y;
 
+        u32 base_addr = MAP_VRAM + 0x10000 + tile_size * oam.tile;
+
         for (; rect_x < rect_width / 2; ++rect_x)
         {
-            // Texture coordinates inside sprite
+            // Texture coordinates inside the sprite
             int tex_x = ((pa * rect_x + pb * rect_y) >> 8) + width / 2;
             int tex_y = ((pc * rect_x + pd * rect_y) >> 8) + height / 2;
 
@@ -92,9 +92,8 @@ void PPU::renderSprites()
                 if (flip_x) tex_x = width  - 1 - tex_x;
                 if (flip_y) tex_y = height - 1 - tex_y;
 
-                if (oam.attr0.mosaic)
+                if (oam.mosaic)
                 {
-                    // Todo: looks like in no$gba, but is slightly different on real GBA
                     tex_x = mosaic_x * (tex_x / mosaic_x);
                     tex_y = mosaic_y * (tex_y / mosaic_y);
                 }
@@ -104,23 +103,23 @@ void PPU::renderSprites()
                 int pixel_x = tex_x % 8;
                 int pixel_y = tex_y % 8;
 
-                u32 addr = base_addr + tile_row_size * tile_y + tile_size * tile_x;
-
-                // Tile overflow
-                if (addr > (MAP_VRAM + 0x18000))
+                // Get tile address and account for overflow
+                u32 addr = base_addr + tile_size_row * tile_y + tile_size * tile_x;
+                if (addr > MAP_VRAM + 0x18000)
                     addr -= 0x8000;
 
-                int color = readPixel(addr, pixel_x, pixel_y, format);
-                if (color != 0)
+                int index = readPixel(addr, pixel_x, pixel_y, format);
+                if (index != 0)
                 {
+                    int color;
                     if (format == BPP4)
-                        color = readFgColor(color, oam.attr2.palette);
+                        color = readFgColor(index, oam.palette_bank);
                     else
-                        color = readFgColor(color, 0);
+                        color = readFgColor(index, 0);
                     
                     int screen_x = center_x + rect_x;
                     if (screen_x >= 0 && screen_x < WIDTH)
-                        buffer_sprites[oam.attr2.priority][screen_x] = color;
+                        buffer_sprites[oam.priority][screen_x] = color;
                 }
             }
         }

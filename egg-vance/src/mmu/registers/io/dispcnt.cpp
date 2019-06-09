@@ -8,7 +8,7 @@ Dispcnt::Dispcnt(u16& data)
     , gbc_mode(data)
     , frame(data)
     , access_oam(data)
-    , sprite_1d(data)
+    , mapping_1d(data)
     , force_blank(data)
     , bg0(data)
     , bg1(data)
@@ -24,5 +24,5 @@ Dispcnt::Dispcnt(u16& data)
 
 u32 Dispcnt::frameAddr() const
 {
-    return  MAP_VRAM + frame_size * frame;
+    return  MAP_VRAM + 0xA000 * frame;
 }

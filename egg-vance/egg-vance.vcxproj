@@ -137,12 +137,9 @@
     <ClCompile Include="src\mmu\registers\io\bgxy.cpp" />
     <ClCompile Include="src\mmu\registers\io\mosaic.cpp" />
     <ClCompile Include="src\arm\decoder.cpp" />
-    <ClCompile Include="src\ppu\tiles\mapentry.cpp" />
+    <ClCompile Include="src\ppu\mapentry.cpp" />
     <ClCompile Include="src\mmu\registers\io\bghvofs.cpp" />
-    <ClCompile Include="src\ppu\sprites\attribute0.cpp" />
-    <ClCompile Include="src\ppu\sprites\attribute1.cpp" />
-    <ClCompile Include="src\ppu\sprites\attribute2.cpp" />
-    <ClCompile Include="src\ppu\sprites\oamentry.cpp" />
+    <ClCompile Include="src\ppu\oamentry.cpp" />
     <ClCompile Include="src\mmu\registers\io\vcount.cpp" />
     <ClCompile Include="src\mmu\registers\other\keycnt.cpp" />
     <ClCompile Include="src\mmu\registers\other\keyinput.cpp" />
@@ -169,13 +166,10 @@
     <ClInclude Include="src\mmu\registers\io\bgxy.h" />
     <ClInclude Include="src\mmu\registers\io\mosaic.h" />
     <ClInclude Include="src\arm\decoder.h" />
-    <ClInclude Include="src\ppu\tiles\mapentry.h" />
+    <ClInclude Include="src\ppu\mapentry.h" />
     <ClInclude Include="src\mmu\registers\io\bghvofs.h" />
     <ClInclude Include="src\common\bitvalue.h" />
-    <ClInclude Include="src\ppu\sprites\attribute0.h" />
-    <ClInclude Include="src\ppu\sprites\attribute1.h" />
-    <ClInclude Include="src\ppu\sprites\attribute2.h" />
-    <ClInclude Include="src\ppu\sprites\oamentry.h" />
+    <ClInclude Include="src\ppu\oamentry.h" />
     <ClInclude Include="src\mmu\registers\other\keycnt.h" />
     <ClInclude Include="src\mmu\registers\other\keyinput.h" />
     <ClInclude Include="src\arm\disassembler.h" />
@@ -198,6 +192,7 @@
     <ClInclude Include="src\common\integer.h" />
     <ClInclude Include="src\mmu\registers\other\waitcnt.h" />
     <ClInclude Include="src\mmu\registers\io\vcount.h" />
+    <ClInclude Include="src\ppu\utility.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

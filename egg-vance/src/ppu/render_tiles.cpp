@@ -1,7 +1,7 @@
 #include "ppu.h"
 
 #include "mmu/map.h"
-#include "tiles/mapentry.h"
+#include "mapentry.h"
 
 // Todo:
 // 8bpp

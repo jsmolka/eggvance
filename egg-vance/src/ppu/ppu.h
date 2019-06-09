@@ -21,8 +21,10 @@ public:
     void render();
 
 private:
-    const int COLOR_TRANSPARENT = 0x8000;
-
+    enum Color
+    { 
+        COLOR_TRANSPARENT = 0x8000 
+    };
     enum Screen
     {
         WIDTH  = 240,
@@ -30,8 +32,8 @@ private:
     };
     enum PixelFormat
     {
-        BPP4,  // 4 bits per pixel (16/16 palette)
-        BPP8   // 8 bits per pixel (256/1 palette)
+        BPP4,  // 4 bits per pixel (16/16)
+        BPP8   // 8 bits per pixel (256/1)
     };
 
     MMU& mmu;
@@ -49,6 +51,7 @@ private:
 
     void renderMode0Layer(int layer);
     void renderMode2Layer(int layer);
+    void renderBitmap(int mode);
 
     int readBgColor(int index, int palette);
     int readFgColor(int index, int palette);
