@@ -133,6 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ppu\bgbuffer.cpp" />
     <ClCompile Include="src\mmu\registers\io\bgpabcd.cpp" />
     <ClCompile Include="src\mmu\registers\io\bgxy.cpp" />
     <ClCompile Include="src\mmu\registers\io\mosaic.cpp" />
@@ -162,6 +163,7 @@
     <ClCompile Include="src\mmu\registers\other\waitcnt.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\ppu\bgbuffer.h" />
     <ClInclude Include="src\mmu\registers\io\bgpabcd.h" />
     <ClInclude Include="src\mmu\registers\io\bgxy.h" />
     <ClInclude Include="src\mmu\registers\io\mosaic.h" />
@@ -192,7 +194,6 @@
     <ClInclude Include="src\common\integer.h" />
     <ClInclude Include="src\mmu\registers\other\waitcnt.h" />
     <ClInclude Include="src\mmu\registers\io\vcount.h" />
-    <ClInclude Include="src\ppu\utility.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

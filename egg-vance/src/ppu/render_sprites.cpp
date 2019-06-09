@@ -3,6 +3,8 @@
 #include "mmu/map.h"
 #include "oamentry.h"
 
+// Todo: maybe move mosaic out of this function
+
 void PPU::renderSprites()
 {
     if (!mmu.dispcnt.sprites)

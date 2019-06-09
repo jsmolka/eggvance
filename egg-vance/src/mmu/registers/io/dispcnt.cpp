@@ -22,6 +22,18 @@ Dispcnt::Dispcnt(u16& data)
 
 }
 
+bool Dispcnt::bg(int bg) const
+{
+    switch (bg)
+    {
+    case 0: return bg0;
+    case 1: return bg1;
+    case 2: return bg2;
+    case 3: return bg3;
+    }
+    return false;
+}
+
 u32 Dispcnt::frameAddr() const
 {
     return  MAP_VRAM + 0xA000 * frame;

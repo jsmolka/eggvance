@@ -4,6 +4,7 @@
 #include <SDL.h>
 
 #include "mmu/mmu.h"
+#include "bgbuffer.h"
 
 class PPU
 {
@@ -51,7 +52,8 @@ private:
 
     void renderMode0Layer(int layer);
     void renderMode2Layer(int layer);
-    void renderBitmap(int mode);
+
+    void generateScanline();
 
     int readBgColor(int index, int palette);
     int readFgColor(int index, int palette);
@@ -59,26 +61,27 @@ private:
 
     int readTilePixel(u32 addr, int x, int y, bool flip_x, bool flip_y, PixelFormat format);
 
+    void applyEffects();
+    void applyMosaic();
+    void applyMosaicBg(BgBuffer& buffer);
+       
     SDL_Window* window;
     SDL_Renderer* renderer;
     SDL_Texture* texture;
 
-    // Scanline buffers (each has its own priority)
     union
     {
         struct
         {
-            std::array<u16, WIDTH> buffer_bg0;
-            std::array<u16, WIDTH> buffer_bg1;
-            std::array<u16, WIDTH> buffer_bg2;
-            std::array<u16, WIDTH> buffer_bg3;
+            BgBuffer buffer_bg0;
+            BgBuffer buffer_bg1;
+            BgBuffer buffer_bg2;
+            BgBuffer buffer_bg3;
         };
-        std::array<u16, WIDTH> buffer_bg[4];
+        BgBuffer buffer_bg[4];
     };
 
-    // Sprite priority buffers (each sprite has its own priority)
     std::array<std::array<u16, WIDTH>, 4> buffer_sprites;
 
-    // Screen buffer
-    std::array<u16, WIDTH * HEIGHT> buffer;
+    std::array<u16, WIDTH * HEIGHT> buffer_screen;
 };
