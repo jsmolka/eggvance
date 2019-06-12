@@ -50,8 +50,8 @@ private:
     void renderMode5();
     void renderSprites();
 
-    void renderMode0Layer(int layer);
-    void renderMode2Layer(int layer);
+    void renderBackgroundMode0(int layer);
+    void renderBackgroundMode2(int layer);
 
     void generateScanline();
 

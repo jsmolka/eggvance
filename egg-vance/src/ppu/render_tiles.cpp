@@ -3,29 +3,34 @@
 #include "mmu/map.h"
 #include "mapentry.h"
 
-// Todo:
-// 8bpp
-// Mosaic for all
+// Todo: 8bpp?
 
-// Rotate / scale: no
-// Layers: 0 - 3
-// Size: 256x256 - 512x512
-// Tiles: 1024
-// Colors: 16/16 - 256/1
-// Features: scrolling, flip, mosaic, alpha blending, brightness, priority
 void PPU::renderMode0()
 {
-    if (mmu.dispcnt.bg3) renderMode0Layer(3);
-    if (mmu.dispcnt.bg2) renderMode0Layer(2);
-    if (mmu.dispcnt.bg1) renderMode0Layer(1);
-    if (mmu.dispcnt.bg0) renderMode0Layer(0);
+    if (mmu.dispcnt.bg0) renderBackgroundMode0(0);
+    if (mmu.dispcnt.bg1) renderBackgroundMode0(1);
+    if (mmu.dispcnt.bg2) renderBackgroundMode0(2);
+    if (mmu.dispcnt.bg3) renderBackgroundMode0(3);
 }
 
-void PPU::renderMode0Layer(int layer)
+void PPU::renderMode1()
 {
-    const Bgcnt& bgcnt = mmu.bgcnt[layer];
-    const int scroll_x = mmu.bghofs[layer].offset;
-    const int scroll_y = mmu.bgvofs[layer].offset + mmu.vcount;
+    if (mmu.dispcnt.bg0) renderBackgroundMode0(0);
+    if (mmu.dispcnt.bg1) renderBackgroundMode0(1);
+    if (mmu.dispcnt.bg2) renderBackgroundMode2(2);
+}
+
+void PPU::renderMode2()
+{
+    if (mmu.dispcnt.bg2) renderBackgroundMode2(2);
+    if (mmu.dispcnt.bg3) renderBackgroundMode2(3);
+}
+
+void PPU::renderBackgroundMode0(int bg)
+{
+    const Bgcnt& bgcnt = mmu.bgcnt[bg];
+    const int scroll_x = mmu.bghofs[bg].offset;
+    const int scroll_y = mmu.bgvofs[bg].offset + mmu.vcount;
 
     int priority = bgcnt.priority;
     int tile_x = (scroll_x / 8) % 32;
@@ -65,7 +70,7 @@ void PPU::renderMode0Layer(int layer)
                     format
                 );
 
-                buffer_bg[layer][screen_x] = readBgColor(index, entry.palette);
+                buffer_bg[bg][screen_x] = readBgColor(index, entry.palette);
 
                 if (++screen_x == WIDTH)
                     return;
@@ -136,35 +141,15 @@ int PPU::nextHorizontalMapBlock(const Bgcnt& bgcnt, int block)
     return 0;
 }
 
-// Layers: 0 - 2 (BG0, BG1 rendered as mode 0, BG2 rendered as mode 2)
-void PPU::renderMode1()
+void PPU::renderBackgroundMode2(int bg)
 {
-    if (mmu.dispcnt.bg2) renderMode2Layer(2);
-    if (mmu.dispcnt.bg1) renderMode0Layer(1);
-    if (mmu.dispcnt.bg0) renderMode0Layer(0);
-}
+    const auto& bgcnt = mmu.bgcnt[bg];
 
-// Rotate / scale: yes
-// Layers: 2 - 3
-// Size: 128x128 - 1024x1024
-// Tiles: 256
-// Colors: 16/16 - 256/1
-// Features: mosaic, alpha blending, brightness, priority
-void PPU::renderMode2()
-{
-    if (mmu.dispcnt.bg3) renderMode2Layer(3);
-    if (mmu.dispcnt.bg2) renderMode2Layer(2);
-}
+    float ref_x = mmu.bgx[bg - 2].internal;
+    float ref_y = mmu.bgy[bg - 2].internal;
 
-void PPU::renderMode2Layer(int layer)
-{
-    const auto& bgcnt = mmu.bgcnt[layer];
-
-    float ref_x = mmu.bgx[layer - 2].internal;
-    float ref_y = mmu.bgy[layer - 2].internal;
-
-    float pa = mmu.bgpa[layer - 2].value();
-    float pc = mmu.bgpc[layer - 2].value();
+    float pa = mmu.bgpa[bg - 2].value();
+    float pc = mmu.bgpc[bg - 2].value();
 
     int size = bgcnt.affineSize();
     int tiles_per_row = size / 8;
@@ -209,6 +194,6 @@ void PPU::renderMode2Layer(int layer)
 
         u32 addr = bgcnt.tileBase() + 0x40 * tile;
 
-        buffer_bg[layer][screen_x] = readBgColor(readPixel(addr, pixel_x, pixel_y, BPP8), 0);
+        buffer_bg[bg][screen_x] = readBgColor(readPixel(addr, pixel_x, pixel_y, BPP8), 0);
     }
 }

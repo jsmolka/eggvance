@@ -74,7 +74,6 @@ void PPU::scanline()
 
     generateScanline();
 
-    // Increment reference points after scanline
     mmu.bg2x.internal += mmu.bg2pb.value();
     mmu.bg3x.internal += mmu.bg3pb.value();
     mmu.bg2y.internal += mmu.bg2pd.value();
@@ -97,7 +96,6 @@ void PPU::vblank()
     mmu.dispstat.hblank = false;
     mmu.dispstat.vblank = true;
 
-    // Copy reference points to internal register
     mmu.bg2x.internal = mmu.bg2x.value();
     mmu.bg3x.internal = mmu.bg3x.value();
     mmu.bg2y.internal = mmu.bg2y.value();
