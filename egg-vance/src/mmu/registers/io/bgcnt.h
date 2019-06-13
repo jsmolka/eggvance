@@ -5,9 +5,6 @@
 class Bgcnt : public Register<u16>
 {
 public:
-    static constexpr int tile_block_size = 0x4000;
-    static constexpr int map_block_size = 0x800;
-
     Bgcnt(u16& data);
 
     using Register<u16>::operator=;

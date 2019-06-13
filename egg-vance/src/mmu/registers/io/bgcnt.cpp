@@ -17,12 +17,12 @@ Bgcnt::Bgcnt(u16& data)
 
 u32 Bgcnt::tileBase() const
 {
-    return MAP_VRAM + tile_block_size * tile_base;
+    return MAP_VRAM + 0x4000 * tile_base;
 }
 
 u32 Bgcnt::mapBase() const
 {
-    return MAP_VRAM + map_block_size * map_base;
+    return MAP_VRAM + 0x800 * map_base;
 }
 
 int Bgcnt::width() const

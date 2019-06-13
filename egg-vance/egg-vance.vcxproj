@@ -163,6 +163,7 @@
     <ClCompile Include="src\mmu\registers\other\waitcnt.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\common\utility.h" />
     <ClInclude Include="src\ppu\bgbuffer.h" />
     <ClInclude Include="src\mmu\registers\io\bgpabcd.h" />
     <ClInclude Include="src\mmu\registers\io\bgxy.h" />

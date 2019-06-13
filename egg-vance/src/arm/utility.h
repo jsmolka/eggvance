@@ -22,6 +22,7 @@ inline bool misalignedWord(u32 addr)
     return addr & 0x3;
 }
 
+// Todo: replace with signExtend?
 template<unsigned int size>
 inline s32 twos(u32 value)
 {

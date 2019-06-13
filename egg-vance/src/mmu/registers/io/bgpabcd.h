@@ -13,8 +13,6 @@ public:
     BitField<u16,  0, 8> fractal;  // Fractional portion
     BitField<u16,  8, 7> integer;  // Integer portion
     BitField<u16, 15, 1> sign;     // Sign
-
-    float value() const;
 };
 
 using Bgpa = Bgpabcd;

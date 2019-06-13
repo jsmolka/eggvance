@@ -1,9 +1,8 @@
 #include "ppu.h"
 
+#include "common/utility.h"
 #include "mmu/map.h"
 #include "mapentry.h"
-
-// Todo: 8bpp?
 
 void PPU::renderMode0()
 {
@@ -46,7 +45,7 @@ void PPU::renderBackgroundMode0(int bg)
     while (true)
     {
         // Get base address for the used block
-        u32 mapAddr = bgcnt.mapBase() + block * Bgcnt::map_block_size;
+        u32 mapAddr = bgcnt.mapBase() + 0x800 * block;
         // Add offset for the currently used tile
         mapAddr += 2 * (32 * tile_y + tile_x);
 
@@ -143,56 +142,54 @@ int PPU::nextHorizontalMapBlock(const Bgcnt& bgcnt, int block)
 
 void PPU::renderBackgroundMode2(int bg)
 {
-    const auto& bgcnt = mmu.bgcnt[bg];
+    const Bgcnt& bgcnt = mmu.bgcnt[bg];
 
-    float ref_x = mmu.bgx[bg - 2].internal;
-    float ref_y = mmu.bgy[bg - 2].internal;
+    int pa = signExtend<int, 16>(mmu.bgpa[bg - 2]);
+    int pb = signExtend<int, 16>(mmu.bgpb[bg - 2]);
+    int pc = signExtend<int, 16>(mmu.bgpc[bg - 2]);
+    int pd = signExtend<int, 16>(mmu.bgpd[bg - 2]);
 
-    float pa = mmu.bgpa[bg - 2].value();
-    float pc = mmu.bgpc[bg - 2].value();
+    int line = mmu.vcount.line;
+
+    // Inaccurate (not copying and incrementing like real GBA)
+    int ref_x = signExtend<int, 28>(mmu.bgx[bg - 2]) + line * pb;
+    int ref_y = signExtend<int, 28>(mmu.bgy[bg - 2]) + line * pd;
 
     int size = bgcnt.affineSize();
-    int tiles_per_row = size / 8;
 
-    int mosaic_x = mmu.mosaic.bg_x + 1;
-    int mosaic_y = mmu.mosaic.bg_y + 1;
+    int tiles_per_row = size / 8;
 
     for (int screen_x = 0; screen_x < WIDTH; ++screen_x)
     {
-        int tex_x = static_cast<int>(ref_x + static_cast<float>(screen_x) * pa);
-        int tex_y = static_cast<int>(ref_y + static_cast<float>(screen_x) * pc);
+        int tex_x = (ref_x + screen_x * pa) >> 8;
+        int tex_y = (ref_y + screen_x * pc) >> 8;
 
-        if (tex_x < 0 || tex_x >= size)
+        if (tex_x < 0 || tex_x >= size || tex_y < 0 || tex_y >= size)
         {
             if (bgcnt.wraparound)
-                tex_x = (tex_x + size) % size;
-            else
-                continue;
-        }
-        if (tex_y < 0 || tex_y >= size)
-        {
-            if (bgcnt.wraparound)
-                tex_y = (tex_y + size) % size;
-            else
-                continue;
-        }
+            {
+                tex_x %= size;
+                tex_y %= size;
 
-        if (bgcnt.mosaic)
-        {
-            tex_x = mosaic_x * (tex_x / mosaic_x);
-            tex_y = mosaic_y * (tex_y / mosaic_y);
+                if (tex_x < 0) tex_x += size;
+                if (tex_y < 0) tex_y += size;
+            }
+            else
+            {
+                buffer_bg[bg][screen_x] = COLOR_TRANSPARENT;
+                continue;
+            }
         }
 
         int tile_x = tex_x / 8;
         int tile_y = tex_y / 8;
+
+        u32 map_addr = bgcnt.mapBase() + tile_y * tiles_per_row + tile_x;
+        int tile = mmu.readByteFast(map_addr);
+        u32 addr = bgcnt.tileBase() + 0x40 * tile;
+
         int pixel_x = tex_x % 8;
         int pixel_y = tex_y % 8;
-
-        u32 mapAddr = bgcnt.mapBase() + tile_y * tiles_per_row + tile_x;
-
-        int tile = mmu.readByteFast(mapAddr);
-
-        u32 addr = bgcnt.tileBase() + 0x40 * tile;
 
         buffer_bg[bg][screen_x] = readBgColor(readPixel(addr, pixel_x, pixel_y, BPP8), 0);
     }

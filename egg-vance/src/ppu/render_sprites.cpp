@@ -102,13 +102,14 @@ void PPU::renderSprites()
 
                 int tile_x = tex_x / 8;
                 int tile_y = tex_y / 8;
-                int pixel_x = tex_x % 8;
-                int pixel_y = tex_y % 8;
 
                 // Get tile address and account for overflow
                 u32 addr = base_addr + tile_size_row * tile_y + tile_size * tile_x;
                 if (addr > MAP_VRAM + 0x18000)
                     addr -= 0x8000;
+
+                int pixel_x = tex_x % 8;
+                int pixel_y = tex_y % 8;
 
                 int index = readPixel(addr, pixel_x, pixel_y, format);
                 if (index != 0)

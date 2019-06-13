@@ -73,11 +73,6 @@ void PPU::scanline()
     applyEffects();
 
     generateScanline();
-
-    mmu.bg2x.internal += mmu.bg2pb.value();
-    mmu.bg3x.internal += mmu.bg3pb.value();
-    mmu.bg2y.internal += mmu.bg2pd.value();
-    mmu.bg3y.internal += mmu.bg3pd.value();
 }
 
 void PPU::hblank()
@@ -95,11 +90,6 @@ void PPU::vblank()
 {
     mmu.dispstat.hblank = false;
     mmu.dispstat.vblank = true;
-
-    mmu.bg2x.internal = mmu.bg2x.value();
-    mmu.bg3x.internal = mmu.bg3x.value();
-    mmu.bg2y.internal = mmu.bg2y.value();
-    mmu.bg3y.internal = mmu.bg3y.value();
 
     if (mmu.dispstat.vblank_irq)
     {
