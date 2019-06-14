@@ -184,14 +184,6 @@ int PPU::readPixel(u32 addr, int x, int y, PixelFormat format)
     }
 }
 
-int PPU::readTilePixel(u32 addr, int x, int y, bool flip_x, bool flip_y, PixelFormat format)
-{
-    if (flip_x) x = 7 - x;
-    if (flip_y) y = 7 - y;
-
-    return readPixel(addr, x, y, format);
-}
-
 void PPU::applyEffects()
 {
     applyMosaic();

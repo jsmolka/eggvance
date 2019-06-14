@@ -121,8 +121,8 @@ void ARM::execute(ARM::PipeState& state)
             case ArmInstr::SWI: swiArm(instr); break;
             case ArmInstr::CoDataOperation:
             case ArmInstr::CoDataTransfer:
-            case ArmInstr::CoRegisterTransfer: fmt::printf("Coprocessor instruction %08X", instr); break;
-            case ArmInstr::Invalid: fmt::printf("Invalid instruction %08X", instr); break;
+            case ArmInstr::CoRegisterTransfer: fmt::printf("Coprocessor instruction %08X\n", instr); break;
+            case ArmInstr::Invalid: fmt::printf("Invalid instruction %08X\n", instr); break;
             }
         }
         else

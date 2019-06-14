@@ -39,9 +39,6 @@ private:
 
     MMU& mmu;
 
-    int initialMapBlock(const Bgcnt& bgcnt, int offset_x, int offset_y);
-    int nextHorizontalMapBlock(const Bgcnt& bgcnt, int block);
-
     void renderMode0();
     void renderMode1();
     void renderMode2();
@@ -58,8 +55,6 @@ private:
     int readBgColor(int index, int palette);
     int readFgColor(int index, int palette);
     int readPixel(u32 addr, int x, int y, PixelFormat format);
-
-    int readTilePixel(u32 addr, int x, int y, bool flip_x, bool flip_y, PixelFormat format);
 
     void applyEffects();
     void applyMosaic();

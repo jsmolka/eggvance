@@ -28,116 +28,89 @@ void PPU::renderMode2()
 void PPU::renderBackgroundMode0(int bg)
 {
     const Bgcnt& bgcnt = mmu.bgcnt[bg];
-    const int scroll_x = mmu.bghofs[bg].offset;
-    const int scroll_y = mmu.bgvofs[bg].offset + mmu.vcount;
 
-    int priority = bgcnt.priority;
-    int tile_x = (scroll_x / 8) % 32;
-    int tile_y = (scroll_y / 8) % 32;
     int tile_size = bgcnt.palette_type ? 0x40 : 0x20;
     PixelFormat format = bgcnt.palette_type ? BPP8 : BPP4;
 
+    int ref_x = mmu.bghofs[bg].offset;
+    int ref_y = mmu.bgvofs[bg].offset + mmu.vcount.line;
+
+    // Amount of blocks along axis
+    int blocks_x = (bgcnt.screen_size & 0x1) ? 2 : 1;
+    int blocks_y = (bgcnt.screen_size & 0x2) ? 2 : 1;
+
+    // Wraparound
+    ref_x %= (blocks_x * 256);
+    ref_y %= (blocks_y * 256);
+
+    // Initial block
+    int block = 0;
+    switch (bgcnt.screen_size)
+    {
+    case 0b00: block = 0; break;
+    case 0b01: block = ref_x / 256; break;
+    case 0b10: block = ref_y / 256; break;
+    case 0b11: block = 2 * (ref_y / 256) + ref_x / 256; break;
+    }
+
+    // Tiles inside initial block
+    int tile_x = (ref_x / 8) % 32;
+    int tile_y = (ref_y / 8) % 32;
+
+    int pixel_x = ref_x % 8;
+    int pixel_y = ref_y % 8;
+
     int screen_x = 0;
-    int x = scroll_x % 8;
-
-    int block = initialMapBlock(bgcnt, scroll_x, scroll_y);
-
     while (true)
     {
-        // Get base address for the used block
-        u32 mapAddr = bgcnt.mapBase() + 0x800 * block;
-        // Add offset for the currently used tile
-        mapAddr += 2 * (32 * tile_y + tile_x);
+        u32 map_addr = bgcnt.mapBase() + 0x800 * block + 2 * (0x20 * tile_y + tile_x);
 
         for (int tile = tile_x; tile < 32; ++tile)
         {
-            MapEntry entry(mmu.readHalfFast(mapAddr));
+            MapEntry entry(mmu.readHalfFast(map_addr));
 
             u32 addr = bgcnt.tileBase() + tile_size * entry.tile;
 
-            // Cannot read tiles from sprite memory
-            if (addr >= MAP_VRAM + 0x10000)
-                return;
-
-            for (; x < 8; ++x)
+            for (; pixel_x < 8; ++pixel_x)
             {
-                int index = readTilePixel(
-                    addr, 
-                    x, scroll_y % 8, 
-                    entry.flip_x, 
-                    entry.flip_y,
-                    format
-                );
+                int color = COLOR_TRANSPARENT;
+                // Prevent reading sprite memory
+                if (addr < MAP_VRAM + 0x10000)
+                {
+                    int index = readPixel(
+                        addr,
+                        entry.flip_x ? (7 - pixel_x) : pixel_x,
+                        entry.flip_y ? (7 - pixel_y) : pixel_y,
+                        format
+                    );
 
-                buffer_bg[bg][screen_x] = readBgColor(index, entry.palette);
+                    if (format == BPP4)
+                        color = readBgColor(index, entry.palette);
+                    else
+                        color = readBgColor(index, 0);
+                        
+                }
+                buffer_bg[bg][screen_x] = color;
 
                 if (++screen_x == WIDTH)
                     return;
             }
-            x = 0;
+            pixel_x = 0;
             
-            mapAddr += 2;
+            // Next map entry
+            map_addr += 2;
         }
         tile_x = 0;
 
-        block = nextHorizontalMapBlock(bgcnt, block);
-    }
-}
-
-int PPU::initialMapBlock(const Bgcnt& bgcnt, int offset_x, int offset_y)
-{
-    // Offset y contains vcount to get the correct line block
-
-    switch (bgcnt.screen_size)
-    {
-    // 1x1 blocks
-    case 0b00:
-        return 0;
-
-    // 2x1 blocks
-    case 0b01:
-        return offset_x / 256;
-
-    // 1x2 blocks
-    case 0b10:
-        return (offset_y < 512) ? (offset_y / 256) : 0;
-
-    // 2x2 blocks
-    case 0b11:
-        return ((offset_y < 512) ? (2 * (offset_y / 256)) : 0) + offset_x / 256;
-    }
-    return 0;
-}
-
-int PPU::nextHorizontalMapBlock(const Bgcnt& bgcnt, int block)
-{
-    // Assumes blocks starting at 0
-
-    switch (bgcnt.screen_size)
-    {
-    // 1x1 blocks
-    case 0b00:
-        return block;
-
-    // 2x1 blocks
-    case 0b01: 
-        return std::abs(block - 1);
-
-    // 1x2 blocks
-    case 0b10: 
-        return block;
-
-    // 2x2 blocks
-    case 0b11:
-        switch (block)
+        // Next vertical block
+        if (blocks_x == 2)
         {
-        case 0: return 1;
-        case 1: return 0;
-        case 2: return 3;
-        case 3: return 2;
+            if (block % 2 == 1)
+                block--;
+            else
+                block++;
         }
     }
-    return 0;
 }
 
 void PPU::renderBackgroundMode2(int bg)
