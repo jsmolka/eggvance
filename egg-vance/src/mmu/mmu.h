@@ -120,6 +120,9 @@ public:
         Bgpd bgpd[2];
     };
     Mosaic mosaic;
+    Bldcnt bldcnt;
+    Bldalpha bldalpha;
+    Bldy bldy;
     Keycnt keycnt;
     Keyinput keyinput;
     Waitcnt waitcnt;

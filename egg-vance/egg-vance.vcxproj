@@ -133,6 +133,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\mmu\registers\io\bldalpha.cpp" />
+    <ClCompile Include="src\mmu\registers\io\bldcnt.cpp" />
+    <ClCompile Include="src\mmu\registers\io\bldy.cpp" />
     <ClCompile Include="src\ppu\bgbuffer.cpp" />
     <ClCompile Include="src\mmu\registers\io\bgpabcd.cpp" />
     <ClCompile Include="src\mmu\registers\io\bgxy.cpp" />
@@ -163,6 +166,9 @@
     <ClCompile Include="src\mmu\registers\other\waitcnt.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\mmu\registers\io\bldalpha.h" />
+    <ClInclude Include="src\mmu\registers\io\bldcnt.h" />
+    <ClInclude Include="src\mmu\registers\io\bldy.h" />
     <ClInclude Include="src\common\utility.h" />
     <ClInclude Include="src\ppu\bgbuffer.h" />
     <ClInclude Include="src\mmu\registers\io\bgpabcd.h" />

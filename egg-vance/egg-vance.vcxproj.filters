@@ -99,6 +99,15 @@
     <ClCompile Include="src\ppu\bgbuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\mmu\registers\io\bldalpha.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mmu\registers\io\bldcnt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mmu\registers\io\bldy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core.h">
@@ -195,6 +204,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\common\utility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\io\bldalpha.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\io\bldcnt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\io\bldy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
