@@ -4,7 +4,7 @@
 #include <SDL.h>
 
 #include "mmu/mmu.h"
-#include "bgbuffer.h"
+#include "doublebuffer.h"
 
 class PPU
 {
@@ -36,6 +36,12 @@ private:
         BPP4,  // 4 bits per pixel (16/16)
         BPP8   // 8 bits per pixel (256/1)
     };
+    struct SpritePixel
+    {
+        int color;
+        int entry;
+        int priority;
+    };
 
     MMU& mmu;
 
@@ -50,33 +56,22 @@ private:
     void renderBackgroundMode0(int layer);
     void renderBackgroundMode2(int layer);
 
+    void effects();
+
+    void mosaic();
+    void mosaicBg(DoubleBuffer& buffer);
+
     void generateScanline();
 
     int readBgColor(int index, int palette);
     int readFgColor(int index, int palette);
     int readPixel(u32 addr, int x, int y, PixelFormat format);
-
-    void applyEffects();
-    void applyMosaic();
-    void applyMosaicBg(BgBuffer& buffer);
        
     SDL_Window* window;
     SDL_Renderer* renderer;
     SDL_Texture* texture;
 
-    union
-    {
-        struct
-        {
-            BgBuffer buffer_bg0;
-            BgBuffer buffer_bg1;
-            BgBuffer buffer_bg2;
-            BgBuffer buffer_bg3;
-        };
-        BgBuffer buffer_bg[4];
-    };
-
-    std::array<std::array<u16, WIDTH>, 4> buffer_sprites;
-
-    std::array<u16, WIDTH * HEIGHT> buffer_screen;
+    DoubleBuffer buffer[4];
+    std::array<SpritePixel, WIDTH> sprites;
+    std::array<u16, WIDTH * HEIGHT> screen;
 };

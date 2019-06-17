@@ -96,9 +96,6 @@
     <ClCompile Include="src\ppu\oamentry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ppu\bgbuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\mmu\registers\io\bldalpha.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -106,6 +103,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\mmu\registers\io\bldy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ppu\doublebuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ppu\effects.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -200,9 +203,6 @@
     <ClInclude Include="src\ppu\oamentry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\ppu\bgbuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\common\utility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -213,6 +213,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\mmu\registers\io\bldy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ppu\doublebuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

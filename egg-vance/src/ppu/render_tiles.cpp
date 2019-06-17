@@ -90,7 +90,7 @@ void PPU::renderBackgroundMode0(int bg)
                         color = readBgColor(index, 0);
                         
                 }
-                buffer_bg[bg][screen_x] = color;
+                buffer[bg][screen_x] = color;
 
                 if (++screen_x == WIDTH)
                     return;
@@ -149,7 +149,7 @@ void PPU::renderBackgroundMode2(int bg)
             }
             else
             {
-                buffer_bg[bg][screen_x] = COLOR_TRANSPARENT;
+                buffer[bg][screen_x] = COLOR_TRANSPARENT;
                 continue;
             }
         }
@@ -164,6 +164,6 @@ void PPU::renderBackgroundMode2(int bg)
         int pixel_x = tex_x % 8;
         int pixel_y = tex_y % 8;
 
-        buffer_bg[bg][screen_x] = readBgColor(readPixel(addr, pixel_x, pixel_y, BPP8), 0);
+        buffer[bg][screen_x] = readBgColor(readPixel(addr, pixel_x, pixel_y, BPP8), 0);
     }
 }

@@ -123,7 +123,11 @@ void PPU::renderSprites()
                     
                     int screen_x = center_x + rect_x;
                     if (screen_x >= 0 && screen_x < WIDTH)
-                        buffer_sprites[oam.priority][screen_x] = color;
+                    {
+                        sprites[screen_x].color = color;
+                        sprites[screen_x].entry = entry;
+                        sprites[screen_x].priority = oam.priority;
+                    }
                 }
             }
         }

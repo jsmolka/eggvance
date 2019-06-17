@@ -50,14 +50,12 @@ void PPU::scanline()
     mmu.dispstat.hblank = false;
     mmu.dispstat.vblank = false;
 
-    for (BgBuffer& buffer : buffer_bg)
-        buffer.flip();
+    buffer[0].flip();
+    buffer[1].flip();
+    buffer[2].flip();
+    buffer[3].flip();
 
-    if (mmu.dispcnt.sprites)
-    {
-        for (auto& buffer : buffer_sprites)
-            buffer.fill(COLOR_TRANSPARENT);
-    }
+    sprites.fill({ COLOR_TRANSPARENT, 0, 4 });
 
     switch (mmu.dispcnt.bg_mode)
     {
@@ -70,7 +68,7 @@ void PPU::scanline()
     }
     renderSprites();
 
-    applyEffects();
+    effects();
 
     generateScanline();
 }
@@ -115,7 +113,7 @@ void PPU::render()
     SDL_UpdateTexture(
         texture,
         0,
-        buffer_screen.data(),
+        screen.data(),
         2 * WIDTH
     );
     SDL_RenderCopy(renderer, texture, 0, 0);
@@ -125,27 +123,32 @@ void PPU::render()
 void PPU::generateScanline()
 {
     int backdrop = mmu.readHalfFast(MAP_PALETTE);
-    u16* scanline = &buffer_screen[mmu.vcount * WIDTH];
+    u16* scanline = &screen[WIDTH * mmu.vcount];
     for (int x = 0; x < WIDTH; ++x)
     {
         int pixel = backdrop;
-        for (int priority = 3; priority > -1; --priority)
+
+        for (int priority = 0; priority < 4; ++priority)
         {
             for (int bg = 3; bg > -1; --bg)
             {
                 if (mmu.dispcnt.bg(bg) && mmu.bgcnt[bg].priority == priority)
                 {
-                    int value = buffer_bg[bg][x];
-                    if (value != COLOR_TRANSPARENT)
-                        pixel = value;
+                    int color = buffer[bg][x];
+                    if (color != COLOR_TRANSPARENT)
+                        pixel = color;
                 }
             }
+
             if (mmu.dispcnt.sprites)
             {
-                int value = buffer_sprites[priority][x];
-                if (value != COLOR_TRANSPARENT)
-                    pixel = value;
+                SpritePixel& sprite = sprites[x];
+                if (sprite.priority == priority && sprite.color != COLOR_TRANSPARENT)
+                    pixel = sprite.color;
             }
+
+            if (pixel != COLOR_TRANSPARENT)
+                break;
         }
         scanline[x] = pixel;
     }
@@ -181,44 +184,5 @@ int PPU::readPixel(u32 addr, int x, int y, PixelFormat format)
         return mmu.readByteFast(
             addr + 8 * y + x
         );
-    }
-}
-
-void PPU::applyEffects()
-{
-    applyMosaic();
-}
-
-void PPU::applyMosaic()
-{
-    for (int bg = 0; bg < 4; ++bg)
-    {
-        if (mmu.dispcnt.bg(bg) && mmu.bgcnt[bg].mosaic)
-            applyMosaicBg(buffer_bg[bg]);
-    }
-}
-
-void PPU::applyMosaicBg(BgBuffer& buffer)
-{
-    int mosaic_x = mmu.mosaic.bg_x + 1;
-    int mosaic_y = mmu.mosaic.bg_y + 1;
-
-    if (mmu.vcount.line % mosaic_y == 0)
-    {
-        if (mosaic_x == 1)
-            return;
-
-        int color;
-        for (int x = 0; x < WIDTH; ++x)
-        {
-            if (x % mosaic_x == 0)
-                color = buffer[x];
-
-            buffer[x] = color;
-        }
-    }
-    else
-    {
-        buffer.copyPage();
     }
 }

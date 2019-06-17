@@ -136,11 +136,12 @@
     <ClCompile Include="src\mmu\registers\io\bldalpha.cpp" />
     <ClCompile Include="src\mmu\registers\io\bldcnt.cpp" />
     <ClCompile Include="src\mmu\registers\io\bldy.cpp" />
-    <ClCompile Include="src\ppu\bgbuffer.cpp" />
+    <ClCompile Include="src\ppu\doublebuffer.cpp" />
     <ClCompile Include="src\mmu\registers\io\bgpabcd.cpp" />
     <ClCompile Include="src\mmu\registers\io\bgxy.cpp" />
     <ClCompile Include="src\mmu\registers\io\mosaic.cpp" />
     <ClCompile Include="src\arm\decoder.cpp" />
+    <ClCompile Include="src\ppu\effects.cpp" />
     <ClCompile Include="src\ppu\mapentry.cpp" />
     <ClCompile Include="src\mmu\registers\io\bghvofs.cpp" />
     <ClCompile Include="src\ppu\oamentry.cpp" />
@@ -170,7 +171,7 @@
     <ClInclude Include="src\mmu\registers\io\bldcnt.h" />
     <ClInclude Include="src\mmu\registers\io\bldy.h" />
     <ClInclude Include="src\common\utility.h" />
-    <ClInclude Include="src\ppu\bgbuffer.h" />
+    <ClInclude Include="src\ppu\doublebuffer.h" />
     <ClInclude Include="src\mmu\registers\io\bgpabcd.h" />
     <ClInclude Include="src\mmu\registers\io\bgxy.h" />
     <ClInclude Include="src\mmu\registers\io\mosaic.h" />

@@ -1,13 +1,13 @@
-#include "bgbuffer.h"
+#include "doublebuffer.h"
 
 #include <algorithm>
 
-void BgBuffer::flip()
+void DoubleBuffer::flip()
 {
     page ^= 1;
 }
 
-void BgBuffer::copyPage()
+void DoubleBuffer::copyPage()
 {
     std::copy(
         buffer[page ^ 1].begin(),
@@ -16,12 +16,12 @@ void BgBuffer::copyPage()
     );
 }
 
-u16 BgBuffer::operator[](int index) const
+u16 DoubleBuffer::operator[](int index) const
 {
     return buffer[page][index];
 }
 
-u16& BgBuffer::operator[](int index)
+u16& DoubleBuffer::operator[](int index)
 {
     return buffer[page][index];
 }

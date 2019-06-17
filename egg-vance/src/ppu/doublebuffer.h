@@ -4,7 +4,7 @@
 
 #include "common/integer.h"
 
-class BgBuffer
+class DoubleBuffer
 {
 public:
     void flip();
