@@ -17,9 +17,9 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{371b584c-d6d3-4974-adf3-e66735450416}</ProjectGuid>
-    <RootNamespace>egg_vance</RootNamespace>
+    <RootNamespace>eggvance</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>egg-vance</ProjectName>
+    <ProjectName>eggvance</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">

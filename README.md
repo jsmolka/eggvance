@@ -1,5 +1,5 @@
-# egg-vance
-A Game Boy Advance emulator.
+# eggvance
+An experimental Game Boy Advance emulator.
 
 ## Progression
 - 30/01/19: Initial commit

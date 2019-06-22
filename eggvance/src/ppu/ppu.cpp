@@ -8,7 +8,7 @@ PPU::PPU(MMU& mmu)
     SDL_Init(SDL_INIT_VIDEO);
 
     window = SDL_CreateWindow(
-        "egg-vance",
+        "eggvance",
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
         2 * WIDTH, 2 * HEIGHT,
