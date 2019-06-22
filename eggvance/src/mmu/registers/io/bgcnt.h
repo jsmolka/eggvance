@@ -8,7 +8,7 @@ public:
     Bgcnt(u16& data);
 
     using Register<u16>::operator=;
-    using Register<u16>::operator unsigned int;
+    using Register<u16>::operator int;
 
     BitField<u16,  0, 2> priority;      // BG priority (0-3, 0 = highest)
     BitField<u16,  2, 2> tile_base;     // BG tile base block (0-3, in units of 16kb)

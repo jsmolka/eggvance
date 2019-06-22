@@ -8,7 +8,7 @@ public:
     Bgpabcd(u16& data);
 
     using Register<u16>::operator=;
-    using Register<u16>::operator unsigned int;
+    using Register<u16>::operator int;
 
     BitField<u16,  0, 8> fractal;  // Fractional portion
     BitField<u16,  8, 7> integer;  // Integer portion

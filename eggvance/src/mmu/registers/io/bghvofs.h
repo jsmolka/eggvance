@@ -8,7 +8,7 @@ public:
     Bghvofs(u16& data);
 
     using Register<u16>::operator=;
-    using Register<u16>::operator unsigned int;
+    using Register<u16>::operator int;
 
     BitField<u16, 0, 9> offset;  // X / y offset (0..511)
 };

@@ -8,7 +8,7 @@ public:
     Dispstat(u16& data);
 
     using Register<u16>::operator=;
-    using Register<u16>::operator unsigned int;
+    using Register<u16>::operator int;
 
     BitField<u16, 0, 1> vblank;          // V-Blank flag, set in lines 160..226, not 227 (1 = V-Blank)
     BitField<u16, 1, 1> hblank;          // H-Blank flag, toggled in all lines 0..227 (1 = H-Blank)

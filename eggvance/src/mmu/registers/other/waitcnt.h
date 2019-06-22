@@ -8,7 +8,7 @@ public:
     Waitcnt(u16& data);
 
     using Register<u16>::operator=;
-    using Register<u16>::operator unsigned int;
+    using Register<u16>::operator int;
 
     BitField<u16,  0, 2> sram;      // SRAM wait control (0..3 = 4,3,2,8 cycles)          
     BitField<u16,  2, 2> nonseq0;   // Wait state 0 first access (0..3 = 4,3,2,8 cycles)

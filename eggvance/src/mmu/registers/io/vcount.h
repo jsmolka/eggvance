@@ -8,7 +8,7 @@ public:
     Vcount(u16& data);
 
     using Register<u16>::operator=;
-    using Register<u16>::operator unsigned int;
+    using Register<u16>::operator int;
 
     BitField<u16, 0, 8> line;  // Current scanline (0..227)
 };

@@ -143,8 +143,8 @@ void PPU::generateScanline()
             if (mmu.dispcnt.sprites)
             {
                 SpritePixel& sprite = sprites[x];
-                if (sprite.priority == priority && sprite.color != COLOR_TRANSPARENT)
-                    pixel = sprite.color;
+                if (sprite.priority == priority && sprite.pixel != COLOR_TRANSPARENT)
+                    pixel = sprite.pixel;
             }
 
             if (pixel != COLOR_TRANSPARENT)

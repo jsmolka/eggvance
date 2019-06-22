@@ -8,7 +8,7 @@ public:
     Mosaic(u16& data);
 
     using Register<u16>::operator=;
-    using Register<u16>::operator unsigned int;
+    using Register<u16>::operator int;
 
     BitField<u16,  0, 4> bg_x;      // BG x stretch (minus 1)
     BitField<u16,  4, 4> bg_y;      // BG y stretch (minus 1)

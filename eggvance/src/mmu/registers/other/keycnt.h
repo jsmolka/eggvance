@@ -8,7 +8,7 @@ public:
     Keycnt(u16& data);
 
     using Register<u16>::operator=;
-    using Register<u16>::operator unsigned int;
+    using Register<u16>::operator int;
 
     BitField<u16,  0, 1> a;       // Button A (1 = select)
     BitField<u16,  1, 1> b;       // Button B (1 = select)

@@ -8,7 +8,7 @@ public:
     Dispcnt(u16& data);
 
     using Register<u16>::operator=;
-    using Register<u16>::operator unsigned int;
+    using Register<u16>::operator int;
 
     BitField<u16,  0, 3> bg_mode;      // BG mode
     BitField<u16,  3, 1> gbc_mode;     // GBC flag

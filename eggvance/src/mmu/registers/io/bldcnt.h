@@ -8,7 +8,7 @@ public:
     Bldcnt(u16& data);
 
     using Register<u16>::operator=;
-    using Register<u16>::operator unsigned int;
+    using Register<u16>::operator int;
 
     BitField<u16,  0, 1> a_bg0;  // Top layer BG0
     BitField<u16,  1, 1> a_bg1;  // Top layer BG1

@@ -8,7 +8,7 @@ public:
     Bgxy(u32& data);
 
     using Register<u32>::operator=;
-    using Register<u32>::operator unsigned int;
+    using Register<u32>::operator int;
 
     BitField<u32,  0,  8> fractal;  // Fractional portion
     BitField<u32,  8, 19> integer;  // Integer portion

@@ -38,7 +38,7 @@ private:
     };
     struct SpritePixel
     {
-        int color;
+        u16 pixel;
         int entry;
         int priority;
     };
@@ -60,6 +60,16 @@ private:
 
     void mosaic();
     void mosaicBg(DoubleBuffer& buffer);
+
+    struct BlendPixel
+    {
+        u16* pixel = nullptr;
+        int prio = 4;
+    };
+    void blend();
+    BlendPixel blendLayerA(int x);
+    BlendPixel blendLayerB(int x);
+    void alphaBlend(u16* a, u16* b);
 
     void generateScanline();
 
