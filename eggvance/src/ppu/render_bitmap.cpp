@@ -7,6 +7,7 @@ void PPU::renderMode3()
     if (!mmu.dispcnt.bg2)
         return;
 
+    // Todo: "In BG mode 3, only one frame exists"
     u32 addr = mmu.dispcnt.frameAddr();
 
     int y = mmu.vcount.line;

@@ -40,6 +40,7 @@ private:
     {
         u16 pixel;
         int entry;
+        int semi_transparent;
         int priority;
     };
 
@@ -61,15 +62,14 @@ private:
     void mosaic();
     void mosaicBg(DoubleBuffer& buffer);
 
-    struct BlendPixel
-    {
-        u16* pixel = nullptr;
-        int prio = 4;
-    };
     void blend();
-    BlendPixel blendLayerA(int x);
-    BlendPixel blendLayerB(int x);
-    void alphaBlend(u16* a, u16* b);
+    
+    bool findBlendLayers(int x, u16*& a);
+    bool findBlendLayers(int x, u16*& a, int& b);
+    
+    void alphaBlend(u16* a, int b);
+    void fadeToWhite(u16* a);
+    void fadeToBlack(u16* a);
 
     void generateScanline();
 

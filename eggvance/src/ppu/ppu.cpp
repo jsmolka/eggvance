@@ -55,7 +55,7 @@ void PPU::scanline()
     buffer[2].flip();
     buffer[3].flip();
 
-    sprites.fill({ COLOR_TRANSPARENT, 0, 4 });
+    sprites.fill({ COLOR_TRANSPARENT, 0, 0, 4 });
 
     switch (mmu.dispcnt.bg_mode)
     {

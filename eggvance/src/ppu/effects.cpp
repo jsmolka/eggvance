@@ -1,8 +1,11 @@
 #include "ppu.h"
 
+#include "mmu/map.h"
+
 void PPU::effects()
 {
     mosaic();
+
     blend();
 }
 
@@ -42,106 +45,237 @@ void PPU::mosaicBg(DoubleBuffer& buffer)
 
 void PPU::blend()
 {
-    if (mmu.bldcnt.mode == 0)
-        return;
-
     for (int x = 0; x < WIDTH; ++x)
     {
-        BlendPixel a = blendLayerA(x);
-        BlendPixel b = blendLayerB(x);
+        u16* a = nullptr;
+        int  b = -1;
 
-        // Todo: probably wrong for sprites
-        if (a.prio <= b.prio)
+        if (sprites[x].semi_transparent)
         {
-            if (a.pixel && b.pixel && *a.pixel != COLOR_TRANSPARENT && *b.pixel != COLOR_TRANSPARENT)
-                alphaBlend(a.pixel, b.pixel);
+            // Semi-transparent sprites use alpha blending if possible
+            if (findBlendLayers(x, a, b))
+            {
+                alphaBlend(a, b);
+                continue;
+            }
+            else  // Reset layers
+            {
+                a = nullptr;
+                b = -1;
+            }
+        }
+
+        switch (mmu.bldcnt.mode)
+        {
+        // Alpha blend
+        case 0b01:
+            if (findBlendLayers(x, a, b))
+                alphaBlend(a, b);
+            break;
+
+        // Fade to white
+        case 0b10:
+            if (findBlendLayers(x, a))
+                fadeToWhite(a);
+            break;
+
+        // Fade to black
+        case 0b11:
+            if (findBlendLayers(x, a))
+                fadeToBlack(a);
+            break;
         }
     }
 }
 
-PPU::BlendPixel PPU::blendLayerA(int x)
+bool PPU::findBlendLayers(int x, u16*& a)
 {
-    BlendPixel bp;
-    if (mmu.bldcnt.a_bg3 && mmu.dispcnt.bg3 && mmu.bg3cnt.priority <= bp.prio)
+    SpritePixel& sprite = sprites[x];
+
+    bool opaque[4] = {
+        buffer[0][x] != COLOR_TRANSPARENT,
+        buffer[1][x] != COLOR_TRANSPARENT,
+        buffer[2][x] != COLOR_TRANSPARENT,
+        buffer[3][x] != COLOR_TRANSPARENT
+    };
+    bool opaque_sprite = sprite.pixel != COLOR_TRANSPARENT;
+
+    if (mmu.dispcnt.sprites && opaque_sprite && sprite.semi_transparent)
     {
-        bp.pixel = &buffer[3][x];
-        bp.prio = mmu.bg3cnt.priority;
+        // Semi-transparent sprites are always layer A
+        a = &sprite.pixel;
+        return true;
     }
-    if (mmu.bldcnt.a_bg2 && mmu.dispcnt.bg2 && mmu.bg2cnt.priority <= bp.prio)
+    else
     {
-        bp.pixel = &buffer[2][x];
-        bp.prio = mmu.bg2cnt.priority;
-    }
-    if (mmu.bldcnt.a_bg1 && mmu.dispcnt.bg1 && mmu.bg1cnt.priority <= bp.prio)
-    {
-        bp.pixel = &buffer[1][x];
-        bp.prio = mmu.bg1cnt.priority;
-    }
-    if (mmu.bldcnt.a_bg0 && mmu.dispcnt.bg0 && mmu.bg0cnt.priority <= bp.prio)
-    {
-        bp.pixel = &buffer[0][x];
-        bp.prio = mmu.bg0cnt.priority;
-    }
-    if (mmu.bldcnt.a_obj && mmu.dispcnt.sprites)
-    {
-        if (sprites[x].priority <= bp.prio)
+        for (int priority = 0; priority < 4; ++priority)
         {
-            bp.pixel = &sprites[x].pixel;
-            bp.prio = sprites[x].priority;
+            if (mmu.dispcnt.sprites && opaque_sprite && sprite.priority == priority)
+            {
+                if (mmu.bldcnt.a_sprites)
+                {
+                    a = &sprite.pixel;
+                    return true;
+                }
+                else
+                {
+                    // Layer A is not on top
+                    return false;
+                }
+            }
+
+            for (int bg = 0; bg < 4; ++bg)
+            {
+                if (mmu.dispcnt.bg(bg) && opaque[bg] && mmu.bgcnt[bg].priority == priority)
+                {
+                    if (mmu.bldcnt.a_bg(bg))
+                    {
+                        a = &buffer[bg][x];
+                        return true;
+                    }
+                    else
+                    {
+                        // Layer A is not on top
+                        return false;
+                    }
+                }
+            }
+        }
+
+        // All other layers are transparent
+        if (mmu.bldcnt.a_backdrop)
+        {
+            for (int bg = 0; bg < 4; ++bg)
+            {
+                if (mmu.dispcnt.bg(bg))
+                {
+                    // Todo: find a better way to do this
+                    // Assign backdrop to first enabled background
+                    buffer[bg][x] = mmu.readHalfFast(MAP_PALETTE);
+                    a = &buffer[bg][x];
+                    return true;
+                }
+            }
         }
     }
-    return bp;
+    return false;
 }
 
-PPU::BlendPixel PPU::blendLayerB(int x)
+bool PPU::findBlendLayers(int x, u16*& a, int& b)
 {
-    BlendPixel bp;
-    if (mmu.bldcnt.b_bg3 && mmu.dispcnt.bg3 && mmu.bg3cnt.priority <= bp.prio)
+    SpritePixel& sprite = sprites[x];
+
+    bool opaque[4] = {
+        buffer[0][x] != COLOR_TRANSPARENT,
+        buffer[1][x] != COLOR_TRANSPARENT,
+        buffer[2][x] != COLOR_TRANSPARENT,
+        buffer[3][x] != COLOR_TRANSPARENT
+    };
+    bool opaque_sprite = sprite.pixel != COLOR_TRANSPARENT;
+
+    if (mmu.dispcnt.sprites && opaque_sprite && sprite.semi_transparent)
+        // Semi-transparent sprites are always layer A
+        a = &sprite.pixel;
+
+    for (int priority = 0; priority < 4; ++priority)
     {
-        bp.pixel = &buffer[3][x];
-        bp.prio = mmu.bg3cnt.priority;
-    }
-    if (mmu.bldcnt.b_bg2 && mmu.dispcnt.bg2 && mmu.bg2cnt.priority <= bp.prio)
-    {
-        bp.pixel = &buffer[2][x];
-        bp.prio = mmu.bg2cnt.priority;
-    }
-    if (mmu.bldcnt.b_bg1 && mmu.dispcnt.bg1 && mmu.bg1cnt.priority <= bp.prio)
-    {
-        bp.pixel = &buffer[1][x];
-        bp.prio = mmu.bg1cnt.priority;
-    }
-    if (mmu.bldcnt.b_bg0 && mmu.dispcnt.bg0 && mmu.bg0cnt.priority <= bp.prio)
-    {
-        bp.pixel = &buffer[0][x];
-        bp.prio = mmu.bg0cnt.priority;
-    }
-    if (mmu.bldcnt.b_obj && mmu.dispcnt.sprites)
-    {
-        if (sprites[x].priority <= bp.prio)
+        if (mmu.dispcnt.sprites && opaque_sprite && sprite.priority == priority && !sprite.semi_transparent)
         {
-            bp.pixel = &sprites[x].pixel;
-            bp.prio = sprites[x].priority;
+            if (mmu.bldcnt.a_sprites && !a)
+            {
+                a = &sprite.pixel;
+            } 
+            else if (mmu.bldcnt.b_sprites && b == -1)
+            {
+                b = sprite.pixel;
+                return a != nullptr;
+            } 
+            else
+            {
+                // Non-transparent pixel in front or between layers A and B
+                return false;
+            }
+        }
+
+        for (int bg = 0; bg < 4; ++bg)
+        {
+            if (mmu.dispcnt.bg(bg) && opaque[bg] && mmu.bgcnt[bg].priority == priority)
+            {
+                if (mmu.bldcnt.a_bg(bg) && !a)
+                {
+                    a = &buffer[bg][x];
+                }
+                else if (mmu.bldcnt.b_bg(bg) && b == -1)
+                {
+                    b = buffer[bg][x];
+                    return a != nullptr;
+                }
+                else
+                {
+                    // Non-transparent pixel in front or between layers A and B
+                    return false;
+                }
+            }
+        }
+
+        // Backdrop only makes sense for layer B
+        if (a && b == -1)
+        {
+            if (mmu.bldcnt.b_backdrop)
+            {
+                b = mmu.readHalfFast(MAP_PALETTE);
+                return true;
+            }
         }
     }
-    return bp;
+    return false;
 }
 
-void PPU::alphaBlend(u16* a, u16* b)
+void PPU::alphaBlend(u16* a, int b)
 {
-    u16 a_r = (*a >>  0) & 0x1F;
-    u16 a_g = (*a >>  5) & 0x1F;
-    u16 a_b = (*a >> 10) & 0x1F;
-    u16 b_r = (*b >>  0) & 0x1F;
-    u16 b_g = (*b >>  5) & 0x1F;
-    u16 b_b = (*b >> 10) & 0x1F;
+    int a_r = (*a >>  0) & 0x1F;
+    int a_g = (*a >>  5) & 0x1F;
+    int a_b = (*a >> 10) & 0x1F;
+    int b_r = ( b >>  0) & 0x1F;
+    int b_g = ( b >>  5) & 0x1F;
+    int b_b = ( b >> 10) & 0x1F;
 
     int eva = std::min(static_cast<int>(mmu.bldalpha.eva), 17);
     int evb = std::min(static_cast<int>(mmu.bldalpha.evb), 17);
 
-    u16 t_r = std::min(31, (a_r * eva + b_r * evb) >> 4);
-    u16 t_g = std::min(31, (a_g * eva + b_g * evb) >> 4);
-    u16 t_b = std::min(31, (a_b * eva + b_b * evb) >> 4);
+    int t_r = std::min(31, (a_r * eva + b_r * evb) >> 4);
+    int t_g = std::min(31, (a_g * eva + b_g * evb) >> 4);
+    int t_b = std::min(31, (a_b * eva + b_b * evb) >> 4);
+
+    *a = (t_r << 0) | (t_g << 5) | (t_b << 10);
+}
+
+void PPU::fadeToWhite(u16* a)
+{
+    int a_r = (*a >>  0) & 0x1F;
+    int a_g = (*a >>  5) & 0x1F;
+    int a_b = (*a >> 10) & 0x1F;
+
+    int evy = std::min(static_cast<int>(mmu.bldy.evy), 17);
+
+    int t_r = std::min(31, a_r + (((31 - a_r) * evy) >> 4));
+    int t_g = std::min(31, a_g + (((31 - a_g) * evy) >> 4));
+    int t_b = std::min(31, a_b + (((31 - a_b) * evy) >> 4));
+
+    *a = (t_r << 0) | (t_g << 5) | (t_b << 10);
+}
+
+void PPU::fadeToBlack(u16* a)
+{
+    int a_r = (*a >>  0) & 0x1F;
+    int a_g = (*a >>  5) & 0x1F;
+    int a_b = (*a >> 10) & 0x1F;
+
+    int evy = std::min(static_cast<int>(mmu.bldy.evy), 17);
+
+    int t_r = std::min(31, a_r - ((a_r * evy) >> 4));
+    int t_g = std::min(31, a_g - ((a_g * evy) >> 4));
+    int t_b = std::min(31, a_b - ((a_b * evy) >> 4));
 
     *a = (t_r << 0) | (t_g << 5) | (t_b << 10);
 }

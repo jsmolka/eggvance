@@ -126,6 +126,7 @@ void PPU::renderSprites()
                     {
                         sprites[screen_x].pixel = color;
                         sprites[screen_x].entry = entry;
+                        sprites[screen_x].semi_transparent = oam.gfx_mode == 1;
                         sprites[screen_x].priority = oam.priority;
                     }
                 }

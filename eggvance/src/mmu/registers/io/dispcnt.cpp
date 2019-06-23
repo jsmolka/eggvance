@@ -22,7 +22,7 @@ Dispcnt::Dispcnt(u16& data)
 
 }
 
-bool Dispcnt::bg(int bg) const
+int Dispcnt::bg(int bg) const
 {
     switch (bg)
     {
@@ -31,7 +31,7 @@ bool Dispcnt::bg(int bg) const
     case 2: return bg2;
     case 3: return bg3;
     }
-    return false;
+    return 0;
 }
 
 u32 Dispcnt::frameAddr() const

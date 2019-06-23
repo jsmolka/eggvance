@@ -25,7 +25,7 @@ public:
     BitField<u16, 14, 1> win1;         // Display window 1 flag
     BitField<u16, 15, 1> winobj;       // Display OBJ window flag
 
-    bool bg(int bg) const;
+    int bg(int bg) const;
 
     u32 frameAddr() const;
 };
