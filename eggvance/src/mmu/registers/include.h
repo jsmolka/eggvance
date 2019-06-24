@@ -11,6 +11,10 @@
 #include "io/dispstat.h"
 #include "io/mosaic.h"
 #include "io/vcount.h"
+#include "io/winh.h"
+#include "io/winin.h"
+#include "io/winout.h"
+#include "io/winv.h"
 
 #include "other/keyinput.h"
 #include "other/keycnt.h"

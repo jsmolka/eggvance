@@ -119,6 +119,26 @@ public:
         };
         Bgpd bgpd[2];
     };
+    union
+    {
+        struct
+        {
+            Winh win0h;
+            Winh win1h;
+        };
+        Winh winh[2];
+    };
+    union
+    {
+        struct
+        {
+            Winv win0v;
+            Winv win1v;
+        };
+        Winv winv[2];
+    };
+    Winin winin;
+    Winout winout;
     Mosaic mosaic;
     Bldcnt bldcnt;
     Bldalpha bldalpha;

@@ -165,6 +165,10 @@
     <ClCompile Include="src\ppu\render_bitmap.cpp" />
     <ClCompile Include="src\ppu\render_tiles.cpp" />
     <ClCompile Include="src\mmu\registers\other\waitcnt.cpp" />
+    <ClCompile Include="src\mmu\registers\io\winh.cpp" />
+    <ClCompile Include="src\mmu\registers\io\winin.cpp" />
+    <ClCompile Include="src\mmu\registers\io\winout.cpp" />
+    <ClCompile Include="src\mmu\registers\io\winv.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\mmu\registers\io\bldalpha.h" />
@@ -202,6 +206,10 @@
     <ClInclude Include="src\common\integer.h" />
     <ClInclude Include="src\mmu\registers\other\waitcnt.h" />
     <ClInclude Include="src\mmu\registers\io\vcount.h" />
+    <ClInclude Include="src\mmu\registers\io\winh.h" />
+    <ClInclude Include="src\mmu\registers\io\winin.h" />
+    <ClInclude Include="src\mmu\registers\io\winout.h" />
+    <ClInclude Include="src\mmu\registers\io\winv.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
