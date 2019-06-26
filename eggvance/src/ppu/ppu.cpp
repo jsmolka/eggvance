@@ -55,7 +55,8 @@ void PPU::scanline()
     buffer[2].flip();
     buffer[3].flip();
 
-    sprites.fill({ COLOR_TRANSPARENT, 0, 0, 4 });
+    sprites.fill(COLOR_TRANSPARENT);
+    sprites_meta.fill({ 0, 0, 4 });
 
     switch (mmu.dispcnt.bg_mode)
     {
@@ -142,9 +143,9 @@ void PPU::generateScanline()
 
             if (mmu.dispcnt.sprites)
             {
-                SpritePixel& sprite = sprites[x];
-                if (sprite.priority == priority && sprite.pixel != COLOR_TRANSPARENT)
-                    pixel = sprite.pixel;
+                int color = sprites[x];
+                if (sprites_meta[x].priority == priority && color != COLOR_TRANSPARENT)
+                    pixel = color;
             }
 
             if (pixel != COLOR_TRANSPARENT)

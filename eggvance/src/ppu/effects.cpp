@@ -18,7 +18,7 @@ void PPU::mosaic()
     }
 }
 
-void PPU::mosaicBg(DoubleBuffer& buffer)
+void PPU::mosaicBg(DoubleBuffer<u16>& buffer)
 {
     int mosaic_x = mmu.mosaic.bg_x + 1;
     int mosaic_y = mmu.mosaic.bg_y + 1;
@@ -50,7 +50,7 @@ void PPU::blend()
         u16* a = nullptr;
         int  b = -1;
 
-        if (sprites[x].semi_transparent)
+        if (sprites_meta[x].semi_transparent)
         {
             // Semi-transparent sprites use alpha blending if possible
             if (findBlendLayers(x, a, b))
@@ -90,7 +90,7 @@ void PPU::blend()
 
 bool PPU::findBlendLayers(int x, u16*& a)
 {
-    SpritePixel& sprite = sprites[x];
+    SpriteMeta& sprite_meta = sprites_meta[x];
 
     bool opaque[4] = {
         buffer[0][x] != COLOR_TRANSPARENT,
@@ -98,23 +98,23 @@ bool PPU::findBlendLayers(int x, u16*& a)
         buffer[2][x] != COLOR_TRANSPARENT,
         buffer[3][x] != COLOR_TRANSPARENT
     };
-    bool opaque_sprite = sprite.pixel != COLOR_TRANSPARENT;
+    bool opaque_sprite = sprites[x] != COLOR_TRANSPARENT;
 
-    if (mmu.dispcnt.sprites && opaque_sprite && sprite.semi_transparent)
+    if (mmu.dispcnt.sprites && opaque_sprite && sprite_meta.semi_transparent)
     {
         // Semi-transparent sprites are always layer A
-        a = &sprite.pixel;
+        a = &sprites[x];
         return true;
     }
     else
     {
         for (int priority = 0; priority < 4; ++priority)
         {
-            if (mmu.dispcnt.sprites && opaque_sprite && sprite.priority == priority)
+            if (mmu.dispcnt.sprites && opaque_sprite && sprite_meta.priority == priority)
             {
                 if (mmu.bldcnt.a_sprites)
                 {
-                    a = &sprite.pixel;
+                    a = &sprites[x];
                     return true;
                 }
                 else
@@ -163,7 +163,7 @@ bool PPU::findBlendLayers(int x, u16*& a)
 
 bool PPU::findBlendLayers(int x, u16*& a, int& b)
 {
-    SpritePixel& sprite = sprites[x];
+    SpriteMeta& sprite_meta = sprites_meta[x];
 
     bool opaque[4] = {
         buffer[0][x] != COLOR_TRANSPARENT,
@@ -171,23 +171,23 @@ bool PPU::findBlendLayers(int x, u16*& a, int& b)
         buffer[2][x] != COLOR_TRANSPARENT,
         buffer[3][x] != COLOR_TRANSPARENT
     };
-    bool opaque_sprite = sprite.pixel != COLOR_TRANSPARENT;
+    bool opaque_sprite = sprites[x] != COLOR_TRANSPARENT;
 
-    if (mmu.dispcnt.sprites && opaque_sprite && sprite.semi_transparent)
+    if (mmu.dispcnt.sprites && opaque_sprite && sprite_meta.semi_transparent)
         // Semi-transparent sprites are always layer A
-        a = &sprite.pixel;
+        a = &sprites[x];
 
     for (int priority = 0; priority < 4; ++priority)
     {
-        if (mmu.dispcnt.sprites && opaque_sprite && sprite.priority == priority && !sprite.semi_transparent)
+        if (mmu.dispcnt.sprites && opaque_sprite && sprite_meta.priority == priority && !sprite_meta.semi_transparent)
         {
             if (mmu.bldcnt.a_sprites && !a)
             {
-                a = &sprite.pixel;
+                a = &sprites[x];
             } 
             else if (mmu.bldcnt.b_sprites && b == -1)
             {
-                b = sprite.pixel;
+                b = sprites[x];
                 return a != nullptr;
             } 
             else

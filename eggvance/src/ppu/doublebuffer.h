@@ -1,20 +1,43 @@
 #pragma once
 
-#include <array>
+#include <algorithm>
 
-#include "common/integer.h"
+#include "buffer.h"
 
+template<typename T>
 class DoubleBuffer
 {
 public:
-    void flip();
-    void copyPage();
+    inline void flip()
+    {
+        page ^= 1;
+    }
 
-    u16  operator[](int index) const;
-    u16& operator[](int index);
+    inline void copyPage()
+    {
+        std::copy(
+            buffer[page ^ 1].begin(),
+            buffer[page ^ 1].end(),
+            buffer[page].begin()
+        );
+    }
+
+    inline T* data() const
+    {
+        return buffer[page].data();
+    }
+
+    inline T operator[](int index) const
+    {
+        return buffer[page][index];
+    }
+
+    inline T& operator[](int index)
+    {
+        return buffer[page][index];
+    }
 
 private:
-    int page;
-
-    std::array<std::array<u16, 240>, 2> buffer;
+    int page = 0;
+    Buffer<T> buffer[2];
 };

@@ -36,9 +36,8 @@ private:
         BPP4,  // 4 bits per pixel (16/16)
         BPP8   // 8 bits per pixel (256/1)
     };
-    struct SpritePixel
+    struct SpriteMeta
     {
-        u16 pixel;
         int entry;
         int semi_transparent;
         int priority;
@@ -60,7 +59,7 @@ private:
     void effects();
 
     void mosaic();
-    void mosaicBg(DoubleBuffer& buffer);
+    void mosaicBg(DoubleBuffer<u16>& buffer);
 
     void blend();
     
@@ -81,7 +80,9 @@ private:
     SDL_Renderer* renderer;
     SDL_Texture* texture;
 
-    DoubleBuffer buffer[4];
-    std::array<SpritePixel, WIDTH> sprites;
+    DoubleBuffer<u16> buffer[4];
+    Buffer<u16> sprites;
+    Buffer<SpriteMeta> sprites_meta;
+
     std::array<u16, WIDTH * HEIGHT> screen;
 };
