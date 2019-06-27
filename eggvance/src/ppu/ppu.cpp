@@ -1,6 +1,7 @@
 #include "ppu.h"
 
 #include "mmu/map.h"
+#include "layers.h"
 
 PPU::PPU(MMU& mmu)
     : mmu(mmu)
@@ -50,13 +51,12 @@ void PPU::scanline()
     mmu.dispstat.hblank = false;
     mmu.dispstat.vblank = false;
 
-    buffer[0].flip();
-    buffer[1].flip();
-    buffer[2].flip();
-    buffer[3].flip();
+    bgs[0].flip();
+    bgs[1].flip();
+    bgs[2].flip();
+    bgs[3].flip();
 
-    sprites.fill(COLOR_TRANSPARENT);
-    sprites_meta.fill({ 0, 0, 4 });
+    objs.fill(ObjPixel());
 
     switch (mmu.dispcnt.bg_mode)
     {
@@ -69,9 +69,9 @@ void PPU::scanline()
     }
     renderSprites();
 
-    effects();
+    mosaic();
 
-    generateScanline();
+    generate();
 }
 
 void PPU::hblank()
@@ -121,38 +121,130 @@ void PPU::render()
     SDL_RenderPresent(renderer);
 }
 
-void PPU::generateScanline()
+void PPU::mosaic()
 {
-    int backdrop = mmu.readHalfFast(MAP_PALETTE);
-    u16* scanline = &screen[WIDTH * mmu.vcount];
-    for (int x = 0; x < WIDTH; ++x)
-    {
-        int pixel = backdrop;
+    int mosaic_x = mmu.mosaic.bg_x + 1;
+    int mosaic_y = mmu.mosaic.bg_y + 1;
 
-        for (int priority = 0; priority < 4; ++priority)
+    for (int bg = 0; bg < 4; ++bg)
+    {
+        if (mmu.dispcnt.bg(bg) && mmu.bgcnt[bg].mosaic)
         {
-            for (int bg = 3; bg > -1; --bg)
+            if (mmu.vcount.line % mosaic_y == 0)
             {
-                if (mmu.dispcnt.bg(bg) && mmu.bgcnt[bg].priority == priority)
+                if (mosaic_x == 1)
+                    return;
+
+                int color;
+                for (int x = 0; x < WIDTH; ++x)
                 {
-                    int color = buffer[bg][x];
-                    if (color != COLOR_TRANSPARENT)
-                        pixel = color;
+                    if (x % mosaic_x == 0)
+                        color = bgs[bg][x];
+
+                    bgs[bg][x] = color;
                 }
             }
-
-            if (mmu.dispcnt.sprites)
+            else
             {
-                int color = sprites[x];
-                if (sprites_meta[x].priority == priority && color != COLOR_TRANSPARENT)
-                    pixel = color;
+                bgs[bg].copyPage();
             }
+        }
+    }
+}
 
-            if (pixel != COLOR_TRANSPARENT)
+void PPU::generate()
+{
+    Layers layers(bgs, objs, mmu);
+
+    u16* scanline = &screen[WIDTH * mmu.vcount.line];
+
+    for (int x = 0; x < WIDTH; ++x)
+    {
+        layers.arrange(x);
+
+        u16 pixel = layers.begin()->color;
+
+        u16 a = 0;
+        u16 b = 0;
+
+        bool blended = false;
+        if (objs[x].semi)
+        {
+            // Semi-transparent sprites use alpha blending if possible
+            if (blended = layers.getBlendLayers(a, b))
+                pixel = blendAlpha(a, b);
+        }
+        if (!blended)
+        {
+            switch (mmu.bldcnt.mode)
+            {
+            case 0b01:
+                if (layers.getBlendLayers(a, b))
+                    pixel = blendAlpha(a, b);
                 break;
+
+            case 0b10:
+                if (layers.getBlendLayers(a))
+                    pixel = blendWhite(a);
+                break;
+
+            case 0b11:
+                if (layers.getBlendLayers(a))
+                    pixel = blendBlack(a);
+                break;
+            }
         }
         scanline[x] = pixel;
     }
+}
+
+int PPU::blendAlpha(int a, int b)
+{
+    int a_r = (a >>  0) & 0x1F;
+    int a_g = (a >>  5) & 0x1F;
+    int a_b = (a >> 10) & 0x1F;
+    int b_r = (b >>  0) & 0x1F;
+    int b_g = (b >>  5) & 0x1F;
+    int b_b = (b >> 10) & 0x1F;
+
+    int eva = std::min(static_cast<int>(mmu.bldalpha.eva), 17);
+    int evb = std::min(static_cast<int>(mmu.bldalpha.evb), 17);
+
+    int t_r = std::min(31, (a_r * eva + b_r * evb) >> 4);
+    int t_g = std::min(31, (a_g * eva + b_g * evb) >> 4);
+    int t_b = std::min(31, (a_b * eva + b_b * evb) >> 4);
+
+    return (t_r << 0) | (t_g << 5) | (t_b << 10);
+}
+
+int PPU::blendWhite(int a)
+{
+    int a_r = (a >>  0) & 0x1F;
+    int a_g = (a >>  5) & 0x1F;
+    int a_b = (a >> 10) & 0x1F;
+
+    int evy = std::min(static_cast<int>(mmu.bldy.evy), 17);
+
+    int t_r = std::min(31, a_r + (((31 - a_r) * evy) >> 4));
+    int t_g = std::min(31, a_g + (((31 - a_g) * evy) >> 4));
+    int t_b = std::min(31, a_b + (((31 - a_b) * evy) >> 4));
+
+    return (t_r << 0) | (t_g << 5) | (t_b << 10);
+}
+
+int PPU::blendBlack(int a)
+{
+    int a_r = (a >>  0) & 0x1F;
+    int a_g = (a >>  5) & 0x1F;
+    int a_b = (a >> 10) & 0x1F;
+
+    int evy = std::min(static_cast<int>(mmu.bldy.evy), 17);
+
+    int t_r = std::min(31, a_r - ((a_r * evy) >> 4));
+    int t_g = std::min(31, a_g - ((a_g * evy) >> 4));
+    int t_b = std::min(31, a_b - ((a_b * evy) >> 4));
+
+    return (t_r << 0) | (t_g << 5) | (t_b << 10);
 }
 
 int PPU::readBgColor(int index, int palette)

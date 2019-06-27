@@ -16,7 +16,7 @@ void PPU::renderMode3()
         int offset = 2 * (WIDTH * y + x);
         int color = mmu.readHalfFast(addr + offset);
 
-        buffer[2][x] = color;
+        bgs[2][x] = color;
     }
 }
 
@@ -34,7 +34,7 @@ void PPU::renderMode4()
         int index = mmu.readByteFast(addr + offset);
         int color = readBgColor(index, 0);
 
-        buffer[2][x] = color;
+        bgs[2][x] = color;
     }
 }
 
@@ -54,6 +54,6 @@ void PPU::renderMode5()
             int offset = 2 * (160 * y + x);
             color = mmu.readHalfFast(addr + offset);
         }
-        buffer[2][x] = color;
+        bgs[2][x] = color;
     }
 }

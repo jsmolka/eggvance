@@ -4,6 +4,7 @@
 #include <SDL.h>
 
 #include "mmu/mmu.h"
+#include "common.h"
 #include "doublebuffer.h"
 
 class PPU
@@ -22,10 +23,6 @@ public:
     void render();
 
 private:
-    enum Color
-    { 
-        COLOR_TRANSPARENT = 0x8000 
-    };
     enum Screen
     {
         WIDTH  = 240,
@@ -35,12 +32,6 @@ private:
     {
         BPP4,  // 4 bits per pixel (16/16)
         BPP8   // 8 bits per pixel (256/1)
-    };
-    struct SpriteMeta
-    {
-        int entry;
-        int semi_transparent;
-        int priority;
     };
 
     MMU& mmu;
@@ -56,21 +47,13 @@ private:
     void renderBackgroundMode0(int layer);
     void renderBackgroundMode2(int layer);
 
-    void effects();
-
     void mosaic();
-    void mosaicBg(DoubleBuffer<u16>& buffer);
 
-    void blend();
+    void generate();
     
-    bool findBlendLayers(int x, u16*& a);
-    bool findBlendLayers(int x, u16*& a, int& b);
-    
-    void alphaBlend(u16* a, int b);
-    void fadeToWhite(u16* a);
-    void fadeToBlack(u16* a);
-
-    void generateScanline();
+    int blendAlpha(int a, int b);
+    int blendWhite(int a);
+    int blendBlack(int a);
 
     int readBgColor(int index, int palette);
     int readFgColor(int index, int palette);
@@ -80,9 +63,8 @@ private:
     SDL_Renderer* renderer;
     SDL_Texture* texture;
 
-    DoubleBuffer<u16> buffer[4];
-    Buffer<u16> sprites;
-    Buffer<SpriteMeta> sprites_meta;
+    DoubleBuffer<u16> bgs[4];
+    Buffer<ObjPixel> objs;
 
     std::array<u16, WIDTH * HEIGHT> screen;
 };

@@ -133,6 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ppu\layers.cpp" />
     <ClCompile Include="src\mmu\registers\io\bldalpha.cpp" />
     <ClCompile Include="src\mmu\registers\io\bldcnt.cpp" />
     <ClCompile Include="src\mmu\registers\io\bldy.cpp" />
@@ -140,7 +141,6 @@
     <ClCompile Include="src\mmu\registers\io\bgxy.cpp" />
     <ClCompile Include="src\mmu\registers\io\mosaic.cpp" />
     <ClCompile Include="src\arm\decoder.cpp" />
-    <ClCompile Include="src\ppu\effects.cpp" />
     <ClCompile Include="src\ppu\mapentry.cpp" />
     <ClCompile Include="src\mmu\registers\io\bghvofs.cpp" />
     <ClCompile Include="src\ppu\oamentry.cpp" />
@@ -170,6 +170,8 @@
     <ClCompile Include="src\mmu\registers\io\winv.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\ppu\common.h" />
+    <ClInclude Include="src\ppu\layers.h" />
     <ClInclude Include="src\mmu\registers\io\bldalpha.h" />
     <ClInclude Include="src\mmu\registers\io\bldcnt.h" />
     <ClInclude Include="src\mmu\registers\io\bldy.h" />
