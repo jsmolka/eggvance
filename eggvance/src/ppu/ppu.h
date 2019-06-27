@@ -4,8 +4,9 @@
 #include <SDL.h>
 
 #include "mmu/mmu.h"
-#include "common.h"
+#include "constants.h"
 #include "doublebuffer.h"
+#include "objdata.h"
 
 class PPU
 {
@@ -23,17 +24,6 @@ public:
     void render();
 
 private:
-    enum Screen
-    {
-        WIDTH  = 240,
-        HEIGHT = 160
-    };
-    enum PixelFormat
-    {
-        BPP4,  // 4 bits per pixel (16/16)
-        BPP8   // 8 bits per pixel (256/1)
-    };
-
     MMU& mmu;
 
     void renderMode0();
@@ -64,7 +54,7 @@ private:
     SDL_Texture* texture;
 
     DoubleBuffer<u16> bgs[4];
-    Buffer<ObjPixel> objs;
+    Buffer<ObjData> objs;
 
     std::array<u16, WIDTH * HEIGHT> screen;
 };

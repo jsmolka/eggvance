@@ -15,14 +15,14 @@ public:
     BitValue<10, 2> gfx_mode;     // Graphics mode (0 = normal, 1 = alpha blending, 2 = window, 3 = prohibited)
     BitValue<12, 1> mosaic;       // Mosaic flag
     BitValue<13, 1> color_mode;   // Color mode (1 = 256/1, 0 = 16/16)
-    BitValue<14, 2> shape;        // Sprite shape (0 = square, 1 = horizontal, 2 = vertical, 3 = prohibited)
+    BitValue<14, 2> shape;        // Object shape (0 = square, 1 = horizontal, 2 = vertical, 3 = prohibited)
 
     // Attribute 1
     BitValue< 0, 9> x;         // X coordinate
     BitValue< 9, 5> paramter;  // If affine: affine paramter
     BitValue<12, 1> flip_y;    // If not affine: horizontal flip
     BitValue<13, 1> flip_x;    // If not affine: vertical flip
-    BitValue<14, 2> size;      // Sprite size
+    BitValue<14, 2> size;      // Object size
 
     // Attribute 2
     BitValue< 0, 10> tile;          // Base tile number

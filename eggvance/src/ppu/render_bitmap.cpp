@@ -48,7 +48,7 @@ void PPU::renderMode5()
     int y = mmu.vcount.line;
     for (int x = 0; x < WIDTH; ++x)
     {
-        int color = COLOR_TRANSPARENT;
+        int color = TRANSPARENT;
         if (x < 160 && y < 128)
         {
             int offset = 2 * (160 * y + x);

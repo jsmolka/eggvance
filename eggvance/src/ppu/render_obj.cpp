@@ -1,6 +1,7 @@
 #include "ppu.h"
 
 #include "mmu/map.h"
+#include "enums.h"
 #include "oamentry.h"
 
 // Todo: maybe move mosaic out of this function
@@ -125,8 +126,8 @@ void PPU::renderSprites()
                     if (screen_x >= 0 && screen_x < WIDTH)
                     {
                         objs[screen_x].color = color;
-                        objs[screen_x].prio = oam.priority;
-                        objs[screen_x].semi = oam.gfx_mode == 1;
+                        objs[screen_x].priority = oam.priority;
+                        objs[screen_x].mode = static_cast<GraphicsMode>(static_cast<int>(oam.gfx_mode));
                     }
                 }
             }

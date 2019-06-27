@@ -16,28 +16,23 @@ public:
     inline void copyPage()
     {
         std::copy(
-            pages[page ^ 1].begin(),
-            pages[page ^ 1].end(),
-            pages[page].begin()
+            buffer[page ^ 1].begin(),
+            buffer[page ^ 1].end(),
+            buffer[page].begin()
         );
-    }
-
-    inline Buffer<T>& buffer() const
-    {
-        return buffer[page];
     }
 
     inline T operator[](int index) const
     {
-        return pages[page][index];
+        return buffer[page][index];
     }
 
     inline T& operator[](int index)
     {
-        return pages[page][index];
+        return buffer[page][index];
     }
 
 private:
     int page = 0;
-    Buffer<T> pages[2];
+    Buffer<T> buffer[2];
 };

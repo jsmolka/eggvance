@@ -7,3 +7,4 @@ An experimental Game Boy Advance emulator.
 - 02/05/19: Displays tonc bitmap demos
 - 29/05/19: Displays tonc regular sprite and tiled background demos
 - 08/06/19: Displays tonc affine sprite and tiled background demos
+- 27/06/19: Displays tonc graphic effects demos

@@ -57,9 +57,6 @@
     <ClCompile Include="src\ppu\render_bitmap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ppu\render_sprites.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\mmu\registers\io\bgcnt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -117,7 +114,10 @@
     <ClCompile Include="src\mmu\registers\io\winv.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ppu\layers.cpp">
+    <ClCompile Include="src\ppu\render_obj.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ppu\scanlinebuilder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -242,10 +242,16 @@
     <ClInclude Include="src\ppu\buffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\ppu\layers.h">
+    <ClInclude Include="src\ppu\enums.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\ppu\common.h">
+    <ClInclude Include="src\ppu\objdata.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ppu\constants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ppu\scanlinebuilder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

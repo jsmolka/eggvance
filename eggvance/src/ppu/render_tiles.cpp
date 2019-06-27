@@ -73,7 +73,7 @@ void PPU::renderBackgroundMode0(int bg)
 
             for (; pixel_x < 8; ++pixel_x)
             {
-                int color = COLOR_TRANSPARENT;
+                int color = TRANSPARENT;
                 // Prevent reading sprite memory
                 if (addr < MAP_VRAM + 0x10000)
                 {
@@ -149,7 +149,7 @@ void PPU::renderBackgroundMode2(int bg)
             }
             else
             {
-                bgs[bg][screen_x] = COLOR_TRANSPARENT;
+                bgs[bg][screen_x] = TRANSPARENT;
                 continue;
             }
         }

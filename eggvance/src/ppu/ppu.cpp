@@ -1,7 +1,8 @@
 #include "ppu.h"
 
 #include "mmu/map.h"
-#include "layers.h"
+#include "enums.h"
+#include "scanlinebuilder.h"
 
 PPU::PPU(MMU& mmu)
     : mmu(mmu)
@@ -56,7 +57,7 @@ void PPU::scanline()
     bgs[2].flip();
     bgs[3].flip();
 
-    objs.fill(ObjPixel());
+    objs.fill(ObjData());
 
     switch (mmu.dispcnt.bg_mode)
     {
@@ -136,6 +137,7 @@ void PPU::mosaic()
                     return;
 
                 int color;
+
                 for (int x = 0; x < WIDTH; ++x)
                 {
                     if (x % mosaic_x == 0)
@@ -154,46 +156,51 @@ void PPU::mosaic()
 
 void PPU::generate()
 {
-    Layers layers(bgs, objs, mmu);
+    ScanlineBuilder builder(bgs, objs, mmu);
 
     u16* scanline = &screen[WIDTH * mmu.vcount.line];
 
     for (int x = 0; x < WIDTH; ++x)
     {
-        layers.arrange(x);
+        builder.build(x);
 
-        u16 pixel = layers.begin()->color;
+        int pixel = builder.begin()->color;
 
-        u16 a = 0;
-        u16 b = 0;
-
-        bool blended = false;
-        if (objs[x].semi)
+        if (builder.canBlend() && mmu.bldcnt.mode != BLD_DISABLED || objs[x].mode == GFX_ALPHA)
         {
-            // Semi-transparent sprites use alpha blending if possible
-            if (blended = layers.getBlendLayers(a, b))
-                pixel = blendAlpha(a, b);
-        }
-        if (!blended)
-        {
-            switch (mmu.bldcnt.mode)
+            int a = 0;
+            int b = 0;
+
+            bool blended = false;
+
+            if (objs[x].mode == GFX_ALPHA)
             {
-            case 0b01:
-                if (layers.getBlendLayers(a, b))
+                if (blended = builder.getBlendLayers(a, b))
                     pixel = blendAlpha(a, b);
-                break;
+            }
 
-            case 0b10:
-                if (layers.getBlendLayers(a))
-                    pixel = blendWhite(a);
-                break;
+            if (!blended)
+            {
+                switch (mmu.bldcnt.mode)
+                {
+                case BLD_ALPHA:
+                    if (builder.getBlendLayers(a, b))
+                        pixel = blendAlpha(a, b);
+                    break;
 
-            case 0b11:
-                if (layers.getBlendLayers(a))
-                    pixel = blendBlack(a);
-                break;
+                case BLD_WHITE:
+                    if (builder.getBlendLayers(a))
+                        pixel = blendWhite(a);
+                    break;
+
+                case BLD_BLACK:
+                    if (builder.getBlendLayers(a))
+                        pixel = blendBlack(a);
+                    break;
+                }
             }
         }
+
         scanline[x] = pixel;
     }
 }
@@ -207,8 +214,8 @@ int PPU::blendAlpha(int a, int b)
     int b_g = (b >>  5) & 0x1F;
     int b_b = (b >> 10) & 0x1F;
 
-    int eva = std::min(static_cast<int>(mmu.bldalpha.eva), 17);
-    int evb = std::min(static_cast<int>(mmu.bldalpha.evb), 17);
+    int eva = std::min(17, static_cast<int>(mmu.bldalpha.eva));
+    int evb = std::min(17, static_cast<int>(mmu.bldalpha.evb));
 
     int t_r = std::min(31, (a_r * eva + b_r * evb) >> 4);
     int t_g = std::min(31, (a_g * eva + b_g * evb) >> 4);
@@ -223,7 +230,7 @@ int PPU::blendWhite(int a)
     int a_g = (a >>  5) & 0x1F;
     int a_b = (a >> 10) & 0x1F;
 
-    int evy = std::min(static_cast<int>(mmu.bldy.evy), 17);
+    int evy = std::min(17, static_cast<int>(mmu.bldy.evy));
 
     int t_r = std::min(31, a_r + (((31 - a_r) * evy) >> 4));
     int t_g = std::min(31, a_g + (((31 - a_g) * evy) >> 4));
@@ -238,7 +245,7 @@ int PPU::blendBlack(int a)
     int a_g = (a >>  5) & 0x1F;
     int a_b = (a >> 10) & 0x1F;
 
-    int evy = std::min(static_cast<int>(mmu.bldy.evy), 17);
+    int evy = std::min(17, static_cast<int>(mmu.bldy.evy));
 
     int t_r = std::min(31, a_r - ((a_r * evy) >> 4));
     int t_g = std::min(31, a_g - ((a_g * evy) >> 4));
@@ -250,7 +257,7 @@ int PPU::blendBlack(int a)
 int PPU::readBgColor(int index, int palette)
 {
     if (index == 0)
-        return COLOR_TRANSPARENT;
+        return TRANSPARENT;
 
     return mmu.readHalfFast(MAP_PALETTE + 0x20 * palette + 2 * index);
 }
@@ -258,7 +265,7 @@ int PPU::readBgColor(int index, int palette)
 int PPU::readFgColor(int index, int palette)
 {
     if (index == 0)
-        return COLOR_TRANSPARENT;
+        return TRANSPARENT;
 
     return mmu.readHalfFast(MAP_PALETTE + 0x200 + 0x20 * palette + 2 * index);
 }

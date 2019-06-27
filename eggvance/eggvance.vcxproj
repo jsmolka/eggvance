@@ -133,7 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\ppu\layers.cpp" />
+    <ClCompile Include="src\ppu\scanlinebuilder.cpp" />
     <ClCompile Include="src\mmu\registers\io\bldalpha.cpp" />
     <ClCompile Include="src\mmu\registers\io\bldcnt.cpp" />
     <ClCompile Include="src\mmu\registers\io\bldy.cpp" />
@@ -153,7 +153,7 @@
     <ClCompile Include="src\mmu\registers\io\bgcnt.cpp" />
     <ClCompile Include="src\mmu\registers\io\dispcnt.cpp" />
     <ClCompile Include="src\mmu\registers\io\dispstat.cpp" />
-    <ClCompile Include="src\ppu\render_sprites.cpp" />
+    <ClCompile Include="src\ppu\render_obj.cpp" />
     <ClCompile Include="src\ppu\ppu.cpp" />
     <ClCompile Include="src\core.cpp" />
     <ClCompile Include="src\arm\instr_arm.cpp" />
@@ -170,8 +170,9 @@
     <ClCompile Include="src\mmu\registers\io\winv.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\ppu\common.h" />
-    <ClInclude Include="src\ppu\layers.h" />
+    <ClInclude Include="src\ppu\constants.h" />
+    <ClInclude Include="src\ppu\enums.h" />
+    <ClInclude Include="src\ppu\scanlinebuilder.h" />
     <ClInclude Include="src\mmu\registers\io\bldalpha.h" />
     <ClInclude Include="src\mmu\registers\io\bldcnt.h" />
     <ClInclude Include="src\mmu\registers\io\bldy.h" />
@@ -200,6 +201,7 @@
     <ClInclude Include="src\mmu\registers\io\dispstat.h" />
     <ClInclude Include="src\mmu\registers\register.h" />
     <ClInclude Include="src\mmu\registers\include.h" />
+    <ClInclude Include="src\ppu\objdata.h" />
     <ClInclude Include="src\ppu\ppu.h" />
     <ClInclude Include="src\core.h" />
     <ClInclude Include="src\mmu\map.h" />
