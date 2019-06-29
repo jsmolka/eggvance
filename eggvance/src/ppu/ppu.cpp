@@ -61,16 +61,37 @@ void PPU::scanline()
 
     switch (mmu.dispcnt.bg_mode)
     {
-    case 0: renderMode0(); break;
-    case 1: renderMode1(); break;
-    case 2: renderMode2(); break;
-    case 3: renderMode3(); break;
-    case 4: renderMode4(); break;
-    case 5: renderMode5(); break;
-    }
-    renderSprites();
+    case 0: 
+        renderBg(&PPU::renderBgMode0, 0);
+        renderBg(&PPU::renderBgMode0, 1);
+        renderBg(&PPU::renderBgMode0, 2);
+        renderBg(&PPU::renderBgMode0, 3);
+        break;
 
-    mosaic();
+    case 1: 
+        renderBg(&PPU::renderBgMode0, 0);
+        renderBg(&PPU::renderBgMode0, 1);
+        renderBg(&PPU::renderBgMode2, 2);
+        break;
+
+    case 2: 
+        renderBg(&PPU::renderBgMode2, 2);
+        renderBg(&PPU::renderBgMode2, 3);
+        break;
+
+    case 3: 
+        renderBg(&PPU::renderBgMode3, 2);
+        break;
+
+    case 4: 
+        renderBg(&PPU::renderBgMode4, 2);
+        break;
+
+    case 5: 
+        renderBg(&PPU::renderBgMode5, 2);
+        break;
+    }
+    renderObjects();
 
     generate();
 }
@@ -110,11 +131,10 @@ void PPU::next()
     }
 }
 
-void PPU::render()
+void PPU::update()
 {
     SDL_UpdateTexture(
-        texture,
-        0,
+        texture, 0,
         screen.data(),
         2 * WIDTH
     );
@@ -122,36 +142,49 @@ void PPU::render()
     SDL_RenderPresent(renderer);
 }
 
-void PPU::mosaic()
+void PPU::renderBg(RenderFunc func, int bg)
 {
-    int mosaic_x = mmu.mosaic.bg_x + 1;
-    int mosaic_y = mmu.mosaic.bg_y + 1;
+    if (!mmu.dispcnt.bg(bg))
+        return;
 
-    for (int bg = 0; bg < 4; ++bg)
+    if (mmu.bgcnt[bg].mosaic)
     {
-        if (mmu.dispcnt.bg(bg) && mmu.bgcnt[bg].mosaic)
+        if (mosaicDominant())
         {
-            if (mmu.vcount.line % mosaic_y == 0)
-            {
-                if (mosaic_x == 1)
-                    return;
-
-                int color;
-
-                for (int x = 0; x < WIDTH; ++x)
-                {
-                    if (x % mosaic_x == 0)
-                        color = bgs[bg][x];
-
-                    bgs[bg][x] = color;
-                }
-            }
-            else
-            {
-                bgs[bg].copyPage();
-            }
+            (this->*func)(bg);
+            mosaic(bg);
+        }
+        else
+        {
+            bgs[bg].flip();
         }
     }
+    else
+    {
+        (this->*func)(bg);
+    }
+}
+
+// Todo: does this overflow in mode 5?
+void PPU::mosaic(int bg)
+{
+    int mosaic_x = mmu.mosaic.bg_x + 1;
+    if (mosaic_x == 1)
+        return;
+
+    int color;
+    for (int x = 0; x < WIDTH; ++x)
+    {
+        if (x % mosaic_x == 0)
+            color = bgs[bg][x];
+
+        bgs[bg][x] = color;
+    }
+}
+
+bool PPU::mosaicDominant() const
+{
+    return mmu.vcount.line % (mmu.mosaic.bg_y + 1) == 0;
 }
 
 void PPU::generate()
@@ -200,12 +233,11 @@ void PPU::generate()
                 }
             }
         }
-
         scanline[x] = pixel;
     }
 }
 
-int PPU::blendAlpha(int a, int b)
+int PPU::blendAlpha(int a, int b) const
 {
     int a_r = (a >>  0) & 0x1F;
     int a_g = (a >>  5) & 0x1F;
@@ -224,7 +256,7 @@ int PPU::blendAlpha(int a, int b)
     return (t_r << 0) | (t_g << 5) | (t_b << 10);
 }
 
-int PPU::blendWhite(int a)
+int PPU::blendWhite(int a) const
 {
     int a_r = (a >>  0) & 0x1F;
     int a_g = (a >>  5) & 0x1F;
@@ -239,7 +271,7 @@ int PPU::blendWhite(int a)
     return (t_r << 0) | (t_g << 5) | (t_b << 10);
 }
 
-int PPU::blendBlack(int a)
+int PPU::blendBlack(int a) const
 {
     int a_r = (a >>  0) & 0x1F;
     int a_g = (a >>  5) & 0x1F;

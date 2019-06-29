@@ -36,6 +36,8 @@ void ScanlineBuilder::build(int x)
 {
     this->x = x;
 
+    findActiveWindow();
+
     bool opaque[4] = {
         bgs[0][x] != TRANSPARENT,
         bgs[1][x] != TRANSPARENT,
@@ -44,7 +46,7 @@ void ScanlineBuilder::build(int x)
     };
     bool opaque_obj = objs[x].color != TRANSPARENT;
 
-    int mask = allowedMask();
+    int window_flags = windowLayerFlags();
 
     layers.clear();
 
@@ -52,7 +54,7 @@ void ScanlineBuilder::build(int x)
     {
         if (on_obj && opaque_obj && objs[x].priority == priority)
         {
-            if (mask & LF_OBJ)
+            if (window_flags & LF_OBJ)
                 layers.push_back(Layer(objs[x].color, LF_OBJ));
         }
 
@@ -60,8 +62,8 @@ void ScanlineBuilder::build(int x)
         {
             if (on[bg] && opaque[bg] && priorities[bg] == priority)
             {
-                if (mask & flags[bg])
-                layers.push_back(Layer(bgs[bg][x], flags[bg]));
+                if (window_flags & flag_lut[bg])
+                    layers.push_back(Layer(bgs[bg][x], flag_lut[bg]));
             }
         }
     }
@@ -94,23 +96,21 @@ bool ScanlineBuilder::getBlendLayers(int& a)
 
 bool ScanlineBuilder::getBlendLayers(int& a, int& b)
 {
-    bool found_a = false;
+    bool valid = false;
 
-    int mask_a = objs[x].mode == GFX_ALPHA
-        ? LF_OBJ 
-        : blend_mask_a;
+    int mask_a = objs[x].mode == GFX_ALPHA ? LF_OBJ : blend_mask_a;
 
     for (Layer& layer : layers)
     {
-        if (layer.flag & mask_a && !found_a)
+        if (layer.flag & mask_a && !valid)
         {
             a = layer.color;
-            found_a = true;
+            valid = true;
         }
         else if (layer.flag & blend_mask_b)
         {
             b = layer.color;
-            return found_a;
+            return valid;
         }
         else
         {
@@ -122,18 +122,23 @@ bool ScanlineBuilder::getBlendLayers(int& a, int& b)
 
 bool ScanlineBuilder::canBlend()
 {
-    bool windows = mmu.dispcnt.win0 || mmu.dispcnt.win1 || mmu.dispcnt.winobj;
-
-    if (windows)
+    switch (window)
     {
-        if (inWin(0))
-            return mmu.winin.win0_sfx;
-        else if (inWin(1))
-            return mmu.winin.win1_sfx;
-        else
-            return mmu.winout.winobj_sfx;
+    case WF_DISABLED: 
+        return true;
+
+    case WF_WIN0: 
+        return mmu.winin.win0_sfx;
+
+    case WF_WIN1: 
+        return mmu.winin.win1_sfx;
+
+    case WF_WINOBJ: 
+        return mmu.winout.winobj_sfx;
+
+    case WF_WINOUT: 
+        return mmu.winout.winout_sfx;
     }
-    return true;
 }
 
 std::vector<Layer>::iterator ScanlineBuilder::begin()
@@ -146,64 +151,88 @@ std::vector<Layer>::iterator ScanlineBuilder::end()
     return layers.end();
 }
 
-bool ScanlineBuilder::inWin(int win)
+void ScanlineBuilder::findActiveWindow()
 {
-    int x1 = mmu.winh[win].x1;
-    int x2 = mmu.winh[win].x2;
-    int y1 = mmu.winv[win].y1;
-    int y2 = mmu.winv[win].y2;
+    if (mmu.dispcnt.win0 || mmu.dispcnt.win1 || mmu.dispcnt.winobj)
+    {
+        if (insideWindow(0))
+        {
+            window = WF_WIN0;
+        }
+        else if (insideWindow(1))
+        {
+            window = WF_WIN1;
+        }
+        else if (objs[x].mode == GFX_WINDOW && objs[x].color != TRANSPARENT)
+        {
+            window = WF_WINOBJ;
+        }
+        else
+        {
+            window = WF_WINOUT;
+        }
+    }
+    else
+    {
+        window = WF_DISABLED;
+    }
+}
+
+bool ScanlineBuilder::insideWindow(int window) const
+{
+    int x1 = mmu.winh[window].x1;
+    int x2 = mmu.winh[window].x2;
+    int y1 = mmu.winv[window].y1;
+    int y2 = mmu.winv[window].y2;
 
     if (x2 > WIDTH  || x2 < x1) x2 = WIDTH;
     if (y2 > HEIGHT || y2 < y1) y2 = HEIGHT;
 
-    bool h_ok = x >= x1 && x < x2;
-    bool v_ok = y >= y1 && y < y2;
+    bool inside_h = x >= x1 && x < x2;
+    bool inside_v = y >= y1 && y < y2;
 
-    return h_ok && v_ok;
+    return inside_h && inside_v;
 }
 
-int ScanlineBuilder::allowedMask()
+int ScanlineBuilder::windowLayerFlags() const
 {
-    int x = this->x;
-    int y = mmu.vcount.line;
+    if (window == WF_DISABLED)
+        return 0xFF;
 
-    bool windows = mmu.dispcnt.win0 || mmu.dispcnt.win1 || mmu.dispcnt.winobj;
-
-    if (!windows)
-        return 0b111111;
-
-    if (inWin(0))
+    int flags = 0;
+    switch (window)
     {
-        int mask = 0;
-        if (mmu.winin.win0_bg0) mask |= LF_BG0;
-        if (mmu.winin.win0_bg1) mask |= LF_BG1;
-        if (mmu.winin.win0_bg2) mask |= LF_BG2;
-        if (mmu.winin.win0_bg3) mask |= LF_BG3;
-        if (mmu.winin.win0_obj) mask |= LF_OBJ;
-        return mask;
-    }
-    else if (inWin(1))
-    {
-        int mask = 0;
-        if (mmu.winin.win1_bg0) mask |= LF_BG0;
-        if (mmu.winin.win1_bg1) mask |= LF_BG1;
-        if (mmu.winin.win1_bg2) mask |= LF_BG2;
-        if (mmu.winin.win1_bg3) mask |= LF_BG3;
-        if (mmu.winin.win1_obj) mask |= LF_OBJ;
-        return mask;
-    }
-    //else if (isObjWin)
-    //{
+    case WF_WIN0:
+        if (mmu.winin.win0_bg0) flags |= LF_BG0;
+        if (mmu.winin.win0_bg1) flags |= LF_BG1;
+        if (mmu.winin.win0_bg2) flags |= LF_BG2;
+        if (mmu.winin.win0_bg3) flags |= LF_BG3;
+        if (mmu.winin.win0_obj) flags |= LF_OBJ;
+        break;
 
-    //}
-    else
-    {
-        int mask = 0;
-        if (mmu.winout.winout_bg0) mask |= LF_BG0;
-        if (mmu.winout.winout_bg1) mask |= LF_BG1;
-        if (mmu.winout.winout_bg2) mask |= LF_BG2;
-        if (mmu.winout.winout_bg3) mask |= LF_BG3;
-        if (mmu.winout.winout_obj) mask |= LF_OBJ;
-        return mask;
+    case WF_WIN1:
+        if (mmu.winin.win1_bg0) flags |= LF_BG0;
+        if (mmu.winin.win1_bg1) flags |= LF_BG1;
+        if (mmu.winin.win1_bg2) flags |= LF_BG2;
+        if (mmu.winin.win1_bg3) flags |= LF_BG3;
+        if (mmu.winin.win1_obj) flags |= LF_OBJ;
+        break;
+
+    case WF_WINOBJ:
+        if (mmu.winout.winobj_bg0) flags |= LF_BG0;
+        if (mmu.winout.winobj_bg1) flags |= LF_BG1;
+        if (mmu.winout.winobj_bg2) flags |= LF_BG2;
+        if (mmu.winout.winobj_bg3) flags |= LF_BG3;
+        if (mmu.winout.winobj_obj) flags |= LF_OBJ;
+        break;
+
+    case WF_WINOUT:
+        if (mmu.winout.winout_bg0) flags |= LF_BG0;
+        if (mmu.winout.winout_bg1) flags |= LF_BG1;
+        if (mmu.winout.winout_bg2) flags |= LF_BG2;
+        if (mmu.winout.winout_bg3) flags |= LF_BG3;
+        if (mmu.winout.winout_obj) flags |= LF_OBJ;
+        break;
     }
+    return flags;
 }

@@ -21,29 +21,29 @@ public:
     void vblank();
     void next();
 
-    void render();
+    void update();
 
 private:
     MMU& mmu;
 
-    void renderMode0();
-    void renderMode1();
-    void renderMode2();
-    void renderMode3();
-    void renderMode4();
-    void renderMode5();
-    void renderSprites();
+    using RenderFunc = void(PPU::*)(int);
 
-    void renderBackgroundMode0(int layer);
-    void renderBackgroundMode2(int layer);
+    void renderBg(RenderFunc func, int bg);
+    void renderBgMode0(int bg);
+    void renderBgMode2(int bg);
+    void renderBgMode3(int bg);
+    void renderBgMode4(int bg);
+    void renderBgMode5(int bg);
+    void renderObjects();
 
-    void mosaic();
+    void mosaic(int bg);
+    bool mosaicDominant() const;
 
     void generate();
     
-    int blendAlpha(int a, int b);
-    int blendWhite(int a);
-    int blendBlack(int a);
+    int blendAlpha(int a, int b) const;
+    int blendWhite(int a) const;
+    int blendBlack(int a) const;
 
     int readBgColor(int index, int palette);
     int readFgColor(int index, int palette);

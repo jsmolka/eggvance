@@ -4,9 +4,7 @@
 #include "enums.h"
 #include "oamentry.h"
 
-// Todo: maybe move mosaic out of this function
-
-void PPU::renderSprites()
+void PPU::renderObjects()
 {
     if (!mmu.dispcnt.sprites)
         return;

@@ -13,15 +13,6 @@ public:
         page ^= 1;
     }
 
-    inline void copyPage()
-    {
-        std::copy(
-            buffer[page ^ 1].begin(),
-            buffer[page ^ 1].end(),
-            buffer[page].begin()
-        );
-    }
-
     inline T operator[](int index) const
     {
         return buffer[page][index];

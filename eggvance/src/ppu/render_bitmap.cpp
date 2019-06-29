@@ -2,12 +2,9 @@
 
 #include "mmu/map.h"
 
-void PPU::renderMode3()
+// Todo: "In BG mode 3, only one frame exists"
+void PPU::renderBgMode3(int bg)
 {
-    if (!mmu.dispcnt.bg2)
-        return;
-
-    // Todo: "In BG mode 3, only one frame exists"
     u32 addr = mmu.dispcnt.frameAddr();
 
     int y = mmu.vcount.line;
@@ -16,15 +13,12 @@ void PPU::renderMode3()
         int offset = 2 * (WIDTH * y + x);
         int color = mmu.readHalfFast(addr + offset);
 
-        bgs[2][x] = color;
+        bgs[bg][x] = color;
     }
 }
 
-void PPU::renderMode4()
+void PPU::renderBgMode4(int bg)
 {
-    if (!mmu.dispcnt.bg2)
-        return;
-
     u32 addr = mmu.dispcnt.frameAddr();
 
     int y = mmu.vcount.line;
@@ -34,15 +28,12 @@ void PPU::renderMode4()
         int index = mmu.readByteFast(addr + offset);
         int color = readBgColor(index, 0);
 
-        bgs[2][x] = color;
+        bgs[bg][x] = color;
     }
 }
 
-void PPU::renderMode5()
+void PPU::renderBgMode5(int bg)
 {
-    if (!mmu.dispcnt.bg2)
-        return;
-
     u32 addr = mmu.dispcnt.frameAddr();
 
     int y = mmu.vcount.line;
@@ -54,6 +45,6 @@ void PPU::renderMode5()
             int offset = 2 * (160 * y + x);
             color = mmu.readHalfFast(addr + offset);
         }
-        bgs[2][x] = color;
+        bgs[bg][x] = color;
     }
 }

@@ -4,28 +4,7 @@
 #include "mmu/map.h"
 #include "mapentry.h"
 
-void PPU::renderMode0()
-{
-    if (mmu.dispcnt.bg0) renderBackgroundMode0(0);
-    if (mmu.dispcnt.bg1) renderBackgroundMode0(1);
-    if (mmu.dispcnt.bg2) renderBackgroundMode0(2);
-    if (mmu.dispcnt.bg3) renderBackgroundMode0(3);
-}
-
-void PPU::renderMode1()
-{
-    if (mmu.dispcnt.bg0) renderBackgroundMode0(0);
-    if (mmu.dispcnt.bg1) renderBackgroundMode0(1);
-    if (mmu.dispcnt.bg2) renderBackgroundMode2(2);
-}
-
-void PPU::renderMode2()
-{
-    if (mmu.dispcnt.bg2) renderBackgroundMode2(2);
-    if (mmu.dispcnt.bg3) renderBackgroundMode2(3);
-}
-
-void PPU::renderBackgroundMode0(int bg)
+void PPU::renderBgMode0(int bg)
 {
     const Bgcnt& bgcnt = mmu.bgcnt[bg];
 
@@ -113,7 +92,7 @@ void PPU::renderBackgroundMode0(int bg)
     }
 }
 
-void PPU::renderBackgroundMode2(int bg)
+void PPU::renderBgMode2(int bg)
 {
     const Bgcnt& bgcnt = mmu.bgcnt[bg];
 

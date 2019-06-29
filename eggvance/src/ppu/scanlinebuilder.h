@@ -34,9 +34,9 @@ public:
     std::vector<Layer>::iterator end();
 
 private:
-    bool inWin(int win);
-
-    int allowedMask();
+    void findActiveWindow();
+    bool insideWindow(int window) const;
+    int windowLayerFlags() const;
 
     MMU& mmu;
 
@@ -54,8 +54,13 @@ private:
     int blend_mask_a;
     int blend_mask_b;
 
-    constexpr static LayerFlag flags[4] = {
-        LF_BG0, LF_BG1, LF_BG2, LF_BG3
+    WindowFlag window;
+
+    constexpr static LayerFlag flag_lut[4] = {
+        LF_BG0, 
+        LF_BG1, 
+        LF_BG2, 
+        LF_BG3
     };
 
     std::vector<Layer> layers;
