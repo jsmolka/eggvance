@@ -57,7 +57,7 @@ void PPU::scanline()
     bgs[2].flip();
     bgs[3].flip();
 
-    objs.fill(ObjData());
+    obj.fill(ObjData());
 
     switch (mmu.dispcnt.bg_mode)
     {
@@ -189,7 +189,7 @@ bool PPU::mosaicDominant() const
 
 void PPU::generate()
 {
-    ScanlineBuilder builder(bgs, objs, mmu);
+    ScanlineBuilder builder(bgs, obj, mmu);
 
     u16* scanline = &screen[WIDTH * mmu.vcount.line];
 
@@ -197,19 +197,19 @@ void PPU::generate()
     {
         builder.build(x);
 
-        int pixel = builder.begin()->color;
+        int color = builder.begin()->color;
 
-        if (builder.canBlend() && mmu.bldcnt.mode != BLD_DISABLED || objs[x].mode == GFX_ALPHA)
+        if (builder.windowSfx() && (mmu.bldcnt.mode != BLD_DISABLED || obj[x].mode == GFX_ALPHA))
         {
             int a = 0;
             int b = 0;
 
             bool blended = false;
 
-            if (objs[x].mode == GFX_ALPHA)
+            if (obj[x].mode == GFX_ALPHA)
             {
                 if (blended = builder.getBlendLayers(a, b))
-                    pixel = blendAlpha(a, b);
+                    color = blendAlpha(a, b);
             }
 
             if (!blended)
@@ -218,22 +218,22 @@ void PPU::generate()
                 {
                 case BLD_ALPHA:
                     if (builder.getBlendLayers(a, b))
-                        pixel = blendAlpha(a, b);
+                        color = blendAlpha(a, b);
                     break;
 
                 case BLD_WHITE:
                     if (builder.getBlendLayers(a))
-                        pixel = blendWhite(a);
+                        color = blendWhite(a);
                     break;
 
                 case BLD_BLACK:
                     if (builder.getBlendLayers(a))
-                        pixel = blendBlack(a);
+                        color = blendBlack(a);
                     break;
                 }
             }
         }
-        scanline[x] = pixel;
+        scanline[x] = color;
     }
 }
 

@@ -20,7 +20,7 @@ public:
     BitField<u16,  9, 1> bg1;          // Display BG1 flag
     BitField<u16, 10, 1> bg2;          // Display BG2 flag
     BitField<u16, 11, 1> bg3;          // Display BG3 flag
-    BitField<u16, 12, 1> sprites;      // Display sprites flag
+    BitField<u16, 12, 1> obj;          // Display objects flag
     BitField<u16, 13, 1> win0;         // Display window 0 flag
     BitField<u16, 14, 1> win1;         // Display window 1 flag
     BitField<u16, 15, 1> winobj;       // Display OBJ window flag

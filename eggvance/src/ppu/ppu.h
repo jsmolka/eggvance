@@ -54,7 +54,7 @@ private:
     SDL_Texture* texture;
 
     DoubleBuffer<u16> bgs[4];
-    Buffer<ObjData> objs;
+    Buffer<ObjData> obj;
 
     std::array<u16, WIDTH * HEIGHT> screen;
 };

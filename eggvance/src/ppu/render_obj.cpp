@@ -6,7 +6,7 @@
 
 void PPU::renderObjects()
 {
-    if (!mmu.dispcnt.sprites)
+    if (!mmu.dispcnt.obj)
         return;
 
     int line = mmu.vcount.line;
@@ -123,9 +123,9 @@ void PPU::renderObjects()
                     int screen_x = center_x + rect_x;
                     if (screen_x >= 0 && screen_x < WIDTH)
                     {
-                        objs[screen_x].color = color;
-                        objs[screen_x].priority = oam.priority;
-                        objs[screen_x].mode = static_cast<GraphicsMode>(static_cast<int>(oam.gfx_mode));
+                        obj[screen_x].color = color;
+                        obj[screen_x].priority = oam.priority;
+                        obj[screen_x].mode = static_cast<GraphicsMode>(static_cast<int>(oam.gfx_mode));
                     }
                 }
             }

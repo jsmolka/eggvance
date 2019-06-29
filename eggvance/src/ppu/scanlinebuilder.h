@@ -9,12 +9,10 @@
 
 struct Layer
 {
-    Layer(u16 color, LayerFlag flag)
-        : color(color)
-        , flag(flag) 
-    { }
+    Layer(int color, LayerFlag flag)
+        : color(color), flag(flag) { }
 
-    u16 color;
+    int color;
     LayerFlag flag;
 };
 
@@ -28,40 +26,35 @@ public:
     bool getBlendLayers(int& a);
     bool getBlendLayers(int& a, int& b);
 
-    bool canBlend();
+    bool windowSfx();
 
     std::vector<Layer>::iterator begin();
     std::vector<Layer>::iterator end();
 
 private:
-    void findActiveWindow();
+    constexpr static LayerFlag flags[4] = { LF_BG0, LF_BG1, LF_BG2, LF_BG3 };
+
+    int masterMask() const;
+    int blendAMask() const;
+    int blendBMask() const;
+    int windowMask() const;
+
+    WindowFlag activeWindow() const;
     bool insideWindow(int window) const;
-    int windowLayerFlags() const;
 
     MMU& mmu;
 
     DoubleBuffer<u16>(&bgs)[4];
-    Buffer<ObjData>& objs;
+    Buffer<ObjData>& obj;
 
     int x;
     int y;
 
-    bool on[4];
-    bool on_obj;
-
-    int priorities[4];
-
-    int blend_mask_a;
-    int blend_mask_b;
+    int mask_master;
+    int mask_blend_a;
+    int mask_blend_b;
 
     WindowFlag window;
-
-    constexpr static LayerFlag flag_lut[4] = {
-        LF_BG0, 
-        LF_BG1, 
-        LF_BG2, 
-        LF_BG3
-    };
 
     std::vector<Layer> layers;
 };
