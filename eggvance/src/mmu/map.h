@@ -60,4 +60,5 @@ enum MemoryRegister
     REG_IF       = 0x04000202,
     REG_WAITCNT  = 0x04000204,
     REG_IME      = 0x04000208,
+    REG_HALTCNT  = 0x04000301
 };

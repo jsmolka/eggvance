@@ -8,6 +8,8 @@
 #include "disassembler.h"
 #include "utility.h"
 
+static u64 total_cycles = 0;
+
 ARM::ARM(MMU& mmu)
     : mmu(mmu)
 {
@@ -25,19 +27,30 @@ int ARM::step()
 {
     cycles = 0;
 
-    fetch(pipe[0]);
-    decode(pipe[1]);
+    if (mmu.interruptRequested() && !(regs.cpsr & CPSR_I))
+    {
+        interrupt();
+    }
+    else
+    {
+        fetch(pipe[0]);
+        decode(pipe[1]);
 
-    #ifdef _DEBUG
-    debug(pipe[2]);
-    #endif
+        #ifdef _DEBUG
+        if (total_cycles > 3006050)
+            debug(pipe[2]);
+        #endif
 
-    execute(pipe[2]);
+        execute(pipe[2]);
+    }
+
 
     if (needs_flush)
         flush();
     else
         advance();
+
+    total_cycles += cycles;
 
     return cycles;
 }
@@ -140,6 +153,30 @@ void ARM::advance()
     regs.pc += regs.thumb ? 2 : 4;
 }
 
+void ARM::interrupt()
+{
+    // Interrupts are disabled on the CPU side
+    if (regs.cpsr & CPSR_I)
+        return;
+
+    // Todo: pretty sure the -2 will not mattern when returning from the ARM handler
+    u32 next = regs.thumb ? (regs.pc - 2) : (regs.pc - 4);
+    u32 cpsr = regs.cpsr;
+
+    // Switch mode
+    regs.switchMode(MODE_IRQ);
+
+    // Save return address and status
+    regs.spsr = cpsr;
+    regs.lr = next;
+
+    // Leave thumb, disabled interrupts
+    regs.cpsr = (regs.cpsr & ~CPSR_T) | CPSR_I;
+
+    // Jump to interrupt exception vector
+    regs.pc = EXV_IRQ;
+    needs_flush = true;
+}
 
 void ARM::debug(ARM::PipeState& state)
 {

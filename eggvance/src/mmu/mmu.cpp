@@ -46,6 +46,9 @@ MMU::MMU()
     , keycnt(ref<u16>(REG_KEYCNT))
     , keyinput(ref<u16>(REG_KEYINPUT))
     , waitcnt(ref<u16>(REG_WAITCNT))
+    , ime(ref<u32>(REG_IME))
+    , ie(ref<u16>(REG_IE))
+    , ir(ref<u16>(REG_IF))
 {
 
 }
@@ -53,6 +56,8 @@ MMU::MMU()
 void MMU::reset()
 {
     memory.fill(0);
+
+    halt = false;
 }
 
 bool MMU::readFile(const std::string& file, u32 addr)
@@ -81,6 +86,22 @@ void MMU::dump(u32 start, u32 size)
     {
         file << memory[i];
     }
+}
+
+void MMU::requestInterrupt(InterruptFlag flag)
+{
+    if (ime.enabled)
+    {
+        if (ie & flag)
+        {
+            ir = ir | flag;
+        }
+    }
+}
+
+bool MMU::interruptRequested()
+{
+    return ir != 0;
 }
 
 u8 MMU::readByte(u32 addr) const
@@ -129,17 +150,36 @@ u32 MMU::readWordFast(u32 addr)
 
 void MMU::writeByte(u32 addr, u8 byte)
 {
+    switch (addr)
+    {
+    case REG_IF:
+        // Acknowledge interrupt, do not write value
+        ir = ir & ~byte;
+        return;
+
+    case REG_IF + 1:
+        // Acknowledge interrupt, do not write value
+        ir = ir & ~(byte << 8);
+        return;
+        
+    case REG_HALTCNT:
+        // Todo: this could also be stop
+        halt = true;
+        break;
+    }
     memory[addr] = byte;
 }
 
 void MMU::writeHalf(u32 addr, u16 half)
 {
-    ref<u16>(addr) = half;
+    writeByte(addr, half & 0xFF);
+    writeByte(addr + 1, half >> 8);
 }
 
 void MMU::writeWord(u32 addr, u32 word)
 {
-    ref<u32>(addr) = word;
+    writeHalf(addr, word & 0xFFFF);
+    writeHalf(addr + 2, word >> 16);
 }
 
 template<typename T>

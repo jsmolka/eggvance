@@ -1,5 +1,9 @@
 #pragma once
 
+#include "interrupt/ie.h"
+#include "interrupt/ime.h"
+#include "interrupt/ir.h"
+
 #include "io/bgcnt.h"
 #include "io/bghvofs.h"
 #include "io/bgpabcd.h"

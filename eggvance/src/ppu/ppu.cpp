@@ -103,10 +103,8 @@ void PPU::hblank()
 
     if (mmu.dispstat.hblank_irq)
     {
-        // Todo: request interrupt
+        mmu.requestInterrupt(IF_HBLANK);
     }
-
-    mmu.writeByte(0x04000000 - 8, 0);
 }
 
 void PPU::vblank()
@@ -116,10 +114,8 @@ void PPU::vblank()
 
     if (mmu.dispstat.vblank_irq)
     {
-        // Todo: request interrupt
+        mmu.requestInterrupt(IF_VBLANK);
     }
-
-    mmu.writeByte(0x04000000 - 8, 1);
 }
 
 void PPU::next()
@@ -131,7 +127,7 @@ void PPU::next()
 
     if (vcount_match && mmu.dispstat.vcount_irq)
     {
-        // Todo: request interrupt
+        mmu.requestInterrupt(IF_VCOUNT_MATCH);
     }
 }
 

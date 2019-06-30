@@ -99,5 +99,4 @@ enum ExceptionVector
     EXV_ADDR     = 0x14,  // ? Address exceeds 26bit
     EXV_IRQ      = 0x18,  // 4 Normal interrupt
     EXV_FIQ      = 0x1C   // 3 Fast interrupt
- 
 };

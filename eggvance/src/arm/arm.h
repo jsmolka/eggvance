@@ -31,6 +31,8 @@ private:
     void execute(PipeState &state);
     void advance();
 
+    void interrupt();
+
     void debug(PipeState& state);
 
     PipeState pipe[3];

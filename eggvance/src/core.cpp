@@ -91,7 +91,22 @@ void Core::emulate(int cycles)
     remaining += cycles;
 
     while (remaining > 0)
+    {
+        if (mmu.halt)
+        {
+            if (mmu.ir == 0)
+            {
+                // No events in this loop could cause an interrupt
+                remaining = 0;
+                return;
+            }
+            else 
+            {
+                mmu.halt = false;
+            }
+        }
         remaining -= arm.step();
+    }
 }
 
 void Core::keyEvent(SDL_Keycode key, bool pressed)
