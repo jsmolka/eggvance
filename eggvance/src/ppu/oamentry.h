@@ -20,8 +20,8 @@ public:
     // Attribute 1
     BitValue< 0, 9> x;         // X coordinate
     BitValue< 9, 5> paramter;  // If affine: affine paramter
-    BitValue<12, 1> flip_y;    // If not affine: horizontal flip
-    BitValue<13, 1> flip_x;    // If not affine: vertical flip
+    BitValue<12, 1> flip_h;    // If not affine: horizontal flip
+    BitValue<13, 1> flip_v;    // If not affine: vertical flip
     BitValue<14, 2> size;      // Object size
 
     // Attribute 2

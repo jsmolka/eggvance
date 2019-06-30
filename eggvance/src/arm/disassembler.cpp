@@ -928,20 +928,22 @@ std::string Disassembler::halfSignedTransfer(u32 instr)
 
     if (pre_index)
     {
-        return fmt::format("{:<8}{},[{},{}]{}",
+        return fmt::format("{:<8}{},[{},{}{}]{}",
             mnemonic,
             reg(rd),
             reg(rn),
+            increment ? "" : "-",
             offset,
             writeback ? "!" : ""
         );
     }
     else
     {
-        return fmt::format("{:<8}{},[{}],{}",
+        return fmt::format("{:<8}{},[{}{}],{}",
             mnemonic,
             reg(rd),
             reg(rn),
+            increment ? "" : "-",
             offset
         );
     }

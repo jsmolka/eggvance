@@ -55,8 +55,8 @@ void PPU::renderObjects()
         // 2D mapping arranges sprites in a 32x32 tile matrix
         int tile_size_row = tile_size * (mmu.dispcnt.mapping_1d ? (width / 8) : 32);
 
-        bool flip_x = !oam.affine && oam.flip_x;
-        bool flip_y = !oam.affine && oam.flip_y;
+        bool flip_h = !oam.affine && oam.flip_h;
+        bool flip_v = !oam.affine && oam.flip_v;
 
         // Initialize with identity
         s16 pa = 0x100;
@@ -90,8 +90,8 @@ void PPU::renderObjects()
 
             if (tex_x >= 0 && tex_x < width && tex_y >= 0 && tex_y < height)
             {
-                if (flip_x) tex_x = width  - 1 - tex_x;
-                if (flip_y) tex_y = height - 1 - tex_y;
+                if (flip_h) tex_x = width  - 1 - tex_x;
+                if (flip_v) tex_y = height - 1 - tex_y;
 
                 if (oam.mosaic)
                 {

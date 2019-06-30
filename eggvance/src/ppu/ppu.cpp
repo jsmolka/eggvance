@@ -105,6 +105,8 @@ void PPU::hblank()
     {
         // Todo: request interrupt
     }
+
+    mmu.writeByte(0x04000000 - 8, 0);
 }
 
 void PPU::vblank()
@@ -116,6 +118,8 @@ void PPU::vblank()
     {
         // Todo: request interrupt
     }
+
+    mmu.writeByte(0x04000000 - 8, 1);
 }
 
 void PPU::next()
