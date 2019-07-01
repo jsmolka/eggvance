@@ -27,7 +27,7 @@ int ARM::step()
 {
     cycles = 0;
 
-    if (mmu.interruptRequested() && !(regs.cpsr & CPSR_I))
+    if (mmu.int_request != 0 && !(regs.cpsr & CPSR_I))
     {
         interrupt();
     }

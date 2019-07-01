@@ -133,9 +133,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\mmu\registers\interrupt\ie.cpp" />
-    <ClCompile Include="src\mmu\registers\interrupt\ime.cpp" />
-    <ClCompile Include="src\mmu\registers\interrupt\ir.cpp" />
+    <ClCompile Include="src\mmu\registers\interrupt\interrupt.cpp" />
+    <ClCompile Include="src\mmu\registers\interrupt\interruptmaster.cpp" />
     <ClCompile Include="src\ppu\scanlinebuilder.cpp" />
     <ClCompile Include="src\mmu\registers\io\bldalpha.cpp" />
     <ClCompile Include="src\mmu\registers\io\bldcnt.cpp" />
@@ -173,10 +172,8 @@
     <ClCompile Include="src\mmu\registers\io\winv.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\mmu\enums.h" />
-    <ClInclude Include="src\mmu\registers\interrupt\ie.h" />
-    <ClInclude Include="src\mmu\registers\interrupt\ime.h" />
-    <ClInclude Include="src\mmu\registers\interrupt\ir.h" />
+    <ClInclude Include="src\mmu\registers\interrupt\interrupt.h" />
+    <ClInclude Include="src\mmu\registers\interrupt\interruptmaster.h" />
     <ClInclude Include="src\ppu\constants.h" />
     <ClInclude Include="src\ppu\enums.h" />
     <ClInclude Include="src\ppu\scanlinebuilder.h" />

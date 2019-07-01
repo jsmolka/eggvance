@@ -5,7 +5,6 @@
 
 #include "common/integer.h"
 #include "registers/include.h"
-#include "enums.h"
 
 class MMU
 {
@@ -19,7 +18,6 @@ public:
     void dump(u32 start, u32 size);
 
     void requestInterrupt(InterruptFlag flag);
-    bool interruptRequested();
 
     u8  readByte(u32 addr) const;
     u16 readHalf(u32 addr) const;
@@ -150,9 +148,9 @@ public:
     Keycnt keycnt;
     Keyinput keyinput;
     Waitcnt waitcnt;
-    Ime ime;
-    Ie ie;
-    Ir ir;
+    InterruptMaster int_master;
+    InterruptEnabled int_enabled;
+    InterruptRequest int_request;
 
     bool halt;
 

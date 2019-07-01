@@ -1,8 +1,7 @@
 #pragma once
 
-#include "interrupt/ie.h"
-#include "interrupt/ime.h"
-#include "interrupt/ir.h"
+#include "interrupt/interrupt.h"
+#include "interrupt/interruptmaster.h"
 
 #include "io/bgcnt.h"
 #include "io/bghvofs.h"

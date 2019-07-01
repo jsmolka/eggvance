@@ -120,13 +120,10 @@
     <ClCompile Include="src\ppu\render_tiles.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\mmu\registers\interrupt\ie.cpp">
+    <ClCompile Include="src\mmu\registers\interrupt\interrupt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\mmu\registers\interrupt\ime.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mmu\registers\interrupt\ir.cpp">
+    <ClCompile Include="src\mmu\registers\interrupt\interruptmaster.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -263,16 +260,10 @@
     <ClInclude Include="src\ppu\scanlinebuilder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\interrupt\ie.h">
+    <ClInclude Include="src\mmu\registers\interrupt\interrupt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\interrupt\ime.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\registers\interrupt\ir.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\enums.h">
+    <ClInclude Include="src\mmu\registers\interrupt\interruptmaster.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -94,7 +94,7 @@ void Core::emulate(int cycles)
     {
         if (mmu.halt)
         {
-            if (mmu.ir == 0)
+            if (mmu.int_request == 0)
             {
                 // No events in this loop could cause an interrupt
                 remaining = 0;

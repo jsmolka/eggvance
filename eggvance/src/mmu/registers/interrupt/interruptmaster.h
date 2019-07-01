@@ -2,10 +2,10 @@
 
 #include "../register.h"
 
-class Ime : public Register<u32>
+class InterruptMaster : public Register<u32>
 {
 public:
-    Ime(u32& data);
+    InterruptMaster(u32& data);
 
     using Register<u32>::operator=;
     using Register<u32>::operator int;

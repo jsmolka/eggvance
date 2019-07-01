@@ -46,9 +46,9 @@ MMU::MMU()
     , keycnt(ref<u16>(REG_KEYCNT))
     , keyinput(ref<u16>(REG_KEYINPUT))
     , waitcnt(ref<u16>(REG_WAITCNT))
-    , ime(ref<u32>(REG_IME))
-    , ie(ref<u16>(REG_IE))
-    , ir(ref<u16>(REG_IF))
+    , int_master(ref<u32>(REG_IME))
+    , int_enabled(ref<u16>(REG_IE))
+    , int_request(ref<u16>(REG_IF))
 {
 
 }
@@ -90,18 +90,13 @@ void MMU::dump(u32 start, u32 size)
 
 void MMU::requestInterrupt(InterruptFlag flag)
 {
-    if (ime.enabled)
+    if (int_master.enabled)
     {
-        if (ie & flag)
+        if (int_enabled & flag)
         {
-            ir = ir | flag;
+            int_request = int_request | flag;
         }
     }
-}
-
-bool MMU::interruptRequested()
-{
-    return ir != 0;
 }
 
 u8 MMU::readByte(u32 addr) const
@@ -154,12 +149,12 @@ void MMU::writeByte(u32 addr, u8 byte)
     {
     case REG_IF:
         // Acknowledge interrupt, do not write value
-        ir = ir & ~byte;
+        int_request = int_request & ~byte;
         return;
 
     case REG_IF + 1:
         // Acknowledge interrupt, do not write value
-        ir = ir & ~(byte << 8);
+        int_request = int_request & ~(byte << 8);
         return;
         
     case REG_HALTCNT:

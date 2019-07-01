@@ -1,6 +1,6 @@
-#include "ie.h"
+#include "interrupt.h"
 
-Ie::Ie(u16& data)
+Interrupt::Interrupt(u16& data)
     : Register<u16>(data)
     , vblank(data)
     , hblank(data)
