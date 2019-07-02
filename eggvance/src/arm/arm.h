@@ -12,6 +12,9 @@ public:
 
     void reset();
 
+    bool irq() const;
+    void interrupt();
+
     int step();
 
 private:
@@ -30,8 +33,6 @@ private:
     void decode(PipeState &state);
     void execute(PipeState &state);
     void advance();
-
-    void interrupt();
 
     void debug(PipeState& state);
 

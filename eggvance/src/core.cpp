@@ -94,16 +94,12 @@ void Core::emulate(int cycles)
     {
         if (mmu.halt)
         {
-            if (mmu.int_request == 0)
-            {
-                // No events in this loop could cause an interrupt
-                remaining = 0;
-                return;
-            }
-            else 
-            {
-                mmu.halt = false;
-            }
+            remaining = 0;
+            return;
+        }
+        if (arm.irq() && mmu.int_master && (mmu.int_enabled & mmu.int_request))
+        {
+            arm.interrupt();
         }
         remaining -= arm.step();
     }

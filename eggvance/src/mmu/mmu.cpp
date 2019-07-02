@@ -95,6 +95,7 @@ void MMU::requestInterrupt(InterruptFlag flag)
         if (int_enabled & flag)
         {
             int_request = int_request | flag;
+            halt = false;
         }
     }
 }
@@ -158,7 +159,6 @@ void MMU::writeByte(u32 addr, u8 byte)
         return;
         
     case REG_HALTCNT:
-        // Todo: this could also be stop
         halt = true;
         break;
     }
