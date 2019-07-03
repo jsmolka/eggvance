@@ -93,10 +93,9 @@ void MMU::requestInterrupt(InterruptFlag flag)
     if (int_master.enabled)
     {
         if (int_enabled & flag)
-        {
-            int_request = int_request | flag;
             halt = false;
-        }
+
+        int_request = int_request | flag;
     }
 }
 

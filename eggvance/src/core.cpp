@@ -55,26 +55,23 @@ void Core::reset()
     arm.reset();
     ppu.reset();
     
-    // Set keys to no pressed
     mmu.keyinput = 0x3FF;
 }
 
 void Core::frame()
 {
-    // Visible lines
     for (int line = 0; line < 160; ++line)
     {
-        ppu.scanline();
         emulate(960);
 
-        // H-Blank
+        ppu.scanline();
         ppu.hblank();
+        
         emulate(272);
 
         ppu.next();
     }
 
-    // Invisible lines and V-Blank
     ppu.vblank();
     for (int line = 0; line < 68; ++line)
     {
