@@ -101,6 +101,77 @@ void MMU::requestInterrupt(InterruptFlag flag)
 
 u8 MMU::readByte(u32 addr) const
 {
+    switch (addr)
+    {
+    case REG_BG0HOFS:
+    case REG_BG0HOFS+1:
+    case REG_BG0VOFS:
+    case REG_BG0VOFS+1:
+    case REG_BG1HOFS:
+    case REG_BG1HOFS+1:
+    case REG_BG1VOFS:
+    case REG_BG1VOFS+1:
+    case REG_BG2HOFS:
+    case REG_BG2HOFS+1:
+    case REG_BG2VOFS:
+    case REG_BG2VOFS+1:
+    case REG_BG3HOFS:
+    case REG_BG3HOFS+1:
+    case REG_BG3VOFS:
+    case REG_BG3VOFS+1:
+    case REG_BG2X:
+    case REG_BG2X+1:
+    case REG_BG2X+2:
+    case REG_BG2X+3:
+    case REG_BG2Y:
+    case REG_BG2Y+1:
+    case REG_BG2Y+2:
+    case REG_BG2Y+3:
+    case REG_BG3X:
+    case REG_BG3X+1:
+    case REG_BG3X+2:
+    case REG_BG3X+3:
+    case REG_BG3Y:
+    case REG_BG3Y+1:
+    case REG_BG3Y+2:
+    case REG_BG3Y+3:
+    case REG_BG2PA:
+    case REG_BG2PA+1:
+    case REG_BG2PB:
+    case REG_BG2PB+1:
+    case REG_BG2PC:
+    case REG_BG2PC+1:
+    case REG_BG2PD:
+    case REG_BG2PD+1:
+    case REG_BG3PA:
+    case REG_BG3PA+1:
+    case REG_BG3PB:
+    case REG_BG3PB+1:
+    case REG_BG3PC:
+    case REG_BG3PC+1:
+    case REG_BG3PD:
+    case REG_BG3PD+1:
+    case REG_WIN0H:
+    case REG_WIN0H+1:
+    case REG_WIN1H:
+    case REG_WIN1H+1:
+    case REG_WIN0V:
+    case REG_WIN0V+1:
+    case REG_WIN1V:
+    case REG_WIN1V+1:
+    case REG_MOSAIC:
+    case REG_MOSAIC+1:
+    case REG_MOSAIC+2:
+    case REG_MOSAIC+3:
+    case REG_BLDALPHA:
+    case REG_BLDALPHA+1:
+    case REG_BLDY:
+    case REG_BLDY+1:
+    case REG_BLDY+2:
+    case REG_BLDY+3:
+        return 0;
+    }
+
     switch ((addr >> 30) & 0xF)
     {
     // Waitstate 1
@@ -147,14 +218,21 @@ void MMU::writeByte(u32 addr, u8 byte)
 {
     switch (addr)
     {
-    case REG_IF:
-        // Acknowledge interrupt, do not write value
-        int_request = int_request & ~byte;
+    case REG_VCOUNT:
+    case REG_VCOUNT+1:
+    case REG_KEYINPUT:
+    case REG_KEYINPUT+1:
         return;
 
-    case REG_IF + 1:
-        // Acknowledge interrupt, do not write value
-        int_request = int_request & ~(byte << 8);
+    // Protect status flags
+    case REG_DISPSTAT:
+        byte &= ~0x7;
+        break;
+
+    // Acknowledge interrupt, writing clears
+    case REG_IF:
+    case REG_IF+1:
+        memory[addr] &= ~byte;
         return;
         
     case REG_HALTCNT:

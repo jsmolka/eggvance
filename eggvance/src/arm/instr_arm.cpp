@@ -768,15 +768,11 @@ void ARM::swiArm(u32 instr)
     u32 cpsr = regs.cpsr;
     u32 next = regs.pc - 4;
 
-    // Switch mode
     regs.switchMode(MODE_SVC);
+    regs.cpsr |= CPSR_I;
 
-    // Save CPSR and next instruction
     regs.spsr = cpsr;
     regs.lr = next;
-
-    // Disable interrupts
-    regs.cpsr |= CPSR_I;
 
     regs.pc = EXV_SWI;
     needs_flush = true;

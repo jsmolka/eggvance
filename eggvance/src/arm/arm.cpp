@@ -30,23 +30,18 @@ bool ARM::irq() const
 
 void ARM::interrupt()
 {
-    // Todo: pretty sure the -2 will not mattern when returning from the ARM handler
-    u32 next = regs.thumb ? (regs.pc - 2) : (regs.pc - 4);
     u32 cpsr = regs.cpsr;
+    // Instruction after IRQ is $+4 (different from SWI)
+    u32 next = regs.thumb ? (regs.pc) : (regs.pc - 4);
 
-    // Switch mode
     regs.switchMode(MODE_IRQ);
+    regs.cpsr &= ~CPSR_T;
+    regs.cpsr |= CPSR_I;
 
-    // Save return address and status
     regs.spsr = cpsr;
     regs.lr = next;
 
-    // Leave thumb, disabled interrupts
-    regs.cpsr = (regs.cpsr & ~CPSR_T) | CPSR_I;
-
-    // Jump to interrupt exception vector
     regs.pc = EXV_IRQ;
-    
     flush();
 }
 
@@ -56,11 +51,9 @@ int ARM::step()
 
     fetch(pipe[0]);
     decode(pipe[1]);
-
-    #ifdef _DEBUG
-    if (total_cycles > 3006050)
-        debug(pipe[2]);
-    #endif
+     
+    //if (total_cycles > 0x0000000000158c27)
+        //debug(pipe[2]);
 
     execute(pipe[2]);
 
@@ -177,7 +170,8 @@ void ARM::debug(ARM::PipeState& state)
     if (pipe[2].refill)
         return;
     
-    fmt::printf("%08X  %08X  %s\n",
+    fmt::printf("%08X  %08X  %08X  %s\n",
+        total_cycles,
         regs.pc - (regs.thumb ? 4 : 8),
         state.data,
         Disassembler::disassemble(state.data, regs)

@@ -683,15 +683,12 @@ void ARM::swiThumb(u16 instr)
     u32 cpsr = regs.cpsr;
     u32 next = regs.pc - 2;
 
-    // Switch mode
     regs.switchMode(MODE_SVC);
+    regs.cpsr &= ~CPSR_T;
+    regs.cpsr |= CPSR_I;
 
-    // Save CPSR and next instruction
     regs.spsr = cpsr;
     regs.lr = next;
-
-    // Disallow interrupts and switch to ARM
-    regs.cpsr = (regs.cpsr & ~CPSR_T) | CPSR_I;
 
     regs.pc = EXV_SWI;
     needs_flush = true;

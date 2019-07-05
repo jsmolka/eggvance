@@ -105,6 +105,7 @@ void Core::emulate(int cycles)
 void Core::keyEvent(SDL_Keycode key, bool pressed)
 {
     int state = pressed ? 0 : 1;
+    int bit = 0;
 
     switch (key)
     {
@@ -120,5 +121,18 @@ void Core::keyEvent(SDL_Keycode key, bool pressed)
     case SDLK_q: mmu.keyinput.l      = state; break;
     }
 
-    // Todo: keycnt and interrupts
+    if (mmu.keycnt.irq)
+    {
+        int input = mmu.keyinput & 0x3FF;
+        int control = mmu.keycnt & 0x3FF;
+
+        bool interrupt = mmu.keycnt.logic
+            ? (input & control)
+            : (input | control);
+
+        if (interrupt)
+        {
+            mmu.requestInterrupt(IF_KEYPAD);
+        }
+    }
 }
