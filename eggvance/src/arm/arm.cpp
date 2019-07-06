@@ -23,23 +23,20 @@ void ARM::reset()
     flush();
 }
 
-bool ARM::irq() const
-{
-    return !(regs.cpsr & CPSR_I);
-}
-
 void ARM::interrupt()
 {
+    if ((regs.cpsr & CPSR_I) || pipe[2].refill)
+        return;
+
     u32 cpsr = regs.cpsr;
-    // Instruction after IRQ is $+4 (different from SWI)
+    // Interrupts returns with subs pc, lr, 4
     u32 next = regs.thumb ? (regs.pc) : (regs.pc - 4);
 
     regs.switchMode(MODE_IRQ);
-    regs.cpsr &= ~CPSR_T;
-    regs.cpsr |= CPSR_I;
-
     regs.spsr = cpsr;
     regs.lr = next;
+
+    regs.cpsr = (regs.cpsr & ~CPSR_T) | CPSR_I;
 
     regs.pc = EXV_IRQ;
     flush();
@@ -52,8 +49,8 @@ int ARM::step()
     fetch(pipe[0]);
     decode(pipe[1]);
      
-    //if (total_cycles > 0x0000000000158c27)
-        //debug(pipe[2]);
+    //if (total_cycles > 0x0000000000159055)
+    //    debug(pipe[2]);
 
     execute(pipe[2]);
 

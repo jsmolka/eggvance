@@ -12,7 +12,6 @@ public:
 
     void reset();
 
-    bool irq() const;
     void interrupt();
 
     int step();

@@ -769,10 +769,10 @@ void ARM::swiArm(u32 instr)
     u32 next = regs.pc - 4;
 
     regs.switchMode(MODE_SVC);
-    regs.cpsr |= CPSR_I;
-
     regs.spsr = cpsr;
     regs.lr = next;
+
+    regs.cpsr |= CPSR_I;
 
     regs.pc = EXV_SWI;
     needs_flush = true;

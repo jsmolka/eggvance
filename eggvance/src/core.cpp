@@ -94,7 +94,7 @@ void Core::emulate(int cycles)
             remaining = 0;
             return;
         }
-        if (arm.irq() && mmu.int_master && (mmu.int_enabled & mmu.int_request))
+        if (mmu.int_master && (mmu.int_enabled & mmu.int_request))
         {
             arm.interrupt();
         }
@@ -105,7 +105,6 @@ void Core::emulate(int cycles)
 void Core::keyEvent(SDL_Keycode key, bool pressed)
 {
     int state = pressed ? 0 : 1;
-    int bit = 0;
 
     switch (key)
     {
