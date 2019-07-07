@@ -29,7 +29,7 @@ inline s32 twos(u32 value)
     static_assert(size <= 32, "Invalid size");
 
     if (value & (1 << (size - 1)))
-        value |= 0xFFFFFFFF << size;
+        value |= 0xFFFFFFFFull << size;
 
     return static_cast<s32>(value);
 }

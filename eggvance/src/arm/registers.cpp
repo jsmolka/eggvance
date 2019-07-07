@@ -2,6 +2,8 @@
 
 #include <cstring>
 
+static bool use_bios = false;
+
 Registers::Registers()
     : thumb(cpsr)
     , fiq_disable(cpsr)
@@ -20,16 +22,21 @@ void Registers::reset()
     std::memset(bank,     0, sizeof(bank));
     std::memset(bank_fiq, 0, sizeof(bank_fiq));
 
-    pc = 0x8000000;
-    
-    sp = 0x03007F00;
-    bank[BANK_FIQ].sp = 0x03007F00;
-    bank[BANK_ABT].sp = 0x03007F00;
-    bank[BANK_UND].sp = 0x03007F00;
-    bank[BANK_SVC].sp = 0x03007FE0;
-    bank[BANK_IRQ].sp = 0x03007FA0;
-
-    cpsr = 0x5F;
+    if (!use_bios)
+    {
+        pc = 0x8000000;
+        sp = 0x03007F00;
+        bank[BANK_FIQ].sp = 0x03007F00;
+        bank[BANK_ABT].sp = 0x03007F00;
+        bank[BANK_UND].sp = 0x03007F00;
+        bank[BANK_SVC].sp = 0x03007FE0;
+        bank[BANK_IRQ].sp = 0x03007FA0;
+        cpsr = 0x5F;
+    }
+    else 
+    {
+        cpsr = 0xD3;
+    }
 }
 
 bool Registers::check(Condition condition) const

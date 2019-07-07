@@ -398,9 +398,9 @@ void ARM::multiplyLong(u32 instr)
 
     if (sign)
     {
-        if (op1 & (1 << 31))
+        if (op1 & (1ull << 31))
             op1 |= 0xFFFFFFFF00000000;
-        if (op2 & (1 << 31))
+        if (op2 & (1ull << 31))
             op2 |= 0xFFFFFFFF00000000;
     }
     

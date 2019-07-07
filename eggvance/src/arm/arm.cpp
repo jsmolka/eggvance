@@ -25,16 +25,34 @@ void ARM::reset()
 
 void ARM::interrupt()
 {
-    if ((regs.cpsr & CPSR_I) || pipe[2].refill)
+    // Check if interrupts are disabled
+    if (regs.cpsr & CPSR_I)
         return;
 
     u32 cpsr = regs.cpsr;
-    // Interrupts returns with subs pc, lr, 4
-    u32 next = regs.thumb ? (regs.pc) : (regs.pc - 4);
+    u32 next;
+
+    // Handle interrupts during branches.
+    if (pipe[0].refill)
+    {
+        // Right after the branch. The PC did not advance yet.
+        next = regs.pc;
+    }
+    else if (pipe[1].refill)
+    {
+        // One step after the branch. The PC advanced once.
+        next = regs.pc - (regs.thumb ? 2 : 4);
+    }
+    else
+    {
+        // Normal execution. The PC advanced twice.
+        next = regs.pc - (regs.thumb ? 4 : 8);
+    }
 
     regs.switchMode(MODE_IRQ);
     regs.spsr = cpsr;
-    regs.lr = next;
+    // Interrupts return with subs pc, lr, 4
+    regs.lr = next + 4;
 
     regs.cpsr = (regs.cpsr & ~CPSR_T) | CPSR_I;
 
@@ -50,7 +68,7 @@ int ARM::step()
     decode(pipe[1]);
      
     //if (total_cycles > 0x0000000000159055)
-    //    debug(pipe[2]);
+        //debug(pipe[2]);
 
     execute(pipe[2]);
 
