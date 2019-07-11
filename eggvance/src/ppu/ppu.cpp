@@ -1,5 +1,6 @@
 #include "ppu.h"
 
+#include "common/utility.h"
 #include "mmu/map.h"
 #include "enums.h"
 #include "scanlinebuilder.h"
@@ -98,6 +99,11 @@ void PPU::scanline()
 
 void PPU::hblank()
 {
+    mmu.bgx[0].internal += signExtend<int, 16>(mmu.bgpb[0]);
+    mmu.bgx[1].internal += signExtend<int, 16>(mmu.bgpb[1]);
+    mmu.bgy[0].internal += signExtend<int, 16>(mmu.bgpd[0]);
+    mmu.bgy[1].internal += signExtend<int, 16>(mmu.bgpd[1]);
+
     mmu.dispstat.hblank = true;
     mmu.dispstat.vblank = false;
 
@@ -109,6 +115,11 @@ void PPU::hblank()
 
 void PPU::vblank()
 {
+    mmu.bgx[0].moveToInternal();
+    mmu.bgx[1].moveToInternal();
+    mmu.bgy[0].moveToInternal();
+    mmu.bgy[1].moveToInternal();
+
     mmu.dispstat.hblank = false;
     mmu.dispstat.vblank = true;
 

@@ -97,15 +97,12 @@ void PPU::renderBgMode2(int bg)
     const Bgcnt& bgcnt = mmu.bgcnt[bg];
 
     int pa = signExtend<int, 16>(mmu.bgpa[bg - 2]);
-    int pb = signExtend<int, 16>(mmu.bgpb[bg - 2]);
     int pc = signExtend<int, 16>(mmu.bgpc[bg - 2]);
-    int pd = signExtend<int, 16>(mmu.bgpd[bg - 2]);
 
     int line = mmu.vcount.line;
 
-    // Inaccurate (not copying and incrementing like real GBA)
-    int ref_x = signExtend<int, 28>(mmu.bgx[bg - 2]) + line * pb;
-    int ref_y = signExtend<int, 28>(mmu.bgy[bg - 2]) + line * pd;
+    int ref_x = mmu.bgx[bg - 2].internal;
+    int ref_y = mmu.bgy[bg - 2].internal;
 
     int size = bgcnt.affineSize();
 

@@ -240,6 +240,37 @@ void MMU::writeByte(u32 addr, u8 byte)
         break;
     }
     memory[addr] = byte;
+
+    switch (addr)
+    {
+    case REG_BG2X: 
+    case REG_BG2X+1: 
+    case REG_BG2X+2: 
+    case REG_BG2X+3: 
+        bgx[0].moveToInternal(); 
+        break;
+
+    case REG_BG2Y: 
+    case REG_BG2Y+1: 
+    case REG_BG2Y+2: 
+    case REG_BG2Y+3: 
+        bgy[0].moveToInternal(); 
+        break;
+
+    case REG_BG3X: 
+    case REG_BG3X+1: 
+    case REG_BG3X+2: 
+    case REG_BG3X+3: 
+        bgx[1].moveToInternal(); 
+        break;
+
+    case REG_BG3Y: 
+    case REG_BG3Y+1: 
+    case REG_BG3Y+2: 
+    case REG_BG3Y+3: 
+        bgy[1].moveToInternal(); 
+        break;
+    }
 }
 
 void MMU::writeHalf(u32 addr, u16 half)
