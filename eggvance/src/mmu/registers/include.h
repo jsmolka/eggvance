@@ -21,4 +21,6 @@
 
 #include "other/keyinput.h"
 #include "other/keycnt.h"
+#include "other/timercontrol.h"
+#include "other/timerdata.h"
 #include "other/waitcnt.h"

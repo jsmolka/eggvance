@@ -21,4 +21,3 @@ public:
     BitField<u16, 8, 1> r;       // Button R (0 = pressed)
     BitField<u16, 9, 1> l;       // Button L (0 = pressed)
 };
-

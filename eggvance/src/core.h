@@ -19,6 +19,7 @@ private:
 
     void frame();
     void emulate(int cycles);
+    void emulateTimers(int cycles);
 
     void keyEvent(SDL_Keycode key, bool pressed);
 
@@ -26,4 +27,3 @@ private:
     PPU ppu;
     ARM arm;
 };
-

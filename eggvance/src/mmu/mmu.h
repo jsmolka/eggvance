@@ -5,6 +5,7 @@
 
 #include "common/integer.h"
 #include "registers/include.h"
+#include "timer.h"
 
 class MMU
 {
@@ -17,6 +18,7 @@ public:
 
     void dump(u32 start, u32 size);
 
+    // Create interrupt handler class and make it static in mmu
     void requestInterrupt(InterruptFlag flag);
 
     u8  readByte(u32 addr) const;
@@ -152,11 +154,19 @@ public:
     InterruptEnabled int_enabled;
     InterruptRequest int_request;
 
+    TimerControl timer_control[4];
+    TimerData timer_data[4];
+    Timer timer[4];
+
     bool halt;
 
 private:
     template<typename T>
     T& ref(u32 addr);
+
+    template<typename T>
+    bool preWrite(u32 addr, T& value);
+    void postWrite(u32 addr);
 
     std::array<u8, 0x10000000> memory;
 };

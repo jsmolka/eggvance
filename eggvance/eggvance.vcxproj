@@ -170,6 +170,9 @@
     <ClCompile Include="src\mmu\registers\io\winin.cpp" />
     <ClCompile Include="src\mmu\registers\io\winout.cpp" />
     <ClCompile Include="src\mmu\registers\io\winv.cpp" />
+    <ClCompile Include="src\mmu\registers\other\timercontrol.cpp" />
+    <ClCompile Include="src\mmu\registers\other\timerdata.cpp" />
+    <ClCompile Include="src\mmu\timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\mmu\registers\interrupt\interrupt.h" />
@@ -218,6 +221,9 @@
     <ClInclude Include="src\mmu\registers\io\winin.h" />
     <ClInclude Include="src\mmu\registers\io\winout.h" />
     <ClInclude Include="src\mmu\registers\io\winv.h" />
+    <ClInclude Include="src\mmu\registers\other\timercontrol.h" />
+    <ClInclude Include="src\mmu\registers\other\timerdata.h" />
+    <ClInclude Include="src\mmu\timer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -49,8 +49,35 @@ MMU::MMU()
     , int_master(ref<u32>(REG_IME))
     , int_enabled(ref<u16>(REG_IE))
     , int_request(ref<u16>(REG_IF))
+    , timer_data 
+      {
+          TimerData(ref<u16>(REG_TM0D)),
+          TimerData(ref<u16>(REG_TM1D)),
+          TimerData(ref<u16>(REG_TM2D)),
+          TimerData(ref<u16>(REG_TM3D)) 
+      }
+    , timer_control 
+      {
+          TimerControl(ref<u16>(REG_TM0CNT)),
+          TimerControl(ref<u16>(REG_TM1CNT)),
+          TimerControl(ref<u16>(REG_TM2CNT)),
+          TimerControl(ref<u16>(REG_TM3CNT)) 
+      }
+    , timer 
+      { 
+          Timer(timer_control[0], timer_data[0]), 
+          Timer(timer_control[1], timer_data[1]), 
+          Timer(timer_control[2], timer_data[2]), 
+          Timer(timer_control[3], timer_data[3])
+      }
 {
+    timer[0].next = &timer[1];
+    timer[1].next = &timer[2];
+    timer[2].next = &timer[3];
 
+    timer[1].prev = &timer[0];
+    timer[2].prev = &timer[1];
+    timer[3].prev = &timer[2];
 }
 
 void MMU::reset()
@@ -216,77 +243,109 @@ u32 MMU::readWordFast(u32 addr)
 
 void MMU::writeByte(u32 addr, u8 byte)
 {
-    switch (addr)
-    {
-    case REG_VCOUNT:
-    case REG_VCOUNT+1:
-    case REG_KEYINPUT:
-    case REG_KEYINPUT+1:
+    if (!preWrite(addr, byte))
         return;
 
-    // Protect status flags
-    case REG_DISPSTAT:
-        byte &= ~0x7;
-        break;
-
-    // Acknowledge interrupt, writing clears
-    case REG_IF:
-    case REG_IF+1:
-        memory[addr] &= ~byte;
-        return;
-        
-    case REG_HALTCNT:
-        halt = true;
-        break;
-    }
     memory[addr] = byte;
 
-    switch (addr)
-    {
-    case REG_BG2X: 
-    case REG_BG2X+1: 
-    case REG_BG2X+2: 
-    case REG_BG2X+3: 
-        bgx[0].moveToInternal(); 
-        break;
-
-    case REG_BG2Y: 
-    case REG_BG2Y+1: 
-    case REG_BG2Y+2: 
-    case REG_BG2Y+3: 
-        bgy[0].moveToInternal(); 
-        break;
-
-    case REG_BG3X: 
-    case REG_BG3X+1: 
-    case REG_BG3X+2: 
-    case REG_BG3X+3: 
-        bgx[1].moveToInternal(); 
-        break;
-
-    case REG_BG3Y: 
-    case REG_BG3Y+1: 
-    case REG_BG3Y+2: 
-    case REG_BG3Y+3: 
-        bgy[1].moveToInternal(); 
-        break;
-    }
+    postWrite(addr);
 }
 
 void MMU::writeHalf(u32 addr, u16 half)
 {
-    writeByte(addr, half & 0xFF);
-    writeByte(addr + 1, half >> 8);
+    if (!preWrite(addr, half))
+        return;
+
+    ref<u16>(addr) = half;
+
+    postWrite(addr);
 }
 
 void MMU::writeWord(u32 addr, u32 word)
 {
-    writeHalf(addr, word & 0xFFFF);
-    writeHalf(addr + 2, word >> 16);
+    if (!preWrite(addr, word))
+        return;
+
+    ref<u32>(addr) = word;
+
+    postWrite(addr);
 }
 
 template<typename T>
 T& MMU::ref(u32 addr)
 {
     return *reinterpret_cast<T*>(&memory[addr]);
+}
+
+template<typename T>
+bool MMU::preWrite(u32 addr, T& value)
+{
+    switch (addr)
+    {
+    case REG_VCOUNT:
+    case REG_VCOUNT+1:
+    case REG_KEYINPUT:
+    case REG_KEYINPUT+1:
+        return false;
+
+    case REG_TM0D: timer[0].initial = value; break;
+    case REG_TM1D: timer[1].initial = value; break;
+    case REG_TM2D: timer[2].initial = value; break;
+    case REG_TM3D: timer[3].initial = value; break;
+
+    case REG_TM0CNT: if (!timer_control[0].enabled && (value & 0x80)) timer[0].init(); break;
+    case REG_TM1CNT: if (!timer_control[1].enabled && (value & 0x80)) timer[1].init(); break;
+    case REG_TM2CNT: if (!timer_control[2].enabled && (value & 0x80)) timer[2].init(); break;
+    case REG_TM3CNT: if (!timer_control[3].enabled && (value & 0x80)) timer[3].init(); break;
+
+    // Protect status flags
+    case REG_DISPSTAT:
+        value &= ~0x7;
+        break;
+
+    // Acknowledge interrupt, writing clears
+    case REG_IF:
+    case REG_IF+1:
+        ref<T>(addr) &= ~value;
+        return false;
+
+    case REG_HALTCNT:
+        halt = true;
+        break;
+    }
+    return true;
+}
+
+void MMU::postWrite(u32 addr)
+{
+    switch (addr)
+    {
+    case REG_BG2X:
+    case REG_BG2X + 1:
+    case REG_BG2X + 2:
+    case REG_BG2X + 3:
+        bgx[0].moveToInternal();
+        break;
+
+    case REG_BG2Y:
+    case REG_BG2Y + 1:
+    case REG_BG2Y + 2:
+    case REG_BG2Y + 3:
+        bgy[0].moveToInternal();
+        break;
+
+    case REG_BG3X:
+    case REG_BG3X + 1:
+    case REG_BG3X + 2:
+    case REG_BG3X + 3:
+        bgx[1].moveToInternal();
+        break;
+
+    case REG_BG3Y:
+    case REG_BG3Y + 1:
+    case REG_BG3Y + 2:
+    case REG_BG3Y + 3:
+        bgy[1].moveToInternal();
+        break;
+    }
 }

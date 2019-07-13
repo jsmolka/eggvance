@@ -89,16 +89,43 @@ void Core::emulate(int cycles)
 
     while (remaining > 0)
     {
-        if (mmu.halt)
-        {
-            remaining = 0;
-            return;
-        }
         if (mmu.int_master && (mmu.int_enabled & mmu.int_request))
         {
             arm.interrupt();
         }
-        remaining -= arm.step();
+        if (mmu.halt)
+        {
+            // Todo: inaccurate, should emulate until first interrupt
+            emulateTimers(remaining);
+            remaining = 0;
+            return;
+        }
+        cycles = arm.step();
+        remaining -= cycles;
+        emulateTimers(cycles);
+    }
+}
+
+void Core::emulateTimers(int cycles)
+{
+    static InterruptFlag flags[4] = {
+        IF_TIMER0_OVERFLOW,
+        IF_TIMER1_OVERFLOW,
+        IF_TIMER2_OVERFLOW,
+        IF_TIMER3_OVERFLOW
+    };
+
+    while (cycles-- > 0)
+    {
+        for (int x = 0; x < 4; ++x)
+        {
+            mmu.timer[x].step();
+
+            if (mmu.timer[x].requestInterrupt()) 
+            {
+                mmu.requestInterrupt(flags[x]);
+            }
+        }
     }
 }
 
