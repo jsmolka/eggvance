@@ -51,9 +51,11 @@ void PPU::renderObjects()
             continue;
 
         PixelFormat format = oam.color_mode ? BPP8 : BPP4;
-        int tile_size = oam.color_mode ? 0x40 : 0x20;
-        // 2D mapping arranges sprites in a 32x32 tile matrix
-        int tile_size_row = tile_size * (mmu.dispcnt.mapping_1d ? (width / 8) : 32);
+        int tile_size = (format == BPP8) ? 0x40 : 0x20;
+        // 2d mapping arranges the object tiles in a 32x32 tile matrix. In 256
+        // color mode the matrix is only 16 tiles wide, with each tile taking
+        // up 0x40 bytes.
+        int tile_size_row = tile_size * (mmu.dispcnt.mapping_1d ? (width / 8) : ((format == BPP8) ? 16 : 32));
 
         bool flip_h = !oam.affine && oam.flip_h;
         bool flip_v = !oam.affine && oam.flip_v;
@@ -80,7 +82,9 @@ void PPU::renderObjects()
         int rect_x = -rect_width / 2;
         int rect_y = line - center_y;
 
-        u32 base_addr = MAP_VRAM + 0x10000 + tile_size * oam.tile;
+        // In 256 bit color mode, only each second tile may be used. That's why
+        // we can assume the default tile size of 0x20.
+        u32 base_addr = MAP_VRAM + 0x10000 + 0x20 * oam.tile;
 
         for (; rect_x < rect_width / 2; ++rect_x)
         {
