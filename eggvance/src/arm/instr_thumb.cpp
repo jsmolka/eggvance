@@ -687,7 +687,8 @@ void ARM::swiThumb(u16 instr)
     regs.spsr = cpsr;
     regs.lr = next;
 
-    regs.cpsr = (regs.cpsr & ~CPSR_T) | CPSR_I;
+    regs.thumb = false;
+    regs.irq_disable = true;
 
     regs.pc = EXV_SWI;
     needs_flush = true;

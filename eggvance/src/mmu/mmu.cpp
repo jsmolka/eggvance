@@ -78,6 +78,8 @@ MMU::MMU()
     timer[1].prev = &timer[0];
     timer[2].prev = &timer[1];
     timer[3].prev = &timer[2];
+
+    // Todo: how are registers initialized when not using the bios?
 }
 
 void MMU::reset()
@@ -128,6 +130,8 @@ void MMU::requestInterrupt(InterruptFlag flag)
 
 u8 MMU::readByte(u32 addr) const
 {
+    demirror(addr);
+
     switch (addr)
     {
     case REG_BG0HOFS:
@@ -199,20 +203,6 @@ u8 MMU::readByte(u32 addr) const
         return 0;
     }
 
-    switch ((addr >> 30) & 0xF)
-    {
-    // Waitstate 1
-    case 0xA:
-    case 0xB:
-        addr -= 0x2000000;
-        break;
-
-    // Waitstate 2
-    case 0xC:
-    case 0xD:
-        addr -= 0x4000000;
-        break;
-    }
     return memory[addr];
 }
 
@@ -243,6 +233,7 @@ u32 MMU::readWordFast(u32 addr)
 
 void MMU::writeByte(u32 addr, u8 byte)
 {
+    demirror(addr);
     if (!preWrite(addr, byte))
         return;
 
@@ -253,6 +244,7 @@ void MMU::writeByte(u32 addr, u8 byte)
 
 void MMU::writeHalf(u32 addr, u16 half)
 {
+    demirror(addr);
     if (!preWrite(addr, half))
         return;
 
@@ -263,6 +255,7 @@ void MMU::writeHalf(u32 addr, u16 half)
 
 void MMU::writeWord(u32 addr, u32 word)
 {
+    demirror(addr);
     if (!preWrite(addr, word))
         return;
 
@@ -280,6 +273,11 @@ T& MMU::ref(u32 addr)
 template<typename T>
 bool MMU::preWrite(u32 addr, T& value)
 {
+    if (std::is_same<T, u8>::value)
+    {
+        // Todo: test if writing to video memory
+    }
+
     switch (addr)
     {
     case REG_VCOUNT:
@@ -321,31 +319,87 @@ void MMU::postWrite(u32 addr)
     switch (addr)
     {
     case REG_BG2X:
-    case REG_BG2X + 1:
-    case REG_BG2X + 2:
-    case REG_BG2X + 3:
+    case REG_BG2X+1:
+    case REG_BG2X+2:
+    case REG_BG2X+3:
         bgx[0].moveToInternal();
         break;
 
     case REG_BG2Y:
-    case REG_BG2Y + 1:
-    case REG_BG2Y + 2:
-    case REG_BG2Y + 3:
+    case REG_BG2Y+1:
+    case REG_BG2Y+2:
+    case REG_BG2Y+3:
         bgy[0].moveToInternal();
         break;
 
     case REG_BG3X:
-    case REG_BG3X + 1:
-    case REG_BG3X + 2:
-    case REG_BG3X + 3:
+    case REG_BG3X+1:
+    case REG_BG3X+2:
+    case REG_BG3X+3:
         bgx[1].moveToInternal();
         break;
 
     case REG_BG3Y:
-    case REG_BG3Y + 1:
-    case REG_BG3Y + 2:
-    case REG_BG3Y + 3:
+    case REG_BG3Y+1:
+    case REG_BG3Y+2:
+    case REG_BG3Y+3:
         bgy[1].moveToInternal();
+        break;
+    }
+}
+
+void MMU::demirror(u32& addr) const
+{
+    switch (addr >> 24)
+    {
+    // Todo: should BIOS memory be mirrored?
+    case 0x0:
+    case 0x1:
+    case 0x4:
+    case 0x8:
+    case 0x9:
+        break;
+
+    // On-board work RAM
+    case 0x2:
+        addr &= 0x0203FFFF;
+        break;
+
+    // On-chip work RAM
+    case 0x3:
+        addr &= 0x03007FFF;
+        break;
+
+    // Palette RAM
+    case 0x5:
+        addr &= 0x050003FF;
+        break;
+
+    // VRAM
+    case 0x6:
+        // Todo: proper VRAM mirroring
+        break;
+
+    // OAM
+    case 0x7:
+        addr &= 0x070003FF;
+        break;
+
+    // Waitstate 1
+    case 0xA:
+    case 0xB:
+        addr -= 0x02000000;
+        break;
+        
+    // Waitstate 2
+    case 0xC:
+    case 0xD:
+        addr -= 0x04000000;
+        break;
+
+    case 0xE:
+    case 0xF:
+        // Todo: SRAM
         break;
     }
 }

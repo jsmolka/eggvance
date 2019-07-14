@@ -772,7 +772,7 @@ void ARM::swiArm(u32 instr)
     regs.spsr = cpsr;
     regs.lr = next;
 
-    regs.cpsr |= CPSR_I;
+    regs.irq_disable = true;
 
     regs.pc = EXV_SWI;
     needs_flush = true;

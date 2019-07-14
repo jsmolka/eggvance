@@ -26,7 +26,7 @@ void ARM::reset()
 void ARM::interrupt()
 {
     // Check if interrupts are disabled
-    if (regs.cpsr & CPSR_I)
+    if (regs.irq_disable)
         return;
 
     u32 cpsr = regs.cpsr;
@@ -54,7 +54,8 @@ void ARM::interrupt()
     // Interrupts return with subs pc, lr, 4
     regs.lr = next + 4;
 
-    regs.cpsr = (regs.cpsr & ~CPSR_T) | CPSR_I;
+    regs.thumb = false;
+    regs.irq_disable = true;
 
     regs.pc = EXV_IRQ;
     flush();

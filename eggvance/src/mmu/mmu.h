@@ -168,5 +168,7 @@ private:
     bool preWrite(u32 addr, T& value);
     void postWrite(u32 addr);
 
+    void demirror(u32& addr) const;
+
     std::array<u8, 0x10000000> memory;
 };
