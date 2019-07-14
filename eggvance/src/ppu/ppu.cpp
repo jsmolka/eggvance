@@ -23,7 +23,6 @@ PPU::PPU(MMU& mmu)
         -1, 
         SDL_RENDERER_ACCELERATED
     );
-    SDL_RenderSetIntegerScale(renderer, SDL_TRUE);
     SDL_RenderSetLogicalSize(renderer, WIDTH, HEIGHT);
 
     texture = SDL_CreateTexture(

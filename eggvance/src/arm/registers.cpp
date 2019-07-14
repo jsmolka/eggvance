@@ -2,7 +2,7 @@
 
 #include <cstring>
 
-static bool use_bios = true;
+static bool use_bios = false;
 
 Registers::Registers()
     : thumb(cpsr)
