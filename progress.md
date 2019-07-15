@@ -1,4 +1,4 @@
-# Progression
+# Progress
 
 ##  Demos
 - 30/01/19: Initial commit
