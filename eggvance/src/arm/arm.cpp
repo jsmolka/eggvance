@@ -68,7 +68,7 @@ int ARM::step()
     fetch(pipe[0]);
     decode(pipe[1]);
      
-    //if (total_cycles > 0x0098FD1B)
+    //if (total_cycles > 0x00E68312)
     //    debug(pipe[2]);
 
     execute(pipe[2]);

@@ -235,13 +235,13 @@ WindowFlag ScanlineBuilder::activeWindow() const
 {
     if (mmu.dispcnt.win0 || mmu.dispcnt.win1 || mmu.dispcnt.winobj)
     {
-        if (insideWindow(0))
+        if (mmu.dispcnt.win0 && insideWindow(0))
             return WF_WIN0;
 
-        if (insideWindow(1))
+        if (mmu.dispcnt.win1 && insideWindow(1))
             return WF_WIN1;
 
-        if (obj[x].mode == GFX_WINDOW && obj[x].color != TRANSPARENT)
+        if (mmu.dispcnt.winobj && obj[x].window && obj[x].color != TRANSPARENT)
             return WF_WINOBJ;
             
         return WF_WINOUT;

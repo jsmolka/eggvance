@@ -143,13 +143,19 @@ void PPU::next()
 
 void PPU::update()
 {
-    SDL_UpdateTexture(
-        texture, 0,
-        screen.data(),
-        2 * WIDTH
-    );
-    SDL_RenderCopy(renderer, texture, 0, 0);
-    SDL_RenderPresent(renderer);
+    // There must the at least one background or objects enabled in order to
+    // render the screen. This prevents black flashing between the BIOS and
+    // the actual game.
+    if (mmu.dispcnt & 0x1F00)
+    {
+        SDL_UpdateTexture(
+            texture, 0,
+            screen.data(),
+            2 * WIDTH
+        );
+        SDL_RenderCopy(renderer, texture, 0, 0);
+        SDL_RenderPresent(renderer);
+    }
 }
 
 void PPU::renderBg(RenderFunc func, int bg)

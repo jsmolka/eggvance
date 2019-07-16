@@ -127,7 +127,11 @@ void PPU::renderObjects()
                     int screen_x = center_x + rect_x;
                     if (screen_x >= 0 && screen_x < WIDTH)
                     {
-                        if (oam.priority <= obj[screen_x].priority)
+                        if (oam.gfx_mode == GFX_WINDOW)
+                        {
+                            obj[screen_x].window = true;
+                        } 
+                        else if (oam.priority <= obj[screen_x].priority)
                         {
                             obj[screen_x].color = color;
                             obj[screen_x].priority = oam.priority;

@@ -244,24 +244,14 @@ void MMU::writeByte(u32 addr, u8 byte)
 
 void MMU::writeHalf(u32 addr, u16 half)
 {
-    demirror(addr);
-    if (!preWrite(addr, half))
-        return;
-
-    ref<u16>(addr) = half;
-
-    postWrite(addr);
+    writeByte(addr, half & 0xFF);
+    writeByte(addr + 1, half >> 8);
 }
 
 void MMU::writeWord(u32 addr, u32 word)
 {
-    demirror(addr);
-    if (!preWrite(addr, word))
-        return;
-
-    ref<u32>(addr) = word;
-
-    postWrite(addr);
+    writeHalf(addr, word & 0xFFFF);
+    writeHalf(addr + 2, word >> 16);
 }
 
 template<typename T>

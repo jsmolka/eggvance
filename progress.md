@@ -11,5 +11,5 @@
 - 11/07/19: Displays tonc mode 7 demos
 
 ## Commerical Games
-- 14/07/19: Displays half of the BIOS
-- 14/07/19: Boots Kirby, first level is perfectly playable, not tested further
+- 14/07/19: Boots Kirby, perfectly playable until first boss, not tested further
+- 16/07/19: Displays the BIOS
