@@ -260,14 +260,8 @@ T& MMU::ref(u32 addr)
     return *reinterpret_cast<T*>(&memory[addr]);
 }
 
-template<typename T>
-bool MMU::preWrite(u32 addr, T& value)
+bool MMU::preWrite(u32 addr, u8& byte)
 {
-    if (std::is_same<T, u8>::value)
-    {
-        // Todo: test if writing to video memory
-    }
-
     switch (addr)
     {
     case REG_VCOUNT:
@@ -276,25 +270,52 @@ bool MMU::preWrite(u32 addr, T& value)
     case REG_KEYINPUT+1:
         return false;
 
-    case REG_TM0D: timer[0].initial = value; break;
-    case REG_TM1D: timer[1].initial = value; break;
-    case REG_TM2D: timer[2].initial = value; break;
-    case REG_TM3D: timer[3].initial = value; break;
+    case REG_TM0D: 
+        timer[0].initial = (timer[0].initial & ~0x00FF) | byte; 
+        break;
 
-    case REG_TM0CNT: if (!timer_control[0].enabled && (value & 0x80)) timer[0].init(); break;
-    case REG_TM1CNT: if (!timer_control[1].enabled && (value & 0x80)) timer[1].init(); break;
-    case REG_TM2CNT: if (!timer_control[2].enabled && (value & 0x80)) timer[2].init(); break;
-    case REG_TM3CNT: if (!timer_control[3].enabled && (value & 0x80)) timer[3].init(); break;
+    case REG_TM0D+1: 
+        timer[0].initial = (timer[0].initial & ~0xFF00) | (byte << 8); 
+        break;
+
+    case REG_TM1D: 
+        timer[1].initial = (timer[1].initial & ~0x00FF) | byte; 
+        break;
+
+    case REG_TM1D+1: 
+        timer[1].initial = (timer[1].initial & ~0xFF00) | (byte << 8); 
+        break;
+
+    case REG_TM2D: 
+        timer[2].initial = (timer[2].initial & ~0x00FF) | byte; 
+        break;
+
+    case REG_TM2D+1: 
+        timer[2].initial = (timer[2].initial & ~0xFF00) | (byte << 8); 
+        break;
+
+    case REG_TM3D: 
+        timer[3].initial = (timer[3].initial & ~0x00FF) | byte; 
+        break;
+
+    case REG_TM3D+1: 
+        timer[3].initial = (timer[3].initial & ~0xFF00) | (byte << 8); 
+        break;
+
+    case REG_TM0CNT: if (!timer_control[0].enabled && (byte & 0x80)) timer[0].init(); break;
+    case REG_TM1CNT: if (!timer_control[1].enabled && (byte & 0x80)) timer[1].init(); break;
+    case REG_TM2CNT: if (!timer_control[2].enabled && (byte & 0x80)) timer[2].init(); break;
+    case REG_TM3CNT: if (!timer_control[3].enabled && (byte & 0x80)) timer[3].init(); break;
 
     // Protect status flags
     case REG_DISPSTAT:
-        value &= ~0x7;
+        byte &= ~0x7;
         break;
 
     // Acknowledge interrupt, writing clears
     case REG_IF:
     case REG_IF+1:
-        ref<T>(addr) &= ~value;
+        memory[addr] &= ~byte;
         return false;
 
     case REG_HALTCNT:
