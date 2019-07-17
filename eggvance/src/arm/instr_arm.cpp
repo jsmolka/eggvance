@@ -354,10 +354,10 @@ void ARM::multiply(u32 instr)
 {
     int accumulate = (instr >> 21) & 0x1;
     int flags      = (instr >> 20) & 0x1;
-    int rd           = (instr >> 16) & 0xF;
+    int rd         = (instr >> 16) & 0xF;
     int rn         = (instr >> 12) & 0xF;
     int rs         = (instr >>  8) & 0xF;
-    int rm           = (instr >>  0) & 0xF;
+    int rm         = (instr >>  0) & 0xF;
 
     u32& dst = regs[rd];
     u32  op1 = regs[rs];
