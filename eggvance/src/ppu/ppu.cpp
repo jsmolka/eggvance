@@ -98,10 +98,10 @@ void PPU::scanline()
 
 void PPU::hblank()
 {
-    mmu.bgx[0].internal += signExtend<int, 16>(mmu.bgpb[0]);
-    mmu.bgx[1].internal += signExtend<int, 16>(mmu.bgpb[1]);
-    mmu.bgy[0].internal += signExtend<int, 16>(mmu.bgpd[0]);
-    mmu.bgy[1].internal += signExtend<int, 16>(mmu.bgpd[1]);
+    mmu.bgx[0].internal += signExtend<16, int>(mmu.bgpb[0]);
+    mmu.bgx[1].internal += signExtend<16, int>(mmu.bgpb[1]);
+    mmu.bgy[0].internal += signExtend<16, int>(mmu.bgpd[0]);
+    mmu.bgy[1].internal += signExtend<16, int>(mmu.bgpd[1]);
 
     mmu.dispstat.hblank = true;
     mmu.dispstat.vblank = false;

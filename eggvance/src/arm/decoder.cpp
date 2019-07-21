@@ -1,115 +1,95 @@
 #include "decoder.h"
 
 #include <array>
-#include <string>
 
-int charMask(const std::string& pattern, char mask_char)
+InstructionArm decodeHashArm(int hash)
 {
-    int mask = 0;
-    for (char value : pattern)
-    {
-        mask <<= 1;
-        mask |= static_cast<int>(value == mask_char);
-    }
-    return mask;
+    if ((hash & 0b1110'0000'0000) == 0b1010'0000'0000) return InstructionArm::BranchLink;
+    if ((hash & 0b1110'0000'0000) == 0b1000'0000'0000) return InstructionArm::BlockDataTransfer;
+    if ((hash & 0b1110'0000'0000) == 0b1100'0000'0000) return InstructionArm::CoprocessorDataTransfers;
+    if ((hash & 0b1111'0000'0001) == 0b1110'0000'0000) return InstructionArm::CoprocessorDataOperations;
+    if ((hash & 0b1111'0000'0001) == 0b1110'0000'0001) return InstructionArm::CoprocessorRegisterTransfers;
+    if ((hash & 0b1111'0000'0000) == 0b1111'0000'0000) return InstructionArm::SoftwareInterrupt;
+    if ((hash & 0b1110'0000'0001) == 0b0110'0000'0001) return InstructionArm::Undefined;
+    if ((hash & 0b1100'0000'0000) == 0b0100'0000'0000) return InstructionArm::SingleDataTransfer;
+    if ((hash & 0b1111'1111'1111) == 0b0001'0010'0001) return InstructionArm::BranchExchange;
+    if ((hash & 0b1111'1100'1111) == 0b0000'0000'1001) return InstructionArm::Multiply;
+    if ((hash & 0b1111'1000'1111) == 0b0000'1000'1001) return InstructionArm::MultiplyLong;
+    if ((hash & 0b1111'1011'1111) == 0b0001'0000'1001) return InstructionArm::SingleDataSwap;
+    if ((hash & 0b1110'0000'1001) == 0b0000'0000'1001) return InstructionArm::HalfwordSignedDataTransfer;
+    if ((hash & 0b1101'1001'0000) == 0b0001'0000'0000) return InstructionArm::PSRTransfer;
+    if ((hash & 0b1100'0000'0000) == 0b0000'0000'0000) return InstructionArm::DataProcessing;
+
+    return InstructionArm::Invalid;
 }
 
-bool matches(const std::string& pattern, int bits)
+using LutArm = std::array<InstructionArm, 4096>;
+
+const LutArm makeLutArm()
 {
-    int mask0 = charMask(pattern, '0');
-    int mask1 = charMask(pattern, '1');
-
-    return (bits & (mask0 | mask1)) == mask1;
-}
-
-ArmInstr decodeArmHash(int hash)
-{
-    if (matches("101xxxxxxxxx", hash)) return ArmInstr::BranchLink;
-    if (matches("100xxxxxxxxx", hash)) return ArmInstr::BlockTransfer;
-    if (matches("110xxxxxxxxx", hash)) return ArmInstr::CoDataTransfer;
-    if (matches("1110xxxxxxx0", hash)) return ArmInstr::CoDataOperation;
-    if (matches("1110xxxxxxx1", hash)) return ArmInstr::CoRegisterTransfer;
-    if (matches("1111xxxxxxxx", hash)) return ArmInstr::SWI;
-    if (matches("011xxxxxxxx1", hash)) return ArmInstr::Undefined;
-    if (matches("01xxxxxxxxxx", hash)) return ArmInstr::SingleTransfer;
-    if (matches("000100100001", hash)) return ArmInstr::BranchExchange;
-    if (matches("000000xx1001", hash)) return ArmInstr::Multiply;
-    if (matches("00001xxx1001", hash)) return ArmInstr::MultiplyLong;
-    if (matches("00010x001001", hash)) return ArmInstr::SingleSwap;
-    if (matches("000xxxxx1xx1", hash)) return ArmInstr::HalfSignedTransfer;
-    if (matches("00x10xx0xxxx", hash)) return ArmInstr::PsrTransfer;
-    if (matches("00xxxxxxxxxx", hash)) return ArmInstr::DataProcessing;
-
-    return ArmInstr::Invalid;
-}
-
-using ArmLut = std::array<ArmInstr, 4096>;
-
-const ArmLut generateArmLut()
-{
-    ArmLut lut;
+    LutArm lut;
     for (int hash = 0; hash < lut.size(); ++hash)
-        lut[hash] = decodeArmHash(hash);
+        lut[hash] = decodeHashArm(hash);
 
     return lut;
 }
 
-inline int armHash(u32 instr)
+inline int hashArm(u32 instr)
 {
     return ((instr >> 16) & 0xFF0) | ((instr >> 4) & 0xF);
 }
 
-ArmInstr decoder::decodeArm(u32 instr)
+InstructionArm decodeArm(u32 instr)
 {
-    static const ArmLut arm_lut = generateArmLut();
+    static const LutArm lut = makeLutArm();
 
-    return arm_lut[armHash(instr)];
+    return lut[hashArm(instr)];
 }
 
-ThumbInstr decodeThumbHash(int hash)
+InstructionThumb decodeHashThumb(int hash)
 {
-    if (matches("00011xxx", hash)) return ThumbInstr::AddSubImmediate;
-    if (matches("000xxxxx", hash)) return ThumbInstr::MoveShiftedRegister;
-    if (matches("001xxxxx", hash)) return ThumbInstr::AddSubMovCmpImmediate;
-    if (matches("010000xx", hash)) return ThumbInstr::AluOperations;
-    if (matches("010001xx", hash)) return ThumbInstr::HighRegisterBranchExchange;
-    if (matches("01001xxx", hash)) return ThumbInstr::LoadPcRelative;
-    if (matches("0101xx0x", hash)) return ThumbInstr::LoadStoreRegisterOffset;
-    if (matches("0101xx1x", hash)) return ThumbInstr::LoadStoreHalfSigned;
-    if (matches("011xxxxx", hash)) return ThumbInstr::LoadStoreImmediateOffset;
-    if (matches("1000xxxx", hash)) return ThumbInstr::LoadStoreHalf;
-    if (matches("1001xxxx", hash)) return ThumbInstr::LoadStoreSpRelative;
-    if (matches("1010xxxx", hash)) return ThumbInstr::LoadAddress;
-    if (matches("10110000", hash)) return ThumbInstr::AddOffsetSp;
-    if (matches("1011x10x", hash)) return ThumbInstr::PushPopRegisters;
-    if (matches("1100xxxx", hash)) return ThumbInstr::LoadStoreMultiple;
-    if (matches("11011111", hash)) return ThumbInstr::SWI;
-    if (matches("1101xxxx", hash)) return ThumbInstr::ConditionalBranch;
-    if (matches("11100xxx", hash)) return ThumbInstr::UnconditionalBranch;
-    if (matches("1111xxxx", hash)) return ThumbInstr::LongBranchLink;
+    if ((hash & 0b1111'1000) == 0b0001'1000) return InstructionThumb::AddSubtractImmediate;
+    if ((hash & 0b1110'0000) == 0b0000'0000) return InstructionThumb::MoveShiftedRegister;
+    if ((hash & 0b1110'0000) == 0b0010'0000) return InstructionThumb::AddSubtractMoveCompareImmediate;
+    if ((hash & 0b1111'1100) == 0b0100'0000) return InstructionThumb::ALUOperations;
+    if ((hash & 0b1111'1100) == 0b0100'0100) return InstructionThumb::HighRegisterBranchExchange;
+    if ((hash & 0b1111'1000) == 0b0100'1000) return InstructionThumb::LoadPCRelative;
+    if ((hash & 0b1111'0010) == 0b0101'0000) return InstructionThumb::LoadStoreRegisterOffset;
+    if ((hash & 0b1111'0010) == 0b0101'0010) return InstructionThumb::LoadStoreHalfwordSigned;
+    if ((hash & 0b1110'0000) == 0b0110'0000) return InstructionThumb::LoadStoreImmediateOffset;
+    if ((hash & 0b1111'0000) == 0b1000'0000) return InstructionThumb::LoadStoreHalfword;
+    if ((hash & 0b1111'0000) == 0b1001'0000) return InstructionThumb::LoadStoreSPRelative;
+    if ((hash & 0b1111'0000) == 0b1010'0000) return InstructionThumb::LoadAddress;
+    if ((hash & 0b1111'1111) == 0b1011'0000) return InstructionThumb::AddOffsetSP;
+    if ((hash & 0b1111'0110) == 0b1011'0100) return InstructionThumb::PushPopRegisters;
+    if ((hash & 0b1111'0000) == 0b1100'0000) return InstructionThumb::LoadStoreMultiple;
+    if ((hash & 0b1111'1111) == 0b1101'1111) return InstructionThumb::SoftwareInterrupt;
+    if ((hash & 0b1111'0000) == 0b1101'0000) return InstructionThumb::ConditionalBranch;
+    if ((hash & 0b1111'1000) == 0b1110'0000) return InstructionThumb::UnconditionalBranch;
+    if ((hash & 0b1111'0000) == 0b1111'0000) return InstructionThumb::LongBranchLink;
 
-    return ThumbInstr::Invalid;
+    return InstructionThumb::Invalid;
 }
 
-using ThumbLut = std::array<ThumbInstr, 256>;
+using LutThumb = std::array<InstructionThumb, 256>;
 
-const ThumbLut generateThumbLut()
+const LutThumb makeLutThumb()
 {
-    ThumbLut lut;
+    LutThumb lut;
     for (int hash = 0; hash < lut.size(); ++hash)
-        lut[hash] = decodeThumbHash(hash);
+        lut[hash] = decodeHashThumb(hash);
 
     return lut;
 }
 
-inline int thumbHash(u16 instr)
+inline int hashThumb(u16 instr)
 {
     return instr >> 8;
 }
 
-ThumbInstr decoder::decodeThumb(u16 instr)
+InstructionThumb decodeThumb(u16 instr)
 {
-    static const ThumbLut thumb_lut = generateThumbLut();
+    static const LutThumb lut = makeLutThumb();
 
-    return thumb_lut[thumbHash(instr)];
+    return lut[hashThumb(instr)];
 }

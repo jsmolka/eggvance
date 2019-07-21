@@ -10,27 +10,27 @@ std::string Disassembler::disassemble(u32 data, const Registers& regs)
     {
         u16 instr = static_cast<u16>(data);
 
-        switch (decoder::decodeThumb(instr))
+        switch (decodeThumb(instr))
         {
-        case ThumbInstr::MoveShiftedRegister: return moveShiftedRegister(instr);;
-        case ThumbInstr::AddSubImmediate: return addSubImmediate(instr);;
-        case ThumbInstr::AddSubMovCmpImmediate: return addSubMovCmpImmediate(instr);;
-        case ThumbInstr::AluOperations: return aluOperations(instr);;
-        case ThumbInstr::HighRegisterBranchExchange: return highRegisterBranchExchange(instr);;
-        case ThumbInstr::LoadPcRelative: return loadPcRelative(instr, regs.pc);;
-        case ThumbInstr::LoadStoreRegisterOffset: return loadStoreRegisterOffset(instr);;
-        case ThumbInstr::LoadStoreHalfSigned: return loadStoreHalfSigned(instr);;
-        case ThumbInstr::LoadStoreImmediateOffset: return loadStoreImmediateOffset(instr);;
-        case ThumbInstr::LoadStoreHalf: return loadStoreHalf(instr);;
-        case ThumbInstr::LoadStoreSpRelative: return loadStoreSpRelative(instr);;
-        case ThumbInstr::LoadAddress: return loadAddress(instr, regs.pc);;
-        case ThumbInstr::AddOffsetSp: return addOffsetSp(instr);;
-        case ThumbInstr::PushPopRegisters: return pushPopRegisters(instr);;
-        case ThumbInstr::LoadStoreMultiple: return loadStoreMultiple(instr);;
-        case ThumbInstr::ConditionalBranch: return conditionalBranch(instr, regs.pc);;
-        case ThumbInstr::SWI: return swiThumb(instr);;
-        case ThumbInstr::UnconditionalBranch: return unconditionalBranch(instr, regs.pc);;
-        case ThumbInstr::LongBranchLink: return longBranchLink(instr, regs.lr);;
+        case InstructionThumb::MoveShiftedRegister: return moveShiftedRegister(instr);;
+        case InstructionThumb::AddSubtractImmediate: return addSubImmediate(instr);;
+        case InstructionThumb::AddSubtractMoveCompareImmediate: return addSubMovCmpImmediate(instr);;
+        case InstructionThumb::ALUOperations: return aluOperations(instr);;
+        case InstructionThumb::HighRegisterBranchExchange: return highRegisterBranchExchange(instr);;
+        case InstructionThumb::LoadPCRelative: return loadPcRelative(instr, regs.pc);;
+        case InstructionThumb::LoadStoreRegisterOffset: return loadStoreRegisterOffset(instr);;
+        case InstructionThumb::LoadStoreHalfwordSigned: return loadStoreHalfSigned(instr);;
+        case InstructionThumb::LoadStoreImmediateOffset: return loadStoreImmediateOffset(instr);;
+        case InstructionThumb::LoadStoreHalfword: return loadStoreHalf(instr);;
+        case InstructionThumb::LoadStoreSPRelative: return loadStoreSpRelative(instr);;
+        case InstructionThumb::LoadAddress: return loadAddress(instr, regs.pc);;
+        case InstructionThumb::AddOffsetSP: return addOffsetSp(instr);;
+        case InstructionThumb::PushPopRegisters: return pushPopRegisters(instr);;
+        case InstructionThumb::LoadStoreMultiple: return loadStoreMultiple(instr);;
+        case InstructionThumb::ConditionalBranch: return conditionalBranch(instr, regs.pc);;
+        case InstructionThumb::SoftwareInterrupt: return swiThumb(instr);;
+        case InstructionThumb::UnconditionalBranch: return unconditionalBranch(instr, regs.pc);;
+        case InstructionThumb::LongBranchLink: return longBranchLink(instr, regs.lr);;
 
         default:
             return fmt::format("unknown thumb instruction %08X", instr);
@@ -40,23 +40,23 @@ std::string Disassembler::disassemble(u32 data, const Registers& regs)
     {
         u32 instr = data;
 
-        switch (decoder::decodeArm(instr))
+        switch (decodeArm(instr))
         {
-        case ArmInstr::BranchExchange: return branchExchange(instr);
-        case ArmInstr::BranchLink: return branchLink(instr, regs.pc);
-        case ArmInstr::DataProcessing: return dataProcessing(instr, regs.pc);
-        case ArmInstr::PsrTransfer: return psrTransfer(instr);
-        case ArmInstr::Multiply: return multiply(instr);
-        case ArmInstr::MultiplyLong: return multiplyLong(instr);
-        case ArmInstr::SingleTransfer: return singleTransfer(instr);
-        case ArmInstr::HalfSignedTransfer: return halfSignedTransfer(instr);
-        case ArmInstr::BlockTransfer: return blockTransfer(instr);
-        case ArmInstr::SingleSwap: return singleSwap(instr);
-        case ArmInstr::SWI: return swiArm(instr);
-        case ArmInstr::CoDataOperation:
-        case ArmInstr::CoDataTransfer:
-        case ArmInstr::CoRegisterTransfer: return fmt::format("Coprocessor instruction %08X", instr);
-        case ArmInstr::Invalid: return fmt::format("Invalid instruction %08X", instr);
+        case InstructionArm::BranchExchange: return branchExchange(instr);
+        case InstructionArm::BranchLink: return branchLink(instr, regs.pc);
+        case InstructionArm::DataProcessing: return dataProcessing(instr, regs.pc);
+        case InstructionArm::PSRTransfer: return psrTransfer(instr);
+        case InstructionArm::Multiply: return multiply(instr);
+        case InstructionArm::MultiplyLong: return multiplyLong(instr);
+        case InstructionArm::SingleDataTransfer: return singleTransfer(instr);
+        case InstructionArm::HalfwordSignedDataTransfer: return halfSignedTransfer(instr);
+        case InstructionArm::BlockDataTransfer: return blockTransfer(instr);
+        case InstructionArm::SingleDataSwap: return singleSwap(instr);
+        case InstructionArm::SoftwareInterrupt: return swiArm(instr);
+        case InstructionArm::CoprocessorDataOperations:
+        case InstructionArm::CoprocessorDataTransfers:
+        case InstructionArm::CoprocessorRegisterTransfers: return fmt::format("Coprocessor instruction %08X", instr);
+        case InstructionArm::Invalid: return fmt::format("Invalid instruction %08X", instr);
 
         default:
             return fmt::format("unknown arm instruction %08X", instr);

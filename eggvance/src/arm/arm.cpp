@@ -1,7 +1,5 @@
 #include "arm.h"
 
-#include <array>
-
 #include "common/format.h"
 #include "mmu/map.h"
 #include "enums.h"
@@ -19,8 +17,6 @@ ARM::ARM(MMU& mmu)
 void ARM::reset()
 {
     regs.reset();
-
-    flush();
 }
 
 void ARM::interrupt()
@@ -32,22 +28,7 @@ void ARM::interrupt()
     u32 cpsr = regs.cpsr;
     u32 next;
 
-    // Handle interrupts during branches.
-    if (pipe[0].refill)
-    {
-        // Right after the branch. The PC did not advance yet.
-        next = regs.pc;
-    }
-    else if (pipe[1].refill)
-    {
-        // One step after the branch. The PC advanced once.
-        next = regs.pc - (regs.thumb ? 2 : 4);
-    }
-    else
-    {
-        // Normal execution. The PC advanced twice.
-        next = regs.pc - (regs.thumb ? 4 : 8);
-    }
+    next = regs.pc - (regs.thumb ? 4 : 8);
 
     regs.switchMode(MODE_IRQ);
     regs.spsr = cpsr;
@@ -58,112 +39,74 @@ void ARM::interrupt()
     regs.irq_disable = true;
 
     regs.pc = EXV_IRQ;
-    flush();
+    
+    advance();
+    advance();
 }
 
 int ARM::step()
 {
     cycles = 0;
-
-    fetch(pipe[0]);
-    decode(pipe[1]);
      
     //if (total_cycles > 0x00E68312)
-    //    debug(pipe[2]);
+    //    debug();
 
-    execute(pipe[2]);
-
-    if (needs_flush)
-        flush();
-    else
-        advance();
+    execute();
+    advance();
 
     total_cycles += cycles;
 
     return cycles;
 }
 
-void ARM::fetch(ARM::PipeState& state)
+void ARM::execute()
 {
     if (regs.thumb)
     {
-        state.data = mmu.readHalf(regs.pc);
-        state.thumb = ThumbInstr::Invalid;
-    }
-    else
-    {
-        state.data = mmu.readWord(regs.pc);
-        state.arm = ArmInstr::Invalid;
-    }
-    state.refill = false;
-}
+        u16 instr = mmu.readHalf(regs.pc - 4);
 
-void ARM::decode(ARM::PipeState& state)
-{
-    if (state.refill)
-        return;
-
-    if (regs.thumb)
-        state.thumb = decoder::decodeThumb(static_cast<u16>(state.data));
-    else
-        state.arm = decoder::decodeArm(state.data);
-}
-
-void ARM::execute(ARM::PipeState& state)
-{
-    if (state.refill)
-        return;
-
-    if (regs.thumb)
-    {
-        u16 instr = static_cast<u16>(state.data);
-
-        switch (state.thumb)
+        switch (decodeThumb(instr))
         {
-        case ThumbInstr::MoveShiftedRegister: moveShiftedRegister(instr); break;
-        case ThumbInstr::AddSubImmediate: addSubImmediate(instr); break;
-        case ThumbInstr::AddSubMovCmpImmediate: addSubMovCmpImmediate(instr); break;
-        case ThumbInstr::AluOperations: aluOperations(instr); break;
-        case ThumbInstr::HighRegisterBranchExchange: highRegisterBranchExchange(instr); break;
-        case ThumbInstr::LoadPcRelative: loadPcRelative(instr); break;
-        case ThumbInstr::LoadStoreRegisterOffset: loadStoreRegisterOffset(instr); break;
-        case ThumbInstr::LoadStoreHalfSigned: loadStoreHalfSigned(instr); break;
-        case ThumbInstr::LoadStoreImmediateOffset: loadStoreImmediateOffset(instr); break;
-        case ThumbInstr::LoadStoreHalf: loadStoreHalf(instr); break;
-        case ThumbInstr::LoadStoreSpRelative: loadStoreSpRelative(instr); break;
-        case ThumbInstr::LoadAddress: loadAddress(instr); break;
-        case ThumbInstr::AddOffsetSp: addOffsetSp(instr); break;
-        case ThumbInstr::PushPopRegisters: pushPopRegisters(instr); break;
-        case ThumbInstr::LoadStoreMultiple: loadStoreMultiple(instr); break;
-        case ThumbInstr::ConditionalBranch: conditionalBranch(instr); break;
-        case ThumbInstr::SWI: swiThumb(instr); break;
-        case ThumbInstr::UnconditionalBranch: unconditionalBranch(instr); break;
-        case ThumbInstr::LongBranchLink: longBranchLink(instr); break;
+        case InstructionThumb::MoveShiftedRegister: moveShiftedRegister(instr); break;
+        case InstructionThumb::AddSubtractImmediate: addSubtractImmediate(instr); break;
+        case InstructionThumb::AddSubtractMoveCompareImmediate: addSubtractMoveCompareImmediate(instr); break;
+        case InstructionThumb::ALUOperations: aluOperations(instr); break;
+        case InstructionThumb::HighRegisterBranchExchange: highRegisterBranchExchange(instr); break;
+        case InstructionThumb::LoadPCRelative: loadPCRelative(instr); break;
+        case InstructionThumb::LoadStoreRegisterOffset: loadStoreRegisterOffset(instr); break;
+        case InstructionThumb::LoadStoreHalfwordSigned: loadStoreHalfwordSigned(instr); break;
+        case InstructionThumb::LoadStoreImmediateOffset: loadStoreImmediateOffset(instr); break;
+        case InstructionThumb::LoadStoreHalfword: loadStoreHalfword(instr); break;
+        case InstructionThumb::LoadStoreSPRelative: loadStoreSPRelative(instr); break;
+        case InstructionThumb::LoadAddress: loadAddress(instr); break;
+        case InstructionThumb::AddOffsetSP: addOffsetSP(instr); break;
+        case InstructionThumb::PushPopRegisters: pushPopRegisters(instr); break;
+        case InstructionThumb::LoadStoreMultiple: loadStoreMultiple(instr); break;
+        case InstructionThumb::ConditionalBranch: conditionalBranch(instr); break;
+        case InstructionThumb::SoftwareInterrupt: softwareInterruptThumb(instr); break;
+        case InstructionThumb::UnconditionalBranch: unconditionalBranch(instr); break;
+        case InstructionThumb::LongBranchLink: longBranchLink(instr); break;
         }
     }
     else
     {
-        u32 instr = state.data;
+        u32 instr = mmu.readWord(regs.pc - 8);
 
         if (regs.check(static_cast<Condition>(instr >> 28)))
         {
-            switch (state.arm)
+            switch (decodeArm(instr))
             {
-            case ArmInstr::BranchExchange: branchExchange(instr); break;
-            case ArmInstr::BranchLink: branchLink(instr); break;
-            case ArmInstr::DataProcessing: dataProcessing(instr); break;
-            case ArmInstr::PsrTransfer: psrTransfer(instr); break;
-            case ArmInstr::Multiply: multiply(instr); break;
-            case ArmInstr::MultiplyLong: multiplyLong(instr); break;
-            case ArmInstr::SingleTransfer: singleTransfer(instr); break;
-            case ArmInstr::HalfSignedTransfer: halfSignedTransfer(instr); break;
-            case ArmInstr::BlockTransfer: blockTransfer(instr); break;
-            case ArmInstr::SingleSwap: singleSwap(instr); break;
-            case ArmInstr::SWI: swiArm(instr); break;
-            case ArmInstr::CoDataOperation:
-            case ArmInstr::CoDataTransfer:
-            case ArmInstr::CoRegisterTransfer: fmt::printf("Coprocessor instruction %08X\n", instr); break;
-            case ArmInstr::Invalid: fmt::printf("Invalid instruction %08X\n", instr); break;
+            case InstructionArm::BranchExchange: branchExchange(instr); break;
+            case InstructionArm::BranchLink: branchLink(instr); break;
+            case InstructionArm::DataProcessing: dataProcessing(instr); break;
+            case InstructionArm::PSRTransfer: psrTransfer(instr); break;
+            case InstructionArm::Multiply: multiply(instr); break;
+            case InstructionArm::MultiplyLong: multiplyLong(instr); break;
+            case InstructionArm::SingleDataTransfer: singleDataTransfer(instr); break;
+            case InstructionArm::HalfwordSignedDataTransfer: halfwordSignedDataTransfer(instr); break;
+            case InstructionArm::BlockDataTransfer: blockDataTransfer(instr); break;
+            case InstructionArm::SingleDataSwap: singleDataSwap(instr); break;
+            case InstructionArm::SoftwareInterrupt: softwareInterruptArm(instr); break;
             }
         }
         else
@@ -175,90 +118,37 @@ void ARM::execute(ARM::PipeState& state)
 
 void ARM::advance()
 {
-    pipe[2] = pipe[1];
-    pipe[1] = pipe[0];
-
-    regs.pc += regs.thumb ? 2 : 4;
+    regs.pc += (regs.thumb ? 2 : 4);
 }
 
-void ARM::debug(ARM::PipeState& state)
+void ARM::debug()
 {
-    if (pipe[2].refill)
-        return;
-    
+    u32 pc = regs.thumb
+        ? regs.pc - 4
+        : regs.pc - 8;
+
+    u32 data = regs.thumb
+        ? mmu.readHalf(pc)
+        : mmu.readWord(pc);
+
     fmt::printf("%08X  %08X  %08X  %s\n",
         total_cycles,
-        regs.pc - (regs.thumb ? 4 : 8),
-        state.data,
-        Disassembler::disassemble(state.data, regs)
+        pc,
+        data,
+        Disassembler::disassemble(data, regs)
     );
-}
-
-void ARM::flush()
-{
-    pipe[0].refill = true;
-    pipe[1].refill = true;
-    pipe[2].refill = true;
-
-    needs_flush = false;
-}
-
-void ARM::updateZ(u32 result)
-{
-    regs.z = result == 0;
-}
-
-void ARM::updateN(u32 result)
-{
-    regs.n = result >> 31;
-}
-
-void ARM::updateC(u32 op1, u32 op2, bool addition)
-{
-    bool carry;
-
-    if (addition)
-        carry = op2 > (0xFFFFFFFF - op1);
-    else
-        carry = op2 <= op1;
-
-    regs.c = carry;
-}
-
-void ARM::updateV(u32 op1, u32 op2, bool addition)
-{
-    int msb_op1 = op1 >> 31;
-    int msb_op2 = op2 >> 31;
-
-    bool overflow = false;
-
-    if (addition)
-    {
-        int msb_result = (op1 + op2) >> 31;
-        if (msb_op1 == msb_op2)
-            overflow = msb_result != msb_op1;
-    }
-    else
-    {
-        int msb_result = (op1 - op2) >> 31;
-        if (msb_op1 != msb_op2)
-            overflow = msb_result == msb_op2;
-    }
-
-    regs.v = overflow;
 }
 
 void ARM::logical(u32 result)
 {
-    updateZ(result);
-    updateN(result);
+    regs.z = result == 0;
+    regs.n = result >> 31;
 }
 
 void ARM::logical(u32 result, bool carry)
 {
-    updateZ(result);
-    updateN(result);
-
+    regs.z = result == 0;
+    regs.n = result >> 31;
     regs.c = carry;
 }
 
@@ -268,10 +158,19 @@ void ARM::arithmetic(u32 op1, u32 op2, bool addition)
         ? op1 + op2
         : op1 - op2;
 
-    updateZ(result);
-    updateN(result);
-    updateC(op1, op2, addition);
-    updateV(op1, op2, addition);
+    regs.z = result == 0;
+    regs.n = result >> 31;
+
+    regs.c = addition
+        ? op2 > (0xFFFFFFFF - op1)
+        : op2 <= op1;
+
+    int msb_op1 = op1 >> 31;
+    int msb_op2 = op2 >> 31;
+
+    regs.v = addition
+        ? msb_op1 == msb_op2 && (result >> 31) != msb_op1
+        : msb_op1 != msb_op2 && (result >> 31) == msb_op2;
 }
 
 u32 ARM::lsl(u32 value, int offset, bool& carry)
@@ -490,7 +389,7 @@ void ARM::cycle(u32 addr, MemoryAccess access)
 
 void ARM::cycleMultiplication(u32 multiplier, bool allow_ones)
 {
-    static const std::array<u32, 3> masks = 
+    static constexpr int masks[3] = 
     {
         0xFF000000,
         0xFFFF0000,

@@ -13,5 +13,5 @@ Bgxy::Bgxy(u32& data)
 
 void Bgxy::moveToInternal()
 {
-    internal = signExtend<int, 28>(static_cast<int>(*this));
+    internal = signExtend<28, int>(static_cast<int>(*this));
 }

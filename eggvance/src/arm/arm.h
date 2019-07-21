@@ -17,32 +17,13 @@ public:
     int step();
 
 private:
-    struct PipeState
-    {
-        u32 data;
-        bool refill;
-        ArmInstr arm;
-        ThumbInstr thumb;
-    };
-
     MMU& mmu;
     Registers regs;
 
-    void fetch(PipeState &state);
-    void decode(PipeState &state);
-    void execute(PipeState &state);
+    void execute();
     void advance();
 
-    void debug(PipeState& state);
-
-    PipeState pipe[3];
-    bool needs_flush;
-    void flush();
-
-    void updateZ(u32 result);
-    void updateN(u32 result);
-    void updateC(u32 op1, u32 op2, bool addition);
-    void updateV(u32 op1, u32 op2, bool addition);
+    void debug();
 
     void logical(u32 result);
     void logical(u32 result, bool carry);
@@ -58,22 +39,22 @@ private:
     u32 ldrsh(u32 addr);
 
     void moveShiftedRegister(u16 instr);
-    void addSubImmediate(u16 instr);
-    void addSubMovCmpImmediate(u16 instr);
+    void addSubtractImmediate(u16 instr);
+    void addSubtractMoveCompareImmediate(u16 instr);
     void aluOperations(u16 instr);
     void highRegisterBranchExchange(u16 instr);
-    void loadPcRelative(u16 instr);
+    void loadPCRelative(u16 instr);
     void loadStoreRegisterOffset(u16 instr);
-    void loadStoreHalfSigned(u16 instr);
+    void loadStoreHalfwordSigned(u16 instr);
     void loadStoreImmediateOffset(u16 instr);
-    void loadStoreHalf(u16 instr);
-    void loadStoreSpRelative(u16 instr);
+    void loadStoreHalfword(u16 instr);
+    void loadStoreSPRelative(u16 instr);
     void loadAddress(u16 instr);
-    void addOffsetSp(u16 instr);
+    void addOffsetSP(u16 instr);
     void pushPopRegisters(u16 instr);
     void loadStoreMultiple(u16 instr);
     void conditionalBranch(u16 instr);
-    void swiThumb(u16 instr);
+    void softwareInterruptThumb(u16 instr);
     void unconditionalBranch(u16 instr);
     void longBranchLink(u16 instr);
 
@@ -86,11 +67,11 @@ private:
     void psrTransfer(u32 instr);
     void multiply(u32 instr);
     void multiplyLong(u32 instr);
-    void singleTransfer(u32 instr);
-    void halfSignedTransfer(u32 instr);
-    void blockTransfer(u32 instr);
-    void singleSwap(u32 instr);
-    void swiArm(u32 instr);
+    void singleDataTransfer(u32 instr);
+    void halfwordSignedDataTransfer(u32 instr);
+    void blockDataTransfer(u32 instr);
+    void singleDataSwap(u32 instr);
+    void softwareInterruptArm(u32 instr);
 
     enum MemoryAccess
     {

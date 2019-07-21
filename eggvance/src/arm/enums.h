@@ -2,50 +2,6 @@
 
 #include "common/integer.h"
 
-enum class ArmInstr : u8
-{
-    Invalid,
-    BranchExchange,      // ARM 1
-    BranchLink,          // ARM 2
-    DataProcessing,      // ARM 3
-    PsrTransfer,         // ARM 4
-    Multiply,            // ARM 5
-    MultiplyLong,        // ARM 6
-    SingleTransfer,      // ARM 7
-    HalfSignedTransfer,  // ARM 8
-    BlockTransfer,       // ARM 9
-    SingleSwap,          // ARM 10
-    SWI,                 // ARM 11
-    CoDataOperation,     // ARM 12
-    CoDataTransfer,      // ARM 13
-    CoRegisterTransfer,  // ARM 14
-    Undefined            // ARM 15
-};
-
-enum class ThumbInstr : u8
-{
-    Invalid,
-    MoveShiftedRegister,         // THUMB 1
-    AddSubImmediate,             // THUMB 2
-    AddSubMovCmpImmediate,       // THUMB 3
-    AluOperations,               // THUMB 4
-    HighRegisterBranchExchange,  // THUMB 5
-    LoadPcRelative,              // THUMB 6
-    LoadStoreRegisterOffset,     // THUMB 7
-    LoadStoreHalfSigned,         // THUMB 8
-    LoadStoreImmediateOffset,    // THUMB 9
-    LoadStoreHalf,               // THUMB 10
-    LoadStoreSpRelative,         // THUMB 11
-    LoadAddress,                 // THUMB 12
-    AddOffsetSp,                 // THUMB 13
-    PushPopRegisters,            // THUMB 14
-    LoadStoreMultiple,           // THUMB 15
-    ConditionalBranch,           // THUMB 16
-    SWI,                         // THUMB 17
-    UnconditionalBranch,         // THUMB 18
-    LongBranchLink               // THUMB 19
-};
-
 enum Mode
 {
     MODE_USR = 0b10000,  // User

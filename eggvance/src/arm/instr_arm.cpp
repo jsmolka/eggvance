@@ -1,5 +1,6 @@
 #include "arm.h"
 
+#include "common/format.h"
 #include "utility.h"
 
 u32 ARM::shiftedRegister(int data, bool& carry)
@@ -64,7 +65,7 @@ void ARM::branchExchange(u32 instr)
     cycle(regs.pc, NSEQ);
 
     regs.pc = addr;
-    needs_flush = true;
+    advance();
 
     cycle(regs.pc, SEQ);
     cycle(regs.pc + (regs.thumb ? 2 : 4), SEQ);
@@ -85,7 +86,7 @@ void ARM::branchLink(u32 instr)
     cycle(regs.pc, NSEQ);
 
     regs.pc += offset;
-    needs_flush = true;
+    advance();
 
     cycle(regs.pc, SEQ);
     cycle(regs.pc + 4, SEQ);
@@ -274,7 +275,7 @@ void ARM::dataProcessing(u32 instr)
     {
         // Interrupt return from ARM into THUMB possible
         dst = regs.thumb ? alignHalf(dst) : alignWord(dst);
-        needs_flush = true;
+        advance();
 
         cycle(regs.pc, SEQ);
     }
@@ -337,7 +338,7 @@ void ARM::psrTransfer(u32 instr)
             if (regs.thumb)
             {
                 regs.pc = alignHalf(regs.pc);
-                needs_flush = true;
+                advance();
             }
         }
     }
@@ -427,7 +428,7 @@ void ARM::multiplyLong(u32 instr)
 }
 
 // ARM 7
-void ARM::singleTransfer(u32 instr)
+void ARM::singleDataTransfer(u32 instr)
 {
     int use_reg   = (instr >> 25) & 0x001;
     int pre_index = (instr >> 24) & 0x001;
@@ -484,7 +485,7 @@ void ARM::singleTransfer(u32 instr)
         if (rd == 15)
         {
             dst = alignWord(dst);
-            needs_flush = true;
+            advance();
 
             cycle(regs.pc, SEQ);
         }
@@ -517,7 +518,7 @@ void ARM::singleTransfer(u32 instr)
 }
 
 // ARM 8
-void ARM::halfSignedTransfer(u32 instr)
+void ARM::halfwordSignedDataTransfer(u32 instr)
 {
     int pre_index = (instr >> 24) & 0x1;
     int use_imm   = (instr >> 22) & 0x1;
@@ -591,7 +592,7 @@ void ARM::halfSignedTransfer(u32 instr)
         if (rd == 15)
         {
             dst = alignWord(dst);
-            needs_flush = true;
+            advance();
 
             cycle(regs.pc, SEQ);
         }
@@ -622,7 +623,7 @@ void ARM::halfSignedTransfer(u32 instr)
 }
 
 // ARM 9
-void ARM::blockTransfer(u32 instr)
+void ARM::blockDataTransfer(u32 instr)
 {
     int full      = (instr >> 24) & 0x0001;
     int ascending = (instr >> 23) & 0x0001;
@@ -644,9 +645,7 @@ void ARM::blockTransfer(u32 instr)
         cycle(regs.pc, NSEQ);
 
         // Register count needed for cycles
-        int rcount = 0;
-        for (int temp = rlist; temp != 0; temp >>= 1)
-            rcount += temp & 0x1;
+        int rcount = count_bits(rlist & 0xFF) + count_bits(rlist >> 8);
 
         int init = ascending ? 0 : 15;
         int loop = ascending ? 1 : -1;
@@ -678,7 +677,7 @@ void ARM::blockTransfer(u32 instr)
                     if (x == 15)
                     {
                         regs.pc = alignWord(regs.pc);
-                        needs_flush = true;
+                        advance();
 
                         cycle(regs.pc, SEQ);
                     }
@@ -713,7 +712,7 @@ void ARM::blockTransfer(u32 instr)
         {
             regs.pc = mmu.readWord(alignWord(addr));
             regs.pc = alignWord(regs.pc);
-            needs_flush = true;
+            advance();
         }
         else
         {
@@ -731,7 +730,7 @@ void ARM::blockTransfer(u32 instr)
 }
 
 // ARM 10
-void ARM::singleSwap(u32 instr)
+void ARM::singleDataSwap(u32 instr)
 {
     int byte = (instr >> 22) & 0x1;
     int rn   = (instr >> 16) & 0xF;
@@ -761,7 +760,7 @@ void ARM::singleSwap(u32 instr)
 }
 
 // ARM 11
-void ARM::swiArm(u32 instr)
+void ARM::softwareInterruptArm(u32 instr)
 {
     cycle(regs.pc, NSEQ);
 
@@ -775,7 +774,7 @@ void ARM::swiArm(u32 instr)
     regs.irq_disable = true;
 
     regs.pc = EXV_SWI;
-    needs_flush = true;
+    advance();
 
     cycle(regs.pc, SEQ);
     cycle(regs.pc + 4, SEQ);

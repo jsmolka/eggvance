@@ -284,5 +284,8 @@
     <ClInclude Include="src\mmu\registers\other\timercontrol.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\common\tmp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

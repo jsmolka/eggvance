@@ -96,8 +96,8 @@ void PPU::renderBgMode2(int bg)
 {
     const Bgcnt& bgcnt = mmu.bgcnt[bg];
 
-    int pa = signExtend<int, 16>(mmu.bgpa[bg - 2]);
-    int pc = signExtend<int, 16>(mmu.bgpc[bg - 2]);
+    int pa = signExtend<16, int>(mmu.bgpa[bg - 2]);
+    int pc = signExtend<16, int>(mmu.bgpc[bg - 2]);
 
     int line = mmu.vcount.line;
 
