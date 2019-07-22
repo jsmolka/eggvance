@@ -11,8 +11,8 @@ public:
     void reset();
 
     BitField<u32,  5, 1> thumb;
-    BitField<u32,  6, 1> fiq_disable;
-    BitField<u32,  7, 1> irq_disable;
+    BitField<u32,  6, 1> fiqd;
+    BitField<u32,  7, 1> irqd;
     BitField<u32, 28, 1> v;
     BitField<u32, 29, 1> c;
     BitField<u32, 30, 1> z;

@@ -24,14 +24,12 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -39,7 +37,6 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release (Debug)|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -148,7 +145,7 @@
     <ClCompile Include="src\mmu\registers\io\bgpabcd.cpp" />
     <ClCompile Include="src\mmu\registers\io\bgxy.cpp" />
     <ClCompile Include="src\mmu\registers\io\mosaic.cpp" />
-    <ClCompile Include="src\arm\decoder.cpp" />
+    <ClCompile Include="src\arm\decode.cpp" />
     <ClCompile Include="src\ppu\mapentry.cpp" />
     <ClCompile Include="src\mmu\registers\io\bghvofs.cpp" />
     <ClCompile Include="src\ppu\oamentry.cpp" />
@@ -196,7 +193,7 @@
     <ClInclude Include="src\mmu\registers\io\bgpabcd.h" />
     <ClInclude Include="src\mmu\registers\io\bgxy.h" />
     <ClInclude Include="src\mmu\registers\io\mosaic.h" />
-    <ClInclude Include="src\arm\decoder.h" />
+    <ClInclude Include="src\arm\decode.h" />
     <ClInclude Include="src\ppu\mapentry.h" />
     <ClInclude Include="src\mmu\registers\io\bghvofs.h" />
     <ClInclude Include="src\common\bitvalue.h" />

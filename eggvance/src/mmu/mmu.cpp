@@ -94,7 +94,7 @@ bool MMU::readFile(const std::string& file, u32 addr)
     std::ifstream stream(file, std::ios::binary);
     if (!stream.is_open())
     {
-        fmt::printf("Cannot open file {}\n", file);
+        fmt::print("Cannot open file {}\n", file);
         return false;
     }
 
@@ -106,15 +106,6 @@ bool MMU::readFile(const std::string& file, u32 addr)
     stream.read(reinterpret_cast<char*>(memory_ptr), size);
 
     return true;
-}
-
-void MMU::dump(u32 start, u32 size)
-{
-    std::ofstream file("dump.bin");
-    for (u32 i = start; i < (start + size); ++i)
-    {
-        file << memory[i];
-    }
 }
 
 void MMU::requestInterrupt(InterruptFlag flag)

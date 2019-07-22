@@ -2,7 +2,6 @@
 
 #include "common/integer.h"
 #include "mmu/mmu.h"
-#include "decoder.h"
 #include "registers.h"
 
 class ARM
@@ -17,6 +16,12 @@ public:
     int step();
 
 private:
+    enum AccessType
+    {
+        NSEQ,
+        SEQ
+    };
+
     MMU& mmu;
     Registers regs;
 
@@ -37,6 +42,12 @@ private:
     u32 ldr(u32 addr);
     u32 ldrh(u32 addr);
     u32 ldrsh(u32 addr);
+
+    int cycles = 0;
+
+    void cycle();
+    void cycle(u32 addr, AccessType access);
+    void cycleBooth(u32 multiplier, bool allow_ones);
 
     void moveShiftedRegister(u16 instr);
     void addSubtractImmediate(u16 instr);
@@ -72,16 +83,4 @@ private:
     void blockDataTransfer(u32 instr);
     void singleDataSwap(u32 instr);
     void softwareInterruptArm(u32 instr);
-
-    enum MemoryAccess
-    {
-        NSEQ,
-        SEQ
-    };
-
-    int cycles;
-
-    void cycle();
-    void cycle(u32 addr, MemoryAccess access);
-    void cycleMultiplication(u32 multiplier, bool allow_ones);
 };

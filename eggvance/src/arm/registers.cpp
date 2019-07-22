@@ -6,8 +6,8 @@ static bool use_bios = false;
 
 Registers::Registers()
     : thumb(cpsr)
-    , fiq_disable(cpsr)
-    , irq_disable(cpsr)
+    , fiqd(cpsr)
+    , irqd(cpsr)
     , v(cpsr)
     , c(cpsr)
     , z(cpsr)

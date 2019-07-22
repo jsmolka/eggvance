@@ -1,6 +1,5 @@
 #include "arm.h"
 
-#include "common/format.h"
 #include "utility.h"
 
 // THUMB 1
@@ -183,7 +182,7 @@ void ARM::aluOperations(u16 instr)
 
     // MUL
     case 0b1101: 
-        cycleMultiplication(dst, true);
+        cycleBooth(dst, true);
         dst *= src;
         logical(dst);
         break;
@@ -684,7 +683,7 @@ void ARM::softwareInterruptThumb(u16 instr)
     regs.lr = next;
 
     regs.thumb = false;
-    regs.irq_disable = true;
+    regs.irqd = true;
 
     regs.pc = EXV_SWI;
     advance();

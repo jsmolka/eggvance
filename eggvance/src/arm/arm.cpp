@@ -1,12 +1,12 @@
 #include "arm.h"
 
 #include "common/format.h"
-#include "mmu/map.h"
-#include "enums.h"
+#include "common/utility.h"
+#include "decode.h"
 #include "disassembler.h"
 #include "utility.h"
 
-static u64 total_cycles = 0;
+static u64 total = 0;
 
 ARM::ARM(MMU& mmu)
     : mmu(mmu)
@@ -21,25 +21,23 @@ void ARM::reset()
 
 void ARM::interrupt()
 {
-    // Check if interrupts are disabled
-    if (regs.irq_disable)
+    // Interrupts must be enabled
+    if (regs.irqd)
         return;
 
     u32 cpsr = regs.cpsr;
-    u32 next;
-
-    next = regs.pc - (regs.thumb ? 4 : 8);
+    u32 next = regs.pc - (regs.thumb ? 4 : 8);
 
     regs.switchMode(MODE_IRQ);
     regs.spsr = cpsr;
+
     // Interrupts return with subs pc, lr, 4
     regs.lr = next + 4;
 
     regs.thumb = false;
-    regs.irq_disable = true;
+    regs.irqd = true;
 
     regs.pc = EXV_IRQ;
-    
     advance();
     advance();
 }
@@ -48,13 +46,13 @@ int ARM::step()
 {
     cycles = 0;
      
-    //if (total_cycles > 0x00E68312)
+    //if (total > 0x00E68312)
     //    debug();
 
     execute();
     advance();
 
-    total_cycles += cycles;
+    total += cycles;
 
     return cycles;
 }
@@ -131,11 +129,8 @@ void ARM::debug()
         ? mmu.readHalf(pc)
         : mmu.readWord(pc);
 
-    fmt::printf("%08X  %08X  %08X  %s\n",
-        total_cycles,
-        pc,
-        data,
-        Disassembler::disassemble(data, regs)
+    fmt::printf("%08X  %08X  %08X  %s\n", 
+        total, pc, data, Disassembler::disassemble(data, regs)
     );
 }
 
@@ -182,7 +177,7 @@ u32 ARM::lsl(u32 value, int offset, bool& carry)
             carry = (value >> (32 - offset)) & 0x1;
             value <<= offset;
         }
-        else  // Shifts by 32 are undefined behavior in C++
+        else
         {
             if (offset == 32)
                 carry = value & 0x1;
@@ -214,7 +209,7 @@ u32 ARM::lsr(u32 value, int offset, bool& carry, bool immediate)
             value = 0;
         }
     }
-    else  // Special case LSR #32 (assembles to LSR #0)
+    else  // Special case LSR #0 / #32
     {
         if (immediate)
         {
@@ -229,7 +224,6 @@ u32 ARM::lsr(u32 value, int offset, bool& carry, bool immediate)
     return value;
 }
 
-// Todo: convert to s32 and use shift operator?
 u32 ARM::asr(u32 value, int offset, bool& carry, bool immediate)
 {
     if (offset != 0)
@@ -243,6 +237,8 @@ u32 ARM::asr(u32 value, int offset, bool& carry, bool immediate)
 
             if (msb)
                 value |= 0xFFFFFFFF << (31 - offset);
+            //carry = value >> (offset - 1) & 0x1;
+            //value = static_cast<s32>(value) >> offset;
         }
         else
         {
@@ -250,7 +246,7 @@ u32 ARM::asr(u32 value, int offset, bool& carry, bool immediate)
             value = carry ? 0xFFFFFFFF : 0;
         }
     }
-    else  // Special case ASR #32 (assembles to ASR #0)
+    else  // Special case ASR #0 / #32
     {
         if (immediate)
         {
@@ -276,7 +272,7 @@ u32 ARM::ror(u32 value, int offset, bool& carry, bool immediate)
 
         carry = value >> 31;
     }
-    else  // Special case ROR #0 (RRX)
+    else  // Special case RRX
     {
         if (immediate)
         {
@@ -331,14 +327,12 @@ u32 ARM::ldrsh(u32 addr)
     if (misalignedHalf(addr))
     {
         value = mmu.readByte(addr);
-        if (value & (1 << 7))
-            value |= 0xFFFFFF00;
+        value = signExtend<8>(value);
     }
     else
     {
         value = mmu.readHalf(addr);
-        if (value & (1 << 15))
-            value |= 0xFFFF0000;
+        value = signExtend<16>(value);
     }
     return value;
 }
@@ -348,46 +342,62 @@ void ARM::cycle()
     cycles++;
 }
 
-void ARM::cycle(u32 addr, MemoryAccess access)
+void ARM::cycle(u32 addr, AccessType access)
 {
     cycles++;
 
-    static const int nonseq_lut[4] = { 4, 3, 2, 8 };
+    static constexpr int seq0[2]   = { 1, 2 };
+    static constexpr int seq1[2]   = { 1, 4 };
+    static constexpr int seq2[2]   = { 1, 8 };
+    static constexpr int nonseq[4] = { 4, 3, 2, 8 };
 
-    if (addr >= MAP_PALETTE && addr < (MAP_OAM + 0x400))
+    switch (addr >> 24)
     {
-        // Add one cycle if accessing VRAM and not in HBlank or VBlank
-        if (!mmu.dispstat.hblank || !mmu.dispstat.vblank)
+    // Palette, VRAM, OAM
+    case 0x5:
+    case 0x6:
+    case 0x7:
+        // Add cycle if not in H-Blank or V-Blank
+        if (!mmu.dispstat.hblank && !mmu.dispstat.vblank)
             cycles++;
-    }
-    else if (addr >= MAP_GAMEPAK_0 && addr < MAP_GAMEPAK_1)
-    {
-        if (access == NSEQ)
-            cycles += nonseq_lut[mmu.waitcnt.nonseq0];
+        break;
+
+    // Waitstate 0
+    case 0x8:
+    case 0x9:
+        if (access == SEQ)
+            cycles += seq0[mmu.waitcnt.seq0];
         else
-            cycles += mmu.waitcnt.seq0 ? 1 : 2;
-    }
-    else if (addr >= MAP_GAMEPAK_1 && addr < MAP_GAMEPAK_2)
-    {
-        if (access == NSEQ)
-            cycles += nonseq_lut[mmu.waitcnt.nonseq1];
+            cycles += nonseq[mmu.waitcnt.nonseq0];
+        break;
+
+    // Waitstate 1
+    case 0xA:
+    case 0xB:
+        if (access == SEQ)
+            cycles += seq1[mmu.waitcnt.seq1];
         else
-            cycles += mmu.waitcnt.seq1 ? 1 : 4;
-    }
-    else if (addr >= MAP_GAMEPAK_2 && addr < MAP_GAMEPAK_SRAM)
-    {
-        if (access == NSEQ)
-            cycles += nonseq_lut[mmu.waitcnt.nonseq2];
+            cycles += nonseq[mmu.waitcnt.nonseq1];
+        break;
+
+    // Waitstate 2
+    case 0xC:
+    case 0xD:
+        if (access == SEQ)
+            cycles += seq2[mmu.waitcnt.seq2];
         else
-            cycles += mmu.waitcnt.seq2 ? 1 : 8;
-    }
-    else if (addr >= MAP_GAMEPAK_SRAM && addr < (MAP_GAMEPAK_SRAM + 0x10000))
-    {
-        cycles += nonseq_lut[mmu.waitcnt.sram];
+            cycles += nonseq[mmu.waitcnt.nonseq2];
+        break;
+
+    // SRAM
+    case 0xE:
+    case 0xF:
+        cycles += nonseq[mmu.waitcnt.sram];
+        break;
     }
 }
 
-void ARM::cycleMultiplication(u32 multiplier, bool allow_ones)
+void ARM::cycleBooth(u32 multiplier, bool allow_ones)
 {
     static constexpr int masks[3] = 
     {

@@ -1,7 +1,7 @@
 #include "disassembler.h"
 
 #include "common/format.h"
-#include "decoder.h"
+#include "decode.h"
 #include "utility.h"
 
 std::string Disassembler::disassemble(u32 data, const Registers& regs)

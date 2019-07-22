@@ -16,9 +16,6 @@ public:
 
     bool readFile(const std::string& file, u32 addr);
 
-    void dump(u32 start, u32 size);
-
-    // Create interrupt handler class and make it static in mmu
     void requestInterrupt(InterruptFlag flag);
 
     u8  readByte(u32 addr) const;
