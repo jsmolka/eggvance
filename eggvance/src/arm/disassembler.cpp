@@ -1,6 +1,7 @@
 #include "disassembler.h"
 
 #include "common/format.h"
+#include "common/utility.h"
 #include "decode.h"
 #include "utility.h"
 
@@ -475,7 +476,7 @@ std::string Disassembler::conditionalBranch(u16 instr, u32 pc)
     int condition = (instr >> 8) & 0x0F;
     int offset    = (instr >> 0) & 0xFF;
 
-    offset = twos<8>(offset);
+    offset = signExtend<8>(offset);
     offset <<= 1;
 
     std::string mnemonic;
@@ -514,7 +515,7 @@ std::string Disassembler::unconditionalBranch(u16 instr, u32 pc)
 {
     int offset = (instr >> 0) & 0x7FF;
 
-    offset = twos<11>(offset);
+    offset = signExtend<11>(offset);
     offset <<= 1;
 
     return fmt::format("{:<8}{}",
@@ -601,7 +602,7 @@ std::string Disassembler::branchLink(u32 instr, u32 pc)
     int link   = (instr >> 24) & 0x000001;
     int offset = (instr >>  0) & 0xFFFFFF;
 
-    offset = twos<24>(offset);
+    offset = signExtend<24>(offset);
     offset <<= 2;
 
     return fmt::format("{:<8}{}",

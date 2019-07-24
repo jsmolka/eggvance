@@ -230,15 +230,8 @@ u32 ARM::asr(u32 value, int offset, bool& carry, bool immediate)
     {
         if (offset < 32)
         {
-            bool msb = value >> 31;
-
             carry = value >> (offset - 1) & 0x1;
-            value >>= offset;
-
-            if (msb)
-                value |= 0xFFFFFFFF << (31 - offset);
-            //carry = value >> (offset - 1) & 0x1;
-            //value = static_cast<s32>(value) >> offset;
+            value = static_cast<s32>(value) >> offset;
         }
         else
         {

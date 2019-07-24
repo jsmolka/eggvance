@@ -33,21 +33,3 @@ inline int count_bits(u8 byte)
     });
     return counts[byte];
 }
-
-// Todo: replace with signExtend?
-template<unsigned int size>
-inline s32 twos(u32 value)
-{
-    static_assert(size <= 32, "Invalid size");
-
-    if (value & (1 << (size - 1)))
-        value |= 0xFFFFFFFFull << size;
-
-    return static_cast<s32>(value);
-}
-
-template<>
-inline s32 twos<32>(u32 value)
-{
-    return static_cast<s32>(value);
-}

@@ -401,8 +401,8 @@ void ARM::multiplyLong(u32 instr)
         regs.n = result >> 63;
     }
 
-    cycleBooth(static_cast<u32>(op1), sign);
     cycle();
+    cycleBooth(static_cast<u32>(op1), sign);
     cycle(regs.pc + 4, SEQ);
 }
 
@@ -574,15 +574,13 @@ void ARM::halfwordSignedDataTransfer(u32 instr)
         }
         cycle(regs.pc + 4, SEQ);
     }
-    else
+    else  // STRH
     {
         u32 value = dst;
         // Account for prefetch
         if (rd == 15) value += 4;
 
-        // Just defined for halfwords
-        if (half)
-            mmu.writeHalf(alignHalf(addr), value);
+        mmu.writeHalf(alignHalf(addr), value);
 
         cycle(addr, NSEQ);
     }
@@ -621,7 +619,7 @@ void ARM::blockDataTransfer(u32 instr)
         cycle(regs.pc, NSEQ);
 
         // Register count needed for cycles
-        int rcount = count_bits(rlist & 0xFF) + count_bits(rlist >> 8);
+        int rcount = count_bits(rlist) + count_bits(rlist >> 8);
 
         int init = ascending ? 0 : 15;
         int loop = ascending ? 1 : -1;
