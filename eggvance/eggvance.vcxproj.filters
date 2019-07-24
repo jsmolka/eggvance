@@ -152,9 +152,6 @@
     <ClInclude Include="src\ppu\ppu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\arm\enums.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\arm\registers.h">
       <Filter>Header Files</Filter>
     </ClInclude>

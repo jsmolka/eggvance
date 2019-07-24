@@ -339,9 +339,7 @@ void ARM::cycle(u32 addr, AccessType access)
 {
     cycles++;
 
-    static constexpr int seq0[2]   = { 1, 2 };
-    static constexpr int seq1[2]   = { 1, 4 };
-    static constexpr int seq2[2]   = { 1, 8 };
+    static constexpr int seq[3][2] = { { 1, 2 }, { 1, 4 }, { 1, 8} };
     static constexpr int nonseq[4] = { 4, 3, 2, 8 };
 
     switch (addr >> 24)
@@ -359,7 +357,7 @@ void ARM::cycle(u32 addr, AccessType access)
     case 0x8:
     case 0x9:
         if (access == SEQ)
-            cycles += seq0[mmu.waitcnt.seq0];
+            cycles += seq[0][mmu.waitcnt.seq0];
         else
             cycles += nonseq[mmu.waitcnt.nonseq0];
         break;
@@ -368,7 +366,7 @@ void ARM::cycle(u32 addr, AccessType access)
     case 0xA:
     case 0xB:
         if (access == SEQ)
-            cycles += seq1[mmu.waitcnt.seq1];
+            cycles += seq[1][mmu.waitcnt.seq1];
         else
             cycles += nonseq[mmu.waitcnt.nonseq1];
         break;
@@ -377,7 +375,7 @@ void ARM::cycle(u32 addr, AccessType access)
     case 0xC:
     case 0xD:
         if (access == SEQ)
-            cycles += seq2[mmu.waitcnt.seq2];
+            cycles += seq[2][mmu.waitcnt.seq2];
         else
             cycles += nonseq[mmu.waitcnt.nonseq2];
         break;

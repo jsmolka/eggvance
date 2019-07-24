@@ -1,6 +1,5 @@
 #include "arm.h"
 
-#include "common/format.h"
 #include "common/utility.h"
 #include "utility.h"
 
@@ -264,7 +263,10 @@ void ARM::dataProcessing(u32 instr)
     if (rd == 15)
     {
         // Interrupt return from ARM into THUMB possible
-        dst = regs.thumb ? alignHalf(dst) : alignWord(dst);
+        if (regs.thumb)
+            dst = alignHalf(dst);
+        else
+            dst = alignWord(dst);
         advance();
 
         cycle(regs.pc, SEQ);

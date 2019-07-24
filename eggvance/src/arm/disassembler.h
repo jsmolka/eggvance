@@ -3,7 +3,6 @@
 #include <string>
 
 #include "common/integer.h"
-#include "enums.h"
 #include "registers.h"
 
 class Disassembler

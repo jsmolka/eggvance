@@ -283,11 +283,13 @@ void ARM::loadPCRelative(u16 instr)
     int offset = bits<0, 8>(instr);
     int rd     = bits<8, 3>(instr);
 
+    offset <<= 2;
+
     cycle(regs.pc, NSEQ);
     cycle();
 
     u32& dst = regs[rd];
-    u32 addr = alignWord(regs.pc) + (offset << 2);
+    u32 addr = alignWord(regs.pc) + offset;
 
     dst = mmu.readWord(addr);
 
@@ -419,8 +421,10 @@ void ARM::loadStoreHalfword(u16 instr)
     int offset = bits< 6, 5>(instr);
     int load   = bits<11, 1>(instr);
 
+    offset <<= 1;
+
     u32& dst = regs[rd];
-    u32 addr = regs[rb] + (offset << 1);
+    u32 addr = regs[rb] + offset;
 
     cycle(regs.pc, NSEQ);
 
@@ -443,8 +447,10 @@ void ARM::loadStoreSPRelative(u16 instr)
     int rd     = bits< 8, 3>(instr);
     int load   = bits<11, 1>(instr);
 
+    offset <<= 2;
+
     u32& dst = regs[rd];
-    u32 addr = regs.sp + (offset << 2);
+    u32 addr = regs.sp + offset;
     
     cycle(regs.pc, NSEQ);
 
@@ -683,7 +689,6 @@ void ARM::unconditionalBranch(u16 instr)
     cycle(regs.pc + 2, SEQ);
 }
 
-// THUMB 19
 void ARM::longBranchLink(u16 instr)
 {
     int offset = bits< 0, 11>(instr);

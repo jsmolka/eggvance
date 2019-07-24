@@ -24,7 +24,7 @@ void Registers::reset()
 
     if (!use_bios)
     {
-        pc = 0x8000000;
+        pc = 0x8000008;
         sp = 0x03007F00;
         bank[BANK_FIQ].sp = 0x03007F00;
         bank[BANK_ABT].sp = 0x03007F00;
@@ -35,33 +35,34 @@ void Registers::reset()
     }
     else 
     {
+        pc = 0x8;
         cpsr = 0xD3;
     }
 }
 
 bool Registers::check(Condition condition) const
 {
-    if (condition == COND_AL)
+    if (condition == Condition::AL)
         return true;
 
     switch (condition)
     {
-    case COND_EQ: return z;
-    case COND_NE: return !z;
-    case COND_CS: return c;
-    case COND_CC: return !c;
-    case COND_MI: return n;
-    case COND_PL: return !n;
-    case COND_VS: return v;
-    case COND_VC: return !v;
-    case COND_HI: return c && !z;
-    case COND_LS: return !c || z;
-    case COND_GE: return n == v;
-    case COND_LT: return n != v;
-    case COND_GT: return !z && (n == v);
-    case COND_LE: return z || (n != v);
-    case COND_AL: return true;
-    case COND_NV: return false;
+    case Condition::EQ: return z;
+    case Condition::NE: return !z;
+    case Condition::CS: return c;
+    case Condition::CC: return !c;
+    case Condition::MI: return n;
+    case Condition::PL: return !n;
+    case Condition::VS: return v;
+    case Condition::VC: return !v;
+    case Condition::HI: return c && !z;
+    case Condition::LS: return !c || z;
+    case Condition::GE: return n == v;
+    case Condition::LT: return n != v;
+    case Condition::GT: return !z && (n == v);
+    case Condition::LE: return z || (n != v);
+    case Condition::AL: return true;
+    case Condition::NV: return false;
     }
     return true;
 }

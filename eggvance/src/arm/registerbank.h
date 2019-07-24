@@ -1,7 +1,29 @@
 #pragma once
 
 #include "common/integer.h"
-#include "enums.h"
+
+enum Mode
+{
+    MODE_USR = 0b10000,  // User
+    MODE_FIQ = 0b10001,  // Fast interrupt request
+    MODE_IRQ = 0b10010,  // Interrupt request
+    MODE_SVC = 0b10011,  // Supervisor
+    MODE_ABT = 0b10111,  // Abort
+    MODE_SYS = 0b11111,  // System
+    MODE_UND = 0b11011   // Undefined
+};
+
+enum CPSR
+{
+    CPSR_M = 0x1F,     // Mode
+    CPSR_T = 1 <<  5,  // THUMB enable
+    CPSR_F = 1 <<  6,  // FIQ disable
+    CPSR_I = 1 <<  7,  // IRQ disable
+    CPSR_V = 1 << 28,  // Overflow
+    CPSR_C = 1 << 29,  // Carry
+    CPSR_Z = 1 << 30,  // Zero
+    CPSR_N = 1 << 31   // Negative
+};
 
 class RegisterBank
 {

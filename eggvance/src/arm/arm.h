@@ -22,6 +22,13 @@ private:
         SEQ
     };
 
+    enum ExceptionVector
+    {
+        EXV_RST = 0x00,
+        EXV_SWI = 0x08,
+        EXV_IRQ = 0x18,
+    };
+
     MMU& mmu;
     Registers regs;
 

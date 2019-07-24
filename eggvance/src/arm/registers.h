@@ -1,7 +1,27 @@
 #pragma once
 
-#include "registerbank.h"
 #include "common/bitfield.h"
+#include "registerbank.h"
+
+enum class Condition
+{
+    EQ = 0x0,  // Equal
+    NE = 0x1,  // Not equal
+    CS = 0x2,  // Carry set
+    CC = 0x3,  // Carry clear
+    MI = 0x4,  // Minus
+    PL = 0x5,  // Plus
+    VS = 0x6,  // V set
+    VC = 0x7,  // V clear
+    HI = 0x8,  // Unsigned higher
+    LS = 0x9,  // Unsigned lower or same
+    GE = 0xA,  // Greater or equal
+    LT = 0xB,  // Less than
+    GT = 0xC,  // Greater than
+    LE = 0xD,  // Less or equal
+    AL = 0xE,  // Always
+    NV = 0xF,  // Never
+};
 
 class Registers : public RegisterBank
 {

@@ -116,22 +116,22 @@ std::string Disassembler::cond(u32 instr)
 {
     switch (static_cast<Condition>(instr >> 28))
     {
-    case COND_EQ: return "eq"; break;
-    case COND_NE: return "ne"; break;
-    case COND_CS: return "cs"; break;
-    case COND_CC: return "cc"; break;
-    case COND_MI: return "mi"; break;
-    case COND_PL: return "pl"; break;
-    case COND_VS: return "vs"; break;
-    case COND_VC: return "vc"; break;
-    case COND_HI: return "hi"; break;
-    case COND_LS: return "ls"; break;
-    case COND_GE: return "ge"; break;
-    case COND_LT: return "lt"; break;
-    case COND_GT: return "gt"; break;
-    case COND_LE: return "le"; break;
-    case COND_AL: return ""  ; break;
-    case COND_NV: return "nv"; break;
+    case Condition::EQ: return "eq"; break;
+    case Condition::NE: return "ne"; break;
+    case Condition::CS: return "cs"; break;
+    case Condition::CC: return "cc"; break;
+    case Condition::MI: return "mi"; break;
+    case Condition::PL: return "pl"; break;
+    case Condition::VS: return "vs"; break;
+    case Condition::VC: return "vc"; break;
+    case Condition::HI: return "hi"; break;
+    case Condition::LS: return "ls"; break;
+    case Condition::GE: return "ge"; break;
+    case Condition::LT: return "lt"; break;
+    case Condition::GT: return "gt"; break;
+    case Condition::LE: return "le"; break;
+    case Condition::AL: return ""  ; break;
+    case Condition::NV: return "nv"; break;
     }
     return "??";
 }
@@ -482,22 +482,22 @@ std::string Disassembler::conditionalBranch(u16 instr, u32 pc)
     std::string mnemonic;
     switch (static_cast<Condition>(condition))
     {
-    case COND_EQ: mnemonic = "beq"; break;
-    case COND_NE: mnemonic = "bne"; break;
-    case COND_CS: mnemonic = "bcs"; break;
-    case COND_CC: mnemonic = "bcc"; break;
-    case COND_MI: mnemonic = "bmi"; break;
-    case COND_PL: mnemonic = "bpl"; break;
-    case COND_VS: mnemonic = "bvs"; break;
-    case COND_VC: mnemonic = "bvc"; break;
-    case COND_HI: mnemonic = "bhi"; break;
-    case COND_LS: mnemonic = "bls"; break;
-    case COND_GE: mnemonic = "bge"; break;
-    case COND_LT: mnemonic = "blt"; break;
-    case COND_GT: mnemonic = "bgt"; break;
-    case COND_LE: mnemonic = "ble"; break;
-    case COND_AL: mnemonic = "b"; break;
-    case COND_NV: mnemonic = "b??"; break;
+    case Condition::EQ: mnemonic = "beq"; break;
+    case Condition::NE: mnemonic = "bne"; break;
+    case Condition::CS: mnemonic = "bcs"; break;
+    case Condition::CC: mnemonic = "bcc"; break;
+    case Condition::MI: mnemonic = "bmi"; break;
+    case Condition::PL: mnemonic = "bpl"; break;
+    case Condition::VS: mnemonic = "bvs"; break;
+    case Condition::VC: mnemonic = "bvc"; break;
+    case Condition::HI: mnemonic = "bhi"; break;
+    case Condition::LS: mnemonic = "bls"; break;
+    case Condition::GE: mnemonic = "bge"; break;
+    case Condition::LT: mnemonic = "blt"; break;
+    case Condition::GT: mnemonic = "bgt"; break;
+    case Condition::LE: mnemonic = "ble"; break;
+    case Condition::AL: mnemonic = "b";   break;
+    case Condition::NV: mnemonic = "b??"; break;
     }
 
     return fmt::format("{:<8}{}",
