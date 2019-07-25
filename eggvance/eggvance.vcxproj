@@ -156,7 +156,6 @@
     <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\arm\registerbank.cpp" />
     <ClCompile Include="src\mmu\registers\io\bgcnt.cpp" />
-    <ClCompile Include="src\mmu\registers\io\dispcnt.cpp" />
     <ClCompile Include="src\mmu\registers\io\dispstat.cpp" />
     <ClCompile Include="src\ppu\render_obj.cpp" />
     <ClCompile Include="src\ppu\ppu.cpp" />

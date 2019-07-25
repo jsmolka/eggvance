@@ -57,9 +57,6 @@
     <ClCompile Include="src\mmu\registers\io\bgcnt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\mmu\registers\io\dispcnt.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\mmu\registers\io\dispstat.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

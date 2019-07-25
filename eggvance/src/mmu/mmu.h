@@ -161,7 +161,6 @@ private:
     template<typename T>
     T& ref(u32 addr);
 
-    bool preWrite(u32 addr, u8& byte);
     void postWrite(u32 addr);
 
     void demirror(u32& addr) const;

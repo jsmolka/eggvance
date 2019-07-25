@@ -2,10 +2,15 @@
 
 #include "mmu/map.h"
 
+inline u32 frameAddr(int frame)
+{
+    return MAP_VRAM + 0xA000 * frame;
+}
+
 // Todo: "In BG mode 3, only one frame exists"
 void PPU::renderBgMode3(int bg)
 {
-    u32 addr = mmu.dispcnt.frameAddr();
+    u32 addr = frameAddr(mmu.dispcnt.frame);
 
     int y = mmu.vcount.line;
     for (int x = 0; x < WIDTH; ++x)
@@ -19,7 +24,7 @@ void PPU::renderBgMode3(int bg)
 
 void PPU::renderBgMode4(int bg)
 {
-    u32 addr = mmu.dispcnt.frameAddr();
+    u32 addr = frameAddr(mmu.dispcnt.frame);
 
     int y = mmu.vcount.line;
     for (int x = 0; x < WIDTH; ++x)
@@ -34,7 +39,7 @@ void PPU::renderBgMode4(int bg)
 
 void PPU::renderBgMode5(int bg)
 {
-    u32 addr = mmu.dispcnt.frameAddr();
+    u32 addr = frameAddr(mmu.dispcnt.frame);
 
     int y = mmu.vcount.line;
     for (int x = 0; x < WIDTH; ++x)

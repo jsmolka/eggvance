@@ -146,7 +146,7 @@ void PPU::update()
     // There must the at least one background or objects enabled in order to
     // render the screen. This prevents black flashing between the BIOS and
     // the actual game.
-    if (mmu.dispcnt & 0x1F00)
+    if (mmu.dispcnt.data & 0x1F00)
     {
         SDL_UpdateTexture(
             texture, 0,
@@ -160,7 +160,7 @@ void PPU::update()
 
 void PPU::renderBg(RenderFunc func, int bg)
 {
-    if (!mmu.dispcnt.bg(bg))
+    if (!mmu.dispcnt.bg[bg])
         return;
 
     if (mmu.bgcnt[bg].mosaic)

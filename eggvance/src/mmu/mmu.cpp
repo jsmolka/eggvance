@@ -3,11 +3,11 @@
 #include <fstream>
 
 #include "common/format.h"
+#include "common/utility.h"
 #include "map.h"
 
 MMU::MMU()
-    : dispcnt(ref<u16>(REG_DISPCNT))
-    , dispstat(ref<u16>(REG_DISPSTAT))
+    : dispstat(ref<u16>(REG_DISPSTAT))
     , vcount(ref<u16>(REG_VCOUNT))
     , bg0cnt(ref<u16>(REG_BG0CNT))
     , bg1cnt(ref<u16>(REG_BG1CNT))
@@ -225,8 +225,89 @@ u32 MMU::readWordFast(u32 addr)
 void MMU::writeByte(u32 addr, u8 byte)
 {
     demirror(addr);
-    if (!preWrite(addr, byte))
+
+    switch (addr)
+    {
+    case REG_DISPCNT:
+        dispcnt.bg_mode     = bits<0, 3>(byte);
+        dispcnt.gbc_mode    = bits<3, 1>(byte);
+        dispcnt.frame       = bits<4, 1>(byte);
+        dispcnt.access_oam  = bits<5, 1>(byte);
+        dispcnt.mapping_1d  = bits<6, 1>(byte);
+        dispcnt.force_blank = bits<7, 1>(byte);
+        dispcnt.bytes[0]    = byte;
+        break;
+
+    case REG_DISPCNT+1:
+        dispcnt.bg0      = bits<0, 1>(byte);
+        dispcnt.bg1      = bits<1, 1>(byte);
+        dispcnt.bg2      = bits<2, 1>(byte);
+        dispcnt.bg3      = bits<3, 1>(byte);
+        dispcnt.obj      = bits<4, 1>(byte);
+        dispcnt.win0     = bits<5, 1>(byte);
+        dispcnt.win1     = bits<6, 1>(byte);
+        dispcnt.winobj   = bits<7, 1>(byte);
+        dispcnt.bytes[1] = byte;
+        break;
+
+    case REG_VCOUNT:
+    case REG_VCOUNT+1:
+    case REG_KEYINPUT:
+    case REG_KEYINPUT+1:
         return;
+
+    case REG_TM0D:
+        timer[0].initial = (timer[0].initial & ~0x00FF) | byte;
+        break;
+
+    case REG_TM0D + 1:
+        timer[0].initial = (timer[0].initial & ~0xFF00) | (byte << 8);
+        break;
+
+    case REG_TM1D:
+        timer[1].initial = (timer[1].initial & ~0x00FF) | byte;
+        break;
+
+    case REG_TM1D + 1:
+        timer[1].initial = (timer[1].initial & ~0xFF00) | (byte << 8);
+        break;
+
+    case REG_TM2D:
+        timer[2].initial = (timer[2].initial & ~0x00FF) | byte;
+        break;
+
+    case REG_TM2D + 1:
+        timer[2].initial = (timer[2].initial & ~0xFF00) | (byte << 8);
+        break;
+
+    case REG_TM3D:
+        timer[3].initial = (timer[3].initial & ~0x00FF) | byte;
+        break;
+
+    case REG_TM3D + 1:
+        timer[3].initial = (timer[3].initial & ~0xFF00) | (byte << 8);
+        break;
+
+    case REG_TM0CNT: if (!timer_control[0].enabled && (byte & 0x80)) timer[0].init(); break;
+    case REG_TM1CNT: if (!timer_control[1].enabled && (byte & 0x80)) timer[1].init(); break;
+    case REG_TM2CNT: if (!timer_control[2].enabled && (byte & 0x80)) timer[2].init(); break;
+    case REG_TM3CNT: if (!timer_control[3].enabled && (byte & 0x80)) timer[3].init(); break;
+
+        // Protect status flags
+    case REG_DISPSTAT:
+        byte &= ~0x7;
+        break;
+
+        // Acknowledge interrupt, writing clears
+    case REG_IF:
+    case REG_IF + 1:
+        memory[addr] &= ~byte;
+        return;
+
+    case REG_HALTCNT:
+        halt = true;
+        break;
+    }
 
     memory[addr] = byte;
 
@@ -249,71 +330,6 @@ template<typename T>
 T& MMU::ref(u32 addr)
 {
     return *reinterpret_cast<T*>(&memory[addr]);
-}
-
-bool MMU::preWrite(u32 addr, u8& byte)
-{
-    switch (addr)
-    {
-    case REG_VCOUNT:
-    case REG_VCOUNT+1:
-    case REG_KEYINPUT:
-    case REG_KEYINPUT+1:
-        return false;
-
-    case REG_TM0D: 
-        timer[0].initial = (timer[0].initial & ~0x00FF) | byte; 
-        break;
-
-    case REG_TM0D+1: 
-        timer[0].initial = (timer[0].initial & ~0xFF00) | (byte << 8); 
-        break;
-
-    case REG_TM1D: 
-        timer[1].initial = (timer[1].initial & ~0x00FF) | byte; 
-        break;
-
-    case REG_TM1D+1: 
-        timer[1].initial = (timer[1].initial & ~0xFF00) | (byte << 8); 
-        break;
-
-    case REG_TM2D: 
-        timer[2].initial = (timer[2].initial & ~0x00FF) | byte; 
-        break;
-
-    case REG_TM2D+1: 
-        timer[2].initial = (timer[2].initial & ~0xFF00) | (byte << 8); 
-        break;
-
-    case REG_TM3D: 
-        timer[3].initial = (timer[3].initial & ~0x00FF) | byte; 
-        break;
-
-    case REG_TM3D+1: 
-        timer[3].initial = (timer[3].initial & ~0xFF00) | (byte << 8); 
-        break;
-
-    case REG_TM0CNT: if (!timer_control[0].enabled && (byte & 0x80)) timer[0].init(); break;
-    case REG_TM1CNT: if (!timer_control[1].enabled && (byte & 0x80)) timer[1].init(); break;
-    case REG_TM2CNT: if (!timer_control[2].enabled && (byte & 0x80)) timer[2].init(); break;
-    case REG_TM3CNT: if (!timer_control[3].enabled && (byte & 0x80)) timer[3].init(); break;
-
-    // Protect status flags
-    case REG_DISPSTAT:
-        byte &= ~0x7;
-        break;
-
-    // Acknowledge interrupt, writing clears
-    case REG_IF:
-    case REG_IF+1:
-        memory[addr] &= ~byte;
-        return false;
-
-    case REG_HALTCNT:
-        halt = true;
-        break;
-    }
-    return true;
 }
 
 void MMU::postWrite(u32 addr)
