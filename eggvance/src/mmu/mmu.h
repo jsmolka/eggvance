@@ -30,7 +30,11 @@ public:
     void writeHalf(u32 addr, u16 half);
     void writeWord(u32 addr, u32 word);
 
-    Dispcnt dispcnt;
+    void writeByteFast(u32 addr, u8  byte);
+    void writeHalfFast(u32 addr, u16 half);
+    void writeWordFast(u32 addr, u32 word);
+
+    DisplayControl dispcnt;
     Dispstat dispstat;
     Vcount vcount;
     union

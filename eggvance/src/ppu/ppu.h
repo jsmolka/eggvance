@@ -21,7 +21,7 @@ public:
     void vblank();
     void next();
 
-    void update();
+    void present();
 
 private:
     MMU& mmu;

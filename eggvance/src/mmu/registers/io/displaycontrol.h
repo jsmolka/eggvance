@@ -2,12 +2,12 @@
 
 #include "../register.h"
 
-struct Dispcnt : public Register16
+struct DisplayControl : public Register16
 {
-    int bg_mode;      // BG mode
-    int gbc_mode;     // GBC flag
+    int mode;         // BG mode (6-7 prohibited)
+    int gbc;          // Game Boy Color mode
     int frame;        // Frame used in BG modes 4, 5
-    int access_oam;   // Allow access to OAM during V-Blank flag
+    int oam_hblank;   // Allow OAM access during H-Blank
     int mapping_1d;   // Sprite character mapping (0 = 2D, 1 = 1D)
     int force_blank;  // Forced blank (1 = allow fast access to VRAM, palette and OAM)
 

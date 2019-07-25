@@ -59,7 +59,7 @@ void PPU::scanline()
 
     obj.fill(ObjData());
 
-    switch (mmu.dispcnt.bg_mode)
+    switch (mmu.dispcnt.mode)
     {
     case 0: 
         renderBg(&PPU::renderBgMode0, 0);
@@ -141,11 +141,8 @@ void PPU::next()
     }
 }
 
-void PPU::update()
+void PPU::present()
 {
-    // There must the at least one background or objects enabled in order to
-    // render the screen. This prevents black flashing between the BIOS and
-    // the actual game.
     if (mmu.dispcnt.data & 0x1F00)
     {
         SDL_UpdateTexture(

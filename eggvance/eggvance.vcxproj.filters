@@ -191,9 +191,6 @@
     <ClInclude Include="src\mmu\registers\io\bgcnt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\dispcnt.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\mmu\registers\io\dispstat.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -279,6 +276,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\arm\decode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\io\displaycontrol.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -10,7 +10,7 @@
 #include "io/bldalpha.h"
 #include "io/bldcnt.h"
 #include "io/bldy.h"
-#include "io/dispcnt.h"
+#include "io/displaycontrol.h"
 #include "io/dispstat.h"
 #include "io/mosaic.h"
 #include "io/vcount.h"

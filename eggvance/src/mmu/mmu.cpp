@@ -229,10 +229,10 @@ void MMU::writeByte(u32 addr, u8 byte)
     switch (addr)
     {
     case REG_DISPCNT:
-        dispcnt.bg_mode     = bits<0, 3>(byte);
-        dispcnt.gbc_mode    = bits<3, 1>(byte);
+        dispcnt.mode        = bits<0, 3>(byte);
+        dispcnt.gbc         = bits<3, 1>(byte);
         dispcnt.frame       = bits<4, 1>(byte);
-        dispcnt.access_oam  = bits<5, 1>(byte);
+        dispcnt.oam_hblank  = bits<5, 1>(byte);
         dispcnt.mapping_1d  = bits<6, 1>(byte);
         dispcnt.force_blank = bits<7, 1>(byte);
         dispcnt.bytes[0]    = byte;
@@ -316,14 +316,29 @@ void MMU::writeByte(u32 addr, u8 byte)
 
 void MMU::writeHalf(u32 addr, u16 half)
 {
-    writeByte(addr, half & 0xFF);
+    writeByte(addr, static_cast<u8>(half));
     writeByte(addr + 1, half >> 8);
 }
 
 void MMU::writeWord(u32 addr, u32 word)
 {
-    writeHalf(addr, word & 0xFFFF);
+    writeHalf(addr, static_cast<u16>(word));
     writeHalf(addr + 2, word >> 16);
+}
+
+void MMU::writeByteFast(u32 addr, u8 byte)
+{
+    memory[addr] = byte;
+}
+
+void MMU::writeHalfFast(u32 addr, u16 half)
+{
+    ref<u16>(addr) = half;
+}
+
+void MMU::writeWordFast(u32 addr, u32 word)
+{
+    ref<u32>(addr) = word;
 }
 
 template<typename T>

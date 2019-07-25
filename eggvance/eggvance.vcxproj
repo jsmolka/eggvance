@@ -206,7 +206,7 @@
     <ClInclude Include="src\common\format.h" />
     <ClInclude Include="src\common\bitfield.h" />
     <ClInclude Include="src\mmu\registers\io\bgcnt.h" />
-    <ClInclude Include="src\mmu\registers\io\dispcnt.h" />
+    <ClInclude Include="src\mmu\registers\io\displaycontrol.h" />
     <ClInclude Include="src\mmu\registers\io\dispstat.h" />
     <ClInclude Include="src\mmu\registers\register.h" />
     <ClInclude Include="src\mmu\registers\include.h" />

@@ -79,7 +79,7 @@ void Core::frame()
         ppu.next();
     }
 
-    ppu.update();
+    ppu.present();
 }
 
 void Core::emulate(int cycles)

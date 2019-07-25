@@ -129,7 +129,7 @@ std::vector<Layer>::iterator ScanlineBuilder::end()
 int ScanlineBuilder::masterMask() const
 {
     int mask = LF_BDP;
-    switch (mmu.dispcnt.bg_mode)
+    switch (mmu.dispcnt.mode)
     {
     case 0:
         if (mmu.dispcnt.bg0) mask |= LF_BG0;
