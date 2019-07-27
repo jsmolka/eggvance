@@ -34,6 +34,9 @@ public:
     void writeHalfFast(u32 addr, u16 half);
     void writeWordFast(u32 addr, u32 word);
 
+    template<typename T>
+    T& ref(u32 addr);
+
     DisplayControl dispcnt;
     DisplayStatus dispstat;
     int vcount;
@@ -58,12 +61,11 @@ public:
     BlendAlpha bldalpha;
     BlendFade bldy;
 
-    Keycnt keycnt;
-    Keyinput keyinput;
+    KeyControl keycnt;
     WaitControl waitcnt;
-    InterruptMaster int_master;
-    InterruptEnabled int_enabled;
-    InterruptRequest int_request;
+    Interrupt int_enabled;
+    Interrupt int_request;
+    bool int_master;
 
     TimerControl timer_control[4];
     TimerData timer_data[4];
@@ -72,10 +74,14 @@ public:
     bool halt;
 
 private:
-    template<typename T>
-    T& ref(u32 addr);
 
     void demirror(u32& addr) const;
 
     std::array<u8, 0x10000000> memory;
 };
+
+template<typename T>
+inline T& MMU::ref(u32 addr)
+{
+    return *reinterpret_cast<T*>(&memory[addr]);
+}

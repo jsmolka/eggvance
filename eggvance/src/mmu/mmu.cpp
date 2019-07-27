@@ -7,12 +7,7 @@
 #include "map.h"
 
 MMU::MMU()
-    : keycnt(ref<u16>(REG_KEYCNT))
-    , keyinput(ref<u16>(REG_KEYINPUT))
-    , int_master(ref<u32>(REG_IME))
-    , int_enabled(ref<u16>(REG_IE))
-    , int_request(ref<u16>(REG_IF))
-    , timer_data 
+    : timer_data 
       {
           TimerData(ref<u16>(REG_TM0D)),
           TimerData(ref<u16>(REG_TM1D)),
@@ -66,12 +61,13 @@ bool MMU::readFile(const std::string& file, u32 addr)
 
 void MMU::requestInterrupt(InterruptFlag flag)
 {
-    if (int_master.enabled)
+    if (int_master)
     {
-        if (int_enabled & flag)
+        if (int_enabled.mask & flag)
             halt = false;
 
-        int_request = int_request | flag;
+        int_request.mask |= flag;
+        ref<u16>(REG_IF) |= flag;
     }
 }
 
@@ -682,9 +678,35 @@ void MMU::writeByte(u32 addr, u8 byte)
         timer_control[3].enabled   = bits<7, 1>(byte);
         break;
 
-    // Acknowledge interrupt, writing clears
+    case REG_KEYCNT:
+        keycnt.bytes[0] = byte;
+        break;
+
+    case REG_KEYCNT+1:
+        keycnt.bytes[1] = byte & 0x3;
+        keycnt.irq      = bits<6, 1>(byte);
+        keycnt.logic    = bits<7, 1>(byte);
+        break;
+
+    case REG_IME:
+        int_master = bits<0, 1>(byte);
+        break;
+
+    case REG_IE:
+        int_enabled.bytes[0] = byte;
+        break;
+
+    case REG_IE+1:
+        int_enabled.bytes[1] = byte;
+        break;
+
     case REG_IF:
+        int_request.bytes[0] &= ~byte;
+        memory[addr] &= ~byte;
+        return;
+
     case REG_IF+1:
+        int_request.bytes[1] &= ~byte;
         memory[addr] &= ~byte;
         return;
 
@@ -721,12 +743,6 @@ void MMU::writeHalfFast(u32 addr, u16 half)
 void MMU::writeWordFast(u32 addr, u32 word)
 {
     ref<u32>(addr) = word;
-}
-
-template<typename T>
-T& MMU::ref(u32 addr)
-{
-    return *reinterpret_cast<T*>(&memory[addr]);
 }
 
 void MMU::demirror(u32& addr) const

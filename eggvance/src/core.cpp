@@ -55,7 +55,7 @@ void Core::reset()
     arm.reset();
     ppu.reset();
     
-    mmu.keyinput = 0x3FF;
+    mmu.ref<u16>(REG_KEYINPUT) = 0x3FF;
 }
 
 void Core::frame()
@@ -89,7 +89,7 @@ void Core::emulate(int cycles)
 
     while (remaining > 0)
     {
-        if (mmu.int_master && (mmu.int_enabled & mmu.int_request))
+        if (mmu.int_master && (mmu.int_enabled.mask & mmu.int_request.mask))
         {
             arm.interrupt();
         }
@@ -131,30 +131,33 @@ void Core::emulateTimers(int cycles)
 
 void Core::keyEvent(SDL_Keycode key, bool pressed)
 {
-    int state = pressed ? 0 : 1;
+    int state = !pressed;
+    int shift = 0;
 
     switch (key)
     {
-    case SDLK_u: mmu.keyinput.a      = state; break;
-    case SDLK_h: mmu.keyinput.b      = state; break;
-    case SDLK_f: mmu.keyinput.select = state; break;
-    case SDLK_g: mmu.keyinput.start  = state; break;
-    case SDLK_d: mmu.keyinput.right  = state; break;
-    case SDLK_a: mmu.keyinput.left   = state; break;
-    case SDLK_w: mmu.keyinput.up     = state; break;
-    case SDLK_s: mmu.keyinput.down   = state; break;
-    case SDLK_i: mmu.keyinput.r      = state; break;
-    case SDLK_q: mmu.keyinput.l      = state; break;
+    case SDLK_u: shift = 0; break; // A
+    case SDLK_h: shift = 1; break; // B
+    case SDLK_f: shift = 2; break; // Select
+    case SDLK_g: shift = 3; break; // Start
+    case SDLK_d: shift = 4; break; // Right
+    case SDLK_a: shift = 5; break; // Left
+    case SDLK_w: shift = 6; break; // Up
+    case SDLK_s: shift = 7; break; // Down
+    case SDLK_i: shift = 8; break; // R
+    case SDLK_q: shift = 9; break; // L
     }
+
+    u16& keyinput = mmu.ref<u16>(REG_KEYINPUT);
+    
+    keyinput &= ~(1 << shift);
+    keyinput |= (state << shift);
 
     if (mmu.keycnt.irq)
     {
-        int input = mmu.keyinput & 0x3FF;
-        int control = mmu.keycnt & 0x3FF;
-
         bool interrupt = mmu.keycnt.logic
-            ? (input & control)
-            : (input | control);
+            ? (keyinput & mmu.keycnt.mask)
+            : (keyinput | mmu.keycnt.mask);
 
         if (interrupt)
         {

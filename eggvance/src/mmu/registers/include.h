@@ -1,8 +1,5 @@
 #pragma once
 
-#include "interrupt/interrupt.h"
-#include "interrupt/interruptmaster.h"
-
 #include "io/displaycontrol.h"
 #include "io/displaystatus.h"
 #include "io/backgroundcontrol.h"
@@ -18,8 +15,8 @@
 #include "io/blendalpha.h"
 #include "io/blendfade.h"
 
-#include "other/keyinput.h"
-#include "other/keycnt.h"
+#include "other/keycontrol.h"
 #include "other/waitcontrol.h"
 #include "other/timercontrol.h"
 #include "other/timerdata.h"
+#include "other/interrupt.h"

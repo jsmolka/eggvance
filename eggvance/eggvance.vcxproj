@@ -136,14 +136,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\mmu\registers\interrupt\interrupt.cpp" />
-    <ClCompile Include="src\mmu\registers\interrupt\interruptmaster.cpp" />
+    <ClCompile Include="src\mmu\registers\other\timerdata.cpp" />
     <ClCompile Include="src\ppu\scanlinebuilder.cpp" />
     <ClCompile Include="src\arm\decode.cpp" />
     <ClCompile Include="src\ppu\mapentry.cpp" />
     <ClCompile Include="src\ppu\oamentry.cpp" />
-    <ClCompile Include="src\mmu\registers\other\keycnt.cpp" />
-    <ClCompile Include="src\mmu\registers\other\keyinput.cpp" />
     <ClCompile Include="src\arm\disassembler.cpp" />
     <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\arm\registerbank.cpp" />
@@ -158,13 +155,12 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ppu\render_bitmap.cpp" />
     <ClCompile Include="src\ppu\render_tiles.cpp" />
-    <ClCompile Include="src\mmu\registers\other\timerdata.cpp" />
     <ClCompile Include="src\mmu\timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\common\tmp.h" />
-    <ClInclude Include="src\mmu\registers\interrupt\interrupt.h" />
-    <ClInclude Include="src\mmu\registers\interrupt\interruptmaster.h" />
+    <ClInclude Include="src\mmu\registers\other\interrupt.h" />
+    <ClInclude Include="src\mmu\registers\other\timerdata.h" />
     <ClInclude Include="src\ppu\constants.h" />
     <ClInclude Include="src\ppu\enums.h" />
     <ClInclude Include="src\ppu\scanlinebuilder.h" />
@@ -182,8 +178,7 @@
     <ClInclude Include="src\mmu\registers\io\backgroundoffset.h" />
     <ClInclude Include="src\common\bitvalue.h" />
     <ClInclude Include="src\ppu\oamentry.h" />
-    <ClInclude Include="src\mmu\registers\other\keycnt.h" />
-    <ClInclude Include="src\mmu\registers\other\keyinput.h" />
+    <ClInclude Include="src\mmu\registers\other\keycontrol.h" />
     <ClInclude Include="src\arm\disassembler.h" />
     <ClInclude Include="src\arm\registers.h" />
     <ClInclude Include="src\arm\registerbank.h" />
@@ -208,7 +203,6 @@
     <ClInclude Include="src\mmu\registers\io\windowoutside.h" />
     <ClInclude Include="src\mmu\registers\io\windowrangev.h" />
     <ClInclude Include="src\mmu\registers\other\timercontrol.h" />
-    <ClInclude Include="src\mmu\registers\other\timerdata.h" />
     <ClInclude Include="src\mmu\timer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
