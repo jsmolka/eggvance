@@ -12,7 +12,7 @@ void PPU::renderBgMode3(int bg)
 {
     u32 addr = frameAddr(mmu.dispcnt.frame);
 
-    int y = mmu.vcount.line;
+    int y = mmu.vcount;
     for (int x = 0; x < WIDTH; ++x)
     {
         int offset = 2 * (WIDTH * y + x);
@@ -26,7 +26,7 @@ void PPU::renderBgMode4(int bg)
 {
     u32 addr = frameAddr(mmu.dispcnt.frame);
 
-    int y = mmu.vcount.line;
+    int y = mmu.vcount;
     for (int x = 0; x < WIDTH; ++x)
     {
         int offset = WIDTH * y + x;
@@ -41,7 +41,7 @@ void PPU::renderBgMode5(int bg)
 {
     u32 addr = frameAddr(mmu.dispcnt.frame);
 
-    int y = mmu.vcount.line;
+    int y = mmu.vcount;
     for (int x = 0; x < WIDTH; ++x)
     {
         int color = TRANSPARENT;

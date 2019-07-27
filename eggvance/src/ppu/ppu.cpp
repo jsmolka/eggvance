@@ -49,8 +49,11 @@ void PPU::reset()
 
 void PPU::scanline()
 {
-    mmu.dispstat.hblank = false;
     mmu.dispstat.vblank = false;
+    mmu.dispstat.hblank = false;
+
+    u16 reg = mmu.readHalfFast(REG_DISPSTAT);
+    mmu.writeHalfFast(REG_DISPSTAT, reg & ~0x3);
 
     bgs[0].flip();
     bgs[1].flip();
@@ -98,13 +101,16 @@ void PPU::scanline()
 
 void PPU::hblank()
 {
-    mmu.bgx[0].internal += signExtend<16, int>(mmu.bgpb[0]);
-    mmu.bgx[1].internal += signExtend<16, int>(mmu.bgpb[1]);
-    mmu.bgy[0].internal += signExtend<16, int>(mmu.bgpd[0]);
-    mmu.bgy[1].internal += signExtend<16, int>(mmu.bgpd[1]);
-
-    mmu.dispstat.hblank = true;
     mmu.dispstat.vblank = false;
+    mmu.dispstat.hblank = true;
+
+    u16 reg = mmu.readHalfFast(REG_DISPSTAT);
+    mmu.writeHalfFast(REG_DISPSTAT, (reg & ~0x3) | 0x2);
+
+    mmu.bgx[0].internal += mmu.bgpb[0].value;
+    mmu.bgx[1].internal += mmu.bgpb[1].value;
+    mmu.bgy[0].internal += mmu.bgpd[0].value;
+    mmu.bgy[1].internal += mmu.bgpd[1].value;
 
     if (mmu.dispstat.hblank_irq)
     {
@@ -114,13 +120,16 @@ void PPU::hblank()
 
 void PPU::vblank()
 {
-    mmu.bgx[0].moveToInternal();
-    mmu.bgx[1].moveToInternal();
-    mmu.bgy[0].moveToInternal();
-    mmu.bgy[1].moveToInternal();
-
-    mmu.dispstat.hblank = false;
     mmu.dispstat.vblank = true;
+    mmu.dispstat.hblank = false;
+
+    u16 reg = mmu.readHalfFast(REG_DISPSTAT);
+    mmu.writeHalfFast(REG_DISPSTAT, (reg & ~0x3) | 0x1);
+
+    mmu.bgx[0].internal = mmu.bgx[0].value;
+    mmu.bgx[1].internal = mmu.bgx[1].value;
+    mmu.bgy[0].internal = mmu.bgy[0].value;
+    mmu.bgy[1].internal = mmu.bgy[1].value;
 
     if (mmu.dispstat.vblank_irq)
     {
@@ -135,6 +144,9 @@ void PPU::next()
     mmu.vcount = (mmu.vcount + 1) % 228;
     mmu.dispstat.vcount_match = vcount_match;
 
+    u16 reg = mmu.readHalfFast(REG_DISPSTAT);
+    mmu.writeHalfFast(REG_DISPSTAT, (reg & ~0x4) | (vcount_match << 2));
+
     if (vcount_match && mmu.dispstat.vcount_irq)
     {
         mmu.requestInterrupt(IF_VCOUNT_MATCH);
@@ -143,7 +155,7 @@ void PPU::next()
 
 void PPU::present()
 {
-    if (mmu.dispcnt.data & 0x1F00)
+    if (mmu.readHalfFast(REG_DISPCNT) & 0x1F00)
     {
         SDL_UpdateTexture(
             texture, 0,
@@ -178,7 +190,6 @@ void PPU::renderBg(RenderFunc func, int bg)
     }
 }
 
-// Todo: does this overflow in mode 5?
 void PPU::mosaic(int bg)
 {
     int mosaic_x = mmu.mosaic.bg_x + 1;
@@ -197,14 +208,14 @@ void PPU::mosaic(int bg)
 
 bool PPU::mosaicDominant() const
 {
-    return mmu.vcount.line % (mmu.mosaic.bg_y + 1) == 0;
+    return mmu.vcount % (mmu.mosaic.bg_y + 1) == 0;
 }
 
 void PPU::generate()
 {
     ScanlineBuilder builder(bgs, obj, mmu);
 
-    u16* scanline = &screen[WIDTH * mmu.vcount.line];
+    u16* scanline = &screen[WIDTH * mmu.vcount];
 
     for (int x = 0; x < WIDTH; ++x)
     {
@@ -259,8 +270,8 @@ int PPU::blendAlpha(int a, int b) const
     int b_g = (b >>  5) & 0x1F;
     int b_b = (b >> 10) & 0x1F;
 
-    int eva = std::min(17, static_cast<int>(mmu.bldalpha.eva));
-    int evb = std::min(17, static_cast<int>(mmu.bldalpha.evb));
+    int eva = std::min(17, mmu.bldalpha.eva);
+    int evb = std::min(17, mmu.bldalpha.evb);
 
     int t_r = std::min(31, (a_r * eva + b_r * evb) >> 4);
     int t_g = std::min(31, (a_g * eva + b_g * evb) >> 4);
@@ -275,7 +286,7 @@ int PPU::blendWhite(int a) const
     int a_g = (a >>  5) & 0x1F;
     int a_b = (a >> 10) & 0x1F;
 
-    int evy = std::min(17, static_cast<int>(mmu.bldy.evy));
+    int evy = std::min(17, mmu.bldy.evy);
 
     int t_r = std::min(31, a_r + (((31 - a_r) * evy) >> 4));
     int t_g = std::min(31, a_g + (((31 - a_g) * evy) >> 4));
@@ -290,7 +301,7 @@ int PPU::blendBlack(int a) const
     int a_g = (a >>  5) & 0x1F;
     int a_b = (a >> 10) & 0x1F;
 
-    int evy = std::min(17, static_cast<int>(mmu.bldy.evy));
+    int evy = std::min(17, mmu.bldy.evy);
 
     int t_r = std::min(31, a_r - ((a_r * evy) >> 4));
     int t_g = std::min(31, a_g - ((a_g * evy) >> 4));

@@ -7,45 +7,8 @@
 #include "map.h"
 
 MMU::MMU()
-    : dispstat(ref<u16>(REG_DISPSTAT))
-    , vcount(ref<u16>(REG_VCOUNT))
-    , bg0cnt(ref<u16>(REG_BG0CNT))
-    , bg1cnt(ref<u16>(REG_BG1CNT))
-    , bg2cnt(ref<u16>(REG_BG2CNT))
-    , bg3cnt(ref<u16>(REG_BG3CNT))
-    , bg0hofs(ref<u16>(REG_BG0HOFS))
-    , bg1hofs(ref<u16>(REG_BG1HOFS))
-    , bg2hofs(ref<u16>(REG_BG2HOFS))
-    , bg3hofs(ref<u16>(REG_BG3HOFS))
-    , bg0vofs(ref<u16>(REG_BG0VOFS))
-    , bg1vofs(ref<u16>(REG_BG1VOFS))
-    , bg2vofs(ref<u16>(REG_BG2VOFS))
-    , bg3vofs(ref<u16>(REG_BG3VOFS))
-    , bg2x(ref<u32>(REG_BG2X))
-    , bg3x(ref<u32>(REG_BG3X))
-    , bg2y(ref<u32>(REG_BG2Y))
-    , bg3y(ref<u32>(REG_BG3Y))
-    , bg2pa(ref<u16>(REG_BG2PA))
-    , bg3pa(ref<u16>(REG_BG3PA))
-    , bg2pb(ref<u16>(REG_BG2PB))
-    , bg3pb(ref<u16>(REG_BG3PB))
-    , bg2pc(ref<u16>(REG_BG2PC))
-    , bg3pc(ref<u16>(REG_BG3PC))
-    , bg2pd(ref<u16>(REG_BG2PD))
-    , bg3pd(ref<u16>(REG_BG3PD))
-    , mosaic(ref<u16>(REG_MOSAIC))
-    , bldcnt(ref<u16>(REG_BLDCNT))
-    , bldalpha(ref<u16>(REG_BLDALPHA))
-    , bldy(ref<u16>(REG_BLDY))
-    , win0h(ref<u16>(REG_WIN0H))
-    , win1h(ref<u16>(REG_WIN1H))
-    , win0v(ref<u16>(REG_WIN0V))
-    , win1v(ref<u16>(REG_WIN1V))
-    , winin(ref<u16>(REG_WININ))
-    , winout(ref<u16>(REG_WINOUT))
-    , keycnt(ref<u16>(REG_KEYCNT))
+    : keycnt(ref<u16>(REG_KEYCNT))
     , keyinput(ref<u16>(REG_KEYINPUT))
-    , waitcnt(ref<u16>(REG_WAITCNT))
     , int_master(ref<u32>(REG_IME))
     , int_enabled(ref<u16>(REG_IE))
     , int_request(ref<u16>(REG_IF))
@@ -55,13 +18,6 @@ MMU::MMU()
           TimerData(ref<u16>(REG_TM1D)),
           TimerData(ref<u16>(REG_TM2D)),
           TimerData(ref<u16>(REG_TM3D)) 
-      }
-    , timer_control 
-      {
-          TimerControl(ref<u16>(REG_TM0CNT)),
-          TimerControl(ref<u16>(REG_TM1CNT)),
-          TimerControl(ref<u16>(REG_TM2CNT)),
-          TimerControl(ref<u16>(REG_TM3CNT)) 
       }
     , timer 
       { 
@@ -125,6 +81,12 @@ u8 MMU::readByte(u32 addr) const
 
     switch (addr)
     {
+    case REG_VCOUNT:
+        return vcount;
+
+    case REG_VCOUNT+1:
+        return 0;
+
     case REG_BG0HOFS:
     case REG_BG0HOFS+1:
     case REG_BG0VOFS:
@@ -235,23 +197,415 @@ void MMU::writeByte(u32 addr, u8 byte)
         dispcnt.oam_hblank  = bits<5, 1>(byte);
         dispcnt.mapping_1d  = bits<6, 1>(byte);
         dispcnt.force_blank = bits<7, 1>(byte);
-        dispcnt.bytes[0]    = byte;
         break;
 
     case REG_DISPCNT+1:
-        dispcnt.bg0      = bits<0, 1>(byte);
-        dispcnt.bg1      = bits<1, 1>(byte);
-        dispcnt.bg2      = bits<2, 1>(byte);
-        dispcnt.bg3      = bits<3, 1>(byte);
-        dispcnt.obj      = bits<4, 1>(byte);
-        dispcnt.win0     = bits<5, 1>(byte);
-        dispcnt.win1     = bits<6, 1>(byte);
-        dispcnt.winobj   = bits<7, 1>(byte);
-        dispcnt.bytes[1] = byte;
+        dispcnt.bg0    = bits<0, 1>(byte);
+        dispcnt.bg1    = bits<1, 1>(byte);
+        dispcnt.bg2    = bits<2, 1>(byte);
+        dispcnt.bg3    = bits<3, 1>(byte);
+        dispcnt.obj    = bits<4, 1>(byte);
+        dispcnt.win0   = bits<5, 1>(byte);
+        dispcnt.win1   = bits<6, 1>(byte);
+        dispcnt.winobj = bits<7, 1>(byte);
+        break;
+
+    case REG_DISPSTAT:
+        dispstat.vblank_irq = bits<3, 1>(byte);
+        dispstat.hblank_irq = bits<4, 1>(byte);
+        dispstat.vcount_irq = bits<5, 1>(byte);
+        break;
+
+    case REG_DISPSTAT+1:
+        dispstat.vcount_compare = byte;
         break;
 
     case REG_VCOUNT:
     case REG_VCOUNT+1:
+        return;
+
+    case REG_BG0CNT:
+        bgcnt[0].priority     = bits<0, 2>(byte);
+        bgcnt[0].tile_base    = bits<2, 3>(byte);
+        bgcnt[0].mosaic       = bits<6, 1>(byte);
+        bgcnt[0].palette_type = bits<7, 1>(byte);
+        break;
+
+    case REG_BG0CNT+1:
+        bgcnt[0].map_base    = bits<0, 5>(byte);
+        bgcnt[0].wraparound  = bits<5, 1>(byte);
+        bgcnt[0].screen_size = bits<6, 2>(byte);
+        break;
+
+    case REG_BG1CNT:
+        bgcnt[1].priority     = bits<0, 2>(byte);
+        bgcnt[1].tile_base    = bits<2, 3>(byte);
+        bgcnt[1].mosaic       = bits<6, 1>(byte);
+        bgcnt[1].palette_type = bits<7, 1>(byte);
+        break;
+
+    case REG_BG1CNT+1:
+        bgcnt[1].map_base    = bits<0, 5>(byte);
+        bgcnt[1].wraparound  = bits<5, 1>(byte);
+        bgcnt[1].screen_size = bits<6, 2>(byte);
+        break;
+
+    case REG_BG2CNT:
+        bgcnt[2].priority     = bits<0, 2>(byte);
+        bgcnt[2].tile_base    = bits<2, 3>(byte);
+        bgcnt[2].mosaic       = bits<6, 1>(byte);
+        bgcnt[2].palette_type = bits<7, 1>(byte);
+        break;
+
+    case REG_BG2CNT+1:
+        bgcnt[2].map_base    = bits<0, 5>(byte);
+        bgcnt[2].wraparound  = bits<5, 1>(byte);
+        bgcnt[2].screen_size = bits<6, 2>(byte);
+        break;
+
+    case REG_BG3CNT:
+        bgcnt[3].priority     = bits<0, 2>(byte);
+        bgcnt[3].tile_base    = bits<2, 3>(byte);
+        bgcnt[3].mosaic       = bits<6, 1>(byte);
+        bgcnt[3].palette_type = bits<7, 1>(byte);
+        break;
+
+    case REG_BG3CNT+1:
+        bgcnt[3].map_base    = bits<0, 5>(byte);
+        bgcnt[3].wraparound  = bits<5, 1>(byte);
+        bgcnt[3].screen_size = bits<6, 2>(byte);
+        break;
+
+    case REG_BG0HOFS:
+        bghofs[0].bytes[0] = byte;
+        break;
+
+    case REG_BG0HOFS+1:
+        bghofs[0].bytes[1] = byte & 0x1;
+        break;
+
+    case REG_BG0VOFS:
+        bgvofs[0].bytes[0] = byte;
+        break;
+
+    case REG_BG0VOFS+1:
+        bgvofs[0].bytes[1] = byte & 0x1;
+        break;
+
+    case REG_BG1HOFS:
+        bghofs[1].bytes[0] = byte;
+        break;
+
+    case REG_BG1HOFS+1:
+        bghofs[1].bytes[1] = byte & 0x1;
+        break;
+
+    case REG_BG1VOFS:
+        bgvofs[1].bytes[0] = byte;
+        break;
+
+    case REG_BG1VOFS+1:
+        bgvofs[1].bytes[1] = byte & 0x1;
+        break;
+
+    case REG_BG2HOFS:
+        bghofs[2].bytes[0] = byte;
+        break;
+
+    case REG_BG2HOFS+1:
+        bghofs[2].bytes[1] = byte & 0x1;
+        break;
+
+    case REG_BG2VOFS:
+        bgvofs[2].bytes[0] = byte;
+        break;
+
+    case REG_BG2VOFS+1:
+        bgvofs[2].bytes[1] = byte & 0x1;
+        break;
+
+    case REG_BG3HOFS:
+        bghofs[3].bytes[0] = byte;
+        break;
+
+    case REG_BG3HOFS+1:
+        bghofs[3].bytes[1] = byte & 0x1;
+        break;
+
+    case REG_BG3VOFS:
+        bgvofs[3].bytes[0] = byte;
+        break;
+
+    case REG_BG3VOFS+1:
+        bgvofs[3].bytes[1] = byte & 0x1;
+        break;
+
+    case REG_BG2X:
+        bgx[0].bytes[0] = byte;
+        bgx[0].internal = bgx[0].value;
+        break;
+
+    case REG_BG2X+1:
+        bgx[0].bytes[1] = byte;
+        bgx[0].internal = bgx[0].value;
+        break;
+
+    case REG_BG2X+2:
+        bgx[0].bytes[2] = byte;
+        bgx[0].internal = bgx[0].value;
+        break;
+
+    case REG_BG2X+3:
+        bgx[0].bytes[3] = signExtend<4>(byte);
+        bgx[0].internal = bgx[0].value;
+        break;
+
+    case REG_BG3X:
+        bgx[1].bytes[0] = byte;
+        bgx[1].internal = bgx[1].value;
+        break;
+
+    case REG_BG3X+1:
+        bgx[1].bytes[1] = byte;
+        bgx[1].internal = bgx[1].value;
+        break;
+
+    case REG_BG3X+2:
+        bgx[1].bytes[2] = byte;
+        bgx[1].internal = bgx[1].value;
+        break;
+
+    case REG_BG3X+3:
+        bgx[1].bytes[3] = signExtend<4>(byte);
+        bgx[1].internal = bgx[1].value;
+        break;
+
+    case REG_BG2Y:
+        bgy[0].bytes[0] = byte;
+        bgy[0].internal = bgy[0].value;
+        break;
+
+    case REG_BG2Y+1:
+        bgy[0].bytes[1] = byte;
+        bgy[0].internal = bgy[0].value;
+        break;
+
+    case REG_BG2Y+2:
+        bgy[0].bytes[2] = byte;
+        bgy[0].internal = bgy[0].value;
+        break;
+
+    case REG_BG2Y+3:
+        bgy[0].bytes[3] = signExtend<4>(byte);
+        bgy[0].internal = bgy[0].value;
+        break;
+
+    case REG_BG3Y:
+        bgy[1].bytes[0] = byte;
+        bgy[1].internal = bgy[1].value;
+        break;
+
+    case REG_BG3Y+1:
+        bgy[1].bytes[1] = byte;
+        bgy[1].internal = bgy[1].value;
+        break;
+
+    case REG_BG3Y+2:
+        bgy[1].bytes[2] = byte;
+        bgy[1].internal = bgy[1].value;
+        break;
+
+    case REG_BG3Y+3:
+        bgy[1].bytes[3] = signExtend<4>(byte);
+        bgy[1].internal = bgy[1].value;
+        break;
+
+    case REG_BG2PA:
+        bgpa[0].bytes[0] = byte;
+        break;
+
+    case REG_BG2PA+1:
+        bgpa[0].bytes[1] = byte;
+        break;
+
+    case REG_BG2PB:
+        bgpb[0].bytes[0] = byte;
+        break;
+
+    case REG_BG2PB+1:
+        bgpb[0].bytes[1] = byte;
+        break;
+
+    case REG_BG2PC:
+        bgpc[0].bytes[0] = byte;
+        break;
+
+    case REG_BG2PC+1:
+        bgpc[0].bytes[1] = byte;
+        break;
+
+    case REG_BG2PD:
+        bgpd[0].bytes[0] = byte;
+        break;
+
+    case REG_BG2PD+1:
+        bgpd[0].bytes[1] = byte;
+        break;
+
+    case REG_BG3PA:
+        bgpa[1].bytes[0] = byte;
+        break;
+
+    case REG_BG3PA+1:
+        bgpa[1].bytes[1] = byte;
+        break;
+
+    case REG_BG3PB:
+        bgpb[1].bytes[0] = byte;
+        break;
+
+    case REG_BG3PB+1:
+        bgpb[1].bytes[1] = byte;
+        break;
+
+    case REG_BG3PC:
+        bgpc[1].bytes[0] = byte;
+        break;
+
+    case REG_BG3PC+1:
+        bgpc[1].bytes[1] = byte;
+        break;
+
+    case REG_BG3PD:
+        bgpd[1].bytes[0] = byte;
+        break;
+
+    case REG_BG3PD+1:
+        bgpd[1].bytes[1] = byte;
+        break;
+
+    case REG_WIN0H:
+        winh[0].x2 = byte;
+        break;
+
+    case REG_WIN0H+1:
+        winh[0].x1 = byte;
+        break;
+
+    case REG_WIN1H:
+        winh[1].x2 = byte;
+        break;
+
+    case REG_WIN1H+1:
+        winh[1].x1 = byte;
+        break;
+
+    case REG_WIN0V:
+        winv[0].y2 = byte;
+        break;
+
+    case REG_WIN0V+1:
+        winv[0].y1 = byte;
+        break;
+
+    case REG_WIN1V:
+        winv[1].y2 = byte;
+        break;
+
+    case REG_WIN1V+1:
+        winv[1].y1 = byte;
+        break;
+
+    case REG_WININ:
+        winin.win0_bg0 = bits<0, 1>(byte);
+        winin.win0_bg1 = bits<1, 1>(byte);
+        winin.win0_bg2 = bits<2, 1>(byte);
+        winin.win0_bg3 = bits<3, 1>(byte);
+        winin.win0_obj = bits<4, 1>(byte);
+        winin.win0_sfx = bits<5, 1>(byte);
+        break;
+
+    case REG_WININ+1:
+        winin.win1_bg0 = bits<0, 1>(byte);
+        winin.win1_bg1 = bits<1, 1>(byte);
+        winin.win1_bg2 = bits<2, 1>(byte);
+        winin.win1_bg3 = bits<3, 1>(byte);
+        winin.win1_obj = bits<4, 1>(byte);
+        winin.win1_sfx = bits<5, 1>(byte);
+        break;
+        
+    case REG_WINOUT:
+        winout.winout_bg0 = bits<0, 1>(byte);
+        winout.winout_bg1 = bits<1, 1>(byte);
+        winout.winout_bg2 = bits<2, 1>(byte);
+        winout.winout_bg3 = bits<3, 1>(byte);
+        winout.winout_obj = bits<4, 1>(byte);
+        winout.winout_sfx = bits<5, 1>(byte);
+        break;
+
+    case REG_WINOUT+1:
+        winout.winobj_bg0 = bits<0, 1>(byte);
+        winout.winobj_bg1 = bits<1, 1>(byte);
+        winout.winobj_bg2 = bits<2, 1>(byte);
+        winout.winobj_bg3 = bits<3, 1>(byte);
+        winout.winobj_obj = bits<4, 1>(byte);
+        winout.winobj_sfx = bits<5, 1>(byte);
+        break;
+
+    case REG_MOSAIC:
+        mosaic.bg_x  = bits< 0, 4>(byte);
+        mosaic.bg_y  = bits< 4, 4>(byte);
+        mosaic.obj_x = bits< 8, 4>(byte);
+        mosaic.obj_y = bits<12, 4>(byte);
+        break;
+
+    case REG_BLDCNT:
+        bldcnt.a_bg0 = bits<0, 1>(byte);
+        bldcnt.a_bg1 = bits<1, 1>(byte);
+        bldcnt.a_bg2 = bits<2, 1>(byte);
+        bldcnt.a_bg3 = bits<3, 1>(byte);
+        bldcnt.a_obj = bits<4, 1>(byte);
+        bldcnt.a_bdp = bits<5, 1>(byte);
+        bldcnt.mode  = bits<6, 2>(byte);
+        break;
+
+    case REG_BLDCNT+1:
+        bldcnt.b_bg0 = bits<0, 1>(byte);
+        bldcnt.b_bg1 = bits<1, 1>(byte);
+        bldcnt.b_bg2 = bits<2, 1>(byte);
+        bldcnt.b_bg3 = bits<3, 1>(byte);
+        bldcnt.b_obj = bits<4, 1>(byte);
+        bldcnt.b_bdp = bits<5, 1>(byte);
+        break;
+
+    case REG_BLDALPHA:
+        bldalpha.eva = bits<0, 5>(byte);
+        break;
+
+    case REG_BLDALPHA+1:
+        bldalpha.evb = bits<0, 5>(byte);
+        break;
+
+    case REG_BLDY:
+        bldy.evy = bits<0, 5>(byte);
+        break;
+
+    case REG_WAITCNT:
+        waitcnt.sram  = bits<0, 2>(byte);
+        waitcnt.ws0_n = bits<2, 2>(byte);
+        waitcnt.ws0_s = bits<4, 1>(byte);
+        waitcnt.ws1_n = bits<5, 2>(byte);
+        waitcnt.ws1_s = bits<7, 1>(byte);
+        break;
+
+    case REG_WAITCNT+1:
+        waitcnt.ws2_n    = bits<0, 2>(byte);
+        waitcnt.ws2_s    = bits<2, 1>(byte);
+        waitcnt.phi      = bits<3, 2>(byte);
+        waitcnt.prefetch = bits<6, 1>(byte);
+        waitcnt.type     = bits<7, 1>(byte);
+        break;
+
     case REG_KEYINPUT:
     case REG_KEYINPUT+1:
         return;
@@ -260,7 +614,7 @@ void MMU::writeByte(u32 addr, u8 byte)
         timer[0].initial = (timer[0].initial & ~0x00FF) | byte;
         break;
 
-    case REG_TM0D + 1:
+    case REG_TM0D+1:
         timer[0].initial = (timer[0].initial & ~0xFF00) | (byte << 8);
         break;
 
@@ -268,7 +622,7 @@ void MMU::writeByte(u32 addr, u8 byte)
         timer[1].initial = (timer[1].initial & ~0x00FF) | byte;
         break;
 
-    case REG_TM1D + 1:
+    case REG_TM1D+1:
         timer[1].initial = (timer[1].initial & ~0xFF00) | (byte << 8);
         break;
 
@@ -276,7 +630,7 @@ void MMU::writeByte(u32 addr, u8 byte)
         timer[2].initial = (timer[2].initial & ~0x00FF) | byte;
         break;
 
-    case REG_TM2D + 1:
+    case REG_TM2D+1:
         timer[2].initial = (timer[2].initial & ~0xFF00) | (byte << 8);
         break;
 
@@ -284,23 +638,53 @@ void MMU::writeByte(u32 addr, u8 byte)
         timer[3].initial = (timer[3].initial & ~0x00FF) | byte;
         break;
 
-    case REG_TM3D + 1:
+    case REG_TM3D+1:
         timer[3].initial = (timer[3].initial & ~0xFF00) | (byte << 8);
         break;
 
-    case REG_TM0CNT: if (!timer_control[0].enabled && (byte & 0x80)) timer[0].init(); break;
-    case REG_TM1CNT: if (!timer_control[1].enabled && (byte & 0x80)) timer[1].init(); break;
-    case REG_TM2CNT: if (!timer_control[2].enabled && (byte & 0x80)) timer[2].init(); break;
-    case REG_TM3CNT: if (!timer_control[3].enabled && (byte & 0x80)) timer[3].init(); break;
+    case REG_TM0CNT: 
+        if (!timer_control[0].enabled && (byte & 0x80)) 
+            timer[0].init();
 
-        // Protect status flags
-    case REG_DISPSTAT:
-        byte &= ~0x7;
+        timer_control[0].prescaler = bits<0, 2>(byte);
+        timer_control[0].cascade   = bits<2, 1>(byte);
+        timer_control[0].irq       = bits<6, 1>(byte);
+        timer_control[0].enabled   = bits<7, 1>(byte);
+        break;
+    
+    case REG_TM1CNT: 
+        if (!timer_control[1].enabled && (byte & 0x80)) 
+            timer[1].init(); 
+
+        timer_control[1].prescaler = bits<0, 2>(byte);
+        timer_control[1].cascade   = bits<2, 1>(byte);
+        timer_control[1].irq       = bits<6, 1>(byte);
+        timer_control[1].enabled   = bits<7, 1>(byte);
         break;
 
-        // Acknowledge interrupt, writing clears
+    case REG_TM2CNT: 
+        if (!timer_control[2].enabled && (byte & 0x80)) 
+            timer[2].init(); 
+
+        timer_control[2].prescaler = bits<0, 2>(byte);
+        timer_control[2].cascade   = bits<2, 1>(byte);
+        timer_control[2].irq       = bits<6, 1>(byte);
+        timer_control[2].enabled   = bits<7, 1>(byte);
+        break;
+
+    case REG_TM3CNT: 
+        if (!timer_control[3].enabled && (byte & 0x80)) 
+            timer[3].init();
+
+        timer_control[3].prescaler = bits<0, 2>(byte);
+        timer_control[3].cascade   = bits<2, 1>(byte);
+        timer_control[3].irq       = bits<6, 1>(byte);
+        timer_control[3].enabled   = bits<7, 1>(byte);
+        break;
+
+    // Acknowledge interrupt, writing clears
     case REG_IF:
-    case REG_IF + 1:
+    case REG_IF+1:
         memory[addr] &= ~byte;
         return;
 
@@ -310,8 +694,6 @@ void MMU::writeByte(u32 addr, u8 byte)
     }
 
     memory[addr] = byte;
-
-    postWrite(addr);
 }
 
 void MMU::writeHalf(u32 addr, u16 half)
@@ -345,40 +727,6 @@ template<typename T>
 T& MMU::ref(u32 addr)
 {
     return *reinterpret_cast<T*>(&memory[addr]);
-}
-
-void MMU::postWrite(u32 addr)
-{
-    switch (addr)
-    {
-    case REG_BG2X:
-    case REG_BG2X+1:
-    case REG_BG2X+2:
-    case REG_BG2X+3:
-        bgx[0].moveToInternal();
-        break;
-
-    case REG_BG2Y:
-    case REG_BG2Y+1:
-    case REG_BG2Y+2:
-    case REG_BG2Y+3:
-        bgy[0].moveToInternal();
-        break;
-
-    case REG_BG3X:
-    case REG_BG3X+1:
-    case REG_BG3X+2:
-    case REG_BG3X+3:
-        bgx[1].moveToInternal();
-        break;
-
-    case REG_BG3Y:
-    case REG_BG3Y+1:
-    case REG_BG3Y+2:
-    case REG_BG3Y+3:
-        bgy[1].moveToInternal();
-        break;
-    }
 }
 
 void MMU::demirror(u32& addr) const

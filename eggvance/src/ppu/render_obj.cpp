@@ -9,10 +9,10 @@ void PPU::renderObjects()
     if (!mmu.dispcnt.obj)
         return;
 
-    int line = mmu.vcount.line;
+    int line = mmu.vcount;
 
-    int mosaic_x = mmu.mosaic.sprite_x + 1;
-    int mosaic_y = mmu.mosaic.sprite_y + 1;
+    int mosaic_x = mmu.mosaic.obj_x + 1;
+    int mosaic_y = mmu.mosaic.obj_y + 1;
 
     for (int entry = 127; entry > -1; --entry)
     {

@@ -7,7 +7,7 @@ ScanlineBuilder::ScanlineBuilder(DoubleBuffer<u16>(&bgs)[4], Buffer<ObjData>& ob
     , obj(obj)
     , mmu(mmu)
 {
-    y = mmu.vcount.line;
+    y = mmu.vcount;
 
     mask_master  = masterMask();
     mask_blend_a = blendAMask();

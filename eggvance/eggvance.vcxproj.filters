@@ -45,61 +45,16 @@
     <ClCompile Include="src\arm\disassembler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\mmu\registers\other\waitcnt.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\mmu\registers\other\keyinput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\mmu\registers\other\keycnt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\mmu\registers\io\bgcnt.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mmu\registers\io\dispstat.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mmu\registers\io\vcount.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mmu\registers\io\mosaic.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mmu\registers\io\bgxy.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mmu\registers\io\bghvofs.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mmu\registers\io\bgpabcd.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\ppu\mapentry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\ppu\oamentry.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mmu\registers\io\bldalpha.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mmu\registers\io\bldcnt.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mmu\registers\io\bldy.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mmu\registers\io\winh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mmu\registers\io\winin.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mmu\registers\io\winout.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mmu\registers\io\winv.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\ppu\scanlinebuilder.cpp">
@@ -126,10 +81,10 @@
     <ClCompile Include="src\mmu\registers\other\timerdata.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\mmu\registers\other\timercontrol.cpp">
+    <ClCompile Include="src\arm\decode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\arm\decode.cpp">
+    <ClCompile Include="src\mmu\registers\io\backgroundcontrol.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -164,9 +119,6 @@
     <ClInclude Include="src\common\format.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\other\waitcnt.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\mmu\registers\other\keyinput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -188,25 +140,7 @@
     <ClInclude Include="src\common\bitvalue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\bgcnt.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\dispstat.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\vcount.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\mmu\registers\io\mosaic.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\bgxy.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\bghvofs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\bgpabcd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ppu\mapentry.h">
@@ -218,28 +152,7 @@
     <ClInclude Include="src\common\utility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\bldalpha.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\bldcnt.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\bldy.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\ppu\doublebuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\winh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\winin.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\winout.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\winv.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ppu\buffer.h">
@@ -279,6 +192,45 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\mmu\registers\io\displaycontrol.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\io\displaystatus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\io\backgroundcontrol.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\io\backgroundoffset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\io\backgroundreference.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\io\backgroundparameter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\io\windowrangeh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\io\windowrangev.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\io\windowinside.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\io\windowoutside.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\io\blendcontrol.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\io\blendalpha.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\io\blendfade.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\other\waitcontrol.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

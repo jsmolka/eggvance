@@ -6,13 +6,13 @@
 
 void PPU::renderBgMode0(int bg)
 {
-    const Bgcnt& bgcnt = mmu.bgcnt[bg];
+    const BackgroundControl& bgcnt = mmu.bgcnt[bg];
 
     int tile_size = bgcnt.palette_type ? 0x40 : 0x20;
     PixelFormat format = bgcnt.palette_type ? BPP8 : BPP4;
 
     int ref_x = mmu.bghofs[bg].offset;
-    int ref_y = mmu.bgvofs[bg].offset + mmu.vcount.line;
+    int ref_y = mmu.bgvofs[bg].offset + mmu.vcount;
 
     // Amount of blocks along axis
     int blocks_x = (bgcnt.screen_size & 0x1) ? 2 : 1;
@@ -94,12 +94,12 @@ void PPU::renderBgMode0(int bg)
 
 void PPU::renderBgMode2(int bg)
 {
-    const Bgcnt& bgcnt = mmu.bgcnt[bg];
+    const BackgroundControl& bgcnt = mmu.bgcnt[bg];
 
-    int pa = signExtend<16, int>(mmu.bgpa[bg - 2]);
-    int pc = signExtend<16, int>(mmu.bgpc[bg - 2]);
+    s16 pa = mmu.bgpa[bg - 2].value;
+    s16 pc = mmu.bgpc[bg - 2].value;
 
-    int line = mmu.vcount.line;
+    int line = mmu.vcount;
 
     int ref_x = mmu.bgx[bg - 2].internal;
     int ref_y = mmu.bgy[bg - 2].internal;

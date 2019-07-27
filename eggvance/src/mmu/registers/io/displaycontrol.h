@@ -1,8 +1,6 @@
 #pragma once
 
-#include "../register.h"
-
-struct DisplayControl : public Register16
+struct DisplayControl
 {
     int mode;         // BG mode (6-7 prohibited)
     int gbc;          // Game Boy Color mode

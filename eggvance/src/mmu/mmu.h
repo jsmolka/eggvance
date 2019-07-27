@@ -35,122 +35,32 @@ public:
     void writeWordFast(u32 addr, u32 word);
 
     DisplayControl dispcnt;
-    Dispstat dispstat;
-    Vcount vcount;
-    union
-    {
-        struct
-        {
-            Bgcnt bg0cnt;
-            Bgcnt bg1cnt;
-            Bgcnt bg2cnt;
-            Bgcnt bg3cnt;
-        };
-        Bgcnt bgcnt[4];
-    };
-    union
-    {
-        struct
-        {
-            Bghofs bg0hofs;
-            Bghofs bg1hofs;
-            Bghofs bg2hofs;
-            Bghofs bg3hofs;
-        };
-        Bghofs bghofs[4];
-    };
-    union
-    {
-        struct
-        {
-            Bgvofs bg0vofs;
-            Bgvofs bg1vofs;
-            Bgvofs bg2vofs;
-            Bgvofs bg3vofs;
-        };
-        Bgvofs bgvofs[4];
-    };
-    union
-    {
-        struct
-        {
-            Bgx bg2x;
-            Bgx bg3x;
-        };
-        Bgx bgx[2];
-    };
-    union
-    {
-        struct
-        {
-            Bgy bg2y;
-            Bgy bg3y;
-        };
-        Bgy bgy[2];
-    };
-    union
-    {
-        struct
-        {
-            Bgpa bg2pa;
-            Bgpa bg3pa;
-        };
-        Bgpa bgpa[2];
-    };
-    union
-    {
-        struct
-        {
-            Bgpb bg2pb;
-            Bgpb bg3pb;
-        };
-        Bgpb bgpb[2];
-    };
-    union
-    {
-        struct
-        {
-            Bgpc bg2pc;
-            Bgpc bg3pc;
-        };
-        Bgpc bgpc[2];
-    };
-    union
-    {
-        struct
-        {
-            Bgpa bg2pd;
-            Bgpd bg3pd;
-        };
-        Bgpd bgpd[2];
-    };
-    union
-    {
-        struct
-        {
-            Winh win0h;
-            Winh win1h;
-        };
-        Winh winh[2];
-    };
-    union
-    {
-        struct
-        {
-            Winv win0v;
-            Winv win1v;
-        };
-        Winv winv[2];
-    };
-    Winin winin;
-    Winout winout;
+    DisplayStatus dispstat;
+    int vcount;
+
+    BackgroundControl bgcnt[4];
+    BackgroundOffset bghofs[4];
+    BackgroundOffset bgvofs[4];
+    BackgroundReference bgx[2];
+    BackgroundReference bgy[2];
+    BackgroundParameter bgpa[2];
+    BackgroundParameter bgpb[2];
+    BackgroundParameter bgpc[2];
+    BackgroundParameter bgpd[2];
+
+    WindowRangeH winh[2];
+    WindowRangeV winv[2];
+    WindowInside winin;
+    WindowOutside winout;
+
     Mosaic mosaic;
-    Bldcnt bldcnt;
-    Bldalpha bldalpha;
-    Bldy bldy;
+    BlendControl bldcnt;
+    BlendAlpha bldalpha;
+    BlendFade bldy;
+
     Keycnt keycnt;
     Keyinput keyinput;
-    Waitcnt waitcnt;
+    WaitControl waitcnt;
     InterruptMaster int_master;
     InterruptEnabled int_enabled;
     InterruptRequest int_request;
@@ -164,8 +74,6 @@ public:
 private:
     template<typename T>
     T& ref(u32 addr);
-
-    void postWrite(u32 addr);
 
     void demirror(u32& addr) const;
 
