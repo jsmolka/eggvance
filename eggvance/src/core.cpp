@@ -98,38 +98,24 @@ void Core::emulate(int cycles)
         }
         if (mmu.halt)
         {
-            // Todo: inaccurate, should emulate until first interrupt
-            //emulateTimers(remaining);
+            // Todo: Emulate until first interrupt
+            emulateTimers(remaining);
             remaining = 0;
-            return;
+            break;
         }
-        cycles = arm.step();
-        remaining -= cycles;
-        //emulateTimers(cycles);
+        else
+        {
+            cycles = arm.step();
+            remaining -= cycles;
+            emulateTimers(cycles);
+        }
     }
 }
 
 void Core::emulateTimers(int cycles)
 {
-    static InterruptFlag flags[4] = {
-        IF_TIMER0_OVERFLOW,
-        IF_TIMER1_OVERFLOW,
-        IF_TIMER2_OVERFLOW,
-        IF_TIMER3_OVERFLOW
-    };
-
-    while (cycles-- > 0)
-    {
-        for (int x = 0; x < 4; ++x)
-        {
-            mmu.timer[x].step();
-
-            if (mmu.timer[x].requestInterrupt()) 
-            {
-                Interrupt::request(flags[x]);
-            }
-        }
-    }
+    for (Timer& timer : mmu.timer)
+        timer.emulate(cycles);
 }
 
 void Core::keyEvent(SDL_Keycode key, bool pressed)

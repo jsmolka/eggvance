@@ -15,5 +15,3 @@
 #include "blendfade.h"
 #include "keycontrol.h"
 #include "waitcontrol.h"
-#include "timercontrol.h"
-#include "timerdata.h"

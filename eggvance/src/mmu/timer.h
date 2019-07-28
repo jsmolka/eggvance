@@ -1,27 +1,31 @@
 #pragma once
 
-#include "registers/timercontrol.h"
-#include "registers/timerdata.h"
+#include "common/integer.h"
 
 class Timer
 {
 public:
-    Timer(TimerControl& control, TimerData& data);
-    
+    Timer(int timer);
+
     void init();
-    void step();
+    void emulate(int cycles);
 
-    bool requestInterrupt() const;
-
-    Timer* prev = nullptr;
     Timer* next = nullptr;
-    int initial = 0;
+
+    u16 data;
+    int initial;
+
+    struct TimerControl
+    {
+        int prescaler;  // Prescaler value (0 = 1, 1 = 64, 2 = 256, 3 = 1024)
+        int cascade;    // Timer disabled, increments if previous overflows
+        int irq;        // Interrupt on overflow
+        int enabled;    // Timer enabled
+    } control;
 
 private:
-    void increment();
-    bool overflowed() const;
+    int timer;
+    int counter;
 
-    int counter = 0;
-    TimerControl& control;
-    TimerData& data;
+    void increment(int amount);
 };

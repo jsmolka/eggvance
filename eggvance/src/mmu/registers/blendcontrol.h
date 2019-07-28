@@ -19,5 +19,5 @@ struct BlendControl
 
     BlendLayer upper;  // Upper blend layer
     BlendLayer lower;  // Lower blend layer
-    int mode;      // Mode (0 = none, 1 = alpha blending, 2 = brightness increase, 3 = brightness decrease)
+    int mode;          // Mode (0 = none, 1 = alpha blending, 2 = brightness increase, 3 = brightness decrease)
 };

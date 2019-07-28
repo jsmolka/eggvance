@@ -66,8 +66,6 @@ public:
     u16& intr_enabled;
     u16& intr_request;
 
-    TimerControl timer_control[4];
-    TimerData timer_data[4];
     Timer timer[4];
 
     bool halt;

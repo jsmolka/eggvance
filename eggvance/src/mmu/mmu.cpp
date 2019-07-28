@@ -10,30 +10,11 @@ MMU::MMU()
     : vcount(ref<u8>(REG_VCOUNT))
     , intr_request(ref<u16>(REG_IF))
     , intr_enabled(ref<u16>(REG_IE))
-    , timer_data 
-      {
-          TimerData(ref<u16>(REG_TM0D)),
-          TimerData(ref<u16>(REG_TM1D)),
-          TimerData(ref<u16>(REG_TM2D)),
-          TimerData(ref<u16>(REG_TM3D)) 
-      }
-    , timer 
-      { 
-          Timer(timer_control[0], timer_data[0]), 
-          Timer(timer_control[1], timer_data[1]), 
-          Timer(timer_control[2], timer_data[2]), 
-          Timer(timer_control[3], timer_data[3])
-      }
+    , timer{ 0, 1, 2, 3 }
 {
     timer[0].next = &timer[1];
     timer[1].next = &timer[2];
     timer[2].next = &timer[3];
-
-    timer[1].prev = &timer[0];
-    timer[2].prev = &timer[1];
-    timer[3].prev = &timer[2];
-
-    // Todo: how are registers initialized when not using the bios?
 }
 
 void MMU::reset()
@@ -135,6 +116,30 @@ u8 MMU::readByte(u32 addr) const
     case REG_BLDY+2:
     case REG_BLDY+3:
         return 0;
+
+    case REG_TM0D:
+        return timer[0].data & 0xFF;
+
+    case REG_TM0D+1:
+        return (timer[0].data >> 8) & 0xFF;
+
+    case REG_TM1D:
+        return timer[1].data & 0xFF;
+
+    case REG_TM1D+1:
+        return (timer[1].data >> 8) & 0xFF;
+
+    case REG_TM2D:
+        return timer[2].data & 0xFF;
+
+    case REG_TM2D+1:
+        return (timer[2].data >> 8) & 0xFF;
+
+    case REG_TM3D:
+        return timer[3].data & 0xFF;
+
+    case REG_TM3D+1:
+        return (timer[3].data >> 8) & 0xFF;
     }
 
     return memory[addr];
@@ -547,7 +552,7 @@ void MMU::writeByte(u32 addr, u8 byte)
         bldcnt.upper.bg3 = bits<3, 1>(byte);
         bldcnt.upper.obj = bits<4, 1>(byte);
         bldcnt.upper.bdp = bits<5, 1>(byte);
-        bldcnt.mode  = bits<6, 2>(byte);
+        bldcnt.mode      = bits<6, 2>(byte);
         break;
 
     case REG_BLDCNT+1:
@@ -592,75 +597,83 @@ void MMU::writeByte(u32 addr, u8 byte)
         return;
 
     case REG_TM0D:
-        timer[0].initial = (timer[0].initial & ~0x00FF) | byte;
+        timer[0].initial &= ~0xFF;
+        timer[0].initial |= byte;
         break;
 
     case REG_TM0D+1:
-        timer[0].initial = (timer[0].initial & ~0xFF00) | (byte << 8);
+        timer[0].initial &= ~0xFF00;
+        timer[0].initial |= byte << 8;
         break;
 
     case REG_TM1D:
-        timer[1].initial = (timer[1].initial & ~0x00FF) | byte;
+        timer[1].initial &= ~0xFF;
+        timer[1].initial |= byte;
         break;
 
     case REG_TM1D+1:
-        timer[1].initial = (timer[1].initial & ~0xFF00) | (byte << 8);
+        timer[1].initial &= ~0xFF00;
+        timer[1].initial |= byte << 8;
         break;
 
     case REG_TM2D:
-        timer[2].initial = (timer[2].initial & ~0x00FF) | byte;
+        timer[2].initial &= ~0xFF;
+        timer[2].initial |= byte;
         break;
 
     case REG_TM2D+1:
-        timer[2].initial = (timer[2].initial & ~0xFF00) | (byte << 8);
+        timer[2].initial &= ~0xFF00;
+        timer[2].initial |= byte << 8;
         break;
 
     case REG_TM3D:
-        timer[3].initial = (timer[3].initial & ~0x00FF) | byte;
+        timer[3].initial &= ~0xFF;
+        timer[3].initial |= byte;
         break;
 
     case REG_TM3D+1:
-        timer[3].initial = (timer[3].initial & ~0xFF00) | (byte << 8);
+        timer[3].initial &= ~0xFF00;
+        timer[3].initial |= byte << 8;
         break;
 
     case REG_TM0CNT: 
-        if (!timer_control[0].enabled && (byte & 0x80)) 
+        if (!timer[0].control.enabled && (byte & 0x80))
             timer[0].init();
 
-        timer_control[0].prescaler = bits<0, 2>(byte);
-        timer_control[0].cascade   = bits<2, 1>(byte);
-        timer_control[0].irq       = bits<6, 1>(byte);
-        timer_control[0].enabled   = bits<7, 1>(byte);
+        timer[0].control.prescaler = bits<0, 2>(byte);
+        timer[0].control.cascade   = bits<2, 1>(byte);
+        timer[0].control.irq       = bits<6, 1>(byte);
+        timer[0].control.enabled   = bits<7, 1>(byte);
         break;
     
     case REG_TM1CNT: 
-        if (!timer_control[1].enabled && (byte & 0x80)) 
-            timer[1].init(); 
+        if (!timer[1].control.enabled && (byte & 0x80))
+            timer[1].init();
 
-        timer_control[1].prescaler = bits<0, 2>(byte);
-        timer_control[1].cascade   = bits<2, 1>(byte);
-        timer_control[1].irq       = bits<6, 1>(byte);
-        timer_control[1].enabled   = bits<7, 1>(byte);
+        timer[1].control.prescaler = bits<0, 2>(byte);
+        timer[1].control.cascade   = bits<2, 1>(byte);
+        timer[1].control.irq       = bits<6, 1>(byte);
+        timer[1].control.enabled   = bits<7, 1>(byte);
         break;
 
     case REG_TM2CNT: 
-        if (!timer_control[2].enabled && (byte & 0x80)) 
-            timer[2].init(); 
+        if (!timer[2].control.enabled && (byte & 0x80))
+            timer[2].init();
 
-        timer_control[2].prescaler = bits<0, 2>(byte);
-        timer_control[2].cascade   = bits<2, 1>(byte);
-        timer_control[2].irq       = bits<6, 1>(byte);
-        timer_control[2].enabled   = bits<7, 1>(byte);
+        timer[2].control.prescaler = bits<0, 2>(byte);
+        timer[2].control.cascade   = bits<2, 1>(byte);
+        timer[2].control.irq       = bits<6, 1>(byte);
+        timer[2].control.enabled   = bits<7, 1>(byte);
         break;
 
     case REG_TM3CNT: 
-        if (!timer_control[3].enabled && (byte & 0x80)) 
+        if (!timer[3].control.enabled && (byte & 0x80))
             timer[3].init();
 
-        timer_control[3].prescaler = bits<0, 2>(byte);
-        timer_control[3].cascade   = bits<2, 1>(byte);
-        timer_control[3].irq       = bits<6, 1>(byte);
-        timer_control[3].enabled   = bits<7, 1>(byte);
+        timer[3].control.prescaler = bits<0, 2>(byte);
+        timer[3].control.cascade   = bits<2, 1>(byte);
+        timer[3].control.irq       = bits<6, 1>(byte);
+        timer[3].control.enabled   = bits<7, 1>(byte);
         break;
 
     case REG_KEYCNT:

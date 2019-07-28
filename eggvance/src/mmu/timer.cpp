@@ -1,50 +1,79 @@
 #include "timer.h"
 
-Timer::Timer(TimerControl& control, TimerData& data)
-    : control(control)
-    , data(data)
+#include "interrupt.h"
+
+Timer::Timer(int timer)
+    : timer(timer)
 {
 
 }
 
 void Timer::init()
 {
+    counter = 0;
     data = initial;
 }
 
-void Timer::step()
+void Timer::emulate(int cycles)
 {
     if (!control.enabled || control.cascade) 
         return;
 
-    increment();
+    increment(cycles);
 }
 
-bool Timer::requestInterrupt() const
+void Timer::increment(int amount)
 {
-    return control.irq && overflowed();
-}
+    static constexpr int prescalers[4] = { 1, 64, 256, 1024 };
 
-void Timer::increment()
-{
-    static int prescalers[4] = { 1, 64, 256, 1024 };
+    static constexpr InterruptFlag flags[4] = {
+        IF_TIMER0_OVERFLOW,
+        IF_TIMER1_OVERFLOW,
+        IF_TIMER2_OVERFLOW,
+        IF_TIMER3_OVERFLOW
+    };
 
-    if (++counter == prescalers[control.prescaler]) 
+    if (control.prescaler != 0)
     {
-        counter = 0;
-        data = data + 1;
-        if (data == 0) 
+        counter += amount;
+
+        while (counter >= prescalers[control.prescaler])
         {
-            data = initial;
-            if (next && next->control.cascade)
-                next->increment();
+            if (++data == 0)
+            {
+                data = initial;
+
+                if (next && next->control.cascade)
+                    next->increment(1);
+
+                if (control.irq)
+                    Interrupt::request(flags[timer]);
+            }
+            counter -= prescalers[control.prescaler];
         }
     }
-}
+    else  // Upper solution with prescaler 1 eats cpu cycles
+    {
+        int value = data + amount;
+        if (value >= 0x10000)
+        {
+            int range = 0x10000 - initial;
 
-bool Timer::overflowed() const
-{
-    return control.cascade
-        ? (counter == 0 && data == initial && prev && prev->overflowed())
-        : (counter == 0 && data == initial);
+            while (value >= 0x10000)
+            {
+                if (next && next->control.cascade)
+                    next->increment(1);
+
+                value -= range;
+            }
+            data = value;
+
+            if (control.irq)
+                Interrupt::request(flags[timer]);
+        }
+        else
+        {
+            data += amount;
+        }
+    }
 }

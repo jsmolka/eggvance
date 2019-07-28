@@ -20,9 +20,8 @@ enum InterruptFlag
     IF_GAMEPAK         = 1 << 13   // GamePak removed interrupt
 };
 
-class Interrupt
+struct Interrupt
 {
-public:
     Interrupt() = delete;
 
     static inline void request(InterruptFlag flag)
