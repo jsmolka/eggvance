@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../register.h"
-
 struct DisplayStatus
 {
     int vblank;          // V-Blank flag (set in lines 160..226, not 227)

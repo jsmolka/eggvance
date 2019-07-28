@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../register.h"
+#include "register.h"
 
 class TimerData : public Register<u16>
 {

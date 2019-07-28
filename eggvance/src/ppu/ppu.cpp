@@ -1,6 +1,7 @@
 #include "ppu.h"
 
 #include "common/utility.h"
+#include "mmu/interrupt.h"
 #include "mmu/map.h"
 #include "enums.h"
 #include "scanlinebuilder.h"
@@ -51,9 +52,7 @@ void PPU::scanline()
 {
     mmu.dispstat.vblank = false;
     mmu.dispstat.hblank = false;
-
-    u16 reg = mmu.readHalfFast(REG_DISPSTAT);
-    mmu.writeHalfFast(REG_DISPSTAT, reg & ~0x3);
+    mmu.ref<u16>(REG_DISPSTAT) &= ~0x3;
 
     bgs[0].flip();
     bgs[1].flip();
@@ -103,9 +102,8 @@ void PPU::hblank()
 {
     mmu.dispstat.vblank = false;
     mmu.dispstat.hblank = true;
-
-    u16 reg = mmu.readHalfFast(REG_DISPSTAT);
-    mmu.writeHalfFast(REG_DISPSTAT, (reg & ~0x3) | 0x2);
+    mmu.ref<u16>(REG_DISPSTAT) &= ~0x3;
+    mmu.ref<u16>(REG_DISPSTAT) |= 0x2;
 
     mmu.bgx[0].internal += mmu.bgpb[0].value;
     mmu.bgx[1].internal += mmu.bgpb[1].value;
@@ -114,7 +112,7 @@ void PPU::hblank()
 
     if (mmu.dispstat.hblank_irq)
     {
-        mmu.requestInterrupt(IF_HBLANK);
+        Interrupt::request(IF_HBLANK);
     }
 }
 
@@ -122,9 +120,8 @@ void PPU::vblank()
 {
     mmu.dispstat.vblank = true;
     mmu.dispstat.hblank = false;
-
-    u16 reg = mmu.readHalfFast(REG_DISPSTAT);
-    mmu.writeHalfFast(REG_DISPSTAT, (reg & ~0x3) | 0x1);
+    mmu.ref<u16>(REG_DISPSTAT) &= ~0x3;
+    mmu.ref<u16>(REG_DISPSTAT) |= 0x1;
 
     mmu.bgx[0].internal = mmu.bgx[0].value;
     mmu.bgx[1].internal = mmu.bgx[1].value;
@@ -133,23 +130,23 @@ void PPU::vblank()
 
     if (mmu.dispstat.vblank_irq)
     {
-        mmu.requestInterrupt(IF_VBLANK);
+        Interrupt::request(IF_VBLANK);
     }
 }
 
 void PPU::next()
 {
-    bool vcount_match = mmu.vcount == mmu.dispstat.vcount_compare;
+    int vcount_match = mmu.vcount == mmu.dispstat.vcount_compare;
 
     mmu.vcount = (mmu.vcount + 1) % 228;
     mmu.dispstat.vcount_match = vcount_match;
 
-    u16 reg = mmu.readHalfFast(REG_DISPSTAT);
-    mmu.writeHalfFast(REG_DISPSTAT, (reg & ~0x4) | (vcount_match << 2));
+    mmu.ref<u16>(REG_DISPSTAT) &= ~0x4;
+    mmu.ref<u16>(REG_DISPSTAT) |= vcount_match << 2;
 
     if (vcount_match && mmu.dispstat.vcount_irq)
     {
-        mmu.requestInterrupt(IF_VCOUNT_MATCH);
+        Interrupt::request(IF_VCOUNT_MATCH);
     }
 }
 

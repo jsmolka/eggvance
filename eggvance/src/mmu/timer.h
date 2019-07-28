@@ -1,7 +1,7 @@
 #pragma once
 
-#include "registers/other/timercontrol.h"
-#include "registers/other/timerdata.h"
+#include "registers/timercontrol.h"
+#include "registers/timerdata.h"
 
 class Timer
 {

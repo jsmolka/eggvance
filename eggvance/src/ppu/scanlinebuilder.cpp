@@ -100,16 +100,16 @@ bool ScanlineBuilder::windowSfx()
         return true;
 
     case WF_WIN0: 
-        return mmu.winin.win0_sfx;
+        return mmu.winin.win0.sfx;
 
     case WF_WIN1: 
-        return mmu.winin.win1_sfx;
+        return mmu.winin.win1.sfx;
 
     case WF_WINOBJ: 
-        return mmu.winout.winobj_sfx;
+        return mmu.winout.winobj.sfx;
 
     case WF_WINOUT: 
-        return mmu.winout.winout_sfx;
+        return mmu.winout.winout.sfx;
 
     default:
         return true;
@@ -165,12 +165,12 @@ int ScanlineBuilder::masterMask() const
 int ScanlineBuilder::blendAMask() const
 {
     int mask = 0;
-    if (mmu.bldcnt.a_bg0) mask |= LF_BG0;
-    if (mmu.bldcnt.a_bg1) mask |= LF_BG1;
-    if (mmu.bldcnt.a_bg2) mask |= LF_BG2;
-    if (mmu.bldcnt.a_bg3) mask |= LF_BG3;
-    if (mmu.bldcnt.a_obj) mask |= LF_OBJ;
-    if (mmu.bldcnt.a_bdp) mask |= LF_BDP;
+    if (mmu.bldcnt.upper.bg0) mask |= LF_BG0;
+    if (mmu.bldcnt.upper.bg1) mask |= LF_BG1;
+    if (mmu.bldcnt.upper.bg2) mask |= LF_BG2;
+    if (mmu.bldcnt.upper.bg3) mask |= LF_BG3;
+    if (mmu.bldcnt.upper.obj) mask |= LF_OBJ;
+    if (mmu.bldcnt.upper.bdp) mask |= LF_BDP;
     
     return mask;
 }
@@ -178,12 +178,12 @@ int ScanlineBuilder::blendAMask() const
 int ScanlineBuilder::blendBMask() const
 {
     int mask = 0;
-    if (mmu.bldcnt.b_bg0) mask |= LF_BG0;
-    if (mmu.bldcnt.b_bg1) mask |= LF_BG1;
-    if (mmu.bldcnt.b_bg2) mask |= LF_BG2;
-    if (mmu.bldcnt.b_bg3) mask |= LF_BG3;
-    if (mmu.bldcnt.b_obj) mask |= LF_OBJ;
-    if (mmu.bldcnt.b_bdp) mask |= LF_BDP;
+    if (mmu.bldcnt.lower.bg0) mask |= LF_BG0;
+    if (mmu.bldcnt.lower.bg1) mask |= LF_BG1;
+    if (mmu.bldcnt.lower.bg2) mask |= LF_BG2;
+    if (mmu.bldcnt.lower.bg3) mask |= LF_BG3;
+    if (mmu.bldcnt.lower.obj) mask |= LF_OBJ;
+    if (mmu.bldcnt.lower.bdp) mask |= LF_BDP;
     
     return mask;
 }
@@ -197,35 +197,35 @@ int ScanlineBuilder::windowMask() const
     switch (window)
     {
     case WF_WIN0:
-        if (mmu.winin.win0_bg0) mask |= LF_BG0;
-        if (mmu.winin.win0_bg1) mask |= LF_BG1;
-        if (mmu.winin.win0_bg2) mask |= LF_BG2;
-        if (mmu.winin.win0_bg3) mask |= LF_BG3;
-        if (mmu.winin.win0_obj) mask |= LF_OBJ;
+        if (mmu.winin.win0.bg0) mask |= LF_BG0;
+        if (mmu.winin.win0.bg1) mask |= LF_BG1;
+        if (mmu.winin.win0.bg2) mask |= LF_BG2;
+        if (mmu.winin.win0.bg3) mask |= LF_BG3;
+        if (mmu.winin.win0.obj) mask |= LF_OBJ;
         break;
 
     case WF_WIN1:
-        if (mmu.winin.win1_bg0) mask |= LF_BG0;
-        if (mmu.winin.win1_bg1) mask |= LF_BG1;
-        if (mmu.winin.win1_bg2) mask |= LF_BG2;
-        if (mmu.winin.win1_bg3) mask |= LF_BG3;
-        if (mmu.winin.win1_obj) mask |= LF_OBJ;
+        if (mmu.winin.win1.bg0) mask |= LF_BG0;
+        if (mmu.winin.win1.bg1) mask |= LF_BG1;
+        if (mmu.winin.win1.bg2) mask |= LF_BG2;
+        if (mmu.winin.win1.bg3) mask |= LF_BG3;
+        if (mmu.winin.win1.obj) mask |= LF_OBJ;
         break;
 
     case WF_WINOBJ:
-        if (mmu.winout.winobj_bg0) mask |= LF_BG0;
-        if (mmu.winout.winobj_bg1) mask |= LF_BG1;
-        if (mmu.winout.winobj_bg2) mask |= LF_BG2;
-        if (mmu.winout.winobj_bg3) mask |= LF_BG3;
-        if (mmu.winout.winobj_obj) mask |= LF_OBJ;
+        if (mmu.winout.winobj.bg0) mask |= LF_BG0;
+        if (mmu.winout.winobj.bg1) mask |= LF_BG1;
+        if (mmu.winout.winobj.bg2) mask |= LF_BG2;
+        if (mmu.winout.winobj.bg3) mask |= LF_BG3;
+        if (mmu.winout.winobj.obj) mask |= LF_OBJ;
         break;
 
     case WF_WINOUT:
-        if (mmu.winout.winout_bg0) mask |= LF_BG0;
-        if (mmu.winout.winout_bg1) mask |= LF_BG1;
-        if (mmu.winout.winout_bg2) mask |= LF_BG2;
-        if (mmu.winout.winout_bg3) mask |= LF_BG3;
-        if (mmu.winout.winout_obj) mask |= LF_OBJ;
+        if (mmu.winout.winout.bg0) mask |= LF_BG0;
+        if (mmu.winout.winout.bg1) mask |= LF_BG1;
+        if (mmu.winout.winout.bg2) mask |= LF_BG2;
+        if (mmu.winout.winout.bg3) mask |= LF_BG3;
+        if (mmu.winout.winout.obj) mask |= LF_OBJ;
         break;
     }
     return mask;
@@ -254,16 +254,16 @@ WindowFlag ScanlineBuilder::activeWindow() const
 
 bool ScanlineBuilder::insideWindow(int window) const
 {
-    int x1 = mmu.winh[window].x1;
-    int x2 = mmu.winh[window].x2;
-    int y1 = mmu.winv[window].y1;
-    int y2 = mmu.winv[window].y2;
+    int x_min = mmu.winh[window].min;
+    int x_max = mmu.winh[window].max;
+    int y_min = mmu.winv[window].min;
+    int y_max = mmu.winv[window].max;
 
-    if (x2 > WIDTH  || x2 < x1) x2 = WIDTH;
-    if (y2 > HEIGHT || y2 < y1) y2 = HEIGHT;
+    if (x_max > WIDTH  || x_max < x_min) x_max = WIDTH;
+    if (y_max > HEIGHT || y_max < y_min) y_max = HEIGHT;
 
-    bool inside_h = x >= x1 && x < x2;
-    bool inside_v = y >= y1 && y < y2;
+    bool inside_h = x >= x_min && x < x_max;
+    bool inside_v = y >= y_min && y < y_max;
 
     return inside_h && inside_v;
 }

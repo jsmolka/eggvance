@@ -4,7 +4,7 @@
 #include <string>
 
 #include "common/integer.h"
-#include "registers/include.h"
+#include "registers/all.h"
 #include "timer.h"
 
 class MMU
@@ -15,8 +15,6 @@ public:
     void reset();
 
     bool readFile(const std::string& file, u32 addr);
-
-    void requestInterrupt(InterruptFlag flag);
 
     u8  readByte(u32 addr) const;
     u16 readHalf(u32 addr) const;
@@ -39,7 +37,7 @@ public:
 
     DisplayControl dispcnt;
     DisplayStatus dispstat;
-    int vcount;
+    u8& vcount;
 
     BackgroundControl bgcnt[4];
     BackgroundOffset bghofs[4];
@@ -51,8 +49,8 @@ public:
     BackgroundParameter bgpc[2];
     BackgroundParameter bgpd[2];
 
-    WindowRangeH winh[2];
-    WindowRangeV winv[2];
+    WindowRange winh[2];
+    WindowRange winv[2];
     WindowInside winin;
     WindowOutside winout;
 
@@ -63,9 +61,10 @@ public:
 
     KeyControl keycnt;
     WaitControl waitcnt;
-    Interrupt int_enabled;
-    Interrupt int_request;
-    bool int_master;
+
+    bool intr_master;
+    u16& intr_enabled;
+    u16& intr_request;
 
     TimerControl timer_control[4];
     TimerData timer_data[4];

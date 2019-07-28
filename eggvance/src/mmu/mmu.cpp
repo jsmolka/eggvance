@@ -7,7 +7,10 @@
 #include "map.h"
 
 MMU::MMU()
-    : timer_data 
+    : vcount(ref<u8>(REG_VCOUNT))
+    , intr_request(ref<u16>(REG_IF))
+    , intr_enabled(ref<u16>(REG_IE))
+    , timer_data 
       {
           TimerData(ref<u16>(REG_TM0D)),
           TimerData(ref<u16>(REG_TM1D)),
@@ -59,30 +62,12 @@ bool MMU::readFile(const std::string& file, u32 addr)
     return true;
 }
 
-void MMU::requestInterrupt(InterruptFlag flag)
-{
-    if (int_master)
-    {
-        if (int_enabled.mask & flag)
-            halt = false;
-
-        int_request.mask |= flag;
-        ref<u16>(REG_IF) |= flag;
-    }
-}
-
 u8 MMU::readByte(u32 addr) const
 {
     demirror(addr);
 
     switch (addr)
     {
-    case REG_VCOUNT:
-        return vcount;
-
-    case REG_VCOUNT+1:
-        return 0;
-
     case REG_BG0HOFS:
     case REG_BG0HOFS+1:
     case REG_BG0VOFS:
@@ -481,71 +466,71 @@ void MMU::writeByte(u32 addr, u8 byte)
         break;
 
     case REG_WIN0H:
-        winh[0].x2 = byte;
+        winh[0].max = byte;
         break;
 
     case REG_WIN0H+1:
-        winh[0].x1 = byte;
+        winh[0].min = byte;
         break;
 
     case REG_WIN1H:
-        winh[1].x2 = byte;
+        winh[1].max = byte;
         break;
 
     case REG_WIN1H+1:
-        winh[1].x1 = byte;
+        winh[1].min = byte;
         break;
 
     case REG_WIN0V:
-        winv[0].y2 = byte;
+        winv[0].max = byte;
         break;
 
     case REG_WIN0V+1:
-        winv[0].y1 = byte;
+        winv[0].min = byte;
         break;
 
     case REG_WIN1V:
-        winv[1].y2 = byte;
+        winv[1].max = byte;
         break;
 
     case REG_WIN1V+1:
-        winv[1].y1 = byte;
+        winv[1].min = byte;
         break;
 
     case REG_WININ:
-        winin.win0_bg0 = bits<0, 1>(byte);
-        winin.win0_bg1 = bits<1, 1>(byte);
-        winin.win0_bg2 = bits<2, 1>(byte);
-        winin.win0_bg3 = bits<3, 1>(byte);
-        winin.win0_obj = bits<4, 1>(byte);
-        winin.win0_sfx = bits<5, 1>(byte);
+        winin.win0.bg0 = bits<0, 1>(byte);
+        winin.win0.bg1 = bits<1, 1>(byte);
+        winin.win0.bg2 = bits<2, 1>(byte);
+        winin.win0.bg3 = bits<3, 1>(byte);
+        winin.win0.obj = bits<4, 1>(byte);
+        winin.win0.sfx = bits<5, 1>(byte);
         break;
 
     case REG_WININ+1:
-        winin.win1_bg0 = bits<0, 1>(byte);
-        winin.win1_bg1 = bits<1, 1>(byte);
-        winin.win1_bg2 = bits<2, 1>(byte);
-        winin.win1_bg3 = bits<3, 1>(byte);
-        winin.win1_obj = bits<4, 1>(byte);
-        winin.win1_sfx = bits<5, 1>(byte);
+        winin.win1.bg0 = bits<0, 1>(byte);
+        winin.win1.bg1 = bits<1, 1>(byte);
+        winin.win1.bg2 = bits<2, 1>(byte);
+        winin.win1.bg3 = bits<3, 1>(byte);
+        winin.win1.obj = bits<4, 1>(byte);
+        winin.win1.sfx = bits<5, 1>(byte);
         break;
         
     case REG_WINOUT:
-        winout.winout_bg0 = bits<0, 1>(byte);
-        winout.winout_bg1 = bits<1, 1>(byte);
-        winout.winout_bg2 = bits<2, 1>(byte);
-        winout.winout_bg3 = bits<3, 1>(byte);
-        winout.winout_obj = bits<4, 1>(byte);
-        winout.winout_sfx = bits<5, 1>(byte);
+        winout.winout.bg0 = bits<0, 1>(byte);
+        winout.winout.bg1 = bits<1, 1>(byte);
+        winout.winout.bg2 = bits<2, 1>(byte);
+        winout.winout.bg3 = bits<3, 1>(byte);
+        winout.winout.obj = bits<4, 1>(byte);
+        winout.winout.sfx = bits<5, 1>(byte);
         break;
 
     case REG_WINOUT+1:
-        winout.winobj_bg0 = bits<0, 1>(byte);
-        winout.winobj_bg1 = bits<1, 1>(byte);
-        winout.winobj_bg2 = bits<2, 1>(byte);
-        winout.winobj_bg3 = bits<3, 1>(byte);
-        winout.winobj_obj = bits<4, 1>(byte);
-        winout.winobj_sfx = bits<5, 1>(byte);
+        winout.winobj.bg0 = bits<0, 1>(byte);
+        winout.winobj.bg1 = bits<1, 1>(byte);
+        winout.winobj.bg2 = bits<2, 1>(byte);
+        winout.winobj.bg3 = bits<3, 1>(byte);
+        winout.winobj.obj = bits<4, 1>(byte);
+        winout.winobj.sfx = bits<5, 1>(byte);
         break;
 
     case REG_MOSAIC:
@@ -556,22 +541,22 @@ void MMU::writeByte(u32 addr, u8 byte)
         break;
 
     case REG_BLDCNT:
-        bldcnt.a_bg0 = bits<0, 1>(byte);
-        bldcnt.a_bg1 = bits<1, 1>(byte);
-        bldcnt.a_bg2 = bits<2, 1>(byte);
-        bldcnt.a_bg3 = bits<3, 1>(byte);
-        bldcnt.a_obj = bits<4, 1>(byte);
-        bldcnt.a_bdp = bits<5, 1>(byte);
+        bldcnt.upper.bg0 = bits<0, 1>(byte);
+        bldcnt.upper.bg1 = bits<1, 1>(byte);
+        bldcnt.upper.bg2 = bits<2, 1>(byte);
+        bldcnt.upper.bg3 = bits<3, 1>(byte);
+        bldcnt.upper.obj = bits<4, 1>(byte);
+        bldcnt.upper.bdp = bits<5, 1>(byte);
         bldcnt.mode  = bits<6, 2>(byte);
         break;
 
     case REG_BLDCNT+1:
-        bldcnt.b_bg0 = bits<0, 1>(byte);
-        bldcnt.b_bg1 = bits<1, 1>(byte);
-        bldcnt.b_bg2 = bits<2, 1>(byte);
-        bldcnt.b_bg3 = bits<3, 1>(byte);
-        bldcnt.b_obj = bits<4, 1>(byte);
-        bldcnt.b_bdp = bits<5, 1>(byte);
+        bldcnt.lower.bg0 = bits<0, 1>(byte);
+        bldcnt.lower.bg1 = bits<1, 1>(byte);
+        bldcnt.lower.bg2 = bits<2, 1>(byte);
+        bldcnt.lower.bg3 = bits<3, 1>(byte);
+        bldcnt.lower.obj = bits<4, 1>(byte);
+        bldcnt.lower.bdp = bits<5, 1>(byte);
         break;
 
     case REG_BLDALPHA:
@@ -588,15 +573,15 @@ void MMU::writeByte(u32 addr, u8 byte)
 
     case REG_WAITCNT:
         waitcnt.sram  = bits<0, 2>(byte);
-        waitcnt.ws0_n = bits<2, 2>(byte);
-        waitcnt.ws0_s = bits<4, 1>(byte);
-        waitcnt.ws1_n = bits<5, 2>(byte);
-        waitcnt.ws1_s = bits<7, 1>(byte);
+        waitcnt.ws0.n = bits<2, 2>(byte);
+        waitcnt.ws0.s = bits<4, 1>(byte);
+        waitcnt.ws1.n = bits<5, 2>(byte);
+        waitcnt.ws1.s = bits<7, 1>(byte);
         break;
 
     case REG_WAITCNT+1:
-        waitcnt.ws2_n    = bits<0, 2>(byte);
-        waitcnt.ws2_s    = bits<2, 1>(byte);
+        waitcnt.ws2.n    = bits<0, 2>(byte);
+        waitcnt.ws2.s    = bits<2, 1>(byte);
         waitcnt.phi      = bits<3, 2>(byte);
         waitcnt.prefetch = bits<6, 1>(byte);
         waitcnt.type     = bits<7, 1>(byte);
@@ -689,24 +674,11 @@ void MMU::writeByte(u32 addr, u8 byte)
         break;
 
     case REG_IME:
-        int_master = bits<0, 1>(byte);
-        break;
-
-    case REG_IE:
-        int_enabled.bytes[0] = byte;
-        break;
-
-    case REG_IE+1:
-        int_enabled.bytes[1] = byte;
+        intr_master = bits<0, 1>(byte);
         break;
 
     case REG_IF:
-        int_request.bytes[0] &= ~byte;
-        memory[addr] &= ~byte;
-        return;
-
     case REG_IF+1:
-        int_request.bytes[1] &= ~byte;
         memory[addr] &= ~byte;
         return;
 

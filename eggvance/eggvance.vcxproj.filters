@@ -69,10 +69,10 @@
     <ClCompile Include="src\arm\decode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\mmu\registers\io\backgroundcontrol.cpp">
+    <ClCompile Include="src\mmu\registers\backgroundcontrol.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\mmu\registers\other\timerdata.cpp">
+    <ClCompile Include="src\mmu\registers\timerdata.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -110,9 +110,6 @@
     <ClInclude Include="src\mmu\registers\register.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\include.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\mmu\map.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -120,9 +117,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\common\bitvalue.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\mosaic.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ppu\mapentry.h">
@@ -155,64 +149,70 @@
     <ClInclude Include="src\mmu\timer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\other\timercontrol.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\common\tmp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\arm\decode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\displaycontrol.h">
+    <ClInclude Include="src\mmu\registers\backgroundcontrol.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\displaystatus.h">
+    <ClInclude Include="src\mmu\registers\backgroundoffset.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\backgroundcontrol.h">
+    <ClInclude Include="src\mmu\registers\backgroundparameter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\backgroundoffset.h">
+    <ClInclude Include="src\mmu\registers\backgroundreference.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\backgroundreference.h">
+    <ClInclude Include="src\mmu\registers\blendalpha.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\backgroundparameter.h">
+    <ClInclude Include="src\mmu\registers\blendcontrol.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\windowrangeh.h">
+    <ClInclude Include="src\mmu\registers\blendfade.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\windowrangev.h">
+    <ClInclude Include="src\mmu\registers\displaycontrol.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\windowinside.h">
+    <ClInclude Include="src\mmu\registers\displaystatus.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\windowoutside.h">
+    <ClInclude Include="src\mmu\registers\mosaic.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\blendcontrol.h">
+    <ClInclude Include="src\mmu\registers\windowinside.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\blendalpha.h">
+    <ClInclude Include="src\mmu\registers\windowoutside.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\io\blendfade.h">
+    <ClInclude Include="src\mmu\registers\keycontrol.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\other\waitcontrol.h">
+    <ClInclude Include="src\mmu\registers\timercontrol.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\other\keycontrol.h">
+    <ClInclude Include="src\mmu\registers\timerdata.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\other\interrupt.h">
+    <ClInclude Include="src\mmu\registers\waitcontrol.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\other\timerdata.h">
+    <ClInclude Include="src\mmu\interrupt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\windowrange.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\all.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -348,7 +348,6 @@ void ARM::cycle(u32 addr, AccessType access)
     case 0x5:
     case 0x6:
     case 0x7:
-        // Add cycle if not in H-Blank or V-Blank
         if (!mmu.dispstat.hblank && !mmu.dispstat.vblank)
             cycles++;
         break;
@@ -357,32 +356,31 @@ void ARM::cycle(u32 addr, AccessType access)
     case 0x8:
     case 0x9:
         if (access == SEQ)
-            cycles += seq[0][mmu.waitcnt.ws0_s];
+            cycles += seq[0][mmu.waitcnt.ws0.s];
         else
-            cycles += nonseq[mmu.waitcnt.ws0_n];
+            cycles += nonseq[mmu.waitcnt.ws0.n];
         break;
 
     // Waitstate 1
     case 0xA:
     case 0xB:
         if (access == SEQ)
-            cycles += seq[1][mmu.waitcnt.ws1_s];
+            cycles += seq[1][mmu.waitcnt.ws1.s];
         else
-            cycles += nonseq[mmu.waitcnt.ws1_n];
+            cycles += nonseq[mmu.waitcnt.ws1.n];
         break;
 
     // Waitstate 2
     case 0xC:
     case 0xD:
         if (access == SEQ)
-            cycles += seq[2][mmu.waitcnt.ws2_s];
+            cycles += seq[2][mmu.waitcnt.ws2.s];
         else
-            cycles += nonseq[mmu.waitcnt.ws2_n];
+            cycles += nonseq[mmu.waitcnt.ws2.n];
         break;
 
     // SRAM
     case 0xE:
-    case 0xF:
         cycles += nonseq[mmu.waitcnt.sram];
         break;
     }

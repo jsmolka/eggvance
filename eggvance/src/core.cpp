@@ -1,11 +1,14 @@
 #include "core.h"
 
 #include "mmu/map.h"
+#include "mmu/interrupt.h"
 
 Core::Core()
     : arm(mmu)
     , ppu(mmu)
 {
+    Interrupt::mmu = &mmu;
+
     reset();
 }
 
@@ -89,20 +92,20 @@ void Core::emulate(int cycles)
 
     while (remaining > 0)
     {
-        if (mmu.int_master && (mmu.int_enabled.mask & mmu.int_request.mask))
+        if (Interrupt::requested())
         {
             arm.interrupt();
         }
         if (mmu.halt)
         {
             // Todo: inaccurate, should emulate until first interrupt
-            emulateTimers(remaining);
+            //emulateTimers(remaining);
             remaining = 0;
             return;
         }
         cycles = arm.step();
         remaining -= cycles;
-        emulateTimers(cycles);
+        //emulateTimers(cycles);
     }
 }
 
@@ -123,7 +126,7 @@ void Core::emulateTimers(int cycles)
 
             if (mmu.timer[x].requestInterrupt()) 
             {
-                mmu.requestInterrupt(flags[x]);
+                Interrupt::request(flags[x]);
             }
         }
     }
@@ -161,7 +164,7 @@ void Core::keyEvent(SDL_Keycode key, bool pressed)
 
         if (interrupt)
         {
-            mmu.requestInterrupt(IF_KEYPAD);
+            Interrupt::request(IF_KEYPAD);
         }
     }
 }
