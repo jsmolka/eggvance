@@ -6,13 +6,15 @@ struct BlendControl
     {
         union
         {
-            int bg0;  // BG0 considered
-            int bg1;  // BG1 considered
-            int bg2;  // BG2 considered
-            int bg3;  // BG3 considered
+            struct
+            {
+                int bg0;  // BG0 considered
+                int bg1;  // BG1 considered
+                int bg2;  // BG2 considered
+                int bg3;  // BG3 considered
+            };
+            int bg[4];
         };
-        int bg[4];
-
         int obj;  // Objects considered
         int bdp;  // Backdrop considered
     };
