@@ -98,13 +98,7 @@
     <ClInclude Include="src\arm\disassembler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\arm\utility.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\common\format.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\map.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\common\bitfield.h">
@@ -201,6 +195,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\mmu\registers\all.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\memory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,9 +2,11 @@
 
 #include <array>
 #include <string>
+#include <vector>
 
 #include "common/integer.h"
 #include "registers/all.h"
+#include "memory.h"
 #include "timer.h"
 
 class MMU
@@ -34,7 +36,7 @@ public:
     void writeWordFast(u32 addr, u32 word);
 
     template<typename T>
-    T& mmio(u32 addr);
+    T& mmio(IORegister reg);
 
     DisplayControl dispcnt;
     DisplayStatus dispstat;
@@ -60,6 +62,7 @@ public:
     BlendAlpha bldalpha;
     BlendFade bldy;
 
+    u16& keyinput;
     KeyControl keycnt;
     WaitControl waitcnt;
 
@@ -71,19 +74,19 @@ public:
 
     bool halt;
 
-    std::array<u8, 0x4000> bios;
+    std::array<u8, 0x04000> bios;
     std::array<u8, 0x40000> wram;
-    std::array<u8, 0x8000> iwram;
-    std::array<u8, 0x400> io;
-    std::array<u8, 0x400> palette;
+    std::array<u8, 0x08000> iwram;
+    std::array<u8, 0x00400> io;
+    std::array<u8, 0x00400> palette;
     std::array<u8, 0x20000> vram;
-    std::array<u8, 0x400> oam;
-    std::array<u8, 0x2000000> gamepak;
+    std::array<u8, 0x00400> oam;
     std::array<u8, 0x10000> sram;
+    std::vector<u8> gamepak;
 };
 
 template<typename T>
-inline T& MMU::mmio(u32 addr)
+inline T& MMU::mmio(IORegister reg)
 {
-    return *reinterpret_cast<T*>(&io[addr]);
+    return *reinterpret_cast<T*>(&io[reg]);
 }

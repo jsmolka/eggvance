@@ -3,7 +3,6 @@
 #include "common/format.h"
 #include "common/utility.h"
 #include "decode.h"
-#include "utility.h"
 
 std::string Disassembler::disassemble(u32 data, const Registers& regs)
 {

@@ -1,7 +1,6 @@
 #include "arm.h"
 
 #include "common/utility.h"
-#include "utility.h"
 
 void ARM::moveShiftedRegister(u16 instr)
 {
@@ -325,7 +324,7 @@ void ARM::loadStoreRegisterOffset(u16 instr)
         if (byte)
             mmu.writeByte(addr, dst);
         else
-            mmu.writeWord(alignWord(addr), dst);
+            mmu.writeWord(addr, dst);
 
         cycle(addr, NSEQ);
     }
@@ -370,7 +369,7 @@ void ARM::loadStoreHalfwordSigned(u16 instr)
     }
     else  // STRH
     {
-        mmu.writeHalf(alignHalf(addr), dst);
+        mmu.writeHalf(addr, dst);
 
         cycle(addr, NSEQ);
     }
@@ -408,7 +407,7 @@ void ARM::loadStoreImmediateOffset(u16 instr)
         if (byte)
             mmu.writeByte(addr, dst);
         else
-            mmu.writeWord(alignWord(addr), dst);
+            mmu.writeWord(addr, dst);
 
         cycle(addr, NSEQ);
     }
@@ -436,7 +435,7 @@ void ARM::loadStoreHalfword(u16 instr)
     }
     else
     {
-        mmu.writeHalf(alignHalf(addr), dst);
+        mmu.writeHalf(addr, dst);
         cycle(addr, NSEQ);
     }
 }
@@ -462,7 +461,7 @@ void ARM::loadStoreSPRelative(u16 instr)
     }
     else
     {
-        mmu.writeWord(alignWord(addr), dst);
+        mmu.writeWord(addr, dst);
         cycle(addr, NSEQ);
     }
 }
@@ -507,7 +506,7 @@ void ARM::pushPopRegisters(u16 instr)
     int pop   = bits<11, 1>(instr);
 
     // Register count needed for cycles
-    int rcount = count_bits(rlist);
+    int rcount = countBits(rlist);
 
     cycle(regs.pc, NSEQ);
 
@@ -523,7 +522,7 @@ void ARM::pushPopRegisters(u16 instr)
                 else
                     cycle();
 
-                regs[x] = mmu.readWord(alignWord(regs.sp));
+                regs[x] = mmu.readWord(regs.sp);
                 regs.sp += 4;
             }
         }
@@ -532,7 +531,7 @@ void ARM::pushPopRegisters(u16 instr)
         {
             cycle(regs.pc + 2, NSEQ);
 
-            regs.pc = mmu.readWord(alignWord(regs.sp));
+            regs.pc = mmu.readWord(regs.sp);
             regs.pc = alignHalf(regs.pc);
             advance();
             regs.sp += 4;
@@ -546,7 +545,7 @@ void ARM::pushPopRegisters(u16 instr)
         if (pc_lr)
         {
             regs.sp -= 4;
-            mmu.writeWord(alignWord(regs.sp), regs.lr);
+            mmu.writeWord(regs.sp, regs.lr);
         }
 
         for (int x = 7; rcount > 0; --x)
@@ -557,7 +556,7 @@ void ARM::pushPopRegisters(u16 instr)
                     cycle(regs.sp, SEQ);
 
                 regs.sp -= 4;
-                mmu.writeWord(alignWord(regs.sp), regs[x]);
+                mmu.writeWord(regs.sp, regs[x]);
             }
         }
         cycle(regs.sp, NSEQ);
@@ -578,7 +577,7 @@ void ARM::loadStoreMultiple(u16 instr)
         cycle(regs.pc, NSEQ);
     
         // Register count needed for cycles
-        int rcount = count_bits(rlist);
+        int rcount = countBits(rlist);
 
         if (load)
         {

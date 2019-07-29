@@ -8,10 +8,13 @@ Timer::Timer(int timer)
 
 }
 
-void Timer::init()
+void Timer::init(bool enabled)
 {
-    counter = 0;
-    data = initial;
+    if (!control.enabled && enabled)
+    {
+        counter = 0;
+        data = initial;
+    }
 }
 
 void Timer::emulate(int cycles)

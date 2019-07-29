@@ -1,6 +1,5 @@
 #include "core.h"
 
-#include "mmu/map.h"
 #include "mmu/interrupt.h"
 
 Core::Core()
@@ -57,8 +56,6 @@ void Core::reset()
     mmu.reset();
     arm.reset();
     ppu.reset();
-    
-    mmu.mmio<u16>(REG_KEYINPUT) = 0x3FF;
 }
 
 void Core::frame()
@@ -137,16 +134,14 @@ void Core::keyEvent(SDL_Keycode key, bool pressed)
     case SDLK_q: shift = 9; break; // L
     }
 
-    u16& keyinput = mmu.mmio<u16>(REG_KEYINPUT);
-    
-    keyinput &= ~(1 << shift);
-    keyinput |= (state << shift);
+    mmu.keyinput &= ~(1 << shift);
+    mmu.keyinput |= (state << shift);
 
     if (mmu.keycnt.irq)
     {
         bool interrupt = mmu.keycnt.logic
-            ? (keyinput & mmu.keycnt.mask)
-            : (keyinput | mmu.keycnt.mask);
+            ? (mmu.keyinput & mmu.keycnt.mask)
+            : (mmu.keyinput | mmu.keycnt.mask);
 
         if (interrupt)
         {

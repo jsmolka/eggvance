@@ -1,21 +1,21 @@
 #pragma once
 
-enum MemoryRegion
+enum Page
 {
-    REGION_BIOS         = 0x00,
-    REGION_WRAM         = 0x02,
-    REGION_IWRAM        = 0x03,
-    REGION_IO           = 0x04,
-    REGION_PALETTE      = 0x05,
-    REGION_VRAM         = 0x06,
-    REGION_OAM          = 0x07,
-    REGION_GAMEPAK_0    = 0x08,
-    REGION_GAMEPAK_1    = 0x0A,
-    REGION_GAMEPAK_2    = 0x0C,
-    REGION_GAMEPAK_SRAM = 0x0E
+    PAGE_BIOS         = 0x00,
+    PAGE_WRAM         = 0x02,
+    PAGE_IWRAM        = 0x03,
+    PAGE_IO           = 0x04,
+    PAGE_PALETTE      = 0x05,
+    PAGE_VRAM         = 0x06,
+    PAGE_OAM          = 0x07,
+    PAGE_GAMEPAK_0    = 0x08,
+    PAGE_GAMEPAK_1    = 0x0A,
+    PAGE_GAMEPAK_2    = 0x0C,
+    PAGE_GAMEPAK_SRAM = 0x0E
 };
 
-enum MemoryMap
+enum Map
 {
     MAP_BIOS         = 0x00000000,
     MAP_WRAM         = 0x02000000,
@@ -30,7 +30,7 @@ enum MemoryMap
     MAP_GAMEPAK_SRAM = 0x0E000000
 };
 
-enum MemoryRegister
+enum IORegister
 {
     REG_DISPCNT  = 0x000,
     REG_DISPSTAT = 0x004,
@@ -67,6 +67,8 @@ enum MemoryRegister
     REG_WINOUT   = 0x04A,
     REG_MOSAIC   = 0x04C,
     REG_BLDCNT   = 0x050,
+    REG_BLDALPHA = 0x052,
+    REG_BLDY     = 0x054,
     REG_TM0D     = 0x100,
     REG_TM0CNT   = 0x102,
     REG_TM1D     = 0x104,
@@ -75,8 +77,6 @@ enum MemoryRegister
     REG_TM2CNT   = 0x10A,
     REG_TM3D     = 0x10C,
     REG_TM3CNT   = 0x10E,
-    REG_BLDALPHA = 0x052,
-    REG_BLDY     = 0x054,
     REG_KEYINPUT = 0x130,
     REG_KEYCNT   = 0x132,
     REG_IE       = 0x200,

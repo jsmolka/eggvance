@@ -2,9 +2,8 @@
 
 #include "common/utility.h"
 #include "mmu/interrupt.h"
-#include "mmu/map.h"
-#include "enums.h"
 #include "scanlinebuilder.h"
+#include "enums.h"
 
 PPU::PPU(MMU& mmu)
     : mmu(mmu)

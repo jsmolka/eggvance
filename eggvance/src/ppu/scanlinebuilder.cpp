@@ -1,7 +1,5 @@
 #include "scanlinebuilder.h"
 
-#include "mmu/map.h"
-
 ScanlineBuilder::ScanlineBuilder(DoubleBuffer<u16>(&bgs)[4], Buffer<ObjData>& obj, MMU& mmu)
     : bgs(bgs)
     , obj(obj)

@@ -182,7 +182,6 @@
     <ClInclude Include="src\arm\disassembler.h" />
     <ClInclude Include="src\arm\registers.h" />
     <ClInclude Include="src\arm\registerbank.h" />
-    <ClInclude Include="src\arm\utility.h" />
     <ClInclude Include="src\common\format.h" />
     <ClInclude Include="src\common\bitfield.h" />
     <ClInclude Include="src\mmu\registers\backgroundcontrol.h" />
@@ -192,7 +191,7 @@
     <ClInclude Include="src\ppu\objdata.h" />
     <ClInclude Include="src\ppu\ppu.h" />
     <ClInclude Include="src\core.h" />
-    <ClInclude Include="src\mmu\map.h" />
+    <ClInclude Include="src\mmu\memory.h" />
     <ClInclude Include="src\mmu\mmu.h" />
     <ClInclude Include="src\arm\arm.h" />
     <ClInclude Include="src\common\integer.h" />

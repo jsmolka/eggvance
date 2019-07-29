@@ -1,6 +1,6 @@
 #include "BackgroundControl.h"
 
-#include "mmu/map.h"
+#include "mmu/memory.h"
 
 u32 BackgroundControl::tileBase() const
 {

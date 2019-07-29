@@ -2,10 +2,8 @@
 
 #include "common/format.h"
 #include "common/utility.h"
-#include "mmu/map.h"
-#include "decode.h"
 #include "disassembler.h"
-#include "utility.h"
+#include "decode.h"
 
 static u64 total = 0;
 
@@ -284,33 +282,23 @@ u32 ARM::ror(u32 value, int offset, bool& carry, bool immediate)
 
 u32 ARM::ldr(u32 addr)
 {
-    u32 value;
+    u32 value = mmu.readWord(addr);
     if (misalignedWord(addr))
     {
         bool carry;
         int rotation = (addr & 0x3) << 3;
-        value = mmu.readWord(alignWord(addr));
         value = ror(value, rotation, carry);
-    }
-    else
-    {
-        value = mmu.readWord(addr);
     }
     return value;
 }
 
 u32 ARM::ldrh(u32 addr)
 {
-    u32 value;
+    u32 value = mmu.readHalf(addr);
     if (misalignedHalf(addr))
     {
         bool carry;
-        value = mmu.readHalf(alignHalf(addr));
         value = ror(value, 8, carry);
-    }
-    else
-    {
-        value = mmu.readHalf(addr);
     }
     return value;
 }
@@ -345,31 +333,31 @@ void ARM::cycle(u32 addr, AccessType access)
 
     switch (addr >> 24)
     {
-    case REGION_PALETTE:
-    case REGION_VRAM:
-    case REGION_OAM:
+    case PAGE_PALETTE:
+    case PAGE_VRAM:
+    case PAGE_OAM:
         if (!mmu.dispstat.hblank && !mmu.dispstat.vblank)
             cycles++;
         break;
 
-    case REGION_GAMEPAK_0:
-    case REGION_GAMEPAK_0+1:
+    case PAGE_GAMEPAK_0:
+    case PAGE_GAMEPAK_0+1:
         if (access == SEQ)
             cycles += seq[0][mmu.waitcnt.ws0.s];
         else
             cycles += nonseq[mmu.waitcnt.ws0.n];
         break;
 
-    case REGION_GAMEPAK_1:
-    case REGION_GAMEPAK_1+1:
+    case PAGE_GAMEPAK_1:
+    case PAGE_GAMEPAK_1+1:
         if (access == SEQ)
             cycles += seq[1][mmu.waitcnt.ws1.s];
         else
             cycles += nonseq[mmu.waitcnt.ws1.n];
         break;
 
-    case REGION_GAMEPAK_2:
-    case REGION_GAMEPAK_2+1:
+    case PAGE_GAMEPAK_2:
+    case PAGE_GAMEPAK_2+1:
         if (access == SEQ)
             cycles += seq[2][mmu.waitcnt.ws2.s];
         else

@@ -1,7 +1,6 @@
 #include "arm.h"
 
 #include "common/utility.h"
-#include "utility.h"
 
 u32 ARM::shiftedRegister(int data, bool& carry)
 {
@@ -480,7 +479,7 @@ void ARM::singleDataTransfer(u32 instr)
         if (byte)
             mmu.writeByte(addr, value);
         else
-            mmu.writeWord(alignWord(addr), value);
+            mmu.writeWord(addr, value);
 
         cycle(addr, NSEQ);
     }
@@ -582,7 +581,7 @@ void ARM::halfwordSignedDataTransfer(u32 instr)
         // Account for prefetch
         if (rd == 15) value += 4;
 
-        mmu.writeHalf(alignHalf(addr), value);
+        mmu.writeHalf(addr, value);
 
         cycle(addr, NSEQ);
     }
@@ -621,7 +620,7 @@ void ARM::blockDataTransfer(u32 instr)
         cycle(regs.pc, NSEQ);
 
         // Register count needed for cycles
-        int rcount = count_bits(rlist) + count_bits(rlist >> 8);
+        int rcount = countBits(rlist) + countBits(rlist >> 8);
 
         int init = ascending ? 0 : 15;
         int loop = ascending ? 1 : -1;
@@ -648,7 +647,7 @@ void ARM::blockDataTransfer(u32 instr)
                     if (x == 15)
                         cycle(regs.pc + 4, NSEQ);
 
-                    regs[x] = mmu.readWord(alignWord(addr));
+                    regs[x] = mmu.readWord(addr);
 
                     if (x == 15)
                     {
@@ -674,7 +673,7 @@ void ARM::blockDataTransfer(u32 instr)
                     if (--rcount > 0)
                         cycle(addr, SEQ);
 
-                    mmu.writeWord(alignWord(addr), regs[x]);
+                    mmu.writeWord(addr, regs[x]);
 
                     if (!full) addr += step;
                 }
@@ -686,14 +685,14 @@ void ARM::blockDataTransfer(u32 instr)
     {
         if (load)
         {
-            regs.pc = mmu.readWord(alignWord(addr));
+            regs.pc = mmu.readWord(addr);
             regs.pc = alignWord(regs.pc);
             advance();
         }
         else
         {
             // Save address of next instruction
-            mmu.writeWord(alignWord(addr), regs.pc + 4);
+            mmu.writeWord(addr, regs.pc + 4);
         }
         addr += ascending ? 0x40 : -0x40;
     }
@@ -727,7 +726,7 @@ void ARM::singleDataSwap(u32 instr)
     else
     {
         dst = ldr(addr);
-        mmu.writeWord(alignWord(addr), src);
+        mmu.writeWord(addr, src);
     }
 
     cycle();

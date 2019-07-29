@@ -4,12 +4,12 @@
 
 #include "common/format.h"
 #include "common/utility.h"
-#include "map.h"
 
 MMU::MMU()
     : vcount(mmio<u8>(REG_VCOUNT))
     , intr_request(mmio<u16>(REG_IF))
     , intr_enabled(mmio<u16>(REG_IE))
+    , keyinput(mmio<u16>(REG_KEYINPUT))
     , timer{ 0, 1, 2, 3 }
 {
     timer[0].next = &timer[1];
@@ -19,8 +19,7 @@ MMU::MMU()
 
 void MMU::reset()
 {
-    gamepak.fill(0);
-
+    keyinput = 0x3FF;
     halt = false;
 }
 
@@ -36,6 +35,8 @@ bool MMU::readFile(const std::string& file)
     stream.seekg(0, std::ios::end);
     std::streampos size = stream.tellg();
     stream.seekg(0, std::ios::beg);
+
+    gamepak.resize(size);
 
     u8* memory_ptr = &gamepak[0];
     stream.read(reinterpret_cast<char*>(memory_ptr), size);
@@ -66,25 +67,20 @@ u8 MMU::readByte(u32 addr) const
 {
     switch (addr >> 24)
     {
-    case REGION_BIOS:
-    case REGION_BIOS+1:
+    case PAGE_BIOS:
+    case PAGE_BIOS+1:
         addr &= 0x3FFF;
         return bios[addr];
 
-    case REGION_WRAM:
+    case PAGE_WRAM:
         addr &= 0x3'FFFF;
         return wram[addr];
 
-    case REGION_IWRAM:
+    case PAGE_IWRAM:
         addr &= 0x7FFF;
         return iwram[addr];
 
-    case REGION_IO:
-        // I/O memory is not mirrored
-        // Todo: there are some weird mirrored parts
-        if (addr >= 0x0400'0400)
-            return 0;
-
+    case PAGE_IO:
         addr &= 0x3FF;
         switch (addr)
         {
@@ -182,35 +178,30 @@ u8 MMU::readByte(u32 addr) const
         }
         return io[addr];
 
-    case REGION_PALETTE:
+    case PAGE_PALETTE:
         addr &= 0x3FF;
         return palette[addr];
 
-    case REGION_VRAM:
+    case PAGE_VRAM:
         addr &= 0x1'FFFF;
         return vram[addr];
 
-    case REGION_OAM:
+    case PAGE_OAM:
         addr &= 0x3FF;
         return oam[addr];
 
-    case REGION_GAMEPAK_0:
-    case REGION_GAMEPAK_0+1:
-        addr -= 0x0800'0000;
-        return gamepak[addr];
-
-    case REGION_GAMEPAK_1:
-    case REGION_GAMEPAK_1+1:
-        addr -= 0x0A00'0000;
-        return gamepak[addr];
-
-    case REGION_GAMEPAK_2:
-    case REGION_GAMEPAK_2+1:
-        addr -= 0x0C00'0000;
+    case PAGE_GAMEPAK_0:
+    case PAGE_GAMEPAK_0+1:
+    case PAGE_GAMEPAK_1:
+    case PAGE_GAMEPAK_1+1:
+    case PAGE_GAMEPAK_2:
+    case PAGE_GAMEPAK_2+1:
+        addr &= 0x1FF'FFFF;
+        if (addr >= gamepak.size())
+            return 0;
         return gamepak[addr];
 
     default:
-        return 0;
         addr &= 0xFFFF;
         return sram[addr];
     }
@@ -218,11 +209,13 @@ u8 MMU::readByte(u32 addr) const
 
 u16 MMU::readHalf(u32 addr) const
 {
+    addr = alignHalf(addr);
     return (readByte(addr + 1) << 8) | readByte(addr);
 }
 
 u32 MMU::readWord(u32 addr) const
 {
+    addr = alignWord(addr);
     return (readHalf(addr + 2) << 16) | readHalf(addr);
 }
 
@@ -243,32 +236,25 @@ u32 MMU::readWordFast(u32 addr)
 
 void MMU::writeByte(u32 addr, u8 byte)
 {
-    u32 old_addr;
     switch (addr >> 24)
     {
-    case REGION_BIOS:
-    case REGION_BIOS+1:
+    case PAGE_BIOS:
+    case PAGE_BIOS+1:
         addr &= 0x3FFF;
         bios[addr] = byte;
         break;
 
-    case REGION_WRAM:
+    case PAGE_WRAM:
         addr &= 0x3'FFFF;
         wram[addr] = byte;
         break;
 
-    case REGION_IWRAM:
+    case PAGE_IWRAM:
         addr &= 0x7FFF;
         iwram[addr] = byte;
         break;
 
-    case REGION_IO:
-        old_addr = addr;
-        // I/O memory is not mirrored
-        // Todo: there are some weird mirrored parts
-        if (addr >= 0x0400'0400)
-            return;
-
+    case PAGE_IO:
         addr &= 0x3FF;
         switch (addr)
         {
@@ -635,10 +621,13 @@ void MMU::writeByte(u32 addr, u8 byte)
             break;
 
         case REG_MOSAIC:
-            mosaic.bg_x  = bits< 0, 4>(byte);
-            mosaic.bg_y  = bits< 4, 4>(byte);
-            mosaic.obj_x = bits< 8, 4>(byte);
-            mosaic.obj_y = bits<12, 4>(byte);
+            mosaic.bg_x  = bits<0, 4>(byte);
+            mosaic.bg_y  = bits<4, 4>(byte);
+            break;
+
+        case REG_MOSAIC+1:
+            mosaic.obj_x = bits<0, 4>(byte);
+            mosaic.obj_y = bits<4, 4>(byte);
             break;
 
         case REG_BLDCNT:
@@ -732,10 +721,8 @@ void MMU::writeByte(u32 addr, u8 byte)
             timer[3].initial |= byte << 8;
             break;
 
-        case REG_TM0CNT: 
-            if (!timer[0].control.enabled && (byte & 0x80))
-                timer[0].init();
-
+        case REG_TM0CNT:
+            timer[0].init(byte & 0x80);
             timer[0].control.prescaler = bits<0, 2>(byte);
             timer[0].control.cascade   = bits<2, 1>(byte);
             timer[0].control.irq       = bits<6, 1>(byte);
@@ -743,9 +730,7 @@ void MMU::writeByte(u32 addr, u8 byte)
             break;
     
         case REG_TM1CNT: 
-            if (!timer[1].control.enabled && (byte & 0x80))
-                timer[1].init();
-
+            timer[1].init(byte & 0x80);
             timer[1].control.prescaler = bits<0, 2>(byte);
             timer[1].control.cascade   = bits<2, 1>(byte);
             timer[1].control.irq       = bits<6, 1>(byte);
@@ -753,9 +738,7 @@ void MMU::writeByte(u32 addr, u8 byte)
             break;
 
         case REG_TM2CNT: 
-            if (!timer[2].control.enabled && (byte & 0x80))
-                timer[2].init();
-
+            timer[2].init(byte & 0x80);
             timer[2].control.prescaler = bits<0, 2>(byte);
             timer[2].control.cascade   = bits<2, 1>(byte);
             timer[2].control.irq       = bits<6, 1>(byte);
@@ -763,9 +746,7 @@ void MMU::writeByte(u32 addr, u8 byte)
             break;
 
         case REG_TM3CNT: 
-            if (!timer[3].control.enabled && (byte & 0x80))
-                timer[3].init();
-
+            timer[3].init(byte & 0x80);
             timer[3].control.prescaler = bits<0, 2>(byte);
             timer[3].control.cascade   = bits<2, 1>(byte);
             timer[3].control.irq       = bits<6, 1>(byte);
@@ -798,37 +779,27 @@ void MMU::writeByte(u32 addr, u8 byte)
         io[addr] = byte;
         break;
 
-    case REGION_PALETTE:
+    case PAGE_PALETTE:
         addr &= 0x3FF;
         palette[addr] = byte;
         break;
 
-    case REGION_VRAM:
+    case PAGE_VRAM:
         addr &= 0x1'FFFF;
         vram[addr] = byte;
         break;
 
-    case REGION_OAM:
+    case PAGE_OAM:
         addr &= 0x3FF;
         oam[addr] = byte;
         break;
 
-    case REGION_GAMEPAK_0:
-    case REGION_GAMEPAK_0+1:
-        addr -= 0x0800'0000;
-        gamepak[addr] = byte;
-        break;
-
-    case REGION_GAMEPAK_1:
-    case REGION_GAMEPAK_1+1:
-        addr -= 0x0A00'0000;
-        gamepak[addr] = byte;
-        break;
-
-    case REGION_GAMEPAK_2:
-    case REGION_GAMEPAK_2+1:
-        addr -= 0x0C00'0000;
-        gamepak[addr] = byte;
+    case PAGE_GAMEPAK_0:
+    case PAGE_GAMEPAK_0+1:
+    case PAGE_GAMEPAK_1:
+    case PAGE_GAMEPAK_1+1:
+    case PAGE_GAMEPAK_2:
+    case PAGE_GAMEPAK_2+1:
         break;
 
     default:
@@ -840,12 +811,14 @@ void MMU::writeByte(u32 addr, u8 byte)
 
 void MMU::writeHalf(u32 addr, u16 half)
 {
+    addr = alignHalf(addr);
     writeByte(addr, static_cast<u8>(half));
     writeByte(addr + 1, half >> 8);
 }
 
 void MMU::writeWord(u32 addr, u32 word)
 {
+    addr = alignWord(addr);
     writeHalf(addr, static_cast<u16>(word));
     writeHalf(addr + 2, word >> 16);
 }

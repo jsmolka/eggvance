@@ -7,7 +7,7 @@ class Timer
 public:
     Timer(int timer);
 
-    void init();
+    void init(bool enabled);
     void emulate(int cycles);
 
     Timer* next = nullptr;
