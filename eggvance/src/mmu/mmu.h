@@ -14,7 +14,8 @@ public:
 
     void reset();
 
-    bool readFile(const std::string& file, u32 addr);
+    bool readFile(const std::string& file);
+    bool readBios(const std::string& file);
 
     u8  readByte(u32 addr) const;
     u16 readHalf(u32 addr) const;
@@ -33,7 +34,7 @@ public:
     void writeWordFast(u32 addr, u32 word);
 
     template<typename T>
-    T& ref(u32 addr);
+    T& mmio(u32 addr);
 
     DisplayControl dispcnt;
     DisplayStatus dispstat;
@@ -70,15 +71,19 @@ public:
 
     bool halt;
 
-private:
-
-    void demirror(u32& addr) const;
-
-    std::array<u8, 0x10000000> memory;
+    std::array<u8, 0x4000> bios;
+    std::array<u8, 0x40000> wram;
+    std::array<u8, 0x8000> iwram;
+    std::array<u8, 0x400> io;
+    std::array<u8, 0x400> palette;
+    std::array<u8, 0x20000> vram;
+    std::array<u8, 0x400> oam;
+    std::array<u8, 0x2000000> gamepak;
+    std::array<u8, 0x10000> sram;
 };
 
 template<typename T>
-inline T& MMU::ref(u32 addr)
+inline T& MMU::mmio(u32 addr)
 {
-    return *reinterpret_cast<T*>(&memory[addr]);
+    return *reinterpret_cast<T*>(&io[addr]);
 }

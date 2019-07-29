@@ -14,10 +14,10 @@ Core::Core()
 
 void Core::run(const std::string& file)
 {
-    if (!mmu.readFile(file, MAP_GAMEPAK_0))
+    if (!mmu.readFile(file))
         return;
 
-    if (!mmu.readFile("bios.bin", MAP_BIOS))
+    if (!mmu.readBios("bios.bin"))
         return;
 
     bool running = true;
@@ -58,7 +58,7 @@ void Core::reset()
     arm.reset();
     ppu.reset();
     
-    mmu.ref<u16>(REG_KEYINPUT) = 0x3FF;
+    mmu.mmio<u16>(REG_KEYINPUT) = 0x3FF;
 }
 
 void Core::frame()
@@ -137,7 +137,7 @@ void Core::keyEvent(SDL_Keycode key, bool pressed)
     case SDLK_q: shift = 9; break; // L
     }
 
-    u16& keyinput = mmu.ref<u16>(REG_KEYINPUT);
+    u16& keyinput = mmu.mmio<u16>(REG_KEYINPUT);
     
     keyinput &= ~(1 << shift);
     keyinput |= (state << shift);

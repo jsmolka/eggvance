@@ -52,7 +52,7 @@ void PPU::scanline()
 {
     mmu.dispstat.vblank = false;
     mmu.dispstat.hblank = false;
-    mmu.ref<u16>(REG_DISPSTAT) &= ~0x3;
+    mmu.mmio<u16>(REG_DISPSTAT) &= ~0x3;
 
     bgs[0].flip();
     bgs[1].flip();
@@ -102,8 +102,8 @@ void PPU::hblank()
 {
     mmu.dispstat.vblank = false;
     mmu.dispstat.hblank = true;
-    mmu.ref<u16>(REG_DISPSTAT) &= ~0x3;
-    mmu.ref<u16>(REG_DISPSTAT) |= 0x2;
+    mmu.mmio<u16>(REG_DISPSTAT) &= ~0x3;
+    mmu.mmio<u16>(REG_DISPSTAT) |= 0x2;
 
     mmu.bgx[0].internal += mmu.bgpb[0].value;
     mmu.bgx[1].internal += mmu.bgpb[1].value;
@@ -120,8 +120,8 @@ void PPU::vblank()
 {
     mmu.dispstat.vblank = true;
     mmu.dispstat.hblank = false;
-    mmu.ref<u16>(REG_DISPSTAT) &= ~0x3;
-    mmu.ref<u16>(REG_DISPSTAT) |= 0x1;
+    mmu.mmio<u16>(REG_DISPSTAT) &= ~0x3;
+    mmu.mmio<u16>(REG_DISPSTAT) |= 0x1;
 
     mmu.bgx[0].internal = mmu.bgx[0].value;
     mmu.bgx[1].internal = mmu.bgx[1].value;
@@ -141,8 +141,8 @@ void PPU::next()
     mmu.vcount = (mmu.vcount + 1) % 228;
     mmu.dispstat.vcount_match = vcount_match;
 
-    mmu.ref<u16>(REG_DISPSTAT) &= ~0x4;
-    mmu.ref<u16>(REG_DISPSTAT) |= vcount_match << 2;
+    mmu.mmio<u16>(REG_DISPSTAT) &= ~0x4;
+    mmu.mmio<u16>(REG_DISPSTAT) |= vcount_match << 2;
 
     if (vcount_match && mmu.dispstat.vcount_irq)
     {
@@ -152,7 +152,7 @@ void PPU::next()
 
 void PPU::present()
 {
-    if (mmu.readHalfFast(REG_DISPCNT) & 0x1F00)
+    if (mmu.mmio<u16>(REG_DISPCNT) & 0x1F00)
     {
         SDL_UpdateTexture(
             texture, 0,

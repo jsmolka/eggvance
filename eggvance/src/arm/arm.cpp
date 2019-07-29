@@ -2,6 +2,7 @@
 
 #include "common/format.h"
 #include "common/utility.h"
+#include "mmu/map.h"
 #include "decode.h"
 #include "disassembler.h"
 #include "utility.h"
@@ -46,7 +47,7 @@ int ARM::step()
 {
     cycles = 0;
      
-    //if (total > 0x00E68312)
+    //if (total > 0x0007929E)
     //    debug();
 
     execute();
@@ -344,44 +345,40 @@ void ARM::cycle(u32 addr, AccessType access)
 
     switch (addr >> 24)
     {
-    // Palette, VRAM, OAM
-    case 0x5:
-    case 0x6:
-    case 0x7:
+    case REGION_PALETTE:
+    case REGION_VRAM:
+    case REGION_OAM:
         if (!mmu.dispstat.hblank && !mmu.dispstat.vblank)
             cycles++;
         break;
 
-    // Waitstate 0
-    case 0x8:
-    case 0x9:
+    case REGION_GAMEPAK_0:
+    case REGION_GAMEPAK_0+1:
         if (access == SEQ)
             cycles += seq[0][mmu.waitcnt.ws0.s];
         else
             cycles += nonseq[mmu.waitcnt.ws0.n];
         break;
 
-    // Waitstate 1
-    case 0xA:
-    case 0xB:
+    case REGION_GAMEPAK_1:
+    case REGION_GAMEPAK_1+1:
         if (access == SEQ)
             cycles += seq[1][mmu.waitcnt.ws1.s];
         else
             cycles += nonseq[mmu.waitcnt.ws1.n];
         break;
 
-    // Waitstate 2
-    case 0xC:
-    case 0xD:
+    case REGION_GAMEPAK_2:
+    case REGION_GAMEPAK_2+1:
         if (access == SEQ)
             cycles += seq[2][mmu.waitcnt.ws2.s];
         else
             cycles += nonseq[mmu.waitcnt.ws2.n];
         break;
 
-    // SRAM
-    case 0xE:
-        cycles += nonseq[mmu.waitcnt.sram];
+    default:
+        if (addr >= MAP_GAMEPAK_SRAM)
+            cycles += nonseq[mmu.waitcnt.sram];
         break;
     }
 }
