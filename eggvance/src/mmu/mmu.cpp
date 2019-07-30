@@ -19,6 +19,8 @@ MMU::MMU()
 
 void MMU::reset()
 {
+    palette.fill(0);
+
     keyinput = 0x3FF;
     halt = false;
 }

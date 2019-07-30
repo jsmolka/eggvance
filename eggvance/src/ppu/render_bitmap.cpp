@@ -1,53 +1,32 @@
 #include "ppu.h"
 
-inline u32 frameAddr(int frame)
-{
-    return MAP_VRAM + 0xA000 * frame;
-}
-
-// Todo: "In BG mode 3, only one frame exists"
 void PPU::renderBgMode3(int bg)
 {
-    u32 addr = frameAddr(mmu.dispcnt.frame);
-
-    int y = mmu.vcount;
-    for (int x = 0; x < WIDTH; ++x)
-    {
-        int offset = 2 * (WIDTH * y + x);
-        int color = mmu.readHalfFast(addr + offset);
-
-        bgs[bg][x] = color;
-    }
+    u32 addr = (0xA000 * mmu.dispcnt.frame) + (2 * WIDTH * mmu.vcount);
+    u16* color = reinterpret_cast<u16*>(&mmu.vram[addr]);
+    std::copy_n(color, WIDTH, &bgs[bg][0]);
 }
 
 void PPU::renderBgMode4(int bg)
 {
-    u32 addr = frameAddr(mmu.dispcnt.frame);
-
-    int y = mmu.vcount;
-    for (int x = 0; x < WIDTH; ++x)
-    {
-        int offset = WIDTH * y + x;
-        int index = mmu.readByteFast(addr + offset);
-        int color = readBgColor(index, 0);
-
-        bgs[bg][x] = color;
-    }
+    u32 addr = (0xA000 * mmu.dispcnt.frame) + (WIDTH * mmu.vcount);
+    u8* index = &mmu.vram[addr];
+    
+    for (int x = 0; x < WIDTH; ++x, ++index)
+        bgs[bg][x] = readBgColor(*index, 0);
 }
 
 void PPU::renderBgMode5(int bg)
 {
-    u32 addr = frameAddr(mmu.dispcnt.frame);
-
-    int y = mmu.vcount;
-    for (int x = 0; x < WIDTH; ++x)
+    if (mmu.vcount < 128)
     {
-        int color = TRANSPARENT;
-        if (x < 160 && y < 128)
-        {
-            int offset = 2 * (160 * y + x);
-            color = mmu.readHalfFast(addr + offset);
-        }
-        bgs[bg][x] = color;
+        u32 addr = (0xA000 * mmu.dispcnt.frame) + (2 * 160 * mmu.vcount);
+        u16* color = reinterpret_cast<u16*>(&mmu.vram[addr]);
+        std::copy_n(color, 160, &bgs[bg][0]);
+        std::fill_n(&bgs[bg][160], 80, TRANSPARENT);
+    }
+    else
+    {
+        bgs[bg].fill(TRANSPARENT);
     }
 }

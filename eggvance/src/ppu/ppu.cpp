@@ -311,7 +311,7 @@ int PPU::readBgColor(int index, int palette)
     if (index == 0)
         return TRANSPARENT;
 
-    return mmu.readHalfFast(MAP_PALETTE + 0x20 * palette + 2 * index);
+    return *reinterpret_cast<u16*>(&mmu.palette[0x20 * palette + 2 * index]);
 }
 
 int PPU::readFgColor(int index, int palette)
@@ -319,7 +319,7 @@ int PPU::readFgColor(int index, int palette)
     if (index == 0)
         return TRANSPARENT;
 
-    return mmu.readHalfFast(MAP_PALETTE + 0x200 + 0x20 * palette + 2 * index);
+    return *reinterpret_cast<u16*>(&mmu.palette[0x200 + 0x20 * palette + 2 * index]);
 }
 
 int PPU::readPixel(u32 addr, int x, int y, PixelFormat format)

@@ -1,5 +1,7 @@
 # Todo
 - replace fast read methods and write methods (not needed)
+- test if all registers are assigned correctly in mmu
+- clean mmu registers (are unions ok?)
 - use pointers for displaying bitmap modes
   - mode 3 might just be a memcpy / copy_n
   - other modes can be simplified

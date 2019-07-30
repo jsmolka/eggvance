@@ -11,6 +11,11 @@ public:
         page ^= 1;
     }
 
+    inline void fill(const T& value)
+    {
+        buffer[page].fill(value);
+    }
+
     inline T operator[](int index) const
     {
         return buffer[page][index];
