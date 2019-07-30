@@ -45,7 +45,7 @@ void PPU::renderBgMode0(int bg)
 
         for (int tile = tile_x; tile < 32; ++tile)
         {
-            MapEntry entry(mmu.readHalfFast(map_addr));
+            MapEntry entry(mmu.vram.get<u16>(map_addr));
 
             u32 addr = bgcnt.tileBase() + tile_size * entry.tile;
 
@@ -133,7 +133,7 @@ void PPU::renderBgMode2(int bg)
         int tile_y = tex_y / 8;
 
         u32 map_addr = bgcnt.mapBase() + tile_y * tiles_per_row + tile_x;
-        int tile = mmu.readByteFast(map_addr);
+        int tile = mmu.vram[map_addr];
         u32 addr = bgcnt.tileBase() + 0x40 * tile;
 
         int pixel_x = tex_x % 8;

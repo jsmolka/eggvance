@@ -1,15 +1,13 @@
 #include "BackgroundControl.h"
 
-#include "mmu/memory.h"
-
 u32 BackgroundControl::tileBase() const
 {
-    return MAP_VRAM + 0x4000 * tile_base;
+    return 0x4000 * tile_base;
 }
 
 u32 BackgroundControl::mapBase() const
 {
-    return MAP_VRAM + 0x800 * map_base;
+    return 0x800 * map_base;
 }
 
 int BackgroundControl::width() const

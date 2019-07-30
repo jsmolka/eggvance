@@ -16,9 +16,9 @@ void PPU::renderObjects()
     for (int entry = 127; entry > -1; --entry)
     {
         OAMEntry oam(
-            mmu.readHalfFast(MAP_OAM + 8 * entry + 0),  // Attribute 0
-            mmu.readHalfFast(MAP_OAM + 8 * entry + 2),  // Attribute 1
-            mmu.readHalfFast(MAP_OAM + 8 * entry + 4)   // Attribute 2
+            mmu.oam.get<u16>(8 * entry + 0),
+            mmu.oam.get<u16>(8 * entry + 2),
+            mmu.oam.get<u16>(8 * entry + 4)
         );
 
         if (!oam.affine && oam.disabled)
@@ -67,10 +67,10 @@ void PPU::renderObjects()
 
         if (oam.affine)
         {
-            pa = mmu.readHalfFast(MAP_OAM + 0x20 * oam.paramter + 0x06);  
-            pb = mmu.readHalfFast(MAP_OAM + 0x20 * oam.paramter + 0x0E);  
-            pc = mmu.readHalfFast(MAP_OAM + 0x20 * oam.paramter + 0x16);  
-            pd = mmu.readHalfFast(MAP_OAM + 0x20 * oam.paramter + 0x1E);  
+            pa = mmu.oam.get<s16>(0x20 * oam.paramter + 0x06);
+            pb = mmu.oam.get<s16>(0x20 * oam.paramter + 0x0E);
+            pc = mmu.oam.get<s16>(0x20 * oam.paramter + 0x16);
+            pd = mmu.oam.get<s16>(0x20 * oam.paramter + 0x16);
         }
 
         // Rotation center
@@ -83,7 +83,7 @@ void PPU::renderObjects()
 
         // In 256 bit color mode, only each second tile may be used. That's why
         // we can assume the default tile size of 0x20.
-        u32 base_addr = MAP_VRAM + 0x10000 + 0x20 * oam.tile;
+        u32 base_addr = 0x10000 + 0x20 * oam.tile;
 
         for (; rect_x < rect_width / 2; ++rect_x)
         {

@@ -163,6 +163,7 @@
     <ClInclude Include="src\mmu\registers\windowrange.h" />
     <ClInclude Include="src\ppu\constants.h" />
     <ClInclude Include="src\ppu\enums.h" />
+    <ClInclude Include="src\mmu\ram.h" />
     <ClInclude Include="src\ppu\scanlinebuilder.h" />
     <ClInclude Include="src\mmu\registers\blendalpha.h" />
     <ClInclude Include="src\mmu\registers\blendcontrol.h" />

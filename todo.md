@@ -1,6 +1,8 @@
 # Todo
-- replace fast read methods and write methods (not needed)
+- properly initialize all variables
 - test if all registers are assigned correctly in mmu
+- maybe apply min value to blend in writeByte
+- test against y = 1 in before going into mosaic branch
 - clean mmu registers (are unions ok?)
 - use pointers for displaying bitmap modes
   - mode 3 might just be a memcpy / copy_n

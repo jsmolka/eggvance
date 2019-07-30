@@ -19,7 +19,17 @@ MMU::MMU()
 
 void MMU::reset()
 {
+    bios.fill(0);
+    wram.fill(0);
+    iwram.fill(0);
+    io.fill(0);
     palette.fill(0);
+    vram.fill(0);
+    oam.fill(0);
+    sram.fill(0);
+
+    for (int iomem = 0; iomem < 0x400; ++iomem)
+        writeByte(MAP_IO + iomem, 0);
 
     keyinput = 0x3FF;
     halt = false;
@@ -219,21 +229,6 @@ u32 MMU::readWord(u32 addr) const
 {
     addr = alignWord(addr);
     return (readHalf(addr + 2) << 16) | readHalf(addr);
-}
-
-u8 MMU::readByteFast(u32 addr)
-{
-    return readByte(addr);
-}
-
-u16 MMU::readHalfFast(u32 addr)
-{
-    return readHalf(addr);
-}
-
-u32 MMU::readWordFast(u32 addr)
-{
-    return readWord(addr);
 }
 
 void MMU::writeByte(u32 addr, u8 byte)
@@ -823,19 +818,4 @@ void MMU::writeWord(u32 addr, u32 word)
     addr = alignWord(addr);
     writeHalf(addr, static_cast<u16>(word));
     writeHalf(addr + 2, word >> 16);
-}
-
-void MMU::writeByteFast(u32 addr, u8 byte)
-{
-    writeByte(addr, byte);
-}
-
-void MMU::writeHalfFast(u32 addr, u16 half)
-{
-    writeHalf(addr, half);
-}
-
-void MMU::writeWordFast(u32 addr, u32 word)
-{
-    writeWord(addr, word);
 }

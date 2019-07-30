@@ -7,6 +7,7 @@
 #include "common/integer.h"
 #include "registers/all.h"
 #include "memory.h"
+#include "ram.h"
 #include "timer.h"
 
 class MMU
@@ -23,17 +24,9 @@ public:
     u16 readHalf(u32 addr) const;
     u32 readWord(u32 addr) const;
 
-    u8  readByteFast(u32 addr);
-    u16 readHalfFast(u32 addr);
-    u32 readWordFast(u32 addr);
-
     void writeByte(u32 addr, u8  byte);
     void writeHalf(u32 addr, u16 half);
     void writeWord(u32 addr, u32 word);
-
-    void writeByteFast(u32 addr, u8  byte);
-    void writeHalfFast(u32 addr, u16 half);
-    void writeWordFast(u32 addr, u32 word);
 
     template<typename T>
     T& mmio(IORegister reg);
@@ -74,14 +67,14 @@ public:
 
     bool halt;
 
-    std::array<u8, 0x04000> bios;
-    std::array<u8, 0x40000> wram;
-    std::array<u8, 0x08000> iwram;
-    std::array<u8, 0x00400> io;
-    std::array<u8, 0x00400> palette;
-    std::array<u8, 0x20000> vram;
-    std::array<u8, 0x00400> oam;
-    std::array<u8, 0x10000> sram;
+    RAM<0x04000> bios;
+    RAM<0x40000> wram;
+    RAM<0x08000> iwram;
+    RAM<0x00400> io;
+    RAM<0x00400> palette;
+    RAM<0x20000> vram;
+    RAM<0x00400> oam;
+    RAM<0x10000> sram;
     std::vector<u8> gamepak;
 };
 

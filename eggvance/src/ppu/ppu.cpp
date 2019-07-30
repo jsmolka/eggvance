@@ -311,7 +311,7 @@ int PPU::readBgColor(int index, int palette)
     if (index == 0)
         return TRANSPARENT;
 
-    return *reinterpret_cast<u16*>(&mmu.palette[0x20 * palette + 2 * index]);
+    return mmu.palette.get<u16>(0x20 * palette + 2 * index);
 }
 
 int PPU::readFgColor(int index, int palette)
@@ -319,22 +319,18 @@ int PPU::readFgColor(int index, int palette)
     if (index == 0)
         return TRANSPARENT;
 
-    return *reinterpret_cast<u16*>(&mmu.palette[0x200 + 0x20 * palette + 2 * index]);
+    return mmu.palette.get<u16>(0x200 + 0x20 * palette + 2 * index);
 }
 
 int PPU::readPixel(u32 addr, int x, int y, PixelFormat format)
 {
     if (format == BPP4)
     {
-        int byte = mmu.readByteFast(
-            addr + 4 * y + x / 2
-        );
+        int byte = mmu.vram[addr + 4 * y + x / 2];
         return (x & 0x1) ? (byte >> 4) : (byte & 0xF);
     }
     else
     {
-        return mmu.readByteFast(
-            addr + 8 * y + x
-        );
+        return mmu.vram[addr + 8 * y + x];
     }
 }
