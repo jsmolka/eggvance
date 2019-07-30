@@ -2,12 +2,12 @@
 
 u32 BackgroundControl::tileBase() const
 {
-    return 0x4000 * tile_base;
+    return 0x4000 * tile_block;
 }
 
 u32 BackgroundControl::mapBase() const
 {
-    return 0x800 * map_base;
+    return 0x800 * map_block;
 }
 
 int BackgroundControl::width() const

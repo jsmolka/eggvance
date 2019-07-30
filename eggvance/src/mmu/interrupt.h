@@ -4,25 +4,31 @@
 
 enum InterruptFlag
 {
-    IF_VBLANK          = 1 <<  0,  // V-Blank interrupt
-    IF_HBLANK          = 1 <<  1,  // H-Blank interrupt
-    IF_VCOUNT_MATCH    = 1 <<  2,  // V-Counter match interrupt
-    IF_TIMER0_OVERFLOW = 1 <<  3,  // Timer0 overflow interrupt
-    IF_TIMER1_OVERFLOW = 1 <<  4,  // Timer1 overflow interrupt
-    IF_TIMER2_OVERFLOW = 1 <<  5,  // Timer2 overflow interrupt
-    IF_TIMER3_OVERFLOW = 1 <<  6,  // Timer3 overflow interrupt
-    IF_SERIAL          = 1 <<  7,  // Serial communication interrupt
-    IF_DMA0            = 1 <<  8,  // DMA0 interrupt
-    IF_DMA1            = 1 <<  9,  // DMA1 interrupt
-    IF_DMA2            = 1 << 10,  // DMA2 interrupt
-    IF_DMA3            = 1 << 11,  // DMA3 interrupt
-    IF_KEYPAD          = 1 << 12,  // Keypad interrupt
-    IF_GAMEPAK         = 1 << 13   // GamePak removed interrupt
+    IF_VBLANK  = 1 <<  0,
+    IF_HBLANK  = 1 <<  1,
+    IF_VMATCH  = 1 <<  2,
+    IF_TIMER0  = 1 <<  3,
+    IF_TIMER1  = 1 <<  4,
+    IF_TIMER2  = 1 <<  5,
+    IF_TIMER3  = 1 <<  6,
+    IF_SERIAL  = 1 <<  7,
+    IF_DMA0    = 1 <<  8,
+    IF_DMA1    = 1 <<  9,
+    IF_DMA2    = 1 << 10,
+    IF_DMA3    = 1 << 11,
+    IF_KEYPAD  = 1 << 12,
+    IF_GAMEPAK = 1 << 13
 };
 
-struct Interrupt
+class Interrupt
 {
+public:
     Interrupt() = delete;
+
+    static inline void init(MMU* mmu)
+    {
+        Interrupt::mmu = mmu;
+    }
 
     static inline void request(InterruptFlag flag)
     {
@@ -40,5 +46,6 @@ struct Interrupt
         return mmu->intr_master && (mmu->intr_enabled & mmu->intr_request);
     }
 
+private:
     static inline MMU* mmu = nullptr;
 };

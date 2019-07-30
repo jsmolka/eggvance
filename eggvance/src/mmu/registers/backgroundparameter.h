@@ -6,7 +6,7 @@ struct BackgroundParameter
 {
     union
     {
-        u8 bytes[2];
-        s16 value;
+        u8  param_bytes[2];  // Affine parameter bytes
+        s16 param;           // Affine parameter
     };
 };

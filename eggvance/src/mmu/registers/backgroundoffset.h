@@ -6,7 +6,7 @@ struct BackgroundOffset
 {
     union
     {
-        u8 bytes[2];
-        u16 offset;   // 0-8: offset (0..511)
+        u8  offset_bytes[2];  // Offset bytes
+        u16 offset;           // Offset (0..511)
     };
 };

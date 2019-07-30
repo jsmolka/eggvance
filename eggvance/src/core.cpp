@@ -6,7 +6,7 @@ Core::Core()
     : arm(mmu)
     , ppu(mmu)
 {
-    Interrupt::mmu = &mmu;
+    Interrupt::init(&mmu);
 
     reset();
 }
@@ -140,8 +140,8 @@ void Core::keyEvent(SDL_Keycode key, bool pressed)
     if (mmu.keycnt.irq)
     {
         bool interrupt = mmu.keycnt.logic
-            ? (mmu.keyinput & mmu.keycnt.mask)
-            : (mmu.keyinput | mmu.keycnt.mask);
+            ? (mmu.keyinput & mmu.keycnt.keys)
+            : (mmu.keyinput | mmu.keycnt.keys);
 
         if (interrupt)
         {

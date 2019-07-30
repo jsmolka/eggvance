@@ -2,8 +2,11 @@
 
 struct Mosaic
 {
-    int bg_x;   // BG x stretch (minus 1)
-    int bg_y;   // BG y stretch (minus 1)
-    int obj_x;  // Object x stretch (minus 1)
-    int obj_y;  // Object y stretch (minus 1)
+    struct Stretch
+    {
+        int x;  // Stretch along x-axis (minus 1)
+        int y;  // Stretch along y-axis (minus 1)
+    };
+    Stretch bg;   // Background stretch
+    Stretch obj;  // Object stretch
 };

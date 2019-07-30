@@ -10,8 +10,8 @@ void PPU::renderObjects()
 
     int line = mmu.vcount;
 
-    int mosaic_x = mmu.mosaic.obj_x + 1;
-    int mosaic_y = mmu.mosaic.obj_y + 1;
+    int mosaic_x = mmu.mosaic.obj.x + 1;
+    int mosaic_y = mmu.mosaic.obj.y + 1;
 
     for (int entry = 127; entry > -1; --entry)
     {
@@ -70,7 +70,7 @@ void PPU::renderObjects()
             pa = mmu.oam.get<s16>(0x20 * oam.paramter + 0x06);
             pb = mmu.oam.get<s16>(0x20 * oam.paramter + 0x0E);
             pc = mmu.oam.get<s16>(0x20 * oam.paramter + 0x16);
-            pd = mmu.oam.get<s16>(0x20 * oam.paramter + 0x16);
+            pd = mmu.oam.get<s16>(0x20 * oam.paramter + 0x1E);
         }
 
         // Rotation center

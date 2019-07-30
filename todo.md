@@ -1,12 +1,9 @@
 # Todo
+- reduce vram to real size without breaking things
+- remove functions from bgcnt
+- reset in constructor and if necessary
 - properly initialize all variables
-- test if all registers are assigned correctly in mmu
-- maybe apply min value to blend in writeByte
 - test against y = 1 in before going into mosaic branch
-- clean mmu registers (are unions ok?)
-- use pointers for displaying bitmap modes
-  - mode 3 might just be a memcpy / copy_n
-  - other modes can be simplified
 - add cartridge and bios classes, parse cartridge header
 - add proper descriptions to cpu tests / cleanup tests
 - test if storing arm handler functions in a static lut is faster than switch

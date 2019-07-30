@@ -2,35 +2,35 @@
 
 enum Page
 {
-    PAGE_BIOS         = 0x00,
-    PAGE_WRAM         = 0x02,
-    PAGE_IWRAM        = 0x03,
-    PAGE_IO           = 0x04,
-    PAGE_PALETTE      = 0x05,
-    PAGE_VRAM         = 0x06,
-    PAGE_OAM          = 0x07,
-    PAGE_GAMEPAK_0    = 0x08,
-    PAGE_GAMEPAK_1    = 0x0A,
-    PAGE_GAMEPAK_2    = 0x0C,
-    PAGE_GAMEPAK_SRAM = 0x0E
+    PAGE_BIOS         = 0x0,
+    PAGE_WRAM         = 0x2,
+    PAGE_IWRAM        = 0x3,
+    PAGE_IO           = 0x4,
+    PAGE_PALETTE      = 0x5,
+    PAGE_VRAM         = 0x6,
+    PAGE_OAM          = 0x7,
+    PAGE_GAMEPAK_0    = 0x8,
+    PAGE_GAMEPAK_1    = 0xA,
+    PAGE_GAMEPAK_2    = 0xC,
+    PAGE_GAMEPAK_SRAM = 0xE
 };
 
 enum Map
 {
-    MAP_BIOS         = 0x00000000,
-    MAP_WRAM         = 0x02000000,
-    MAP_IWRAM        = 0x03000000,
-    MAP_IO           = 0x04000000,
-    MAP_PALETTE      = 0x05000000,
-    MAP_VRAM         = 0x06000000,
-    MAP_OAM          = 0x07000000,
-    MAP_GAMEPAK_0    = 0x08000000,
-    MAP_GAMEPAK_1    = 0x0A000000,
-    MAP_GAMEPAK_2    = 0x0C000000,
-    MAP_GAMEPAK_SRAM = 0x0E000000
+    MAP_BIOS         = 0x0000'0000,
+    MAP_WRAM         = 0x0200'0000,
+    MAP_IWRAM        = 0x0300'0000,
+    MAP_IO           = 0x0400'0000,
+    MAP_PALETTE      = 0x0500'0000,
+    MAP_VRAM         = 0x0600'0000,
+    MAP_OAM          = 0x0700'0000,
+    MAP_GAMEPAK_0    = 0x0800'0000,
+    MAP_GAMEPAK_1    = 0x0A00'0000,
+    MAP_GAMEPAK_2    = 0x0C00'0000,
+    MAP_GAMEPAK_SRAM = 0x0E00'0000
 };
 
-enum IORegister
+enum Register
 {
     REG_DISPCNT  = 0x000,
     REG_DISPSTAT = 0x004,
@@ -69,14 +69,14 @@ enum IORegister
     REG_BLDCNT   = 0x050,
     REG_BLDALPHA = 0x052,
     REG_BLDY     = 0x054,
-    REG_TM0D     = 0x100,
-    REG_TM0CNT   = 0x102,
-    REG_TM1D     = 0x104,
-    REG_TM1CNT   = 0x106,
-    REG_TM2D     = 0x108,
-    REG_TM2CNT   = 0x10A,
-    REG_TM3D     = 0x10C,
-    REG_TM3CNT   = 0x10E,
+    REG_TM0CNT_L = 0x100,
+    REG_TM0CNT_H = 0x102,
+    REG_TM1CNT_L = 0x104,
+    REG_TM1CNT_H = 0x106,
+    REG_TM2CNT_L = 0x108,
+    REG_TM2CNT_H = 0x10A,
+    REG_TM3CNT_L = 0x10C,
+    REG_TM3CNT_H = 0x10E,
     REG_KEYINPUT = 0x130,
     REG_KEYCNT   = 0x132,
     REG_IE       = 0x200,

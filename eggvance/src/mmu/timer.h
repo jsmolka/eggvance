@@ -5,27 +5,38 @@
 class Timer
 {
 public:
-    Timer(int timer);
+    Timer(int number);
 
-    void init(bool enabled);
+    void reset();
+
     void emulate(int cycles);
-
-    Timer* next = nullptr;
-
-    u16 data;
-    int initial;
+    void attemptInit(int enabled);
 
     struct TimerControl
     {
         int prescaler;  // Prescaler value (0 = 1, 1 = 64, 2 = 256, 3 = 1024)
         int cascade;    // Timer disabled, increments if previous overflows
         int irq;        // Interrupt on overflow
-        int enabled;    // Timer enabled
+        int enabled;    // Enabled
     } control;
 
+    union
+    {
+        u8  data_bytes[2];
+        u16 data;
+    };
+    union
+    {
+        u8  initial_bytes[2];
+        u16 initial;
+    };
+    Timer* next;
+
 private:
-    int timer;
+    int number;
     int counter;
 
+    void cascade();
+    void interrupt();
     void increment(int amount);
 };

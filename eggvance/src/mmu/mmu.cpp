@@ -6,11 +6,12 @@
 #include "common/utility.h"
 
 MMU::MMU()
-    : vcount(mmio<u8>(REG_VCOUNT))
-    , intr_request(mmio<u16>(REG_IF))
-    , intr_enabled(mmio<u16>(REG_IE))
-    , keyinput(mmio<u16>(REG_KEYINPUT))
-    , timer{ 0, 1, 2, 3 }
+    : dispstat(io.ref<u16>(REG_DISPSTAT))
+    , vcount(io.ref<u8>(REG_VCOUNT))
+    , intr_request(io.ref<u16>(REG_IF))
+    , intr_enabled(io.ref<u16>(REG_IE))
+    , keyinput(io.ref<u16>(REG_KEYINPUT))
+    , timer{0, 1, 2, 3}
 {
     timer[0].next = &timer[1];
     timer[1].next = &timer[2];
@@ -28,8 +29,8 @@ void MMU::reset()
     oam.fill(0);
     sram.fill(0);
 
-    for (int iomem = 0; iomem < 0x400; ++iomem)
-        writeByte(MAP_IO + iomem, 0);
+    for (int i = 0; i < oam.size(); ++i)
+        writeByte(MAP_IO + i, 0);
 
     keyinput = 0x3FF;
     halt = false;
@@ -93,6 +94,9 @@ u8 MMU::readByte(u32 addr) const
         return iwram[addr];
 
     case PAGE_IO:
+        if (addr >= (MAP_IO + 0x400))
+            return 0;
+
         addr &= 0x3FF;
         switch (addr)
         {
@@ -164,29 +168,35 @@ u8 MMU::readByte(u32 addr) const
         case REG_BLDY+3:
             return 0;
 
-        case REG_TM0D:
-            return timer[0].data & 0xFF;
+        case REG_VCOUNT:
+            return vcount;
 
-        case REG_TM0D+1:
-            return (timer[0].data >> 8) & 0xFF;
+        case REG_VCOUNT+1:
+            return 0;
 
-        case REG_TM1D:
-            return timer[1].data & 0xFF;
+        case REG_TM0CNT_L:
+            return timer[0].data_bytes[0];
 
-        case REG_TM1D+1:
-            return (timer[1].data >> 8) & 0xFF;
+        case REG_TM0CNT_L+1:
+            return timer[0].data_bytes[1];
 
-        case REG_TM2D:
-            return timer[2].data & 0xFF;
+        case REG_TM1CNT_L:
+            return timer[1].data_bytes[0];
 
-        case REG_TM2D+1:
-            return (timer[2].data >> 8) & 0xFF;
+        case REG_TM1CNT_L+1:
+            return timer[1].data_bytes[1];
 
-        case REG_TM3D:
-            return timer[3].data & 0xFF;
+        case REG_TM2CNT_L:
+            return timer[2].data_bytes[0];
 
-        case REG_TM3D+1:
-            return (timer[3].data >> 8) & 0xFF;
+        case REG_TM2CNT_L+1:
+            return timer[2].data_bytes[1];
+
+        case REG_TM3CNT_L:
+            return timer[3].data_bytes[0];
+
+        case REG_TM3CNT_L+1:
+            return timer[3].data_bytes[1];
         }
         return io[addr];
 
@@ -252,6 +262,9 @@ void MMU::writeByte(u32 addr, u8 byte)
         break;
 
     case PAGE_IO:
+        if (addr >= (MAP_IO + 0x400))
+            return;
+
         addr &= 0x3FF;
         switch (addr)
         {
@@ -291,262 +304,262 @@ void MMU::writeByte(u32 addr, u8 byte)
 
         case REG_BG0CNT:
             bgcnt[0].priority     = bits<0, 2>(byte);
-            bgcnt[0].tile_base    = bits<2, 3>(byte);
+            bgcnt[0].tile_block   = bits<2, 2>(byte);
             bgcnt[0].mosaic       = bits<6, 1>(byte);
             bgcnt[0].palette_type = bits<7, 1>(byte);
             break;
 
         case REG_BG0CNT+1:
-            bgcnt[0].map_base    = bits<0, 5>(byte);
+            bgcnt[0].map_block   = bits<0, 5>(byte);
             bgcnt[0].wraparound  = bits<5, 1>(byte);
             bgcnt[0].screen_size = bits<6, 2>(byte);
             break;
 
         case REG_BG1CNT:
             bgcnt[1].priority     = bits<0, 2>(byte);
-            bgcnt[1].tile_base    = bits<2, 3>(byte);
+            bgcnt[1].tile_block   = bits<2, 2>(byte);
             bgcnt[1].mosaic       = bits<6, 1>(byte);
             bgcnt[1].palette_type = bits<7, 1>(byte);
             break;
 
         case REG_BG1CNT+1:
-            bgcnt[1].map_base    = bits<0, 5>(byte);
+            bgcnt[1].map_block   = bits<0, 5>(byte);
             bgcnt[1].wraparound  = bits<5, 1>(byte);
             bgcnt[1].screen_size = bits<6, 2>(byte);
             break;
 
         case REG_BG2CNT:
             bgcnt[2].priority     = bits<0, 2>(byte);
-            bgcnt[2].tile_base    = bits<2, 3>(byte);
+            bgcnt[2].tile_block   = bits<2, 2>(byte);
             bgcnt[2].mosaic       = bits<6, 1>(byte);
             bgcnt[2].palette_type = bits<7, 1>(byte);
             break;
 
         case REG_BG2CNT+1:
-            bgcnt[2].map_base    = bits<0, 5>(byte);
+            bgcnt[2].map_block   = bits<0, 5>(byte);
             bgcnt[2].wraparound  = bits<5, 1>(byte);
             bgcnt[2].screen_size = bits<6, 2>(byte);
             break;
 
         case REG_BG3CNT:
             bgcnt[3].priority     = bits<0, 2>(byte);
-            bgcnt[3].tile_base    = bits<2, 3>(byte);
+            bgcnt[3].tile_block   = bits<2, 2>(byte);
             bgcnt[3].mosaic       = bits<6, 1>(byte);
             bgcnt[3].palette_type = bits<7, 1>(byte);
             break;
 
         case REG_BG3CNT+1:
-            bgcnt[3].map_base    = bits<0, 5>(byte);
+            bgcnt[3].map_block   = bits<0, 5>(byte);
             bgcnt[3].wraparound  = bits<5, 1>(byte);
             bgcnt[3].screen_size = bits<6, 2>(byte);
             break;
 
         case REG_BG0HOFS:
-            bghofs[0].bytes[0] = byte;
+            bghofs[0].offset_bytes[0] = byte;
             break;
 
         case REG_BG0HOFS+1:
-            bghofs[0].bytes[1] = byte & 0x1;
+            bghofs[0].offset_bytes[1] = byte & 0x1;
             break;
 
         case REG_BG0VOFS:
-            bgvofs[0].bytes[0] = byte;
+            bgvofs[0].offset_bytes[0] = byte;
             break;
 
         case REG_BG0VOFS+1:
-            bgvofs[0].bytes[1] = byte & 0x1;
+            bgvofs[0].offset_bytes[1] = byte & 0x1;
             break;
 
         case REG_BG1HOFS:
-            bghofs[1].bytes[0] = byte;
+            bghofs[1].offset_bytes[0] = byte;
             break;
 
         case REG_BG1HOFS+1:
-            bghofs[1].bytes[1] = byte & 0x1;
+            bghofs[1].offset_bytes[1] = byte & 0x1;
             break;
 
         case REG_BG1VOFS:
-            bgvofs[1].bytes[0] = byte;
+            bgvofs[1].offset_bytes[0] = byte;
             break;
 
         case REG_BG1VOFS+1:
-            bgvofs[1].bytes[1] = byte & 0x1;
+            bgvofs[1].offset_bytes[1] = byte & 0x1;
             break;
 
         case REG_BG2HOFS:
-            bghofs[2].bytes[0] = byte;
+            bghofs[2].offset_bytes[0] = byte;
             break;
 
         case REG_BG2HOFS+1:
-            bghofs[2].bytes[1] = byte & 0x1;
+            bghofs[2].offset_bytes[1] = byte & 0x1;
             break;
 
         case REG_BG2VOFS:
-            bgvofs[2].bytes[0] = byte;
+            bgvofs[2].offset_bytes[0] = byte;
             break;
 
         case REG_BG2VOFS+1:
-            bgvofs[2].bytes[1] = byte & 0x1;
+            bgvofs[2].offset_bytes[1] = byte & 0x1;
             break;
 
         case REG_BG3HOFS:
-            bghofs[3].bytes[0] = byte;
+            bghofs[3].offset_bytes[0] = byte;
             break;
 
         case REG_BG3HOFS+1:
-            bghofs[3].bytes[1] = byte & 0x1;
+            bghofs[3].offset_bytes[1] = byte & 0x1;
             break;
 
         case REG_BG3VOFS:
-            bgvofs[3].bytes[0] = byte;
+            bgvofs[3].offset_bytes[0] = byte;
             break;
 
         case REG_BG3VOFS+1:
-            bgvofs[3].bytes[1] = byte & 0x1;
+            bgvofs[3].offset_bytes[1] = byte & 0x1;
             break;
 
         case REG_BG2X:
-            bgx[0].bytes[0] = byte;
-            bgx[0].internal = bgx[0].value;
+            bgx[0].ref_bytes[0] = byte;
+            bgx[0].internal     = bgx[0].ref;
             break;
 
         case REG_BG2X+1:
-            bgx[0].bytes[1] = byte;
-            bgx[0].internal = bgx[0].value;
+            bgx[0].ref_bytes[1] = byte;
+            bgx[0].internal     = bgx[0].ref;
             break;
 
         case REG_BG2X+2:
-            bgx[0].bytes[2] = byte;
-            bgx[0].internal = bgx[0].value;
+            bgx[0].ref_bytes[2] = byte;
+            bgx[0].internal     = bgx[0].ref;
             break;
 
         case REG_BG2X+3:
-            bgx[0].bytes[3] = signExtend<4>(byte);
-            bgx[0].internal = bgx[0].value;
+            bgx[0].ref_bytes[3] = signExtend<4>(byte);
+            bgx[0].internal     = bgx[0].ref;
             break;
 
         case REG_BG3X:
-            bgx[1].bytes[0] = byte;
-            bgx[1].internal = bgx[1].value;
+            bgx[1].ref_bytes[0] = byte;
+            bgx[1].internal     = bgx[1].ref;
             break;
 
         case REG_BG3X+1:
-            bgx[1].bytes[1] = byte;
-            bgx[1].internal = bgx[1].value;
+            bgx[1].ref_bytes[1] = byte;
+            bgx[1].internal     = bgx[1].ref;
             break;
 
         case REG_BG3X+2:
-            bgx[1].bytes[2] = byte;
-            bgx[1].internal = bgx[1].value;
+            bgx[1].ref_bytes[2] = byte;
+            bgx[1].internal     = bgx[1].ref;
             break;
 
         case REG_BG3X+3:
-            bgx[1].bytes[3] = signExtend<4>(byte);
-            bgx[1].internal = bgx[1].value;
+            bgx[1].ref_bytes[3] = signExtend<4>(byte);
+            bgx[1].internal     = bgx[1].ref;
             break;
 
         case REG_BG2Y:
-            bgy[0].bytes[0] = byte;
-            bgy[0].internal = bgy[0].value;
+            bgy[0].ref_bytes[0] = byte;
+            bgy[0].internal     = bgy[0].ref;
             break;
 
         case REG_BG2Y+1:
-            bgy[0].bytes[1] = byte;
-            bgy[0].internal = bgy[0].value;
+            bgy[0].ref_bytes[1] = byte;
+            bgy[0].internal     = bgy[0].ref;
             break;
 
         case REG_BG2Y+2:
-            bgy[0].bytes[2] = byte;
-            bgy[0].internal = bgy[0].value;
+            bgy[0].ref_bytes[2] = byte;
+            bgy[0].internal     = bgy[0].ref;
             break;
 
         case REG_BG2Y+3:
-            bgy[0].bytes[3] = signExtend<4>(byte);
-            bgy[0].internal = bgy[0].value;
+            bgy[0].ref_bytes[3] = signExtend<4>(byte);
+            bgy[0].internal     = bgy[0].ref;
             break;
 
         case REG_BG3Y:
-            bgy[1].bytes[0] = byte;
-            bgy[1].internal = bgy[1].value;
+            bgy[1].ref_bytes[0] = byte;
+            bgy[1].internal     = bgy[1].ref;
             break;
 
         case REG_BG3Y+1:
-            bgy[1].bytes[1] = byte;
-            bgy[1].internal = bgy[1].value;
+            bgy[1].ref_bytes[1] = byte;
+            bgy[1].internal     = bgy[1].ref;
             break;
 
         case REG_BG3Y+2:
-            bgy[1].bytes[2] = byte;
-            bgy[1].internal = bgy[1].value;
+            bgy[1].ref_bytes[2] = byte;
+            bgy[1].internal     = bgy[1].ref;
             break;
 
         case REG_BG3Y+3:
-            bgy[1].bytes[3] = signExtend<4>(byte);
-            bgy[1].internal = bgy[1].value;
+            bgy[1].ref_bytes[3] = signExtend<4>(byte);
+            bgy[1].internal     = bgy[1].ref;
             break;
 
         case REG_BG2PA:
-            bgpa[0].bytes[0] = byte;
+            bgpa[0].param_bytes[0] = byte;
             break;
 
         case REG_BG2PA+1:
-            bgpa[0].bytes[1] = byte;
+            bgpa[0].param_bytes[1] = byte;
             break;
 
         case REG_BG2PB:
-            bgpb[0].bytes[0] = byte;
+            bgpb[0].param_bytes[0] = byte;
             break;
 
         case REG_BG2PB+1:
-            bgpb[0].bytes[1] = byte;
+            bgpb[0].param_bytes[1] = byte;
             break;
 
         case REG_BG2PC:
-            bgpc[0].bytes[0] = byte;
+            bgpc[0].param_bytes[0] = byte;
             break;
 
         case REG_BG2PC+1:
-            bgpc[0].bytes[1] = byte;
+            bgpc[0].param_bytes[1] = byte;
             break;
 
         case REG_BG2PD:
-            bgpd[0].bytes[0] = byte;
+            bgpd[0].param_bytes[0] = byte;
             break;
 
         case REG_BG2PD+1:
-            bgpd[0].bytes[1] = byte;
+            bgpd[0].param_bytes[1] = byte;
             break;
 
         case REG_BG3PA:
-            bgpa[1].bytes[0] = byte;
+            bgpa[1].param_bytes[0] = byte;
             break;
 
         case REG_BG3PA+1:
-            bgpa[1].bytes[1] = byte;
+            bgpa[1].param_bytes[1] = byte;
             break;
 
         case REG_BG3PB:
-            bgpb[1].bytes[0] = byte;
+            bgpb[1].param_bytes[0] = byte;
             break;
 
         case REG_BG3PB+1:
-            bgpb[1].bytes[1] = byte;
+            bgpb[1].param_bytes[1] = byte;
             break;
 
         case REG_BG3PC:
-            bgpc[1].bytes[0] = byte;
+            bgpc[1].param_bytes[0] = byte;
             break;
 
         case REG_BG3PC+1:
-            bgpc[1].bytes[1] = byte;
+            bgpc[1].param_bytes[1] = byte;
             break;
 
         case REG_BG3PD:
-            bgpd[1].bytes[0] = byte;
+            bgpd[1].param_bytes[0] = byte;
             break;
 
         case REG_BG3PD+1:
-            bgpd[1].bytes[1] = byte;
+            bgpd[1].param_bytes[1] = byte;
             break;
 
         case REG_WIN0H:
@@ -618,13 +631,13 @@ void MMU::writeByte(u32 addr, u8 byte)
             break;
 
         case REG_MOSAIC:
-            mosaic.bg_x  = bits<0, 4>(byte);
-            mosaic.bg_y  = bits<4, 4>(byte);
+            mosaic.bg.x  = bits<0, 4>(byte);
+            mosaic.bg.y  = bits<4, 4>(byte);
             break;
 
         case REG_MOSAIC+1:
-            mosaic.obj_x = bits<0, 4>(byte);
-            mosaic.obj_y = bits<4, 4>(byte);
+            mosaic.obj.x = bits<0, 4>(byte);
+            mosaic.obj.y = bits<4, 4>(byte);
             break;
 
         case REG_BLDCNT:
@@ -678,72 +691,64 @@ void MMU::writeByte(u32 addr, u8 byte)
         case REG_KEYINPUT+1:
             return;
 
-        case REG_TM0D:
-            timer[0].initial &= ~0xFF;
-            timer[0].initial |= byte;
+        case REG_TM0CNT_L:
+            timer[0].initial_bytes[0] = byte;
             break;
 
-        case REG_TM0D+1:
-            timer[0].initial &= ~0xFF00;
-            timer[0].initial |= byte << 8;
+        case REG_TM0CNT_L+1:
+            timer[0].initial_bytes[1] = byte;
             break;
 
-        case REG_TM1D:
-            timer[1].initial &= ~0xFF;
-            timer[1].initial |= byte;
+        case REG_TM1CNT_L:
+            timer[1].initial_bytes[0] = byte;
             break;
 
-        case REG_TM1D+1:
-            timer[1].initial &= ~0xFF00;
-            timer[1].initial |= byte << 8;
+        case REG_TM1CNT_L+1:
+            timer[1].initial_bytes[1] = byte;
             break;
 
-        case REG_TM2D:
-            timer[2].initial &= ~0xFF;
-            timer[2].initial |= byte;
+        case REG_TM2CNT_L:
+            timer[2].initial_bytes[0] = byte;
             break;
 
-        case REG_TM2D+1:
-            timer[2].initial &= ~0xFF00;
-            timer[2].initial |= byte << 8;
+        case REG_TM2CNT_L+1:
+            timer[2].initial_bytes[1] = byte;
             break;
 
-        case REG_TM3D:
-            timer[3].initial &= ~0xFF;
-            timer[3].initial |= byte;
+        case REG_TM3CNT_L:
+            timer[3].initial_bytes[0] = byte;
             break;
 
-        case REG_TM3D+1:
-            timer[3].initial &= ~0xFF00;
-            timer[3].initial |= byte << 8;
+        case REG_TM3CNT_L+1:
+            timer[3].initial_bytes[1] = byte;
             break;
 
-        case REG_TM0CNT:
-            timer[0].init(byte & 0x80);
+        case REG_TM0CNT_H:
+            timer[0].attemptInit(byte & 0x80);
             timer[0].control.prescaler = bits<0, 2>(byte);
             timer[0].control.cascade   = bits<2, 1>(byte);
             timer[0].control.irq       = bits<6, 1>(byte);
             timer[0].control.enabled   = bits<7, 1>(byte);
             break;
     
-        case REG_TM1CNT: 
-            timer[1].init(byte & 0x80);
+        case REG_TM1CNT_H: 
+            timer[1].attemptInit(byte & 0x80);
             timer[1].control.prescaler = bits<0, 2>(byte);
             timer[1].control.cascade   = bits<2, 1>(byte);
             timer[1].control.irq       = bits<6, 1>(byte);
             timer[1].control.enabled   = bits<7, 1>(byte);
             break;
 
-        case REG_TM2CNT: 
-            timer[2].init(byte & 0x80);
+        case REG_TM2CNT_H: 
+            timer[2].attemptInit(byte & 0x80);
             timer[2].control.prescaler = bits<0, 2>(byte);
             timer[2].control.cascade   = bits<2, 1>(byte);
             timer[2].control.irq       = bits<6, 1>(byte);
             timer[2].control.enabled   = bits<7, 1>(byte);
             break;
 
-        case REG_TM3CNT: 
-            timer[3].init(byte & 0x80);
+        case REG_TM3CNT_H: 
+            timer[3].attemptInit(byte & 0x80);
             timer[3].control.prescaler = bits<0, 2>(byte);
             timer[3].control.cascade   = bits<2, 1>(byte);
             timer[3].control.irq       = bits<6, 1>(byte);
@@ -751,13 +756,13 @@ void MMU::writeByte(u32 addr, u8 byte)
             break;
 
         case REG_KEYCNT:
-            keycnt.bytes[0] = byte;
+            keycnt.keys_bytes[0] = byte;
             break;
 
         case REG_KEYCNT+1:
-            keycnt.bytes[1] = byte & 0x3;
-            keycnt.irq      = bits<6, 1>(byte);
-            keycnt.logic    = bits<7, 1>(byte);
+            keycnt.keys_bytes[1] = byte & 0x3;
+            keycnt.irq           = bits<6, 1>(byte);
+            keycnt.logic         = bits<7, 1>(byte);
             break;
 
         case REG_IME:

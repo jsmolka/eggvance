@@ -51,7 +51,7 @@ void PPU::scanline()
 {
     mmu.dispstat.vblank = false;
     mmu.dispstat.hblank = false;
-    mmu.mmio<u16>(REG_DISPSTAT) &= ~0x3;
+    mmu.dispstat.data &= ~0x3;
 
     bgs[0].flip();
     bgs[1].flip();
@@ -101,13 +101,12 @@ void PPU::hblank()
 {
     mmu.dispstat.vblank = false;
     mmu.dispstat.hblank = true;
-    mmu.mmio<u16>(REG_DISPSTAT) &= ~0x3;
-    mmu.mmio<u16>(REG_DISPSTAT) |= 0x2;
+    mmu.dispstat.data = (mmu.dispstat.data & ~0x3) | 0x2;
 
-    mmu.bgx[0].internal += mmu.bgpb[0].value;
-    mmu.bgx[1].internal += mmu.bgpb[1].value;
-    mmu.bgy[0].internal += mmu.bgpd[0].value;
-    mmu.bgy[1].internal += mmu.bgpd[1].value;
+    mmu.bgx[0].internal += mmu.bgpb[0].param;
+    mmu.bgx[1].internal += mmu.bgpb[1].param;
+    mmu.bgy[0].internal += mmu.bgpd[0].param;
+    mmu.bgy[1].internal += mmu.bgpd[1].param;
 
     if (mmu.dispstat.hblank_irq)
     {
@@ -119,13 +118,12 @@ void PPU::vblank()
 {
     mmu.dispstat.vblank = true;
     mmu.dispstat.hblank = false;
-    mmu.mmio<u16>(REG_DISPSTAT) &= ~0x3;
-    mmu.mmio<u16>(REG_DISPSTAT) |= 0x1;
+    mmu.dispstat.data = (mmu.dispstat.data & ~0x3) | 0x1;
 
-    mmu.bgx[0].internal = mmu.bgx[0].value;
-    mmu.bgx[1].internal = mmu.bgx[1].value;
-    mmu.bgy[0].internal = mmu.bgy[0].value;
-    mmu.bgy[1].internal = mmu.bgy[1].value;
+    mmu.bgx[0].internal = mmu.bgx[0].ref;
+    mmu.bgx[1].internal = mmu.bgx[1].ref;
+    mmu.bgy[0].internal = mmu.bgy[0].ref;
+    mmu.bgy[1].internal = mmu.bgy[1].ref;
 
     if (mmu.dispstat.vblank_irq)
     {
@@ -139,19 +137,17 @@ void PPU::next()
 
     mmu.vcount = (mmu.vcount + 1) % 228;
     mmu.dispstat.vcount_match = vcount_match;
-
-    mmu.mmio<u16>(REG_DISPSTAT) &= ~0x4;
-    mmu.mmio<u16>(REG_DISPSTAT) |= vcount_match << 2;
+    mmu.dispstat.data = (mmu.dispstat.data & ~0x4) | (vcount_match << 2);
 
     if (vcount_match && mmu.dispstat.vcount_irq)
     {
-        Interrupt::request(IF_VCOUNT_MATCH);
+        Interrupt::request(IF_VMATCH);
     }
 }
 
 void PPU::present()
 {
-    if (mmu.mmio<u16>(REG_DISPCNT) & 0x1F00)
+    if (mmu.io.get<u16>(REG_DISPCNT) & 0x1F00)
     {
         SDL_UpdateTexture(
             texture, 0,
@@ -188,7 +184,7 @@ void PPU::renderBg(RenderFunc func, int bg)
 
 void PPU::mosaic(int bg)
 {
-    int mosaic_x = mmu.mosaic.bg_x + 1;
+    int mosaic_x = mmu.mosaic.bg.x + 1;
     if (mosaic_x == 1)
         return;
 
@@ -204,7 +200,7 @@ void PPU::mosaic(int bg)
 
 bool PPU::mosaicDominant() const
 {
-    return mmu.vcount % (mmu.mosaic.bg_y + 1) == 0;
+    return mmu.vcount % (mmu.mosaic.bg.y + 1) == 0;
 }
 
 void PPU::generate()

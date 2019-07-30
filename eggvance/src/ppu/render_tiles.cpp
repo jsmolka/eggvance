@@ -95,8 +95,8 @@ void PPU::renderBgMode2(int bg)
 {
     const BackgroundControl& bgcnt = mmu.bgcnt[bg];
 
-    s16 pa = mmu.bgpa[bg - 2].value;
-    s16 pc = mmu.bgpc[bg - 2].value;
+    s16 pa = mmu.bgpa[bg - 2].param;
+    s16 pc = mmu.bgpc[bg - 2].param;
 
     int line = mmu.vcount;
 

@@ -28,9 +28,6 @@ public:
     void writeHalf(u32 addr, u16 half);
     void writeWord(u32 addr, u32 word);
 
-    template<typename T>
-    T& mmio(IORegister reg);
-
     DisplayControl dispcnt;
     DisplayStatus dispstat;
     u8& vcount;
@@ -77,9 +74,3 @@ public:
     RAM<0x10000> sram;
     std::vector<u8> gamepak;
 };
-
-template<typename T>
-inline T& MMU::mmio(IORegister reg)
-{
-    return *reinterpret_cast<T*>(&io[reg]);
-}
