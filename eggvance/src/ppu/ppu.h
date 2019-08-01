@@ -1,7 +1,7 @@
 #pragma once
 
 #include <array>
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 #include "mmu/mmu.h"
 #include "constants.h"

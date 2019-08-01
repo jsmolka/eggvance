@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <SDL_events.h>
+#include <SDL2/SDL_events.h>
 
 #include "arm/arm.h"
 #include "mmu/mmu.h"

@@ -6,6 +6,3 @@
 *.cpp  text diff=cpp linguist-language=cpp
 *.inc  text diff=asm linguist-language=asm
 *.asm  text diff=asm linguist-language=asm
-
-# Exclude libraries from linguist
-eggvance/src/external/* linguist-vendored
