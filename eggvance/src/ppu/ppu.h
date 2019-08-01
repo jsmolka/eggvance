@@ -24,6 +24,12 @@ public:
     void present();
 
 private:
+    struct BackgroundRange
+    {
+        int min;
+        int max;
+    };
+
     MMU& mmu;
 
     using RenderFunc = void(PPU::*)(int);
@@ -40,6 +46,9 @@ private:
     bool mosaicDominant() const;
 
     void generate();
+    void generateV2(const BackgroundRange& range);
+
+    void generateEffectless(const BackgroundRange& range);
     
     int blendAlpha(int a, int b) const;
     int blendWhite(int a) const;
@@ -55,6 +64,7 @@ private:
 
     DoubleBuffer<u16> bgs[4];
     Buffer<ObjData> obj;
+    bool alpha_objects;
 
     std::array<u16, WIDTH * HEIGHT> screen;
 };

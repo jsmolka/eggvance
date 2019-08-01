@@ -1,5 +1,8 @@
 #include "ppu.h"
 
+#include <algorithm>
+#include <vector>
+
 #include "common/utility.h"
 #include "mmu/interrupt.h"
 #include "scanlinebuilder.h"
@@ -59,6 +62,9 @@ void PPU::scanline()
     bgs[3].flip();
 
     obj.fill(ObjData());
+    alpha_objects = false;
+
+    renderObjects();
 
     switch (mmu.dispcnt.mode)
     {
@@ -67,34 +73,38 @@ void PPU::scanline()
         renderBg(&PPU::renderBgMode0, 1);
         renderBg(&PPU::renderBgMode0, 2);
         renderBg(&PPU::renderBgMode0, 3);
+        generateV2({ 0, 3 });
         break;
 
     case 1: 
         renderBg(&PPU::renderBgMode0, 0);
         renderBg(&PPU::renderBgMode0, 1);
         renderBg(&PPU::renderBgMode2, 2);
+        generateV2({ 0, 2 });
         break;
 
     case 2: 
         renderBg(&PPU::renderBgMode2, 2);
         renderBg(&PPU::renderBgMode2, 3);
+        generateV2({ 2, 3 });
         break;
 
     case 3: 
         renderBg(&PPU::renderBgMode3, 2);
+        generateV2({ 2, 2 });
         break;
 
     case 4: 
         renderBg(&PPU::renderBgMode4, 2);
+        generateV2({ 2, 2 });
         break;
 
     case 5: 
         renderBg(&PPU::renderBgMode5, 2);
+        generateV2({ 2, 2 });
         break;
     }
-    renderObjects();
 
-    generate();
 }
 
 void PPU::hblank()
@@ -250,6 +260,65 @@ void PPU::generate()
             }
         }
         scanline[x] = color;
+    }
+}
+
+void PPU::generateV2(const BackgroundRange& range)
+{
+    bool no_effects = !alpha_objects && mmu.bldcnt.mode == BLD_DISABLED;
+    bool no_windows = !(mmu.dispcnt.win0 || mmu.dispcnt.win1 || mmu.dispcnt.winobj);
+
+    if (no_effects && no_windows)
+    {
+        generateEffectless(range);
+    }
+    else
+    {
+        generate();
+    }
+}
+
+void PPU::generateEffectless(const BackgroundRange& range)
+{
+    u16  backdrop = mmu.palette.get<u16>(0);
+    u16* scanline = &screen[WIDTH * mmu.vcount];
+
+    struct Layer
+    {
+        int bg;
+        int priority;
+        u16* data;
+    };
+
+    std::vector<Layer> layers;
+    for (int bg = range.min; bg <= range.max; ++bg)
+    {
+        if (mmu.dispcnt.bg[bg])
+            layers.push_back({ bg, mmu.bgcnt[bg].priority, &bgs[bg][0] });
+    }
+
+    std::sort(layers.begin(), layers.end(), [](const Layer& lhs, const Layer& rhs)
+    {
+        if (lhs.priority != rhs.priority)
+            return lhs.priority < rhs.priority;
+        else
+            return lhs.bg < rhs.bg;
+    });
+
+    for (int x = 0; x < WIDTH; ++x)
+    {
+        scanline[x] = backdrop;
+        for (const Layer& layer : layers)
+        {
+            if (layer.data[x] != TRANSPARENT)
+            {
+                if (mmu.dispcnt.obj && obj[x].priority <= layer.priority && obj[x].color != TRANSPARENT)
+                    scanline[x] = obj[x].color;
+                else
+                    scanline[x] = layer.data[x];
+                break;
+            }
+        }
     }
 }
 

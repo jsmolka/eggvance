@@ -134,7 +134,9 @@ void PPU::renderObjects()
                         {
                             obj[screen_x].color = color;
                             obj[screen_x].priority = oam.priority;
-                            obj[screen_x].mode = static_cast<GraphicsMode>(static_cast<int>(oam.gfx_mode));
+                            obj[screen_x].mode = oam.gfx_mode;
+
+                            alpha_objects |= obj[screen_x].mode == GFX_ALPHA;
                         }
                     }
                 }

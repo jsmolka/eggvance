@@ -5,11 +5,11 @@
 
 struct ObjData
 {
-    ObjData(int color = TRANSPARENT, int priority = 4, GraphicsMode mode = GFX_NORMAL, int window = 0)
+    ObjData(int color = TRANSPARENT, int priority = 4, int mode = GFX_NORMAL, int window = 0)
         : color(color), priority(priority), mode(mode), window(window) { }
 
     int color;
     int priority;
-    GraphicsMode mode;
+    int mode;
     int window;
 };
