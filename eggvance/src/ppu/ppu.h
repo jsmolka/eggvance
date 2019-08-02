@@ -6,6 +6,7 @@
 #include "mmu/mmu.h"
 #include "constants.h"
 #include "doublebuffer.h"
+#include "enums.h"
 #include "objdata.h"
 
 class PPU
@@ -24,10 +25,17 @@ public:
     void present();
 
 private:
-    struct BackgroundRange
+    struct Range
     {
         int min;
         int max;
+    };
+    struct Layer
+    {
+        int bg;
+        int priority;
+        int flag;
+        u16* data;
     };
 
     MMU& mmu;
@@ -46,9 +54,13 @@ private:
     bool mosaicDominant() const;
 
     void generate();
-    void generateV2(const BackgroundRange& range);
+    void finalize(const Range& range);
 
-    void generateEffectless(const BackgroundRange& range);
+    // No effects
+    void finalizeBasic(const std::vector<Layer>& layers);
+    // Windows
+    void finalizeWindow(const std::vector<Layer>& layers);
+
     
     int blendAlpha(int a, int b) const;
     int blendWhite(int a) const;

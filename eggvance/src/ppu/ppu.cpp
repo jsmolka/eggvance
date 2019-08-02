@@ -73,35 +73,35 @@ void PPU::scanline()
         renderBg(&PPU::renderBgMode0, 1);
         renderBg(&PPU::renderBgMode0, 2);
         renderBg(&PPU::renderBgMode0, 3);
-        generateV2({ 0, 3 });
+        finalize({ 0, 3 });
         break;
 
     case 1: 
         renderBg(&PPU::renderBgMode0, 0);
         renderBg(&PPU::renderBgMode0, 1);
         renderBg(&PPU::renderBgMode2, 2);
-        generateV2({ 0, 2 });
+        finalize({ 0, 2 });
         break;
 
     case 2: 
         renderBg(&PPU::renderBgMode2, 2);
         renderBg(&PPU::renderBgMode2, 3);
-        generateV2({ 2, 3 });
+        finalize({ 2, 3 });
         break;
 
     case 3: 
         renderBg(&PPU::renderBgMode3, 2);
-        generateV2({ 2, 2 });
+        finalize({ 2, 2 });
         break;
 
     case 4: 
         renderBg(&PPU::renderBgMode4, 2);
-        generateV2({ 2, 2 });
+        finalize({ 2, 2 });
         break;
 
     case 5: 
         renderBg(&PPU::renderBgMode5, 2);
-        generateV2({ 2, 2 });
+        finalize({ 2, 2 });
         break;
     }
 
@@ -263,38 +263,18 @@ void PPU::generate()
     }
 }
 
-void PPU::generateV2(const BackgroundRange& range)
+void PPU::finalize(const Range& range)
 {
-    bool no_effects = !alpha_objects && mmu.bldcnt.mode == BLD_DISABLED;
-    bool no_windows = !(mmu.dispcnt.win0 || mmu.dispcnt.win1 || mmu.dispcnt.winobj);
+    // Test for effects
+    int blending = alpha_objects || mmu.bldcnt.mode != BLD_DISABLED;
+    int windows = mmu.dispcnt.win0 || mmu.dispcnt.win1 || mmu.dispcnt.winobj;
 
-    if (no_effects && no_windows)
-    {
-        generateEffectless(range);
-    }
-    else
-    {
-        generate();
-    }
-}
-
-void PPU::generateEffectless(const BackgroundRange& range)
-{
-    u16  backdrop = mmu.palette.get<u16>(0);
-    u16* scanline = &screen[WIDTH * mmu.vcount];
-
-    struct Layer
-    {
-        int bg;
-        int priority;
-        u16* data;
-    };
-
+    // Sorted layers are needed for pretty much every finalizer
     std::vector<Layer> layers;
     for (int bg = range.min; bg <= range.max; ++bg)
     {
         if (mmu.dispcnt.bg[bg])
-            layers.push_back({ bg, mmu.bgcnt[bg].priority, &bgs[bg][0] });
+            layers.push_back({ bg, mmu.bgcnt[bg].priority, LF_BG0 << bg, &bgs[bg][0] });
     }
 
     std::sort(layers.begin(), layers.end(), [](const Layer& lhs, const Layer& rhs)
@@ -304,6 +284,28 @@ void PPU::generateEffectless(const BackgroundRange& range)
         else
             return lhs.bg < rhs.bg;
     });
+
+    switch ((windows << 1) | blending)
+    {
+    case 0b00:
+        finalizeBasic(layers);
+        break;
+
+    case 0b10:
+        finalizeWindow(layers);
+        break;
+
+    case 0b01:
+    case 0b11:
+        generate();
+        break;
+    }
+}
+
+void PPU::finalizeBasic(const std::vector<Layer>& layers)
+{
+    u16  backdrop = mmu.palette.get<u16>(0);
+    u16* scanline = &screen[WIDTH * mmu.vcount];
 
     for (int x = 0; x < WIDTH; ++x)
     {
@@ -316,9 +318,71 @@ void PPU::generateEffectless(const BackgroundRange& range)
                     scanline[x] = obj[x].color;
                 else
                     scanline[x] = layer.data[x];
-                break;
+                goto rendered;
             }
         }
+        if (mmu.dispcnt.obj && obj[x].color != TRANSPARENT)
+        {
+            scanline[x] = obj[x].color;
+        }
+        rendered:;
+    }
+}
+
+void PPU::finalizeWindow(const std::vector<Layer>& layers)
+{
+    u16  backdrop = mmu.palette.get<u16>(0);
+    u16* scanline = &screen[WIDTH * mmu.vcount];
+
+    struct WindowLayer
+    {
+        Range range;
+        int mask;
+    };
+
+    std::vector<WindowLayer> windows;
+    for (int win = 0; win < 2; ++win)
+    {
+        if (mmu.winv[win].min <= mmu.vcount && mmu.vcount < mmu.winv[win].max_adj)
+        {
+            windows.push_back({ { mmu.winh[win].min, mmu.winh[win].max_adj }, mmu.winin.win[win].mask });
+        }
+    }
+
+    for (int x = 0; x < WIDTH; ++x)
+    {
+        int mask;
+        for (const WindowLayer& window : windows)
+        {
+            if (window.range.min <= x && x < window.range.max)
+            {
+                mask = window.mask;
+                goto found;
+            }
+        }
+        if (obj[x].window)
+            mask = mmu.winout.winobj.mask;
+        else
+            mask = mmu.winout.winout.mask;
+        found:;
+
+        scanline[x] = backdrop;
+        for (const Layer& layer : layers)
+        {
+            if (layer.flag & mask && layer.data[x] != TRANSPARENT)
+            {
+                if (mask & LF_OBJ && mmu.dispcnt.obj && obj[x].priority <= layer.priority && obj[x].color != TRANSPARENT)
+                    scanline[x] = obj[x].color;
+                else
+                    scanline[x] = layer.data[x];
+                goto rendered;
+            }
+        }
+        if (mask & LF_OBJ && mmu.dispcnt.obj && obj[x].color != TRANSPARENT)
+        {
+            scanline[x] = obj[x].color;
+        }
+        rendered:;
     }
 }
 

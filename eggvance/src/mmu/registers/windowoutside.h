@@ -4,6 +4,13 @@
 
 struct WindowOutside
 {
-    Window winout;
-    Window winobj;
+    union
+    {
+        struct
+        {
+            Window winout;
+            Window winobj;
+        };
+        Window win[2];
+    };
 };

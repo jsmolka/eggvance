@@ -4,6 +4,13 @@
 
 struct WindowInside
 {
-    Window win0;
-    Window win1;
+    union
+    {
+        struct
+        {
+            Window win0;
+            Window win1;
+        };
+        Window win[2];
+    };
 };

@@ -564,34 +564,42 @@ void MMU::writeByte(u32 addr, u8 byte)
 
         case REG_WIN0H:
             winh[0].max = byte;
+            winh[0].adjust();
             break;
 
         case REG_WIN0H+1:
             winh[0].min = byte;
+            winh[0].adjust();
             break;
 
         case REG_WIN1H:
             winh[1].max = byte;
+            winh[1].adjust();
             break;
 
         case REG_WIN1H+1:
             winh[1].min = byte;
+            winh[1].adjust();
             break;
 
         case REG_WIN0V:
             winv[0].max = byte;
+            winv[0].adjust();
             break;
 
         case REG_WIN0V+1:
             winv[0].min = byte;
+            winv[0].adjust();
             break;
 
         case REG_WIN1V:
             winv[1].max = byte;
+            winv[1].adjust();
             break;
 
         case REG_WIN1V+1:
             winv[1].min = byte;
+            winv[1].adjust();
             break;
 
         case REG_WININ:
@@ -601,6 +609,7 @@ void MMU::writeByte(u32 addr, u8 byte)
             winin.win0.bg3 = bits<3, 1>(byte);
             winin.win0.obj = bits<4, 1>(byte);
             winin.win0.sfx = bits<5, 1>(byte);
+            winin.win0.makeMask();
             break;
 
         case REG_WININ+1:
@@ -610,6 +619,7 @@ void MMU::writeByte(u32 addr, u8 byte)
             winin.win1.bg3 = bits<3, 1>(byte);
             winin.win1.obj = bits<4, 1>(byte);
             winin.win1.sfx = bits<5, 1>(byte);
+            winin.win1.makeMask();
             break;
         
         case REG_WINOUT:
@@ -619,6 +629,7 @@ void MMU::writeByte(u32 addr, u8 byte)
             winout.winout.bg3 = bits<3, 1>(byte);
             winout.winout.obj = bits<4, 1>(byte);
             winout.winout.sfx = bits<5, 1>(byte);
+            winout.winout.makeMask();
             break;
 
         case REG_WINOUT+1:
@@ -628,6 +639,7 @@ void MMU::writeByte(u32 addr, u8 byte)
             winout.winobj.bg3 = bits<3, 1>(byte);
             winout.winobj.obj = bits<4, 1>(byte);
             winout.winobj.sfx = bits<5, 1>(byte);
+            winout.winobj.makeMask();
             break;
 
         case REG_MOSAIC:
