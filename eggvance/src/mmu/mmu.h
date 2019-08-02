@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "common/integer.h"
-#include "registers/all.h"
+#include "registers/include.h"
 #include "ppu/constants.h"
 #include "memory.h"
 #include "ram.h"

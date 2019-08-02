@@ -609,7 +609,6 @@ void MMU::writeByte(u32 addr, u8 byte)
             winin.win0.bg3 = bits<3, 1>(byte);
             winin.win0.obj = bits<4, 1>(byte);
             winin.win0.sfx = bits<5, 1>(byte);
-            winin.win0.makeMask();
             break;
 
         case REG_WININ+1:
@@ -619,7 +618,6 @@ void MMU::writeByte(u32 addr, u8 byte)
             winin.win1.bg3 = bits<3, 1>(byte);
             winin.win1.obj = bits<4, 1>(byte);
             winin.win1.sfx = bits<5, 1>(byte);
-            winin.win1.makeMask();
             break;
         
         case REG_WINOUT:
@@ -629,7 +627,6 @@ void MMU::writeByte(u32 addr, u8 byte)
             winout.winout.bg3 = bits<3, 1>(byte);
             winout.winout.obj = bits<4, 1>(byte);
             winout.winout.sfx = bits<5, 1>(byte);
-            winout.winout.makeMask();
             break;
 
         case REG_WINOUT+1:
@@ -639,7 +636,6 @@ void MMU::writeByte(u32 addr, u8 byte)
             winout.winobj.bg3 = bits<3, 1>(byte);
             winout.winobj.obj = bits<4, 1>(byte);
             winout.winobj.sfx = bits<5, 1>(byte);
-            winout.winobj.makeMask();
             break;
 
         case REG_MOSAIC:

@@ -4,7 +4,6 @@
 #include <SDL2/SDL.h>
 
 #include "mmu/mmu.h"
-#include "constants.h"
 #include "doublebuffer.h"
 #include "enums.h"
 #include "objdata.h"
@@ -25,19 +24,6 @@ public:
     void present();
 
 private:
-    struct Range
-    {
-        int min;
-        int max;
-    };
-    struct Layer
-    {
-        int bg;
-        int priority;
-        int flag;
-        u16* data;
-    };
-
     MMU& mmu;
 
     using RenderFunc = void(PPU::*)(int);
@@ -54,14 +40,7 @@ private:
     bool mosaicDominant() const;
 
     void generate();
-    void finalize(const Range& range);
 
-    // No effects
-    void finalizeBasic(const std::vector<Layer>& layers);
-    // Windows
-    void finalizeWindow(const std::vector<Layer>& layers);
-
-    
     int blendAlpha(int a, int b) const;
     int blendWhite(int a) const;
     int blendBlack(int a) const;
@@ -76,7 +55,7 @@ private:
 
     DoubleBuffer<u16> bgs[4];
     Buffer<ObjData> obj;
-    bool alpha_objects;
+    bool objects_exist;
 
     std::array<u16, WIDTH * HEIGHT> screen;
 };

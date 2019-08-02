@@ -192,7 +192,7 @@
     <ClInclude Include="src\mmu\registers\backgroundcontrol.h" />
     <ClInclude Include="src\mmu\registers\displaycontrol.h" />
     <ClInclude Include="src\mmu\registers\displaystatus.h" />
-    <ClInclude Include="src\mmu\registers\all.h" />
+    <ClInclude Include="src\mmu\registers\include.h" />
     <ClInclude Include="src\ppu\objdata.h" />
     <ClInclude Include="src\ppu\ppu.h" />
     <ClInclude Include="src\core.h" />

@@ -5,9 +5,6 @@
 
 void PPU::renderObjects()
 {
-    if (!mmu.dispcnt.obj)
-        return;
-
     int line = mmu.vcount;
 
     int mosaic_x = mmu.mosaic.obj.x + 1;
@@ -135,8 +132,7 @@ void PPU::renderObjects()
                             obj[screen_x].color = color;
                             obj[screen_x].priority = oam.priority;
                             obj[screen_x].mode = oam.gfx_mode;
-
-                            alpha_objects |= obj[screen_x].mode == GFX_ALPHA;
+                            objects_exist = true;
                         }
                     }
                 }

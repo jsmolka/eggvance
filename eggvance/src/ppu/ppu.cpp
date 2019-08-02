@@ -61,10 +61,15 @@ void PPU::scanline()
     bgs[2].flip();
     bgs[3].flip();
 
-    obj.fill(ObjData());
-    alpha_objects = false;
-
-    renderObjects();
+    if (mmu.dispcnt.obj)
+    {
+        if (objects_exist)
+        {
+            obj.fill(ObjData());
+            objects_exist = false;
+        }
+        renderObjects();
+    }
 
     switch (mmu.dispcnt.mode)
     {
@@ -73,38 +78,32 @@ void PPU::scanline()
         renderBg(&PPU::renderBgMode0, 1);
         renderBg(&PPU::renderBgMode0, 2);
         renderBg(&PPU::renderBgMode0, 3);
-        finalize({ 0, 3 });
         break;
 
     case 1: 
         renderBg(&PPU::renderBgMode0, 0);
         renderBg(&PPU::renderBgMode0, 1);
         renderBg(&PPU::renderBgMode2, 2);
-        finalize({ 0, 2 });
         break;
 
     case 2: 
         renderBg(&PPU::renderBgMode2, 2);
         renderBg(&PPU::renderBgMode2, 3);
-        finalize({ 2, 3 });
         break;
 
     case 3: 
         renderBg(&PPU::renderBgMode3, 2);
-        finalize({ 2, 2 });
         break;
 
     case 4: 
         renderBg(&PPU::renderBgMode4, 2);
-        finalize({ 2, 2 });
         break;
 
     case 5: 
         renderBg(&PPU::renderBgMode5, 2);
-        finalize({ 2, 2 });
         break;
     }
-
+    generate();
 }
 
 void PPU::hblank()
@@ -213,6 +212,11 @@ bool PPU::mosaicDominant() const
     return mmu.vcount % (mmu.mosaic.bg.y + 1) == 0;
 }
 
+/*
+ * Todo: The whole generation process in its current state is really slow
+ * compared to what it could be (~6% CPU usage maximum) but I don't feel like
+ * improving it right now because it seems to be pretty accurate at least.
+ */
 void PPU::generate()
 {
     ScanlineBuilder builder(bgs, obj, mmu);
@@ -260,129 +264,6 @@ void PPU::generate()
             }
         }
         scanline[x] = color;
-    }
-}
-
-void PPU::finalize(const Range& range)
-{
-    // Test for effects
-    int blending = alpha_objects || mmu.bldcnt.mode != BLD_DISABLED;
-    int windows = mmu.dispcnt.win0 || mmu.dispcnt.win1 || mmu.dispcnt.winobj;
-
-    // Sorted layers are needed for pretty much every finalizer
-    std::vector<Layer> layers;
-    for (int bg = range.min; bg <= range.max; ++bg)
-    {
-        if (mmu.dispcnt.bg[bg])
-            layers.push_back({ bg, mmu.bgcnt[bg].priority, LF_BG0 << bg, &bgs[bg][0] });
-    }
-
-    std::sort(layers.begin(), layers.end(), [](const Layer& lhs, const Layer& rhs)
-    {
-        if (lhs.priority != rhs.priority)
-            return lhs.priority < rhs.priority;
-        else
-            return lhs.bg < rhs.bg;
-    });
-
-    switch ((windows << 1) | blending)
-    {
-    case 0b00:
-        finalizeBasic(layers);
-        break;
-
-    case 0b10:
-        finalizeWindow(layers);
-        break;
-
-    case 0b01:
-    case 0b11:
-        generate();
-        break;
-    }
-}
-
-void PPU::finalizeBasic(const std::vector<Layer>& layers)
-{
-    u16  backdrop = mmu.palette.get<u16>(0);
-    u16* scanline = &screen[WIDTH * mmu.vcount];
-
-    for (int x = 0; x < WIDTH; ++x)
-    {
-        scanline[x] = backdrop;
-        for (const Layer& layer : layers)
-        {
-            if (layer.data[x] != TRANSPARENT)
-            {
-                if (mmu.dispcnt.obj && obj[x].priority <= layer.priority && obj[x].color != TRANSPARENT)
-                    scanline[x] = obj[x].color;
-                else
-                    scanline[x] = layer.data[x];
-                goto rendered;
-            }
-        }
-        if (mmu.dispcnt.obj && obj[x].color != TRANSPARENT)
-        {
-            scanline[x] = obj[x].color;
-        }
-        rendered:;
-    }
-}
-
-void PPU::finalizeWindow(const std::vector<Layer>& layers)
-{
-    u16  backdrop = mmu.palette.get<u16>(0);
-    u16* scanline = &screen[WIDTH * mmu.vcount];
-
-    struct WindowLayer
-    {
-        Range range;
-        int mask;
-    };
-
-    std::vector<WindowLayer> windows;
-    for (int win = 0; win < 2; ++win)
-    {
-        if (mmu.winv[win].min <= mmu.vcount && mmu.vcount < mmu.winv[win].max_adj)
-        {
-            windows.push_back({ { mmu.winh[win].min, mmu.winh[win].max_adj }, mmu.winin.win[win].mask });
-        }
-    }
-
-    for (int x = 0; x < WIDTH; ++x)
-    {
-        int mask;
-        for (const WindowLayer& window : windows)
-        {
-            if (window.range.min <= x && x < window.range.max)
-            {
-                mask = window.mask;
-                goto found;
-            }
-        }
-        if (obj[x].window)
-            mask = mmu.winout.winobj.mask;
-        else
-            mask = mmu.winout.winout.mask;
-        found:;
-
-        scanline[x] = backdrop;
-        for (const Layer& layer : layers)
-        {
-            if (layer.flag & mask && layer.data[x] != TRANSPARENT)
-            {
-                if (mask & LF_OBJ && mmu.dispcnt.obj && obj[x].priority <= layer.priority && obj[x].color != TRANSPARENT)
-                    scanline[x] = obj[x].color;
-                else
-                    scanline[x] = layer.data[x];
-                goto rendered;
-            }
-        }
-        if (mask & LF_OBJ && mmu.dispcnt.obj && obj[x].color != TRANSPARENT)
-        {
-            scanline[x] = obj[x].color;
-        }
-        rendered:;
     }
 }
 
