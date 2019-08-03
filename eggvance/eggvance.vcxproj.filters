@@ -203,5 +203,8 @@
     <ClInclude Include="src\mmu\registers\include.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\ppu\backend.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

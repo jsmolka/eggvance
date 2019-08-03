@@ -11,40 +11,7 @@
 PPU::PPU(MMU& mmu)
     : mmu(mmu)
 {
-    SDL_Init(SDL_INIT_VIDEO);
-
-    window = SDL_CreateWindow(
-        "eggvance",
-        SDL_WINDOWPOS_UNDEFINED,
-        SDL_WINDOWPOS_UNDEFINED,
-        2 * WIDTH, 2 * HEIGHT,
-        SDL_WINDOW_RESIZABLE
-    );
-    
-    renderer = SDL_CreateRenderer(
-        window, 
-        -1, 
-        SDL_RENDERER_ACCELERATED
-    );
-    SDL_RenderSetLogicalSize(renderer, WIDTH, HEIGHT);
-
-    texture = SDL_CreateTexture(
-        renderer,
-        SDL_PIXELFORMAT_BGR555,
-        SDL_TEXTUREACCESS_STREAMING,
-        WIDTH, HEIGHT
-    );
-
     reset();
-}
-
-PPU::~PPU()
-{
-    SDL_DestroyTexture(texture);
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-
-    SDL_Quit();
 }
 
 void PPU::reset()
@@ -160,13 +127,7 @@ void PPU::present()
 {
     if (mmu.io.get<u16>(REG_DISPCNT) & 0x1F00)
     {
-        SDL_UpdateTexture(
-            texture, 0,
-            screen.data(),
-            2 * WIDTH
-        );
-        SDL_RenderCopy(renderer, texture, 0, 0);
-        SDL_RenderPresent(renderer);
+        backend.preset();
     }
 }
 
@@ -223,7 +184,7 @@ void PPU::finalize()
 {
     ScanlineBuilder builder(bgs, obj, mmu);
 
-    u16* scanline = &screen[WIDTH * mmu.vcount];
+    u16* scanline = &backend.buffer[WIDTH * mmu.vcount];
 
     for (int x = 0; x < WIDTH; ++x)
     {

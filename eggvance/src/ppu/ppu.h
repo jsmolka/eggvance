@@ -1,9 +1,7 @@
 #pragma once
 
-#include <array>
-#include <SDL2/SDL.h>
-
 #include "mmu/mmu.h"
+#include "backend.h"
 #include "doublebuffer.h"
 #include "enums.h"
 #include "objdata.h"
@@ -12,7 +10,6 @@ class PPU
 {
 public:
     PPU(MMU& mmu);
-    ~PPU();
 
     void reset();
 
@@ -22,6 +19,8 @@ public:
     void next();
 
     void present();
+
+    Backend backend;
 
 private:
     MMU& mmu;
@@ -49,13 +48,7 @@ private:
     int readFgColor(int index, int palette);
     int readPixel(u32 addr, int x, int y, PixelFormat format);
        
-    SDL_Window* window;
-    SDL_Renderer* renderer;
-    SDL_Texture* texture;
-
     DoubleBuffer<u16> bgs[4];
     Buffer<ObjData> obj;
     bool objects_exist;
-
-    std::array<u16, WIDTH * HEIGHT> screen;
 };

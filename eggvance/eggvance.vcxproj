@@ -84,8 +84,6 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>
-      </AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2main.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -109,8 +107,6 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>
-      </AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2main.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -133,8 +129,6 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>
-      </AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2main.lib</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
@@ -165,6 +159,7 @@
     <ClInclude Include="src\mmu\interrupt.h" />
     <ClInclude Include="src\mmu\registers\window.h" />
     <ClInclude Include="src\mmu\registers\windowrange.h" />
+    <ClInclude Include="src\ppu\backend.h" />
     <ClInclude Include="src\ppu\constants.h" />
     <ClInclude Include="src\ppu\enums.h" />
     <ClInclude Include="src\mmu\ram.h" />

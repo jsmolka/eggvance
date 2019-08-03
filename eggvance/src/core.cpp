@@ -17,8 +17,7 @@ void Core::run(const std::string& file)
     if (!mmu.readBios("bios.bin"))
         return;
 
-    bool running = true;
-    while (running)
+    while (true)
     {
         u32 ticks = SDL_GetTicks();
 
@@ -34,19 +33,15 @@ void Core::run(const std::string& file)
             switch (event.type)
             {
             case SDL_QUIT:
-                running = false;
-                break;
+                return;
 
             case SDL_KEYDOWN:
-                keyEvent(event.key.keysym.sym, true);
-                break;
-
             case SDL_KEYUP:
-                keyEvent(event.key.keysym.sym, false);
+                keyEvent(event.key.keysym.sym, event.type == SDL_KEYDOWN);
                 break;
             }
         }
-    }   
+    } 
 }
 
 void Core::frame()
@@ -103,11 +98,19 @@ void Core::emulate(int cycles)
 void Core::emulateTimers(int cycles)
 {
     for (Timer& timer : mmu.timer)
+    {
         timer.emulate(cycles);
+    }
 }
 
 void Core::keyEvent(SDL_Keycode key, bool pressed)
 {
+    if (key == SDLK_F11 && pressed)
+    {
+        ppu.backend.fullscreen();
+        return;
+    }
+
     int state = !pressed;
     int shift = 0;
 
@@ -123,6 +126,9 @@ void Core::keyEvent(SDL_Keycode key, bool pressed)
     case SDLK_s: shift = 7; break; // Down
     case SDLK_i: shift = 8; break; // R
     case SDLK_q: shift = 9; break; // L
+
+    default:
+        return;
     }
 
     mmu.keyinput &= ~(1 << shift);
