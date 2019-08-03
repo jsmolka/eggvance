@@ -3,8 +3,8 @@
 void PPU::renderBgMode3(int bg)
 {
     u32 addr = 2 * WIDTH * mmu.vcount;
-    u16* color = mmu.vram.ptr<u16>(addr);
-    std::copy_n(color, WIDTH, &bgs[bg][0]);
+    u16* pixel = mmu.vram.ptr<u16>(addr);
+    std::copy_n(pixel, WIDTH, &bgs[bg][0]);
 }
 
 void PPU::renderBgMode4(int bg)
@@ -20,8 +20,8 @@ void PPU::renderBgMode5(int bg)
     if (mmu.vcount < 128)
     {
         u32 addr = (0xA000 * mmu.dispcnt.frame) + (2 * 160 * mmu.vcount);
-        u16* color = mmu.vram.ptr<u16>(addr);
-        std::copy_n(color, 160, &bgs[bg][0]);
+        u16* pixel = mmu.vram.ptr<u16>(addr);
+        std::copy_n(pixel, 160, &bgs[bg][0]);
         std::fill_n(&bgs[bg][160], 80, TRANSPARENT);
     }
     else

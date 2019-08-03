@@ -19,8 +19,8 @@ struct OAMEntry
         u16 x;       // X coordinate
     };
     int paramter;  // Affine paramter (if affine)
-    int flip_h;    // Horizontal flip (if not affine)
-    int flip_v;    // Vertical flip (if not affine)
+    int flip_x;    // Horizontal flip (if not affine)
+    int flip_y;    // Vertical flip (if not affine)
     int size;      // Object size
 
     union

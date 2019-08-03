@@ -10,9 +10,9 @@ void PPU::renderObjects()
     int mosaic_x = mmu.mosaic.obj.x + 1;
     int mosaic_y = mmu.mosaic.obj.y + 1;
 
-    for (auto iter = mmu.oam_entries.rbegin(); iter != mmu.oam_entries.rend(); ++iter)
+    for (auto iter = mmu.oam_entries.crbegin(); iter != mmu.oam_entries.crend(); ++iter)
     {
-        OAMEntry& oam = *iter;
+        const OAMEntry& oam = *iter;
         if (!oam.affine && oam.disabled)
             continue;
 
@@ -26,32 +26,33 @@ void PPU::renderObjects()
         int width  = oam.width();
         int height = oam.height();
 
-        // Bounding rectangle (invisible outside)
+        // Bounding rectangle dimensions
         int rect_width  = width;
         int rect_height = height;
 
         if (oam.double_size)
         {
-            rect_width  *= 2;
-            rect_height *= 2;
+            rect_width  <<= 1;
+            rect_height <<= 1;
         }
 
-        // Check if the sprite is visible
         int sprite_line = line - y;
         if (sprite_line < 0 || sprite_line >= rect_height)
             continue;
 
+        int palette = oam.color_mode ? 0 : oam.palette;
+        int tile_size = oam.color_mode ? 0x40 : 0x20;
         PixelFormat format = oam.color_mode ? BPP8 : BPP4;
-        int tile_size = (format == BPP8) ? 0x40 : 0x20;
-        // 2d mapping arranges the object tiles in a 32x32 tile matrix. In 256
-        // color mode the matrix is only 16 tiles wide, with each tile taking
-        // up 0x40 bytes.
-        int tile_size_row = tile_size * (mmu.dispcnt.mapping_1d ? (width / 8) : ((format == BPP8) ? 16 : 32));
 
-        bool flip_x = !oam.affine && oam.flip_h;
-        bool flip_y = !oam.affine && oam.flip_v;
+        // 1D mapping arranges tiles continuously in memory. 2D mapping arranges 
+        // tiles in a 32x32 matrix. The width is halfed to 16 tiles when using 
+        // 256 color mode. 
+        int tiles_per_row = mmu.dispcnt.mapping_1d ? (width / 8) : (oam.color_mode ? 16 : 32);
 
-        // Initialize with identity
+        bool flip_x = !oam.affine && oam.flip_x;
+        bool flip_y = !oam.affine && oam.flip_y;
+
+        // Initalize with identity
         s16 pa = 0x100;
         s16 pb = 0x000;
         s16 pc = 0x000;
@@ -69,66 +70,80 @@ void PPU::renderObjects()
         int center_x = x + rect_width / 2;
         int center_y = y + rect_height / 2;
 
-        // Offset from rotation center
-        int rect_x = -rect_width / 2;
-        int rect_y = line - center_y;
+        // Rotation center offset
+        int offset_x = -rect_width / 2;
+        int offset_y = line - center_y;
 
-        // In 256 bit color mode, only each second tile may be used. That's why
-        // we can assume the default tile size of 0x20.
+        // The base tile defines the start of the object independent of the
+        // color mode (and therefore tile_size). In 256 bit color mode only 
+        // each second tile may be used.
         u32 base_addr = 0x10000 + 0x20 * oam.tile;
 
-        for (; rect_x < rect_width / 2; ++rect_x)
-        {
-            // Texture coordinates inside the sprite
-            int tex_x = ((pa * rect_x + pb * rect_y) >> 8) + width / 2;
-            int tex_y = ((pc * rect_x + pd * rect_y) >> 8) + height / 2;
+        int half_width  = width / 2;
+        int half_height = height / 2;
 
-            if (tex_x >= 0 && tex_x < width && tex_y >= 0 && tex_y < height)
+        int pb_y = pb * offset_y;
+        int pd_y = pd * offset_y;
+
+        // Do not calculate data outside of the screen
+        int screen_x = center_x + offset_x;
+        if (screen_x < 0)
+        {
+            offset_x -= screen_x;
+            screen_x = 0;
+        }
+
+        for (; offset_x < rect_width / 2; ++offset_x, ++screen_x)
+        {
+            if (screen_x >= WIDTH)
+                break;
+
+            // Texture coordinates inside the sprite
+            int texture_x = ((pa * offset_x + pb_y) >> 8) + half_width;
+            int texture_y = ((pc * offset_x + pd_y) >> 8) + half_height;
+
+            if (texture_x >= 0 && texture_x < width && texture_y >= 0 && texture_y < height)
             {
-                if (flip_x) tex_x = width  - 1 - tex_x;
-                if (flip_y) tex_y = height - 1 - tex_y;
+                if (flip_x) texture_x = width  - texture_x - 1;
+                if (flip_y) texture_y = height - texture_y - 1;
 
                 if (oam.mosaic)
                 {
-                    // Slighty different to real GBA
-                    tex_x = mosaic_x * (tex_x / mosaic_x);
-                    tex_y = mosaic_y * (tex_y / mosaic_y);
+                    // Todo: Slighty different compared to real GBA
+                    texture_x = mosaic_x * (texture_x / mosaic_x);
+                    texture_y = mosaic_y * (texture_y / mosaic_y);
                 }
 
-                int tile_x = tex_x / 8;
-                int tile_y = tex_y / 8;
+                int tile_x = texture_x / 8;
+                int tile_y = texture_y / 8;
 
-                // Get tile address and account for overflow
-                u32 addr = base_addr + tile_size_row * tile_y + tile_size * tile_x;
-                if (addr > MAP_VRAM + 0x18000)
+                // Get tile address and account for memory mirror
+                u32 addr = base_addr + tile_size * (tiles_per_row * tile_y + tile_x);
+                if (addr > 0x18000)
                     addr -= 0x8000;
 
-                int pixel_x = tex_x % 8;
-                int pixel_y = tex_y % 8;
+                int pixel_x = texture_x % 8;
+                int pixel_y = texture_y % 8;
 
                 int index = readPixel(addr, pixel_x, pixel_y, format);
                 if (index != 0)
                 {
-                    int color;
-                    if (format == BPP4)
-                        color = readFgColor(index, oam.palette);
-                    else
-                        color = readFgColor(index, 0);
-                    
-                    int screen_x = center_x + rect_x;
-                    if (screen_x >= 0 && screen_x < WIDTH)
+                    switch (oam.gfx_mode)
                     {
-                        if (oam.gfx_mode == GFX_WINDOW)
+                    case GFX_NORMAL:
+                    case GFX_ALPHA:
+                        if (oam.priority <= obj[screen_x].priority)
                         {
-                            obj[screen_x].window = true;
-                        } 
-                        else if (oam.priority <= obj[screen_x].priority)
-                        {
-                            obj[screen_x].color = color;
+                            obj[screen_x].color = readFgColor(index, palette);
                             obj[screen_x].priority = oam.priority;
                             obj[screen_x].mode = oam.gfx_mode;
                             obj_exist = true;
                         }
+                        break;
+
+                    case GFX_WINDOW:
+                        obj[screen_x].window = true;
+                        break;
                     }
                 }
             }

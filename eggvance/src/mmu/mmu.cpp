@@ -839,8 +839,8 @@ void MMU::writeByte(u32 addr, u8 byte)
             case 3:
                 entry.x_b[1]   = byte & 0x1;
                 entry.paramter = bits<1, 5>(byte);
-                entry.flip_h   = bits<4, 1>(byte);
-                entry.flip_v   = bits<5, 1>(byte);
+                entry.flip_x   = bits<4, 1>(byte);
+                entry.flip_y   = bits<5, 1>(byte);
                 entry.size     = bits<6, 2>(byte);
                 break;
 
