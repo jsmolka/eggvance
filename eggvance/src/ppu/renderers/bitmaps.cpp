@@ -1,4 +1,4 @@
-#include "ppu.h"
+#include "ppu/ppu.h"
 
 void PPU::renderBgMode3(int bg)
 {

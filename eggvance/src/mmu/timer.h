@@ -22,12 +22,12 @@ public:
 
     union
     {
-        u8  data_bytes[2];
+        u8  data_b[2];
         u16 data;
     };
     union
     {
-        u8  initial_bytes[2];
+        u8  initial_b[2];
         u16 initial;
     };
     Timer* next;

@@ -1,25 +1,32 @@
 #include "oamentry.h"
 
-OAMEntry::OAMEntry(int attr0, int attr1, int attr2)
-    : y(attr0)
-    , affine(attr0)
-    , double_size(attr0)
-    , disabled(attr0)
-    , gfx_mode(attr0)
-    , mosaic(attr0)
-    , color_mode(attr0)
-    , shape(attr0)
-    , x(attr1)
-    , paramter(attr1)
-    , flip_h(attr1)
-    , flip_v(attr1)
-    , size(attr1)
-    , tile(attr2)
-    , priority(attr2)
-    , palette_bank(attr2)
+static constexpr int dimensions[4][4][2] = 
 {
-
-}
+    {
+        {  8,  8 },
+        { 16, 16 },
+        { 32, 32 },
+        { 64, 64 },
+    },
+    {
+        { 16,  8 },
+        { 32,  8 },
+        { 32, 16 },
+        { 64, 32 },
+    },
+    {
+        {  8, 16 },
+        {  8, 32 },
+        { 16, 32 },
+        { 32, 64 },
+    },
+    {
+        {  0,  0 },
+        {  0,  0 },
+        {  0,  0 },
+        {  0,  0 }
+    }
+};
 
 int OAMEntry::width() const
 {

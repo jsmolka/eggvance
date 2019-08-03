@@ -5,7 +5,7 @@
 #include "mmu/mmu.h"
 #include "buffer.h"
 #include "doublebuffer.h"
-#include "objdata.h"
+#include "objectdata.h"
 
 struct Layer
 {
@@ -19,7 +19,7 @@ struct Layer
 class ScanlineBuilder
 {
 public:
-    ScanlineBuilder(DoubleBuffer<u16>(&bgs)[4], Buffer<ObjData>& obj, MMU& mmu);
+    ScanlineBuilder(DoubleBuffer<u16>(&bgs)[4], Buffer<ObjectData>& obj, MMU& mmu);
 
     void build(int x);
 
@@ -45,7 +45,7 @@ private:
     MMU& mmu;
 
     DoubleBuffer<u16>(&bgs)[4];
-    Buffer<ObjData>& obj;
+    Buffer<ObjectData>& obj;
 
     int x;
     int y;

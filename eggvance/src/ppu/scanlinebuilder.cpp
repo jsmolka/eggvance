@@ -1,6 +1,6 @@
 #include "scanlinebuilder.h"
 
-ScanlineBuilder::ScanlineBuilder(DoubleBuffer<u16>(&bgs)[4], Buffer<ObjData>& obj, MMU& mmu)
+ScanlineBuilder::ScanlineBuilder(DoubleBuffer<u16>(&bgs)[4], Buffer<ObjectData>& obj, MMU& mmu)
     : bgs(bgs)
     , obj(obj)
     , mmu(mmu)

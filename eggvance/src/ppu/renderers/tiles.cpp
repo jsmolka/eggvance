@@ -1,7 +1,7 @@
-#include "ppu.h"
+#include "ppu/ppu.h"
 
 #include "common/utility.h"
-#include "mapentry.h"
+#include "ppu/mapentry.h"
 
 void PPU::renderBgMode0(int bg)
 {

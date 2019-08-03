@@ -6,6 +6,7 @@
 
 #include "common/integer.h"
 #include "registers/include.h"
+#include "ppu/oamentry.h"
 #include "memory.h"
 #include "ram.h"
 #include "timer.h"
@@ -65,6 +66,8 @@ public:
     Timer timer[4];
 
     bool halt;
+
+    std::array<OAMEntry, 128> oam_entries;
 
     RAM<0x04000> bios;
     RAM<0x40000> wram;

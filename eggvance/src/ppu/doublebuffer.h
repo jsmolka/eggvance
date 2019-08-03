@@ -16,12 +16,12 @@ public:
         buffer[page].fill(value);
     }
 
-    inline T operator[](int index) const
+    inline T operator[](std::size_t index) const
     {
         return buffer[page][index];
     }
 
-    inline T& operator[](int index)
+    inline T& operator[](std::size_t index)
     {
         return buffer[page][index];
     }

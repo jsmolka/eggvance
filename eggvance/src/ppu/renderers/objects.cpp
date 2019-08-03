@@ -1,7 +1,7 @@
-#include "ppu.h"
+#include "ppu/ppu.h"
 
-#include "enums.h"
-#include "oamentry.h"
+#include "ppu/enums.h"
+#include "ppu/oamentry.h"
 
 void PPU::renderObjects()
 {
@@ -10,14 +10,9 @@ void PPU::renderObjects()
     int mosaic_x = mmu.mosaic.obj.x + 1;
     int mosaic_y = mmu.mosaic.obj.y + 1;
 
-    for (int entry = 127; entry > -1; --entry)
+    for (auto iter = mmu.oam_entries.rbegin(); iter != mmu.oam_entries.rend(); ++iter)
     {
-        OAMEntry oam(
-            mmu.oam.get<u16>(8 * entry + 0),
-            mmu.oam.get<u16>(8 * entry + 2),
-            mmu.oam.get<u16>(8 * entry + 4)
-        );
-
+        OAMEntry& oam = *iter;
         if (!oam.affine && oam.disabled)
             continue;
 
@@ -53,8 +48,8 @@ void PPU::renderObjects()
         // up 0x40 bytes.
         int tile_size_row = tile_size * (mmu.dispcnt.mapping_1d ? (width / 8) : ((format == BPP8) ? 16 : 32));
 
-        bool flip_h = !oam.affine && oam.flip_h;
-        bool flip_v = !oam.affine && oam.flip_v;
+        bool flip_x = !oam.affine && oam.flip_h;
+        bool flip_y = !oam.affine && oam.flip_v;
 
         // Initialize with identity
         s16 pa = 0x100;
@@ -64,10 +59,10 @@ void PPU::renderObjects()
 
         if (oam.affine)
         {
-            pa = mmu.oam.get<s16>(0x20 * oam.paramter + 0x06);
-            pb = mmu.oam.get<s16>(0x20 * oam.paramter + 0x0E);
-            pc = mmu.oam.get<s16>(0x20 * oam.paramter + 0x16);
-            pd = mmu.oam.get<s16>(0x20 * oam.paramter + 0x1E);
+            pa = *pas[oam.paramter];
+            pb = *pbs[oam.paramter];
+            pc = *pcs[oam.paramter];
+            pd = *pds[oam.paramter];
         }
 
         // Rotation center
@@ -90,8 +85,8 @@ void PPU::renderObjects()
 
             if (tex_x >= 0 && tex_x < width && tex_y >= 0 && tex_y < height)
             {
-                if (flip_h) tex_x = width  - 1 - tex_x;
-                if (flip_v) tex_y = height - 1 - tex_y;
+                if (flip_x) tex_x = width  - 1 - tex_x;
+                if (flip_y) tex_y = height - 1 - tex_y;
 
                 if (oam.mosaic)
                 {
@@ -116,7 +111,7 @@ void PPU::renderObjects()
                 {
                     int color;
                     if (format == BPP4)
-                        color = readFgColor(index, oam.palette_bank);
+                        color = readFgColor(index, oam.palette);
                     else
                         color = readFgColor(index, 0);
                     
@@ -132,7 +127,7 @@ void PPU::renderObjects()
                             obj[screen_x].color = color;
                             obj[screen_x].priority = oam.priority;
                             obj[screen_x].mode = oam.gfx_mode;
-                            objects_exist = true;
+                            obj_exist = true;
                         }
                     }
                 }

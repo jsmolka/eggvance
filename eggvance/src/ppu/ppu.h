@@ -4,7 +4,7 @@
 #include "backend.h"
 #include "doublebuffer.h"
 #include "enums.h"
-#include "objdata.h"
+#include "objectdata.h"
 
 class PPU
 {
@@ -36,6 +36,7 @@ private:
     void renderObjects();
 
     void mosaic(int bg);
+    bool mosaicAffected(int bg) const;
     bool mosaicDominant() const;
 
     void finalize();
@@ -49,6 +50,11 @@ private:
     int readPixel(u32 addr, int x, int y, PixelFormat format);
        
     DoubleBuffer<u16> bgs[4];
-    Buffer<ObjData> obj;
-    bool objects_exist;
+    Buffer<ObjectData> obj;
+    bool obj_exist;
+
+    std::array<s16*, 32> pas;
+    std::array<s16*, 32> pbs;
+    std::array<s16*, 32> pcs;
+    std::array<s16*, 32> pds;
 };

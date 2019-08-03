@@ -1,9 +1,5 @@
 #include "ppu.h"
 
-#include <algorithm>
-#include <vector>
-
-#include "common/utility.h"
 #include "mmu/interrupt.h"
 #include "scanlinebuilder.h"
 #include "enums.h"
@@ -12,11 +8,26 @@ PPU::PPU(MMU& mmu)
     : mmu(mmu)
 {
     reset();
+
+    for (int x = 0; x < 32; ++x)
+    {
+        pas[x] = mmu.oam.ptr<s16>(0x20 * x + 0x06);
+        pbs[x] = mmu.oam.ptr<s16>(0x20 * x + 0x0E);
+        pcs[x] = mmu.oam.ptr<s16>(0x20 * x + 0x16);
+        pds[x] = mmu.oam.ptr<s16>(0x20 * x + 0x1E);
+    }
 }
 
 void PPU::reset()
 {
-
+    for (DoubleBuffer<u16>& bg : bgs)
+    {
+        bg.fill(TRANSPARENT);
+        bg.flip();
+        bg.fill(TRANSPARENT);
+    }
+    obj = {};
+    obj_exist = false;
 }
 
 void PPU::scanline()
@@ -32,10 +43,10 @@ void PPU::scanline()
 
     if (mmu.dispcnt.obj)
     {
-        if (objects_exist)
+        if (obj_exist)
         {
-            obj.fill(ObjData());
-            objects_exist = false;
+            obj.fill(ObjectData());
+            obj_exist = false;
         }
         renderObjects();
     }
@@ -136,7 +147,7 @@ void PPU::renderBg(RenderFunc func, int bg)
     if (!mmu.dispcnt.bg[bg])
         return;
 
-    if (mmu.bgcnt[bg].mosaic)
+    if (mosaicAffected(bg))
     {
         if (mosaicDominant())
         {
@@ -164,10 +175,16 @@ void PPU::mosaic(int bg)
     for (int x = 0; x < WIDTH; ++x)
     {
         if (x % mosaic_x == 0)
+        {
             color = bgs[bg][x];
-
+        }
         bgs[bg][x] = color;
     }
+}
+
+bool PPU::mosaicAffected(int bg) const
+{
+    return mmu.bgcnt[bg].mosaic && (mmu.mosaic.bg.x > 0 || mmu.mosaic.bg.y > 0);
 }
 
 bool PPU::mosaicDominant() const
