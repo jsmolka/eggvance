@@ -5,17 +5,18 @@
 #include "disassembler.h"
 #include "decode.h"
 
-static u64 total = 0;
-
 ARM::ARM(MMU& mmu)
     : mmu(mmu)
 {
-
+    reset();
 }
 
 void ARM::reset()
 {
     regs.reset();
+
+    cycles = 0;
+    cycles_total = 0;
 }
 
 void ARM::interrupt()
@@ -45,13 +46,13 @@ int ARM::step()
 {
     cycles = 0;
      
-    //if (total > 0x0007929E)
+    //if (cycles_total > 0x0007929E)
     //    debug();
 
     execute();
     advance();
 
-    total += cycles;
+    cycles_total += cycles;
 
     return cycles;
 }
@@ -129,7 +130,7 @@ void ARM::debug()
         : mmu.readWord(pc);
 
     fmt::printf("%08X  %08X  %08X  %s\n", 
-        total, pc, data, Disassembler::disassemble(data, regs)
+        cycles_total, pc, data, Disassembler::disassemble(data, regs)
     );
 }
 

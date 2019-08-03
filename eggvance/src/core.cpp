@@ -7,8 +7,6 @@ Core::Core()
     , ppu(mmu)
 {
     Interrupt::init(&mmu);
-
-    reset();
 }
 
 void Core::run(const std::string& file)
@@ -49,13 +47,6 @@ void Core::run(const std::string& file)
             }
         }
     }   
-}
-
-void Core::reset()
-{
-    mmu.reset();
-    arm.reset();
-    ppu.reset();
 }
 
 void Core::frame()

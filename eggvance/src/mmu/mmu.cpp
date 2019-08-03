@@ -6,8 +6,7 @@
 #include "common/utility.h"
 
 MMU::MMU()
-    : dispstat(io.ref<u16>(REG_DISPSTAT))
-    , vcount(io.ref<u8>(REG_VCOUNT))
+    : vcount(io.ref<u8>(REG_VCOUNT))
     , intr_request(io.ref<u16>(REG_IF))
     , intr_enabled(io.ref<u16>(REG_IE))
     , keyinput(io.ref<u16>(REG_KEYINPUT))
@@ -16,6 +15,8 @@ MMU::MMU()
     timer[0].next = &timer[1];
     timer[1].next = &timer[2];
     timer[2].next = &timer[3];
+
+    reset();
 }
 
 void MMU::reset()
@@ -29,8 +30,17 @@ void MMU::reset()
     oam.fill(0);
     sram.fill(0);
 
+    timer[0].reset();
+    timer[1].reset();
+    timer[2].reset();
+    timer[3].reset();
+
     for (int i = 0; i < oam.size(); ++i)
+    {
         writeByte(MAP_IO + i, 0);
+    }
+    dispstat.hblank = false;
+    dispstat.vblank = false;
 
     keyinput = 0x3FF;
     halt = false;
@@ -41,7 +51,7 @@ bool MMU::readFile(const std::string& file)
     std::ifstream stream(file, std::ios::binary);
     if (!stream.is_open())
     {
-        fmt::print("Cannot open file {}\n", file);
+        fmt::printf("Cannot open file %s\n", file);
         return false;
     }
 
@@ -62,7 +72,7 @@ bool MMU::readBios(const std::string& file)
     std::ifstream stream(file, std::ios::binary);
     if (!stream.is_open())
     {
-        fmt::print("Cannot open file {}\n", file);
+        fmt::printf("Cannot open file %s\n", file);
         return false;
     }
 
@@ -82,6 +92,10 @@ u8 MMU::readByte(u32 addr) const
     {
     case PAGE_BIOS:
     case PAGE_BIOS+1:
+        // Todo: Return last fetched value
+        if (addr >= (MAP_BIOS + 0x4000))
+            return 0;
+
         addr &= 0x3FFF;
         return bios[addr];
 
@@ -206,6 +220,9 @@ u8 MMU::readByte(u32 addr) const
 
     case PAGE_VRAM:
         addr &= 0x1'FFFF;
+        if (addr > 0x1'7FFF)
+            addr -= 0x8000;
+
         return vram[addr];
 
     case PAGE_OAM:
@@ -247,8 +264,6 @@ void MMU::writeByte(u32 addr, u8 byte)
     {
     case PAGE_BIOS:
     case PAGE_BIOS+1:
-        addr &= 0x3FFF;
-        bios[addr] = byte;
         break;
 
     case PAGE_WRAM:
@@ -291,7 +306,7 @@ void MMU::writeByte(u32 addr, u8 byte)
         case REG_DISPSTAT:
             dispstat.vblank_irq = bits<3, 1>(byte);
             dispstat.hblank_irq = bits<4, 1>(byte);
-            dispstat.vcount_irq = bits<5, 1>(byte);
+            dispstat.vmatch_irq = bits<5, 1>(byte);
             break;
 
         case REG_DISPSTAT+1:
@@ -564,42 +579,34 @@ void MMU::writeByte(u32 addr, u8 byte)
 
         case REG_WIN0H:
             winh[0].max = byte;
-            winh[0].adjust();
             break;
 
         case REG_WIN0H+1:
             winh[0].min = byte;
-            winh[0].adjust();
             break;
 
         case REG_WIN1H:
             winh[1].max = byte;
-            winh[1].adjust();
             break;
 
         case REG_WIN1H+1:
             winh[1].min = byte;
-            winh[1].adjust();
             break;
 
         case REG_WIN0V:
             winv[0].max = byte;
-            winv[0].adjust();
             break;
 
         case REG_WIN0V+1:
             winv[0].min = byte;
-            winv[0].adjust();
             break;
 
         case REG_WIN1V:
             winv[1].max = byte;
-            winv[1].adjust();
             break;
 
         case REG_WIN1V+1:
             winv[1].min = byte;
-            winv[1].adjust();
             break;
 
         case REG_WININ:
@@ -796,6 +803,9 @@ void MMU::writeByte(u32 addr, u8 byte)
 
     case PAGE_VRAM:
         addr &= 0x1'FFFF;
+        if (addr > 0x1'7FFF)
+            addr -= 0x8000;
+
         vram[addr] = byte;
         break;
 
@@ -831,4 +841,12 @@ void MMU::writeWord(u32 addr, u32 word)
     addr = alignWord(addr);
     writeHalf(addr, static_cast<u16>(word));
     writeHalf(addr + 2, word >> 16);
+}
+
+void MMU::commitStatus()
+{   
+    io[REG_DISPSTAT] &= ~0x7;
+    io[REG_DISPSTAT] |= (dispstat.vblank << 0);
+    io[REG_DISPSTAT] |= (dispstat.hblank << 1);
+    io[REG_DISPSTAT] |= (dispstat.vmatch << 2);
 }

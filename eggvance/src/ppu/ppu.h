@@ -39,7 +39,7 @@ private:
     void mosaic(int bg);
     bool mosaicDominant() const;
 
-    void generate();
+    void finalize();
 
     int blendAlpha(int a, int b) const;
     int blendWhite(int a) const;

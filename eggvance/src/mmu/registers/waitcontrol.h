@@ -7,6 +7,7 @@ struct WaitControl
         int n;  // Nonsequential cycles (0..3 = 4,3,2,8 cycles)
         int s;  // Sequential cycles (dependent on waitstate)
     };
+
     int sram;       // SRAM wait control (0..3 = 4,3,2,8 cycles)      
     WaitState ws0;  // Sequential cycles (0..1 = 2,1 cycles)
     WaitState ws1;  // Sequential cycles (0..1 = 4,1 cycles)

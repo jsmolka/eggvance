@@ -15,8 +15,6 @@ public:
     void run(const std::string& file);
 
 private:
-    void reset();
-
     void frame();
     void emulate(int cycles);
     void emulateTimers(int cycles);

@@ -34,6 +34,8 @@ PPU::PPU(MMU& mmu)
         SDL_TEXTUREACCESS_STREAMING,
         WIDTH, HEIGHT
     );
+
+    reset();
 }
 
 PPU::~PPU()
@@ -54,7 +56,7 @@ void PPU::scanline()
 {
     mmu.dispstat.vblank = false;
     mmu.dispstat.hblank = false;
-    mmu.dispstat.data &= ~0x3;
+    mmu.commitStatus();
 
     bgs[0].flip();
     bgs[1].flip();
@@ -103,14 +105,14 @@ void PPU::scanline()
         renderBg(&PPU::renderBgMode5, 2);
         break;
     }
-    generate();
+    finalize();
 }
 
 void PPU::hblank()
 {
     mmu.dispstat.vblank = false;
     mmu.dispstat.hblank = true;
-    mmu.dispstat.data = (mmu.dispstat.data & ~0x3) | 0x2;
+    mmu.commitStatus();
 
     mmu.bgx[0].internal += mmu.bgpb[0].param;
     mmu.bgx[1].internal += mmu.bgpb[1].param;
@@ -127,7 +129,7 @@ void PPU::vblank()
 {
     mmu.dispstat.vblank = true;
     mmu.dispstat.hblank = false;
-    mmu.dispstat.data = (mmu.dispstat.data & ~0x3) | 0x1;
+    mmu.commitStatus();
 
     mmu.bgx[0].internal = mmu.bgx[0].ref;
     mmu.bgx[1].internal = mmu.bgx[1].ref;
@@ -142,13 +144,13 @@ void PPU::vblank()
 
 void PPU::next()
 {
-    int vcount_match = mmu.vcount == mmu.dispstat.vcount_compare;
+    int vmatch = mmu.vcount == mmu.dispstat.vcount_compare;
 
     mmu.vcount = (mmu.vcount + 1) % 228;
-    mmu.dispstat.vcount_match = vcount_match;
-    mmu.dispstat.data = (mmu.dispstat.data & ~0x4) | (vcount_match << 2);
+    mmu.dispstat.vmatch = vmatch;
+    mmu.commitStatus();
 
-    if (vcount_match && mmu.dispstat.vcount_irq)
+    if (vmatch && mmu.dispstat.vmatch_irq)
     {
         Interrupt::request(IF_VMATCH);
     }
@@ -217,7 +219,7 @@ bool PPU::mosaicDominant() const
  * compared to what it could be (~6% CPU usage maximum) but I don't feel like
  * improving it right now because it seems to be pretty accurate at least.
  */
-void PPU::generate()
+void PPU::finalize()
 {
     ScanlineBuilder builder(bgs, obj, mmu);
 

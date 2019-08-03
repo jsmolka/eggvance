@@ -6,7 +6,6 @@
 
 #include "common/integer.h"
 #include "registers/include.h"
-#include "ppu/constants.h"
 #include "memory.h"
 #include "ram.h"
 #include "timer.h"
@@ -29,6 +28,8 @@ public:
     void writeHalf(u32 addr, u16 half);
     void writeWord(u32 addr, u32 word);
 
+    void commitStatus();
+
     DisplayControl dispcnt;
     DisplayStatus dispstat;
     u8& vcount;
@@ -43,8 +44,8 @@ public:
     BackgroundParameter bgpc[2];
     BackgroundParameter bgpd[2];
 
-    WindowRange<WIDTH>  winh[2];
-    WindowRange<HEIGHT> winv[2];
+    WindowRange winh[2];
+    WindowRange winv[2];
     WindowInside winin;
     WindowOutside winout;
 
@@ -70,7 +71,7 @@ public:
     RAM<0x08000> iwram;
     RAM<0x00400> io;
     RAM<0x00400> palette;
-    RAM<0x20000> vram;
+    RAM<0x18000> vram;
     RAM<0x00400> oam;
     RAM<0x10000> sram;
     std::vector<u8> gamepak;

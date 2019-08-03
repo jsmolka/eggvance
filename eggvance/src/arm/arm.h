@@ -50,7 +50,8 @@ private:
     u32 ldrh(u32 addr);
     u32 ldrsh(u32 addr);
 
-    int cycles = 0;
+    int cycles;
+    u64 cycles_total;
 
     void cycle();
     void cycle(u32 addr, AccessType access);

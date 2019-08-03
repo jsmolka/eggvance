@@ -1,7 +1,5 @@
 #pragma once
 
-#include "ppu/enums.h"
-
 struct Window
 {
     int bg0;  // BG0 enabled

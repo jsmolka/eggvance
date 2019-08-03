@@ -22,5 +22,5 @@ struct DisplayControl
     int obj;     // Display objects flag
     int win0;    // Display window 0 flag
     int win1;    // Display window 1 flag
-    int winobj;  // Display OBJ window flag
+    int winobj;  // Display object window flag
 };
