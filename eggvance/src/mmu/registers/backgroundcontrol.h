@@ -1,7 +1,5 @@
 #pragma once
 
-#include "common/integer.h"
-
 struct BackgroundControl
 {
     int priority;      // BG priority (0-3, 0 = highest)
@@ -12,13 +10,7 @@ struct BackgroundControl
     int wraparound;    // Display area overflow (1 = enable)
     int screen_size;   // Screen size
 
-    u32 tileBase() const;
-    u32 mapBase() const;
-
+    int size() const;
     int width() const;
     int height() const;
-    int affineSize() const;
-
-    static const int sizes[4][2];
-    static const int affine_sizes[4];
 };

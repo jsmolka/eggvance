@@ -134,15 +134,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ppu\render.cpp" />
     <ClCompile Include="src\ppu\scanlinebuilder.cpp" />
     <ClCompile Include="src\arm\decode.cpp" />
-    <ClCompile Include="src\ppu\mapentry.cpp" />
     <ClCompile Include="src\ppu\oamentry.cpp" />
     <ClCompile Include="src\arm\disassembler.cpp" />
     <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\arm\registerbank.cpp" />
     <ClCompile Include="src\mmu\registers\backgroundcontrol.cpp" />
-    <ClCompile Include="src\ppu\renderers\objects.cpp" />
     <ClCompile Include="src\ppu\ppu.cpp" />
     <ClCompile Include="src\core.cpp" />
     <ClCompile Include="src\arm\instr_arm.cpp" />
@@ -150,8 +149,6 @@
     <ClCompile Include="src\mmu\mmu.cpp" />
     <ClCompile Include="src\arm\arm.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\ppu\renderers\bitmaps.cpp" />
-    <ClCompile Include="src\ppu\renderers\tiles.cpp" />
     <ClCompile Include="src\mmu\timer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -174,7 +171,6 @@
     <ClInclude Include="src\mmu\registers\backgroundreference.h" />
     <ClInclude Include="src\mmu\registers\mosaic.h" />
     <ClInclude Include="src\arm\decode.h" />
-    <ClInclude Include="src\ppu\mapentry.h" />
     <ClInclude Include="src\mmu\registers\backgroundoffset.h" />
     <ClInclude Include="src\common\bitvalue.h" />
     <ClInclude Include="src\ppu\oamentry.h" />

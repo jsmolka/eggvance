@@ -1,13 +1,16 @@
-#include "BackgroundControl.h"
+#include "backgroundcontrol.h"
 
-u32 BackgroundControl::tileBase() const
+static constexpr int sizes[4][2] =
 {
-    return 0x4000 * tile_block;
-}
+    { 256, 256 },
+    { 512, 256 },
+    { 256, 512 },
+    { 512, 512 }
+};
 
-u32 BackgroundControl::mapBase() const
+int BackgroundControl::size() const
 {
-    return 0x800 * map_block;
+    return 1 << (7 + screen_size);
 }
 
 int BackgroundControl::width() const
@@ -19,24 +22,3 @@ int BackgroundControl::height() const
 {
     return sizes[screen_size][1];;
 }
-
-int BackgroundControl::affineSize() const
-{
-    return affine_sizes[screen_size];
-}
-
-const int BackgroundControl::sizes[4][2] =
-{
-    { 256, 256 },
-    { 512, 256 },
-    { 256, 512 },
-    { 512, 512 }
-};
-
-const int BackgroundControl::affine_sizes[4] =
-{
-     128,
-     256,
-     512,
-    1024
-};

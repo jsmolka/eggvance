@@ -45,9 +45,6 @@
     <ClCompile Include="src\arm\disassembler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ppu\mapentry.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\ppu\oamentry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -63,13 +60,7 @@
     <ClCompile Include="src\mmu\registers\backgroundcontrol.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ppu\renderers\tiles.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ppu\renderers\bitmaps.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ppu\renderers\objects.cpp">
+    <ClCompile Include="src\ppu\render.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -105,9 +96,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\common\bitvalue.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ppu\mapentry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ppu\oamentry.h">
