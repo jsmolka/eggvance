@@ -2,8 +2,7 @@
 
 #include "mmu/mmu.h"
 #include "backend.h"
-#include "doublebuffer.h"
-#include "enums.h"
+#include "buffer.h"
 #include "objectdata.h"
 
 class PPU
@@ -23,6 +22,11 @@ public:
     Backend backend;
 
 private:
+    enum PixelFormat
+    {
+        BPP4,  // 4 bits per pixel (16/16)
+        BPP8   // 8 bits per pixel (256/1)
+    };
     MMU& mmu;
 
     using RenderFunc = void(PPU::*)(int);

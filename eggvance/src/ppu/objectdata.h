@@ -1,7 +1,6 @@
 #pragma once
 
 #include "constants.h"
-#include "enums.h"
 
 struct ObjectData
 {
@@ -10,8 +9,8 @@ struct ObjectData
         , priority(4)
         , mode(GFX_NORMAL)
         , window(0) 
-    { 
-
+    {
+    
     }
 
     int color;

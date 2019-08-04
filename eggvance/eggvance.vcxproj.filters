@@ -95,22 +95,13 @@
     <ClInclude Include="src\common\bitfield.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\common\bitvalue.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\ppu\oamentry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\common\utility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\ppu\doublebuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\ppu\buffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ppu\enums.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ppu\constants.h">

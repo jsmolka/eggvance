@@ -158,7 +158,6 @@
     <ClInclude Include="src\mmu\registers\windowrange.h" />
     <ClInclude Include="src\ppu\backend.h" />
     <ClInclude Include="src\ppu\constants.h" />
-    <ClInclude Include="src\ppu\enums.h" />
     <ClInclude Include="src\mmu\ram.h" />
     <ClInclude Include="src\ppu\scanlinebuilder.h" />
     <ClInclude Include="src\mmu\registers\blendalpha.h" />
@@ -166,13 +165,11 @@
     <ClInclude Include="src\mmu\registers\blendfade.h" />
     <ClInclude Include="src\common\utility.h" />
     <ClInclude Include="src\ppu\buffer.h" />
-    <ClInclude Include="src\ppu\doublebuffer.h" />
     <ClInclude Include="src\mmu\registers\backgroundparameter.h" />
     <ClInclude Include="src\mmu\registers\backgroundreference.h" />
     <ClInclude Include="src\mmu\registers\mosaic.h" />
     <ClInclude Include="src\arm\decode.h" />
     <ClInclude Include="src\mmu\registers\backgroundoffset.h" />
-    <ClInclude Include="src\common\bitvalue.h" />
     <ClInclude Include="src\ppu\oamentry.h" />
     <ClInclude Include="src\mmu\registers\keycontrol.h" />
     <ClInclude Include="src\arm\disassembler.h" />

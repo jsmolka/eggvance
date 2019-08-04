@@ -1,5 +1,13 @@
 #pragma once
 
+enum BlendMode
+{
+    BLD_DISABLED = 0b00,  // Blend disabled
+    BLD_ALPHA    = 0b01,  // Blend alpha
+    BLD_WHITE    = 0b10,  // Blend with white
+    BLD_BLACK    = 0b11   // Blend with black
+};
+
 struct BlendControl
 {
     struct BlendLayer

@@ -2,7 +2,6 @@
 
 #include "mmu/interrupt.h"
 #include "scanlinebuilder.h"
-#include "enums.h"
 
 PPU::PPU(MMU& mmu)
     : mmu(mmu)
@@ -316,8 +315,9 @@ int PPU::readPixel(u32 addr, int x, int y, PixelFormat format)
 {
     if (format == BPP4)
     {
-        int byte = mmu.vram[addr + 4 * y + x / 2];
-        return (x & 0x1) ? (byte >> 4) : (byte & 0xF);
+        return (x & 0x1) 
+            ? mmu.vram[addr + 4 * y + x / 2] >> 4
+            : mmu.vram[addr + 4 * y + x / 2] & 0xF;
     }
     else
     {

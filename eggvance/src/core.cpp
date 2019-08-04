@@ -37,7 +37,7 @@ void Core::run(const std::string& file)
 
             case SDL_KEYDOWN:
             case SDL_KEYUP:
-                keyEvent(event.key.keysym.sym, event.type == SDL_KEYDOWN);
+                keyEvent(event.key);
                 break;
             }
         }
@@ -103,8 +103,11 @@ void Core::emulateTimers(int cycles)
     }
 }
 
-void Core::keyEvent(SDL_Keycode key, bool pressed)
+void Core::keyEvent(const SDL_KeyboardEvent& event)
 {
+    SDL_Keycode key = event.keysym.sym;
+    bool pressed = event.state == SDL_PRESSED;
+
     if (key == SDLK_F11 && pressed)
     {
         ppu.backend.fullscreen();

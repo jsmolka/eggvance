@@ -19,7 +19,7 @@ private:
     void emulate(int cycles);
     void emulateTimers(int cycles);
 
-    void keyEvent(SDL_Keycode key, bool pressed);
+    void keyEvent(const SDL_KeyboardEvent& event);
 
     MMU mmu;
     PPU ppu;

@@ -1,9 +1,15 @@
-#include "ppu/ppu.h"
+#include "ppu.h"
 
 #include "common/utility.h"
 
 void PPU::renderBgMode0(int bg)
 {
+    // Removes branch prediction from flipping
+    static constexpr int flip_lut[2][8] = {
+        { 0, 1, 2, 3, 4, 5, 6, 7 },
+        { 7, 6, 5, 4, 3, 2, 1, 0 }
+    };
+
     const BackgroundControl& bgcnt = mmu.bgcnt[bg];
 
     int ref_x = mmu.bghofs[bg].offset;
@@ -20,7 +26,7 @@ void PPU::renderBgMode0(int bg)
     ref_x %= (blocks_x * 256);
     ref_y %= (blocks_y * 256);
 
-    // Initial block
+    // Current block
     int block = 0;
     switch (bgcnt.screen_size)
     {
@@ -30,9 +36,9 @@ void PPU::renderBgMode0(int bg)
     case 0b11: block = 2 * (ref_y / 256) + ref_x / 256; break;
     }
 
-    // Tiles inside initial block
-    int block_tile_x = (ref_x / 8) % 32;
-    int block_tile_y = (ref_y / 8) % 32;
+    // Tiles inside current block
+    int tile_x = (ref_x / 8) % 32;
+    int tile_y = (ref_y / 8) % 32;
 
     int pixel_x = ref_x % 8;
     int pixel_y = ref_y % 8;
@@ -43,45 +49,49 @@ void PPU::renderBgMode0(int bg)
     int screen_x = 0;
     while (true)
     {
-        u32 addr_map = base_map + 0x800 * block + 2 * (0x20 * block_tile_y + block_tile_x);
+        u32 addr_map = base_map + 0x800 * block + 2 * (0x20 * tile_y + tile_x);
 
-        for (int tile_x = block_tile_x; tile_x < 32; ++tile_x)
+        // Loop over all horizontal tiles in the block
+        while (tile_x++ < 32)
         {
-            u16 entry = mmu.vram.get<u16>(addr_map);
-
-            int tile    = bits<0, 10>(entry);
-            int flip_x  = bits<10, 1>(entry);
-            int flip_y  = bits<11, 1>(entry);
-            int palette = bgcnt.palette_type ? 0 : bits<12, 4>(entry);;
+            int entry = mmu.vram.get<u16>(addr_map);
+            int tile  = bits<0, 10>(entry);
 
             u32 addr = base_addr + tile_size * tile;
-
-            for (; pixel_x < 8; ++pixel_x)
+            if (addr < 0x10000)
             {
-                int color = TRANSPARENT;
-                // Prevent reading sprite memory
-                if (addr < 0x10000)
+                int flip_x  = bits<10, 1>(entry);
+                int flip_y  = bits<11, 1>(entry);
+                int palette = bgcnt.palette_type ? 0 : bits<12, 4>(entry);
+
+                for (; pixel_x < 8; ++pixel_x)
                 {
                     int index = readPixel(
                         addr,
-                        flip_x ? (7 - pixel_x) : pixel_x,
-                        flip_y ? (7 - pixel_y) : pixel_y,
+                        flip_lut[flip_x][pixel_x],
+                        flip_lut[flip_y][pixel_y],
                         format
                     );
-                    color = readBgColor(index, palette);
+                    bgs[bg][screen_x] = readBgColor(index, palette);
+                    if (++screen_x == WIDTH)
+                        return;
                 }
-                bgs[bg][screen_x] = color;
-
-                if (++screen_x == WIDTH)
-                    return;
+            }
+            else  // Prevent reading from object memory
+            {
+                for (; pixel_x < 8; ++pixel_x)
+                {
+                    bgs[bg][screen_x] = TRANSPARENT;
+                    if (++screen_x == WIDTH)
+                        return;
+                }
             }
             pixel_x = 0;
-
+            // Advance inside map
             addr_map += 2;
         }
-        block_tile_x = 0;
-
-        // Move to next horizontal block
+        tile_x = 0;
+        // Advance to next horizontal block
         block ^= static_cast<int>(blocks_x == 2);
     }
 }

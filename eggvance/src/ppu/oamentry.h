@@ -2,6 +2,14 @@
 
 #include "common/integer.h"
 
+enum GraphicsMode
+{
+    GFX_NORMAL     = 0b00,  // Normal
+    GFX_ALPHA      = 0b01,  // Blend alpha
+    GFX_WINDOW     = 0b10,  // Window
+    GFX_PROHIBITED = 0b11   // Prohibited
+};
+
 struct OAMEntry
 {
     int y;            // Y coordiante

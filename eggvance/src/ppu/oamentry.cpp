@@ -1,6 +1,6 @@
 #include "oamentry.h"
 
-static constexpr int dimensions[4][4][2] = 
+static constexpr int sizes[4][4][2] = 
 {
     {
         {  8,  8 },
@@ -30,10 +30,10 @@ static constexpr int dimensions[4][4][2] =
 
 int OAMEntry::width() const
 {
-    return dimensions[shape][size][0];
+    return sizes[shape][size][0];
 }
 
 int OAMEntry::height() const
 {
-    return dimensions[shape][size][1];
+    return sizes[shape][size][1];
 }
