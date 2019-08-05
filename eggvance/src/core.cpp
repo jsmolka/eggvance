@@ -1,10 +1,13 @@
 #include "core.h"
 
+#include <SDL2/SDL_events.h>
+
 #include "mmu/interrupt.h"
 
 Core::Core()
     : arm(mmu)
     , ppu(mmu)
+    , input(mmu)
 {
     Interrupt::init(&mmu);
 }
@@ -37,7 +40,24 @@ void Core::run(const std::string& file)
 
             case SDL_KEYDOWN:
             case SDL_KEYUP:
-                keyEvent(event.key);
+                if (event.key.keysym.sym == SDLK_F11 && event.key.state == SDL_PRESSED)
+                    ppu.backend.fullscreen();
+                else
+                    input.handleKeyEvent(event.key);
+                break;
+
+            case SDL_CONTROLLERDEVICEADDED:
+            case SDL_CONTROLLERDEVICEREMOVED:
+                input.updateController(event.cdevice.which);
+                break;
+
+            case SDL_CONTROLLERBUTTONDOWN:
+            case SDL_CONTROLLERBUTTONUP:
+                input.handleControllerButtonEvent(event.cbutton);
+                break;
+
+            case SDL_CONTROLLERAXISMOTION:
+                input.handleControllerAxisEvent(event.caxis);
                 break;
             }
         }
@@ -100,52 +120,5 @@ void Core::emulateTimers(int cycles)
     for (Timer& timer : mmu.timer)
     {
         timer.emulate(cycles);
-    }
-}
-
-void Core::keyEvent(const SDL_KeyboardEvent& event)
-{
-    SDL_Keycode key = event.keysym.sym;
-    bool pressed = event.state == SDL_PRESSED;
-
-    if (key == SDLK_F11 && pressed)
-    {
-        ppu.backend.fullscreen();
-        return;
-    }
-
-    int state = !pressed;
-    int shift = 0;
-
-    switch (key)
-    {
-    case SDLK_u: shift = 0; break; // A
-    case SDLK_h: shift = 1; break; // B
-    case SDLK_f: shift = 2; break; // Select
-    case SDLK_g: shift = 3; break; // Start
-    case SDLK_d: shift = 4; break; // Right
-    case SDLK_a: shift = 5; break; // Left
-    case SDLK_w: shift = 6; break; // Up
-    case SDLK_s: shift = 7; break; // Down
-    case SDLK_i: shift = 8; break; // R
-    case SDLK_q: shift = 9; break; // L
-
-    default:
-        return;
-    }
-
-    mmu.keyinput &= ~(1 << shift);
-    mmu.keyinput |= (state << shift);
-
-    if (mmu.keycnt.irq)
-    {
-        bool interrupt = mmu.keycnt.logic
-            ? (mmu.keyinput & mmu.keycnt.keys)
-            : (mmu.keyinput | mmu.keycnt.keys);
-
-        if (interrupt)
-        {
-            Interrupt::request(IF_KEYPAD);
-        }
     }
 }

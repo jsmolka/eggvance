@@ -1,11 +1,11 @@
 #pragma once
 
 #include <string>
-#include <SDL2/SDL_events.h>
 
 #include "arm/arm.h"
 #include "mmu/mmu.h"
 #include "ppu/ppu.h"
+#include "input.h"
 
 class Core
 {
@@ -19,9 +19,8 @@ private:
     void emulate(int cycles);
     void emulateTimers(int cycles);
 
-    void keyEvent(const SDL_KeyboardEvent& event);
-
     MMU mmu;
     PPU ppu;
     ARM arm;
+    Input input;
 };
