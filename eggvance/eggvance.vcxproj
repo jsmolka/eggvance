@@ -134,6 +134,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\mmu\dma.cpp" />
     <ClCompile Include="src\input.cpp" />
     <ClCompile Include="src\ppu\render.cpp" />
     <ClCompile Include="src\ppu\scanlinebuilder.cpp" />
@@ -153,6 +154,7 @@
     <ClCompile Include="src\mmu\timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\mmu\dma.h" />
     <ClInclude Include="src\input.h" />
     <ClInclude Include="src\common\tmp.h" />
     <ClInclude Include="src\mmu\interrupt.h" />

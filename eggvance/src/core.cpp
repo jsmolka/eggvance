@@ -72,6 +72,7 @@ void Core::frame()
 
         ppu.scanline();
         ppu.hblank();
+        runDMA(DT_HBLANK);
         
         emulate(272);
 
@@ -79,6 +80,7 @@ void Core::frame()
     }
 
     ppu.vblank();
+    runDMA(DT_VBLANK);
     for (int line = 0; line < 68; ++line)
     {
         emulate(960 + 272);
@@ -111,6 +113,7 @@ void Core::emulate(int cycles)
             cycles = arm.step();
             remaining -= cycles;
             emulateTimers(cycles);
+            runDMA(DT_NOW);
         }
     }
 }
@@ -120,5 +123,13 @@ void Core::emulateTimers(int cycles)
     for (Timer& timer : mmu.timer)
     {
         timer.emulate(cycles);
+    }
+}
+
+void Core::runDMA(DMATiming timing)
+{
+    for (DMA& dma : mmu.dma)
+    {
+        dma.run(timing);
     }
 }

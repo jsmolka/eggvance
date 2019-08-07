@@ -7,6 +7,7 @@
 #include "common/integer.h"
 #include "registers/include.h"
 #include "ppu/oamentry.h"
+#include "dma.h"
 #include "memory.h"
 #include "ram.h"
 #include "timer.h"
@@ -64,6 +65,7 @@ public:
     u16& intr_request;
 
     Timer timer[4];
+    DMA dma[4];
 
     bool halt;
 
@@ -78,4 +80,13 @@ public:
     RAM<0x00400> oam;
     RAM<0x10000> sram;
     std::vector<u8> gamepak;
+
+private:
+    void writeBackgroundControlLower(BackgroundControl& control, u8 byte);
+    void writeBackgroundControlUpper(BackgroundControl& control, u8 byte);
+    void writeWindow(Window& window, u8 byte);
+    void writeBlendLayer(BlendControl::Layer& layer, u8 byte);
+    void writeDMAControlLower(DMA::Control &control, u8 byte);
+    void writeDMAControlUpper(DMA::Control &control, u8 byte);
+    void writeTimerControl(Timer& timer, u8 byte);
 };

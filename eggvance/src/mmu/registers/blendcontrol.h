@@ -10,7 +10,7 @@ enum BlendMode
 
 struct BlendControl
 {
-    struct BlendLayer
+    struct Layer
     {
         union
         {
@@ -28,6 +28,6 @@ struct BlendControl
     };
 
     int mode;          // Mode (0 = none, 1 = alpha blending, 2 = brightness increase, 3 = brightness decrease)
-    BlendLayer upper;  // Upper blend layer
-    BlendLayer lower;  // Lower blend layer
+    Layer upper;  // Upper blend layer
+    Layer lower;  // Lower blend layer
 };

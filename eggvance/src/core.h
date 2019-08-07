@@ -18,6 +18,7 @@ private:
     void frame();
     void emulate(int cycles);
     void emulateTimers(int cycles);
+    void runDMA(DMATiming timing);
 
     MMU mmu;
     PPU ppu;
