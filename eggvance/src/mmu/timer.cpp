@@ -2,8 +2,8 @@
 
 #include "interrupt.h"
 
-Timer::Timer(int number)
-    : number(number)
+Timer::Timer(int id)
+    : id(id)
     , next(nullptr)
 {
     reset();
@@ -50,7 +50,7 @@ void Timer::interrupt()
     };
 
     if (control.irq)
-        Interrupt::request(flags[number]);
+        Interrupt::request(flags[id]);
 }
 
 void Timer::increment(int amount)
@@ -60,13 +60,11 @@ void Timer::increment(int amount)
     if (control.prescaler != 0)
     {
         counter += amount;
-
         while (counter >= prescalers[control.prescaler])
         {
             if (++data == 0)
             {
                 data = initial;
-
                 cascade();
                 interrupt();
             }
@@ -79,15 +77,12 @@ void Timer::increment(int amount)
         if (value >= 0x10000)
         {
             int range = 0x10000 - initial;
-
             while (value >= 0x10000)
             {
-                cascade();
-
                 value -= range;
+                cascade();
             }
             data = value;
-
             interrupt();
         }
         else

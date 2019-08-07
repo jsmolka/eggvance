@@ -5,7 +5,7 @@
 class Timer
 {
 public:
-    Timer(int number);
+    Timer(int id);
 
     void reset();
 
@@ -33,7 +33,7 @@ public:
     Timer* next;
 
 private:
-    int number;
+    int id;
     int counter;
 
     void cascade();
