@@ -15,5 +15,6 @@ An experimental Game Boy Advance emulator.
 - 07/08/19: Displays all tonc demos
 
 ## Commerical Games
-- 14/07/19: Boots Kirby, perfectly playable until first boss, not tested further
-- 16/07/19: Displays the BIOS
+- 14/07/19: Boots Kirby, successfully tested first world
+- 16/07/19: Displays BIOS
+- 07/08/19: Boots Pokemon Mystery Dungeon, successfully tested first dungeon

@@ -15,7 +15,7 @@ enum DMATiming
 class DMA
 {
 public:
-    DMA(MMU& mmu);
+    DMA(int id, MMU& mmu);
 
     void reset();
     void run(DMATiming timing);
@@ -59,5 +59,6 @@ private:
         SA_FIX = 2
     };
 
+    int id;
     MMU& mmu;
 };

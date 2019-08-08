@@ -10,8 +10,8 @@ MMU::MMU()
     , intr_request(io.ref<u16>(REG_IF))
     , intr_enabled(io.ref<u16>(REG_IE))
     , keyinput(io.ref<u16>(REG_KEYINPUT))
-    , timer{0, 1, 2, 3}
-    , dma{*this, *this, *this, *this}
+    , timer{ Timer(0), Timer(1), Timer(2), Timer(3) }
+    , dma{ DMA(0, *this), DMA(1, *this), DMA(2, *this), DMA(3, *this) }
 {
     timer[0].next = &timer[1];
     timer[1].next = &timer[2];
@@ -465,7 +465,6 @@ void MMU::writeByte(u32 addr, u8 byte)
         case REG_DMA3DAD+2: dma[3].dst.addr_b[2] = byte; break;
         case REG_DMA3DAD+3: dma[3].dst.addr_b[3] = byte & 0xF; break;
 
-        // Todo: This logic allows higher values than 0x4000 and 0x10000
         case REG_DMA0CNT_L+0: dma[0].units_b[0] = byte; break;
         case REG_DMA0CNT_L+1: dma[0].units_b[1] = byte & 0x3F; break;
         case REG_DMA1CNT_L+0: dma[1].units_b[0] = byte; break;
@@ -656,14 +655,12 @@ void MMU::writeBlendLayer(BlendControl::Layer& layer, u8 byte)
 void MMU::writeDMAControlLower(DMA::Control& control, u8 byte)
 {
     control.dst_control = bits<5, 2>(byte);
-    control.src_control &= ~0x1; 
-    control.src_control |= bits<7, 1>(byte);
+    control.src_control = (control.src_control & ~0x1) | bits<7, 1>(byte);
 }
 
 void MMU::writeDMAControlUpper(DMA::Control& control, u8 byte)
 {
-    control.src_control &= ~0x2;
-    control.src_control |= bits<0, 1>(byte);
+    control.src_control = (control.src_control & ~0x2) | (bits<0, 1>(byte) << 1);
     control.repeat      = bits<1, 1>(byte);
     control.word        = bits<2, 1>(byte);
     control.gamepak_drq = bits<3, 1>(byte);

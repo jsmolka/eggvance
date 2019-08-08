@@ -1,9 +1,11 @@
 #include "dma.h"
 
+#include "interrupt.h"
 #include "mmu.h"
 
-DMA::DMA(MMU& mmu)
-    : mmu(mmu)
+DMA::DMA(int id, MMU& mmu)
+    : id(id)
+    , mmu(mmu)
 {
     reset();
 }
@@ -21,7 +23,13 @@ void DMA::run(DMATiming timing)
     if (!control.enable || timing != control.timing)
         return;
 
-    u16 loop = units;
+    int loop = units;
+    if (loop == 0)
+    {
+        loop = id < 3
+            ? 0x04000
+            : 0x10000;
+    }
 
     u32 dst_addr = dst.addr;
     int addr_diff = control.word ? 4 : 2;
@@ -62,5 +70,10 @@ void DMA::run(DMATiming timing)
     if (control.dst_control == DA_RLD)
         dst.addr = dst_addr;
 
-    // Todo: Interrupts, ...
+    static constexpr InterruptFlag flags[4] = {
+        IF_DMA0, IF_DMA1, IF_DMA2, IF_DMA3
+    };
+
+    if (control.irq)
+        Interrupt::request(flags[id]);
 }
