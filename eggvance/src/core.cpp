@@ -72,7 +72,6 @@ void Core::frame()
 
         ppu.scanline();
         ppu.hblank();
-        runDMA(DT_HBLANK);
         
         emulate(272);
 
@@ -80,7 +79,6 @@ void Core::frame()
     }
 
     ppu.vblank();
-    runDMA(DT_VBLANK);
     for (int line = 0; line < 68; ++line)
     {
         emulate(960 + 272);
@@ -97,39 +95,40 @@ void Core::emulate(int cycles)
 
     while (remaining > 0)
     {
-        if (Interrupt::requested())
+        if (mmu.dmas_active.empty())
         {
-            arm.interrupt();
-        }
-        if (mmu.halt)
-        {
-            // Todo: Emulate until first interrupt
-            emulateTimers(remaining);
-            remaining = 0;
-            break;
+            if (Interrupt::requested())
+            {
+                arm.interrupt();
+            }
+            if (mmu.halt)
+            {
+                // Todo: Emulate until first interrupt
+                emulateTimers(remaining);
+                remaining = 0;
+                break;
+            }
+            else
+            {
+                cycles = arm.step();
+                remaining -= cycles;
+                emulateTimers(cycles);
+            }
         }
         else
         {
-            cycles = arm.step();
-            remaining -= cycles;
-            emulateTimers(cycles);
-            runDMA(DT_NOW);
+            if (mmu.dmas_active.front()->emulate(remaining))
+            {
+                mmu.dmas_active.pop_front();
+            }
         }
     }
 }
 
 void Core::emulateTimers(int cycles)
 {
-    for (Timer& timer : mmu.timer)
+    for (Timer& timer : mmu.timers)
     {
         timer.emulate(cycles);
-    }
-}
-
-void Core::runDMA(DMATiming timing)
-{
-    for (DMA& dma : mmu.dma)
-    {
-        dma.run(timing);
     }
 }

@@ -4,21 +4,35 @@
 
 class MMU;
 
-enum DMATiming
-{
-    DT_NOW     = 0,
-    DT_VBLANK  = 1,
-    DT_HBLANK  = 2,
-    DT_REFRESH = 3
-};
-
 class DMA
 {
 public:
+    enum Timing
+    {
+        IMMEDIATE = 0,
+        VBLANK    = 1,
+        HBLANK    = 2,
+        REFRESH   = 3
+    };
+
     DMA(int id, MMU& mmu);
 
     void reset();
-    void run(DMATiming timing);
+
+    void activate();
+    bool emulate(int& cycles);
+
+    struct Control
+    {
+        int src_adjust;   // Destination address control
+        int dst_adjust;   // Source address control
+        int repeat;       // DMA repeat
+        int word;         // DMA transfer type
+        int gamepak_drq;  // ???
+        int timing;       // Start timing
+        int irq;          // IRQ on end of word count
+        int enable;       // DMA enable
+    } control; 
 
     union
     {
@@ -28,37 +42,31 @@ public:
 
     union
     {
-        u8  units_b[2];  // Units bytes
-        u16 units;       // Units
-    };
-
-    struct Control
-    {
-        int src_control;  // Destination address control
-        int dst_control;  // Source address control
-        int repeat;       // DMA repeat
-        int word;         // DMA transfer type
-        int gamepak_drq;  // ???
-        int timing;       // Start timing
-        int irq;          // IRQ on end of word count
-        int enable;       // DMA enable
-    } control; 
-
-private:
-    enum DestinationAdjustment
-    {
-        DA_INC = 0,
-        DA_DEC = 1,
-        DA_FIX = 2,
-        DA_RLD = 3
-    };
-    enum SourceAdjustment
-    {
-        SA_INC = 0,
-        SA_DEC = 1,
-        SA_FIX = 2
+        u8  count_b[2];  // Word count bytes
+        u16 count;       // Word count
     };
 
     int id;
+    bool active;
+
+private:
+    enum Adjustment
+    {
+        ADJ_INCREMENT = 0,
+        ADJ_DECREMENT = 1,
+        ADJ_FIXED     = 2,
+        ADJ_RELOAD    = 3
+    };
+
+    int stepDifference(Adjustment adj);
+
+    void reload();
+    void interrupt();
+
+    int remaining;
+    int seq_cycles;
+    u32 addr_dst;
+    int diff_dst;
+    int diff_src;
     MMU& mmu;
 };

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <deque>
 #include <string>
 #include <vector>
 
@@ -31,6 +32,8 @@ public:
     void writeWord(u32 addr, u32 word);
 
     void commitStatus();
+
+    void signalDMA(DMA::Timing timing);
 
     DisplayControl dispcnt;
     DisplayStatus dispstat;
@@ -64,8 +67,9 @@ public:
     u16& intr_enabled;
     u16& intr_request;
 
-    Timer timer[4];
-    DMA dma[4];
+    Timer timers[4];
+    DMA dmas[4];
+    std::deque<DMA*> dmas_active;
 
     bool halt;
 
@@ -86,7 +90,7 @@ private:
     void writeBackgroundControlUpper(BackgroundControl& control, u8 byte);
     void writeWindow(Window& window, u8 byte);
     void writeBlendLayer(BlendControl::Layer& layer, u8 byte);
-    void writeDMAControlLower(DMA::Control &control, u8 byte);
-    void writeDMAControlUpper(DMA::Control &control, u8 byte);
+    void writeDMAControlLower(DMA::Control& control, u8 byte);
+    void writeDMAControlUpper(DMA::Control& control, u8 byte);
     void writeTimerControl(Timer& timer, u8 byte);
 };

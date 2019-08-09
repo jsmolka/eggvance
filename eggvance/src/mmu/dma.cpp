@@ -1,5 +1,6 @@
 #include "dma.h"
 
+#include "common/format.h"
 #include "interrupt.h"
 #include "mmu.h"
 
@@ -12,64 +13,97 @@ DMA::DMA(int id, MMU& mmu)
 
 void DMA::reset()
 {
-    units = 0;
+    count = 0;
     src.addr = 0;
     dst.addr = 0;
     control = {};
+
+    remaining = 0;
+    seq_cycles = 0;
+    addr_dst = 0;
+    diff_dst = 0;
+    diff_src = 0;
+    active = false;
 }
 
-void DMA::run(DMATiming timing)
+void DMA::activate()
 {
-    if (!control.enable || timing != control.timing)
-        return;
+    // Todo: use actual cycles
+    seq_cycles = 2;
 
-    int loop = units;
-    if (loop == 0)
-    {
-        loop = id < 3
+    remaining = count > 0
+        ? count
+        : id < 3
             ? 0x04000
             : 0x10000;
-    }
 
-    u32 dst_addr = dst.addr;
-    int addr_diff = control.word ? 4 : 2;
+    addr_dst = dst.addr;
+    diff_dst = stepDifference(static_cast<Adjustment>(control.dst_adjust));
+    diff_src = stepDifference(static_cast<Adjustment>(control.src_adjust));
 
-    int dst_delta = 0;
-    switch (control.dst_control)
+    if (control.src_adjust != ADJ_RELOAD)
     {
-    case DA_INC: dst_delta =  addr_diff; break;
-    case DA_DEC: dst_delta = -addr_diff; break;
-    case DA_FIX: dst_delta =          0; break;
-    case DA_RLD: dst_delta = -addr_diff; break;
+        active = true;
     }
-
-    int src_delta = 0;
-    switch (control.src_control)
+    else
     {
-    case SA_INC: src_delta =  addr_diff; break;
-    case SA_DEC: src_delta = -addr_diff; break;
-    case SA_FIX: src_delta =          0; break;
-    
-    default:
-        return;
+        fmt::printf("DMA: Reload for source adjustment\n");
+        active = false;
     }
+}
 
-    while (loop-- > 0)
+bool DMA::emulate(int& cycles)
+{
+    while (remaining-- > 0)
     {
         if (control.word)
             mmu.writeWord(dst.addr, mmu.readWord(src.addr));
         else
             mmu.writeHalf(dst.addr, mmu.readHalf(src.addr));
 
-        dst.addr += dst_delta;
-        src.addr += src_delta;
+        dst.addr += diff_dst;
+        src.addr += diff_src;
+
+        cycles -= 2 + 2 * seq_cycles;
+        if (cycles <= 0)
+            return false;
     }
 
+    reload();
+    interrupt();
+
     control.enable = control.repeat;
+    active = false;
+    return true;
+}
 
-    if (control.dst_control == DA_RLD)
-        dst.addr = dst_addr;
+int DMA::stepDifference(Adjustment adj)
+{
+    int size = control.word ? 4 : 2;
 
+    switch (adj)
+    {
+    case ADJ_INCREMENT: 
+    case ADJ_RELOAD:
+        return size;
+
+    case ADJ_DECREMENT: 
+        return -size;
+
+    case ADJ_FIXED: 
+        return 0; 
+    }
+    return 0;
+}
+
+void DMA::reload()
+{
+    if (control.dst_adjust == ADJ_RELOAD)
+        dst.addr = addr_dst;
+}
+
+void DMA::interrupt()
+{
     static constexpr InterruptFlag flags[4] = {
         IF_DMA0, IF_DMA1, IF_DMA2, IF_DMA3
     };

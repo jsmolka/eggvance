@@ -87,6 +87,7 @@ void PPU::scanline()
 
 void PPU::hblank()
 {
+    mmu.signalDMA(DMA::Timing::HBLANK);
     mmu.dispstat.vblank = false;
     mmu.dispstat.hblank = true;
     mmu.commitStatus();
@@ -104,6 +105,7 @@ void PPU::hblank()
 
 void PPU::vblank()
 {
+    mmu.signalDMA(DMA::Timing::VBLANK);
     mmu.dispstat.vblank = true;
     mmu.dispstat.hblank = false;
     mmu.commitStatus();
