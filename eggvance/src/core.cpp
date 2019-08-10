@@ -117,9 +117,9 @@ void Core::emulate(int cycles)
         }
         else
         {
-            if (mmu.dmas_active.front()->emulate(remaining))
+            if (mmu.dmas_active.back()->emulate(remaining))
             {
-                mmu.dmas_active.pop_front();
+                mmu.dmas_active.pop_back();
             }
         }
     }

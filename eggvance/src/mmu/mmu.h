@@ -1,7 +1,6 @@
 #pragma once
 
 #include <array>
-#include <deque>
 #include <string>
 #include <vector>
 
@@ -69,7 +68,7 @@ public:
 
     Timer timers[4];
     DMA dmas[4];
-    std::deque<DMA*> dmas_active;
+    std::vector<DMA*> dmas_active;
 
     bool halt;
 

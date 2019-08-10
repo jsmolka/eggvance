@@ -25,6 +25,8 @@ MMU::MMU()
     timers[1].next = &timers[2];
     timers[2].next = &timers[3];
 
+    dmas_active.reserve(4);
+
     reset();
 }
 
@@ -647,7 +649,7 @@ void MMU::signalDMA(DMA::Timing timing)
     if (pushed && dmas_active.size() > 1)
     {
         std::sort(dmas_active.begin(), dmas_active.end(), [](const DMA* lhs, const DMA* rhs) {
-            return lhs->id < rhs->id;
+            return lhs->id > rhs->id;
         });
     }
 }
