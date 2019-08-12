@@ -1,10 +1,10 @@
 # Visual Studio
 .vs/
 bin/
+*.aps
 *.user
 
-# FASMARM
+# GBA / FASMARM
 *.gba
-
-# GBA
+*.sav
 bios.bin

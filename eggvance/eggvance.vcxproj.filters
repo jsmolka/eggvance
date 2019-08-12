@@ -69,6 +69,9 @@
     <ClCompile Include="src\mmu\dma.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="icon\icon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core.h">
@@ -197,5 +200,13 @@
     <ClInclude Include="src\mmu\dma.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="icon\icon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="eggvance.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>
