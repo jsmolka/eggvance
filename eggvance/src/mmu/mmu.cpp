@@ -21,6 +21,8 @@ MMU::MMU()
         DMA(2, *this), 
         DMA(3, *this) }
 {
+    bios.fill(0);
+
     timers[0].next = &timers[1];
     timers[1].next = &timers[2];
     timers[2].next = &timers[3];
@@ -32,7 +34,6 @@ MMU::MMU()
 
 void MMU::reset()
 {
-    bios.fill(0);
     wram.fill(0);
     iwram.fill(0);
     io.fill(0);
@@ -40,6 +41,7 @@ void MMU::reset()
     vram.fill(0);
     oam.fill(0);
     sram.fill(0);
+    gamepak.clear();
 
     timers[0].reset();
     timers[1].reset();

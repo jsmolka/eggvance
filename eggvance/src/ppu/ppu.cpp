@@ -139,6 +139,7 @@ void PPU::present()
 {
     if (mmu.io.get<u16>(REG_DISPCNT) & 0x1F00)
     {
+        backend.copyTexture();
         backend.preset();
     }
 }

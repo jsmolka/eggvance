@@ -1,8 +1,11 @@
 #include "core.h"
 
+#include <filesystem>
 #include <SDL2/SDL_events.h>
 
 #include "mmu/interrupt.h"
+
+namespace fs = std::filesystem;
 
 Core::Core()
     : arm(mmu)
@@ -10,21 +13,27 @@ Core::Core()
     , input(mmu)
 {
     Interrupt::init(&mmu);
+
+    SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 }
 
-void Core::run(const std::string& file)
+void Core::run(const std::string& bios, const std::string& file)
 {
-    if (!mmu.readFile(file))
+    if (!mmu.readBios(bios))
         return;
 
-    if (!mmu.readBios("bios.bin"))
-        return;
+    bool emulate = open(file);
+    if (!emulate)
+        ppu.backend.renderIcon();
 
     while (true)
     {
         u32 ticks = SDL_GetTicks();
 
-        frame();
+        if (emulate)
+            frame();
+        else
+            ppu.backend.preset();
 
         u32 delta = SDL_GetTicks() - ticks;
         if (delta < 16)
@@ -37,6 +46,11 @@ void Core::run(const std::string& file)
             {
             case SDL_QUIT:
                 return;
+
+            case SDL_DROPFILE: 
+                emulate = open(event.drop.file);
+                SDL_free(event.drop.file);
+                break;
 
             case SDL_KEYDOWN:
             case SDL_KEYUP:
@@ -62,6 +76,23 @@ void Core::run(const std::string& file)
             }
         }
     } 
+}
+
+void Core::reset()
+{
+    mmu.reset();
+    arm.reset();
+    ppu.reset();
+}
+
+bool Core::open(const std::string& file)
+{
+    if (std::filesystem::is_regular_file(file))
+    {
+        reset();
+        return mmu.readFile(file);
+    }
+    return false;
 }
 
 void Core::frame()

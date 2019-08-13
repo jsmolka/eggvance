@@ -12,9 +12,13 @@ class Core
 public:
     Core();
 
-    void run(const std::string& file);
+    void run(const std::string& bios, const std::string& file);
 
 private:
+    void reset();
+
+    bool open(const std::string& file);
+
     void frame();
     void emulate(int cycles);
     void emulateTimers(int cycles);
