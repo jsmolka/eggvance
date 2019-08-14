@@ -1,7 +1,5 @@
 #pragma once
 
-#include <string>
-
 #include "arm/arm.h"
 #include "mmu/mmu.h"
 #include "ppu/ppu.h"
@@ -10,14 +8,16 @@
 class Core
 {
 public:
-    Core();
+    Core(std::shared_ptr<BIOS> bios);
 
-    void run(const std::string& bios, const std::string& file);
+    void run(std::shared_ptr<GamePak> gamepak);
 
 private:
     void reset();
 
-    bool open(const std::string& file);
+    void drawIcon();
+    bool dropAwait();
+    bool dropEvent(const SDL_DropEvent& event);
 
     void frame();
     void emulate(int cycles);

@@ -1,12 +1,10 @@
 #include "mmu.h"
 
-#include <fstream>
-
-#include "common/format.h"
 #include "common/utility.h"
 
-MMU::MMU()
-    : vcount(io.ref<u8>(REG_VCOUNT))
+MMU::MMU(std::shared_ptr<BIOS> bios)
+    : bios(bios)
+    , vcount(io.ref<u8>(REG_VCOUNT))
     , intr_request(io.ref<u16>(REG_IF))
     , intr_enabled(io.ref<u16>(REG_IE))
     , keyinput(io.ref<u16>(REG_KEYINPUT))
@@ -21,8 +19,6 @@ MMU::MMU()
         DMA(2, *this), 
         DMA(3, *this) }
 {
-    bios.fill(0);
-
     timers[0].next = &timers[1];
     timers[1].next = &timers[2];
     timers[2].next = &timers[3];
@@ -40,8 +36,6 @@ void MMU::reset()
     palette.fill(0);
     vram.fill(0);
     oam.fill(0);
-    sram.fill(0);
-    gamepak.clear();
 
     timers[0].reset();
     timers[1].reset();
@@ -68,44 +62,9 @@ void MMU::reset()
     oam_entries.fill(OAMEntry());
 }
 
-bool MMU::readFile(const std::string& file)
+void MMU::setGamePak(std::shared_ptr<GamePak> gamepak)
 {
-    std::ifstream stream(file, std::ios::binary);
-    if (!stream.is_open())
-    {
-        fmt::printf("Cannot open file %s\n", file);
-        return false;
-    }
-
-    stream.seekg(0, std::ios::end);
-    std::streampos size = stream.tellg();
-    stream.seekg(0, std::ios::beg);
-
-    gamepak.resize(size);
-
-    u8* memory_ptr = &gamepak[0];
-    stream.read(reinterpret_cast<char*>(memory_ptr), size);
-
-    return true;
-}
-
-bool MMU::readBios(const std::string& file)
-{
-    std::ifstream stream(file, std::ios::binary);
-    if (!stream.is_open())
-    {
-        fmt::printf("Cannot open file %s\n", file);
-        return false;
-    }
-
-    stream.seekg(0, std::ios::end);
-    std::streampos size = stream.tellg();
-    stream.seekg(0, std::ios::beg);
-
-    u8* memory_ptr = &bios[0];
-    stream.read(reinterpret_cast<char*>(memory_ptr), size);
-
-    return true;
+    this->gamepak = gamepak;
 }
 
 u8 MMU::readByte(u32 addr) const
@@ -119,7 +78,7 @@ u8 MMU::readByte(u32 addr) const
 
         // Todo: Return last fetched value if PC outside BIOS
         addr &= 0x3FFF;
-        return bios[addr];
+        return bios->readByte(addr);
 
     case PAGE_WRAM:
         addr &= 0x3'FFFF;
@@ -238,13 +197,11 @@ u8 MMU::readByte(u32 addr) const
     case PAGE_GAMEPAK_1: case PAGE_GAMEPAK_1+1:
     case PAGE_GAMEPAK_2: case PAGE_GAMEPAK_2+1:
         addr &= 0x1FF'FFFF;
-        if (addr >= gamepak.size())
-            return 0;
-        return gamepak[addr];
+        return gamepak->readByte(addr);
 
     default:
         addr &= 0xFFFF;
-        return sram[addr];
+        return gamepak->readSaveByte(addr);
     }
 }
 
@@ -609,7 +566,7 @@ void MMU::writeByte(u32 addr, u8 byte)
 
     default:
         addr &= 0xFFFF;
-        sram[addr] = byte;
+        gamepak->writeSaveByte(addr, byte);
         break;
     }
 }

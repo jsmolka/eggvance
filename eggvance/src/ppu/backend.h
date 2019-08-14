@@ -5,7 +5,6 @@
 
 #include "common/integer.h"
 #include "constants.h"
-#include "icon.h"
 
 struct Backend
 {
@@ -45,7 +44,7 @@ struct Backend
         SDL_QuitSubSystem(SDL_INIT_VIDEO);
     }
 
-    inline void copyTexture()
+    inline void present()
     {
         SDL_UpdateTexture(
             texture, nullptr,
@@ -53,10 +52,6 @@ struct Backend
             sizeof(u16) * WIDTH
         );
         SDL_RenderCopy(renderer, texture, nullptr, nullptr);
-    }
-
-    inline void preset()
-    {
         SDL_RenderPresent(renderer);
     }
 
@@ -65,24 +60,6 @@ struct Backend
         u32 flag = SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN_DESKTOP;
         SDL_SetWindowFullscreen(window, flag ^ SDL_WINDOW_FULLSCREEN_DESKTOP);
         SDL_ShowCursor(1 ^ SDL_ShowCursor(SDL_QUERY));
-    }
-
-    inline void renderIcon()
-    {
-        SDL_Rect rect = { 0, 0, WIDTH, HEIGHT };
-        SDL_SetRenderDrawColor(renderer, 48, 48, 48, 1);
-        SDL_RenderFillRect(renderer, &rect);
-
-        int scale = 9;
-        rect.w = scale;
-        rect.h = scale;
-        for (const IconPixel& pixel : icon)
-        {
-            rect.x = scale * pixel.x + 48;
-            rect.y = scale * pixel.y + 8;
-            SDL_SetRenderDrawColor(renderer, pixel.r, pixel.g, pixel.b, 1);
-            SDL_RenderFillRect(renderer, &rect);
-        }
     }
 
     SDL_Window* window;

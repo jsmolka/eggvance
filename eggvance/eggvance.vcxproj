@@ -134,6 +134,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\mmu\gamepak.cpp" />
+    <ClCompile Include="src\mmu\bios.cpp" />
     <ClCompile Include="icon\icon.cpp" />
     <ClCompile Include="src\mmu\dma.cpp" />
     <ClCompile Include="src\input.cpp" />
@@ -155,6 +157,8 @@
     <ClCompile Include="src\mmu\timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\mmu\gamepak.h" />
+    <ClInclude Include="src\mmu\bios.h" />
     <ClInclude Include="icon\icon.h" />
     <ClInclude Include="src\mmu\dma.h" />
     <ClInclude Include="src\input.h" />

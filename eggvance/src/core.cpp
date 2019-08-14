@@ -1,14 +1,15 @@
 #include "core.h"
 
 #include <filesystem>
-#include <SDL2/SDL_events.h>
 
 #include "mmu/interrupt.h"
+#include "icon.h"
 
 namespace fs = std::filesystem;
 
-Core::Core()
-    : arm(mmu)
+Core::Core(std::shared_ptr<BIOS> bios)
+    : mmu(bios)
+    , arm(mmu)
     , ppu(mmu)
     , input(mmu)
 {
@@ -17,23 +18,23 @@ Core::Core()
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 }
 
-void Core::run(const std::string& bios, const std::string& file)
+void Core::run(std::shared_ptr<GamePak> gamepak)
 {
-    if (!mmu.readBios(bios))
-        return;
-
-    bool emulate = open(file);
-    if (!emulate)
-        ppu.backend.renderIcon();
+    if (gamepak && gamepak->valid)
+    {
+        mmu.setGamePak(gamepak);
+    }
+    else
+    {
+        if (!dropAwait())
+            return;
+    }
 
     while (true)
     {
         u32 ticks = SDL_GetTicks();
 
-        if (emulate)
-            frame();
-        else
-            ppu.backend.preset();
+        frame();
 
         u32 delta = SDL_GetTicks() - ticks;
         if (delta < 16)
@@ -46,11 +47,6 @@ void Core::run(const std::string& bios, const std::string& file)
             {
             case SDL_QUIT:
                 return;
-
-            case SDL_DROPFILE: 
-                emulate = open(event.drop.file);
-                SDL_free(event.drop.file);
-                break;
 
             case SDL_KEYDOWN:
             case SDL_KEYUP:
@@ -73,6 +69,10 @@ void Core::run(const std::string& bios, const std::string& file)
             case SDL_CONTROLLERAXISMOTION:
                 input.handleControllerAxisEvent(event.caxis);
                 break;
+
+            case SDL_DROPFILE:
+                dropEvent(event.drop);
+                break;
             }
         }
     } 
@@ -85,12 +85,66 @@ void Core::reset()
     ppu.reset();
 }
 
-bool Core::open(const std::string& file)
+void Core::drawIcon()
 {
-    if (std::filesystem::is_regular_file(file))
+    SDL_Rect rect = { 0, 0, WIDTH, HEIGHT };
+    SDL_Renderer* renderer = ppu.backend.renderer;
+    SDL_SetRenderDrawColor(renderer, 40, 40, 40, 1);
+    SDL_RenderFillRect(renderer, &rect);
+
+    int scale = 9;
+    rect.w = scale;
+    rect.h = scale;
+    for (const IconPixel& pixel : icon)
     {
+        rect.x = scale * pixel.x + 48;
+        rect.y = scale * pixel.y + 8;
+        SDL_SetRenderDrawColor(renderer, pixel.r, pixel.g, pixel.b, 1);
+        SDL_RenderFillRect(renderer, &rect);
+    }
+}
+
+bool Core::dropAwait()
+{
+    drawIcon();
+
+    while (true)
+    {
+        SDL_Delay(16);
+        SDL_RenderPresent(ppu.backend.renderer);
+
+        SDL_Event event;
+        while (SDL_PollEvent(&event))
+        {
+            switch (event.type)
+            {
+            case SDL_QUIT:
+                return false;
+
+            case SDL_DROPFILE:
+                if (dropEvent(event.drop))
+                    return true;
+                break;
+            }
+        }
+    }
+}
+
+bool Core::dropEvent(const SDL_DropEvent& event)
+{
+    std::string file = event.file;
+    SDL_free(event.file);
+
+    if (fs::is_regular_file(file))
+    {
+        auto gamepak = std::make_shared<GamePak>(file);
+        if (!gamepak->valid)
+            return false;
+
         reset();
-        return mmu.readFile(file);
+        mmu.setGamePak(gamepak);
+        SDL_RaiseWindow(ppu.backend.window);
+        return true;
     }
     return false;
 }
@@ -100,22 +154,17 @@ void Core::frame()
     for (int line = 0; line < 160; ++line)
     {
         emulate(960);
-
         ppu.scanline();
         ppu.hblank();
-        
         emulate(272);
-
         ppu.next();
     }
-
     ppu.vblank();
     for (int line = 0; line < 68; ++line)
     {
         emulate(960 + 272);
         ppu.next();
     }
-
     ppu.present();
 }
 

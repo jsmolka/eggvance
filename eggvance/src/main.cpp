@@ -1,32 +1,32 @@
 #include <filesystem>
-#include <memory>
 
 #include "core.h"
 
 namespace fs = std::filesystem;
 
+void exit(const char* title, const char* message)
+{
+    SDL_ShowSimpleMessageBox(0, title, message, nullptr);
+    std::exit(1);
+}
+
 int main(int argc, char* argv[])
 {
-    fs::path exe = argv[0];
-    fs::path dir = exe.parent_path();
-    fs::path bios = dir.append("bios.bin");
+    fs::path directory = fs::path(argv[0]).parent_path();
+    fs::path bios_file = directory.append("bios.bin");
 
-    if (fs::is_regular_file(bios))
-    {
-        std::string file;
-        if (argc > 1 && fs::is_regular_file(argv[1]))
-            file = argv[1];
+    if (!fs::is_regular_file(bios_file))
+        exit("Missing BIOS", "Please place a GBA bios.bin next to the emulator.");
 
-        std::make_shared<Core>()->run(bios.string(), file);
-    }
-    else
-    {
-        SDL_ShowSimpleMessageBox(
-            0, 
-            "Missing BIOS", 
-            "Please place a GBA bios.bin in the emulator folder.", 
-            nullptr
-        );
-    }
+    auto bios = std::make_shared<BIOS>(bios_file.string());
+    if (!bios->valid)
+        exit("Invalid BIOS", "The BIOS does not match the requirements.");
+
+    std::shared_ptr<GamePak> gamepak;
+    if (argc > 1 && fs::is_regular_file(argv[1]))
+        gamepak = std::make_shared<GamePak>(argv[1]);
+
+    std::make_shared<Core>(bios)->run(gamepak);
+
     return 0;
 }

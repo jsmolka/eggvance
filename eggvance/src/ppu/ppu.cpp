@@ -137,10 +137,9 @@ void PPU::next()
 
 void PPU::present()
 {
-    if (mmu.io.get<u16>(REG_DISPCNT) & 0x1F00)
+    if (mmu.readByte(MAP_IO + REG_DISPCNT + 1) & 0x1F)
     {
-        backend.copyTexture();
-        backend.preset();
+        backend.present();
     }
 }
 
