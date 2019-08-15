@@ -74,7 +74,30 @@ bool DMA::emulate(int& cycles)
 
     control.enable = control.repeat;
     active = false;
+    writeback();
+
     return true;
+}
+
+void DMA::writeback()
+{
+    u16 value = 0;
+    value |= control.dst_adjust  <<  5;
+    value |= control.src_adjust  <<  7;
+    value |= control.repeat      <<  9;
+    value |= control.word        << 10;
+    value |= control.gamepak_drq << 11;
+    value |= control.timing      << 12;
+    value |= control.irq         << 14;
+    value |= control.enable      << 15;
+
+    switch (id)
+    {
+    case 0: mmu.io.ref<u16>(REG_DMA0CNT_H) = value; break;
+    case 1: mmu.io.ref<u16>(REG_DMA1CNT_H) = value; break;
+    case 2: mmu.io.ref<u16>(REG_DMA2CNT_H) = value; break;
+    case 3: mmu.io.ref<u16>(REG_DMA3CNT_H) = value; break;
+    }
 }
 
 int DMA::stepDifference(Adjustment adj)

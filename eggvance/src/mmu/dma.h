@@ -58,6 +58,8 @@ private:
         ADJ_RELOAD    = 3
     };
 
+    void writeback();
+
     int stepDifference(Adjustment adj);
 
     void reload();

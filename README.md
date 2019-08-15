@@ -17,5 +17,9 @@ An experimental Game Boy Advance emulator.
 ## Commerical Games
 - 14/07/19: Boots Kirby, successfully tested first world
 - 16/07/19: Displays BIOS
-- 07/08/19: Boots Pokemon Mystery Dungeon, successfully tested first dungeon
-- 13/08/19: Boots Castlevania, successfully tested until first boss
+- 07/08/19: Boots Pokemon Mystery Dungeon
+- 13/08/19: Boots Castlevania
+- 15/08/19: Boots Final Fantasy VI
+- 15/08/19: Boots Mario & Luigi - Superstar Saga
+- 15/08/19: Boots Metroid Fusion
+- 15/08/19: Boots Mother 3

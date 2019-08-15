@@ -74,6 +74,7 @@ public:
 
     std::array<OAMEntry, 128> oam_entries;
 
+    RAM<0x00400> io;
     RAM<0x00400> palette;
     RAM<0x18000> vram;
     RAM<0x00400> oam;
@@ -94,5 +95,4 @@ private:
 
     RAM<0x40000> wram;
     RAM<0x08000> iwram;
-    RAM<0x00400> io;
 };

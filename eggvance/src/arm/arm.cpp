@@ -46,8 +46,7 @@ int ARM::step()
 {
     cycles = 0;
      
-    //if (cycles_total > 0x0007929E)
-    //    debug();
+    //debug();
 
     execute();
     advance();
