@@ -20,12 +20,7 @@ Input::~Input()
     SDL_QuitSubSystem(SDL_INIT_GAMECONTROLLER);
 }
 
-void Input::updateController(int device)
-{
-    controller = SDL_GameControllerOpen(device);
-}
-
-void Input::handleKeyEvent(const SDL_KeyboardEvent& event)
+void Input::keyEvent(const SDL_KeyboardEvent& event)
 {
     Button button;
     switch (event.keysym.sym)
@@ -47,7 +42,7 @@ void Input::handleKeyEvent(const SDL_KeyboardEvent& event)
     processInput(button, event.state);
 }
 
-void Input::handleControllerAxisEvent(const SDL_ControllerAxisEvent& event)
+void Input::controllerAxisEvent(const SDL_ControllerAxisEvent& event)
 {
     static constexpr int deadzone = 16000;
 
@@ -84,7 +79,7 @@ void Input::handleControllerAxisEvent(const SDL_ControllerAxisEvent& event)
     processInput(button, std::abs(event.value) > deadzone ? SDL_PRESSED : SDL_RELEASED);
 }
 
-void Input::handleControllerButtonEvent(const SDL_ControllerButtonEvent& event)
+void Input::controllerButtonEvent(const SDL_ControllerButtonEvent& event)
 {
     Button button;
     switch (event.button)
@@ -137,6 +132,14 @@ void Input::handleControllerButtonEvent(const SDL_ControllerButtonEvent& event)
         return;
     }
     processInput(button, event.state);
+}
+
+void Input::controllerDeviceEvent(const SDL_ControllerDeviceEvent& event)
+{
+    if (event.type == SDL_CONTROLLERDEVICEADDED)
+        controller = SDL_GameControllerOpen(event.which);
+    else
+        controller = nullptr;
 }
 
 bool Input::isButtonPressed(Button button) const

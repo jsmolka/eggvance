@@ -48,26 +48,26 @@ void Core::run(std::shared_ptr<GamePak> gamepak)
             case SDL_QUIT:
                 return;
 
-            case SDL_KEYDOWN:
             case SDL_KEYUP:
+            case SDL_KEYDOWN:
                 if (event.key.keysym.sym == SDLK_F11 && event.key.state == SDL_PRESSED)
                     ppu.backend.fullscreen();
                 else
-                    input.handleKeyEvent(event.key);
+                    input.keyEvent(event.key);
                 break;
 
             case SDL_CONTROLLERDEVICEADDED:
             case SDL_CONTROLLERDEVICEREMOVED:
-                input.updateController(event.cdevice.which);
+                input.controllerDeviceEvent(event.cdevice);
                 break;
 
-            case SDL_CONTROLLERBUTTONDOWN:
             case SDL_CONTROLLERBUTTONUP:
-                input.handleControllerButtonEvent(event.cbutton);
+            case SDL_CONTROLLERBUTTONDOWN:
+                input.controllerButtonEvent(event.cbutton);
                 break;
 
             case SDL_CONTROLLERAXISMOTION:
-                input.handleControllerAxisEvent(event.caxis);
+                input.controllerAxisEvent(event.caxis);
                 break;
 
             case SDL_DROPFILE:
@@ -120,6 +120,11 @@ bool Core::dropAwait()
             {
             case SDL_QUIT:
                 return false;
+
+            case SDL_CONTROLLERDEVICEADDED:
+            case SDL_CONTROLLERDEVICEREMOVED:
+                input.controllerDeviceEvent(event.cdevice);
+                break;
 
             case SDL_DROPFILE:
                 if (dropEvent(event.drop))

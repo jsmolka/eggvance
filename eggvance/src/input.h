@@ -10,11 +10,12 @@ public:
     Input(MMU& mmu);
     ~Input();
 
-    void updateController(int device);
 
-    void handleKeyEvent(const SDL_KeyboardEvent& event);
-    void handleControllerAxisEvent(const SDL_ControllerAxisEvent& event);
-    void handleControllerButtonEvent(const SDL_ControllerButtonEvent& event);
+    void keyEvent(const SDL_KeyboardEvent& event);
+
+    void controllerAxisEvent(const SDL_ControllerAxisEvent& event);
+    void controllerButtonEvent(const SDL_ControllerButtonEvent& event);
+    void controllerDeviceEvent(const SDL_ControllerDeviceEvent& event);
 
 private:
     enum Button
