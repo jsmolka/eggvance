@@ -15,11 +15,12 @@ An experimental Game Boy Advance emulator.
 - 07/08/19: Displays all tonc demos
 
 ## Commerical Games
-- 14/07/19: Boots Kirby, successfully tested first world
+- 14/07/19: Displays Kirby - Nightmare In Dreamland
 - 16/07/19: Displays BIOS
-- 07/08/19: Boots Pokemon Mystery Dungeon
-- 13/08/19: Boots Castlevania
-- 15/08/19: Boots Final Fantasy VI
-- 15/08/19: Boots Mario & Luigi - Superstar Saga
-- 15/08/19: Boots Metroid Fusion
-- 15/08/19: Boots Mother 3
+- 07/08/19: Displays Pokemon Mystery Dungeon - Red Rescue Team
+- 13/08/19: Displays Castlevania - Aria of Sorrow
+- 15/08/19: Displays Final Fantasy VI Advance
+- 15/08/19: Displays Mario & Luigi - Superstar Saga
+- 15/08/19: Displays Metroid Fusion
+- 15/08/19: Displays Mother 3
+- 15/08/19: Displays Super Dodge Ball Advance

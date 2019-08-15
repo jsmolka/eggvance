@@ -217,7 +217,7 @@ std::string Disassembler::aluOperations(u16 instr)
     std::string mnemonic;
     switch (opcode)
     {
-    case 0b0000: mnemonic = "add"; break;
+    case 0b0000: mnemonic = "and"; break;
     case 0b0001: mnemonic = "eor"; break;
     case 0b0010: mnemonic = "lsl"; break;
     case 0b0011: mnemonic = "lsr"; break;

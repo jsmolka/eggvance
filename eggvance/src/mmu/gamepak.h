@@ -24,6 +24,7 @@ public:
     };
 
     GamePak(const std::string& file);
+    ~GamePak();
 
     u8 readByte(u32 addr) const;
 
@@ -32,14 +33,20 @@ public:
 
     bool valid;
     Header header;
+    Save save_type;
+    std::string save_file;
 
 private:
-    static std::string makeString(u8* data, int size);
+    bool static read(const std::string& file, std::vector<u8>& dst);
+    void static write(const std::string& file, std::vector<u8>& src);
 
-    bool read(const std::string& file);
+    static std::string makeString(u8* data, int size);
+    static bool isSaveType(u8* data, const std::vector<u8>& type);
+
     void parseHeader();
+    void detectSave();
 
     std::vector<u8> data;
-    RAM<0x10000> sram;
+    std::vector<u8> sram;
 };
 
