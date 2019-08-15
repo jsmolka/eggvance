@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
     if (argc > 1 && fs::is_regular_file(argv[1]))
         gamepak = std::make_shared<GamePak>(argv[1]);
 
-    std::make_shared<Core>(bios)->run(gamepak);
+    std::make_unique<Core>(bios)->run(gamepak);
 
     return 0;
 }

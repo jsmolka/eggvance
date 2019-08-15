@@ -168,18 +168,18 @@ void ARM::arithmetic(u32 op1, u32 op2, bool addition)
         : msb_op1 != msb_op2 && (result >> 31) == msb_op2;
 }
 
-u32 ARM::lsl(u32 value, int offset, bool& carry)
+u32 ARM::lsl(u32 value, int amount, bool& carry)
 {
-    if (offset != 0)
+    if (amount != 0)
     {
-        if (offset < 32)
+        if (amount < 32)
         {
-            carry = (value >> (32 - offset)) & 0x1;
-            value <<= offset;
+            carry = (value >> (32 - amount)) & 0x1;
+            value <<= amount;
         }
         else
         {
-            if (offset == 32)
+            if (amount == 32)
                 carry = value & 0x1;
             else
                 carry = 0;
@@ -194,14 +194,14 @@ u32 ARM::lsl(u32 value, int offset, bool& carry)
     return value;
 }
 
-u32 ARM::lsr(u32 value, int offset, bool& carry, bool immediate)
+u32 ARM::lsr(u32 value, int amount, bool& carry, bool immediate)
 {
-    if (offset != 0 && offset != 32)
+    if (amount != 0)
     {
-        if (offset < 32)
+        if (amount < 32)
         {
-            carry = (value >> (offset - 1)) & 0x1;
-            value >>= offset;
+            carry = (value >> (amount - 1)) & 0x1;
+            value >>= amount;
         }
         else
         {
@@ -224,14 +224,14 @@ u32 ARM::lsr(u32 value, int offset, bool& carry, bool immediate)
     return value;
 }
 
-u32 ARM::asr(u32 value, int offset, bool& carry, bool immediate)
+u32 ARM::asr(u32 value, int amount, bool& carry, bool immediate)
 {
-    if (offset != 0)
+    if (amount != 0)
     {
-        if (offset < 32)
+        if (amount < 32)
         {
-            carry = value >> (offset - 1) & 0x1;
-            value = static_cast<s32>(value) >> offset;
+            carry = value >> (amount - 1) & 0x1;
+            value = static_cast<s32>(value) >> amount;
         }
         else
         {
@@ -254,14 +254,14 @@ u32 ARM::asr(u32 value, int offset, bool& carry, bool immediate)
     return value;
 }
 
-u32 ARM::ror(u32 value, int offset, bool& carry, bool immediate)
+u32 ARM::ror(u32 value, int amount, bool& carry, bool immediate)
 {
-    if (offset != 0)
+    if (amount != 0)
     {
-        offset %= 32;
+        amount %= 32;
 
-        if (offset != 0)
-            value = (value << (32 - offset)) | (value >> offset);
+        if (amount != 0)
+            value = (value << (32 - amount)) | (value >> amount);
 
         carry = value >> 31;
     }

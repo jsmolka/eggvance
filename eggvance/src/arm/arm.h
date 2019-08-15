@@ -77,7 +77,6 @@ private:
     void unconditionalBranch(u16 instr);
     void longBranchLink(u16 instr);
 
-    u32 shiftedRegister(int data, bool& carry);
     u32 rotatedImmediate(int data, bool& carry);
 
     void branchExchange(u32 instr);

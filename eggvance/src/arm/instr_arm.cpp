@@ -2,35 +2,6 @@
 
 #include "common/utility.h"
 
-u32 ARM::shiftedRegister(int data, bool& carry)
-{
-    int rm      = bits<0, 4>(data);
-    int use_reg = bits<4, 1>(data);
-    int type    = bits<5, 2>(data);
-
-    int offset;
-    if (use_reg)
-    {
-        int rs = bits<8, 4>(data);
-        offset = regs[rs];
-        offset &= 0xFF;
-    }
-    else
-    {
-        offset = bits<7, 5>(data);
-    }
-
-    u32 value = regs[rm];
-    switch (type)
-    {
-    case 0b00: return lsl(value, offset, carry); break;
-    case 0b01: return lsr(value, offset, carry, !use_reg); break;
-    case 0b10: return asr(value, offset, carry, !use_reg); break;
-    case 0b11: return ror(value, offset, carry, !use_reg); break;
-    }
-    return value;
-}
-
 u32 ARM::rotatedImmediate(int data, bool& carry)
 {
     u32 value    = bits<0, 8>(data);
@@ -109,12 +80,12 @@ void ARM::dataProcessing(u32 instr)
 
         u32 value = regs[rm];
 
-        int offset;
+        int amount;
         if (use_reg)
         {
             int rs = bits<8, 4>(instr);
-            offset = regs[rs];
-            offset &= 0xFF;
+            amount = regs[rs];
+            amount &= 0xFF;
 
             // Account for prefetch
             if (rn == 15) op1 += 4;
@@ -122,15 +93,15 @@ void ARM::dataProcessing(u32 instr)
         }
         else
         {
-            offset = bits<7, 5>(data);
+            amount = bits<7, 5>(data);
         }
 
         switch (type)
         {
-        case 0b00: op2 = lsl(value, offset, carry); break;
-        case 0b01: op2 = lsr(value, offset, carry, !use_reg); break;
-        case 0b10: op2 = asr(value, offset, carry, !use_reg); break;
-        case 0b11: op2 = ror(value, offset, carry, !use_reg); break;
+        case 0b00: op2 = lsl(value, amount, carry); break;
+        case 0b01: op2 = lsr(value, amount, carry, !use_reg); break;
+        case 0b10: op2 = asr(value, amount, carry, !use_reg); break;
+        case 0b11: op2 = ror(value, amount, carry, !use_reg); break;
         }
         cycle();
     }
@@ -428,8 +399,32 @@ void ARM::singleDataTransfer(u32 instr)
     u32 offset;
     if (use_reg)
     {
+        int rm      = bits<0, 4>(data);
+        int use_reg = bits<4, 1>(data);
+        int type    = bits<5, 2>(data);
+
+        u32 value = regs[rm];
+
+        int amount;
+        if (use_reg)
+        {
+            int rs = bits<8, 4>(data);
+            amount = regs[rs];
+            amount &= 0xFF;
+        }
+        else
+        {
+            amount = bits<7, 5>(data);
+        }
+
         bool carry;
-        offset = shiftedRegister(data, carry);
+        switch (type)
+        {
+        case 0b00: offset = lsl(value, amount, carry); break;
+        case 0b01: offset = lsr(value, amount, carry); break;
+        case 0b10: offset = asr(value, amount, carry); break;
+        case 0b11: offset = ror(value, amount, carry); break;
+        }
     }
     else
     {
