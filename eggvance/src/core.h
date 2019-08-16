@@ -19,9 +19,13 @@ private:
     bool dropAwait();
     bool dropEvent(const SDL_DropEvent& event);
 
+    void updateTitle(std::shared_ptr<GamePak> gamepak);
+
     void frame();
     void emulate(int cycles);
     void emulateTimers(int cycles);
+
+    int remaining;
 
     MMU mmu;
     PPU ppu;

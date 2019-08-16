@@ -5,11 +5,11 @@
 #include <vector>
 
 #include "common/integer.h"
+#include "gamepak/gamepak.h"
 #include "registers/include.h"
 #include "ppu/oamentry.h"
 #include "bios.h"
 #include "dma.h"
-#include "gamepak.h"
 #include "memory.h"
 #include "ram.h"
 #include "timer.h"

@@ -199,10 +199,16 @@ u8 MMU::readByte(u32 addr) const
         addr &= 0x1FF'FFFF;
         return gamepak->readByte(addr);
 
-    default:
-        addr &= 0xFFFF;
-        return gamepak->readSaveByte(addr);
+    case PAGE_GAMEPAK_SRAM:
+    case PAGE_UNUSED:
+        if (gamepak->save->type == Save::Type::SRAM)
+        {
+            addr &= 0x7FFF;
+            return gamepak->save->readByte(addr);
+        }
+        return 0;
     }
+    return 0;
 }
 
 u16 MMU::readHalf(u32 addr) const
@@ -564,10 +570,13 @@ void MMU::writeByte(u32 addr, u8 byte)
     case PAGE_GAMEPAK_2: case PAGE_GAMEPAK_2+1:
         break;
 
-    default:
-        addr &= 0xFFFF;
-        gamepak->writeSaveByte(addr, byte);
-        break;
+    case PAGE_GAMEPAK_SRAM:
+    case PAGE_UNUSED:
+        if (gamepak->save->type == Save::Type::SRAM)
+        {
+            addr &= 0x7FFF;
+            gamepak->save->writeByte(addr, byte);
+        }
     }
 }
 

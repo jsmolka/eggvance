@@ -2,13 +2,15 @@
 
 #include <filesystem>
 
+#include "common/format.h"
 #include "mmu/interrupt.h"
 #include "icon.h"
 
 namespace fs = std::filesystem;
 
 Core::Core(std::shared_ptr<BIOS> bios)
-    : mmu(bios)
+    : remaining(0)
+    , mmu(bios)
     , arm(mmu)
     , ppu(mmu)
     , input(mmu)
@@ -22,6 +24,7 @@ void Core::run(std::shared_ptr<GamePak> gamepak)
 {
     if (gamepak && gamepak->valid)
     {
+        updateTitle(gamepak);
         mmu.setGamePak(gamepak);
     }
     else
@@ -147,11 +150,42 @@ bool Core::dropEvent(const SDL_DropEvent& event)
             return false;
 
         reset();
+        updateTitle(gamepak);
         mmu.setGamePak(gamepak);
         SDL_RaiseWindow(ppu.backend.window);
         return true;
     }
     return false;
+}
+
+void Core::updateTitle(std::shared_ptr<GamePak> gamepak)
+{
+    std::string save;
+    switch (gamepak->save->type)
+    {
+    case Save::Type::SRAM:
+        save = "SRAM";
+        break;
+
+    case Save::Type::FLASH64:
+        save = "FLASH64";
+        break;
+
+    case Save::Type::FLASH128:
+        save = "FLASH128";
+        break;
+
+    case Save::Type::EEPROM:
+        save = "EEPROM";
+        break;
+
+    case Save::Type::NONE:
+        save = "NONE";
+        break;
+    }
+    std::string title = fmt::format("eggvance - {} - {}", gamepak->header.title.c_str(), save.c_str());
+
+    SDL_SetWindowTitle(ppu.backend.window, title.c_str());
 }
 
 void Core::frame()
@@ -175,7 +209,6 @@ void Core::frame()
 
 void Core::emulate(int cycles)
 {
-    static int remaining = 0;
     remaining += cycles;
 
     while (remaining > 0)
@@ -202,10 +235,12 @@ void Core::emulate(int cycles)
         }
         else
         {
+            cycles = remaining;
             if (mmu.dmas_active.back()->emulate(remaining))
             {
                 mmu.dmas_active.pop_back();
             }
+            emulateTimers(cycles - remaining);
         }
     }
 }

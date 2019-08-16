@@ -12,7 +12,8 @@ enum Page
     PAGE_GAMEPAK_0    = 0x8,
     PAGE_GAMEPAK_1    = 0xA,
     PAGE_GAMEPAK_2    = 0xC,
-    PAGE_GAMEPAK_SRAM = 0xE
+    PAGE_GAMEPAK_SRAM = 0xE,
+    PAGE_UNUSED       = 0xF
 };
 
 enum Map
