@@ -1,5 +1,6 @@
 #include "mmu.h"
 
+#include "common/format.h"
 #include "common/utility.h"
 
 MMU::MMU(std::shared_ptr<BIOS> bios)
@@ -195,7 +196,20 @@ u8 MMU::readByte(u32 addr) const
 
     case PAGE_GAMEPAK_0: case PAGE_GAMEPAK_0+1:
     case PAGE_GAMEPAK_1: case PAGE_GAMEPAK_1+1:
-    case PAGE_GAMEPAK_2: case PAGE_GAMEPAK_2+1:
+    case PAGE_GAMEPAK_2: 
+        addr &= 0x1FF'FFFF;
+        return gamepak->readByte(addr);
+    
+    case PAGE_GAMEPAK_2+1:
+        if (gamepak->save->type == Save::Type::EEPROM)
+        {
+            if (gamepak->size() <= 0x1000000 || (addr >= 0xDFF'FF00 && addr < 0xDFF'FFFF))
+            {
+                return 1;
+                //fmt::printf("R %X\n", addr);
+                //return gamepak->save->readByte(addr);
+            }
+        }
         addr &= 0x1FF'FFFF;
         return gamepak->readByte(addr);
 
@@ -567,7 +581,18 @@ void MMU::writeByte(u32 addr, u8 byte)
 
     case PAGE_GAMEPAK_0: case PAGE_GAMEPAK_0+1:
     case PAGE_GAMEPAK_1: case PAGE_GAMEPAK_1+1:
-    case PAGE_GAMEPAK_2: case PAGE_GAMEPAK_2+1:
+    case PAGE_GAMEPAK_2: 
+        break;
+    
+    case PAGE_GAMEPAK_2+1:
+        if (gamepak->save->type == Save::Type::EEPROM)
+        {
+            if (gamepak->size() <= 0x1000000 || (addr >= 0xDFF'FF00 && addr < 0xDFF'FFFF))
+            {
+                //fmt::printf("W %X %X\n", addr, byte);
+                //gamepak->save->writeByte(0, byte);
+            }
+        }
         break;
 
     case PAGE_GAMEPAK_SRAM:

@@ -19,6 +19,7 @@ public:
     GamePak(const std::string& file);
 
     u8 readByte(u32 addr) const;
+    std::size_t size() const;
 
     bool valid;
     Header header;

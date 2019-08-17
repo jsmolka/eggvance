@@ -56,10 +56,25 @@ bool DMA::emulate(int& cycles)
 {
     while (remaining-- > 0)
     {
-        if (control.word)
-            mmu.writeWord(dst.addr, mmu.readWord(src.addr));
+        if (id == 3 && dst.addr >= 0xD00'0000 && dst.addr < 0xE00'0000)
+        {
+            //fmt::printf("W %X\n", mmu.readHalf(src.addr) & 0x1);
+
+            mmu.gamepak->save->writeByte(dst.addr, (u8)mmu.readHalf(src.addr));
+        }
+        else if (id == 3 && src.addr >= 0xD00'0000 && src.addr < 0xE00'0000)
+        {
+            //fmt::printf("R\n");
+
+            mmu.writeHalf(dst.addr, mmu.gamepak->save->readByte(src.addr));
+        }
         else
-            mmu.writeHalf(dst.addr, mmu.readHalf(src.addr));
+        {
+            if (control.word)
+                mmu.writeWord(dst.addr, mmu.readWord(src.addr));
+            else
+                mmu.writeHalf(dst.addr, mmu.readHalf(src.addr));
+        }
 
         dst.addr += diff_dst;
         src.addr += diff_src;

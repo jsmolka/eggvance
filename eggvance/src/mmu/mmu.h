@@ -74,6 +74,8 @@ public:
 
     std::array<OAMEntry, 128> oam_entries;
 
+    std::shared_ptr<GamePak> gamepak;
+
     RAM<0x00400> io;
     RAM<0x00400> palette;
     RAM<0x18000> vram;
@@ -91,7 +93,6 @@ private:
     DMA dmas[4];
 
     std::shared_ptr<BIOS> bios;
-    std::shared_ptr<GamePak> gamepak;
 
     RAM<0x40000> wram;
     RAM<0x08000> iwram;

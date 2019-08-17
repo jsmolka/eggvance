@@ -26,7 +26,7 @@ GamePak::GamePak(const std::string& file)
             break;
 
         case Save::Type::EEPROM:
-            save = std::make_unique<EEPROM>(save_file);
+            save = std::make_unique<EEPROM>(save_file, data.size());
             break;
 
         case Save::Type::FLASH64:
@@ -44,6 +44,11 @@ GamePak::GamePak(const std::string& file)
 u8 GamePak::readByte(u32 addr) const
 {
     return addr < data.size() ? data[addr] : 0;
+}
+
+std::size_t GamePak::size() const
+{
+    return data.size();
 }
 
 std::string GamePak::toSaveFile(const std::string& file)

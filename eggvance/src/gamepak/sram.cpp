@@ -5,10 +5,10 @@
 SRAM::SRAM(const std::string& file)
     : Save(file, Save::Type::SRAM)
 {
+    data.resize(0x8000, 0);
+
     if (File::exists(file))
         File::read(file, data);
-    else
-        data.resize(0x8000, 0);
 }
 
 SRAM::~SRAM()
