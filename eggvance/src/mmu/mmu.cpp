@@ -215,12 +215,18 @@ u8 MMU::readByte(u32 addr) const
 
     case PAGE_GAMEPAK_SRAM:
     case PAGE_UNUSED:
-        if (gamepak->save->type == Save::Type::SRAM)
+        switch (gamepak->save->type)
         {
+        case Save::Type::SRAM:
             addr &= 0x7FFF;
             return gamepak->save->readByte(addr);
+
+        case Save::Type::FLASH64:
+        case Save::Type::FLASH128:
+            addr &= 0xFFFF;
+            return gamepak->save->readByte(addr);
         }
-        return 0;
+        break;
     }
     return 0;
 }
@@ -597,10 +603,18 @@ void MMU::writeByte(u32 addr, u8 byte)
 
     case PAGE_GAMEPAK_SRAM:
     case PAGE_UNUSED:
-        if (gamepak->save->type == Save::Type::SRAM)
+        switch (gamepak->save->type)
         {
+        case Save::Type::SRAM:
             addr &= 0x7FFF;
             gamepak->save->writeByte(addr, byte);
+            break;
+
+        case Save::Type::FLASH64:
+        case Save::Type::FLASH128:
+            addr &= 0xFFFF;
+            gamepak->save->writeByte(addr, byte);
+            break;
         }
     }
 }
