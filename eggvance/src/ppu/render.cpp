@@ -169,8 +169,8 @@ void PPU::renderBgMode5(int bg)
     {
         u32 addr = (0xA000 * mmu.dispcnt.frame) + (2 * 160 * mmu.vcount);
         u16* pixel = mmu.vram.ptr<u16>(addr);
-        std::copy_n(pixel, 160, &bgs[bg][0]);
-        std::fill_n(&bgs[bg][160], 80, TRANSPARENT);
+        pixel = std::copy_n(pixel, 160, &bgs[bg][0]);
+        std::fill_n(pixel, 80, TRANSPARENT);
     }
     else
     {

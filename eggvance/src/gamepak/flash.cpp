@@ -103,8 +103,7 @@ void Flash::writeByte(u32 addr, u8 byte)
             if (erase && command == CMD_ERASE_SECTOR)
             {
                 u8* sector = bank + (addr & 0xF000);
-                for (int x = 0; x < 0x1000; ++x, ++sector)
-                    *sector = 0xFF;
+                std::fill_n(sector, 0x1000, 0xFF);
                 erase = false;
             }
         }
