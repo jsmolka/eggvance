@@ -10,6 +10,7 @@ namespace fs = std::filesystem;
 
 Core::Core(std::shared_ptr<BIOS> bios)
     : remaining(0)
+    , limited(true)
     , mmu(bios)
     , arm(mmu)
     , ppu(mmu)
@@ -40,7 +41,7 @@ void Core::run(std::shared_ptr<GamePak> gamepak)
         frame();
 
         u32 delta = SDL_GetTicks() - ticks;
-        if (delta < 16)
+        if (limited && delta < 16)
             SDL_Delay(16 - delta);
 
         SDL_Event event;
@@ -53,10 +54,8 @@ void Core::run(std::shared_ptr<GamePak> gamepak)
 
             case SDL_KEYUP:
             case SDL_KEYDOWN:
-                if (event.key.keysym.sym == SDLK_F11 && event.key.state == SDL_PRESSED)
-                    ppu.backend.fullscreen();
-                else
-                    input.keyEvent(event.key);
+                coreKeyEvent(event.key);
+                input.keyEvent(event.key);
                 break;
 
             case SDL_CONTROLLERDEVICEADDED:
@@ -156,6 +155,23 @@ bool Core::dropEvent(const SDL_DropEvent& event)
         return true;
     }
     return false;
+}
+
+void Core::coreKeyEvent(const SDL_KeyboardEvent& event)
+{
+    if (event.state == SDL_RELEASED)
+        return;
+
+    switch (event.keysym.sym)
+    {
+    case SDLK_LSHIFT:
+        limited ^= true;
+        break;
+
+    case SDLK_F11:
+        ppu.backend.fullscreen();
+        break;
+    }
 }
 
 void Core::updateTitle(std::shared_ptr<GamePak> gamepak)

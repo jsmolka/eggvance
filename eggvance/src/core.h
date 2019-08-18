@@ -19,6 +19,7 @@ private:
     bool dropAwait();
     bool dropEvent(const SDL_DropEvent& event);
 
+    void coreKeyEvent(const SDL_KeyboardEvent& event);
     void updateTitle(std::shared_ptr<GamePak> gamepak);
 
     void frame();
@@ -26,6 +27,7 @@ private:
     void emulateTimers(int cycles);
 
     int remaining;
+    bool limited;
 
     MMU mmu;
     PPU ppu;
