@@ -54,18 +54,42 @@ void DMA::activate()
 
 bool DMA::emulate(int& cycles)
 {
+    if (id == 3 && dst.addr >= 0xD00'0000 && dst.addr < 0xE00'0000)
+    {
+        // Guessing EEPROM size in advance seems to be pretty much impossible.
+        // That's why we base the size on the first write (which should happen
+        // before the first read).
+        if (mmu.gamepak->save->data.empty())
+        {
+            switch (count)
+            {
+            // Bus width 6
+            case  9:  // Set address for reading
+            case 73:  // Write data to address
+                mmu.gamepak->save->data.resize(0x0200, 0);
+                break;
+
+            // Bus width 14
+            case 17:  // Set address for reading
+            case 81:  // Write data to address
+                mmu.gamepak->save->data.resize(0x2000, 0);
+                break;
+
+            default:
+                fmt::printf("DMA: Unexpected EEPROM write count %d\n", count);
+                break;
+            }
+        }
+    }
+
     while (remaining-- > 0)
     {
         if (id == 3 && dst.addr >= 0xD00'0000 && dst.addr < 0xE00'0000)
         {
-            //fmt::printf("W %X\n", mmu.readHalf(src.addr) & 0x1);
-
             mmu.gamepak->save->writeByte(dst.addr, (u8)mmu.readHalf(src.addr));
         }
         else if (id == 3 && src.addr >= 0xD00'0000 && src.addr < 0xE00'0000)
         {
-            //fmt::printf("R\n");
-
             mmu.writeHalf(dst.addr, mmu.gamepak->save->readByte(src.addr));
         }
         else

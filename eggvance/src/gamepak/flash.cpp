@@ -18,18 +18,10 @@ Flash::Flash(const std::string& file, Save::Type type)
         break;
     }
 
-    if (File::exists(file))
-        File::read(file, data);
-
     id = false;
     erase = false;
     command = 0;
     bank = &data[0];
-}
-
-Flash::~Flash()
-{
-    File::write(file, data);
 }
 
 u8 Flash::readByte(u32 addr)

@@ -26,7 +26,7 @@ GamePak::GamePak(const std::string& file)
             break;
 
         case Save::Type::EEPROM:
-            save = std::make_unique<EEPROM>(save_file, data.size());
+            save = std::make_unique<EEPROM>(save_file);
             break;
 
         case Save::Type::FLASH64:

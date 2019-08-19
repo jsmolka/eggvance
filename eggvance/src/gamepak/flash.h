@@ -1,14 +1,11 @@
 #pragma once
 
-#include <vector>
-
 #include "save.h"
 
 class Flash : public Save
 {
 public:
     Flash(const std::string& file, Save::Type type);
-    ~Flash();
 
     virtual u8 readByte(u32 addr) final;
     virtual void writeByte(u32 addr, u8 byte) final;
@@ -28,7 +25,5 @@ private:
     bool id;
     bool erase;
     u32 command;
-
-    std::vector<u8> data;
     u8* bank;
 };
