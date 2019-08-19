@@ -1,32 +1,32 @@
 #include "core.h"
 
 #include <filesystem>
+#include <sstream>
 
-#include "common/format.h"
 #include "mmu/interrupt.h"
 #include "icon.h"
 
 namespace fs = std::filesystem;
 
-Core::Core(std::shared_ptr<BIOS> bios)
-    : remaining(0)
-    , limited(true)
-    , mmu(bios)
+Core::Core(std::unique_ptr<BIOS> bios)
+    : mmu(std::move(bios))
     , arm(mmu)
     , ppu(mmu)
     , input(mmu)
+    , remaining(0)
+    , limited(true)
 {
     Interrupt::init(&mmu);
 
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 }
 
-void Core::run(std::shared_ptr<GamePak> gamepak)
+void Core::run(std::unique_ptr<GamePak> gamepak)
 {
     if (gamepak && gamepak->valid)
     {
-        updateTitle(gamepak);
-        mmu.setGamePak(gamepak);
+        setWindowTitle(*gamepak);
+        mmu.setGamePak(std::move(gamepak));
     }
     else
     {
@@ -70,10 +70,6 @@ void Core::run(std::shared_ptr<GamePak> gamepak)
 
             case SDL_CONTROLLERAXISMOTION:
                 input.controllerAxisEvent(event.caxis);
-                break;
-
-            case SDL_DROPFILE:
-                dropEvent(event.drop);
                 break;
             }
         }
@@ -144,13 +140,12 @@ bool Core::dropEvent(const SDL_DropEvent& event)
 
     if (fs::is_regular_file(file))
     {
-        auto gamepak = std::make_shared<GamePak>(file);
+        auto gamepak = std::make_unique<GamePak>(file);
         if (!gamepak->valid)
             return false;
 
-        reset();
-        updateTitle(gamepak);
-        mmu.setGamePak(gamepak);
+        setWindowTitle(*gamepak);
+        mmu.setGamePak(std::move(gamepak));
         SDL_RaiseWindow(ppu.backend.window);
         return true;
     }
@@ -174,34 +169,34 @@ void Core::coreKeyEvent(const SDL_KeyboardEvent& event)
     }
 }
 
-void Core::updateTitle(std::shared_ptr<GamePak> gamepak)
+void Core::setWindowTitle(const GamePak& gamepak)
 {
-    std::string save;
-    switch (gamepak->save->type)
+    std::stringstream stream;
+    stream << "eggvance";
+    if (!gamepak.header.title.empty())
+    {
+        stream << " - ";
+        stream << gamepak.header.title;
+    }
+    switch (gamepak.save->type)
     {
     case Save::Type::SRAM:
-        save = "SRAM";
+        stream << " - SRAM";
         break;
 
     case Save::Type::FLASH64:
-        save = "FLASH64";
+        stream << " - FLASH64";
         break;
 
     case Save::Type::FLASH128:
-        save = "FLASH128";
+        stream << " - FLASH128";
         break;
 
     case Save::Type::EEPROM:
-        save = "EEPROM";
-        break;
-
-    case Save::Type::NONE:
-        save = "NONE";
+        stream << " - EEPROM";
         break;
     }
-    std::string title = fmt::format("eggvance - {} - {}", gamepak->header.title.c_str(), save.c_str());
-
-    SDL_SetWindowTitle(ppu.backend.window, title.c_str());
+    SDL_SetWindowTitle(ppu.backend.window, stream.str().c_str());
 }
 
 void Core::frame()

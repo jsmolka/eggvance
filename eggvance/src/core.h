@@ -8,9 +8,9 @@
 class Core
 {
 public:
-    Core(std::shared_ptr<BIOS> bios);
+    Core(std::unique_ptr<BIOS> bios);
 
-    void run(std::shared_ptr<GamePak> gamepak);
+    void run(std::unique_ptr<GamePak> gamepak);
 
 private:
     void reset();
@@ -20,7 +20,7 @@ private:
     bool dropEvent(const SDL_DropEvent& event);
 
     void coreKeyEvent(const SDL_KeyboardEvent& event);
-    void updateTitle(std::shared_ptr<GamePak> gamepak);
+    void setWindowTitle(const GamePak& gamepak);
 
     void frame();
     void emulate(int cycles);

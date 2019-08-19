@@ -1,7 +1,5 @@
 #include "eeprom.h"
 
-#include "file.h"
-
 EEPROM::EEPROM(const std::string& file)
     : Save(file, Save::Type::EEPROM)
 {

@@ -17,11 +17,11 @@
 class MMU
 {
 public:
-    MMU(std::shared_ptr<BIOS> bios);
+    MMU(std::unique_ptr<BIOS> bios);
 
     void reset();
 
-    void setGamePak(std::shared_ptr<GamePak> gamepak);
+    void setGamePak(std::unique_ptr<GamePak> gamepak);
 
     u8  readByte(u32 addr) const;
     u16 readHalf(u32 addr) const;
@@ -74,7 +74,7 @@ public:
 
     std::array<OAMEntry, 128> oam_entries;
 
-    std::shared_ptr<GamePak> gamepak;
+    std::unique_ptr<GamePak> gamepak;
 
     RAM<0x00400> io;
     RAM<0x00400> palette;
@@ -92,7 +92,7 @@ private:
 
     DMA dmas[4];
 
-    std::shared_ptr<BIOS> bios;
+    std::unique_ptr<BIOS> bios;
 
     RAM<0x40000> wram;
     RAM<0x08000> iwram;

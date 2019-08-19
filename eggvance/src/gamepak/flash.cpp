@@ -2,8 +2,6 @@
 
 #include <algorithm>
 
-#include "file.h"
-
 Flash::Flash(const std::string& file, Save::Type type)
     : Save(file, type)
 {

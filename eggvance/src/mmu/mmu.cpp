@@ -3,8 +3,8 @@
 #include "common/format.h"
 #include "common/utility.h"
 
-MMU::MMU(std::shared_ptr<BIOS> bios)
-    : bios(bios)
+MMU::MMU(std::unique_ptr<BIOS> bios)
+    : bios(std::move(bios))
     , vcount(io.ref<u8>(REG_VCOUNT))
     , intr_request(io.ref<u16>(REG_IF))
     , intr_enabled(io.ref<u16>(REG_IE))
@@ -63,9 +63,9 @@ void MMU::reset()
     oam_entries.fill(OAMEntry());
 }
 
-void MMU::setGamePak(std::shared_ptr<GamePak> gamepak)
+void MMU::setGamePak(std::unique_ptr<GamePak> gamepak)
 {
-    this->gamepak = gamepak;
+    this->gamepak = std::move(gamepak);
 }
 
 u8 MMU::readByte(u32 addr) const

@@ -18,15 +18,15 @@ int main(int argc, char* argv[])
     if (!fs::is_regular_file(bios_file))
         exit("Missing BIOS", "Please place a GBA bios.bin next to the emulator.");
 
-    auto bios = std::make_shared<BIOS>(bios_file.string());
+    auto bios = std::make_unique<BIOS>(bios_file.string());
     if (!bios->valid)
         exit("Invalid BIOS", "The BIOS does not match the requirements.");
 
-    std::shared_ptr<GamePak> gamepak;
+    std::unique_ptr<GamePak> gamepak;
     if (argc > 1 && fs::is_regular_file(argv[1]))
-        gamepak = std::make_shared<GamePak>(argv[1]);
+        gamepak = std::make_unique<GamePak>(argv[1]);
 
-    std::make_unique<Core>(bios)->run(gamepak);
+    std::make_unique<Core>(std::move(bios))->run(std::move(gamepak));
 
     return 0;
 }

@@ -27,6 +27,7 @@ public:
 
 private:
     static std::string toSaveFile(const std::string& file);
+    static std::string makeString(u8* data, int size);
 
     void parseHeader();
     Save::Type parseSaveType();

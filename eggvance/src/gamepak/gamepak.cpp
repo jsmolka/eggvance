@@ -58,11 +58,18 @@ std::string GamePak::toSaveFile(const std::string& file)
     return path.string();
 }
 
+std::string GamePak::makeString(u8* data, int size)
+{
+    std::string str(reinterpret_cast<char*>(data), size);
+    str.erase(std::find(str.begin(), str.end(), '\0'), str.end());
+    return str;
+}
+
 void GamePak::parseHeader()
 {
-    header.title = std::string(reinterpret_cast<char*>(&data[0xA0]), 12);
-    header.code  = std::string(reinterpret_cast<char*>(&data[0xAC]), 4);
-    header.maker = std::string(reinterpret_cast<char*>(&data[0xB0]), 2);
+    header.title = makeString(&data[0xA0], 12);
+    header.code  = makeString(&data[0xAC], 4);
+    header.maker = makeString(&data[0xB0], 2);
 }
 
 Save::Type GamePak::parseSaveType()
