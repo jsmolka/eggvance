@@ -210,7 +210,7 @@ void PPU::finalize()
 
         int color = builder.begin()->color;
 
-        if (builder.windowSfx() && (mmu.bldcnt.mode != BLD_DISABLED || obj[x].mode == GFX_ALPHA))
+        if ((builder.windowSfx() && mmu.bldcnt.mode != BLD_DISABLED) || obj[x].mode == GFX_ALPHA)
         {
             int a = 0;
             int b = 0;
