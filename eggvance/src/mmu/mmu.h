@@ -23,9 +23,9 @@ public:
 
     void setGamePak(std::unique_ptr<GamePak> gamepak);
 
-    u8  readByte(u32 addr) const;
-    u16 readHalf(u32 addr) const;
-    u32 readWord(u32 addr) const;
+    u8  readByte(u32 addr);
+    u16 readHalf(u32 addr);
+    u32 readWord(u32 addr);
 
     void writeByte(u32 addr, u8  byte);
     void writeHalf(u32 addr, u16 half);
@@ -82,6 +82,10 @@ public:
     RAM<0x00400> oam;
 
 private:
+    u8 readIO(u32 addr);
+    void writeIO(u32 addr, u8 byte);
+    void writeOAM(u32 addr, u16 half);
+
     void writeBackgroundControlLower(BackgroundControl& control, u8 byte);
     void writeBackgroundControlUpper(BackgroundControl& control, u8 byte);
     void writeWindow(Window& window, u8 byte);
@@ -94,6 +98,6 @@ private:
 
     std::unique_ptr<BIOS> bios;
 
-    RAM<0x40000> wram;
+    RAM<0x40000> ewram;
     RAM<0x08000> iwram;
 };

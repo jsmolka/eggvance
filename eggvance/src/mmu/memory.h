@@ -3,7 +3,7 @@
 enum Page
 {
     PAGE_BIOS         = 0x0,
-    PAGE_WRAM         = 0x2,
+    PAGE_EWRAM        = 0x2,
     PAGE_IWRAM        = 0x3,
     PAGE_IO           = 0x4,
     PAGE_PALETTE      = 0x5,
@@ -19,7 +19,7 @@ enum Page
 enum Map
 {
     MAP_BIOS         = 0x0000'0000,
-    MAP_WRAM         = 0x0200'0000,
+    MAP_EWRAM        = 0x0200'0000,
     MAP_IWRAM        = 0x0300'0000,
     MAP_IO           = 0x0400'0000,
     MAP_PALETTE      = 0x0500'0000,

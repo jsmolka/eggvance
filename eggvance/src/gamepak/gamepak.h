@@ -18,7 +18,10 @@ public:
 
     GamePak(const std::string& file);
 
-    u8 readByte(u32 addr) const;
+    u8  readByte(u32 addr);
+    u16 readHalf(u32 addr);
+    u32 readWord(u32 addr);
+
     std::size_t size() const;
 
     bool valid;
@@ -26,6 +29,9 @@ public:
     std::unique_ptr<Save> save;
 
 private:
+    template<typename T>
+    T read(u32 addr);
+
     static std::string toSaveFile(const std::string& file);
     static std::string makeString(u8* data, int size);
 

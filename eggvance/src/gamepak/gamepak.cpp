@@ -41,14 +41,33 @@ GamePak::GamePak(const std::string& file)
     }
 }
 
-u8 GamePak::readByte(u32 addr) const
+u8 GamePak::readByte(u32 addr)
 {
-    return addr < data.size() ? data[addr] : 0;
+    return read<u8>(addr);
+}
+
+u16 GamePak::readHalf(u32 addr)
+{
+    return read<u16>(addr);
+}
+
+u32 GamePak::readWord(u32 addr)
+{
+    return read<u32>(addr);
 }
 
 std::size_t GamePak::size() const
 {
     return data.size();
+}
+
+template<typename T>
+inline T GamePak::read(u32 addr)
+{
+    if (addr < data.size())
+        return *reinterpret_cast<T*>(&data[addr]);
+    else
+        return 0;
 }
 
 std::string GamePak::toSaveFile(const std::string& file)

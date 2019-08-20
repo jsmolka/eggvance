@@ -21,21 +21,13 @@ struct OAMEntry
     int color_mode;   // Color mode (1 = 256/1, 0 = 16/16)
     int shape;        // Object shape (0 = square, 1 = horizontal, 2 = vertical, 3 = prohibited)
 
-    union
-    {
-        u8  x_b[2];  // X coordinate bytes
-        u16 x;       // X coordinate
-    };
+    int x;         // X coordinate
     int paramter;  // Affine paramter (if affine)
     int flip_x;    // Horizontal flip (if not affine)
     int flip_y;    // Vertical flip (if not affine)
     int size;      // Object size
 
-    union
-    {
-        u8  tile_b[2];  // Base tile number bytes
-        u16 tile;       // Base tile number
-    };
+    int tile;      // Base tile number
     int priority;  // Priority
     int palette;   // Palette bank for 16/16 color mode
 

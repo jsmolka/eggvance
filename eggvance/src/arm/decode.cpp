@@ -39,11 +39,11 @@ inline int hashArm(u32 instr)
     return ((instr >> 16) & 0xFF0) | ((instr >> 4) & 0xF);
 }
 
+static const LutArm lut_arm = makeLutArm();
+
 InstructionArm decodeArm(u32 instr)
 {
-    static const LutArm lut = makeLutArm();
-
-    return lut[hashArm(instr)];
+    return lut_arm[hashArm(instr)];
 }
 
 InstructionThumb decodeHashThumb(int hash)
@@ -87,9 +87,9 @@ inline int hashThumb(u16 instr)
     return instr >> 8;
 }
 
+static const LutThumb lut_thumb = makeLutThumb();
+
 InstructionThumb decodeThumb(u16 instr)
 {
-    static const LutThumb lut = makeLutThumb();
-
-    return lut[hashThumb(instr)];
+    return lut_thumb[hashThumb(instr)];
 }
