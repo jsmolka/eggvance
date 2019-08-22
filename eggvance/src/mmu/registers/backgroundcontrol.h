@@ -1,7 +1,12 @@
 #pragma once
 
-struct BackgroundControl
+#include "common/integer.h"
+
+class BackgroundControl
 {
+public:
+    void write(int index, u8 byte);
+
     int priority;      // BG priority (0-3, 0 = highest)
     int tile_block;    // BG tile base block (0-3, in units of 16kb)
     int mosaic;        // Mosaic (1 = enable)

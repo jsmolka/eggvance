@@ -2,8 +2,11 @@
 
 #include "common/integer.h"
 
-struct BackgroundReference
+class BackgroundReference
 {
+public:
+    void write(int index, u8 byte);
+
     union
     {
         u8  ref_b[4];  // Reference point bytes

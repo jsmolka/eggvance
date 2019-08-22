@@ -123,7 +123,7 @@ void PPU::vblank()
 
 void PPU::next()
 {
-    int vmatch = mmu.vcount == mmu.dispstat.vcount_compare;
+    int vmatch = mmu.vcount == mmu.dispstat.vcount_eval;
 
     mmu.vcount = (mmu.vcount + 1) % 228;
     mmu.dispstat.vmatch = vmatch;
@@ -137,7 +137,7 @@ void PPU::next()
 
 void PPU::present()
 {
-    if (mmu.io.get<u16>(REG_DISPCNT) & 0x1F00)
+    if (mmu.io.readHalf(REG_DISPCNT) & 0x1F00)
     {
         backend.present();
     }
@@ -302,7 +302,7 @@ int PPU::readBgColor(int index, int palette)
     if (index == 0)
         return TRANSPARENT;
 
-    return mmu.palette.get<u16>(0x20 * palette + 2 * index);
+    return mmu.palette.readHalf(0x20 * palette + 2 * index);
 }
 
 int PPU::readFgColor(int index, int palette)
@@ -310,7 +310,7 @@ int PPU::readFgColor(int index, int palette)
     if (index == 0)
         return TRANSPARENT;
 
-    return mmu.palette.get<u16>(0x200 + 0x20 * palette + 2 * index);
+    return mmu.palette.readHalf(0x200 + 0x20 * palette + 2 * index);
 }
 
 int PPU::readPixel(u32 addr, int x, int y, PixelFormat format)

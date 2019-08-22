@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common/integer.h"
+
 enum BlendMode
 {
     BLD_DISABLED = 0b00,  // Blend disabled
@@ -12,6 +14,8 @@ struct BlendControl
 {
     struct Layer
     {
+        void write(u8 byte);
+
         union
         {
             struct
@@ -27,7 +31,9 @@ struct BlendControl
         int bdp;  // Backdrop enable
     };
 
-    int mode;          // Mode (0 = none, 1 = alpha blending, 2 = brightness increase, 3 = brightness decrease)
+    void write(int index, u8 byte);
+
+    int mode;     // Mode (0 = none, 1 = alpha blending, 2 = brightness increase, 3 = brightness decrease)
     Layer upper;  // Upper blend layer
     Layer lower;  // Lower blend layer
 };

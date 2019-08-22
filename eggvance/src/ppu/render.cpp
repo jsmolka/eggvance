@@ -54,7 +54,7 @@ void PPU::renderBgMode0(int bg)
         // Loop over all horizontal tiles in the block
         while (tile_x++ < 32)
         {
-            int entry = mmu.vram.get<u16>(addr_map);
+            int entry = mmu.vram.readHalf(addr_map);
             int tile  = bits<0, 10>(entry);
 
             u32 addr = base_addr + tile_size * tile;

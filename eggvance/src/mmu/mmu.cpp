@@ -73,16 +73,18 @@ u8 MMU::readByte(u32 addr)
     switch (addr >> 24)
     {
     case PAGE_BIOS:
-    case PAGE_BIOS+1:
         return bios->readByte(addr);
+
+    case PAGE_BIOS+1:
+        return 0;
 
     case PAGE_EWRAM:
         addr &= 0x3'FFFF;
-        return ewram[addr];
+        return ewram.readByte(addr);
 
     case PAGE_IWRAM:
         addr &= 0x7FFF;
-        return iwram[addr];
+        return iwram.readByte(addr);
 
     case PAGE_IO:
         return readIO(addr);
@@ -103,7 +105,7 @@ u8 MMU::readByte(u32 addr)
     case PAGE_GAMEPAK_2+1:
         if (gamepak->save->type == Save::Type::EEPROM)
         {
-            if (gamepak->size() <= 0x1000000 || (addr >= 0xDFF'FF00 && addr < 0xDFF'FFFF))
+            if (gamepak->size() <= 0x100'0000 || (addr >= 0xDFF'FF00 && addr < 0xDFF'FFFF))
                 return 1;
         }
         addr &= 0x1FF'FFFF;
@@ -140,16 +142,18 @@ u16 MMU::readHalf(u32 addr)
     switch ((addr >> 24) & 0xF)
     {
     case PAGE_BIOS:
-    case PAGE_BIOS+1:
         return bios->readHalf(addr);
+
+    case PAGE_BIOS+1:
+        return 0;
 
     case PAGE_EWRAM:
         addr &= 0x3'FFFF;
-        return ewram.get<u16>(addr);
+        return ewram.readHalf(addr);
 
     case PAGE_IWRAM:
         addr &= 0x7FFF;
-        return iwram.get<u16>(addr);
+        return iwram.readHalf(addr);
 
     case PAGE_IO:
         return readIO(addr) 
@@ -157,17 +161,17 @@ u16 MMU::readHalf(u32 addr)
 
     case PAGE_PALETTE:
         addr &= 0x3FF;
-        return palette.get<u16>(addr);
+        return palette.readHalf(addr);
 
     case PAGE_VRAM:
         addr &= 0x1'FFFF;
         if (addr > 0x1'7FFF)
             addr -= 0x8000;
-        return vram.get<u16>(addr);
+        return vram.readHalf(addr);
 
     case PAGE_OAM:
         addr &= 0x3FF;
-        return oam.get<u16>(addr);
+        return oam.readHalf(addr);
 
     case PAGE_GAMEPAK_0: 
     case PAGE_GAMEPAK_0+1:
@@ -180,7 +184,7 @@ u16 MMU::readHalf(u32 addr)
     case PAGE_GAMEPAK_2+1:
         if (gamepak->save->type == Save::Type::EEPROM)
         {
-            if (gamepak->size() <= 0x1000000 || (addr >= 0xDFF'FF00 && addr < 0xDFF'FFFF))
+            if (gamepak->size() <= 0x100'0000 || (addr >= 0xDFF'FF00 && addr < 0xDFF'FFFF))
                 return 1;
         }
         addr &= 0x1FF'FFFF;
@@ -195,16 +199,18 @@ u32 MMU::readWord(u32 addr)
     switch ((addr >> 24) & 0xF)
     {
     case PAGE_BIOS:
-    case PAGE_BIOS+1:
         return bios->readWord(addr);
+
+    case PAGE_BIOS+1:
+        return 0;
 
     case PAGE_EWRAM:
         addr &= 0x3'FFFF;
-        return ewram.get<u32>(addr);
+        return ewram.readWord(addr);
 
     case PAGE_IWRAM:
         addr &= 0x7FFF;
-        return iwram.get<u32>(addr);
+        return iwram.readWord(addr);
 
     case PAGE_IO:
         return readIO(addr) 
@@ -214,17 +220,17 @@ u32 MMU::readWord(u32 addr)
 
     case PAGE_PALETTE:
         addr &= 0x3FF;
-        return palette.get<u32>(addr);
+        return palette.readWord(addr);
 
     case PAGE_VRAM:
         addr &= 0x1'FFFF;
         if (addr > 0x1'7FFF)
             addr -= 0x8000;
-        return vram.get<u32>(addr);
+        return vram.readWord(addr);
 
     case PAGE_OAM:
         addr &= 0x3FF;
-        return oam.get<u32>(addr);
+        return oam.readWord(addr);
 
     case PAGE_GAMEPAK_0: 
     case PAGE_GAMEPAK_0+1:
@@ -256,12 +262,12 @@ void MMU::writeByte(u32 addr, u8 byte)
 
     case PAGE_EWRAM:
         addr &= 0x3'FFFF;
-        ewram[addr] = byte;
+        ewram.writeByte(addr, byte);
         break;
 
     case PAGE_IWRAM:
         addr &= 0x7FFF;
-        iwram[addr] = byte;
+        iwram.writeByte(addr, byte);
         break;
 
     case PAGE_IO:
@@ -318,12 +324,12 @@ void MMU::writeHalf(u32 addr, u16 half)
 
     case PAGE_EWRAM:
         addr &= 0x3'FFFF;
-        ewram.ref<u16>(addr) = half;
+        ewram.writeHalf(addr, half);
         break;
 
     case PAGE_IWRAM:
         addr &= 0x7FFF;
-        iwram.ref<u16>(addr) = half;
+        iwram.writeHalf(addr, half);
         break;
 
     case PAGE_IO:
@@ -333,14 +339,14 @@ void MMU::writeHalf(u32 addr, u16 half)
 
     case PAGE_PALETTE:
         addr &= 0x3FF;
-        palette.ref<u16>(addr) = half;
+        palette.writeHalf(addr, half);
         break;
 
     case PAGE_VRAM:
         addr &= 0x1'FFFF;
         if (addr > 0x1'7FFF)
             addr -= 0x8000;
-        vram.ref<u16>(addr) = half;
+        vram.writeHalf(addr, half);
         break;
 
     case PAGE_OAM:
@@ -372,12 +378,12 @@ void MMU::writeWord(u32 addr, u32 word)
 
     case PAGE_EWRAM:
         addr &= 0x3'FFFF;
-        ewram.ref<u32>(addr) = word;
+        ewram.writeWord(addr, word);
         break;
 
     case PAGE_IWRAM:
         addr &= 0x7FFF;
-        iwram.ref<u32>(addr) = word;
+        iwram.writeWord(addr, word);
         break;
 
     case PAGE_IO:
@@ -389,14 +395,14 @@ void MMU::writeWord(u32 addr, u32 word)
 
     case PAGE_PALETTE:
         addr &= 0x3FF;
-        palette.ref<u32>(addr) = word;
+        palette.writeWord(addr, word);
         break;
 
     case PAGE_VRAM:
         addr &= 0x1'FFFF;
         if (addr > 0x1'7FFF)
             addr -= 0x8000;
-        vram.ref<u32>(addr) = word;
+        vram.writeWord(addr, word);
         break;
 
     case PAGE_OAM:
@@ -573,7 +579,7 @@ void MMU::writeIO(u32 addr, u8 byte)
         break;
 
     case REG_DISPSTAT+1:
-        dispstat.vcount_compare = byte;
+        dispstat.vcount_eval = byte;
         break;
 
     case REG_VCOUNT:
@@ -837,7 +843,7 @@ void MMU::writeOAM(u32 addr, u16 half)
             break;
         }
     }
-    oam.ref<u16>(addr) = half;
+    oam.writeHalf(addr, half);
 }
 
 void MMU::writeBackgroundControlLower(BackgroundControl& control, u8 byte)

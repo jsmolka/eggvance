@@ -2,8 +2,11 @@
 
 #include "common/integer.h"
 
-struct BackgroundOffset
+class BackgroundOffset
 {
+public:
+    void write(int index, u8 byte);
+
     union
     {
         u8  offset_b[2];  // Offset bytes

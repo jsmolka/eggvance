@@ -1,7 +1,12 @@
 #pragma once
 
-struct DisplayControl
+#include "common/integer.h"
+
+class DisplayControl
 {
+public:
+    void write(int index, u8 byte);
+
     int mode;         // BG video mode (6,7 prohibited)
     int gbc;          // Game Boy Color mode
     int frame;        // Frame used in BG modes 4,5

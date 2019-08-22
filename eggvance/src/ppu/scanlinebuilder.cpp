@@ -37,7 +37,7 @@ void ScanlineBuilder::build(int x)
             }
         }
     }
-    layers.push_back(Layer(mmu.palette.get<u16>(0), LF_BDP));
+    layers.push_back(Layer(mmu.palette.readHalf(0), LF_BDP));
 }
 
 bool ScanlineBuilder::getBlendLayers(int& a)

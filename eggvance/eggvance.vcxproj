@@ -81,6 +81,8 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>26451;26495</DisableSpecificWarnings>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PreprocessorDefinitions>_MBCS;EGG_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -124,6 +126,7 @@
       <DebugInformationFormat>OldStyle</DebugInformationFormat>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <PreprocessorDefinitions>_MBCS;EGG_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -145,6 +148,18 @@
     <ClCompile Include="icon\icon.cpp" />
     <ClCompile Include="src\mmu\dma.cpp" />
     <ClCompile Include="src\input.cpp" />
+    <ClCompile Include="src\mmu\mmio.cpp" />
+    <ClCompile Include="src\mmu\registers\backgroundoffset.cpp" />
+    <ClCompile Include="src\mmu\registers\backgroundparameter.cpp" />
+    <ClCompile Include="src\mmu\registers\backgroundreference.cpp" />
+    <ClCompile Include="src\mmu\registers\blendalpha.cpp" />
+    <ClCompile Include="src\mmu\registers\blendcontrol.cpp" />
+    <ClCompile Include="src\mmu\registers\blendfade.cpp" />
+    <ClCompile Include="src\mmu\registers\displaycontrol.cpp" />
+    <ClCompile Include="src\mmu\registers\displaystatus.cpp" />
+    <ClCompile Include="src\mmu\registers\mosaic.cpp" />
+    <ClCompile Include="src\mmu\registers\window.cpp" />
+    <ClCompile Include="src\mmu\registers\windowrange.cpp" />
     <ClCompile Include="src\ppu\render.cpp" />
     <ClCompile Include="src\ppu\scanlinebuilder.cpp" />
     <ClCompile Include="src\arm\decode.cpp" />
@@ -163,6 +178,7 @@
     <ClCompile Include="src\mmu\timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\common\macros.h" />
     <ClInclude Include="src\gamepak\eeprom.h" />
     <ClInclude Include="src\gamepak\flash.h" />
     <ClInclude Include="src\gamepak\file.h" />
@@ -176,6 +192,7 @@
     <ClInclude Include="src\input.h" />
     <ClInclude Include="src\common\tmp.h" />
     <ClInclude Include="src\mmu\interrupt.h" />
+    <ClInclude Include="src\mmu\mmio.h" />
     <ClInclude Include="src\mmu\registers\window.h" />
     <ClInclude Include="src\mmu\registers\windowrange.h" />
     <ClInclude Include="src\ppu\backend.h" />
