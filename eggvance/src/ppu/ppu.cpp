@@ -134,10 +134,36 @@ void PPU::next()
 
 void PPU::present()
 {
-    // Todo: :)
-    //if (mmu.io.readHalf(REG_DISPCNT) & 0x1F00)
+    // Todo: cleaner?
+    switch (mmio.dispcnt.mode)
     {
-        backend.present();
+    case 0: 
+        if (mmio.dispcnt.bg0
+            || mmio.dispcnt.bg1
+            || mmio.dispcnt.bg2
+            || mmio.dispcnt.bg3)
+            backend.present();
+        break;
+
+    case 1: 
+        if (mmio.dispcnt.bg0
+            || mmio.dispcnt.bg1
+            || mmio.dispcnt.bg2)
+            backend.present();
+        break;
+
+    case 2: 
+        if (mmio.dispcnt.bg2
+            || mmio.dispcnt.bg3)
+            backend.present();
+        break;
+
+    case 3: 
+    case 4: 
+    case 5: 
+        if (mmio.dispcnt.bg2)
+            backend.present();
+        break;
     }
 }
 

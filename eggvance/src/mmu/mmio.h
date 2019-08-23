@@ -1,12 +1,14 @@
 #pragma once
 
-#include "common/integer.h"
 #include "registers/include.h"
+#include "dma.h"
 #include "ram.h"
 
 class MMIO
 {
 public:
+    MMIO();
+
     void reset();
 
     u8  readByte(u32 addr);
@@ -49,6 +51,13 @@ public:
     int keyinput;
     KeyControl keycnt;
     WaitControl waitcnt;
+
+    struct
+    {
+        DMAAddress sad[4];
+        DMAAddress dad[4];
+        DMAControl control[4];
+    } dma;
 
 private:
     RAM<0x400> data;

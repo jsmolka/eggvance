@@ -7,16 +7,18 @@
 DMA::DMA(int id, MMU& mmu)
     : id(id)
     , mmu(mmu)
+    , control(mmu.mmio.dma.control[id])
+    , sad(mmu.mmio.dma.sad[id])
+    , dad(mmu.mmio.dma.dad[id])
 {
     reset();
 }
 
 void DMA::reset()
 {
-    count = 0;
-    src.addr = 0;
-    dst.addr = 0;
-    control = {};
+    //control = {};
+    sad.addr = 0;
+    dad.addr = 0;
 
     remaining = 0;
     seq_cycles = 0;
@@ -31,13 +33,9 @@ void DMA::activate()
     // Todo: use actual cycles
     seq_cycles = 2;
 
-    remaining = count > 0
-        ? count
-        : id < 3
-            ? 0x04000
-            : 0x10000;
+    remaining = control.count;
 
-    addr_dst = dst.addr;
+    addr_dst = dad.addr;
     diff_dst = stepDifference(static_cast<Adjustment>(control.dst_adjust));
     diff_src = stepDifference(static_cast<Adjustment>(control.src_adjust));
 
@@ -54,14 +52,15 @@ void DMA::activate()
 
 bool DMA::emulate(int& cycles)
 {
-    if (id == 3 && dst.addr >= 0xD00'0000 && dst.addr < 0xE00'0000)
+    // Todo: in activate?
+    if (id == 3 && dad.addr >= 0xD00'0000 && dad.addr < 0xE00'0000)
     {
         // Guessing EEPROM size in advance seems to be pretty much impossible.
         // That's why we base the size on the first write (which should happen
         // before the first read).
         if (mmu.gamepak->save->data.empty())
         {
-            switch (count)
+            switch (control.count)
             {
             // Bus width 6
             case  9:  // Set address for reading
@@ -76,7 +75,7 @@ bool DMA::emulate(int& cycles)
                 break;
 
             default:
-                fmt::printf("DMA: Unexpected EEPROM write count %d\n", count);
+                fmt::printf("DMA: Unexpected EEPROM write count %d\n", control.count);
                 break;
             }
         }
@@ -84,24 +83,25 @@ bool DMA::emulate(int& cycles)
 
     while (remaining-- > 0)
     {
-        if (id == 3 && dst.addr >= 0xD00'0000 && dst.addr < 0xE00'0000)
+        // Todo: check if EEPROM
+        if (id == 3 && dad.addr >= 0xD00'0000 && dad.addr < 0xE00'0000)
         {
-            mmu.gamepak->save->writeByte(dst.addr, (u8)mmu.readHalf(src.addr));
+            mmu.gamepak->save->writeByte(dad.addr, (u8)mmu.readHalf(sad.addr));
         }
-        else if (id == 3 && src.addr >= 0xD00'0000 && src.addr < 0xE00'0000)
+        else if (id == 3 && sad.addr >= 0xD00'0000 && sad.addr < 0xE00'0000)
         {
-            mmu.writeHalf(dst.addr, mmu.gamepak->save->readByte(src.addr));
+            mmu.writeHalf(dad.addr, mmu.gamepak->save->readByte(sad.addr));
         }
         else
         {
             if (control.word)
-                mmu.writeWord(dst.addr, mmu.readWord(src.addr));
+                mmu.writeWord(dad.addr, mmu.readWord(sad.addr));
             else
-                mmu.writeHalf(dst.addr, mmu.readHalf(src.addr));
+                mmu.writeHalf(dad.addr, mmu.readHalf(sad.addr));
         }
 
-        dst.addr += diff_dst;
-        src.addr += diff_src;
+        dad.addr += diff_dst;
+        sad.addr += diff_src;
 
         cycles -= 2 + 2 * seq_cycles;
         if (cycles <= 0)
@@ -113,30 +113,8 @@ bool DMA::emulate(int& cycles)
 
     control.enable = control.repeat;
     active = false;
-    writeback();
 
     return true;
-}
-
-void DMA::writeback()
-{
-    u16 value = 0;
-    value |= control.dst_adjust  <<  5;
-    value |= control.src_adjust  <<  7;
-    value |= control.repeat      <<  9;
-    value |= control.word        << 10;
-    value |= control.gamepak_drq << 11;
-    value |= control.timing      << 12;
-    value |= control.irq         << 14;
-    value |= control.enable      << 15;
-
-    switch (id)
-    {
-    case 0: mmu.io.ref<u16>(REG_DMA0CNT_H) = value; break;
-    case 1: mmu.io.ref<u16>(REG_DMA1CNT_H) = value; break;
-    case 2: mmu.io.ref<u16>(REG_DMA2CNT_H) = value; break;
-    case 3: mmu.io.ref<u16>(REG_DMA3CNT_H) = value; break;
-    }
 }
 
 int DMA::stepDifference(Adjustment adj)
@@ -161,7 +139,7 @@ int DMA::stepDifference(Adjustment adj)
 void DMA::reload()
 {
     if (control.dst_adjust == ADJ_RELOAD)
-        dst.addr = addr_dst;
+        dad.addr = addr_dst;
 }
 
 void DMA::interrupt()

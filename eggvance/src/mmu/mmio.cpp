@@ -1,7 +1,25 @@
 #include "mmio.h"
 
+#include "common/format.h"
 #include "common/utility.h"
 #include "memory.h"
+
+MMIO::MMIO()
+{
+    dma.sad[0].addr_mask = 0x07FF'FFFF;
+    dma.sad[1].addr_mask = 0x0FFF'FFFF;
+    dma.sad[2].addr_mask = 0x0FFF'FFFF;
+    dma.sad[3].addr_mask = 0x0FFF'FFFF;
+    dma.dad[0].addr_mask = 0x07FF'FFFF;
+    dma.dad[1].addr_mask = 0x07FF'FFFF;
+    dma.dad[2].addr_mask = 0x07FF'FFFF;
+    dma.dad[3].addr_mask = 0x0FFF'FFFF;
+
+    dma.control[0].count_mask = 0x3FFF;
+    dma.control[1].count_mask = 0x3FFF;
+    dma.control[2].count_mask = 0x3FFF;
+    dma.control[3].count_mask = 0xFFFF;
+}
 
 void MMIO::reset()
 {
@@ -113,15 +131,24 @@ u8 MMIO::readByte(u32 addr)
     case REG_DMA3DAD+1: 
     case REG_DMA3DAD+2: 
     case REG_DMA3DAD+3:
-    case REG_DMA0CNT_L: 
+    case REG_DMA0CNT_L:
     case REG_DMA0CNT_L+1:
-    case REG_DMA1CNT_L: 
+    case REG_DMA1CNT_L:
     case REG_DMA1CNT_L+1:
-    case REG_DMA2CNT_L: 
+    case REG_DMA2CNT_L:
     case REG_DMA2CNT_L+1:
-    case REG_DMA3CNT_L: 
+    case REG_DMA3CNT_L:
     case REG_DMA3CNT_L+1:
         return 0;
+
+    case REG_DMA0CNT_H+0: return dma.control[0].read<2>();
+    case REG_DMA0CNT_H+1: return dma.control[0].read<3>();
+    case REG_DMA1CNT_H+0: return dma.control[1].read<2>();
+    case REG_DMA1CNT_H+1: return dma.control[1].read<3>();
+    case REG_DMA2CNT_H+0: return dma.control[2].read<2>();
+    case REG_DMA2CNT_H+1: return dma.control[2].read<3>();
+    case REG_DMA3CNT_H+0: return dma.control[3].read<2>();
+    case REG_DMA3CNT_H+1: return dma.control[3].read<3>();
 
     case REG_DISPSTAT+0: return dispstat.read<0>();
     case REG_DISPSTAT+1: return dispstat.read<1>();
@@ -257,32 +284,89 @@ void MMIO::writeByte(u32 addr, u8 byte)
 
     case REG_BLDY: bldy.write(byte); break;
 
+    case REG_DMA0SAD+0: dma.sad[0].write<0>(byte); break;
+    case REG_DMA0SAD+1: dma.sad[0].write<1>(byte); break;
+    case REG_DMA0SAD+2: dma.sad[0].write<2>(byte); break;
+    case REG_DMA0SAD+3: dma.sad[0].write<3>(byte); break;
+    case REG_DMA1SAD+0: dma.sad[1].write<0>(byte); break;
+    case REG_DMA1SAD+1: dma.sad[1].write<1>(byte); break;
+    case REG_DMA1SAD+2: dma.sad[1].write<2>(byte); break;
+    case REG_DMA1SAD+3: dma.sad[1].write<3>(byte); break;
+    case REG_DMA2SAD+0: dma.sad[2].write<0>(byte); break;
+    case REG_DMA2SAD+1: dma.sad[2].write<1>(byte); break;
+    case REG_DMA2SAD+2: dma.sad[2].write<2>(byte); break;
+    case REG_DMA2SAD+3: dma.sad[2].write<3>(byte); break;
+    case REG_DMA3SAD+0: dma.sad[3].write<0>(byte); break;
+    case REG_DMA3SAD+1: dma.sad[3].write<1>(byte); break;
+    case REG_DMA3SAD+2: dma.sad[3].write<2>(byte); break;
+    case REG_DMA3SAD+3: dma.sad[3].write<3>(byte); break;
+
+    case REG_DMA0DAD+0: dma.dad[0].write<0>(byte); break;
+    case REG_DMA0DAD+1: dma.dad[0].write<1>(byte); break;
+    case REG_DMA0DAD+2: dma.dad[0].write<2>(byte); break;
+    case REG_DMA0DAD+3: dma.dad[0].write<3>(byte); break;
+    case REG_DMA1DAD+0: dma.dad[1].write<0>(byte); break;
+    case REG_DMA1DAD+1: dma.dad[1].write<1>(byte); break;
+    case REG_DMA1DAD+2: dma.dad[1].write<2>(byte); break;
+    case REG_DMA1DAD+3: dma.dad[1].write<3>(byte); break;
+    case REG_DMA2DAD+0: dma.dad[2].write<0>(byte); break;
+    case REG_DMA2DAD+1: dma.dad[2].write<1>(byte); break;
+    case REG_DMA2DAD+2: dma.dad[2].write<2>(byte); break;
+    case REG_DMA2DAD+3: dma.dad[2].write<3>(byte); break;
+    case REG_DMA3DAD+0: dma.dad[3].write<0>(byte); break;
+    case REG_DMA3DAD+1: dma.dad[3].write<1>(byte); break;
+    case REG_DMA3DAD+2: dma.dad[3].write<2>(byte); break;
+    case REG_DMA3DAD+3: dma.dad[3].write<3>(byte); break;
+
+    case REG_DMA0CNT_L+0: dma.control[0].write<0>(byte); break;
+    case REG_DMA0CNT_L+1: dma.control[0].write<1>(byte); break;
+    case REG_DMA0CNT_H+0: dma.control[0].write<2>(byte); break;
+    case REG_DMA0CNT_H+1: dma.control[0].write<3>(byte); break;
+
+    case REG_DMA1CNT_L+0: dma.control[1].write<0>(byte); break;
+    case REG_DMA1CNT_L+1: dma.control[1].write<1>(byte); break;
+    case REG_DMA1CNT_H+0: dma.control[1].write<2>(byte); break;
+    case REG_DMA1CNT_H+1: dma.control[1].write<3>(byte); break;
+
+    case REG_DMA2CNT_L+0: dma.control[2].write<0>(byte); break;
+    case REG_DMA2CNT_L+1: dma.control[2].write<1>(byte); break;
+    case REG_DMA2CNT_H+0: dma.control[2].write<2>(byte); break;
+    case REG_DMA2CNT_H+1: dma.control[2].write<3>(byte); break;
+
+    case REG_DMA3CNT_L+0: dma.control[3].write<0>(byte); break;
+    case REG_DMA3CNT_L+1: dma.control[3].write<1>(byte); break;
+    case REG_DMA3CNT_H+0: dma.control[3].write<2>(byte); break;
+    case REG_DMA3CNT_H+1: dma.control[3].write<3>(byte); break;
+
     case REG_WAITCNT+0: waitcnt.write<0>(byte); break;
     case REG_WAITCNT+1: waitcnt.write<1>(byte); break;
 
-    case REG_KEYCNT+0: keycnt.write<0>(byte); break;
-    case REG_KEYCNT+1: keycnt.write<1>(byte); break;
+    case REG_KEYCNT: 
+        keycnt.write<0>(byte); 
+        break;
+
+    case REG_KEYCNT+1: 
+        keycnt.write<1>(byte); 
+        break;
 
     case REG_IME:
         intr_master = bits<0, 1>(byte);
         return;
 
     case REG_IE: 
-        intr_enabled &= 0xFF00;
-        intr_enabled |= byte;
+        bytes(&intr_enabled)[0] = byte;
         return;
 
     case REG_IE+1:
-        intr_enabled &= 0x00FF;
-        intr_enabled |= byte << 8;
+        bytes(&intr_enabled)[1] = byte;
         return;
 
-    case REG_IF: 
-        intr_request &= (0xFF00 | (~byte << 0)); 
+    case REG_IF:
+        bytes(&intr_request)[0] &= ~byte;
         return;
 
     case REG_IF+1: 
-        intr_request &= (0x00FF | (~byte << 8)); 
+        bytes(&intr_request)[1] &= ~byte;
         return;
 
     case REG_HALTCNT:

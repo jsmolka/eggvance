@@ -1,6 +1,7 @@
 #pragma once
 
-#include "common/integer.h"
+#include "registers/dmaaddress.h"
+#include "registers/dmacontrol.h"
 
 class MMU;
 
@@ -22,29 +23,9 @@ public:
     void activate();
     bool emulate(int& cycles);
 
-    struct Control
-    {
-        int src_adjust;   // Destination address control
-        int dst_adjust;   // Source address control
-        int repeat;       // DMA repeat
-        int word;         // DMA transfer type
-        int gamepak_drq;  // ???
-        int timing;       // Start timing
-        int irq;          // IRQ on end of word count
-        int enable;       // DMA enable
-    } control; 
-
-    union
-    {
-        u8  addr_b[4];  // Address bytes
-        u32 addr;       // Address
-    } src, dst;
-
-    union
-    {
-        u8  count_b[2];  // Word count bytes
-        u16 count;       // Word count
-    };
+    DMAControl& control;
+    DMAAddress& sad;
+    DMAAddress& dad;
 
     int id;
     bool active;
@@ -57,8 +38,6 @@ private:
         ADJ_FIXED     = 2,
         ADJ_RELOAD    = 3
     };
-
-    void writeback();
 
     int stepDifference(Adjustment adj);
 

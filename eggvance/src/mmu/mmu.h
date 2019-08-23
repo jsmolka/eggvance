@@ -54,8 +54,6 @@ private:
     void writeBackgroundControlUpper(BackgroundControl& control, u8 byte);
     void writeWindow(Window& window, u8 byte);
     void writeBlendLayer(BlendControl::Layer& layer, u8 byte);
-    void writeDMAControlLower(DMA::Control& control, u8 byte);
-    void writeDMAControlUpper(DMA::Control& control, u8 byte);
     void writeTimerControl(Timer& timer, u8 byte);
 
     DMA dmas[4];

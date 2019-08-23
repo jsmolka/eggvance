@@ -10,10 +10,10 @@ MMU::MMU(std::unique_ptr<BIOS> bios)
         Timer(1), 
         Timer(2), 
         Timer(3) }
-    , dmas{ 
-        DMA(0, *this), 
-        DMA(1, *this), 
-        DMA(2, *this), 
+    , dmas{
+        DMA(0, *this),
+        DMA(1, *this),
+        DMA(2, *this),
         DMA(3, *this) }
 {
     timers[0].next = &timers[1];
@@ -428,8 +428,11 @@ void MMU::signalDMA(DMA::Timing timing)
         if (!dma.active && dma.control.enable && dma.control.timing == timing)
         {
             dma.activate();
-            dmas_active.push_back(&dma);
-            pushed = true;
+            if (dma.active)
+            {
+                dmas_active.push_back(&dma);
+                pushed = true;
+            }
         }
     }
     if (pushed && dmas_active.size() > 1)
@@ -468,58 +471,6 @@ void MMU::writeIO(u32 addr, u8 byte)
     addr &= 0x3FF;
     switch (addr)
     {
-    case REG_DMA0SAD+0: dmas[0].src.addr_b[0] = byte; break;
-    case REG_DMA0SAD+1: dmas[0].src.addr_b[1] = byte; break;
-    case REG_DMA0SAD+2: dmas[0].src.addr_b[2] = byte; break;
-    case REG_DMA0SAD+3: dmas[0].src.addr_b[3] = byte & 0x7; break;
-    case REG_DMA1SAD+0: dmas[1].src.addr_b[0] = byte; break;
-    case REG_DMA1SAD+1: dmas[1].src.addr_b[1] = byte; break;
-    case REG_DMA1SAD+2: dmas[1].src.addr_b[2] = byte; break;
-    case REG_DMA1SAD+3: dmas[1].src.addr_b[3] = byte & 0xF; break;
-    case REG_DMA2SAD+0: dmas[2].src.addr_b[0] = byte; break;
-    case REG_DMA2SAD+1: dmas[2].src.addr_b[1] = byte; break;
-    case REG_DMA2SAD+2: dmas[2].src.addr_b[2] = byte; break;
-    case REG_DMA2SAD+3: dmas[2].src.addr_b[3] = byte & 0xF; break;
-    case REG_DMA3SAD+0: dmas[3].src.addr_b[0] = byte; break;
-    case REG_DMA3SAD+1: dmas[3].src.addr_b[1] = byte; break;
-    case REG_DMA3SAD+2: dmas[3].src.addr_b[2] = byte; break;
-    case REG_DMA3SAD+3: dmas[3].src.addr_b[3] = byte & 0xF; break;
-
-    case REG_DMA0DAD+0: dmas[0].dst.addr_b[0] = byte; break;
-    case REG_DMA0DAD+1: dmas[0].dst.addr_b[1] = byte; break;
-    case REG_DMA0DAD+2: dmas[0].dst.addr_b[2] = byte; break;
-    case REG_DMA0DAD+3: dmas[0].dst.addr_b[3] = byte & 0x7; break;
-    case REG_DMA1DAD+0: dmas[1].dst.addr_b[0] = byte; break;
-    case REG_DMA1DAD+1: dmas[1].dst.addr_b[1] = byte; break;
-    case REG_DMA1DAD+2: dmas[1].dst.addr_b[2] = byte; break;
-    case REG_DMA1DAD+3: dmas[1].dst.addr_b[3] = byte & 0x7; break;
-    case REG_DMA2DAD+0: dmas[2].dst.addr_b[0] = byte; break;
-    case REG_DMA2DAD+1: dmas[2].dst.addr_b[1] = byte; break;
-    case REG_DMA2DAD+2: dmas[2].dst.addr_b[2] = byte; break;
-    case REG_DMA2DAD+3: dmas[2].dst.addr_b[3] = byte & 0x7; break;
-    case REG_DMA3DAD+0: dmas[3].dst.addr_b[0] = byte; break;
-    case REG_DMA3DAD+1: dmas[3].dst.addr_b[1] = byte; break;
-    case REG_DMA3DAD+2: dmas[3].dst.addr_b[2] = byte; break;
-    case REG_DMA3DAD+3: dmas[3].dst.addr_b[3] = byte & 0xF; break;
-
-    case REG_DMA0CNT_L+0: dmas[0].count_b[0] = byte; break;
-    case REG_DMA0CNT_L+1: dmas[0].count_b[1] = byte & 0x3F; break;
-    case REG_DMA1CNT_L+0: dmas[1].count_b[0] = byte; break;
-    case REG_DMA1CNT_L+1: dmas[1].count_b[1] = byte & 0x3F; break;
-    case REG_DMA2CNT_L+0: dmas[2].count_b[0] = byte; break;
-    case REG_DMA2CNT_L+1: dmas[2].count_b[1] = byte & 0x3F; break;
-    case REG_DMA3CNT_L+0: dmas[3].count_b[0] = byte; break;
-    case REG_DMA3CNT_L+1: dmas[3].count_b[1] = byte; break;
-
-    case REG_DMA0CNT_H+0: writeDMAControlLower(dmas[0].control, byte); break;
-    case REG_DMA0CNT_H+1: writeDMAControlUpper(dmas[0].control, byte); break;
-    case REG_DMA1CNT_H+0: writeDMAControlLower(dmas[1].control, byte); break;
-    case REG_DMA1CNT_H+1: writeDMAControlUpper(dmas[1].control, byte); break;
-    case REG_DMA2CNT_H+0: writeDMAControlLower(dmas[2].control, byte); break;
-    case REG_DMA2CNT_H+1: writeDMAControlUpper(dmas[2].control, byte); break;
-    case REG_DMA3CNT_H+0: writeDMAControlLower(dmas[3].control, byte); break;
-    case REG_DMA3CNT_H+1: writeDMAControlUpper(dmas[3].control, byte); break;
-
     case REG_TM0CNT_L+0: timers[0].initial_b[0] = byte; break;
     case REG_TM0CNT_L+1: timers[0].initial_b[1] = byte; break;
     case REG_TM1CNT_L+0: timers[1].initial_b[0] = byte; break;
@@ -535,6 +486,16 @@ void MMU::writeIO(u32 addr, u8 byte)
     case REG_TM3CNT_H: writeTimerControl(timers[3], byte); break;
     }
     mmio.writeByte(addr, byte);
+
+    switch (addr)
+    {
+    case REG_DMA0CNT_H+1:
+    case REG_DMA1CNT_H+1:
+    case REG_DMA2CNT_H+1:
+    case REG_DMA3CNT_H+1:
+        signalDMA(DMA::Timing::IMMEDIATE);
+        break;
+    }
 }
 
 void MMU::writeOAM(u32 addr, u16 half)
@@ -607,25 +568,6 @@ void MMU::writeBlendLayer(BlendControl::Layer& layer, u8 byte)
     layer.bg3 = bits<3, 1>(byte);
     layer.obj = bits<4, 1>(byte);
     layer.bdp = bits<5, 1>(byte);
-}
-
-void MMU::writeDMAControlLower(DMA::Control& control, u8 byte)
-{
-    control.dst_adjust = bits<5, 2>(byte);
-    control.src_adjust = (control.src_adjust & ~0x1) | bits<7, 1>(byte);
-}
-
-void MMU::writeDMAControlUpper(DMA::Control& control, u8 byte)
-{
-    control.src_adjust  = (control.src_adjust & ~0x2) | (bits<0, 1>(byte) << 1);
-    control.repeat      = bits<1, 1>(byte);
-    control.word        = bits<2, 1>(byte);
-    control.gamepak_drq = bits<3, 1>(byte);
-    control.timing      = bits<4, 2>(byte);
-    control.irq         = bits<6, 1>(byte);
-    control.enable      = bits<7, 1>(byte);
-
-    signalDMA(DMA::Timing::IMMEDIATE);
 }
 
 void MMU::writeTimerControl(Timer& timer, u8 byte)

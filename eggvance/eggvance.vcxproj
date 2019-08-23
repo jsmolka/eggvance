@@ -149,6 +149,8 @@
     <ClCompile Include="src\mmu\dma.cpp" />
     <ClCompile Include="src\input.cpp" />
     <ClCompile Include="src\mmu\mmio.cpp" />
+    <ClCompile Include="src\mmu\registers\dmaaddress.cpp" />
+    <ClCompile Include="src\mmu\registers\dmacontrol.cpp" />
     <ClCompile Include="src\ppu\render.cpp" />
     <ClCompile Include="src\ppu\scanlinebuilder.cpp" />
     <ClCompile Include="src\arm\decode.cpp" />
@@ -182,6 +184,8 @@
     <ClInclude Include="src\common\tmp.h" />
     <ClInclude Include="src\mmu\interrupt.h" />
     <ClInclude Include="src\mmu\mmio.h" />
+    <ClInclude Include="src\mmu\registers\dmaaddress.h" />
+    <ClInclude Include="src\mmu\registers\dmacontrol.h" />
     <ClInclude Include="src\mmu\registers\window.h" />
     <ClInclude Include="src\mmu\registers\windowrange.h" />
     <ClInclude Include="src\ppu\backend.h" />

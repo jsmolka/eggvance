@@ -9,6 +9,8 @@
 #include "blendfade.h"
 #include "displaycontrol.h"
 #include "displaystatus.h"
+#include "dmaaddress.h"
+#include "dmacontrol.h"
 #include "keycontrol.h"
 #include "mosaic.h"
 #include "waitcontrol.h"
