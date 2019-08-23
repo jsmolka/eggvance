@@ -4,8 +4,8 @@
 
 #include "mmu/interrupt.h"
 
-Input::Input(MMU& mmu)
-    : mmu(mmu)
+Input::Input(MMIO& mmio)
+    : mmio(mmio)
 {
     SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER);
 
@@ -144,22 +144,21 @@ void Input::controllerDeviceEvent(const SDL_ControllerDeviceEvent& event)
 
 bool Input::isButtonPressed(Button button) const
 {
-    return (mmu.keyinput & button) == 0;
+    return (mmio.keyinput & button) == 0;
 }
 
 void Input::processInput(Button button, int state)
 {
-    mmu.keyinput &= ~button;
     if (state == SDL_RELEASED)
-    {
-        mmu.keyinput |= button;
-    }
+        mmio.keyinput |= button;
+    else
+        mmio.keyinput &= ~button;
 
-    if (mmu.keycnt.irq)
+    if (mmio.keycnt.irq)
     {
-        bool interrupt = mmu.keycnt.logic
-            ? (mmu.keyinput & mmu.keycnt.keys)
-            : (mmu.keyinput | mmu.keycnt.keys);
+        bool interrupt = mmio.keycnt.logic
+            ? (mmio.keyinput & mmio.keycnt.keys)
+            : (mmio.keyinput | mmio.keycnt.keys);
 
         if (interrupt)
         {

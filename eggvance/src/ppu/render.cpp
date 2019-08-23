@@ -10,10 +10,10 @@ void PPU::renderBgMode0(int bg)
         { 7, 6, 5, 4, 3, 2, 1, 0 }
     };
 
-    const BackgroundControl& bgcnt = mmu.bgcnt[bg];
+    const BackgroundControl& bgcnt = mmio.bgcnt[bg];
 
-    int ref_x = mmu.bghofs[bg].offset;
-    int ref_y = mmu.bgvofs[bg].offset + mmu.vcount;
+    int ref_x = mmio.bghofs[bg].offset;
+    int ref_y = mmio.bgvofs[bg].offset + mmio.vcount;
 
     int tile_size = bgcnt.palette_type ? 0x40 : 0x20;
     PixelFormat format = bgcnt.palette_type ? BPP8 : BPP4;
@@ -98,13 +98,13 @@ void PPU::renderBgMode0(int bg)
 
 void PPU::renderBgMode2(int bg)
 {
-    const BackgroundControl& bgcnt = mmu.bgcnt[bg];
+    const BackgroundControl& bgcnt = mmio.bgcnt[bg];
 
-    s16 pa = mmu.bgpa[bg - 2].param;
-    s16 pc = mmu.bgpc[bg - 2].param;
+    s16 pa = mmio.bgpa[bg - 2].param;
+    s16 pc = mmio.bgpc[bg - 2].param;
 
-    int ref_x = mmu.bgx[bg - 2].internal;
-    int ref_y = mmu.bgy[bg - 2].internal;
+    int ref_x = mmio.bgx[bg - 2].internal;
+    int ref_y = mmio.bgy[bg - 2].internal;
 
     int size = bgcnt.size();
 
@@ -150,14 +150,14 @@ void PPU::renderBgMode2(int bg)
 
 void PPU::renderBgMode3(int bg)
 {
-    u32 addr = 2 * WIDTH * mmu.vcount;
+    u32 addr = 2 * WIDTH * mmio.vcount;
     u16* pixel = mmu.vram.ptr<u16>(addr);
     std::copy_n(pixel, WIDTH, &bgs[bg][0]);
 }
 
 void PPU::renderBgMode4(int bg)
 {
-    u32 addr = (0xA000 * mmu.dispcnt.frame) + (WIDTH * mmu.vcount);
+    u32 addr = (0xA000 * mmio.dispcnt.frame) + (WIDTH * mmio.vcount);
     u8* index = mmu.vram.ptr<u8>(addr);
     for (int x = 0; x < WIDTH; ++x, ++index)
         bgs[bg][x] = readBgColor(*index, 0);
@@ -165,9 +165,9 @@ void PPU::renderBgMode4(int bg)
 
 void PPU::renderBgMode5(int bg)
 {
-    if (mmu.vcount < 128)
+    if (mmio.vcount < 128)
     {
-        u32 addr = (0xA000 * mmu.dispcnt.frame) + (2 * 160 * mmu.vcount);
+        u32 addr = (0xA000 * mmio.dispcnt.frame) + (2 * 160 * mmio.vcount);
         u16* pixel = mmu.vram.ptr<u16>(addr);
         pixel = std::copy_n(pixel, 160, &bgs[bg][0]);
         std::fill_n(pixel, 80, TRANSPARENT);
@@ -180,10 +180,10 @@ void PPU::renderBgMode5(int bg)
 
 void PPU::renderObjects()
 {
-    int line = mmu.vcount;
+    int line = mmio.vcount;
 
-    int mosaic_x = mmu.mosaic.obj.x + 1;
-    int mosaic_y = mmu.mosaic.obj.y + 1;
+    int mosaic_x = mmio.mosaic.obj.x + 1;
+    int mosaic_y = mmio.mosaic.obj.y + 1;
 
     for (auto iter = mmu.oam_entries.crbegin(); iter != mmu.oam_entries.crend(); ++iter)
     {
@@ -222,7 +222,7 @@ void PPU::renderObjects()
         // 1D mapping arranges tiles continuously in memory. 2D mapping arranges 
         // tiles in a 32x32 matrix. The width is halfed to 16 tiles when using 
         // 256 color mode. 
-        int tiles_per_row = mmu.dispcnt.mapping_1d ? (width / 8) : (oam.color_mode ? 16 : 32);
+        int tiles_per_row = mmio.dispcnt.mapping_1d ? (width / 8) : (oam.color_mode ? 16 : 32);
 
         bool flip_x = !oam.affine && oam.flip_x;
         bool flip_y = !oam.affine && oam.flip_y;

@@ -1,11 +1,12 @@
 #pragma once
 
-#include "common/integer.h"
+#include "common/macros.h"
+#include "common/utility.h"
 
-class BackgroundControl
+struct BackgroundControl
 {
-public:
-    void write(int index, u8 byte);
+    template<unsigned index>
+    inline void write(u8 byte);
 
     int priority;      // BG priority (0-3, 0 = highest)
     int tile_block;    // BG tile base block (0-3, in units of 16kb)
@@ -19,3 +20,29 @@ public:
     int width() const;
     int height() const;
 };
+
+template<unsigned index>
+inline void BackgroundControl::write(u8 byte)
+{
+    static_assert(index <= 1);
+
+    switch (index)
+    {
+    case 0:
+        priority     = bits<0, 2>(byte);
+        tile_block   = bits<2, 2>(byte);
+        mosaic       = bits<6, 1>(byte);
+        palette_type = bits<7, 1>(byte);
+        break;
+
+    case 1:
+        map_block   = bits<0, 5>(byte);
+        wraparound  = bits<5, 1>(byte);
+        screen_size = bits<6, 2>(byte);
+        break;
+
+    default:
+        UNREACHABLE;
+        break;
+    }
+}

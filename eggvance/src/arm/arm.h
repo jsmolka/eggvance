@@ -30,6 +30,7 @@ private:
     };
 
     MMU& mmu;
+    MMIO& mmio;
     Registers regs;
 
     void execute();

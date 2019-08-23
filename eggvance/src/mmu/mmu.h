@@ -6,11 +6,11 @@
 
 #include "common/integer.h"
 #include "gamepak/gamepak.h"
-#include "registers/include.h"
 #include "ppu/oamentry.h"
 #include "bios.h"
 #include "dma.h"
 #include "memory.h"
+#include "mmio.h"
 #include "ram.h"
 #include "timer.h"
 
@@ -31,49 +31,13 @@ public:
     void writeHalf(u32 addr, u16 half);
     void writeWord(u32 addr, u32 word);
 
-    void commitStatus();
-
     void signalDMA(DMA::Timing timing);
 
-    DisplayControl dispcnt;
-    DisplayStatus dispstat;
-    u8& vcount;
-
-    BackgroundControl bgcnt[4];
-    BackgroundOffset bghofs[4];
-    BackgroundOffset bgvofs[4];
-    BackgroundReference bgx[2];
-    BackgroundReference bgy[2];
-    BackgroundParameter bgpa[2];
-    BackgroundParameter bgpb[2];
-    BackgroundParameter bgpc[2];
-    BackgroundParameter bgpd[2];
-
-    WindowRange winh[2];
-    WindowRange winv[2];
-    WindowInside winin;
-    WindowOutside winout;
-
-    Mosaic mosaic;
-    BlendControl bldcnt;
-    BlendAlpha bldalpha;
-    BlendFade bldy;
-
-    u16& keyinput;
-    KeyControl keycnt;
-    WaitControl waitcnt;
-
-    bool intr_master;
-    u16& intr_enabled;
-    u16& intr_request;
+    MMIO mmio;
 
     Timer timers[4];
     std::vector<DMA*> dmas_active;
-
-    bool halt;
-
     std::array<OAMEntry, 128> oam_entries;
-
     std::unique_ptr<GamePak> gamepak;
 
     RAM<0x00400> io;

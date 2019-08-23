@@ -4,8 +4,9 @@ ScanlineBuilder::ScanlineBuilder(DoubleBuffer<u16>(&bgs)[4], Buffer<ObjectData>&
     : bgs(bgs)
     , obj(obj)
     , mmu(mmu)
+    , mmio(mmu.mmio)
 {
-    y = mmu.vcount;
+    y = mmio.vcount;
 
     mask_master  = masterMask();
     mask_blend_a = blendAMask();
@@ -31,7 +32,7 @@ void ScanlineBuilder::build(int x)
 
         for (int bg = 0; bg < 4; ++bg)
         {
-            if (mask & flags[bg] && bgs[bg][x] != TRANSPARENT && mmu.bgcnt[bg].priority == priority)
+            if (mask & flags[bg] && bgs[bg][x] != TRANSPARENT && mmio.bgcnt[bg].priority == priority)
             {
                 layers.push_back(Layer(bgs[bg][x], flags[bg]));
             }
@@ -98,16 +99,16 @@ bool ScanlineBuilder::windowSfx()
         return true;
 
     case WF_WIN0: 
-        return mmu.winin.win0.sfx;
+        return mmio.winin.win0.sfx;
 
     case WF_WIN1: 
-        return mmu.winin.win1.sfx;
+        return mmio.winin.win1.sfx;
 
     case WF_WINOBJ: 
-        return mmu.winout.winobj.sfx;
+        return mmio.winout.winobj.sfx;
 
     case WF_WINOUT: 
-        return mmu.winout.winout.sfx;
+        return mmio.winout.winout.sfx;
 
     default:
         return true;
@@ -127,34 +128,34 @@ std::vector<Layer>::iterator ScanlineBuilder::end()
 int ScanlineBuilder::masterMask() const
 {
     int mask = LF_BDP;
-    switch (mmu.dispcnt.mode)
+    switch (mmio.dispcnt.mode)
     {
     case 0:
-        if (mmu.dispcnt.bg0) mask |= LF_BG0;
-        if (mmu.dispcnt.bg1) mask |= LF_BG1;
-        if (mmu.dispcnt.bg2) mask |= LF_BG2;
-        if (mmu.dispcnt.bg3) mask |= LF_BG3;
+        if (mmio.dispcnt.bg0) mask |= LF_BG0;
+        if (mmio.dispcnt.bg1) mask |= LF_BG1;
+        if (mmio.dispcnt.bg2) mask |= LF_BG2;
+        if (mmio.dispcnt.bg3) mask |= LF_BG3;
         break;
 
     case 1:
-        if (mmu.dispcnt.bg0) mask |= LF_BG0;
-        if (mmu.dispcnt.bg1) mask |= LF_BG1;
-        if (mmu.dispcnt.bg2) mask |= LF_BG2;
+        if (mmio.dispcnt.bg0) mask |= LF_BG0;
+        if (mmio.dispcnt.bg1) mask |= LF_BG1;
+        if (mmio.dispcnt.bg2) mask |= LF_BG2;
         break;
 
     case 2:
-        if (mmu.dispcnt.bg2) mask |= LF_BG2;
-        if (mmu.dispcnt.bg3) mask |= LF_BG3;
+        if (mmio.dispcnt.bg2) mask |= LF_BG2;
+        if (mmio.dispcnt.bg3) mask |= LF_BG3;
         break;
 
     case 3:
     case 4:
     case 5:
-        if (mmu.dispcnt.bg2) mask |= LF_BG2;
+        if (mmio.dispcnt.bg2) mask |= LF_BG2;
         break;
     }
 
-    if (mmu.dispcnt.obj)
+    if (mmio.dispcnt.obj)
         mask |= LF_OBJ;
 
     return mask;
@@ -163,12 +164,12 @@ int ScanlineBuilder::masterMask() const
 int ScanlineBuilder::blendAMask() const
 {
     int mask = 0;
-    if (mmu.bldcnt.upper.bg0) mask |= LF_BG0;
-    if (mmu.bldcnt.upper.bg1) mask |= LF_BG1;
-    if (mmu.bldcnt.upper.bg2) mask |= LF_BG2;
-    if (mmu.bldcnt.upper.bg3) mask |= LF_BG3;
-    if (mmu.bldcnt.upper.obj) mask |= LF_OBJ;
-    if (mmu.bldcnt.upper.bdp) mask |= LF_BDP;
+    if (mmio.bldcnt.upper.bg0) mask |= LF_BG0;
+    if (mmio.bldcnt.upper.bg1) mask |= LF_BG1;
+    if (mmio.bldcnt.upper.bg2) mask |= LF_BG2;
+    if (mmio.bldcnt.upper.bg3) mask |= LF_BG3;
+    if (mmio.bldcnt.upper.obj) mask |= LF_OBJ;
+    if (mmio.bldcnt.upper.bdp) mask |= LF_BDP;
     
     return mask;
 }
@@ -176,12 +177,12 @@ int ScanlineBuilder::blendAMask() const
 int ScanlineBuilder::blendBMask() const
 {
     int mask = 0;
-    if (mmu.bldcnt.lower.bg0) mask |= LF_BG0;
-    if (mmu.bldcnt.lower.bg1) mask |= LF_BG1;
-    if (mmu.bldcnt.lower.bg2) mask |= LF_BG2;
-    if (mmu.bldcnt.lower.bg3) mask |= LF_BG3;
-    if (mmu.bldcnt.lower.obj) mask |= LF_OBJ;
-    if (mmu.bldcnt.lower.bdp) mask |= LF_BDP;
+    if (mmio.bldcnt.lower.bg0) mask |= LF_BG0;
+    if (mmio.bldcnt.lower.bg1) mask |= LF_BG1;
+    if (mmio.bldcnt.lower.bg2) mask |= LF_BG2;
+    if (mmio.bldcnt.lower.bg3) mask |= LF_BG3;
+    if (mmio.bldcnt.lower.obj) mask |= LF_OBJ;
+    if (mmio.bldcnt.lower.bdp) mask |= LF_BDP;
     
     return mask;
 }
@@ -195,35 +196,35 @@ int ScanlineBuilder::windowMask() const
     switch (window)
     {
     case WF_WIN0:
-        if (mmu.winin.win0.bg0) mask |= LF_BG0;
-        if (mmu.winin.win0.bg1) mask |= LF_BG1;
-        if (mmu.winin.win0.bg2) mask |= LF_BG2;
-        if (mmu.winin.win0.bg3) mask |= LF_BG3;
-        if (mmu.winin.win0.obj) mask |= LF_OBJ;
+        if (mmio.winin.win0.bg0) mask |= LF_BG0;
+        if (mmio.winin.win0.bg1) mask |= LF_BG1;
+        if (mmio.winin.win0.bg2) mask |= LF_BG2;
+        if (mmio.winin.win0.bg3) mask |= LF_BG3;
+        if (mmio.winin.win0.obj) mask |= LF_OBJ;
         break;
 
     case WF_WIN1:
-        if (mmu.winin.win1.bg0) mask |= LF_BG0;
-        if (mmu.winin.win1.bg1) mask |= LF_BG1;
-        if (mmu.winin.win1.bg2) mask |= LF_BG2;
-        if (mmu.winin.win1.bg3) mask |= LF_BG3;
-        if (mmu.winin.win1.obj) mask |= LF_OBJ;
+        if (mmio.winin.win1.bg0) mask |= LF_BG0;
+        if (mmio.winin.win1.bg1) mask |= LF_BG1;
+        if (mmio.winin.win1.bg2) mask |= LF_BG2;
+        if (mmio.winin.win1.bg3) mask |= LF_BG3;
+        if (mmio.winin.win1.obj) mask |= LF_OBJ;
         break;
 
     case WF_WINOBJ:
-        if (mmu.winout.winobj.bg0) mask |= LF_BG0;
-        if (mmu.winout.winobj.bg1) mask |= LF_BG1;
-        if (mmu.winout.winobj.bg2) mask |= LF_BG2;
-        if (mmu.winout.winobj.bg3) mask |= LF_BG3;
-        if (mmu.winout.winobj.obj) mask |= LF_OBJ;
+        if (mmio.winout.winobj.bg0) mask |= LF_BG0;
+        if (mmio.winout.winobj.bg1) mask |= LF_BG1;
+        if (mmio.winout.winobj.bg2) mask |= LF_BG2;
+        if (mmio.winout.winobj.bg3) mask |= LF_BG3;
+        if (mmio.winout.winobj.obj) mask |= LF_OBJ;
         break;
 
     case WF_WINOUT:
-        if (mmu.winout.winout.bg0) mask |= LF_BG0;
-        if (mmu.winout.winout.bg1) mask |= LF_BG1;
-        if (mmu.winout.winout.bg2) mask |= LF_BG2;
-        if (mmu.winout.winout.bg3) mask |= LF_BG3;
-        if (mmu.winout.winout.obj) mask |= LF_OBJ;
+        if (mmio.winout.winout.bg0) mask |= LF_BG0;
+        if (mmio.winout.winout.bg1) mask |= LF_BG1;
+        if (mmio.winout.winout.bg2) mask |= LF_BG2;
+        if (mmio.winout.winout.bg3) mask |= LF_BG3;
+        if (mmio.winout.winout.obj) mask |= LF_OBJ;
         break;
     }
     return mask;
@@ -231,15 +232,15 @@ int ScanlineBuilder::windowMask() const
 
 WindowFlag ScanlineBuilder::activeWindow() const
 {
-    if (mmu.dispcnt.win0 || mmu.dispcnt.win1 || mmu.dispcnt.winobj)
+    if (mmio.dispcnt.win0 || mmio.dispcnt.win1 || mmio.dispcnt.winobj)
     {
-        if (mmu.dispcnt.win0 && insideWindow(0))
+        if (mmio.dispcnt.win0 && insideWindow(0))
             return WF_WIN0;
 
-        if (mmu.dispcnt.win1 && insideWindow(1))
+        if (mmio.dispcnt.win1 && insideWindow(1))
             return WF_WIN1;
 
-        if (mmu.dispcnt.winobj && obj[x].window && obj[x].color != TRANSPARENT)
+        if (mmio.dispcnt.winobj && obj[x].window && obj[x].color != TRANSPARENT)
             return WF_WINOBJ;
             
         return WF_WINOUT;
@@ -252,10 +253,10 @@ WindowFlag ScanlineBuilder::activeWindow() const
 
 bool ScanlineBuilder::insideWindow(int window) const
 {
-    int x_min = mmu.winh[window].min;
-    int x_max = mmu.winh[window].max;
-    int y_min = mmu.winv[window].min;
-    int y_max = mmu.winv[window].max;
+    int x_min = mmio.winh[window].min;
+    int x_max = mmio.winh[window].max;
+    int y_min = mmio.winv[window].min;
+    int y_max = mmio.winv[window].max;
 
     if (x_max > WIDTH  || x_max < x_min) x_max = WIDTH;
     if (y_max > HEIGHT || y_max < y_min) y_max = HEIGHT;

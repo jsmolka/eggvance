@@ -19,7 +19,7 @@ public:
 
     DisplayControl dispcnt;
     DisplayStatus dispstat;
-    u8 vcount;
+    int vcount;
 
     BackgroundControl bgcnt[4];
     BackgroundOffset bghofs[4];
@@ -40,6 +40,15 @@ public:
     BlendControl bldcnt;
     BlendAlpha bldalpha;
     BlendFade bldy;
+
+    int intr_master;
+    int intr_enabled;
+    int intr_request;
+    int halt;
+
+    int keyinput;
+    KeyControl keycnt;
+    WaitControl waitcnt;
 
 private:
     RAM<0x400> data;

@@ -1,11 +1,10 @@
 #pragma once
 
-#include "common/integer.h"
+#include "common/utility.h"
 
-class Window
+struct Window
 {
-public:
-    void write(u8 byte);
+    inline void write(u8 byte);
 
     int bg0;  // BG0 enabled
     int bg1;  // BG1 enabled
@@ -13,4 +12,26 @@ public:
     int bg3;  // BG3 enabled
     int obj;  // OBJ enabled
     int sfx;  // SFX enabled
+};
+
+void Window::write(u8 byte)
+{
+    bg0 = bits<0, 1>(byte);
+    bg1 = bits<1, 1>(byte);
+    bg2 = bits<2, 1>(byte);
+    bg3 = bits<3, 1>(byte);
+    obj = bits<4, 1>(byte);
+    sfx = bits<5, 1>(byte);
+}
+
+struct WindowInside
+{
+    Window win0;
+    Window win1;
+};
+
+struct WindowOutside
+{
+    Window winout;
+    Window winobj;
 };

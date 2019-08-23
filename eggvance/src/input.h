@@ -2,12 +2,12 @@
 
 #include <SDL2/SDL_events.h>
 
-#include "mmu/mmu.h"
+#include "mmu/mmio.h"
 
 class Input
 {
 public:
-    Input(MMU& mmu);
+    Input(MMIO& mmio);
     ~Input();
 
 
@@ -35,7 +35,7 @@ private:
     bool isButtonPressed(Button button) const;
     void processInput(Button button, int state);
 
-    MMU& mmu;
+    MMIO& mmio;
 
     SDL_GameController* controller;
 };

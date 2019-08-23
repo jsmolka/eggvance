@@ -1,11 +1,11 @@
 #pragma once
 
-#include "common/integer.h"
+#include "common/utility.h"
 
-class BackgroundParameter
+struct BackgroundParameter
 {
-public:
-    void write(int index, u8 byte);
+    template<unsigned index>
+    inline void write(u8 byte);
 
     union
     {
@@ -13,3 +13,11 @@ public:
         s16 param;       // Affine parameter
     };
 };
+
+template<unsigned index>
+inline void BackgroundParameter::write(u8 byte)
+{
+    static_assert(index <= 1);
+
+    bytes(&param)[index] = byte;
+}

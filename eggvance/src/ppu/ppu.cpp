@@ -5,6 +5,7 @@
 
 PPU::PPU(MMU& mmu)
     : mmu(mmu)
+    , mmio(mmu.mmio)
 {
     reset();
 
@@ -31,16 +32,15 @@ void PPU::reset()
 
 void PPU::scanline()
 {
-    mmu.dispstat.vblank = false;
-    mmu.dispstat.hblank = false;
-    mmu.commitStatus();
+    mmio.dispstat.vblank = false;
+    mmio.dispstat.hblank = false;
 
     bgs[0].flip();
     bgs[1].flip();
     bgs[2].flip();
     bgs[3].flip();
 
-    if (mmu.dispcnt.obj)
+    if (mmio.dispcnt.obj)
     {
         if (obj_exist)
         {
@@ -50,7 +50,7 @@ void PPU::scanline()
         renderObjects();
     }
 
-    switch (mmu.dispcnt.mode)
+    switch (mmio.dispcnt.mode)
     {
     case 0: 
         renderBg(&PPU::renderBgMode0, 0);
@@ -88,16 +88,15 @@ void PPU::scanline()
 void PPU::hblank()
 {
     mmu.signalDMA(DMA::Timing::HBLANK);
-    mmu.dispstat.vblank = false;
-    mmu.dispstat.hblank = true;
-    mmu.commitStatus();
+    mmio.dispstat.vblank = false;
+    mmio.dispstat.hblank = true;
 
-    mmu.bgx[0].internal += mmu.bgpb[0].param;
-    mmu.bgx[1].internal += mmu.bgpb[1].param;
-    mmu.bgy[0].internal += mmu.bgpd[0].param;
-    mmu.bgy[1].internal += mmu.bgpd[1].param;
+    mmio.bgx[0].internal += mmio.bgpb[0].param;
+    mmio.bgx[1].internal += mmio.bgpb[1].param;
+    mmio.bgy[0].internal += mmio.bgpd[0].param;
+    mmio.bgy[1].internal += mmio.bgpd[1].param;
 
-    if (mmu.dispstat.hblank_irq)
+    if (mmio.dispstat.hblank_irq)
     {
         Interrupt::request(IF_HBLANK);
     }
@@ -106,16 +105,15 @@ void PPU::hblank()
 void PPU::vblank()
 {
     mmu.signalDMA(DMA::Timing::VBLANK);
-    mmu.dispstat.vblank = true;
-    mmu.dispstat.hblank = false;
-    mmu.commitStatus();
+    mmio.dispstat.vblank = true;
+    mmio.dispstat.hblank = false;
 
-    mmu.bgx[0].internal = mmu.bgx[0].ref;
-    mmu.bgx[1].internal = mmu.bgx[1].ref;
-    mmu.bgy[0].internal = mmu.bgy[0].ref;
-    mmu.bgy[1].internal = mmu.bgy[1].ref;
+    mmio.bgx[0].internal = mmio.bgx[0].ref;
+    mmio.bgx[1].internal = mmio.bgx[1].ref;
+    mmio.bgy[0].internal = mmio.bgy[0].ref;
+    mmio.bgy[1].internal = mmio.bgy[1].ref;
 
-    if (mmu.dispstat.vblank_irq)
+    if (mmio.dispstat.vblank_irq)
     {
         Interrupt::request(IF_VBLANK);
     }
@@ -123,13 +121,12 @@ void PPU::vblank()
 
 void PPU::next()
 {
-    int vmatch = mmu.vcount == mmu.dispstat.vcount_eval;
+    int vmatch = mmio.vcount == mmio.dispstat.vcount_eval;
 
-    mmu.vcount = (mmu.vcount + 1) % 228;
-    mmu.dispstat.vmatch = vmatch;
-    mmu.commitStatus();
+    mmio.vcount = (mmio.vcount + 1) % 228;
+    mmio.dispstat.vmatch = vmatch;
 
-    if (vmatch && mmu.dispstat.vmatch_irq)
+    if (vmatch && mmio.dispstat.vmatch_irq)
     {
         Interrupt::request(IF_VMATCH);
     }
@@ -137,7 +134,8 @@ void PPU::next()
 
 void PPU::present()
 {
-    if (mmu.io.readHalf(REG_DISPCNT) & 0x1F00)
+    // Todo: :)
+    //if (mmu.io.readHalf(REG_DISPCNT) & 0x1F00)
     {
         backend.present();
     }
@@ -145,7 +143,7 @@ void PPU::present()
 
 void PPU::renderBg(RenderFunc func, int bg)
 {
-    if (!mmu.dispcnt.bg[bg])
+    if (!mmio.dispcnt.bg[bg])
         return;
 
     if (mosaicAffected(bg))
@@ -168,7 +166,7 @@ void PPU::renderBg(RenderFunc func, int bg)
 
 void PPU::mosaic(int bg)
 {
-    int mosaic_x = mmu.mosaic.bg.x + 1;
+    int mosaic_x = mmio.mosaic.bg.x + 1;
     if (mosaic_x == 1)
         return;
 
@@ -185,12 +183,12 @@ void PPU::mosaic(int bg)
 
 bool PPU::mosaicAffected(int bg) const
 {
-    return mmu.bgcnt[bg].mosaic && (mmu.mosaic.bg.x > 0 || mmu.mosaic.bg.y > 0);
+    return mmio.bgcnt[bg].mosaic && (mmio.mosaic.bg.x > 0 || mmio.mosaic.bg.y > 0);
 }
 
 bool PPU::mosaicDominant() const
 {
-    return mmu.vcount % (mmu.mosaic.bg.y + 1) == 0;
+    return mmio.vcount % (mmio.mosaic.bg.y + 1) == 0;
 }
 
 /*
@@ -202,7 +200,7 @@ void PPU::finalize()
 {
     ScanlineBuilder builder(bgs, obj, mmu);
 
-    u16* scanline = &backend.buffer[WIDTH * mmu.vcount];
+    u16* scanline = &backend.buffer[WIDTH * mmio.vcount];
 
     for (int x = 0; x < WIDTH; ++x)
     {
@@ -210,7 +208,7 @@ void PPU::finalize()
 
         int color = builder.begin()->color;
 
-        if ((builder.windowSfx() && mmu.bldcnt.mode != BLD_DISABLED) || obj[x].mode == GFX_ALPHA)
+        if ((builder.windowSfx() && mmio.bldcnt.mode != BLD_DISABLED) || obj[x].mode == GFX_ALPHA)
         {
             int a = 0;
             int b = 0;
@@ -225,7 +223,7 @@ void PPU::finalize()
 
             if (!blended)
             {
-                switch (mmu.bldcnt.mode)
+                switch (mmio.bldcnt.mode)
                 {
                 case BLD_ALPHA:
                     if (builder.getBlendLayers(a, b))
@@ -257,8 +255,8 @@ int PPU::blendAlpha(int a, int b) const
     int b_g = (b >>  5) & 0x1F;
     int b_b = (b >> 10) & 0x1F;
 
-    int eva = std::min(17, mmu.bldalpha.eva);
-    int evb = std::min(17, mmu.bldalpha.evb);
+    int eva = std::min(17, mmio.bldalpha.eva);
+    int evb = std::min(17, mmio.bldalpha.evb);
 
     int t_r = std::min(31, (a_r * eva + b_r * evb) >> 4);
     int t_g = std::min(31, (a_g * eva + b_g * evb) >> 4);
@@ -273,7 +271,7 @@ int PPU::blendWhite(int a) const
     int a_g = (a >>  5) & 0x1F;
     int a_b = (a >> 10) & 0x1F;
 
-    int evy = std::min(17, mmu.bldy.evy);
+    int evy = std::min(17, mmio.bldy.evy);
 
     int t_r = std::min(31, a_r + (((31 - a_r) * evy) >> 4));
     int t_g = std::min(31, a_g + (((31 - a_g) * evy) >> 4));
@@ -288,7 +286,7 @@ int PPU::blendBlack(int a) const
     int a_g = (a >>  5) & 0x1F;
     int a_b = (a >> 10) & 0x1F;
 
-    int evy = std::min(17, mmu.bldy.evy);
+    int evy = std::min(17, mmio.bldy.evy);
 
     int t_r = std::min(31, a_r - ((a_r * evy) >> 4));
     int t_g = std::min(31, a_g - ((a_g * evy) >> 4));

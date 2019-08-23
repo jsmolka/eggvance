@@ -12,6 +12,5 @@
 #include "keycontrol.h"
 #include "mosaic.h"
 #include "waitcontrol.h"
-#include "windowinside.h"
-#include "windowoutside.h"
 #include "windowrange.h"
+#include "window.h"

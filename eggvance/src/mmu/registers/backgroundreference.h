@@ -1,11 +1,11 @@
 #pragma once
 
-#include "common/integer.h"
+#include "common/utility.h"
 
-class BackgroundReference
+struct BackgroundReference
 {
-public:
-    void write(int index, u8 byte);
+    template<unsigned index>
+    inline void write(u8 byte);
 
     union
     {
@@ -14,3 +14,15 @@ public:
     };
     int internal;  // Internal register (ref copied during V-Blank or write)
 };
+
+template<unsigned index>
+inline void BackgroundReference::write(u8 byte)
+{
+    static_assert(index <= 3);
+
+    if (index == 3)
+        byte = signExtend<4>(byte);
+
+    bytes(&ref)[index] = byte;
+    internal = ref;
+}

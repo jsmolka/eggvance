@@ -28,6 +28,7 @@ private:
         BPP8   // 8 bits per pixel (256/1)
     };
     MMU& mmu;
+    MMIO& mmio;
 
     using RenderFunc = void(PPU::*)(int);
 

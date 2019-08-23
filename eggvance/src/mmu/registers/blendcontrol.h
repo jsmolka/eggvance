@@ -1,6 +1,7 @@
 #pragma once
 
-#include "common/integer.h"
+#include "common/macros.h"
+#include "common/utility.h"
 
 enum BlendMode
 {
@@ -14,8 +15,6 @@ struct BlendControl
 {
     struct Layer
     {
-        void write(u8 byte);
-
         union
         {
             struct
@@ -31,9 +30,42 @@ struct BlendControl
         int bdp;  // Backdrop enable
     };
 
-    void write(int index, u8 byte);
+    template<unsigned index>
+    inline void write(u8 byte);
 
     int mode;     // Mode (0 = none, 1 = alpha blending, 2 = brightness increase, 3 = brightness decrease)
     Layer upper;  // Upper blend layer
     Layer lower;  // Lower blend layer
 };
+
+template<unsigned index>
+inline void BlendControl::write(u8 byte)
+{
+    static_assert(index <= 1);
+
+    switch (index)
+    {
+    case 0:
+        upper.bg0 = bits<0, 1>(byte);
+        upper.bg1 = bits<1, 1>(byte);
+        upper.bg2 = bits<2, 1>(byte);
+        upper.bg3 = bits<3, 1>(byte);
+        upper.obj = bits<4, 1>(byte);
+        upper.bdp = bits<5, 1>(byte);
+        mode      = bits<6, 2>(byte);
+        break;
+
+    case 1:
+        lower.bg0 = bits<0, 1>(byte);
+        lower.bg1 = bits<1, 1>(byte);
+        lower.bg2 = bits<2, 1>(byte);
+        lower.bg3 = bits<3, 1>(byte);
+        lower.obj = bits<4, 1>(byte);
+        lower.bdp = bits<5, 1>(byte);
+        break;
+
+    default:
+        UNREACHABLE;
+        break;
+    }
+}

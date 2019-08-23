@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #  ifdef EGG_DEBUG
 #    include <cassert>
 #    define UNREACHABLE assert(!"Unreachable line")
@@ -8,5 +8,5 @@
 #    define UNREACHABLE __assume(0)
 #  endif
 #else
-#  define UNREACHABLE ((void)0)
+#  define UNREACHABLE static_cast<void>(0)
 #endif

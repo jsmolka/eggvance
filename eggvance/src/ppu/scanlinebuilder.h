@@ -61,6 +61,7 @@ private:
     bool insideWindow(int window) const;
 
     MMU& mmu;
+    MMIO& mmio;
 
     DoubleBuffer<u16>(&bgs)[4];
     Buffer<ObjectData>& obj;

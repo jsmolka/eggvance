@@ -1,11 +1,11 @@
 #pragma once
 
-#include "common/integer.h"
+#include "common/utility.h"
 
-class BackgroundOffset
+struct BackgroundOffset
 {
-public:
-    void write(int index, u8 byte);
+    template<unsigned index>
+    inline void write(u8 byte);
 
     union
     {
@@ -13,3 +13,14 @@ public:
         u16 offset;       // Offset (0..511)
     };
 };
+
+template<unsigned index>
+inline void BackgroundOffset::write(u8 byte)
+{
+    static_assert(index <= 1);
+
+    if (index == 1)
+        byte &= 0x1;
+
+    bytes(&offset)[index] = byte;
+}

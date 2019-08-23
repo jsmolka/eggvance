@@ -7,6 +7,7 @@
 
 ARM::ARM(MMU& mmu)
     : mmu(mmu)
+    , mmio(mmu.mmio)
 {
     reset();
 }
@@ -336,37 +337,37 @@ void ARM::cycle(u32 addr, AccessType access)
     case PAGE_PALETTE:
     case PAGE_VRAM:
     case PAGE_OAM:
-        if (!mmu.dispstat.hblank && !mmu.dispstat.vblank)
+        if (!mmio.dispstat.hblank && !mmio.dispstat.vblank)
             cycles++;
         break;
 
     case PAGE_GAMEPAK_0:
     case PAGE_GAMEPAK_0+1:
         if (access == SEQ)
-            cycles += seq[0][mmu.waitcnt.ws0.s];
+            cycles += seq[0][mmio.waitcnt.ws0.s];
         else
-            cycles += nonseq[mmu.waitcnt.ws0.n];
+            cycles += nonseq[mmio.waitcnt.ws0.n];
         break;
 
     case PAGE_GAMEPAK_1:
     case PAGE_GAMEPAK_1+1:
         if (access == SEQ)
-            cycles += seq[1][mmu.waitcnt.ws1.s];
+            cycles += seq[1][mmio.waitcnt.ws1.s];
         else
-            cycles += nonseq[mmu.waitcnt.ws1.n];
+            cycles += nonseq[mmio.waitcnt.ws1.n];
         break;
 
     case PAGE_GAMEPAK_2:
     case PAGE_GAMEPAK_2+1:
         if (access == SEQ)
-            cycles += seq[2][mmu.waitcnt.ws2.s];
+            cycles += seq[2][mmio.waitcnt.ws2.s];
         else
-            cycles += nonseq[mmu.waitcnt.ws2.n];
+            cycles += nonseq[mmio.waitcnt.ws2.n];
         break;
 
     default:
         if (addr >= MAP_GAMEPAK_SRAM)
-            cycles += nonseq[mmu.waitcnt.sram];
+            cycles += nonseq[mmio.waitcnt.sram];
         break;
     }
 }

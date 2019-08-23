@@ -12,11 +12,11 @@ Core::Core(std::unique_ptr<BIOS> bios)
     : mmu(std::move(bios))
     , arm(mmu)
     , ppu(mmu)
-    , input(mmu)
+    , input(mmu.mmio)
     , remaining(0)
     , limited(true)
 {
-    Interrupt::init(&mmu);
+    Interrupt::init(&mmu.mmio);
 
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 }
@@ -230,7 +230,7 @@ void Core::emulate(int cycles)
             {
                 arm.interrupt();
             }
-            if (mmu.halt)
+            if (mmu.mmio.halt)
             {
                 // Todo: Emulate until first interrupt
                 emulateTimers(remaining);

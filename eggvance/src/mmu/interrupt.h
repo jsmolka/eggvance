@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mmu.h"
+#include "mmio.h"
 
 enum InterruptFlag
 {
@@ -25,27 +25,27 @@ class Interrupt
 public:
     Interrupt() = delete;
 
-    static inline void init(MMU* mmu)
+    static inline void init(MMIO* mmio)
     {
-        Interrupt::mmu = mmu;
+        Interrupt::mmio = mmio;
     }
 
     static inline void request(InterruptFlag flag)
     {
-        if (mmu->intr_master)
+        if (mmio->intr_master)
         {
-            if (mmu->intr_enabled & flag)
-                mmu->halt = false;
+            if (mmio->intr_enabled & flag)
+                mmio->halt = false;
 
-            mmu->intr_request |= flag;
+            mmio->intr_request |= flag;
         }
     }
 
     static inline bool requested()
     {
-        return mmu->intr_master && (mmu->intr_enabled & mmu->intr_request);
+        return mmio->intr_master && (mmio->intr_enabled & mmio->intr_request);
     }
 
 private:
-    static inline MMU* mmu = nullptr;
+    static inline MMIO* mmio = nullptr;
 };
