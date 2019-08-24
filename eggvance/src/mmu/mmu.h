@@ -50,12 +50,6 @@ private:
     void writeIO(u32 addr, u8 byte);
     void writeOAM(u32 addr, u16 half);
 
-    void writeBackgroundControlLower(BackgroundControl& control, u8 byte);
-    void writeBackgroundControlUpper(BackgroundControl& control, u8 byte);
-    void writeWindow(Window& window, u8 byte);
-    void writeBlendLayer(BlendControl::Layer& layer, u8 byte);
-    void writeTimerControl(Timer& timer, u8 byte);
-
     DMA dmas[4];
 
     std::unique_ptr<BIOS> bios;

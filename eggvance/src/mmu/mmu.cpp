@@ -6,20 +6,16 @@
 MMU::MMU(std::unique_ptr<BIOS> bios)
     : bios(std::move(bios))
     , timers{ 
-        Timer(0), 
-        Timer(1), 
-        Timer(2), 
-        Timer(3) }
+        Timer(0, mmio.tmcnt[0], &timers[1]), 
+        Timer(1, mmio.tmcnt[1], &timers[2]), 
+        Timer(2, mmio.tmcnt[2], &timers[3]), 
+        Timer(3, mmio.tmcnt[3], nullptr) }
     , dmas{
         DMA(0, *this),
         DMA(1, *this),
         DMA(2, *this),
         DMA(3, *this) }
 {
-    timers[0].next = &timers[1];
-    timers[1].next = &timers[2];
-    timers[2].next = &timers[3];
-
     dmas_active.reserve(4);
 
     reset();
@@ -46,15 +42,7 @@ void MMU::reset()
 
     dmas_active.clear();
 
-    for (int i = 0; i < oam.size(); ++i)
-    {
-        writeByte(MAP_IO + i, 0);
-    }
-    mmio.dispstat.hblank = false;
-    mmio.dispstat.vblank = false;
-
-    mmio.keyinput = 0x3FF;
-    mmio.halt = false;
+    mmio.reset();
 
     oam_entries.fill(OAMEntry());
 }
@@ -449,17 +437,6 @@ u8 MMU::readIO(u32 addr)
         return 0;
 
     addr &= 0x3FF;
-    switch (addr)
-    {
-    case REG_TM0CNT_L+0: return timers[0].data_b[0];
-    case REG_TM0CNT_L+1: return timers[0].data_b[1];
-    case REG_TM1CNT_L+0: return timers[1].data_b[0];
-    case REG_TM1CNT_L+1: return timers[1].data_b[1];
-    case REG_TM2CNT_L+0: return timers[2].data_b[0];
-    case REG_TM2CNT_L+1: return timers[2].data_b[1];
-    case REG_TM3CNT_L+0: return timers[3].data_b[0];
-    case REG_TM3CNT_L+1: return timers[3].data_b[1];
-    }
     return mmio.readByte(addr);
 }
 
@@ -469,22 +446,6 @@ void MMU::writeIO(u32 addr, u8 byte)
         return;
 
     addr &= 0x3FF;
-    switch (addr)
-    {
-    case REG_TM0CNT_L+0: timers[0].initial_b[0] = byte; break;
-    case REG_TM0CNT_L+1: timers[0].initial_b[1] = byte; break;
-    case REG_TM1CNT_L+0: timers[1].initial_b[0] = byte; break;
-    case REG_TM1CNT_L+1: timers[1].initial_b[1] = byte; break;
-    case REG_TM2CNT_L+0: timers[2].initial_b[0] = byte; break;
-    case REG_TM2CNT_L+1: timers[2].initial_b[1] = byte; break;
-    case REG_TM3CNT_L+0: timers[3].initial_b[0] = byte; break;
-    case REG_TM3CNT_L+1: timers[3].initial_b[1] = byte; break;
-
-    case REG_TM0CNT_H: writeTimerControl(timers[0], byte); break;
-    case REG_TM1CNT_H: writeTimerControl(timers[1], byte); break;
-    case REG_TM2CNT_H: writeTimerControl(timers[2], byte); break;
-    case REG_TM3CNT_H: writeTimerControl(timers[3], byte); break;
-    }
     mmio.writeByte(addr, byte);
 
     switch (addr)
@@ -534,48 +495,3 @@ void MMU::writeOAM(u32 addr, u16 half)
     }
     oam.writeHalf(addr, half);
 }
-
-void MMU::writeBackgroundControlLower(BackgroundControl& control, u8 byte)
-{
-    control.priority     = bits<0, 2>(byte);
-    control.tile_block   = bits<2, 2>(byte);
-    control.mosaic       = bits<6, 1>(byte);
-    control.palette_type = bits<7, 1>(byte);
- } 
-
-void MMU::writeBackgroundControlUpper(BackgroundControl& control, u8 byte)
-{
-    control.map_block   = bits<0, 5>(byte);
-    control.wraparound  = bits<5, 1>(byte);
-    control.screen_size = bits<6, 2>(byte);
-}
-
-void MMU::writeWindow(Window& window, u8 byte)
-{
-    window.bg0 = bits<0, 1>(byte);
-    window.bg1 = bits<1, 1>(byte);
-    window.bg2 = bits<2, 1>(byte);
-    window.bg3 = bits<3, 1>(byte);
-    window.obj = bits<4, 1>(byte);
-    window.sfx = bits<5, 1>(byte);
-}
-
-void MMU::writeBlendLayer(BlendControl::Layer& layer, u8 byte)
-{
-    layer.bg0 = bits<0, 1>(byte);
-    layer.bg1 = bits<1, 1>(byte);
-    layer.bg2 = bits<2, 1>(byte);
-    layer.bg3 = bits<3, 1>(byte);
-    layer.obj = bits<4, 1>(byte);
-    layer.bdp = bits<5, 1>(byte);
-}
-
-void MMU::writeTimerControl(Timer& timer, u8 byte)
-{
-    timer.attemptInit(byte & 0x80);
-    timer.control.prescaler = bits<0, 2>(byte);
-    timer.control.cascade   = bits<2, 1>(byte);
-    timer.control.irq       = bits<6, 1>(byte);
-    timer.control.enabled   = bits<7, 1>(byte);
-}
- 

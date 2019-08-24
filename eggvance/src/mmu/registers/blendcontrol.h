@@ -15,6 +15,8 @@ struct BlendControl
 {
     struct Layer
     {
+        void reset();
+
         union
         {
             struct
@@ -30,10 +32,12 @@ struct BlendControl
         int bdp;  // Backdrop enable
     };
 
+    void reset();
+
     template<unsigned index>
     inline void write(u8 byte);
 
-    int mode;     // Mode (0 = none, 1 = alpha blending, 2 = brightness increase, 3 = brightness decrease)
+    int mode;     // Blend mode
     Layer upper;  // Upper blend layer
     Layer lower;  // Lower blend layer
 };

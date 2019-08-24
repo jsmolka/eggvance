@@ -52,6 +52,7 @@ public:
     KeyControl keycnt;
     WaitControl waitcnt;
 
+    TimerControl tmcnt[4];
     struct
     {
         DMAAddress sad[4];

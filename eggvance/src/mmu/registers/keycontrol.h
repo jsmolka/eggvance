@@ -5,16 +5,14 @@
 
 struct KeyControl
 {
+    void reset();
+
     template<unsigned index>
     inline void write(u8 byte);
 
-    union
-    {
-        u8  keys_b[2];  // Key mask bytes
-        u16 keys;       // Key mask
-    };
-    int irq;     // IRQ enable
-    int logic;   // IRQ logic (0 = or, 1 = and)
+    int keys;   // Key mask
+    int irq;    // IRQ enable
+    int logic;  // IRQ logic (0 = or, 1 = and)
 };
 
 template<unsigned index>

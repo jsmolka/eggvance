@@ -5,6 +5,8 @@
 
 struct BlendAlpha
 {
+    void reset();
+
     template<unsigned index>
     inline void write(u8 byte);
 
@@ -20,7 +22,7 @@ inline void BlendAlpha::write(u8 byte)
     switch (index)
     {
     case 0: 
-        eva = std::min(bits<0, 5>(byte), 16); 
+        eva = std::min(bits<0, 5>(byte), 16);
         break;
 
     case 1: 

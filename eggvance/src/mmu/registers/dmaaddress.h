@@ -18,6 +18,7 @@ template<unsigned index>
 inline void DMAAddress::write(u8 byte)
 {
     static_assert(index <= 3);
+
     bytes(&addr)[index] = byte;
     addr &= addr_mask;
 }

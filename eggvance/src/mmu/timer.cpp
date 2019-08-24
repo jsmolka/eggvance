@@ -2,19 +2,20 @@
 
 #include "interrupt.h"
 
-Timer::Timer(int id)
+Timer::Timer(int id, TimerControl& control, Timer* next)
     : id(id)
-    , next(nullptr)
+    , next(next)
+    , control(control)
 {
     reset();
 }
 
 void Timer::reset()
 {
-    data = 0;
-    initial = 0;
-    counter = 0;
-    control = {};
+    //data = 0;
+    //initial = 0;
+    //counter = 0;
+    //control = {};
 }
 
 void Timer::emulate(int cycles)
@@ -23,15 +24,6 @@ void Timer::emulate(int cycles)
         return;
 
     increment(cycles);
-}
-
-void Timer::attemptInit(int enabled)
-{
-    if (!control.enabled && enabled)
-    {
-        counter = 0;
-        data = initial;
-    }
 }
 
 void Timer::cascade()
@@ -59,35 +51,35 @@ void Timer::increment(int amount)
 
     if (control.prescaler != 0)
     {
-        counter += amount;
-        while (counter >= prescalers[control.prescaler])
+        control.counter += amount;
+        while (control.counter >= prescalers[control.prescaler])
         {
-            if (++data == 0)
+            if (++control.data == 0)
             {
-                data = initial;
+                control.data = control.initial;
                 cascade();
                 interrupt();
             }
-            counter -= prescalers[control.prescaler];
+            control.counter -= prescalers[control.prescaler];
         }
     }
     else
     {
-        int value = data + amount;
+        int value = control.data + amount;
         if (value >= 0x10000)
         {
-            int range = 0x10000 - initial;
+            int range = 0x10000 - control.initial;
             while (value >= 0x10000)
             {
                 value -= range;
                 cascade();
             }
-            data = value;
+            control.data = value;
             interrupt();
         }
         else
         {
-            data += amount;
+            control.data += amount;
         }
     }
 }

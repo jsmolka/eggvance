@@ -13,9 +13,6 @@ struct DMAControl
     template<unsigned index>
     inline void write(u8 byte);
 
-    int count;       // Word count
-    int count_mask;  // Word count mask
-
     int src_adjust;  // Destination address control
     int dst_adjust;  // Source address control
     int repeat;      // DMA repeat
@@ -24,6 +21,9 @@ struct DMAControl
     int timing;      // Start timing
     int irq;         // IRQ on end of word count
     int enable;      // DMA enable
+
+    int count;       // Word count
+    int count_mask;  // Word count mask
 };
 
 template<unsigned index>
@@ -73,11 +73,11 @@ inline void DMAControl::write(u8 byte)
 
     case 2:
         dst_adjust = bits<5, 2>(byte);
-        src_adjust = (src_adjust & ~0x1) | (bits<7, 1>(byte) << 0);
+        src_adjust = bits<7, 1>(byte) << 0 | (src_adjust & ~0x1);
         break;
 
     case 3:
-        src_adjust = (src_adjust & ~0x2) | (bits<0, 1>(byte) << 1);
+        src_adjust = bits<0, 1>(byte) << 1 | (src_adjust & ~0x2);
         repeat     = bits<1, 1>(byte);
         word       = bits<2, 1>(byte);
         drq        = bits<3, 1>(byte);

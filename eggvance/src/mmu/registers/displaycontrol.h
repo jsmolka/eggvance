@@ -3,9 +3,10 @@
 #include "common/macros.h"
 #include "common/utility.h"
 
-class DisplayControl
+struct DisplayControl
 {
-public:
+    void reset();
+
     template<unsigned index>
     inline void write(u8 byte);
 

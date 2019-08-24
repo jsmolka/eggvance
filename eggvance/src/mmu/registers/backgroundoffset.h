@@ -4,14 +4,12 @@
 
 struct BackgroundOffset
 {
+    void reset();
+
     template<unsigned index>
     inline void write(u8 byte);
 
-    union
-    {
-        u8  offset_b[2];  // Offset bytes
-        u16 offset;       // Offset (0..511)
-    };
+    int offset;  // Offset (0..511)
 };
 
 template<unsigned index>

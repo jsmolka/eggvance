@@ -91,10 +91,10 @@ void PPU::hblank()
     mmio.dispstat.vblank = false;
     mmio.dispstat.hblank = true;
 
-    mmio.bgx[0].internal += mmio.bgpb[0].param;
-    mmio.bgx[1].internal += mmio.bgpb[1].param;
-    mmio.bgy[0].internal += mmio.bgpd[0].param;
-    mmio.bgy[1].internal += mmio.bgpd[1].param;
+    mmio.bgx[0].internal += mmio.bgpb[0].parameter;
+    mmio.bgx[1].internal += mmio.bgpb[1].parameter;
+    mmio.bgy[0].internal += mmio.bgpd[0].parameter;
+    mmio.bgy[1].internal += mmio.bgpd[1].parameter;
 
     if (mmio.dispstat.hblank_irq)
     {
@@ -108,10 +108,10 @@ void PPU::vblank()
     mmio.dispstat.vblank = true;
     mmio.dispstat.hblank = false;
 
-    mmio.bgx[0].internal = mmio.bgx[0].ref;
-    mmio.bgx[1].internal = mmio.bgx[1].ref;
-    mmio.bgy[0].internal = mmio.bgy[0].ref;
-    mmio.bgy[1].internal = mmio.bgy[1].ref;
+    mmio.bgx[0].internal = mmio.bgx[0].reference;
+    mmio.bgx[1].internal = mmio.bgx[1].reference;
+    mmio.bgy[0].internal = mmio.bgy[0].reference;
+    mmio.bgy[1].internal = mmio.bgy[1].reference;
 
     if (mmio.dispstat.vblank_irq)
     {
@@ -121,7 +121,7 @@ void PPU::vblank()
 
 void PPU::next()
 {
-    int vmatch = mmio.vcount == mmio.dispstat.vcount_eval;
+    int vmatch = mmio.vcount == mmio.dispstat.vcount_compare;
 
     mmio.vcount = (mmio.vcount + 1) % 228;
     mmio.dispstat.vmatch = vmatch;

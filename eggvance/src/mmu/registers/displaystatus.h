@@ -5,19 +5,21 @@
 
 struct DisplayStatus
 {
+    void reset();
+
     template<unsigned index>
     inline u8 read();
 
     template<unsigned index>
     inline void write(u8 byte);
 
-    int vblank;       // V-Blank flag (set in lines 160..226, not 227)
-    int hblank;       // H-Blank flag (toggled in all lines 0..227)
-    int vmatch;       // V-Count match flag (set in selected line)
-    int vblank_irq;   // V-Blank IRQ enable
-    int hblank_irq;   // H-Blank IRQ enable
-    int vmatch_irq;   // V-Count match IRQ enable
-    int vcount_eval;  // Compare value for V-Count
+    int vblank;          // V-Blank flag (set in lines 160..226, not 227)
+    int hblank;          // H-Blank flag (toggled in all lines 0..227)
+    int vmatch;          // V-Count match flag (set in selected line)
+    int vblank_irq;      // V-Blank IRQ enable
+    int hblank_irq;      // H-Blank IRQ enable
+    int vmatch_irq;      // V-Count match IRQ enable
+    int vcount_compare;  // Compare value for V-Count
 };
 
 template<unsigned index>
@@ -38,7 +40,7 @@ inline u8 DisplayStatus::read()
         break;
 
     case 1:
-        byte = vcount_eval;
+        byte = vcount_compare;
         break;
 
     default:
@@ -62,7 +64,7 @@ inline void DisplayStatus::write(u8 byte)
         break;
 
     case 1:
-        vcount_eval = byte;
+        vcount_compare = byte;
         break;
 
     default:

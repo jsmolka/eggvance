@@ -7,9 +7,13 @@ struct WaitControl
 {
     struct WaitState
     {
+        void reset();
+
         int n;  // Nonsequential cycles (0..3 = 4,3,2,8 cycles)
         int s;  // Sequential cycles (dependent on waitstate)
     };
+
+    void reset();
 
     template<unsigned index>
     inline void write(u8 byte);

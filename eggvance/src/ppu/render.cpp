@@ -100,8 +100,8 @@ void PPU::renderBgMode2(int bg)
 {
     const BackgroundControl& bgcnt = mmio.bgcnt[bg];
 
-    s16 pa = mmio.bgpa[bg - 2].param;
-    s16 pc = mmio.bgpc[bg - 2].param;
+    s16 pa = mmio.bgpa[bg - 2].parameter;
+    s16 pc = mmio.bgpc[bg - 2].parameter;
 
     int ref_x = mmio.bgx[bg - 2].internal;
     int ref_y = mmio.bgy[bg - 2].internal;

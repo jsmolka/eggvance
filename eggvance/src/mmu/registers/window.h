@@ -4,6 +4,8 @@
 
 struct Window
 {
+    void reset();
+
     inline void write(u8 byte);
 
     int bg0;  // BG0 enabled
@@ -26,12 +28,16 @@ void Window::write(u8 byte)
 
 struct WindowInside
 {
+    void reset();
+
     Window win0;
     Window win1;
 };
 
 struct WindowOutside
 {
+    void reset();
+
     Window winout;
     Window winobj;
 };

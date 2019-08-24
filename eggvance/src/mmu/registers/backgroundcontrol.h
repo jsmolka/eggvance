@@ -5,6 +5,8 @@
 
 struct BackgroundControl
 {
+    void reset();
+
     template<unsigned index>
     inline void write(u8 byte);
 

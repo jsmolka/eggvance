@@ -13,6 +13,7 @@
 #include "dmacontrol.h"
 #include "keycontrol.h"
 #include "mosaic.h"
+#include "timercontrol.h"
 #include "waitcontrol.h"
 #include "windowrange.h"
 #include "window.h"

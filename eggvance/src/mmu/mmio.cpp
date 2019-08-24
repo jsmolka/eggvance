@@ -25,8 +25,49 @@ void MMIO::reset()
 {
     data.fill(0);
 
-    // Todo: default values
-    // Todo: make sure all registers are reset
+    dispcnt.reset();
+    dispstat.reset();
+    vcount = 0;
+
+    for (int x = 0; x < 4; ++x)
+    {
+        bgcnt[x].reset();
+        bghofs[x].reset();
+        bgvofs[x].reset();
+        tmcnt[x].reset();
+        dma.control[x].reset();
+        dma.sad[x].reset();
+        dma.dad[x].reset();
+    }
+
+    for (int x = 0; x < 2; ++x)
+    {
+        bgx[x].reset();
+        bgy[x].reset();
+        bgpa[x].reset();
+        bgpb[x].reset();
+        bgpc[x].reset();
+        bgpd[x].reset();
+        winh[x].reset();
+        winv[x].reset();
+    }
+
+    winin.reset();
+    winout.reset();
+
+    mosaic.reset();
+    bldcnt.reset();
+    bldalpha.reset();
+    bldy.reset();
+
+    intr_master = 0;
+    intr_enabled = 0;
+    intr_request = 0;
+    halt = false;
+
+    keyinput = 0;
+    keycnt.reset();
+    waitcnt.reset();
 }
 
 u8 MMIO::readByte(u32 addr)
@@ -140,6 +181,15 @@ u8 MMIO::readByte(u32 addr)
     case REG_DMA3CNT_L:
     case REG_DMA3CNT_L+1:
         return 0;
+
+    case REG_TM0CNT_L+0: return tmcnt[0].read<0>();
+    case REG_TM0CNT_L+1: return tmcnt[0].read<1>();
+    case REG_TM1CNT_L+0: return tmcnt[1].read<0>();
+    case REG_TM1CNT_L+1: return tmcnt[1].read<1>();
+    case REG_TM2CNT_L+0: return tmcnt[2].read<0>();
+    case REG_TM2CNT_L+1: return tmcnt[2].read<1>();
+    case REG_TM3CNT_L+0: return tmcnt[3].read<0>();
+    case REG_TM3CNT_L+1: return tmcnt[3].read<1>();
 
     case REG_DMA0CNT_H+0: return dma.control[0].read<2>();
     case REG_DMA0CNT_H+1: return dma.control[0].read<3>();
@@ -283,6 +333,20 @@ void MMIO::writeByte(u32 addr, u8 byte)
     case REG_BLDALPHA+1: bldalpha.write<1>(byte); break;
 
     case REG_BLDY: bldy.write(byte); break;
+
+    case REG_TM0CNT_L+0: tmcnt[0].write<0>(byte); break;
+    case REG_TM0CNT_L+1: tmcnt[0].write<1>(byte); break;
+    case REG_TM1CNT_L+0: tmcnt[1].write<0>(byte); break;
+    case REG_TM1CNT_L+1: tmcnt[1].write<1>(byte); break;
+    case REG_TM2CNT_L+0: tmcnt[2].write<0>(byte); break;
+    case REG_TM2CNT_L+1: tmcnt[2].write<1>(byte); break;
+    case REG_TM3CNT_L+0: tmcnt[3].write<0>(byte); break;
+    case REG_TM3CNT_L+1: tmcnt[3].write<1>(byte); break;
+
+    case REG_TM0CNT_H: tmcnt[0].write<2>(byte); break;
+    case REG_TM1CNT_H: tmcnt[1].write<2>(byte); break;
+    case REG_TM2CNT_H: tmcnt[2].write<2>(byte); break;
+    case REG_TM3CNT_H: tmcnt[3].write<2>(byte); break;
 
     case REG_DMA0SAD+0: dma.sad[0].write<0>(byte); break;
     case REG_DMA0SAD+1: dma.sad[0].write<1>(byte); break;

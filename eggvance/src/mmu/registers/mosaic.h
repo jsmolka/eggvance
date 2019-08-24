@@ -7,9 +7,13 @@ struct Mosaic
 {
     struct Stretch
     {
+        void reset();
+
         int x;  // Stretch along x-axis (minus 1)
         int y;  // Stretch along y-axis (minus 1)
     };
+
+    void reset();
 
     template<unsigned index>
     inline void write(u8 byte);
