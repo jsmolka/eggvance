@@ -52,13 +52,13 @@ public:
     KeyControl keycnt;
     WaitControl waitcnt;
 
-    TimerControl tmcnt[4];
-    struct
+    struct 
     {
         DMAAddress sad[4];
         DMAAddress dad[4];
         DMAControl control[4];
     } dma;
+    TimerControl tmcnt[4];
 
 private:
     RAM<0x400> data;
