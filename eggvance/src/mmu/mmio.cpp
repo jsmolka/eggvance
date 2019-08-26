@@ -430,6 +430,6 @@ void MMIO::writeHalf(u32 addr, u16 half)
 
 void MMIO::writeWord(u32 addr, u32 word)
 {
-    writeWord(addr + 0, (word >>  0) & 0xFFFF);
-    writeWord(addr + 2, (word >> 16) & 0xFFFF);
+    writeHalf(addr + 0, (word >>  0) & 0xFFFF);
+    writeHalf(addr + 2, (word >> 16) & 0xFFFF);
 }

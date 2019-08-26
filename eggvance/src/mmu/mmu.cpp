@@ -25,7 +25,6 @@ void MMU::reset()
 {
     ewram.fill(0);
     iwram.fill(0);
-    io.fill(0);
     palette.fill(0);
     vram.fill(0);
     oam.fill(0);
@@ -71,18 +70,21 @@ u8 MMU::readByte(u32 addr)
         return iwram.readByte(addr);
 
     case PAGE_IO:
-        return readIO(addr);
+        if (addr >= (MAP_IO + 0x400))
+            return 0;
+        addr &= 0x3FF;
+        return mmio.readByte(addr);
 
     case PAGE_PALETTE:
     case PAGE_VRAM:
     case PAGE_OAM:
         return 0;
 
-    case PAGE_GAMEPAK_0: 
+    case PAGE_GAMEPAK_0:
     case PAGE_GAMEPAK_0+1:
-    case PAGE_GAMEPAK_1: 
+    case PAGE_GAMEPAK_1:
     case PAGE_GAMEPAK_1+1:
-    case PAGE_GAMEPAK_2: 
+    case PAGE_GAMEPAK_2:
         addr &= 0x1FF'FFFF;
         return gamepak->readByte(addr);
 
@@ -120,10 +122,10 @@ u8 MMU::readByte(u32 addr)
     return 0;
 }
 
+// Todo: do some range checks for bios
 u16 MMU::readHalf(u32 addr)
 {
-    addr = alignHalf(addr);
-    switch ((addr >> 24) & 0xF)
+    switch (addr >> 24)
     {
     case PAGE_BIOS:
         return bios->readHalf(addr);
@@ -132,29 +134,31 @@ u16 MMU::readHalf(u32 addr)
         return 0;
 
     case PAGE_EWRAM:
-        addr &= 0x3'FFFF;
+        addr &= 0x3'FFFE;
         return ewram.readHalf(addr);
 
     case PAGE_IWRAM:
-        addr &= 0x7FFF;
+        addr &= 0x7FFE;
         return iwram.readHalf(addr);
 
     case PAGE_IO:
-        return readIO(addr) 
-             | readIO(addr + 1) << 8;
+        if (addr >= (MAP_IO + 0x400))
+            return 0;
+        addr &= 0x3FE;
+        return mmio.readHalf(addr);
 
     case PAGE_PALETTE:
-        addr &= 0x3FF;
+        addr &= 0x3FE;
         return palette.readHalf(addr);
 
     case PAGE_VRAM:
-        addr &= 0x1'FFFF;
-        if (addr > 0x1'7FFF)
+        addr &= 0x1'FFFE;
+        if (addr >= 0x1'8000)
             addr -= 0x8000;
         return vram.readHalf(addr);
 
     case PAGE_OAM:
-        addr &= 0x3FF;
+        addr &= 0x3FE;
         return oam.readHalf(addr);
 
     case PAGE_GAMEPAK_0: 
@@ -162,7 +166,7 @@ u16 MMU::readHalf(u32 addr)
     case PAGE_GAMEPAK_1: 
     case PAGE_GAMEPAK_1+1:
     case PAGE_GAMEPAK_2: 
-        addr &= 0x1FF'FFFF;
+        addr &= 0x1FF'FFFE;
         return gamepak->readHalf(addr);
 
     case PAGE_GAMEPAK_2+1:
@@ -171,7 +175,7 @@ u16 MMU::readHalf(u32 addr)
             if (gamepak->size() <= 0x100'0000 || (addr >= 0xDFF'FF00 && addr < 0xDFF'FFFF))
                 return 1;
         }
-        addr &= 0x1FF'FFFF;
+        addr &= 0x1FF'FFFE;
         return gamepak->readHalf(addr);
     }
     return 0;
@@ -179,8 +183,7 @@ u16 MMU::readHalf(u32 addr)
 
 u32 MMU::readWord(u32 addr)
 {
-    addr = alignWord(addr);
-    switch ((addr >> 24) & 0xF)
+    switch (addr >> 24)
     {
     case PAGE_BIOS:
         return bios->readWord(addr);
@@ -189,31 +192,31 @@ u32 MMU::readWord(u32 addr)
         return 0;
 
     case PAGE_EWRAM:
-        addr &= 0x3'FFFF;
+        addr &= 0x3'FFFC;
         return ewram.readWord(addr);
 
     case PAGE_IWRAM:
-        addr &= 0x7FFF;
+        addr &= 0x7FFC;
         return iwram.readWord(addr);
 
     case PAGE_IO:
-        return readIO(addr) 
-             | readIO(addr + 1) << 8
-             | readIO(addr + 2) << 16
-             | readIO(addr + 3) << 24;
+        if (addr >= (MAP_IO + 0x400))
+            return 0;
+        addr &= 0x3FC;
+        return mmio.readWord(addr);
 
     case PAGE_PALETTE:
-        addr &= 0x3FF;
+        addr &= 0x3FC;
         return palette.readWord(addr);
 
     case PAGE_VRAM:
-        addr &= 0x1'FFFF;
-        if (addr > 0x1'7FFF)
+        addr &= 0x1'FFFC;
+        if (addr >= 0x1'8000)
             addr -= 0x8000;
         return vram.readWord(addr);
 
     case PAGE_OAM:
-        addr &= 0x3FF;
+        addr &= 0x3FC;
         return oam.readWord(addr);
 
     case PAGE_GAMEPAK_0: 
@@ -221,7 +224,7 @@ u32 MMU::readWord(u32 addr)
     case PAGE_GAMEPAK_1: 
     case PAGE_GAMEPAK_1+1:
     case PAGE_GAMEPAK_2: 
-        addr &= 0x1FF'FFFF;
+        addr &= 0x1FF'FFFC;
         return gamepak->readWord(addr);
 
     case PAGE_GAMEPAK_2+1:
@@ -230,7 +233,7 @@ u32 MMU::readWord(u32 addr)
             if (gamepak->size() <= 0x1000000 || (addr >= 0xDFF'FF00 && addr < 0xDFF'FFFF))
                 return 1;
         }
-        addr &= 0x1FF'FFFF;
+        addr &= 0x1FF'FFFC;
         return gamepak->readWord(addr);
     }
     return 0;
@@ -255,7 +258,19 @@ void MMU::writeByte(u32 addr, u8 byte)
         break;
 
     case PAGE_IO:
-        writeIO(addr, byte);
+        if (addr >= (MAP_IO + 0x400))
+            return;
+        addr &= 0x3FF;
+        mmio.writeByte(addr, byte);
+        switch (addr)
+        {
+        case REG_DMA0CNT_H+1:
+        case REG_DMA1CNT_H+1:
+        case REG_DMA2CNT_H+1:
+        case REG_DMA3CNT_H+1:
+            signalDMA(DMA::Timing::IMMEDIATE);
+            break;
+        }
         break;
 
     case PAGE_PALETTE:
@@ -299,7 +314,6 @@ void MMU::writeByte(u32 addr, u8 byte)
 
 void MMU::writeHalf(u32 addr, u16 half)
 {
-    addr = alignHalf(addr);
     switch (addr >> 24)
     {
     case PAGE_BIOS:
@@ -307,33 +321,45 @@ void MMU::writeHalf(u32 addr, u16 half)
         break;
 
     case PAGE_EWRAM:
-        addr &= 0x3'FFFF;
+        addr &= 0x3'FFFE;
         ewram.writeHalf(addr, half);
         break;
 
     case PAGE_IWRAM:
-        addr &= 0x7FFF;
+        addr &= 0x7FFE;
         iwram.writeHalf(addr, half);
         break;
 
     case PAGE_IO:
-        writeIO(addr + 0, (half >> 0) & 0xFF);
-        writeIO(addr + 1, (half >> 8) & 0xFF);
+        if (addr >= (MAP_IO + 0x400))
+            return;
+        addr &= 0x3FE;
+        mmio.writeHalf(addr, half);
+        switch (addr)
+        {
+        case REG_DMA0CNT_H:
+        case REG_DMA1CNT_H:
+        case REG_DMA2CNT_H:
+        case REG_DMA3CNT_H:
+            signalDMA(DMA::Timing::IMMEDIATE);
+            break;
+        }
         break;
 
     case PAGE_PALETTE:
-        addr &= 0x3FF;
+        addr &= 0x3FE;
         palette.writeHalf(addr, half);
         break;
 
     case PAGE_VRAM:
-        addr &= 0x1'FFFF;
-        if (addr > 0x1'7FFF)
+        addr &= 0x1'FFFE;
+        if (addr >= 0x1'8000)
             addr -= 0x8000;
         vram.writeHalf(addr, half);
         break;
 
     case PAGE_OAM:
+        addr &= 0x3FE;
         writeOAM(addr, half);
         break;
 
@@ -353,7 +379,6 @@ void MMU::writeHalf(u32 addr, u16 half)
 
 void MMU::writeWord(u32 addr, u32 word)
 {
-    addr = alignWord(addr);
     switch (addr >> 24)
     {
     case PAGE_BIOS:
@@ -361,35 +386,45 @@ void MMU::writeWord(u32 addr, u32 word)
         break;
 
     case PAGE_EWRAM:
-        addr &= 0x3'FFFF;
+        addr &= 0x3'FFFC;
         ewram.writeWord(addr, word);
         break;
 
     case PAGE_IWRAM:
-        addr &= 0x7FFF;
+        addr &= 0x7FFC;
         iwram.writeWord(addr, word);
         break;
 
     case PAGE_IO:
-        writeIO(addr + 0, (word >>  0) & 0xFF);
-        writeIO(addr + 1, (word >>  8) & 0xFF);
-        writeIO(addr + 2, (word >> 16) & 0xFF);
-        writeIO(addr + 3, (word >> 24) & 0xFF);
+        if (addr >= (MAP_IO + 0x400))
+            return;
+        addr &= 0x3FC;
+        mmio.writeWord(addr, word);
+        switch (addr)
+        {
+        case REG_DMA0CNT_L:
+        case REG_DMA1CNT_L:
+        case REG_DMA2CNT_L:
+        case REG_DMA3CNT_L:
+            signalDMA(DMA::Timing::IMMEDIATE);
+            break;
+        }
         break;
 
     case PAGE_PALETTE:
-        addr &= 0x3FF;
+        addr &= 0x3FC;
         palette.writeWord(addr, word);
         break;
 
     case PAGE_VRAM:
-        addr &= 0x1'FFFF;
-        if (addr > 0x1'7FFF)
+        addr &= 0x1'FFFC;
+        if (addr >= 0x1'8000)
             addr -= 0x8000;
         vram.writeWord(addr, word);
         break;
 
     case PAGE_OAM:
+        addr &= 0x3FC;
         writeOAM(addr + 0, (word >>  0) & 0xFFFF);
         writeOAM(addr + 2, (word >> 16) & 0xFFFF);
         break;
@@ -431,66 +466,16 @@ void MMU::signalDMA(DMA::Timing timing)
     }
 }
 
-u8 MMU::readIO(u32 addr)
-{
-    if (addr >= (MAP_IO + 0x400))
-        return 0;
-
-    addr &= 0x3FF;
-    return mmio.readByte(addr);
-}
-
-void MMU::writeIO(u32 addr, u8 byte)
-{
-    if (addr >= (MAP_IO + 0x400))
-        return;
-
-    addr &= 0x3FF;
-    mmio.writeByte(addr, byte);
-
-    switch (addr)
-    {
-    case REG_DMA0CNT_H+1:
-    case REG_DMA1CNT_H+1:
-    case REG_DMA2CNT_H+1:
-    case REG_DMA3CNT_H+1:
-        signalDMA(DMA::Timing::IMMEDIATE);
-        break;
-    }
-}
-
 void MMU::writeOAM(u32 addr, u16 half)
 {
-    addr &= 0x3FF;
     if ((addr & 0b110) != 0b110)
     {
-        OAMEntry& entry = oam_entries[addr >> 3];
+        auto& entry = oam_entries[addr >> 3];
         switch (addr & 0x7)
         {
-        case 0b000:
-            entry.y           = bits< 0, 8>(half);
-            entry.affine      = bits< 8, 1>(half);
-            entry.double_size = bits< 9, 1>(half);
-            entry.disabled    = bits< 9, 1>(half);
-            entry.gfx_mode    = bits<10, 2>(half);
-            entry.mosaic      = bits<12, 1>(half);
-            entry.color_mode  = bits<13, 1>(half);
-            entry.shape       = bits<14, 2>(half);
-            break;
-
-        case 0b010:
-            entry.x        = bits< 0, 9>(half);
-            entry.paramter = bits< 9, 5>(half);
-            entry.flip_x   = bits<12, 1>(half);
-            entry.flip_y   = bits<13, 1>(half);
-            entry.size     = bits<14, 2>(half);
-            break;
-
-        case 0b100:
-            entry.tile      = bits< 0, 10>(half);
-            entry.priority  = bits<10,  2>(half);
-            entry.palette   = bits<12,  4>(half);
-            break;
+        case 0: entry.write<0>(half); break;
+        case 2: entry.write<2>(half); break;
+        case 4: entry.write<4>(half); break;
         }
     }
     oam.writeHalf(addr, half);

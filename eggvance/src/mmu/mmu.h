@@ -40,14 +40,11 @@ public:
     std::array<OAMEntry, 128> oam_entries;
     std::unique_ptr<GamePak> gamepak;
 
-    RAM<0x00400> io;
     RAM<0x00400> palette;
     RAM<0x18000> vram;
     RAM<0x00400> oam;
 
 private:
-    u8 readIO(u32 addr);
-    void writeIO(u32 addr, u8 byte);
     void writeOAM(u32 addr, u16 half);
 
     DMA dmas[4];
