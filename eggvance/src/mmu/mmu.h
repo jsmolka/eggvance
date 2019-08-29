@@ -4,14 +4,12 @@
 #include <memory>
 #include <vector>
 
-#include "common/integer.h"
 #include "gamepak/gamepak.h"
 #include "ppu/oamentry.h"
 #include "bios.h"
 #include "dma.h"
 #include "memmap.h"
 #include "mmio.h"
-#include "ram.h"
 #include "timer.h"
 
 class MMU
@@ -20,8 +18,8 @@ public:
     MMU(std::unique_ptr<BIOS> bios);
 
     void reset();
-
     void setGamePak(std::unique_ptr<GamePak> gamepak);
+    void signalDMA(DMA::Timing timing);
 
     u8  readByte(u32 addr);
     u16 readHalf(u32 addr);
@@ -30,8 +28,6 @@ public:
     void writeByte(u32 addr, u8  byte);
     void writeHalf(u32 addr, u16 half);
     void writeWord(u32 addr, u32 word);
-
-    void signalDMA(DMA::Timing timing);
 
     MMIO mmio;
 

@@ -167,6 +167,10 @@ void Core::coreKeyEvent(const SDL_KeyboardEvent& event)
     case SDLK_F11:
         ppu.backend.fullscreen();
         break;
+
+    case SDLK_r:
+        reset();
+        break;
     }
 }
 

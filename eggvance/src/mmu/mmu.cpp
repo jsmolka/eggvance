@@ -53,6 +53,29 @@ void MMU::setGamePak(std::unique_ptr<GamePak> gamepak)
     this->gamepak = std::move(gamepak);
 }
 
+void MMU::signalDMA(DMA::Timing timing)
+{
+    bool pushed = false;
+    for (DMA& dma : dmas)
+    {
+        if (!dma.active && dma.control.enable && dma.control.timing == timing)
+        {
+            dma.activate();
+            if (dma.active)
+            {
+                dmas_active.push_back(&dma);
+                pushed = true;
+            }
+        }
+    }
+    if (pushed && dmas_active.size() > 1)
+    {
+        std::sort(dmas_active.begin(), dmas_active.end(), [](const DMA* lhs, const DMA* rhs) {
+            return lhs->id > rhs->id;
+        });
+    }
+}
+
 u8 MMU::readByte(u32 addr)
 {
     switch (addr >> 24)
@@ -75,10 +98,12 @@ u8 MMU::readByte(u32 addr)
         return iwram.readByte(addr);
 
     case PAGE_IO:
-        if (addr >= (MAP_IO + 0x400))
-            return 0;
-        addr &= 0x3FF;
-        return mmio.readByte(addr);
+        if (addr < (MAP_IO + 0x400))
+        {
+            addr &= 0x3FF;
+            return mmio.readByte(addr);
+        }
+        return 0;
 
     case PAGE_PALETTE:
     case PAGE_VRAM:
@@ -96,7 +121,7 @@ u8 MMU::readByte(u32 addr)
     case PAGE_GAMEPAK_2+1:
         if (gamepak->save->type == Save::Type::EEPROM)
         {
-            if (gamepak->size() <= 0x100'0000 || (addr >= 0xDFF'FF00 && addr < 0xDFF'FFFF))
+            if (gamepak->size() <= 0x100'0000 || (addr >= 0xDFF'FF00 && addr < 0xE00'0000))
                 return 1;
         }
         addr &= 0x1FF'FFFF;
@@ -133,9 +158,11 @@ u16 MMU::readHalf(u32 addr)
     {
     case PAGE_BIOS:
         if (addr < 0x4000)
+        {
+            addr &= 0x3FFE;
             return bios->readHalf(addr);
-        else
-            return 0;
+        }
+        return 0;
 
     case PAGE_BIOS+1:
         return 0;
@@ -149,10 +176,12 @@ u16 MMU::readHalf(u32 addr)
         return iwram.readHalf(addr);
 
     case PAGE_IO:
-        if (addr >= (MAP_IO + 0x400))
-            return 0;
-        addr &= 0x3FE;
-        return mmio.readHalf(addr);
+        if (addr < (MAP_IO + 0x400))
+        {
+            addr &= 0x3FE;
+            return mmio.readHalf(addr);
+        }
+        return 0;
 
     case PAGE_PALETTE:
         addr &= 0x3FE;
@@ -168,22 +197,26 @@ u16 MMU::readHalf(u32 addr)
         addr &= 0x3FE;
         return oam.readHalf(addr);
 
-    case PAGE_GAMEPAK_0: 
+    case PAGE_GAMEPAK_0:
     case PAGE_GAMEPAK_0+1:
-    case PAGE_GAMEPAK_1: 
+    case PAGE_GAMEPAK_1:
     case PAGE_GAMEPAK_1+1:
-    case PAGE_GAMEPAK_2: 
+    case PAGE_GAMEPAK_2:
         addr &= 0x1FF'FFFE;
         return gamepak->readHalf(addr);
 
     case PAGE_GAMEPAK_2+1:
         if (gamepak->save->type == Save::Type::EEPROM)
         {
-            if (gamepak->size() <= 0x100'0000 || (addr >= 0xDFF'FF00 && addr < 0xDFF'FFFF))
+            if (gamepak->size() <= 0x100'0000 || (addr >= 0xDFF'FF00 && addr < 0xE00'0000))
                 return 1;
         }
         addr &= 0x1FF'FFFE;
         return gamepak->readHalf(addr);
+
+    case PAGE_GAMEPAK_SRAM:
+    case PAGE_UNUSED:
+        return 0;
     }
     return 0;
 }
@@ -194,9 +227,11 @@ u32 MMU::readWord(u32 addr)
     {
     case PAGE_BIOS:
         if (addr < 0x4000)
+        {
+            addr &= 0x3FFC;
             return bios->readWord(addr);
-        else
-            return 0;
+        }
+        return 0;
 
     case PAGE_BIOS+1:
         return 0;
@@ -210,10 +245,12 @@ u32 MMU::readWord(u32 addr)
         return iwram.readWord(addr);
 
     case PAGE_IO:
-        if (addr >= (MAP_IO + 0x400))
-            return 0;
-        addr &= 0x3FC;
-        return mmio.readWord(addr);
+        if (addr < (MAP_IO + 0x400))
+        {
+            addr &= 0x3FC;
+            return mmio.readWord(addr);
+        }
+        return 0;
 
     case PAGE_PALETTE:
         addr &= 0x3FC;
@@ -229,22 +266,26 @@ u32 MMU::readWord(u32 addr)
         addr &= 0x3FC;
         return oam.readWord(addr);
 
-    case PAGE_GAMEPAK_0: 
+    case PAGE_GAMEPAK_0:
     case PAGE_GAMEPAK_0+1:
-    case PAGE_GAMEPAK_1: 
+    case PAGE_GAMEPAK_1:
     case PAGE_GAMEPAK_1+1:
-    case PAGE_GAMEPAK_2: 
+    case PAGE_GAMEPAK_2:
         addr &= 0x1FF'FFFC;
         return gamepak->readWord(addr);
 
     case PAGE_GAMEPAK_2+1:
         if (gamepak->save->type == Save::Type::EEPROM)
         {
-            if (gamepak->size() <= 0x1000000 || (addr >= 0xDFF'FF00 && addr < 0xDFF'FFFF))
+            if (gamepak->size() <= 0x100'0000 || (addr >= 0xDFF'FF00 && addr < 0xE00'0000))
                 return 1;
         }
         addr &= 0x1FF'FFFC;
         return gamepak->readWord(addr);
+
+    case PAGE_GAMEPAK_SRAM:
+    case PAGE_UNUSED:
+        return 0;
     }
     return 0;
 }
@@ -268,18 +309,20 @@ void MMU::writeByte(u32 addr, u8 byte)
         break;
 
     case PAGE_IO:
-        if (addr >= (MAP_IO + 0x400))
-            return;
-        addr &= 0x3FF;
-        mmio.writeByte(addr, byte);
-        switch (addr)
+        if (addr < (MAP_IO + 0x400))
         {
-        case REG_DMA0CNT_H+1:
-        case REG_DMA1CNT_H+1:
-        case REG_DMA2CNT_H+1:
-        case REG_DMA3CNT_H+1:
-            signalDMA(DMA::Timing::IMMEDIATE);
-            break;
+            addr &= 0x3FF;
+            mmio.writeByte(addr, byte);
+
+            switch (addr)
+            {
+            case REG_DMA0CNT_H+1:
+            case REG_DMA1CNT_H+1:
+            case REG_DMA2CNT_H+1:
+            case REG_DMA3CNT_H+1:
+                signalDMA(DMA::Timing::IMMEDIATE);
+                break;
+            }
         }
         break;
 
@@ -288,11 +331,11 @@ void MMU::writeByte(u32 addr, u8 byte)
     case PAGE_OAM:
         break;
 
-    case PAGE_GAMEPAK_0: 
+    case PAGE_GAMEPAK_0:
     case PAGE_GAMEPAK_0+1:
-    case PAGE_GAMEPAK_1: 
+    case PAGE_GAMEPAK_1:
     case PAGE_GAMEPAK_1+1:
-    case PAGE_GAMEPAK_2: 
+    case PAGE_GAMEPAK_2:
     case PAGE_GAMEPAK_2+1:
         break;
 
@@ -341,18 +384,20 @@ void MMU::writeHalf(u32 addr, u16 half)
         break;
 
     case PAGE_IO:
-        if (addr >= (MAP_IO + 0x400))
-            return;
-        addr &= 0x3FE;
-        mmio.writeHalf(addr, half);
-        switch (addr)
+        if (addr < (MAP_IO + 0x400))
         {
-        case REG_DMA0CNT_H:
-        case REG_DMA1CNT_H:
-        case REG_DMA2CNT_H:
-        case REG_DMA3CNT_H:
-            signalDMA(DMA::Timing::IMMEDIATE);
-            break;
+            addr &= 0x3FE;
+            mmio.writeHalf(addr, half);
+
+            switch (addr)
+            {
+            case REG_DMA0CNT_H:
+            case REG_DMA1CNT_H:
+            case REG_DMA2CNT_H:
+            case REG_DMA3CNT_H:
+                signalDMA(DMA::Timing::IMMEDIATE);
+                break;
+            }
         }
         break;
 
@@ -373,11 +418,11 @@ void MMU::writeHalf(u32 addr, u16 half)
         writeOAM(addr, half);
         break;
 
-    case PAGE_GAMEPAK_0: 
+    case PAGE_GAMEPAK_0:
     case PAGE_GAMEPAK_0+1:
-    case PAGE_GAMEPAK_1: 
+    case PAGE_GAMEPAK_1:
     case PAGE_GAMEPAK_1+1:
-    case PAGE_GAMEPAK_2: 
+    case PAGE_GAMEPAK_2:
     case PAGE_GAMEPAK_2+1:
         break;
 
@@ -406,18 +451,20 @@ void MMU::writeWord(u32 addr, u32 word)
         break;
 
     case PAGE_IO:
-        if (addr >= (MAP_IO + 0x400))
-            return;
-        addr &= 0x3FC;
-        mmio.writeWord(addr, word);
-        switch (addr)
+        if (addr < (MAP_IO + 0x400))
         {
-        case REG_DMA0CNT_L:
-        case REG_DMA1CNT_L:
-        case REG_DMA2CNT_L:
-        case REG_DMA3CNT_L:
-            signalDMA(DMA::Timing::IMMEDIATE);
-            break;
+            addr &= 0x3FC;
+            mmio.writeWord(addr, word);
+
+            switch (addr)
+            {
+            case REG_DMA0CNT_L:
+            case REG_DMA1CNT_L:
+            case REG_DMA2CNT_L:
+            case REG_DMA3CNT_L:
+                signalDMA(DMA::Timing::IMMEDIATE);
+                break;
+            }
         }
         break;
 
@@ -439,40 +486,17 @@ void MMU::writeWord(u32 addr, u32 word)
         writeOAM(addr + 2, (word >> 16) & 0xFFFF);
         break;
 
-    case PAGE_GAMEPAK_0: 
+    case PAGE_GAMEPAK_0:
     case PAGE_GAMEPAK_0+1:
-    case PAGE_GAMEPAK_1: 
+    case PAGE_GAMEPAK_1:
     case PAGE_GAMEPAK_1+1:
-    case PAGE_GAMEPAK_2: 
+    case PAGE_GAMEPAK_2:
     case PAGE_GAMEPAK_2+1:
         break;
 
     case PAGE_GAMEPAK_SRAM:
     case PAGE_UNUSED:
         break;
-    }
-}
-
-void MMU::signalDMA(DMA::Timing timing)
-{
-    bool pushed = false;
-    for (DMA& dma : dmas)
-    {
-        if (!dma.active && dma.control.enable && dma.control.timing == timing)
-        {
-            dma.activate();
-            if (dma.active)
-            {
-                dmas_active.push_back(&dma);
-                pushed = true;
-            }
-        }
-    }
-    if (pushed && dmas_active.size() > 1)
-    {
-        std::sort(dmas_active.begin(), dmas_active.end(), [](const DMA* lhs, const DMA* rhs) {
-            return lhs->id > rhs->id;
-        });
     }
 }
 

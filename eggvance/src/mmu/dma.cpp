@@ -28,6 +28,7 @@ void DMA::reset()
     active = false;
 }
 
+// Todo: return active?
 void DMA::activate()
 {
     // Todo: use actual cycles
