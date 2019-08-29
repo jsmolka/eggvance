@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "save.h"
 
 class EEPROM : public Save
@@ -9,22 +7,22 @@ class EEPROM : public Save
 public:
     EEPROM(const std::string& file);
 
-    virtual u8 readByte(u32);
+    virtual u8 readByte(u32) final;
     virtual void writeByte(u32, u8 byte) final;
 
 private:
     enum State
     {
-        SF_RECEIVE,
-        SF_READ,
-        SF_READ_NIBBLE,
-        SF_READ_ADDRESS,
-        SF_WRITE,   
-        SF_WRITE_ADDRESS
+        STATE_RECEIVE,
+        STATE_READ,
+        STATE_READ_NIBBLE,
+        STATE_READ_ADDRESS,
+        STATE_WRITE,   
+        STATE_WRITE_ADDRESS
     };
 
+    void resetBuffer();
     int bus() const;
-    void reset();
 
     State state;
     int addr;

@@ -19,6 +19,7 @@ GamePak::GamePak(const std::string& file)
 
         Save::Type save_type = parseSaveType();
         std::string save_file = toSaveFile(file);
+
         switch (save_type)
         {
         case Save::Type::SRAM:
@@ -62,7 +63,7 @@ std::size_t GamePak::size() const
 }
 
 template<typename T>
-inline T GamePak::read(u32 addr)
+T GamePak::read(u32 addr)
 {
     if (addr < data.size())
         return *reinterpret_cast<T*>(&data[addr]);
@@ -103,13 +104,13 @@ Save::Type GamePak::parseSaveType()
 
     std::string id;
     Save::Type type;
+
     for (int x = 0xC0; x < data.size(); x += 4)
     {
-        u8* ptr = &data[x];
         for (const auto& save_type : save_types)
         {
             std::tie(id, type) = save_type;
-            if (std::memcmp(id.data(), ptr, id.size()) == 0)
+            if (std::memcmp(id.data(), &data[x], id.size()) == 0)
                 return type;
         }
     }

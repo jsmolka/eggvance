@@ -1,44 +1,53 @@
 #include "eeprom.h"
 
+#include "common/format.h"
+
 EEPROM::EEPROM(const std::string& file)
     : Save(file, Save::Type::EEPROM)
 {
-    reset();
-    state = SF_RECEIVE;
+    resetBuffer();
+    state = STATE_RECEIVE;
 }
 
 u8 EEPROM::readByte(u32)
 {
     switch (state)
     {
-    case SF_READ_NIBBLE:
+    case STATE_READ_NIBBLE:
         if (++transmitted == 4)
         {
-            state = SF_READ;
-            reset();
+            state = STATE_READ;
+            resetBuffer();
         }
         break;
 
-    case SF_READ:
+    case STATE_READ:
     {
         int off = transmitted / 8;
         int bit = transmitted % 8;
 
         if (++transmitted == 64)
         {
-            state = SF_RECEIVE;
-            reset();
+            state = STATE_RECEIVE;
+            resetBuffer();
         }
         return (data[addr + off] >> (7 - bit)) & 0x1;
     }
+
+    default:
+        fmt::printf("EEPROM: Reading in invalid state %d\n", static_cast<int>(state));
+        break;
     }
     return 1;
 }
 
 void EEPROM::writeByte(u32, u8 byte)
 {
-    if (state == SF_READ || state == SF_READ_NIBBLE)
+    if (state == STATE_READ || state == STATE_READ_NIBBLE)
+    {
+        fmt::printf("EEPROM: Writing in read state %d\n", static_cast<int>(state));
         return;
+    }
 
     byte &= 0x1;
 
@@ -47,46 +56,50 @@ void EEPROM::writeByte(u32, u8 byte)
 
     switch (state)
     {
-    case SF_RECEIVE:
+    case STATE_RECEIVE:
         if (transmitted == 2)
         {
             switch (buffer)
             {
             case 0b10:
-                state = SF_WRITE_ADDRESS;
+                state = STATE_WRITE_ADDRESS;
                 break;
 
             case 0b11:
-                state = SF_READ_ADDRESS;
+                state = STATE_READ_ADDRESS;
+                break;
+
+            default:
+                fmt::printf("EEPROM: Received invalid state %d\n", static_cast<int>(state));
                 break;
             }
             addr = 0;
-            reset();
+            resetBuffer();
         }
         break;
 
-    case SF_READ_ADDRESS:
+    case STATE_READ_ADDRESS:
         if (transmitted == bus())
         {
             addr = buffer << 3;
         }
         else if (transmitted > bus())
         {
-            state = SF_READ_NIBBLE;
-            reset();
+            state = STATE_READ_NIBBLE;
+            resetBuffer();
         }
         break;
 
-    case SF_WRITE_ADDRESS:
+    case STATE_WRITE_ADDRESS:
         if (transmitted == bus())
         {
             addr = buffer << 3;
-            state = SF_WRITE;
-            reset();
+            state = STATE_WRITE;
+            resetBuffer();
         }
         break;
 
-    case SF_WRITE:
+    case STATE_WRITE:
     {
         if (transmitted <= 64)
         {
@@ -98,8 +111,8 @@ void EEPROM::writeByte(u32, u8 byte)
         }
         else if (transmitted > 64)
         {
-            state = SF_RECEIVE;
-            reset();
+            state = STATE_RECEIVE;
+            resetBuffer();
         }
         break;
     }
@@ -111,7 +124,7 @@ int EEPROM::bus() const
     return data.size() == 0x2000 ? 14 : 6;
 }
 
-void EEPROM::reset()
+void EEPROM::resetBuffer()
 {
     buffer = 0;
     transmitted = 0;

@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include "common/macros.h"
+
 Flash::Flash(const std::string& file, Save::Type type)
     : Save(file, type)
 {
@@ -13,6 +15,10 @@ Flash::Flash(const std::string& file, Save::Type type)
 
     case Save::Type::FLASH128:
         data.resize(0x20000, 0xFF);
+        break;
+
+    default:
+        UNREACHABLE;
         break;
     }
 
@@ -61,6 +67,7 @@ void Flash::writeByte(u32 addr, u8 byte)
     case 0x2AAA:
         command <<= 8;
         command |= byte;
+
         switch (command)
         {
         case CMD_ERASE:
@@ -90,6 +97,7 @@ void Flash::writeByte(u32 addr, u8 byte)
         {
             command <<= 8;
             command |= byte;
+
             if (erase && command == CMD_ERASE_SECTOR)
             {
                 u8* sector = bank + (addr & 0xF000);
