@@ -141,7 +141,7 @@
     <ClCompile Include="src\gamepak\eeprom.cpp" />
     <ClCompile Include="src\gamepak\flash.cpp" />
     <ClCompile Include="src\gamepak\file.cpp" />
-    <ClCompile Include="src\gamepak\dummy.cpp" />
+    <ClCompile Include="src\gamepak\none.cpp" />
     <ClCompile Include="src\gamepak\save.cpp" />
     <ClCompile Include="src\gamepak\sram.cpp" />
     <ClCompile Include="src\gamepak\gamepak.cpp" />
@@ -188,7 +188,7 @@
     <ClInclude Include="src\gamepak\eeprom.h" />
     <ClInclude Include="src\gamepak\flash.h" />
     <ClInclude Include="src\gamepak\file.h" />
-    <ClInclude Include="src\gamepak\dummy.h" />
+    <ClInclude Include="src\gamepak\none.h" />
     <ClInclude Include="src\gamepak\save.h" />
     <ClInclude Include="src\gamepak\sram.h" />
     <ClInclude Include="src\gamepak\gamepak.h" />

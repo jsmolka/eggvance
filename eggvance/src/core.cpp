@@ -17,6 +17,7 @@ Core::Core(std::unique_ptr<BIOS> bios)
     , limited(true)
 {
     Interrupt::init(&mmu.mmio);
+    mmu.bios->setPC(&arm.regs.pc);
 
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 }

@@ -23,6 +23,8 @@ MMU::MMU(std::unique_ptr<BIOS> bios)
 
 void MMU::reset()
 {
+    bios->reset();
+
     ewram.fill(0);
     iwram.fill(0);
     palette.fill(0);
@@ -56,7 +58,10 @@ u8 MMU::readByte(u32 addr)
     switch (addr >> 24)
     {
     case PAGE_BIOS:
-        return bios->readByte(addr);
+        if (addr < 0x4000)
+            return bios->readByte(addr);
+        else
+            return 0;
 
     case PAGE_BIOS+1:
         return 0;
@@ -122,13 +127,15 @@ u8 MMU::readByte(u32 addr)
     return 0;
 }
 
-// Todo: do some range checks for bios
 u16 MMU::readHalf(u32 addr)
 {
     switch (addr >> 24)
     {
     case PAGE_BIOS:
-        return bios->readHalf(addr);
+        if (addr < 0x4000)
+            return bios->readHalf(addr);
+        else
+            return 0;
 
     case PAGE_BIOS+1:
         return 0;
@@ -186,7 +193,10 @@ u32 MMU::readWord(u32 addr)
     switch (addr >> 24)
     {
     case PAGE_BIOS:
-        return bios->readWord(addr);
+        if (addr < 0x4000)
+            return bios->readWord(addr);
+        else
+            return 0;
 
     case PAGE_BIOS+1:
         return 0;

@@ -38,6 +38,8 @@ public:
     Timer timers[4];
     std::vector<DMA*> dmas_active;
     std::array<OAMEntry, 128> oam_entries;
+    
+    std::unique_ptr<BIOS> bios;
     std::unique_ptr<GamePak> gamepak;
 
     RAM<0x00400> palette;
@@ -48,8 +50,6 @@ private:
     void writeOAM(u32 addr, u16 half);
 
     DMA dmas[4];
-
-    std::unique_ptr<BIOS> bios;
 
     RAM<0x40000> ewram;
     RAM<0x08000> iwram;

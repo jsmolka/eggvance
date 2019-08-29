@@ -15,6 +15,8 @@ public:
 
     int step();
 
+    Registers regs;
+
 private:
     enum AccessType
     {
@@ -31,7 +33,6 @@ private:
 
     MMU& mmu;
     MMIO& mmio;
-    Registers regs;
 
     void execute();
     void advance();

@@ -2,39 +2,63 @@
 
 #include <fstream>
 
-BIOS::BIOS(const std::string& file)
+BIOS::BIOS(const std::string& file) 
 {
     static constexpr u64 expected_hash = 0xECCF5E4CEA50816E;
 
-    valid = readFile(file);
+    valid = read(file);
     valid = valid && hash(data.ptr<u32>(0), 0x1000) == expected_hash;
+
+    reset();
+}
+
+void BIOS::reset()
+{
+    last_fetched = LF_BRANCH_ROM;
+}
+
+void BIOS::setPC(u32* pc)
+{
+    this->pc = pc;
 }
 
 u8 BIOS::readByte(u32 addr)
 {
-    return read<u8>(addr);
+    protect(addr);
+    return data.readByte(addr);
 }
 
 u16 BIOS::readHalf(u32 addr)
 {
-    return read<u16>(addr);
+    protect(addr);
+    return data.readHalf(addr);
 }
 
 u32 BIOS::readWord(u32 addr)
 {
-    return read<u32>(addr);
+    switch (addr)
+    {
+    case LF_BRANCH_ROM:
+    case LF_BRANCH_IRQ:
+    case LF_RETURN_IRQ:
+    case LF_RETURN_SWI:
+        last_fetched = addr + 8;
+        break;
+
+    default:
+        protect(addr);
+        break;
+    }
+    return data.readWord(addr);
 }
 
-template<typename T>
-inline T BIOS::read(u32 addr)
+void BIOS::protect(u32& addr)
 {
-    if (addr < data.size())
-        return *reinterpret_cast<T*>(&data[addr]);
-    else
-        return 0;
+    if (*pc >= data.size())
+        addr = last_fetched;
 }
 
-bool BIOS::readFile(const std::string& file)
+bool BIOS::read(const std::string& file)
 {
     std::ifstream stream(file, std::ios::binary);
     if (!stream.is_open())
