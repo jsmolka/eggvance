@@ -232,7 +232,7 @@
     <ClInclude Include="src\ppu\objectdata.h" />
     <ClInclude Include="src\ppu\ppu.h" />
     <ClInclude Include="src\core.h" />
-    <ClInclude Include="src\mmu\memory.h" />
+    <ClInclude Include="src\mmu\memmap.h" />
     <ClInclude Include="src\mmu\mmu.h" />
     <ClInclude Include="src\arm\arm.h" />
     <ClInclude Include="src\common\integer.h" />

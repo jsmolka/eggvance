@@ -1,7 +1,7 @@
 #include "mmio.h"
 
 #include "common/utility.h"
-#include "memory.h"
+#include "memmap.h"
 
 MMIO::MMIO()
 {

@@ -3,8 +3,8 @@
 #include <cstring>
 #include <filesystem>
 
-#include "dummy.h"
 #include "eeprom.h"
+#include "none.h"
 #include "flash.h"
 #include "file.h"
 #include "sram.h"
@@ -35,7 +35,7 @@ GamePak::GamePak(const std::string& file)
             break;
 
         default:
-            save = std::make_unique<Dummy>();
+            save = std::make_unique<None>();
             break;
         }
     }

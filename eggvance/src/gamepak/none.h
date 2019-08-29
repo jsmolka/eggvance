@@ -2,10 +2,10 @@
 
 #include "save.h"
 
-class Dummy : public Save
+class None : public Save
 {
 public:
-    Dummy();
+    None();
 
     virtual u8 readByte(u32 addr) final;
     virtual void writeByte(u32 addr, u8 byte) final;

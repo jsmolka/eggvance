@@ -9,7 +9,7 @@
 #include "ppu/oamentry.h"
 #include "bios.h"
 #include "dma.h"
-#include "memory.h"
+#include "memmap.h"
 #include "mmio.h"
 #include "ram.h"
 #include "timer.h"
