@@ -88,7 +88,7 @@ void Core::drawIcon()
 {
     SDL_Rect rect = { 0, 0, WIDTH, HEIGHT };
     SDL_Renderer* renderer = ppu.backend.renderer;
-    SDL_SetRenderDrawColor(renderer, 40, 40, 40, 1);
+    SDL_SetRenderDrawColor(renderer, 33, 35, 36, 1);
     SDL_RenderFillRect(renderer, &rect);
 
     int scale = 9;
