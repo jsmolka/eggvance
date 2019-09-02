@@ -13,5 +13,5 @@ An experimental Game Boy Advance emulator.
 - 14/07/19: Runs Kirby - Nightmare In Dreamland
 - 16/07/19: Displays the BIOS
 - 07/08/19: Displays all tonc demos
-- 17/08/19: Runs Pokemon Emerald with save support 
+- 17/08/19: Runs Pokemon Emerald 
 

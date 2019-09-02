@@ -17,6 +17,8 @@ struct BlendControl
     {
         void reset();
 
+        inline void write(u8 byte);
+
         union
         {
             struct
@@ -50,26 +52,26 @@ inline void BlendControl::write(u8 byte)
     switch (index)
     {
     case 0:
-        upper.bg0 = bits<0, 1>(byte);
-        upper.bg1 = bits<1, 1>(byte);
-        upper.bg2 = bits<2, 1>(byte);
-        upper.bg3 = bits<3, 1>(byte);
-        upper.obj = bits<4, 1>(byte);
-        upper.bdp = bits<5, 1>(byte);
-        mode      = bits<6, 2>(byte);
+        upper.write(byte);
+        mode = bits<6, 2>(byte);
         break;
 
     case 1:
-        lower.bg0 = bits<0, 1>(byte);
-        lower.bg1 = bits<1, 1>(byte);
-        lower.bg2 = bits<2, 1>(byte);
-        lower.bg3 = bits<3, 1>(byte);
-        lower.obj = bits<4, 1>(byte);
-        lower.bdp = bits<5, 1>(byte);
+        lower.write(byte);
         break;
 
     default:
         UNREACHABLE;
         break;
     }
+}
+
+inline void BlendControl::Layer::write(u8 byte)
+{
+    bg0 = bits<0, 1>(byte);
+    bg1 = bits<1, 1>(byte);
+    bg2 = bits<2, 1>(byte);
+    bg3 = bits<3, 1>(byte);
+    obj = bits<4, 1>(byte);
+    bdp = bits<5, 1>(byte);
 }
