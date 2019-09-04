@@ -1,6 +1,6 @@
 #include "eeprom.h"
 
-#include "common/format.h"
+#include "common/fmt.h"
 
 EEPROM::EEPROM(const std::string& file)
     : Save(file, Save::Type::EEPROM)

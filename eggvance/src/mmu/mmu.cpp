@@ -1,6 +1,5 @@
 #include "mmu.h"
 
-#include "common/format.h"
 #include "common/utility.h"
 
 MMU::MMU(std::unique_ptr<BIOS> bios)
