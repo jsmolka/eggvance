@@ -5,6 +5,7 @@
 
 #include "mmu/interrupt.h"
 #include "icon.h"
+#include "microtimer.h"
 
 namespace fs = std::filesystem;
 
@@ -35,15 +36,13 @@ void Core::run(std::unique_ptr<GamePak> gamepak)
             return;
     }
 
+    MicroTimer micro;
+    u32 time_emulator = 0;
+    u32 time_hardware = 16750;
+
     while (true)
     {
-        u32 ticks = SDL_GetTicks();
-
-        frame();
-
-        u32 delta = SDL_GetTicks() - ticks;
-        if (limited && delta < 16)
-            SDL_Delay(16 - delta);
+        u64 begin = micro.now();
 
         SDL_Event event;
         while (SDL_PollEvent(&event))
@@ -73,6 +72,20 @@ void Core::run(std::unique_ptr<GamePak> gamepak)
                 input.controllerAxisEvent(event.caxis);
                 break;
             }
+        }
+
+        frame();
+
+        if (limited)
+        {
+            time_emulator += static_cast<u32>(micro.now() - begin);
+            if (time_emulator < time_hardware)
+            {
+                u64 begin = micro.now();
+                micro.sleep(time_hardware - time_emulator);
+                time_emulator += static_cast<u32>(micro.now() - begin);
+            }
+            time_emulator -= time_hardware;
         }
     } 
 }

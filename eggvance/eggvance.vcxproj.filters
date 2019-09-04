@@ -147,6 +147,9 @@
     <ClCompile Include="src\gamepak\none.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\microtimer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core.h">
@@ -309,6 +312,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\gamepak\none.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\microtimer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
