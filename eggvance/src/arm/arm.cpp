@@ -1,6 +1,7 @@
 #include "arm.h"
 
-#include "common/format.h"
+#include <fmt/printf.h>
+
 #include "common/utility.h"
 #include "disassembler.h"
 #include "decode.h"

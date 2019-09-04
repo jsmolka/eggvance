@@ -2,8 +2,8 @@
 
 #include <filesystem>
 #include <sstream>
+#include <fmt/format.h>
 
-#include "common/fmt.h"
 #include "mmu/interrupt.h"
 #include "icon.h"
 #include "microtimer.h"

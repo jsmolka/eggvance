@@ -1,6 +1,7 @@
 #include "dma.h"
 
-#include "common/fmt.h"
+#include <fmt/printf.h>
+
 #include "interrupt.h"
 #include "mmu.h"
 

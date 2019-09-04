@@ -1,6 +1,7 @@
 #include "disassembler.h"
 
-#include "common/fmt.h"
+#include <fmt/format.h>
+
 #include "common/utility.h"
 #include "decode.h"
 
