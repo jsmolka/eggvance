@@ -3,10 +3,12 @@
 #include <filesystem>
 #include <sstream>
 
+#include "common/format.h"
 #include "mmu/interrupt.h"
 #include "icon.h"
 #include "microtimer.h"
 
+namespace micro = micro_timer;
 namespace fs = std::filesystem;
 
 Core::Core(std::unique_ptr<BIOS> bios)
@@ -36,13 +38,15 @@ void Core::run(std::unique_ptr<GamePak> gamepak)
             return;
     }
 
-    MicroTimer micro;
-    u32 time_emulator = 0;
-    u32 time_hardware = 16750;
+    int time_emulator = 0;
+    int time_hardware = 16750;
+
+    u32 fps_frame = 0;
+    u32 fps_begin = SDL_GetTicks();
 
     while (true)
     {
-        u64 begin = micro.now();
+        u64 begin = micro::now();
 
         SDL_Event event;
         while (SDL_PollEvent(&event))
@@ -78,14 +82,23 @@ void Core::run(std::unique_ptr<GamePak> gamepak)
 
         if (limited)
         {
-            time_emulator += static_cast<u32>(micro.now() - begin);
+            time_emulator += static_cast<u32>(micro::now() - begin);
             if (time_emulator < time_hardware)
             {
-                u64 begin = micro.now();
-                micro.sleep(time_hardware - time_emulator);
-                time_emulator += static_cast<u32>(micro.now() - begin);
+                u64 begin = micro::now();
+                micro::sleep(time_hardware - time_emulator);
+                time_emulator += static_cast<u32>(micro::now() - begin);
             }
             time_emulator -= time_hardware;
+        }
+
+        if (++fps_frame == 60)
+        {
+            std::string fps = fmt::format(" - {:.1f} fps", (1000.f / static_cast<double>(SDL_GetTicks() - fps_begin) * 60.f));
+            SDL_SetWindowTitle(ppu.backend.window, (window_title + fps).c_str());
+
+            fps_frame = 0;
+            fps_begin = SDL_GetTicks();
         }
     } 
 }
@@ -214,7 +227,8 @@ void Core::setWindowTitle(const GamePak& gamepak)
         stream << " - EEPROM";
         break;
     }
-    SDL_SetWindowTitle(ppu.backend.window, stream.str().c_str());
+    window_title = stream.str();
+    SDL_SetWindowTitle(ppu.backend.window, window_title.c_str());
 }
 
 void Core::frame()

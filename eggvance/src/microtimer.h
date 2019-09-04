@@ -2,15 +2,8 @@
 
 #include "common/integer.h"
 
-class MicroTimer
+namespace micro_timer
 {
-public:
-    MicroTimer();
-    ~MicroTimer();
-
-    u64 now() const;
-    void sleep(u32 us) const;
-
-private:
-    void* timer;
-};
+    u64 now();
+    void sleep(u32 us);
+}

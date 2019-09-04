@@ -29,6 +29,8 @@ private:
     int remaining;
     bool limited;
 
+    std::string window_title;
+
     MMU mmu;
     PPU ppu;
     ARM arm;
