@@ -110,7 +110,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <AdditionalDependencies>SDL2main.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -167,7 +167,7 @@
     <ClCompile Include="src\mmu\registers\timercontrol.cpp" />
     <ClCompile Include="src\mmu\registers\waitcontrol.cpp" />
     <ClCompile Include="src\mmu\registers\window.cpp" />
-    <ClCompile Include="src\mmu\registers\windowrange.cpp" />
+    <ClCompile Include="src\ppu\finalize.cpp" />
     <ClCompile Include="src\ppu\render.cpp" />
     <ClCompile Include="src\ppu\scanlinebuilder.cpp" />
     <ClCompile Include="src\arm\decode.cpp" />
@@ -210,6 +210,7 @@
     <ClInclude Include="src\ppu\backend.h" />
     <ClInclude Include="src\ppu\constants.h" />
     <ClInclude Include="src\mmu\ram.h" />
+    <ClInclude Include="src\ppu\layer.h" />
     <ClInclude Include="src\ppu\scanlinebuilder.h" />
     <ClInclude Include="src\mmu\registers\blendalpha.h" />
     <ClInclude Include="src\mmu\registers\blendcontrol.h" />

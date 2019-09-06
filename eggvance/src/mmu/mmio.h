@@ -33,8 +33,8 @@ public:
     BackgroundParameter bgpc[2];
     BackgroundParameter bgpd[2];
 
-    WindowRange winh[2];
-    WindowRange winv[2];
+    WindowRange<WIDTH>  winh[2];
+    WindowRange<HEIGHT> winv[2];
     WindowInside winin;
     WindowOutside winout;
 

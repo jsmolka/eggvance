@@ -6,14 +6,14 @@
 #include "buffer.h"
 #include "objectdata.h"
 
-enum LayerFlag
+enum OldLayerFlag
 {
-    LF_BG0  = 1 << 0,  // BG0 layer
-    LF_BG1  = 1 << 1,  // BG1 layer
-    LF_BG2  = 1 << 2,  // BG2 layer
-    LF_BG3  = 1 << 3,  // BG3 layer
-    LF_OBJ  = 1 << 4,  // OBJ layer
-    LF_BDP  = 1 << 5   // Backdrop
+    OLF_BG0  = 1 << 0,  // BG0 layer
+    OLF_BG1  = 1 << 1,  // BG1 layer
+    OLF_BG2  = 1 << 2,  // BG2 layer
+    OLF_BG3  = 1 << 3,  // BG3 layer
+    OLF_OBJ  = 1 << 4,  // OBJ layer
+    OLF_BDP  = 1 << 5   // Backdrop
 };
 
 enum WindowFlag
@@ -25,13 +25,13 @@ enum WindowFlag
     WF_WINOUT   = 1 << 4   // Outside window
 };
 
-struct Layer
+struct OldLayer
 {
-    Layer(int color, LayerFlag flag)
+    OldLayer(int color, OldLayerFlag flag)
         : color(color), flag(flag) { }
 
     int color;
-    LayerFlag flag;
+    OldLayerFlag flag;
 };
 
 class ScanlineBuilder
@@ -46,11 +46,11 @@ public:
 
     bool windowSfx();
 
-    std::vector<Layer>::iterator begin();
-    std::vector<Layer>::iterator end();
+    std::vector<OldLayer>::iterator begin();
+    std::vector<OldLayer>::iterator end();
 
 private:
-    constexpr static LayerFlag flags[4] = { LF_BG0, LF_BG1, LF_BG2, LF_BG3 };
+    constexpr static OldLayerFlag flags[4] = { OLF_BG0, OLF_BG1, OLF_BG2, OLF_BG3 };
 
     int masterMask() const;
     int blendAMask() const;
@@ -75,5 +75,5 @@ private:
 
     WindowFlag window;
 
-    std::vector<Layer> layers;
+    std::vector<OldLayer> layers;
 };

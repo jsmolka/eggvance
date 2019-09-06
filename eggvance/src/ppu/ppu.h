@@ -3,6 +3,7 @@
 #include "mmu/mmu.h"
 #include "backend.h"
 #include "buffer.h"
+#include "layer.h"
 #include "objectdata.h"
 
 class PPU
@@ -44,7 +45,12 @@ private:
     bool mosaicAffected(int bg) const;
     bool mosaicDominant() const;
 
-    void finalize();
+    void finalizeOld();
+
+    // Call collapse?
+    void finalize(int begin, int end);
+    void finalize__(Layers& layers);
+    void finalize_W(Layers& layers);
 
     int blendAlpha(int a, int b) const;
     int blendWhite(int a) const;
@@ -57,6 +63,7 @@ private:
     DoubleBuffer<u16> bgs[4];
     Buffer<ObjectData> obj;
     bool obj_exist;
+    bool obj_alpha;
 
     std::array<s16*, 32> pas;
     std::array<s16*, 32> pbs;

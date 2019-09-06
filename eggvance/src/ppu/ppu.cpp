@@ -22,12 +22,13 @@ void PPU::reset()
 {
     for (DoubleBuffer<u16>& bg : bgs)
     {
-        bg.fill(TRANSPARENT);
+        bg.fill(COLOR_T);
         bg.flip();
-        bg.fill(TRANSPARENT);
+        bg.fill(COLOR_T);
     }
     obj = {};
     obj_exist = false;
+    obj_alpha = false;
 }
 
 void PPU::scanline()
@@ -46,6 +47,7 @@ void PPU::scanline()
         {
             obj.fill(ObjectData());
             obj_exist = false;
+            obj_alpha = false;
         }
         renderObjects();
     }
@@ -57,32 +59,37 @@ void PPU::scanline()
         renderBg(&PPU::renderBgMode0, 1);
         renderBg(&PPU::renderBgMode0, 2);
         renderBg(&PPU::renderBgMode0, 3);
+        finalize(0, 4);
         break;
 
     case 1: 
         renderBg(&PPU::renderBgMode0, 0);
         renderBg(&PPU::renderBgMode0, 1);
         renderBg(&PPU::renderBgMode2, 2);
+        finalize(0, 3);
         break;
 
     case 2: 
         renderBg(&PPU::renderBgMode2, 2);
         renderBg(&PPU::renderBgMode2, 3);
+        finalize(2, 4);
         break;
 
     case 3: 
         renderBg(&PPU::renderBgMode3, 2);
+        finalize(2, 3);
         break;
 
     case 4: 
         renderBg(&PPU::renderBgMode4, 2);
+        finalize(2, 3);
         break;
 
     case 5: 
         renderBg(&PPU::renderBgMode5, 2);
+        finalize(2, 3);
         break;
     }
-    finalize();
 }
 
 void PPU::hblank()
@@ -226,7 +233,7 @@ bool PPU::mosaicDominant() const
  * compared to what it could be (~6% CPU usage maximum) but I don't feel like
  * improving it right now because it seems to be pretty accurate at least.
  */
-void PPU::finalize()
+void PPU::finalizeOld()
 {
     ScanlineBuilder builder(bgs, obj, mmu);
 
@@ -328,7 +335,7 @@ int PPU::blendBlack(int a) const
 int PPU::readBgColor(int index, int palette)
 {
     if (index == 0)
-        return TRANSPARENT;
+        return COLOR_T;
 
     return mmu.palette.readHalf(0x20 * palette + 2 * index);
 }
@@ -336,7 +343,7 @@ int PPU::readBgColor(int index, int palette)
 int PPU::readFgColor(int index, int palette)
 {
     if (index == 0)
-        return TRANSPARENT;
+        return COLOR_T;
 
     return mmu.palette.readHalf(0x200 + 0x20 * palette + 2 * index);
 }

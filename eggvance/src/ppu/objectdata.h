@@ -5,7 +5,7 @@
 struct ObjectData
 {
     ObjectData()
-        : color(TRANSPARENT)
+        : color(COLOR_T)
         , priority(4)
         , mode(GFX_NORMAL)
         , window(0) 
