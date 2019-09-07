@@ -8,7 +8,7 @@ void Window::reset()
     bg3   = 0;
     obj   = 0;
     sfx   = 0;
-    flags = 0;
+    flags = LF_BDP;
 }
 
 void WindowInside::reset()

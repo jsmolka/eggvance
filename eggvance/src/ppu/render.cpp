@@ -319,6 +319,7 @@ void PPU::renderObjects()
 
                     case GFX_WINDOW:
                         obj[screen_x].window = true;
+                        obj_exist = true;
                         break;
                     }
                 }

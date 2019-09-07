@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/utility.h"
-#include "ppu/layer.h"
+#include "ppu/layers.h"
 
 struct Window
 {
@@ -28,7 +28,7 @@ void Window::write(u8 byte)
     obj = bits<4, 1>(byte);
     sfx = bits<5, 1>(byte);
 
-    flags = 0;
+    flags = LF_BDP;
     if (bg0) flags |= LF_BG0;
     if (bg1) flags |= LF_BG1;
     if (bg2) flags |= LF_BG2;

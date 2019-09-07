@@ -16,6 +16,7 @@ struct BlendControl
     struct Layer
     {
         void reset();
+        void updateFlags();
 
         inline void write(u8 byte);
 
@@ -32,6 +33,9 @@ struct BlendControl
         };
         int obj;  // Objects enable
         int bdp;  // Backdrop enable
+
+        int flags;
+
     };
 
     void reset();
@@ -53,11 +57,13 @@ inline void BlendControl::write(u8 byte)
     {
     case 0:
         upper.write(byte);
+        upper.updateFlags();
         mode = bits<6, 2>(byte);
         break;
 
     case 1:
         lower.write(byte);
+        lower.updateFlags();
         break;
 
     default:

@@ -3,7 +3,7 @@
 #include "mmu/mmu.h"
 #include "backend.h"
 #include "buffer.h"
-#include "layer.h"
+#include "layers.h"
 #include "objectdata.h"
 
 class PPU
@@ -45,12 +45,15 @@ private:
     bool mosaicAffected(int bg) const;
     bool mosaicDominant() const;
 
-    void finalizeOld();
-
     // Call collapse?
     void finalize(int begin, int end);
     void finalize__(Layers& layers);
     void finalize_W(Layers& layers);
+    void finalizeB_(Layers& layers);
+    void finalizeBW(Layers& layers);
+
+    bool getBlendLayers(int x, int win_flags, Layers& layers, int& upper);
+    bool getBlendLayers(int x, int win_flags, Layers& layers, int& upper, int& lower);
 
     int blendAlpha(int a, int b) const;
     int blendWhite(int a) const;

@@ -1,7 +1,6 @@
 #include "ppu.h"
 
 #include "mmu/interrupt.h"
-#include "scanlinebuilder.h"
 
 PPU::PPU(MMU& mmu)
     : mmu(mmu)
@@ -48,14 +47,14 @@ void PPU::scanline()
     bgs[2].flip();
     bgs[3].flip();
 
+    if (obj_exist)
+    {
+        obj.fill(ObjectData());
+        obj_exist = false;
+        obj_alpha = false;
+    }
     if (mmio.dispcnt.obj)
     {
-        if (obj_exist)
-        {
-            obj.fill(ObjectData());
-            obj_exist = false;
-            obj_alpha = false;
-        }
         renderObjects();
     }
 
@@ -200,61 +199,6 @@ bool PPU::mosaicAffected(int bg) const
 bool PPU::mosaicDominant() const
 {
     return mmio.vcount % (mmio.mosaic.bg.y + 1) == 0;
-}
-
-/*
- * Todo: The whole generation process in its current state is really slow
- * compared to what it could be (~6% CPU usage maximum) but I don't feel like
- * improving it right now because it seems to be pretty accurate at least.
- */
-void PPU::finalizeOld()
-{
-    ScanlineBuilder builder(bgs, obj, mmu);
-
-    u16* scanline = &backend.buffer[WIDTH * mmio.vcount];
-
-    for (int x = 0; x < WIDTH; ++x)
-    {
-        builder.build(x);
-
-        int color = builder.begin()->color;
-
-        if ((builder.windowSfx() && mmio.bldcnt.mode != BLD_DISABLED) || obj[x].mode == GFX_ALPHA)
-        {
-            int a = 0;
-            int b = 0;
-
-            bool blended = false;
-
-            if (obj[x].mode == GFX_ALPHA)
-            {
-                if (blended = builder.getBlendLayers(a, b))
-                    color = blendAlpha(a, b);
-            }
-
-            if (!blended)
-            {
-                switch (mmio.bldcnt.mode)
-                {
-                case BLD_ALPHA:
-                    if (builder.getBlendLayers(a, b))
-                        color = blendAlpha(a, b);
-                    break;
-
-                case BLD_WHITE:
-                    if (builder.getBlendLayers(a))
-                        color = blendWhite(a);
-                    break;
-
-                case BLD_BLACK:
-                    if (builder.getBlendLayers(a))
-                        color = blendBlack(a);
-                    break;
-                }
-            }
-        }
-        scanline[x] = color;
-    }
 }
 
 int PPU::blendAlpha(int a, int b) const
