@@ -36,6 +36,13 @@ void PPU::scanline()
     mmio.dispstat.vblank = false;
     mmio.dispstat.hblank = false;
 
+    if (mmio.dispcnt.force_blank)
+    {
+        u16* scanline = &backend.buffer[WIDTH * mmio.vcount];
+        std::fill_n(scanline, WIDTH, 0x7FFF);
+        return;
+    }
+
     bgs[0].flip();
     bgs[1].flip();
     bgs[2].flip();
@@ -141,41 +148,8 @@ void PPU::next()
 
 void PPU::present()
 {
-    // Todo: cleaner?
-    switch (mmio.dispcnt.mode)
-    {
-    case 0: 
-        if (mmio.dispcnt.bg0
-            || mmio.dispcnt.bg1
-            || mmio.dispcnt.bg2
-            || mmio.dispcnt.bg3
-            || mmio.dispcnt.obj)
-            backend.present();
-        break;
-
-    case 1: 
-        if (mmio.dispcnt.bg0
-            || mmio.dispcnt.bg1
-            || mmio.dispcnt.bg2
-            || mmio.dispcnt.obj)
-            backend.present();
-        break;
-
-    case 2: 
-        if (mmio.dispcnt.bg2
-            || mmio.dispcnt.bg3
-            || mmio.dispcnt.obj)
-            backend.present();
-        break;
-
-    case 3: 
-    case 4: 
-    case 5: 
-        if (mmio.dispcnt.bg2
-            || mmio.dispcnt.obj)
-            backend.present();
-        break;
-    }
+    if (mmio.dispcnt.enabled())
+        backend.present();
 }
 
 void PPU::renderBg(RenderFunc func, int bg)

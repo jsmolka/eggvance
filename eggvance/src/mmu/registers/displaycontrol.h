@@ -6,6 +6,7 @@
 struct DisplayControl
 {
     void reset();
+    bool enabled() const;
 
     template<unsigned index>
     inline void write(u8 byte);
