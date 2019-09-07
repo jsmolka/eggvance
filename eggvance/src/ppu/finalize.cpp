@@ -28,10 +28,22 @@ void PPU::finalize(int begin, int end)
 
     switch ((e << 1) | (w << 0))
     {
-    case 0b00: finalize__(layers); break;
-    case 0b01: finalize_W(layers); break;
-    case 0b10: finalizeB_(layers); break;
-    case 0b11: finalizeBW(layers); break;
+    case 0b00: 
+        finalize__(layers); 
+        //fmt::printf("__");
+        break;
+    case 0b01: 
+        finalize_W(layers); 
+        //fmt::printf("_W");
+        break;
+    case 0b10: 
+        finalizeB_(layers); 
+        //fmt::printf("B_");
+        break;
+    case 0b11: 
+        finalizeBW(layers); 
+        //fmt::printf("BW");
+        break;
     }
 }
 
@@ -257,7 +269,7 @@ bool PPU::getBlendLayers(int x, int win_flags, Layers& layers, int& upper)
     {
         for (auto& layer : layers)
         {
-            if (layer->opaque() && layer->flag == LF_OBJ && !obj[x].window)
+            if (layer->opaque() && layer->flag == LF_OBJ)
             {
                 upper = layer->color;
                 return true;
@@ -270,10 +282,17 @@ bool PPU::getBlendLayers(int x, int win_flags, Layers& layers, int& upper)
 
         for (auto& layer : layers)
         {
-            if (layer->opaque() && layer->flag & upper_flags)
+            if (layer->opaque())
             {
-                upper = layer->color;
-                return true;
+                if (layer->flag & upper_flags)
+                {
+                    upper = layer->color;
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
     }
