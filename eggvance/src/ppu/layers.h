@@ -19,6 +19,21 @@ enum LayerFlag
 
 struct Layer
 {
+    Layer(u16* data, int prio, int flag)
+        : data(data), prio(prio), flag(flag) {};
+
+    inline bool opaque(int x) const
+    {
+        return data[x] != COLOR_T;
+    }
+
+    u16* data;
+    int  prio;
+    int  flag;
+};
+
+struct LayerOld
+{
     virtual inline void next() = 0;
 
     inline bool opaque() const
@@ -36,9 +51,9 @@ struct Layer
     int flag;
 };
 
-struct BackdropLayer : public Layer
+struct BackdropLayerOld : public LayerOld
 {
-    BackdropLayer(int backdrop)
+    BackdropLayerOld(int backdrop)
     {
         color = backdrop;
         prio  = 4;
@@ -51,9 +66,9 @@ struct BackdropLayer : public Layer
     }
 };
 
-struct BackgroundLayer : public Layer
+struct BackgroundLayerOld : public LayerOld
 {
-    BackgroundLayer(u16* data, int prio, int flag)
+    BackgroundLayerOld(u16* data, int prio, int flag)
         : data(data)
     {
         this->color = *data;
@@ -70,13 +85,13 @@ struct BackgroundLayer : public Layer
     u16* data;
 };
 
-struct ObjectLayer : public Layer
+struct ObjectLayerOld : public LayerOld
 {
-    ObjectLayer(ObjectData* data)
+    ObjectLayerOld(ObjectData* data)
         : data(data)
     {
         color = data->color;
-        prio  = data->priority;
+        prio  = data->prio;
         flag  = LF_OBJ;
     }
 
@@ -84,7 +99,7 @@ struct ObjectLayer : public Layer
     {
         data++;
         color = data->color;
-        prio  = data->priority;
+        prio  = data->prio;
     }
 
     ObjectData* data;
@@ -103,11 +118,11 @@ void move(std::vector<T>& v, size_t old_index, size_t new_index)
         std::rotate(v.begin() + old_index, v.begin() + old_index + 1, v.begin() + new_index + 1);
 }
 
-struct Layers : public std::vector<std::shared_ptr<Layer>>
+struct LayersOld : public std::vector<std::shared_ptr<LayerOld>>
 {
     void sort()
     {
-        std::sort(begin(), end(), [](const std::shared_ptr<Layer>& lhs, const std::shared_ptr<Layer>& rhs) {
+        std::sort(begin(), end(), [](const std::shared_ptr<LayerOld>& lhs, const std::shared_ptr<LayerOld>& rhs) {
             if (lhs->prio == rhs->prio)
             {
                 if (lhs->flag == LF_OBJ) return true;
@@ -118,12 +133,12 @@ struct Layers : public std::vector<std::shared_ptr<Layer>>
         });
     }
 
-    void pushBackdrop(const std::shared_ptr<Layer>& layer)
+    void pushBackdrop(const std::shared_ptr<LayerOld>& layer)
     {
         push_back(layer);
     }
 
-    void pushObjects(const std::shared_ptr<Layer>& layer)
+    void pushObjects(const std::shared_ptr<LayerOld>& layer)
     {
         for (auto iter = begin(); iter != end(); ++iter)
         {

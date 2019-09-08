@@ -307,10 +307,10 @@ void PPU::renderObjects()
                     {
                     case GFX_NORMAL:
                     case GFX_ALPHA:
-                        if (oam.priority <= obj[screen_x].priority)
+                        if (oam.priority <= obj[screen_x].prio)
                         {
                             obj[screen_x].color = readFgColor(index, palette);
-                            obj[screen_x].priority = oam.priority;
+                            obj[screen_x].prio = oam.priority;
                             obj[screen_x].mode = oam.gfx_mode;
                             obj_exist = true;
                             obj_alpha |= oam.gfx_mode == GFX_ALPHA;

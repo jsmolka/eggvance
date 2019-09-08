@@ -45,15 +45,20 @@ private:
     bool mosaicAffected(int bg) const;
     bool mosaicDominant() const;
 
-    // Call collapse?
-    void finalize(int begin, int end);
-    void finalize__(Layers& layers);
-    void finalize_W(Layers& layers);
-    void finalizeB_(Layers& layers);
-    void finalizeBW(Layers& layers);
+    void collapse(int begin, int end);
+    void collapseNN(const std::vector<Layer>& layers);
+    void collapseNW(const std::vector<Layer>& layers);
+    void collapseBN(const std::vector<Layer>& layers);
+    void collapseBW(const std::vector<Layer>& layers);
 
-    bool getBlendLayers(int x, int win_flags, Layers& layers, int& upper);
-    bool getBlendLayers(int x, int win_flags, Layers& layers, int& upper, int& lower);
+    void finalize(int begin, int end);
+    void finalize__(LayersOld& layers);
+    void finalize_W(LayersOld& layers);
+    void finalizeB_(LayersOld& layers);
+    void finalizeBW(LayersOld& layers);
+
+    bool getBlendLayersOld(int x, int win_flags, LayersOld& layers, int& upper);
+    bool getBlendLayersOld(int x, int win_flags, LayersOld& layers, int& upper, int& lower);
 
     int blendAlpha(int a, int b) const;
     int blendWhite(int a) const;

@@ -39,7 +39,7 @@ void Core::run(std::unique_ptr<GamePak> gamepak)
     }
 
     int time_emulator = 0;
-    int time_hardware = 16750;
+    int time_hardware = 16740;
 
     u32 fps_frame = 0;
     u32 fps_begin = SDL_GetTicks();
@@ -91,14 +91,17 @@ void Core::run(std::unique_ptr<GamePak> gamepak)
             }
             time_emulator -= time_hardware;
         }
-
-        if (++fps_frame == 60)
+        
+        fps_frame++;
+        u32 delta = SDL_GetTicks() - fps_begin;
+        if (delta >= 1000)
         {
-            std::string fps = fmt::format(" - {:.1f} fps", (1000.f / static_cast<double>(SDL_GetTicks() - fps_begin) * 60.f));
+
+            std::string fps = fmt::format(" - {:.1f} fps", (1000.f / static_cast<double>(delta) * static_cast<double>(fps_frame)));
             SDL_SetWindowTitle(ppu.backend.window, (window_title + fps).c_str());
 
-            fps_frame = 0;
             fps_begin = SDL_GetTicks();
+            fps_frame = 0;
         }
     } 
 }

@@ -8,7 +8,7 @@ struct ObjectData
 {
     ObjectData()
         : color(COLOR_T)
-        , priority(5)
+        , prio(4)
         , mode(GFX_NORMAL)
         , window(0) 
     {
@@ -20,13 +20,13 @@ struct ObjectData
         return color != COLOR_T;
     }
 
-    inline bool qualified(int prio) const
+    inline bool visible(int prio = 3) const
     {
-        return priority <= prio && opaque();
+        return this->prio <= prio && opaque();
     }
 
     int color;
-    int priority;
+    int prio;
     int mode;
     int window;
 };

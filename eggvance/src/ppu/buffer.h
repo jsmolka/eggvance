@@ -16,6 +16,11 @@ public:
         page ^= 1;
     }
 
+    inline T* data()
+    {
+        return buffer[page].data();
+    }
+
     inline void fill(const T& value)
     {
         buffer[page].fill(value);

@@ -8,21 +8,21 @@ void PPU::finalize(int begin, int end)
     int w = mmio.dispcnt.win0 || mmio.dispcnt.win1 || mmio.dispcnt.winobj;
     int e = mmio.bldcnt.mode != BLD_DISABLED || obj_alpha;
 
-    Layers layers;
+    LayersOld layers;
     for (int bg = begin; bg < end; ++bg)
     {
         if (mmio.dispcnt.bg[bg])
         {
-            auto layer = std::make_shared<BackgroundLayer>(&bgs[bg][0], mmio.bgcnt[bg].priority, 1 << bg);
+            auto layer = std::make_shared<BackgroundLayerOld>(&bgs[bg][0], mmio.bgcnt[bg].priority, 1 << bg);
             layers.push_back(layer);
         }
     }
     layers.sort();
-    layers.pushBackdrop(std::make_shared<BackdropLayer>(mmu.palette.readHalf(0)));
+    layers.pushBackdrop(std::make_shared<BackdropLayerOld>(mmu.palette.readHalf(0)));
 
     if (obj_exist && mmio.dispcnt.obj)
     {
-        layers.pushObjects(std::make_shared<ObjectLayer>(&obj[0]));
+        layers.pushObjects(std::make_shared<ObjectLayerOld>(&obj[0]));
         layers.resort();
     }
 
@@ -47,7 +47,7 @@ void PPU::finalize(int begin, int end)
     }
 }
 
-void PPU::finalize__(Layers& layers)
+void PPU::finalize__(LayersOld& layers)
 {
     u16* scanline = &backend.buffer[WIDTH * mmio.vcount];
 
@@ -67,7 +67,7 @@ void PPU::finalize__(Layers& layers)
     }
 }
 
-void PPU::finalize_W(Layers& layers)
+void PPU::finalize_W(LayersOld& layers)
 {
     u16* scanline = &backend.buffer[WIDTH * mmio.vcount];
 
@@ -112,7 +112,7 @@ void PPU::finalize_W(Layers& layers)
     }
 }
 
-void PPU::finalizeB_(Layers& layers)
+void PPU::finalizeB_(LayersOld& layers)
 {
     u16* scanline = &backend.buffer[WIDTH * mmio.vcount];
 
@@ -133,7 +133,7 @@ void PPU::finalizeB_(Layers& layers)
         bool blended = false;
         if (obj[x].mode == GFX_ALPHA)
         {
-            if (blended = getBlendLayers(x, 0xFFFF, layers, upper, lower))
+            if (blended = getBlendLayersOld(x, 0xFFFF, layers, upper, lower))
             {
                 scanline[x] = blendAlpha(upper, lower);
             }
@@ -148,17 +148,17 @@ void PPU::finalizeB_(Layers& layers)
             switch (mmio.bldcnt.mode)
             {
             case BLD_ALPHA:
-                if (getBlendLayers(x, 0xFFFF, layers, upper, lower))
+                if (getBlendLayersOld(x, 0xFFFF, layers, upper, lower))
                     scanline[x] = blendAlpha(upper, lower);
                 break;
 
             case BLD_WHITE:
-                if (getBlendLayers(x, 0xFFFF, layers, upper))
+                if (getBlendLayersOld(x, 0xFFFF, layers, upper))
                     scanline[x] = blendWhite(upper);
                 break;
 
             case BLD_BLACK:
-                if (getBlendLayers(x, 0xFFFF, layers, upper))
+                if (getBlendLayersOld(x, 0xFFFF, layers, upper))
                     scanline[x] = blendBlack(upper);
                 break;
             }
@@ -171,7 +171,7 @@ void PPU::finalizeB_(Layers& layers)
     }
 }
 
-void PPU::finalizeBW(Layers& layers)
+void PPU::finalizeBW(LayersOld& layers)
 {
     u16* scanline = &backend.buffer[WIDTH * mmio.vcount];
 
@@ -222,7 +222,7 @@ void PPU::finalizeBW(Layers& layers)
         bool blended = false;
         if (obj[x].mode == GFX_ALPHA)
         {
-            if (blended = getBlendLayers(x, flags, layers, upper, lower))
+            if (blended = getBlendLayersOld(x, flags, layers, upper, lower))
             {
                 scanline[x] = blendAlpha(upper, lower);
             }
@@ -239,17 +239,17 @@ void PPU::finalizeBW(Layers& layers)
                 switch (mmio.bldcnt.mode)
                 {
                 case BLD_ALPHA:
-                    if (getBlendLayers(x, flags, layers, upper, lower))
+                    if (getBlendLayersOld(x, flags, layers, upper, lower))
                         scanline[x] = blendAlpha(upper, lower);
                     break;
 
                 case BLD_WHITE:
-                    if (getBlendLayers(x, flags, layers, upper))
+                    if (getBlendLayersOld(x, flags, layers, upper))
                         scanline[x] = blendWhite(upper);
                     break;
 
                 case BLD_BLACK:
-                    if (getBlendLayers(x, flags, layers, upper))
+                    if (getBlendLayersOld(x, flags, layers, upper))
                         scanline[x] = blendBlack(upper);
                     break;
                 }
@@ -263,7 +263,7 @@ void PPU::finalizeBW(Layers& layers)
     }
 }
 
-bool PPU::getBlendLayers(int x, int win_flags, Layers& layers, int& upper)
+bool PPU::getBlendLayersOld(int x, int win_flags, LayersOld& layers, int& upper)
 {
     if (obj[x].mode == GFX_ALPHA)
     {
@@ -299,7 +299,7 @@ bool PPU::getBlendLayers(int x, int win_flags, Layers& layers, int& upper)
     return false;
 }
 
-bool PPU::getBlendLayers(int x, int win_flags, Layers& layers, int& upper, int& lower)
+bool PPU::getBlendLayersOld(int x, int win_flags, LayersOld& layers, int& upper, int& lower)
 {
     int upper_flags = obj[x].mode == GFX_ALPHA ? LF_OBJ : (mmio.bldcnt.upper.flags & win_flags);
     int lower_flags = mmio.bldcnt.lower.flags & win_flags;

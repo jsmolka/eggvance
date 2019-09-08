@@ -60,38 +60,38 @@ void PPU::scanline()
 
     switch (mmio.dispcnt.mode)
     {
-    case 0: 
+    case 0:
         renderBg(&PPU::renderBgMode0, 0);
         renderBg(&PPU::renderBgMode0, 1);
         renderBg(&PPU::renderBgMode0, 2);
         renderBg(&PPU::renderBgMode0, 3);
-        finalize(0, 4);
+        collapse(0, 4);
         break;
 
-    case 1: 
+    case 1:
         renderBg(&PPU::renderBgMode0, 0);
         renderBg(&PPU::renderBgMode0, 1);
         renderBg(&PPU::renderBgMode2, 2);
-        finalize(0, 3);
+        collapse(0, 3);
         break;
 
-    case 2: 
+    case 2:
         renderBg(&PPU::renderBgMode2, 2);
         renderBg(&PPU::renderBgMode2, 3);
-        finalize(2, 4);
+        collapse(2, 4);
         break;
 
-    case 3: 
+    case 3:
         renderBg(&PPU::renderBgMode3, 2);
-        finalize(2, 3);
+        collapse(2, 3);
         break;
 
-    case 4: 
+    case 4:
         renderBg(&PPU::renderBgMode4, 2);
-        finalize(2, 3);
+        collapse(2, 3);
         break;
 
-    case 5: 
+    case 5:
         renderBg(&PPU::renderBgMode5, 2);
         finalize(2, 3);
         break;
