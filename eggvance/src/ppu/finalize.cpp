@@ -219,21 +219,21 @@ void PPU::finalizeBW(Layers& layers)
         int upper = COLOR_T;
         int lower = COLOR_T;
 
+        bool blended = false;
+        if (obj[x].mode == GFX_ALPHA)
+        {
+            if (blended = getBlendLayers(x, flags, layers, upper, lower))
+            {
+                scanline[x] = blendAlpha(upper, lower);
+            }
+            else
+            {
+                upper = COLOR_T;
+                lower = COLOR_T;
+            }
+        }
         if (effects)
         {
-            bool blended = false;
-            if (obj[x].mode == GFX_ALPHA)
-            {
-                if (blended = getBlendLayers(x, flags, layers, upper, lower))
-                {
-                    scanline[x] = blendAlpha(upper, lower);
-                }
-                else
-                {
-                    upper = COLOR_T;
-                    lower = COLOR_T;
-                }
-            }
             if (!blended)
             {
                 switch (mmio.bldcnt.mode)
