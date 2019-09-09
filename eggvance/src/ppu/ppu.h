@@ -51,6 +51,9 @@ private:
     void collapseBN(const std::vector<Layer>& layers);
     void collapseBW(const std::vector<Layer>& layers);
 
+    bool findUpperLayers(const std::vector<Layer>& layers, int x, int& upper);
+    bool findUpperLayers(const std::vector<Layer>& layers, int x, int& upper, int& lower);
+
     void finalize(int begin, int end);
     void finalize__(LayersOld& layers);
     void finalize_W(LayersOld& layers);

@@ -19,14 +19,15 @@ enum LayerFlag
 
 struct Layer
 {
-    Layer(u16* data, int prio, int flag)
-        : data(data), prio(prio), flag(flag) {};
+    Layer(int id, u16* data, int prio, int flag)
+        : id(id), data(data), prio(prio), flag(flag) {};
 
     inline bool opaque(int x) const
     {
         return data[x] != COLOR_T;
     }
 
+    int  id;
     u16* data;
     int  prio;
     int  flag;
