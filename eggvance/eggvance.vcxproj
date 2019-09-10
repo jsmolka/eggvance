@@ -167,8 +167,6 @@
     <ClCompile Include="src\mmu\registers\timercontrol.cpp" />
     <ClCompile Include="src\mmu\registers\waitcontrol.cpp" />
     <ClCompile Include="src\mmu\registers\window.cpp" />
-    <ClCompile Include="src\ppu\collapse.cpp" />
-    <ClCompile Include="src\ppu\finalize.cpp" />
     <ClCompile Include="src\ppu\render.cpp" />
     <ClCompile Include="src\arm\decode.cpp" />
     <ClCompile Include="src\ppu\oamentry.cpp" />
@@ -243,6 +241,9 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="eggvance.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\ppu\collapse.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

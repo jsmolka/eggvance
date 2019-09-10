@@ -25,7 +25,7 @@ void PPU::reset()
         bg.flip();
         bg.fill(COLOR_T);
     }
-    obj = {};
+    objects = {};
     obj_exist = false;
     obj_alpha = false;
 }
@@ -49,7 +49,7 @@ void PPU::scanline()
 
     if (obj_exist)
     {
-        obj.fill(ObjectData());
+        objects.fill(ObjectData());
         obj_exist = false;
         obj_alpha = false;
     }
@@ -65,35 +65,35 @@ void PPU::scanline()
         renderBg(&PPU::renderBgMode0, 1);
         renderBg(&PPU::renderBgMode0, 2);
         renderBg(&PPU::renderBgMode0, 3);
-        collapse(0, 4);
+        collapse<0, 4>();
         break;
 
     case 1:
         renderBg(&PPU::renderBgMode0, 0);
         renderBg(&PPU::renderBgMode0, 1);
         renderBg(&PPU::renderBgMode2, 2);
-        collapse(0, 3);
+        collapse<0, 3>();
         break;
 
     case 2:
         renderBg(&PPU::renderBgMode2, 2);
         renderBg(&PPU::renderBgMode2, 3);
-        collapse(2, 4);
+        collapse<2, 4>();
         break;
 
     case 3:
         renderBg(&PPU::renderBgMode3, 2);
-        collapse(2, 3);
+        collapse<2, 3>();
         break;
 
     case 4:
         renderBg(&PPU::renderBgMode4, 2);
-        collapse(2, 3);
+        collapse<2, 3>();
         break;
 
     case 5:
         renderBg(&PPU::renderBgMode5, 2);
-        finalize(2, 3);
+        collapse<2, 3>();
         break;
     }
 }

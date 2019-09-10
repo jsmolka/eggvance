@@ -144,12 +144,6 @@
     <ClCompile Include="src\microtimer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ppu\finalize.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ppu\collapse.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core.h">
@@ -319,5 +313,10 @@
     <ResourceCompile Include="eggvance.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\ppu\collapse.inl">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

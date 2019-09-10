@@ -45,23 +45,36 @@ private:
     bool mosaicAffected(int bg) const;
     bool mosaicDominant() const;
 
-    void collapse(int begin, int end);
+    template<int begin, int end>
+    void collapse();
+    template<bool has_objects>
+    u16 findUpperLayer(const std::vector<Layer>& layers, int x);
+    template<bool has_objects>
     void collapseNN(const std::vector<Layer>& layers);
+    template<bool win0, bool win1, bool winobj>
+    int windowFlags(int x);
+    template<bool has_objects, bool win0, bool win1, bool winobj>
+    u16 findUpperLayerWindow(const std::vector<Layer>& layers, int x, int flags);
+    template<bool has_objects>
     void collapseNW(const std::vector<Layer>& layers);
+    template<bool has_objects, bool win0, bool win1, bool winobj>
+    void collapseNWImpl(const std::vector<Layer>& layers);
+    template<bool has_objects>
+    bool findBlendLayer(const std::vector<Layer>& layers, int x, int flags, u16& upper);
+    template<bool has_objects>
+    bool findBlendLayers(const std::vector<Layer>& layers, int x, int flags, u16& upper, u16& lower);
+    template<bool has_objects>
     void collapseBN(const std::vector<Layer>& layers);
+    template<bool has_objects, int blend_mode>
+    void collapseBNImpl(const std::vector<Layer>& layers);
+    template<bool has_objects>
     void collapseBW(const std::vector<Layer>& layers);
-
-    bool findUpperLayers(const std::vector<Layer>& layers, int x, int& upper);
-    bool findUpperLayers(const std::vector<Layer>& layers, int x, int& upper, int& lower);
-
-    void finalize(int begin, int end);
-    void finalize__(LayersOld& layers);
-    void finalize_W(LayersOld& layers);
-    void finalizeB_(LayersOld& layers);
-    void finalizeBW(LayersOld& layers);
-
-    bool getBlendLayersOld(int x, int win_flags, LayersOld& layers, int& upper);
-    bool getBlendLayersOld(int x, int win_flags, LayersOld& layers, int& upper, int& lower);
+    template<bool has_objects, int blend_mode>
+    void collapseBWImpl(const std::vector<Layer>& layers);
+    template<bool win0, bool win1, bool winobj>
+    void windowFlagsAndEffects(int x, int& flags, int& effects);
+    template<bool has_objects, int blend_mode, bool win0, bool win1, bool winobj>
+    void collapseBWImplImpl(const std::vector<Layer>& layers);
 
     int blendAlpha(int a, int b) const;
     int blendWhite(int a) const;
@@ -72,7 +85,7 @@ private:
     int readPixel(u32 addr, int x, int y, PixelFormat format);
        
     DoubleBuffer<u16> bgs[4];
-    Buffer<ObjectData> obj;
+    Buffer<ObjectData> objects;
     bool obj_exist;
     bool obj_alpha;
 
@@ -81,3 +94,5 @@ private:
     std::array<s16*, 32> pcs;
     std::array<s16*, 32> pds;
 };
+
+#include "collapse.inl"

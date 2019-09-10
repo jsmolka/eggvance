@@ -1,32 +1,28 @@
 #pragma once
 
 #include "constants.h"
-#include "ppu/oamentry.h"
+#include "layers.h"
 
-// For sorting lower than backdrop
 struct ObjectData
 {
     ObjectData()
         : color(COLOR_T)
+        , opaque(false)
         , prio(4)
-        , mode(GFX_NORMAL)
-        , window(0) 
-    {
+        , alpha(false)
+        , window(false)
+    { 
     
     }
 
-    inline bool opaque() const
+    inline bool precedes(const Layer& layer) const
     {
-        return color != COLOR_T;
+        return prio <= layer.prio;
     }
 
-    inline bool visible(int prio = 3) const
-    {
-        return this->prio <= prio && opaque();
-    }
-
-    int color;
-    int prio;
-    int mode;
-    int window;
+    int  color;
+    bool opaque;
+    int  prio;
+    bool alpha;
+    bool window;
 };

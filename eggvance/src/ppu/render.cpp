@@ -303,22 +303,26 @@ void PPU::renderObjects()
                 int index = readPixel(addr, pixel_x, pixel_y, format);
                 if (index != 0)
                 {
+                    auto& object = objects[screen_x];
+
                     switch (oam.gfx_mode)
                     {
                     case GFX_NORMAL:
                     case GFX_ALPHA:
-                        if (oam.priority <= obj[screen_x].prio)
+                        if (oam.priority <= objects[screen_x].prio)
                         {
-                            obj[screen_x].color = readFgColor(index, palette);
-                            obj[screen_x].prio = oam.priority;
-                            obj[screen_x].mode = oam.gfx_mode;
+                            object.color  = readFgColor(index, palette);
+                            object.opaque = object.color != COLOR_T; 
+                            object.prio   = oam.priority;
+                            object.alpha  = oam.gfx_mode == GFX_ALPHA;
+
                             obj_exist = true;
-                            obj_alpha |= oam.gfx_mode == GFX_ALPHA;
+                            obj_alpha |= object.alpha;
                         }
                         break;
 
                     case GFX_WINDOW:
-                        obj[screen_x].window = true;
+                        object.window = true;
                         obj_exist = true;
                         break;
                     }
