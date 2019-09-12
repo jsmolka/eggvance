@@ -115,7 +115,7 @@ int PPU::windowFlags(int x)
     return mmio.winout.winout.flags;
 }
 
-template<bool has_objects, bool win0, bool win1, bool winobj>
+template<bool has_objects>
 u16 PPU::findUpperLayerWindow(const std::vector<Layer>& layers, int x, int flags)
 {    
     const auto object = objects[x];
@@ -167,7 +167,7 @@ void PPU::collapseNWImpl(const std::vector<Layer>& layers)
     {
         int flags = windowFlags<win0, win1, winobj>(x);
         
-        scanline[x] = findUpperLayerWindow<has_objects, win0, win1, winobj>(layers, x, flags);
+        scanline[x] = findUpperLayerWindow<has_objects>(layers, x, flags);
     }
 }
 
@@ -178,22 +178,20 @@ bool PPU::findBlendLayer(const std::vector<Layer>& layers, int x, int flags, u16
     
     int upper_flags = object.alpha ? LF_OBJ : mmio.bldcnt.upper.flags;
     
-    upper_flags &= flags;
-
     for (const auto& layer : layers)
     {
-        if (has_objects && object.opaque && object.precedes(layer))
+        if (has_objects && flags & LF_OBJ && object.opaque && object.precedes(layer))
         {
             upper = object.color;
             return upper_flags & LF_OBJ;
         }
-        if (layer.opaque(x))
+        if (flags & layer.flag && layer.opaque(x))
         {
             upper = layer.color(x);
             return upper_flags & layer.flag;
         }
     }
-    if (has_objects && object.opaque)
+    if (has_objects && flags & LF_OBJ && object.opaque)
     {
         upper = object.color;
         return upper_flags & LF_OBJ;
@@ -210,14 +208,11 @@ bool PPU::findBlendLayers(const std::vector<Layer>& layers, int x, int flags, u1
     int upper_flags = object.alpha ? LF_OBJ : mmio.bldcnt.upper.flags;
     int lower_flags = mmio.bldcnt.lower.flags;
     
-    upper_flags &= flags;
-    lower_flags &= flags;
-    
     bool upper_found = false;    
     bool object_used = false;
     for (const auto& layer : layers)
     {
-        if (has_objects && !object_used && object.opaque && object.precedes(layer))
+        if (has_objects && flags & LF_OBJ && !object_used && object.opaque && object.precedes(layer))
         {
             if (upper_found)
             {
@@ -233,7 +228,7 @@ bool PPU::findBlendLayers(const std::vector<Layer>& layers, int x, int flags, u1
             }
             object_used = true;
         }
-        if (layer.opaque(x))
+        if (flags & layer.flag && layer.opaque(x))
         {
             if (upper_found)
             {
@@ -249,7 +244,7 @@ bool PPU::findBlendLayers(const std::vector<Layer>& layers, int x, int flags, u1
             }
         }
     }
-    if (has_objects && !object_used && object.opaque)
+    if (has_objects && flags & LF_OBJ && !object_used && object.opaque)
     {
         if (upper_found)
         {
@@ -412,8 +407,6 @@ void PPU::windowFlagsAndEffects(int x, int& flags, int& effects)
     }
 }
 
-#include <fmt/printf.h>
-
 template<bool has_objects, int blend_mode, bool win0, bool win1, bool winobj>
 void PPU::collapseBWImplImpl(const std::vector<Layer>& layers)
 {
@@ -460,7 +453,7 @@ void PPU::collapseBWImplImpl(const std::vector<Layer>& layers)
                 break;
 
             case BLD_DISABLED:
-                scanline[x] = findUpperLayerWindow<has_objects, win0, win1, winobj>(layers, x, flags);
+                scanline[x] = findUpperLayerWindow<has_objects>(layers, x, flags);
                 break;
                 
             default:
@@ -473,7 +466,7 @@ void PPU::collapseBWImplImpl(const std::vector<Layer>& layers)
             if (upper != COLOR_T)
                 scanline[x] = upper;
             else
-                scanline[x] = findUpperLayerWindow<has_objects, win0, win1, winobj>(layers, x, flags);
+                scanline[x] = findUpperLayerWindow<has_objects>(layers, x, flags);
         }
     }
 }

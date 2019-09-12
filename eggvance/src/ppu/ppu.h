@@ -53,7 +53,7 @@ private:
     void collapseNN(const std::vector<Layer>& layers);
     template<bool win0, bool win1, bool winobj>
     int windowFlags(int x);
-    template<bool has_objects, bool win0, bool win1, bool winobj>
+    template<bool has_objects>
     u16 findUpperLayerWindow(const std::vector<Layer>& layers, int x, int flags);
     template<bool has_objects>
     void collapseNW(const std::vector<Layer>& layers);
