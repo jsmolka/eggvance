@@ -309,7 +309,7 @@ void PPU::renderObjects()
                     {
                     case GFX_NORMAL:
                     case GFX_ALPHA:
-                        if (oam.priority <= objects[screen_x].prio)
+                        if (oam.priority <= object.prio)
                         {
                             object.color  = readFgColor(index, palette);
                             object.opaque = object.color != COLOR_T; 
@@ -322,8 +322,8 @@ void PPU::renderObjects()
                         object.window = true;
                         break;
                     }
-                    obj_exist = true;
-                    obj_alpha |= object.alpha;
+                    objects_exist = true;
+                    objects_alpha |= object.alpha;
                 }
             }
         }

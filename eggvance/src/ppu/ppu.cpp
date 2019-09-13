@@ -26,8 +26,8 @@ void PPU::reset()
         bg.fill(COLOR_T);
     }
     objects = {};
-    obj_exist = false;
-    obj_alpha = false;
+    objects_exist = false;
+    objects_alpha = false;
 }
 
 void PPU::scanline()
@@ -47,11 +47,11 @@ void PPU::scanline()
     bgs[2].flip();
     bgs[3].flip();
 
-    if (obj_exist)
+    if (objects_exist)
     {
         objects.fill(ObjectData());
-        obj_exist = false;
-        obj_alpha = false;
+        objects_exist = false;
+        objects_alpha = false;
     }
     if (mmio.dispcnt.obj)
     {
@@ -65,35 +65,35 @@ void PPU::scanline()
         renderBg(&PPU::renderBgMode0, 1);
         renderBg(&PPU::renderBgMode0, 2);
         renderBg(&PPU::renderBgMode0, 3);
-        collapse<0, 4>();
+        collapse(0, 4);
         break;
 
     case 1:
         renderBg(&PPU::renderBgMode0, 0);
         renderBg(&PPU::renderBgMode0, 1);
         renderBg(&PPU::renderBgMode2, 2);
-        collapse<0, 3>();
+        collapse(0, 3);
         break;
 
     case 2:
         renderBg(&PPU::renderBgMode2, 2);
         renderBg(&PPU::renderBgMode2, 3);
-        collapse<2, 4>();
+        collapse(2, 4);
         break;
 
     case 3:
         renderBg(&PPU::renderBgMode3, 2);
-        collapse<2, 3>();
+        collapse(2, 3);
         break;
 
     case 4:
         renderBg(&PPU::renderBgMode4, 2);
-        collapse<2, 3>();
+        collapse(2, 3);
         break;
 
     case 5:
         renderBg(&PPU::renderBgMode5, 2);
-        collapse<2, 3>();
+        collapse(2, 3);
         break;
     }
 }
@@ -199,6 +199,38 @@ bool PPU::mosaicAffected(int bg) const
 bool PPU::mosaicDominant() const
 {
     return mmio.vcount % (mmio.mosaic.bg.y + 1) == 0;
+}
+
+void PPU::collapse(int begin, int end)
+{
+    std::vector<Layer> layers;
+    layers.reserve(end - begin);
+
+    for (int bg = begin; bg < end; ++bg) 
+    {
+        if (mmio.dispcnt.bg[bg])
+        {
+            layers.emplace_back(
+                bg,
+                bgs[bg].data(),
+                mmio.bgcnt[bg].priority,
+                1 << bg
+            );
+        }
+    }
+
+    std::sort(layers.begin(), layers.end(),
+        [](const Layer& lhs, const Layer& rhs) {
+            return lhs.prio != rhs.prio 
+                ? lhs.prio < rhs.prio 
+                : lhs.id < rhs.id;
+        }
+    );
+
+    if (objects_exist)
+        collapse<1>(layers);
+    else
+        collapse<0>(layers);
 }
 
 int PPU::blendAlpha(int a, int b) const
