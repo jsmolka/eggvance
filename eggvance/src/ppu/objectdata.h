@@ -6,7 +6,7 @@
 struct ObjectData
 {
     ObjectData()
-        : color(COLOR_T)
+        : color(TRANSPARENT)
         , opaque(false)
         , prio(4)
         , alpha(false)

@@ -255,8 +255,8 @@ void PPU::collapseBNImp(const std::vector<Layer>& layers)
     
     for (int x = 0; x < WIDTH; ++x)
     {
-        u16 upper = COLOR_T;
-        u16 lower = COLOR_T;
+        u16 upper = TRANSPARENT;
+        u16 lower = TRANSPARENT;
         
         const auto& object = objects[x];
         
@@ -344,8 +344,8 @@ void PPU::collapseBWImpImp(const std::vector<Layer>& layers)
     
     for (int x = 0; x < WIDTH; ++x)
     {
-        u16 upper = COLOR_T;
-        u16 lower = COLOR_T;
+        u16 upper = TRANSPARENT;
+        u16 lower = TRANSPARENT;
 
         const auto& object = objects[x];
         const auto& window = activeWindow<win_master>(x);
@@ -391,7 +391,7 @@ void PPU::collapseBWImpImp(const std::vector<Layer>& layers)
         }
         else
         {
-            if (upper != COLOR_T)
+            if (upper != TRANSPARENT)
                 scanline[x] = upper;
             else
                 scanline[x] = upperLayer<obj_master>(layers, x, window.flags);

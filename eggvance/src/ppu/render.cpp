@@ -81,7 +81,7 @@ void PPU::renderBgMode0(int bg)
             {
                 for (; pixel_x < 8; ++pixel_x)
                 {
-                    bgs[bg][screen_x] = COLOR_T;
+                    bgs[bg][screen_x] = TRANSPARENT;
                     if (++screen_x == WIDTH)
                         return;
                 }
@@ -130,7 +130,7 @@ void PPU::renderBgMode2(int bg)
             }
             else
             {
-                bgs[bg][screen_x] = COLOR_T;
+                bgs[bg][screen_x] = TRANSPARENT;
                 continue;
             }
         }
@@ -170,11 +170,11 @@ void PPU::renderBgMode5(int bg)
         u32 addr = (0xA000 * mmio.dispcnt.frame) + (2 * 160 * mmio.vcount);
         u16* pixel = mmu.vram.ptr<u16>(addr);
         pixel = std::copy_n(pixel, 160, &bgs[bg][0]);
-        std::fill_n(pixel, 80, COLOR_T);
+        std::fill_n(pixel, 80, TRANSPARENT);
     }
     else
     {
-        bgs[bg].fill(COLOR_T);
+        bgs[bg].fill(TRANSPARENT);
     }
 }
 
@@ -312,7 +312,7 @@ void PPU::renderObjects()
                         if (oam.priority <= object.prio)
                         {
                             object.color  = readFgColor(index, palette);
-                            object.opaque = object.color != COLOR_T; 
+                            object.opaque = object.color != TRANSPARENT; 
                             object.prio   = oam.priority;
                             object.alpha  = oam.gfx_mode == GFX_ALPHA;
                         }

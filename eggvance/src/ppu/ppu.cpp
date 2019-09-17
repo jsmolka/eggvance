@@ -21,9 +21,9 @@ void PPU::reset()
 {
     for (DoubleBuffer<u16>& bg : bgs)
     {
-        bg.fill(COLOR_T);
+        bg.fill(TRANSPARENT);
         bg.flip();
-        bg.fill(COLOR_T);
+        bg.fill(TRANSPARENT);
     }
     objects = {};
     objects_exist = false;
@@ -94,6 +94,10 @@ void PPU::scanline()
     case 5:
         renderBg(&PPU::renderBgMode5, 2);
         collapse(2, 3);
+        break;
+
+    default:
+        UNREACHABLE;
         break;
     }
 }
@@ -233,14 +237,14 @@ void PPU::collapse(int begin, int end)
         collapse<0>(layers);
 }
 
-int PPU::blendAlpha(int a, int b) const
+u16 PPU::blendAlpha(u16 a, u16 b) const
 {
-    int a_r = (a >>  0) & 0x1F;
-    int a_g = (a >>  5) & 0x1F;
-    int a_b = (a >> 10) & 0x1F;
-    int b_r = (b >>  0) & 0x1F;
-    int b_g = (b >>  5) & 0x1F;
-    int b_b = (b >> 10) & 0x1F;
+    int a_r = bits< 0, 5>(a);
+    int a_g = bits< 5, 5>(a);
+    int a_b = bits<10, 5>(a);
+    int b_r = bits< 0, 5>(b);
+    int b_g = bits< 5, 5>(b);
+    int b_b = bits<10, 5>(b);
 
     int eva = std::min(17, mmio.bldalpha.eva);
     int evb = std::min(17, mmio.bldalpha.evb);
@@ -252,11 +256,11 @@ int PPU::blendAlpha(int a, int b) const
     return (t_r << 0) | (t_g << 5) | (t_b << 10);
 }
 
-int PPU::blendWhite(int a) const
+u16 PPU::blendWhite(u16 a) const
 {
-    int a_r = (a >>  0) & 0x1F;
-    int a_g = (a >>  5) & 0x1F;
-    int a_b = (a >> 10) & 0x1F;
+    int a_r = bits< 0, 5>(a);
+    int a_g = bits< 5, 5>(a);
+    int a_b = bits<10, 5>(a);
 
     int evy = std::min(17, mmio.bldy.evy);
 
@@ -267,11 +271,11 @@ int PPU::blendWhite(int a) const
     return (t_r << 0) | (t_g << 5) | (t_b << 10);
 }
 
-int PPU::blendBlack(int a) const
+u16 PPU::blendBlack(u16 a) const
 {
-    int a_r = (a >>  0) & 0x1F;
-    int a_g = (a >>  5) & 0x1F;
-    int a_b = (a >> 10) & 0x1F;
+    int a_r = bits< 0, 5>(a);
+    int a_g = bits< 5, 5>(a);
+    int a_b = bits<10, 5>(a);
 
     int evy = std::min(17, mmio.bldy.evy);
 
@@ -285,7 +289,7 @@ int PPU::blendBlack(int a) const
 int PPU::readBgColor(int index, int palette)
 {
     if (index == 0)
-        return COLOR_T;
+        return TRANSPARENT;
 
     return mmu.palette.readHalf(0x20 * palette + 2 * index);
 }
@@ -293,7 +297,7 @@ int PPU::readBgColor(int index, int palette)
 int PPU::readFgColor(int index, int palette)
 {
     if (index == 0)
-        return COLOR_T;
+        return TRANSPARENT;
 
     return mmu.palette.readHalf(0x200 + 0x20 * palette + 2 * index);
 }

@@ -83,9 +83,9 @@ private:
     template<int obj_master, int win_master, int blend_mode>
     void collapseBWImpImp(const std::vector<Layer>& layers);
 
-    int blendAlpha(int a, int b) const;
-    int blendWhite(int a) const;
-    int blendBlack(int a) const;
+    u16 blendAlpha(u16 a, u16 b) const;
+    u16 blendWhite(u16 a) const;
+    u16 blendBlack(u16 a) const;
 
     int readBgColor(int index, int palette);
     int readFgColor(int index, int palette);

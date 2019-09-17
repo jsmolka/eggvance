@@ -21,9 +21,8 @@ struct Backend
         );
 
         renderer = SDL_CreateRenderer(
-            window, 
-            -1, 
-            SDL_RENDERER_ACCELERATED
+            window, -1, 
+            SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE
         );
         SDL_RenderSetLogicalSize(renderer, WIDTH, HEIGHT);
 

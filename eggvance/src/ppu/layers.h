@@ -28,7 +28,7 @@ struct Layer
 
     inline bool opaque(int x) const
     {
-        return data[x] != COLOR_T;
+        return data[x] != TRANSPARENT;
     }
 
     int  id;
