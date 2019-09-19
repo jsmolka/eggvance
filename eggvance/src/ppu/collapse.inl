@@ -1,5 +1,3 @@
-// Todo: rename bgs to backgrounds
-
 template<int obj_master>
 void PPU::collapse(const std::vector<Layer>& layers)
 {
@@ -17,6 +15,248 @@ void PPU::collapse(const std::vector<Layer>& layers)
         UNREACHABLE;
         break;
     }
+}
+
+template<int obj_master>
+void PPU::collapseNN(const std::vector<Layer>& layers)
+{
+    u16* scanline = &backend.buffer[WIDTH * mmio.vcount];
+
+    for (int x = 0; x < WIDTH; ++x)
+    {
+        scanline[x] = upperLayer<obj_master>(layers, x);
+    }
+}
+
+template<int obj_master>
+void PPU::collapseNW(const std::vector<Layer>& layers)
+{
+    switch (possibleWindows<obj_master>())
+    {
+    case 0b000: collapseNW<obj_master, 0b000>(layers); break;
+    case 0b001: collapseNW<obj_master, 0b001>(layers); break;
+    case 0b010: collapseNW<obj_master, 0b010>(layers); break;
+    case 0b011: collapseNW<obj_master, 0b011>(layers); break;
+    case 0b100: collapseNW<obj_master, 0b100>(layers); break;
+    case 0b101: collapseNW<obj_master, 0b101>(layers); break;
+    case 0b110: collapseNW<obj_master, 0b110>(layers); break;
+    case 0b111: collapseNW<obj_master, 0b111>(layers); break;
+
+    default:
+        UNREACHABLE;
+        break;
+    }
+}
+
+template<int obj_master, int win_master>
+void PPU::collapseNW(const std::vector<Layer>& layers)
+{
+    u16* scanline = &backend.buffer[WIDTH * mmio.vcount];
+
+    for (int x = 0; x < WIDTH; ++x)
+    {
+        const auto& window = activeWindow<win_master>(x);
+
+        scanline[x] = upperLayer<obj_master>(layers, x, window.flags);
+    }
+}
+
+template<int obj_master>
+void PPU::collapseBN(const std::vector<Layer>& layers)
+{
+    switch (mmio.bldcnt.mode)
+    {
+    case 0: collapseBN<obj_master, 0>(layers); break;
+    case 1: collapseBN<obj_master, 1>(layers); break;
+    case 2: collapseBN<obj_master, 2>(layers); break;
+    case 3: collapseBN<obj_master, 3>(layers); break;
+
+    default:
+        UNREACHABLE;
+        break;
+    }
+}
+
+template<int obj_master, int blend_mode>
+void PPU::collapseBN(const std::vector<Layer>& layers)
+{
+    constexpr int flags = 0xFFFF;
+
+    u16* scanline = &backend.buffer[WIDTH * mmio.vcount];
+
+    for (int x = 0; x < WIDTH; ++x)
+    {
+        u16 upper = TRANSPARENT;
+        u16 lower = TRANSPARENT;
+
+        const auto& object = objects[x];
+
+        if (obj_master && object.alpha && findBlendLayers<obj_master>(layers, x, flags, upper, lower))
+        {
+            scanline[x] = blendAlpha(upper, lower);
+        }
+        else
+        {
+            switch (blend_mode)
+            {
+            case BLD_ALPHA:
+                if (findBlendLayers<obj_master>(layers, x, flags, upper, lower))
+                    scanline[x] = blendAlpha(upper, lower);
+                else
+                    scanline[x] = upper;
+                break;
+
+            case BLD_WHITE:
+                if (findBlendLayers<obj_master>(layers, x, flags, upper))
+                    scanline[x] = blendWhite(upper);
+                else
+                    scanline[x] = upper;
+                break;
+
+            case BLD_BLACK:
+                if (findBlendLayers<obj_master>(layers, x, flags, upper))
+                    scanline[x] = blendBlack(upper);
+                else
+                    scanline[x] = upper;
+                break;
+
+            case BLD_DISABLED:
+                scanline[x] = upperLayer<obj_master>(layers, x);
+                break;
+
+            default:
+                UNREACHABLE;
+                break;
+            }
+        }
+    }
+}
+
+template<int obj_master>
+void PPU::collapseBW(const std::vector<Layer>& layers)
+{
+    switch (mmio.bldcnt.mode)
+    {
+    case 0: collapseBW<obj_master, 0>(layers); break;
+    case 1: collapseBW<obj_master, 1>(layers); break;
+    case 2: collapseBW<obj_master, 2>(layers); break;
+    case 3: collapseBW<obj_master, 3>(layers); break;
+
+    default:
+        UNREACHABLE;
+        break;
+    }
+}
+
+template<int obj_master, int blend_mode>
+void PPU::collapseBW(const std::vector<Layer>& layers)
+{
+    switch (possibleWindows<obj_master>())
+    {
+    case 0b000: collapseBW<obj_master, blend_mode, 0b000>(layers); break;
+    case 0b001: collapseBW<obj_master, blend_mode, 0b001>(layers); break;
+    case 0b010: collapseBW<obj_master, blend_mode, 0b010>(layers); break;
+    case 0b011: collapseBW<obj_master, blend_mode, 0b011>(layers); break;
+    case 0b100: collapseBW<obj_master, blend_mode, 0b100>(layers); break;
+    case 0b101: collapseBW<obj_master, blend_mode, 0b101>(layers); break;
+    case 0b110: collapseBW<obj_master, blend_mode, 0b110>(layers); break;
+    case 0b111: collapseBW<obj_master, blend_mode, 0b111>(layers); break;
+
+    default:
+        UNREACHABLE;
+        break;
+    }
+}
+
+template<int obj_master, int blend_mode, int win_master>
+void PPU::collapseBW(const std::vector<Layer>& layers)
+{
+    u16* scanline = &backend.buffer[WIDTH * mmio.vcount];
+
+    for (int x = 0; x < WIDTH; ++x)
+    {
+        u16 upper = TRANSPARENT;
+        u16 lower = TRANSPARENT;
+
+        const auto& object = objects[x];
+        const auto& window = activeWindow<win_master>(x);
+
+        if (obj_master && object.alpha 
+            && findBlendLayers<obj_master>(layers, x, window.flags, upper, lower))
+        {
+            scanline[x] = blendAlpha(upper, lower);
+        }
+        else if (window.sfx)
+        {
+            switch (blend_mode)
+            {
+            case BLD_ALPHA:
+                if (findBlendLayers<obj_master>(layers, x, window.flags, upper, lower))
+                    scanline[x] = blendAlpha(upper, lower);
+                else
+                    scanline[x] = upper;
+                break;
+
+            case BLD_WHITE:
+                if (findBlendLayers<obj_master>(layers, x, window.flags, upper))
+                    scanline[x] = blendWhite(upper);
+                else
+                    scanline[x] = upper;
+                break;
+
+            case BLD_BLACK:
+                if (findBlendLayers<obj_master>(layers, x, window.flags, upper))
+                    scanline[x] = blendBlack(upper);
+                else
+                    scanline[x] = upper;
+                break;
+
+            case BLD_DISABLED:
+                scanline[x] = upperLayer<obj_master>(layers, x, window.flags);
+                break;
+
+            default:
+                UNREACHABLE;
+                break;
+            }
+        }
+        else
+        {
+            if (upper != TRANSPARENT)
+                scanline[x] = upper;
+            else
+                scanline[x] = upperLayer<obj_master>(layers, x, window.flags);
+        }
+    }
+}
+
+template<int obj_master>
+int PPU::possibleWindows() const
+{
+    int windows = 0;
+    if (mmio.dispcnt.win0 && mmio.winv[0].contains(mmio.vcount))
+        windows |= WF_WIN0;
+    if (mmio.dispcnt.win1 && mmio.winv[1].contains(mmio.vcount))
+        windows |= WF_WIN1;
+    if (mmio.dispcnt.winobj && obj_master)
+        windows |= WF_WINOBJ;
+
+    return windows;
+}
+
+template<int win_master>
+const Window& PPU::activeWindow(int x) const
+{
+    if (win_master & WF_WIN0 && mmio.winh[0].contains(x))
+        return mmio.winin.win0;
+
+    if (win_master & WF_WIN1 && mmio.winh[1].contains(x))
+        return mmio.winin.win1;
+
+    if (win_master & WF_WINOBJ && objects[x].window)
+        return mmio.winout.winobj;
+
+    return mmio.winout.winout;
 }
 
 template<int obj_master>
@@ -39,32 +279,6 @@ u16 PPU::upperLayer(const std::vector<Layer>& layers, int x) const
 }
 
 template<int obj_master>
-void PPU::collapseNN(const std::vector<Layer>& layers)
-{
-    u16* scanline = &backend.buffer[WIDTH * mmio.vcount];
-    
-    for (int x = 0; x < WIDTH; ++x)
-    {
-        scanline[x] = upperLayer<obj_master>(layers, x);
-    }
-}
-
-template<int win_master>
-const Window& PPU::activeWindow(int x) const
-{
-    if (win_master & WF_WIN0 && mmio.winh[0].contains(x))
-        return mmio.winin.win0;
-    
-    if (win_master & WF_WIN1 && mmio.winh[1].contains(x))
-        return mmio.winin.win1;
-    
-    if (win_master & WF_WINOBJ && objects[x].window)
-        return mmio.winout.winobj;
-    
-    return mmio.winout.winout;
-}
-
-template<int obj_master>
 u16 PPU::upperLayer(const std::vector<Layer>& layers, int x, int flags) const
 {    
     const auto& object = objects[x];
@@ -84,54 +298,7 @@ u16 PPU::upperLayer(const std::vector<Layer>& layers, int x, int flags) const
 }
 
 template<int obj_master>
-int PPU::possibleWindows() const
-{
-    int windows = 0;
-    if (mmio.dispcnt.win0 && mmio.winv[0].contains(mmio.vcount))
-        windows |= WF_WIN0;
-    if (mmio.dispcnt.win1 && mmio.winv[1].contains(mmio.vcount))
-        windows |= WF_WIN1;
-    if (mmio.dispcnt.winobj && obj_master)
-        windows |= WF_WINOBJ;
-
-    return windows;
-}
-
-template<int obj_master>
-void PPU::collapseNW(const std::vector<Layer>& layers)
-{
-    switch (possibleWindows<obj_master>())
-    {
-    case 0b000: collapseNWImp<obj_master, 0b000>(layers); break;
-    case 0b001: collapseNWImp<obj_master, 0b001>(layers); break;
-    case 0b010: collapseNWImp<obj_master, 0b010>(layers); break;
-    case 0b011: collapseNWImp<obj_master, 0b011>(layers); break;
-    case 0b100: collapseNWImp<obj_master, 0b100>(layers); break;
-    case 0b101: collapseNWImp<obj_master, 0b101>(layers); break;
-    case 0b110: collapseNWImp<obj_master, 0b110>(layers); break;
-    case 0b111: collapseNWImp<obj_master, 0b111>(layers); break;
-                
-    default:
-        UNREACHABLE;
-        break;
-    }
-}
-
-template<int obj_master, int win_master>
-void PPU::collapseNWImp(const std::vector<Layer>& layers)
-{
-    u16* scanline = &backend.buffer[WIDTH * mmio.vcount];
-    
-    for (int x = 0; x < WIDTH; ++x)
-    {
-        const auto& window = activeWindow<win_master>(x);
-        
-        scanline[x] = upperLayer<obj_master>(layers, x, window.flags);
-    }
-}
-
-template<int obj_master>
-bool PPU::findBlendLayer(const std::vector<Layer>& layers, int x, int flags, u16& upper) const
+bool PPU::findBlendLayers(const std::vector<Layer>& layers, int x, int flags, u16& upper) const
 {
     const auto& object = objects[x];
     
@@ -228,173 +395,4 @@ bool PPU::findBlendLayers(const std::vector<Layer>& layers, int x, int flags, u1
         upper = mmu.palette.readHalf(0);
         return false;
     }    
-}
-
-template<int obj_master>
-void PPU::collapseBN(const std::vector<Layer>& layers)
-{
-    switch (mmio.bldcnt.mode)
-    {
-    case 0: collapseBNImp<obj_master, 0>(layers); break;
-    case 1: collapseBNImp<obj_master, 1>(layers); break;
-    case 2: collapseBNImp<obj_master, 2>(layers); break;
-    case 3: collapseBNImp<obj_master, 3>(layers); break;
-    
-    default:
-        UNREACHABLE;
-        break;
-    }
-}
-
-template<int obj_master, int blend_mode>
-void PPU::collapseBNImp(const std::vector<Layer>& layers)
-{
-    constexpr int flags = 0xFFFF;
-    
-    u16* scanline = &backend.buffer[WIDTH * mmio.vcount];
-    
-    for (int x = 0; x < WIDTH; ++x)
-    {
-        u16 upper = TRANSPARENT;
-        u16 lower = TRANSPARENT;
-        
-        const auto& object = objects[x];
-        
-        if (obj_master && object.alpha && findBlendLayers<obj_master>(layers, x, flags, upper, lower))
-        {
-            scanline[x] = blendAlpha(upper, lower);
-        }
-        else
-        {
-            switch (blend_mode)
-            {
-            case BLD_ALPHA:
-                if (findBlendLayers<obj_master>(layers, x, flags, upper, lower))
-                    scanline[x] = blendAlpha(upper, lower);
-                else
-                    scanline[x] = upper;
-                break;
-
-            case BLD_WHITE:
-                if (findBlendLayer<obj_master>(layers, x, flags, upper))
-                    scanline[x] = blendWhite(upper);
-                else
-                    scanline[x] = upper;
-                break;
-
-            case BLD_BLACK:
-                if (findBlendLayer<obj_master>(layers, x, flags, upper))
-                    scanline[x] = blendBlack(upper);
-                else
-                    scanline[x] = upper;
-                break;
-
-            case BLD_DISABLED:
-                scanline[x] = upperLayer<obj_master>(layers, x);
-                break;
-                
-            default:
-                UNREACHABLE;
-                break;
-            }
-        }
-    }
-}
-
-template<int obj_master>
-void PPU::collapseBW(const std::vector<Layer>& layers)
-{
-    switch (mmio.bldcnt.mode)
-    {
-    case 0: collapseBWImp<obj_master, 0>(layers); break;
-    case 1: collapseBWImp<obj_master, 1>(layers); break;
-    case 2: collapseBWImp<obj_master, 2>(layers); break;
-    case 3: collapseBWImp<obj_master, 3>(layers); break;
-    
-    default:
-        UNREACHABLE;
-        break;
-    }
-}
-
-template<int obj_master, int blend_mode>
-void PPU::collapseBWImp(const std::vector<Layer>& layers)
-{
-    switch (possibleWindows<obj_master>())
-    {
-    case 0b000: collapseBWImpImp<obj_master, 0b000, blend_mode>(layers); break;
-    case 0b001: collapseBWImpImp<obj_master, 0b001, blend_mode>(layers); break;
-    case 0b010: collapseBWImpImp<obj_master, 0b010, blend_mode>(layers); break;
-    case 0b011: collapseBWImpImp<obj_master, 0b011, blend_mode>(layers); break;
-    case 0b100: collapseBWImpImp<obj_master, 0b100, blend_mode>(layers); break;
-    case 0b101: collapseBWImpImp<obj_master, 0b101, blend_mode>(layers); break;
-    case 0b110: collapseBWImpImp<obj_master, 0b110, blend_mode>(layers); break;
-    case 0b111: collapseBWImpImp<obj_master, 0b111, blend_mode>(layers); break;
-    
-    default:
-        UNREACHABLE;
-        break;
-    }
-}
-
-template<int obj_master, int win_master, int blend_mode>
-void PPU::collapseBWImpImp(const std::vector<Layer>& layers)
-{
-    u16* scanline = &backend.buffer[WIDTH * mmio.vcount];
-    
-    for (int x = 0; x < WIDTH; ++x)
-    {
-        u16 upper = TRANSPARENT;
-        u16 lower = TRANSPARENT;
-
-        const auto& object = objects[x];
-        const auto& window = activeWindow<win_master>(x);
-        
-        if (obj_master && object.alpha 
-            && findBlendLayers<obj_master>(layers, x, window.flags, upper, lower))
-        {
-            scanline[x] = blendAlpha(upper, lower);
-        }
-        else if (window.sfx)
-        {
-            switch (blend_mode)
-            {
-            case BLD_ALPHA:
-                if (findBlendLayers<obj_master>(layers, x, window.flags, upper, lower))
-                    scanline[x] = blendAlpha(upper, lower);
-                else
-                    scanline[x] = upper;
-                break;
-
-            case BLD_WHITE:
-                if (findBlendLayer<obj_master>(layers, x, window.flags, upper))
-                    scanline[x] = blendWhite(upper);
-                else
-                    scanline[x] = upper;
-                break;
-
-            case BLD_BLACK:
-                if (findBlendLayer<obj_master>(layers, x, window.flags, upper))
-                    scanline[x] = blendBlack(upper);
-                else
-                    scanline[x] = upper;
-                break;
-
-            case BLD_DISABLED:
-                scanline[x] = upperLayer<obj_master>(layers, x, window.flags);
-                break;
-                
-            default:
-                UNREACHABLE;
-                break;
-            }
-        }
-        else
-        {
-            if (upper != TRANSPARENT)
-                scanline[x] = upper;
-            else
-                scanline[x] = upperLayer<obj_master>(layers, x, window.flags);
-        }
-    }
 }
