@@ -10,7 +10,6 @@ public:
     Input(MMIO& mmio);
     ~Input();
 
-
     void keyEvent(const SDL_KeyboardEvent& event);
 
     void controllerAxisEvent(const SDL_ControllerAxisEvent& event);

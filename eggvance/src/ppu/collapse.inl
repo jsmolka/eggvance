@@ -93,7 +93,7 @@ void PPU::collapseBN(const std::vector<Layer>& layers)
 
         if (obj_master && object.alpha && findBlendLayers<obj_master>(layers, x, flags, upper, lower))
         {
-            scanline[x] = argb(blendAlpha(upper, lower));
+            upper = blendAlpha(upper, lower);
         }
         else
         {
@@ -101,27 +101,21 @@ void PPU::collapseBN(const std::vector<Layer>& layers)
             {
             case BLD_ALPHA:
                 if (findBlendLayers<obj_master>(layers, x, flags, upper, lower))
-                    scanline[x] = argb(blendAlpha(upper, lower));
-                else
-                    scanline[x] = argb(upper);
+                    upper = blendAlpha(upper, lower);
                 break;
 
             case BLD_WHITE:
                 if (findBlendLayers<obj_master>(layers, x, flags, upper))
-                    scanline[x] = argb(blendWhite(upper));
-                else
-                    scanline[x] = argb(upper);
+                    upper = blendWhite(upper);
                 break;
 
             case BLD_BLACK:
                 if (findBlendLayers<obj_master>(layers, x, flags, upper))
-                    scanline[x] = argb(blendBlack(upper));
-                else
-                    scanline[x] = argb(upper);
+                    upper = blendBlack(upper);
                 break;
 
             case BLD_DISABLED:
-                scanline[x] = argb(upperLayer<obj_master>(layers, x));
+                upper = upperLayer<obj_master>(layers, x);
                 break;
 
             default:
@@ -129,6 +123,7 @@ void PPU::collapseBN(const std::vector<Layer>& layers)
                 break;
             }
         }
+        scanline[x] = argb(upper);
     }
 }
 
@@ -181,10 +176,9 @@ void PPU::collapseBW(const std::vector<Layer>& layers)
         const auto& object = objects[x];
         const auto& window = activeWindow<win_master>(x);
 
-        if (obj_master && object.alpha 
-            && findBlendLayers<obj_master>(layers, x, window.flags, upper, lower))
+        if (obj_master && object.alpha && findBlendLayers<obj_master>(layers, x, window.flags, upper, lower))
         {
-            scanline[x] = argb(blendAlpha(upper, lower));
+            upper = blendAlpha(upper, lower);
         }
         else if (window.sfx)
         {
@@ -192,27 +186,21 @@ void PPU::collapseBW(const std::vector<Layer>& layers)
             {
             case BLD_ALPHA:
                 if (findBlendLayers<obj_master>(layers, x, window.flags, upper, lower))
-                    scanline[x] = argb(blendAlpha(upper, lower));
-                else
-                    scanline[x] = argb(upper);
+                    upper = blendAlpha(upper, lower);
                 break;
 
-            case BLD_WHITE:
+            case BLD_WHITE: 
                 if (findBlendLayers<obj_master>(layers, x, window.flags, upper))
-                    scanline[x] = argb(blendWhite(upper));
-                else
-                    scanline[x] = argb(upper);
+                    upper = blendWhite(upper);
                 break;
 
             case BLD_BLACK:
                 if (findBlendLayers<obj_master>(layers, x, window.flags, upper))
-                    scanline[x] = argb(blendBlack(upper));
-                else
-                    scanline[x] = argb(upper);
+                    upper = blendBlack(upper);
                 break;
 
             case BLD_DISABLED:
-                scanline[x] = argb(upperLayer<obj_master>(layers, x, window.flags));
+                upper = upperLayer<obj_master>(layers, x, window.flags);
                 break;
 
             default:
@@ -222,11 +210,10 @@ void PPU::collapseBW(const std::vector<Layer>& layers)
         }
         else
         {
-            if (upper != TRANSPARENT)
-                scanline[x] = argb(upper);
-            else
-                scanline[x] = argb(upperLayer<obj_master>(layers, x, window.flags));
+            if (upper == TRANSPARENT)
+                upper = upperLayer<obj_master>(layers, x, window.flags);
         }
+        scanline[x] = argb(upper);
     }
 }
 

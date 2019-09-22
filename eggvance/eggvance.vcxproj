@@ -167,6 +167,7 @@
     <ClCompile Include="src\mmu\registers\timercontrol.cpp" />
     <ClCompile Include="src\mmu\registers\waitcontrol.cpp" />
     <ClCompile Include="src\mmu\registers\window.cpp" />
+    <ClCompile Include="src\ppu\backend.cpp" />
     <ClCompile Include="src\ppu\render.cpp" />
     <ClCompile Include="src\arm\decode.cpp" />
     <ClCompile Include="src\ppu\oamentry.cpp" />
