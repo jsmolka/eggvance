@@ -91,6 +91,8 @@ private:
     u16 blendWhite(u16 a) const;
     u16 blendBlack(u16 a) const;
 
+    static u32 argb(u16 color);
+
     int readBgColor(int index, int palette);
     int readFgColor(int index, int palette);
     int readPixel(u32 addr, int x, int y, PixelFormat format);

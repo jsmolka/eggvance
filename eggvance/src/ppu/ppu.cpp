@@ -37,8 +37,8 @@ void PPU::scanline()
 
     if (mmio.dispcnt.force_blank)
     {
-        u16* scanline = &backend.buffer[WIDTH * mmio.vcount];
-        std::fill_n(scanline, WIDTH, 0x7FFF);
+        u32* scanline = &backend.buffer[WIDTH * mmio.vcount];
+        std::fill_n(scanline, WIDTH, 0xFFFFFFFF);
         return;
     }
 
@@ -284,6 +284,18 @@ u16 PPU::blendBlack(u16 a) const
     int t_b = std::min(31, a_b - ((a_b * evy) >> 4));
 
     return (t_r << 0) | (t_g << 5) | (t_b << 10);
+}
+
+u32 PPU::argb(u16 color)
+{
+    u32 r = bits< 0, 5>(color);
+    u32 g = bits< 5, 5>(color);
+    u32 b = bits<10, 5>(color);
+
+    return 0xFF000000
+        | r << 19
+        | g << 11
+        | b <<  3;
 }
 
 int PPU::readBgColor(int index, int palette)

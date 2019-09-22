@@ -20,11 +20,11 @@ void PPU::collapse(const std::vector<Layer>& layers)
 template<int obj_master>
 void PPU::collapseNN(const std::vector<Layer>& layers)
 {
-    u16* scanline = &backend.buffer[WIDTH * mmio.vcount];
+    u32* scanline = &backend.buffer[WIDTH * mmio.vcount];
 
     for (int x = 0; x < WIDTH; ++x)
     {
-        scanline[x] = upperLayer<obj_master>(layers, x);
+        scanline[x] = argb(upperLayer<obj_master>(layers, x));
     }
 }
 
@@ -51,13 +51,13 @@ void PPU::collapseNW(const std::vector<Layer>& layers)
 template<int obj_master, int win_master>
 void PPU::collapseNW(const std::vector<Layer>& layers)
 {
-    u16* scanline = &backend.buffer[WIDTH * mmio.vcount];
+    u32* scanline = &backend.buffer[WIDTH * mmio.vcount];
 
     for (int x = 0; x < WIDTH; ++x)
     {
         const auto& window = activeWindow<win_master>(x);
 
-        scanline[x] = upperLayer<obj_master>(layers, x, window.flags);
+        scanline[x] = argb(upperLayer<obj_master>(layers, x, window.flags));
     }
 }
 
@@ -82,7 +82,7 @@ void PPU::collapseBN(const std::vector<Layer>& layers)
 {
     constexpr int flags = 0xFFFF;
 
-    u16* scanline = &backend.buffer[WIDTH * mmio.vcount];
+    u32* scanline = &backend.buffer[WIDTH * mmio.vcount];
 
     for (int x = 0; x < WIDTH; ++x)
     {
@@ -93,7 +93,7 @@ void PPU::collapseBN(const std::vector<Layer>& layers)
 
         if (obj_master && object.alpha && findBlendLayers<obj_master>(layers, x, flags, upper, lower))
         {
-            scanline[x] = blendAlpha(upper, lower);
+            scanline[x] = argb(blendAlpha(upper, lower));
         }
         else
         {
@@ -101,27 +101,27 @@ void PPU::collapseBN(const std::vector<Layer>& layers)
             {
             case BLD_ALPHA:
                 if (findBlendLayers<obj_master>(layers, x, flags, upper, lower))
-                    scanline[x] = blendAlpha(upper, lower);
+                    scanline[x] = argb(blendAlpha(upper, lower));
                 else
-                    scanline[x] = upper;
+                    scanline[x] = argb(upper);
                 break;
 
             case BLD_WHITE:
                 if (findBlendLayers<obj_master>(layers, x, flags, upper))
-                    scanline[x] = blendWhite(upper);
+                    scanline[x] = argb(blendWhite(upper));
                 else
-                    scanline[x] = upper;
+                    scanline[x] = argb(upper);
                 break;
 
             case BLD_BLACK:
                 if (findBlendLayers<obj_master>(layers, x, flags, upper))
-                    scanline[x] = blendBlack(upper);
+                    scanline[x] = argb(blendBlack(upper));
                 else
-                    scanline[x] = upper;
+                    scanline[x] = argb(upper);
                 break;
 
             case BLD_DISABLED:
-                scanline[x] = upperLayer<obj_master>(layers, x);
+                scanline[x] = argb(upperLayer<obj_master>(layers, x));
                 break;
 
             default:
@@ -171,7 +171,7 @@ void PPU::collapseBW(const std::vector<Layer>& layers)
 template<int obj_master, int blend_mode, int win_master>
 void PPU::collapseBW(const std::vector<Layer>& layers)
 {
-    u16* scanline = &backend.buffer[WIDTH * mmio.vcount];
+    u32* scanline = &backend.buffer[WIDTH * mmio.vcount];
 
     for (int x = 0; x < WIDTH; ++x)
     {
@@ -184,7 +184,7 @@ void PPU::collapseBW(const std::vector<Layer>& layers)
         if (obj_master && object.alpha 
             && findBlendLayers<obj_master>(layers, x, window.flags, upper, lower))
         {
-            scanline[x] = blendAlpha(upper, lower);
+            scanline[x] = argb(blendAlpha(upper, lower));
         }
         else if (window.sfx)
         {
@@ -192,27 +192,27 @@ void PPU::collapseBW(const std::vector<Layer>& layers)
             {
             case BLD_ALPHA:
                 if (findBlendLayers<obj_master>(layers, x, window.flags, upper, lower))
-                    scanline[x] = blendAlpha(upper, lower);
+                    scanline[x] = argb(blendAlpha(upper, lower));
                 else
-                    scanline[x] = upper;
+                    scanline[x] = argb(upper);
                 break;
 
             case BLD_WHITE:
                 if (findBlendLayers<obj_master>(layers, x, window.flags, upper))
-                    scanline[x] = blendWhite(upper);
+                    scanline[x] = argb(blendWhite(upper));
                 else
-                    scanline[x] = upper;
+                    scanline[x] = argb(upper);
                 break;
 
             case BLD_BLACK:
                 if (findBlendLayers<obj_master>(layers, x, window.flags, upper))
-                    scanline[x] = blendBlack(upper);
+                    scanline[x] = argb(blendBlack(upper));
                 else
-                    scanline[x] = upper;
+                    scanline[x] = argb(upper);
                 break;
 
             case BLD_DISABLED:
-                scanline[x] = upperLayer<obj_master>(layers, x, window.flags);
+                scanline[x] = argb(upperLayer<obj_master>(layers, x, window.flags));
                 break;
 
             default:
@@ -223,9 +223,9 @@ void PPU::collapseBW(const std::vector<Layer>& layers)
         else
         {
             if (upper != TRANSPARENT)
-                scanline[x] = upper;
+                scanline[x] = argb(upper);
             else
-                scanline[x] = upperLayer<obj_master>(layers, x, window.flags);
+                scanline[x] = argb(upperLayer<obj_master>(layers, x, window.flags));
         }
     }
 }

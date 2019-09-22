@@ -28,7 +28,7 @@ struct Backend
 
         texture = SDL_CreateTexture(
             renderer,
-            SDL_PIXELFORMAT_BGR555,
+            SDL_PIXELFORMAT_ARGB8888,
             SDL_TEXTUREACCESS_STREAMING,
             WIDTH, HEIGHT
         );
@@ -48,7 +48,7 @@ struct Backend
         SDL_UpdateTexture(
             texture, nullptr,
             buffer.data(),
-            sizeof(u16) * WIDTH
+            sizeof(u32) * WIDTH
         );
         SDL_RenderCopy(renderer, texture, nullptr, nullptr);
         SDL_RenderPresent(renderer);
@@ -65,5 +65,5 @@ struct Backend
     SDL_Renderer* renderer;
     SDL_Texture* texture;
 
-    std::array<u16, WIDTH * HEIGHT> buffer;
+    std::array<u32, WIDTH * HEIGHT> buffer;
 };
