@@ -1,3 +1,5 @@
+#define MISSING_PIXEL 0x6C3F
+
 template<int obj_master>
 void PPU::collapse(const std::vector<Layer>& layers)
 {
@@ -86,8 +88,8 @@ void PPU::collapseBN(const std::vector<Layer>& layers)
 
     for (int x = 0; x < WIDTH; ++x)
     {
-        u16 upper = TRANSPARENT;
-        u16 lower = TRANSPARENT;
+        u16 upper = MISSING_PIXEL;
+        u16 lower = MISSING_PIXEL;
 
         const auto& object = objects[x];
 
@@ -170,8 +172,8 @@ void PPU::collapseBW(const std::vector<Layer>& layers)
 
     for (int x = 0; x < WIDTH; ++x)
     {
-        u16 upper = TRANSPARENT;
-        u16 lower = TRANSPARENT;
+        u16 upper = MISSING_PIXEL;
+        u16 lower = MISSING_PIXEL;
 
         const auto& object = objects[x];
         const auto& window = activeWindow<win_master>(x);
@@ -210,7 +212,7 @@ void PPU::collapseBW(const std::vector<Layer>& layers)
         }
         else
         {
-            if (upper == TRANSPARENT)
+            if (!obj_master || !object.alpha)
                 upper = upperLayer<obj_master>(layers, x, window.flags);
         }
         scanline[x] = argb(upper);
@@ -313,6 +315,20 @@ bool PPU::findBlendLayers(const std::vector<Layer>& layers, int x, int flags, u1
     return flags_upper & LF_BDP;
 }
 
+#define PROCESS_BLEND_LAYER(color, flag) \
+    if (upper_found)                     \
+    {                                    \
+        lower = color;                   \
+        return flags_lower & flag;       \
+    }                                    \
+    else                                 \
+    {                                    \
+        upper = color;                   \
+        upper_found = true;              \
+        if (flags_upper ^ flag)          \
+            return false;                \
+    }
+
 template<int obj_master>
 bool PPU::findBlendLayers(const std::vector<Layer>& layers, int x, int flags, u16& upper, u16& lower) const
 {
@@ -321,56 +337,24 @@ bool PPU::findBlendLayers(const std::vector<Layer>& layers, int x, int flags, u1
     int flags_upper = object.alpha ? LF_OBJ : mmio.bldcnt.upper.flags;
     int flags_lower = mmio.bldcnt.lower.flags;
     
-    bool upper_found = false;    
+    bool upper_found = false;
     bool object_used = false;
+
     for (const auto& layer : layers)
     {
         if (obj_master && flags & LF_OBJ && !object_used && object.opaque && object.precedes(layer))
         {
-            if (upper_found)
-            {
-                lower = object.color;
-                return flags_lower & LF_OBJ;
-            }
-            else
-            {
-                upper_found = true;
-                upper = object.color;
-                if ((flags_upper & LF_OBJ) == 0)
-                    return false;
-            }
+            PROCESS_BLEND_LAYER(object.color, LF_OBJ);
             object_used = true;
         }
         if (flags & layer.flag && layer.opaque(x))
         {
-            if (upper_found)
-            {
-                lower = layer.color(x);
-                return flags_lower & layer.flag;
-            }
-            else
-            {
-                upper_found = true;
-                upper = layer.color(x);
-                if ((flags_upper & layer.flag) == 0)
-                    return false;
-            }
+            PROCESS_BLEND_LAYER(layer.color(x), layer.flag);
         }
     }
     if (obj_master && flags & LF_OBJ && !object_used && object.opaque)
     {
-        if (upper_found)
-        {
-            lower = object.color;
-            return flags_lower & LF_OBJ;
-        }
-        else
-        {
-            upper_found = true;
-            upper = object.color;
-            if ((flags_upper & LF_OBJ) == 0)
-                return false;
-        }
+        PROCESS_BLEND_LAYER(object.color, LF_OBJ);
     }
     if (upper_found)
     {
@@ -381,5 +365,9 @@ bool PPU::findBlendLayers(const std::vector<Layer>& layers, int x, int flags, u1
     {
         upper = mmu.palette.readHalf(0);
         return false;
-    }    
+    }
 }
+
+#undef PROCESS_BLEND_LAYER
+
+#undef MISSING_PIXEL
