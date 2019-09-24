@@ -214,22 +214,16 @@ void PPU::collapse(int begin, int end)
     {
         if (mmio.dispcnt.bg[bg])
         {
-            layers.emplace_back(
+            layers.push_back({
                 bg,
                 bgs[bg].data(),
                 mmio.bgcnt[bg].priority,
                 1 << bg
-            );
+            });
         }
     }
 
-    std::sort(layers.begin(), layers.end(),
-        [](const Layer& lhs, const Layer& rhs) {
-            return lhs.prio != rhs.prio 
-                ? lhs.prio < rhs.prio 
-                : lhs.id < rhs.id;
-        }
-    );
+    std::sort(layers.begin(), layers.end(), std::less());
 
     if (objects_exist)
         collapse<1>(layers);
@@ -239,63 +233,53 @@ void PPU::collapse(int begin, int end)
 
 u16 PPU::blendAlpha(u16 a, u16 b) const
 {
-    int a_r = bits< 0, 5>(a);
-    int a_g = bits< 5, 5>(a);
-    int a_b = bits<10, 5>(a);
-    int b_r = bits< 0, 5>(b);
-    int b_g = bits< 5, 5>(b);
-    int b_b = bits<10, 5>(b);
+    int ar = bits< 0, 5>(a);
+    int ag = bits< 5, 5>(a);
+    int ab = bits<10, 5>(a);
 
-    int eva = std::min(17, mmio.bldalpha.eva);
-    int evb = std::min(17, mmio.bldalpha.evb);
+    int br = bits< 0, 5>(b);
+    int bg = bits< 5, 5>(b);
+    int bb = bits<10, 5>(b);
 
-    int t_r = std::min(31, (a_r * eva + b_r * evb) >> 4);
-    int t_g = std::min(31, (a_g * eva + b_g * evb) >> 4);
-    int t_b = std::min(31, (a_b * eva + b_b * evb) >> 4);
+    int tr = std::min(31, (ar * mmio.bldalpha.eva + br * mmio.bldalpha.evb) >> 4);
+    int tg = std::min(31, (ag * mmio.bldalpha.eva + bg * mmio.bldalpha.evb) >> 4);
+    int tb = std::min(31, (ab * mmio.bldalpha.eva + bb * mmio.bldalpha.evb) >> 4);
 
-    return (t_r << 0) | (t_g << 5) | (t_b << 10);
+    return (tr << 0) | (tg << 5) | (tb << 10);
 }
 
 u16 PPU::blendWhite(u16 a) const
 {
-    int a_r = bits< 0, 5>(a);
-    int a_g = bits< 5, 5>(a);
-    int a_b = bits<10, 5>(a);
+    int ar = bits< 0, 5>(a);
+    int ag = bits< 5, 5>(a);
+    int ab = bits<10, 5>(a);
 
-    int evy = std::min(17, mmio.bldy.evy);
+    int tr = std::min(31, ar + (((31 - ar) * mmio.bldy.evy) >> 4));
+    int tg = std::min(31, ag + (((31 - ag) * mmio.bldy.evy) >> 4));
+    int tb = std::min(31, ab + (((31 - ab) * mmio.bldy.evy) >> 4));
 
-    int t_r = std::min(31, a_r + (((31 - a_r) * evy) >> 4));
-    int t_g = std::min(31, a_g + (((31 - a_g) * evy) >> 4));
-    int t_b = std::min(31, a_b + (((31 - a_b) * evy) >> 4));
-
-    return (t_r << 0) | (t_g << 5) | (t_b << 10);
+    return (tr << 0) | (tg << 5) | (tb << 10);
 }
 
 u16 PPU::blendBlack(u16 a) const
 {
-    int a_r = bits< 0, 5>(a);
-    int a_g = bits< 5, 5>(a);
-    int a_b = bits<10, 5>(a);
+    int ar = bits< 0, 5>(a);
+    int ag = bits< 5, 5>(a);
+    int ab = bits<10, 5>(a);
 
-    int evy = std::min(17, mmio.bldy.evy);
+    int tr = std::min(31, ar - ((ar * mmio.bldy.evy) >> 4));
+    int tg = std::min(31, ag - ((ag * mmio.bldy.evy) >> 4));
+    int tb = std::min(31, ab - ((ab * mmio.bldy.evy) >> 4));
 
-    int t_r = std::min(31, a_r - ((a_r * evy) >> 4));
-    int t_g = std::min(31, a_g - ((a_g * evy) >> 4));
-    int t_b = std::min(31, a_b - ((a_b * evy) >> 4));
-
-    return (t_r << 0) | (t_g << 5) | (t_b << 10);
+    return (tr << 0) | (tg << 5) | (tb << 10);
 }
 
 u32 PPU::argb(u16 color)
 {
-    u32 r = bits< 0, 5>(color);
-    u32 g = bits< 5, 5>(color);
-    u32 b = bits<10, 5>(color);
-
     return 0xFF000000
-        | r << 19
-        | g << 11
-        | b <<  3;
+        | (color & 0x001F) << 19
+        | (color & 0x03E0) <<  6
+        | (color & 0x7C00) >>  7;
 }
 
 int PPU::readBgColor(int index, int palette)

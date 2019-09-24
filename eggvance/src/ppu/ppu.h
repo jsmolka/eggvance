@@ -4,7 +4,6 @@
 #include "backend.h"
 #include "buffer.h"
 #include "layers.h"
-#include "objectdata.h"
 
 class PPU
 {

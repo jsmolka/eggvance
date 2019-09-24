@@ -1,11 +1,8 @@
 #pragma once
 
-#include <vector>
-
 #include "common/integer.h"
 #include "constants.h"
 
-// Todo: move into layer?
 enum LayerFlag
 {
     LF_BG0 = 1 << 0,
@@ -18,21 +15,50 @@ enum LayerFlag
 
 struct Layer
 {
-    Layer(int id, u16* data, int prio, int flag)
-        : id(id), data(data), prio(prio), flag(flag) {};
-
-    inline u16 color(int x) const
+    u16 color(int x) const
     {
         return data[x];
     }
 
-    inline bool opaque(int x) const
+    bool opaque(int x) const
     {
         return data[x] != TRANSPARENT;
+    }
+
+    bool operator<(const Layer& other) const
+    {
+        if (prio == other.prio)
+            return id < other.id;
+        else
+            return prio < other.prio;
     }
 
     int  id;
     u16* data;
     int  prio;
     int  flag;
+};
+
+struct ObjectData
+{
+    ObjectData()
+        : color(TRANSPARENT)
+        , opaque(false)
+        , prio(4)
+        , alpha(false)
+        , window(false)
+    { 
+
+    }
+
+    bool precedes(const Layer& layer) const
+    {
+        return prio <= layer.prio;
+    }
+
+    int  color;
+    bool opaque;
+    int  prio;
+    bool alpha;
+    bool window;
 };
