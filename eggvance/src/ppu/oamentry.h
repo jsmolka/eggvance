@@ -31,9 +31,9 @@ struct OAMEntry
     int flip_y;    // Vertical flip (if not affine)
     int size;      // Object size
 
-    int tile;      // Base tile number
-    int priority;  // Priority
-    int palette;   // Palette bank for 16/16 color mode
+    int tile;          // Base tile number
+    int priority;      // Priority
+    int palette_bank;  // Palette bank for 16/16 color mode
 
     int width() const;
     int height() const;
@@ -66,9 +66,9 @@ inline void OAMEntry::write(u16 half)
         break;
 
     case 4:
-        tile      = bits< 0, 10>(half);
-        priority  = bits<10,  2>(half);
-        palette   = bits<12,  4>(half);
+        tile         = bits< 0, 10>(half);
+        priority     = bits<10,  2>(half);
+        palette_bank = bits<12,  4>(half);
         break;
 
     default:

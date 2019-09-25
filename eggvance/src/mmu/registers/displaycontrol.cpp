@@ -24,10 +24,9 @@ bool DisplayControl::enabled() const
     case 0: return bg0 || bg1 || bg2 || bg3 || obj;
     case 1: return bg0 || bg1 || bg2 || obj;
     case 2: return bg2 || bg3 || obj;
-    case 3:
-    case 4:
-    case 5: 
-        return bg2 || obj;
+    case 3: return bg2 || obj;
+    case 4: return bg2 || obj;
+    case 5: return bg2 || obj; 
     }
     return false;
 }

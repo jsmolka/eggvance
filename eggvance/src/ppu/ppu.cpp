@@ -19,13 +19,13 @@ PPU::PPU(MMU& mmu)
 
 void PPU::reset()
 {
-    for (DoubleBuffer<u16>& bg : bgs)
+    for (auto& background : backgrounds)
     {
-        bg.fill(TRANSPARENT);
-        bg.flip();
-        bg.fill(TRANSPARENT);
+        background.fill(TRANSPARENT);
+        background.flip();
+        background.fill(TRANSPARENT);
     }
-    objects = {};
+    objects.fill(ObjectLayer());
     objects_exist = false;
     objects_alpha = false;
 }
@@ -42,14 +42,14 @@ void PPU::scanline()
         return;
     }
 
-    bgs[0].flip();
-    bgs[1].flip();
-    bgs[2].flip();
-    bgs[3].flip();
+    backgrounds[0].flip();
+    backgrounds[1].flip();
+    backgrounds[2].flip();
+    backgrounds[3].flip();
 
     if (objects_exist)
     {
-        objects.fill(ObjectData());
+        objects.fill(ObjectLayer());
         objects_exist = false;
         objects_alpha = false;
     }
@@ -104,9 +104,9 @@ void PPU::scanline()
 
 void PPU::hblank()
 {
-    mmu.signalDMA(DMA::Timing::HBLANK);
-    mmio.dispstat.vblank = false;
     mmio.dispstat.hblank = true;
+    mmio.dispstat.vblank = false;
+    mmu.signalDMA(DMA::Timing::HBLANK);
 
     mmio.bgx[0].internal += mmio.bgpb[0].parameter;
     mmio.bgx[1].internal += mmio.bgpb[1].parameter;
@@ -121,9 +121,9 @@ void PPU::hblank()
 
 void PPU::vblank()
 {
-    mmu.signalDMA(DMA::Timing::VBLANK);
     mmio.dispstat.vblank = true;
     mmio.dispstat.hblank = false;
+    mmu.signalDMA(DMA::Timing::VBLANK);
 
     mmio.bgx[0].internal = mmio.bgx[0].reference;
     mmio.bgx[1].internal = mmio.bgx[1].reference;
@@ -138,15 +138,12 @@ void PPU::vblank()
 
 void PPU::next()
 {
-    int vmatch = mmio.vcount == mmio.dispstat.vcount_compare;
-
-    mmio.vcount = (mmio.vcount + 1) % 228;
-    mmio.dispstat.vmatch = vmatch;
-
-    if (vmatch && mmio.dispstat.vmatch_irq)
+    mmio.dispstat.vmatch = mmio.vcount == mmio.dispstat.vcount_compare;
+    if (mmio.dispstat.vmatch && mmio.dispstat.vmatch_irq)
     {
         Interrupt::request(IF_VMATCH);
     }
+    mmio.vcount = (mmio.vcount + 1) % 228;
 }
 
 void PPU::present()
@@ -169,7 +166,7 @@ void PPU::renderBg(RenderFunc func, int bg)
         }
         else
         {
-            bgs[bg].flip();
+            backgrounds[bg].flip();
         }
     }
     else
@@ -184,14 +181,14 @@ void PPU::mosaic(int bg)
     if (mosaic_x == 1)
         return;
 
-    int color;
+    u16 color;
     for (int x = 0; x < WIDTH; ++x)
     {
         if (x % mosaic_x == 0)
         {
-            color = bgs[bg][x];
+            color = backgrounds[bg][x];
         }
-        bgs[bg][x] = color;
+        backgrounds[bg][x] = color;
     }
 }
 
@@ -207,23 +204,28 @@ bool PPU::mosaicDominant() const
 
 void PPU::collapse(int begin, int end)
 {
-    std::vector<Layer> layers;
+    std::vector<BackgroundLayer> layers;
     layers.reserve(end - begin);
 
     for (int bg = begin; bg < end; ++bg) 
     {
         if (mmio.dispcnt.bg[bg])
         {
-            layers.push_back({
-                bg,
-                bgs[bg].data(),
-                mmio.bgcnt[bg].priority,
-                1 << bg
-            });
+            layers.emplace_back(
+                bg, 
+                backgrounds[bg].data(),
+                mmio.bgcnt[bg].priority
+            );
         }
     }
 
-    std::sort(layers.begin(), layers.end(), std::less());
+    std::sort(layers.begin(), layers.end(),
+        [](const BackgroundLayer& lhs, const BackgroundLayer& rhs) {
+            return lhs.priority != rhs.priority
+                ? lhs.priority < rhs.priority
+                : lhs.id < rhs.id;
+        }
+    );
 
     if (objects_exist)
         collapse<1>(layers);
@@ -282,25 +284,25 @@ u32 PPU::argb(u16 color)
         | (color & 0x7C00) >>  7;
 }
 
-int PPU::readBgColor(int index, int palette)
+u16 PPU::readBgColor(int index, int bank)
 {
     if (index == 0)
         return TRANSPARENT;
 
-    return mmu.palette.readHalf(0x20 * palette + 2 * index);
+    return mmu.palette.readHalf(0x20 * bank + 2 * index);
 }
 
-int PPU::readFgColor(int index, int palette)
+u16 PPU::readFgColor(int index, int bank)
 {
     if (index == 0)
         return TRANSPARENT;
 
-    return mmu.palette.readHalf(0x200 + 0x20 * palette + 2 * index);
+    return mmu.palette.readHalf(0x200 + 0x20 * bank + 2 * index);
 }
 
-int PPU::readPixel(u32 addr, int x, int y, PixelFormat format)
+u16 PPU::readPixel(u32 addr, int x, int y, Palette palette)
 {
-    if (format == BPP4)
+    if (palette == P_16_16)
     {
         return (x & 0x1) 
             ? mmu.vram[addr + 4 * y + x / 2] >> 4

@@ -16,7 +16,7 @@ void PPU::renderBgMode0(int bg)
     int ref_y = mmio.bgvofs[bg].offset + mmio.vcount;
 
     int tile_size = bgcnt.palette_type ? 0x40 : 0x20;
-    PixelFormat format = bgcnt.palette_type ? BPP8 : BPP4;
+    Palette palette = bgcnt.palette_type ? P_256_1 : P_16_16;
 
     // Amount of blocks along axis
     int blocks_x = (bgcnt.screen_size & 0x1) ? 2 : 1;
@@ -34,6 +34,10 @@ void PPU::renderBgMode0(int bg)
     case 0b01: block = ref_x / 256; break;
     case 0b10: block = ref_y / 256; break;
     case 0b11: block = 2 * (ref_y / 256) + ref_x / 256; break;
+
+    default:
+        UNREACHABLE;
+        break;
     }
 
     // Tiles inside current block
@@ -60,9 +64,9 @@ void PPU::renderBgMode0(int bg)
             u32 addr = base_addr + tile_size * tile;
             if (addr < 0x10000)
             {
-                int flip_x  = bits<10, 1>(entry);
-                int flip_y  = bits<11, 1>(entry);
-                int palette = bgcnt.palette_type ? 0 : bits<12, 4>(entry);
+                int flip_x = bits<10, 1>(entry);
+                int flip_y = bits<11, 1>(entry);
+                int bank   = palette == P_256_1 ? 0 : bits<12, 4>(entry);
 
                 for (; pixel_x < 8; ++pixel_x)
                 {
@@ -70,9 +74,9 @@ void PPU::renderBgMode0(int bg)
                         addr,
                         flip_lut[flip_x][pixel_x],
                         flip_lut[flip_y][pixel_y],
-                        format
+                        palette
                     );
-                    bgs[bg][screen_x] = readBgColor(index, palette);
+                    backgrounds[bg][screen_x] = readBgColor(index, bank);
                     if (++screen_x == WIDTH)
                         return;
                 }
@@ -81,7 +85,7 @@ void PPU::renderBgMode0(int bg)
             {
                 for (; pixel_x < 8; ++pixel_x)
                 {
-                    bgs[bg][screen_x] = TRANSPARENT;
+                    backgrounds[bg][screen_x] = TRANSPARENT;
                     if (++screen_x == WIDTH)
                         return;
                 }
@@ -130,7 +134,7 @@ void PPU::renderBgMode2(int bg)
             }
             else
             {
-                bgs[bg][screen_x] = TRANSPARENT;
+                backgrounds[bg][screen_x] = TRANSPARENT;
                 continue;
             }
         }
@@ -144,7 +148,7 @@ void PPU::renderBgMode2(int bg)
         int pixel_x = tex_x % 8;
         int pixel_y = tex_y % 8;
 
-        bgs[bg][screen_x] = readBgColor(readPixel(addr, pixel_x, pixel_y, BPP8), 0);
+        backgrounds[bg][screen_x] = readBgColor(readPixel(addr, pixel_x, pixel_y, P_256_1), 0);
     }
 }
 
@@ -152,7 +156,7 @@ void PPU::renderBgMode3(int bg)
 {
     u32 addr = 2 * WIDTH * mmio.vcount;
     u16* pixel = mmu.vram.ptr<u16>(addr);
-    std::copy_n(pixel, WIDTH, &bgs[bg][0]);
+    std::copy_n(pixel, WIDTH, &backgrounds[bg][0]);
 }
 
 void PPU::renderBgMode4(int bg)
@@ -160,7 +164,9 @@ void PPU::renderBgMode4(int bg)
     u32 addr = (0xA000 * mmio.dispcnt.frame) + (WIDTH * mmio.vcount);
     u8* index = mmu.vram.ptr<u8>(addr);
     for (int x = 0; x < WIDTH; ++x, ++index)
-        bgs[bg][x] = readBgColor(*index, 0);
+    {
+        backgrounds[bg][x] = readBgColor(*index, 0);
+    }
 }
 
 void PPU::renderBgMode5(int bg)
@@ -169,12 +175,12 @@ void PPU::renderBgMode5(int bg)
     {
         u32 addr = (0xA000 * mmio.dispcnt.frame) + (2 * 160 * mmio.vcount);
         u16* pixel = mmu.vram.ptr<u16>(addr);
-        pixel = std::copy_n(pixel, 160, &bgs[bg][0]);
+        pixel = std::copy_n(pixel, 160, &backgrounds[bg][0]);
         std::fill_n(pixel, 80, TRANSPARENT);
     }
     else
     {
-        bgs[bg].fill(TRANSPARENT);
+        backgrounds[bg].fill(TRANSPARENT);
     }
 }
 
@@ -215,9 +221,9 @@ void PPU::renderObjects()
         if (sprite_line < 0 || sprite_line >= rect_height)
             continue;
 
-        int palette = oam.color_mode ? 0 : oam.palette;
+        int bank = oam.color_mode ? 0 : oam.palette_bank;
         int tile_size = oam.color_mode ? 0x40 : 0x20;
-        PixelFormat format = oam.color_mode ? BPP8 : BPP4;
+        Palette palette = oam.color_mode ? P_256_1 : P_16_16;
 
         // 1D mapping arranges tiles continuously in memory. 2D mapping arranges 
         // tiles in a 32x32 matrix. The width is halfed to 16 tiles when using 
@@ -250,8 +256,8 @@ void PPU::renderObjects()
         int offset_y = line - center_y;
 
         // The base tile defines the start of the object independent of the
-        // color mode (and therefore tile_size). In 256 bit color mode only 
-        // each second tile may be used.
+        // color mode (and therefore tile_size). In 256/1 color mode only each 
+        // second tile may be used.
         u32 base_addr = 0x10000 + 0x20 * oam.tile;
 
         int half_width  = width / 2;
@@ -300,7 +306,7 @@ void PPU::renderObjects()
                 int pixel_x = tex_x % 8;
                 int pixel_y = tex_y % 8;
 
-                int index = readPixel(addr, pixel_x, pixel_y, format);
+                int index = readPixel(addr, pixel_x, pixel_y, palette);
                 if (index != 0)
                 {
                     auto& object = objects[screen_x];
@@ -309,12 +315,12 @@ void PPU::renderObjects()
                     {
                     case GFX_NORMAL:
                     case GFX_ALPHA:
-                        if (oam.priority <= object.prio)
+                        if (oam.priority <= object.priority)
                         {
-                            object.color  = readFgColor(index, palette);
-                            object.opaque = object.color != TRANSPARENT; 
-                            object.prio   = oam.priority;
-                            object.alpha  = oam.gfx_mode == GFX_ALPHA;
+                            object.color    = readFgColor(index, bank);
+                            object.opaque   = true;
+                            object.priority = oam.priority;
+                            object.alpha    = oam.gfx_mode == GFX_ALPHA;
                         }
                         break;
 

@@ -15,6 +15,36 @@ enum LayerFlag
 
 struct Layer
 {
+    Layer(int priority) 
+        : priority(priority)
+    { 
+    
+    }
+
+    bool operator<(const Layer& other) const
+    {
+        return priority < other.priority;
+    }
+
+    bool operator<=(const Layer& other) const
+    {
+        return priority <= other.priority;
+    }
+
+    int priority;
+};
+
+struct BackgroundLayer : public Layer
+{
+    BackgroundLayer(int id, u16* data, int priority)
+        : Layer(priority)
+        , id(id)
+        , data(data)
+        , flag(1 << id)
+    {
+
+    }
+
     u16 color(int x) const
     {
         return data[x];
@@ -22,43 +52,28 @@ struct Layer
 
     bool opaque(int x) const
     {
-        return data[x] != TRANSPARENT;
-    }
-
-    bool operator<(const Layer& other) const
-    {
-        if (prio == other.prio)
-            return id < other.id;
-        else
-            return prio < other.prio;
+        return color(x) != TRANSPARENT;
     }
 
     int  id;
     u16* data;
-    int  prio;
     int  flag;
 };
 
-struct ObjectData
+struct ObjectLayer : public Layer
 {
-    ObjectData()
-        : color(TRANSPARENT)
+    ObjectLayer()
+        : Layer(4)
+        , color(TRANSPARENT)
         , opaque(false)
-        , prio(4)
-        , alpha(false)
         , window(false)
-    { 
-
-    }
-
-    bool precedes(const Layer& layer) const
+        , alpha(false)
     {
-        return prio <= layer.prio;
+
     }
 
-    int  color;
+    u16  color;
     bool opaque;
-    int  prio;
-    bool alpha;
     bool window;
+    bool alpha;
 };
