@@ -18,7 +18,6 @@ public:
     MMU(std::unique_ptr<BIOS> bios);
 
     void reset();
-    void setGamePak(std::unique_ptr<GamePak> gamepak);
     void signalDMA(DMA::Timing timing);
 
     u8  readByte(u32 addr);

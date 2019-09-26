@@ -26,6 +26,7 @@ public:
 
     bool valid;
     Header header;
+    std::string file;
     std::unique_ptr<Save> save;
 
 private:

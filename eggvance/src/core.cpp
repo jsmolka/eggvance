@@ -30,7 +30,7 @@ void Core::run(std::unique_ptr<GamePak> gamepak)
     if (gamepak && gamepak->valid)
     {
         setWindowTitle(*gamepak);
-        mmu.setGamePak(std::move(gamepak));
+        mmu.gamepak = std::move(gamepak);
     }
     else
     {
@@ -74,6 +74,11 @@ void Core::run(std::unique_ptr<GamePak> gamepak)
 
             case SDL_CONTROLLERAXISMOTION:
                 input.controllerAxisEvent(event.caxis);
+                break;
+
+            case SDL_DROPFILE:
+                if (!dropEvent(event.drop))
+                    return;
                 break;
             }
         }
@@ -170,12 +175,19 @@ bool Core::dropEvent(const SDL_DropEvent& event)
 
     if (fs::is_regular_file(file))
     {
+        if (mmu.gamepak && mmu.gamepak->file == file)
+        {
+            reset();
+            return true;
+        }
+
         auto gamepak = std::make_unique<GamePak>(file);
         if (!gamepak->valid)
             return false;
 
+        reset();
         setWindowTitle(*gamepak);
-        mmu.setGamePak(std::move(gamepak));
+        mmu.gamepak = std::move(gamepak);
         SDL_RaiseWindow(ppu.backend.window);
         return true;
     }

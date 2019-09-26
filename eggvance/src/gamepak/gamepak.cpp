@@ -12,6 +12,7 @@
 namespace fs = std::filesystem;
 
 GamePak::GamePak(const std::string& file)
+    : file(file)
 {
     if (valid = File::read(file, data))
     {

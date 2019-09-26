@@ -47,11 +47,6 @@ void MMU::reset()
     oam_entries.fill(OAMEntry());
 }
 
-void MMU::setGamePak(std::unique_ptr<GamePak> gamepak)
-{
-    this->gamepak = std::move(gamepak);
-}
-
 void MMU::signalDMA(DMA::Timing timing)
 {
     bool pushed = false;
