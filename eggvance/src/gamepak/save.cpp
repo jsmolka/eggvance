@@ -1,17 +1,17 @@
 #include "save.h"
 
-#include "file.h"
+#include "fileutil.h"
 
 Save::Save(const std::string& file, Type type)
     : file(file)
     , type(type)
 {
-    if (File::exists(file))
-        File::read(file, data);
+    if (file_util::exists(file))
+        file_util::read(file, data);
 }
 
 Save::~Save()
 {
     if (!data.empty())
-        File::write(file, data);
+        file_util::write(file, data);
 }

@@ -6,9 +6,9 @@
 
 #include "mmu/interrupt.h"
 #include "icon.h"
-#include "microtimer.h"
+#include "microclock.h"
 
-namespace micro = micro_timer;
+namespace micro = micro_clock;
 namespace fs = std::filesystem;
 
 Core::Core(std::unique_ptr<BIOS> bios)
@@ -128,7 +128,7 @@ void Core::drawIcon()
     int scale = 9;
     rect.w = scale;
     rect.h = scale;
-    for (const IconPixel& pixel : icon)
+    for (const auto& pixel : icon)
     {
         rect.x = scale * pixel.x + 48;
         rect.y = scale * pixel.y + 8;
@@ -306,7 +306,7 @@ void Core::emulate(int cycles)
 
 void Core::emulateTimers(int cycles)
 {
-    for (Timer& timer : mmu.timers)
+    for (auto& timer : mmu.timers)
     {
         timer.emulate(cycles);
     }

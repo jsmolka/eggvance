@@ -1,4 +1,4 @@
-#include "microtimer.h"
+#include "microclock.h"
 
 // Based on https://stackoverflow.com/a/41862592
 
@@ -45,12 +45,12 @@ inline u64 PerfCounter()
     return counter.QuadPart;
 }
 
-u64 micro_timer::now()
+u64 micro_clock::now()
 {
     return static_cast<u64>(static_cast<double>(PerfCounter()) * 1000000 / PerfFrequency());
 }
 
-void micro_timer::sleep(u32 us)
+void micro_clock::sleep(u32 us)
 {
     LARGE_INTEGER relative_time;
     relative_time.QuadPart = -static_cast<s64>(us * 10);

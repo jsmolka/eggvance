@@ -6,7 +6,7 @@
 #include "eeprom.h"
 #include "none.h"
 #include "flash.h"
-#include "file.h"
+#include "fileutil.h"
 #include "sram.h"
 
 namespace fs = std::filesystem;
@@ -14,7 +14,7 @@ namespace fs = std::filesystem;
 GamePak::GamePak(const std::string& file)
     : file(file)
 {
-    if (valid = File::read(file, data))
+    if (valid = file_util::read(file, data))
     {
         parseHeader();
 

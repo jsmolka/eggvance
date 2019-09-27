@@ -1,11 +1,11 @@
-#include "file.h"
+#include "fileutil.h"
 
 #include <filesystem>
 #include <fstream>
 
 namespace fs = std::filesystem;
 
-bool File::read(const std::string& file, std::vector<u8>& dst)
+bool file_util::read(const std::string& file, std::vector<u8>& dst)
 {
     std::ifstream stream(file, std::ios::binary);
     if (!stream.is_open())
@@ -21,7 +21,7 @@ bool File::read(const std::string& file, std::vector<u8>& dst)
     return true;
 }
 
-bool File::write(const std::string& file, std::vector<u8>& src)
+bool file_util::write(const std::string& file, std::vector<u8>& src)
 {
     std::ofstream stream(file, std::ios::binary);
     if (!stream.is_open())
@@ -32,7 +32,7 @@ bool File::write(const std::string& file, std::vector<u8>& src)
     return true;
 }
 
-bool File::exists(const std::string& file)
+bool file_util::exists(const std::string& file)
 {
     return fs::is_regular_file(file);
 }

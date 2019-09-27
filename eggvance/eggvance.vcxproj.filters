@@ -84,9 +84,6 @@
     <ClCompile Include="src\gamepak\gamepak.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\gamepak\file.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\gamepak\save.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -141,10 +138,13 @@
     <ClCompile Include="src\gamepak\none.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\microtimer.cpp">
+    <ClCompile Include="src\ppu\backend.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ppu\backend.cpp">
+    <ClCompile Include="src\microclock.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gamepak\fileutil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -278,9 +278,6 @@
     <ClInclude Include="src\gamepak\gamepak.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\gamepak\file.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\mmu\mmio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -302,10 +299,13 @@
     <ClInclude Include="src\gamepak\none.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\microtimer.h">
+    <ClInclude Include="src\ppu\layers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\ppu\layers.h">
+    <ClInclude Include="src\microclock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gamepak\fileutil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
