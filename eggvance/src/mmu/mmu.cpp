@@ -44,20 +44,16 @@ void MMU::reset()
 
 void MMU::signalDMA(DMA::Timing timing)
 {
-    bool pushed = false;
-    for (DMA& dma : dmas)
+    auto size = dmas_active.size();
+    for (auto& dma : dmas)
     {
         if (!dma.active && dma.control.enable && dma.control.timing == timing)
         {
-            dma.activate();
-            if (dma.active)
-            {
+            if (dma.activate())
                 dmas_active.push_back(&dma);
-                pushed = true;
-            }
         }
     }
-    if (pushed && dmas_active.size() > 1)
+    if (dmas_active.size() > 1 && dmas_active.size() > size)
     {
         std::sort(dmas_active.begin(), dmas_active.end(), [](const DMA* lhs, const DMA* rhs) {
             return lhs->id > rhs->id;
@@ -95,9 +91,18 @@ u8 MMU::readByte(u32 addr)
         return 0;
 
     case PAGE_PALETTE:
+        addr &= 0x3FF;
+        return palette.readByte(addr);
+
     case PAGE_VRAM:
+        addr &= 0x1'FFFF;
+        if (addr >= 0x1'8000)
+            addr -= 0x8000;
+        return vram.readByte(addr);
+
     case PAGE_OAM:
-        return 0;
+        addr &= 0x3FF;
+        return oam.readByte(addr);
 
     case PAGE_GAMEPAK_0:
     case PAGE_GAMEPAK_0+1:
