@@ -17,10 +17,6 @@ DMA::DMA(int id, MMU& mmu)
 
 void DMA::reset()
 {
-    //control = {};
-    sad.addr = 0;
-    dad.addr = 0;
-
     remaining = 0;
     seq_cycles = 0;
     addr_dst = 0;
@@ -29,8 +25,7 @@ void DMA::reset()
     active = false;
 }
 
-// Todo: return active?
-void DMA::activate()
+bool DMA::activate()
 {
     // Todo: use actual cycles
     seq_cycles = 2;
@@ -41,20 +36,11 @@ void DMA::activate()
     diff_dst = stepDifference(static_cast<Adjustment>(control.dst_adjust));
     diff_src = stepDifference(static_cast<Adjustment>(control.src_adjust));
 
-    if (control.src_adjust != ADJ_RELOAD)
-    {
-        active = true;
-    }
-    else
-    {
-        fmt::printf("DMA: Reload for source adjustment\n");
-        active = false;
-    }
+    return active = control.src_adjust != ADJ_RELOAD;
 }
 
 bool DMA::emulate(int& cycles)
 {
-    // Todo: in activate?
     if (id == 3 && dad.addr >= 0xD00'0000 && dad.addr < 0xE00'0000)
     {
         // Guessing EEPROM size in advance seems to be pretty much impossible.
@@ -85,14 +71,20 @@ bool DMA::emulate(int& cycles)
 
     while (remaining-- > 0)
     {
-        // Todo: check if EEPROM
-        if (id == 3 && dad.addr >= 0xD00'0000 && dad.addr < 0xE00'0000)
+        bool eeprom_w = dad.addr >= 0xD00'0000 && dad.addr < 0xE00'0000;
+        bool eeprom_r = sad.addr >= 0xD00'0000 && sad.addr < 0xE00'0000;
+
+        if (id == 3 && mmu.gamepak->save->type == Save::Type::EEPROM && (eeprom_r || eeprom_w))
         {
-            mmu.gamepak->save->writeByte(dad.addr, (u8)mmu.readHalf(sad.addr));
-        }
-        else if (id == 3 && sad.addr >= 0xD00'0000 && sad.addr < 0xE00'0000)
-        {
-            mmu.writeHalf(dad.addr, mmu.gamepak->save->readByte(sad.addr));
+            if (eeprom_w)
+            {
+                // Must read halfs
+                mmu.gamepak->save->writeByte(dad.addr, static_cast<u8>(mmu.readHalf(sad.addr)));
+            }
+            else if (eeprom_r)
+            {
+                mmu.writeHalf(dad.addr, mmu.gamepak->save->readByte(sad.addr));
+            }
         }
         else
         {
@@ -112,9 +104,9 @@ bool DMA::emulate(int& cycles)
 
     reload();
     interrupt();
+    active = false;
 
     control.enable = control.repeat;
-    active = false;
 
     return true;
 }

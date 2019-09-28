@@ -7,20 +7,12 @@ Timer::Timer(int id, TimerControl& control, Timer* next)
     , next(next)
     , control(control)
 {
-    reset();
-}
 
-void Timer::reset()
-{
-    //data = 0;
-    //initial = 0;
-    //counter = 0;
-    //control = {};
 }
 
 void Timer::emulate(int cycles)
 {
-    if (!control.enabled || control.cascade) 
+    if (!control.enabled || control.cascade)
         return;
 
     increment(cycles);

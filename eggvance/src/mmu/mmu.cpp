@@ -30,11 +30,6 @@ void MMU::reset()
     vram.fill(0);
     oam.fill(0);
 
-    timers[0].reset();
-    timers[1].reset();
-    timers[2].reset();
-    timers[3].reset();
-
     dmas[0].reset();
     dmas[1].reset();
     dmas[2].reset();

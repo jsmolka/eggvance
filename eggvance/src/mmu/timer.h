@@ -7,7 +7,6 @@ class Timer
 public:
     Timer(int id, TimerControl& control, Timer* next);
 
-    void reset();
     void emulate(int cycles);
 
 private:

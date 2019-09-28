@@ -20,7 +20,7 @@ public:
 
     void reset();
 
-    void activate();
+    bool activate();
     bool emulate(int& cycles);
 
     DMAControl& control;
