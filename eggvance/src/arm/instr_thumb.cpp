@@ -569,8 +569,9 @@ void ARM::loadStoreMultiple(u16 instr)
     int rb    = bits< 8, 3>(instr);
     int load  = bits<11, 1>(instr);
 
-    u32& addr = regs[rb];
-    addr = alignWord(addr);
+    u32 addr = alignWord(regs[rb]);
+
+    bool writeback = true;
 
     if (rlist != 0)
     {
@@ -581,6 +582,10 @@ void ARM::loadStoreMultiple(u16 instr)
 
         if (load)
         {
+            // Prevent overwriting loaded value
+            if (rlist & (1 << rb))
+                writeback = false;
+
             for (int x = 0; rcount > 0; ++x)
             {
                 if (rlist & (1 << x))
@@ -629,6 +634,9 @@ void ARM::loadStoreMultiple(u16 instr)
         }
         addr += 0x40;
     }
+
+    if (writeback)
+        regs[rb] = addr;
 }
 
 void ARM::conditionalBranch(u16 instr)
