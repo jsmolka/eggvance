@@ -149,6 +149,7 @@ bool Input::isButtonPressed(Button button) const
 
 void Input::processInput(Button button, int state)
 {
+    // GBA uses pull-up logic
     if (state == SDL_RELEASED)
         mmio.keyinput |= button;
     else
@@ -156,9 +157,13 @@ void Input::processInput(Button button, int state)
 
     if (mmio.keycnt.irq)
     {
-        bool interrupt = mmio.keycnt.logic
-            ? (mmio.keyinput & mmio.keycnt.keys)
-            : (mmio.keyinput | mmio.keycnt.keys);
+        int pressed = ~mmio.keyinput & 0x3FF;
+        
+        bool interrupt = mmio.keycnt.irq_logic
+            // OR mode - interrupt if at least one button is pressed
+            ? (pressed & mmio.keycnt.keys)
+            // AND mode - interrupt if all buttons are pressed
+            : (pressed == mmio.keycnt.keys);
 
         if (interrupt)
         {

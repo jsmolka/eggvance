@@ -2,7 +2,7 @@
 
 void KeyControl::reset()
 {
-    keys  = 0;
-    irq   = 0;
-    logic = 0;
+    keys      = 0;
+    irq       = 0;
+    irq_logic = 0;
 }

@@ -10,9 +10,9 @@ struct KeyControl
     template<unsigned index>
     inline void write(u8 byte);
 
-    int keys;   // Key mask
-    int irq;    // IRQ enable
-    int logic;  // IRQ logic (0 = or, 1 = and)
+    int keys;       // Key mask
+    int irq;        // IRQ enable
+    int irq_logic;  // IRQ logic (0 = or, 1 = and)
 };
 
 template<unsigned index>
@@ -29,7 +29,7 @@ inline void KeyControl::write(u8 byte)
     case 1:
         bytes(&keys)[1] = byte & 0x3;
         irq             = bits<6, 1>(byte);
-        logic           = bits<7, 1>(byte);
+        irq_logic       = bits<7, 1>(byte);
         break;
 
     default:
