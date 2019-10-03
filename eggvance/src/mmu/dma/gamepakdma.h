@@ -2,12 +2,12 @@
 
 #include "dma.h"
 
-class DMA3 : public DMA
+class GamePakDMA : public DMA
 {
 public:
     using DMA::DMA;
 
-    virtual Status emulate(int& cycles) final;
+    virtual bool emulate(int& cycles) final;
 
 private:
     bool readEEPROM(int& cycles);

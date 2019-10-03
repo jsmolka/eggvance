@@ -9,12 +9,6 @@ class MMU;
 class DMA
 {
 public:
-    enum Status
-    {
-        RUNNING,
-        DISABLED
-    };
-    
     enum Timing
     {
         IMMEDIATE = 0,
@@ -22,7 +16,6 @@ public:
         HBLANK    = 2,
         REFRESH   = 3
     };
-
 
     DMA(int id, MMU& mmu);
     virtual ~DMA() = default;
@@ -32,10 +25,9 @@ public:
     void reset();
     void start();
 
-    virtual Status emulate(int& cycles) = 0;
+    virtual bool emulate(int& cycles);
 
     int id;
-    Status status;
 
 protected:
     bool transfer(int& cycles);
@@ -44,9 +36,9 @@ protected:
 
     MMU& mmu;
 
-    DMAControl& control;
     DMAAddress& sad;
     DMAAddress& dad;
+    DMAControl& control;
 
     struct Registers
     {
@@ -59,6 +51,8 @@ protected:
     int sad_delta;
     int dad_delta;
     int sequential;
+
+    bool running;
 
 private:
     enum AddressControl

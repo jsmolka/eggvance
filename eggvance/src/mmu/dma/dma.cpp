@@ -18,23 +18,23 @@ DMA::DMA(int id, MMU& mmu)
 
 bool DMA::canStart(Timing timing) const
 {
-    return status == DISABLED && control.enable && control.timing == timing;
+    return !running && control.enable && control.timing == timing;
 }
 
 void DMA::reset()
 {
-    status    = DISABLED;
     regs.sad  = 0;
     regs.dad  = 0;
     sad_delta = 0;
     dad_delta = 0;
     count     = 0;
+    running   = false;
 }
 
 void DMA::start()
 {
-    status    = RUNNING;
-    count     = control.count;
+    running = true;
+    count  = control.count;
 
     if (control.reload)
     {
@@ -52,6 +52,16 @@ void DMA::start()
 
     sad_delta = addressDelta(static_cast<AddressControl>(control.sad_control));
     dad_delta = addressDelta(static_cast<AddressControl>(control.dad_control));
+}
+
+bool DMA::emulate(int& cycles)
+{
+    if (!transfer(cycles))
+        return false;
+
+    finish();
+
+    return true;
 }
 
 bool DMA::transfer(int& cycles)
@@ -91,7 +101,7 @@ bool DMA::transfer(int& cycles)
 
 void DMA::finish()
 {
-    status = DISABLED;
+    running = false;
 
     control.enable = control.repeat;
 

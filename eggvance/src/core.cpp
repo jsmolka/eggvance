@@ -295,7 +295,7 @@ void Core::emulate(int cycles)
         else
         {
             cycles = remaining;
-            if (mmu.dmas_active.back()->emulate(remaining) == DMA::Status::DISABLED)
+            if (mmu.dmas_active.back()->emulate(remaining))
             {
                 mmu.dmas_active.pop_back();
             }

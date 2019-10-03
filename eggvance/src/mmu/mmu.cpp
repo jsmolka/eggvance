@@ -1,10 +1,9 @@
 #include "mmu.h"
 
 #include "common/utility.h"
-#include "dma/dma0.h"
-#include "dma/dma1.h"
-#include "dma/dma2.h"
-#include "dma/dma3.h"
+#include "dma/dma.h"
+#include "dma/gamepakdma.h"
+#include "dma/sounddma.h"
 
 MMU::MMU(std::unique_ptr<BIOS> bios)
     : bios(std::move(bios))
@@ -14,10 +13,10 @@ MMU::MMU(std::unique_ptr<BIOS> bios)
         Timer(2, mmio.tmcnt[2], &timers[3]), 
         Timer(3, mmio.tmcnt[3], nullptr) }
 {
-    dmas[0] = new DMA0(0, *this);
-    dmas[1] = new DMA1(1, *this);
-    dmas[2] = new DMA2(2, *this);
-    dmas[3] = new DMA3(3, *this);
+    dmas[0] = new DMA(0, *this);
+    dmas[1] = new SoundDMA(1, *this);
+    dmas[2] = new SoundDMA(2, *this);
+    dmas[3] = new GamePakDMA(3, *this);
 
     dmas_active.reserve(4);
 

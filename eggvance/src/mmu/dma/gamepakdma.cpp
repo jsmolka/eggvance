@@ -1,10 +1,10 @@
-#include "dma3.h"
+#include "gamepakdma.h"
 
 #include <fmt/printf.h>
 
 #include "mmu/mmu.h"
 
-bool SaveDMA::emulate(int& cycles)
+bool GamePakDMA::emulate(int& cycles)
 {
     bool eeprom_w = regs.dad >= 0xD00'0000 && regs.dad < 0xE00'0000;
     bool eeprom_r = regs.sad >= 0xD00'0000 && regs.sad < 0xE00'0000;
@@ -58,7 +58,7 @@ bool SaveDMA::emulate(int& cycles)
     return true;
 }
 
-bool SaveDMA::readEEPROM(int& cycles)
+bool GamePakDMA::readEEPROM(int& cycles)
 {
     while (count-- > 0)
     {
@@ -75,7 +75,7 @@ bool SaveDMA::readEEPROM(int& cycles)
     return true;
 }
 
-bool SaveDMA::writeEEPROM(int& cycles)
+bool GamePakDMA::writeEEPROM(int& cycles)
 {
     while (count-- > 0)
     {
