@@ -2,8 +2,8 @@
 
 void DMAControl::reset()
 {
-    src_adjust = 0;
-    dst_adjust = 0;
+    sad_control = 0;
+    dad_control = 0;
     repeat     = 0;
     word       = 0;
     drq        = 0;

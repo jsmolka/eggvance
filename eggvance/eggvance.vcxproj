@@ -139,6 +139,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\mmu\dma\dma1.cpp" />
+    <ClCompile Include="src\mmu\dma\dma2.cpp" />
+    <ClCompile Include="src\mmu\dma\dma3.cpp" />
+    <ClCompile Include="src\mmu\dma\dma0.cpp" />
+    <ClCompile Include="src\mmu\dma\dma.cpp" />
     <ClCompile Include="src\gamepak\eeprom.cpp" />
     <ClCompile Include="src\gamepak\flash.cpp" />
     <ClCompile Include="src\gamepak\fileutil.cpp" />
@@ -150,7 +155,6 @@
     <ClCompile Include="src\mmu\bios.cpp" />
     <ClCompile Include="icon\icon.cpp" />
     <ClCompile Include="src\mmu\registers\blendfade.cpp" />
-    <ClCompile Include="src\mmu\dma.cpp" />
     <ClCompile Include="src\input.cpp" />
     <ClCompile Include="src\mmu\mmio.cpp" />
     <ClCompile Include="src\mmu\registers\backgroundoffset.cpp" />
@@ -185,6 +189,11 @@
     <ClCompile Include="src\mmu\timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\mmu\dma\dma1.h" />
+    <ClInclude Include="src\mmu\dma\dma2.h" />
+    <ClInclude Include="src\mmu\dma\dma3.h" />
+    <ClInclude Include="src\mmu\dma\dma0.h" />
+    <ClInclude Include="src\mmu\dma\dma.h" />
     <ClInclude Include="src\common\macros.h" />
     <ClInclude Include="src\gamepak\eeprom.h" />
     <ClInclude Include="src\gamepak\flash.h" />
@@ -196,7 +205,6 @@
     <ClInclude Include="src\microclock.h" />
     <ClInclude Include="src\mmu\bios.h" />
     <ClInclude Include="icon\icon.h" />
-    <ClInclude Include="src\mmu\dma.h" />
     <ClInclude Include="src\input.h" />
     <ClInclude Include="src\common\tmp.h" />
     <ClInclude Include="src\mmu\interrupt.h" />

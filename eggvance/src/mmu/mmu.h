@@ -4,10 +4,10 @@
 #include <memory>
 #include <vector>
 
+#include "dma/dma.h"
 #include "gamepak/gamepak.h"
 #include "ppu/oamentry.h"
 #include "bios.h"
-#include "dma.h"
 #include "memmap.h"
 #include "mmio.h"
 #include "timer.h"
@@ -44,7 +44,7 @@ public:
 private:
     void writeOAM(u32 addr, u16 half);
 
-    DMA dmas[4];
+    DMA* dmas[4];
 
     RAM<0x40000> ewram;
     RAM<0x08000> iwram;

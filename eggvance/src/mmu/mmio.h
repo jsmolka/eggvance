@@ -1,7 +1,6 @@
 #pragma once
 
 #include "registers/include.h"
-#include "dma.h"
 #include "ram.h"
 
 class MMIO

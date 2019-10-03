@@ -1,6 +1,10 @@
 #include "mmu.h"
 
 #include "common/utility.h"
+#include "dma/dma0.h"
+#include "dma/dma1.h"
+#include "dma/dma2.h"
+#include "dma/dma3.h"
 
 MMU::MMU(std::unique_ptr<BIOS> bios)
     : bios(std::move(bios))
@@ -9,12 +13,12 @@ MMU::MMU(std::unique_ptr<BIOS> bios)
         Timer(1, mmio.tmcnt[1], &timers[2]), 
         Timer(2, mmio.tmcnt[2], &timers[3]), 
         Timer(3, mmio.tmcnt[3], nullptr) }
-    , dmas{
-        DMA(0, *this),
-        DMA(1, *this),
-        DMA(2, *this),
-        DMA(3, *this) }
 {
+    dmas[0] = new DMA0(0, *this);
+    dmas[1] = new DMA1(1, *this);
+    dmas[2] = new DMA2(2, *this);
+    dmas[3] = new DMA3(3, *this);
+
     dmas_active.reserve(4);
 
     reset();
@@ -30,10 +34,10 @@ void MMU::reset()
     vram.fill(0);
     oam.fill(0);
 
-    dmas[0].reset();
-    dmas[1].reset();
-    dmas[2].reset();
-    dmas[3].reset();
+    dmas[0]->reset();
+    dmas[1]->reset();
+    dmas[2]->reset();
+    dmas[3]->reset();
 
     dmas_active.clear();
 
@@ -44,20 +48,21 @@ void MMU::reset()
 
 void MMU::signalDMA(DMA::Timing timing)
 {
-    auto size = dmas_active.size();
     for (auto& dma : dmas)
     {
-        if (!dma.active && dma.control.enable && dma.control.timing == timing)
+        if (dma->canStart(timing))
         {
-            if (dma.activate())
-                dmas_active.push_back(&dma);
+            dma->start();
+            dmas_active.push_back(dma);
         }
     }
-    if (dmas_active.size() > 1 && dmas_active.size() > size)
+    if (dmas_active.size() > 1)
     {
-        std::sort(dmas_active.begin(), dmas_active.end(), [](const DMA* lhs, const DMA* rhs) {
-            return lhs->id > rhs->id;
-        });
+        std::sort(dmas_active.begin(), dmas_active.end(), 
+            [](const DMA* lhs, const DMA* rhs) {
+                return lhs->id > rhs->id;
+            }
+        );
     }
 }
 
