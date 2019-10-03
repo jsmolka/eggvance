@@ -42,7 +42,7 @@ void DMA::start()
         regs.dad       = dad.addr;
         control.reload = false;
     }
-    else  if (control.repeat)  // Repeat DMA doesn't reload all registers
+    else if (control.repeat)  // Repeat DMA doesn't reload all registers
     {
         if (control.dad_control == AddressControl::RELOAD)
         {
@@ -52,8 +52,6 @@ void DMA::start()
 
     sad_delta = addressDelta(static_cast<AddressControl>(control.sad_control));
     dad_delta = addressDelta(static_cast<AddressControl>(control.dad_control));
-
-    fmt::printf("DMA %d: %08X -> %08X\n", id, regs.sad, regs.dad);
 }
 
 bool DMA::transfer(int& cycles)
