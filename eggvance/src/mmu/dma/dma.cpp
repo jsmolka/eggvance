@@ -23,12 +23,14 @@ bool DMA::canStart(Timing timing) const
 
 void DMA::reset()
 {
-    regs.sad  = 0;
-    regs.dad  = 0;
-    sad_delta = 0;
-    dad_delta = 0;
-    count     = 0;
-    running   = false;
+    regs.sad   = 0;
+    regs.dad   = 0;
+    sad_delta  = 0;
+    dad_delta  = 0;
+    count      = 0;
+    running    = false;
+    // Todo: real value
+    sequential = 2;
 }
 
 void DMA::start()
