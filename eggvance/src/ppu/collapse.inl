@@ -325,7 +325,7 @@ bool PPU::findBlendLayers(const std::vector<BackgroundLayer>& layers, int x, int
     {                                    \
         upper = color;                   \
         upper_found = true;              \
-        if (flags_upper ^ flag)          \
+        if ((flags_upper & flag) == 0)   \
             return false;                \
     }
 
