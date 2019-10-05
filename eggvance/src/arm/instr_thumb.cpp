@@ -18,7 +18,7 @@ void ARM::moveShiftedRegister(u16 instr)
     case 0b00: dst = lsl(src, offset, carry); break;
     case 0b01: dst = lsr(src, offset, carry); break;
     case 0b10: dst = asr(src, offset, carry); break;
-    default: carry = regs.c; break;
+    default: carry = regs.cpsr.c; break;
     }
     logical(dst, carry);
 
@@ -130,14 +130,14 @@ void ARM::aluOperations(u16 instr)
 
     // ADC
     case 0b0101: 
-        src += regs.c;
+        src += regs.cpsr.c;
         arithmetic(dst, src, true);
         dst += src;
         break;
 
     // SBC
     case 0b0110: 
-        src += 1 - regs.c;
+        src += 1 - regs.cpsr.c;
         arithmetic(dst, src, false);
         dst -= src;
         break;
@@ -263,7 +263,7 @@ void ARM::highRegisterBranchExchange(u16 instr)
         else
         {
             src = alignWord(src);
-            regs.thumb = false;
+            regs.cpsr.thumb = false;
         }
 
         cycle(regs.pc, NSEQ);
@@ -274,7 +274,7 @@ void ARM::highRegisterBranchExchange(u16 instr)
         cycle(regs.pc, SEQ);
         break;
     }
-    cycle(regs.pc + (regs.thumb ? 2 : 4), SEQ);
+    cycle(regs.pc + (regs.cpsr.thumb ? 2 : 4), SEQ);
 }
 
 void ARM::loadPCRelative(u16 instr)
@@ -644,7 +644,7 @@ void ARM::conditionalBranch(u16 instr)
     int offset    = bits<0, 8>(instr);
     int condition = bits<8, 4>(instr);
 
-    if (regs.check(static_cast<Condition>(condition)))
+    if (regs.cpsr.matches(static_cast<PSR::Condition>(condition)))
     {
         offset = signExtend<8>(offset);
         offset <<= 1;
@@ -670,8 +670,8 @@ void ARM::softwareInterruptThumb(u16 instr)
     regs.spsr = cpsr;
     regs.lr = next;
 
-    regs.thumb = false;
-    regs.irqd = true;
+    regs.cpsr.thumb = false;
+    regs.cpsr.irqd = true;
 
     regs.pc = EXV_SWI;
     advance();

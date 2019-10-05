@@ -2,18 +2,11 @@
 
 #include <cstring>
 
-static bool use_bios = false;
+#include "config.h"
 
 Registers::Registers()
-    : thumb(cpsr)
-    , fiqd(cpsr)
-    , irqd(cpsr)
-    , v(cpsr)
-    , c(cpsr)
-    , z(cpsr)
-    , n(cpsr)
 {
-
+    reset();
 }
 
 void Registers::reset()
@@ -22,7 +15,7 @@ void Registers::reset()
     std::memset(bank,     0, sizeof(bank));
     std::memset(bank_fiq, 0, sizeof(bank_fiq));
 
-    if (!use_bios)
+    if (!cfg.skip_bios)
     {
         pc = 0x8000008;
         sp = 0x03007F00;
@@ -35,36 +28,9 @@ void Registers::reset()
     }
     else 
     {
-        pc = 0x8;
+        pc   = 0x08;
         cpsr = 0xD3;
     }
-}
-
-bool Registers::check(Condition condition) const
-{
-    if (condition == Condition::AL)
-        return true;
-
-    switch (condition)
-    {
-    case Condition::EQ: return z;
-    case Condition::NE: return !z;
-    case Condition::CS: return c;
-    case Condition::CC: return !c;
-    case Condition::MI: return n;
-    case Condition::PL: return !n;
-    case Condition::VS: return v;
-    case Condition::VC: return !v;
-    case Condition::HI: return c && !z;
-    case Condition::LS: return !c || z;
-    case Condition::GE: return n == v;
-    case Condition::LT: return n != v;
-    case Condition::GT: return !z && (n == v);
-    case Condition::LE: return z || (n != v);
-    case Condition::AL: return true;
-    case Condition::NV: return false;
-    }
-    return true;
 }
 
 u32 Registers::operator[](int index) const

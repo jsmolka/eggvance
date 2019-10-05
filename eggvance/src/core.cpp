@@ -267,7 +267,6 @@ void Core::frame()
 
 void Core::emulate(int cycles)
 {
-    // Todo: maybe remove remaining from hot loop?
     remaining += cycles;
 
     while (remaining > 0)

@@ -2,7 +2,7 @@
 
 Mode RegisterBank::mode() const
 {
-    return static_cast<Mode>(cpsr & CPSR_M);
+    return static_cast<Mode>(cpsr.mode);
 }
 
 void RegisterBank::switchMode(Mode mode)
@@ -38,7 +38,7 @@ void RegisterBank::switchMode(Mode mode)
         lr   = bank[new_bank].lr;
         spsr = bank[new_bank].spsr;
     }
-    cpsr = (cpsr & ~CPSR_M) | mode;
+    cpsr = (cpsr & ~0x1F) | mode;
 }
 
 RegisterBank::Bank RegisterBank::modeToBank(Mode mode)

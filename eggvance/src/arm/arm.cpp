@@ -24,11 +24,11 @@ void ARM::reset()
 void ARM::interrupt()
 {
     // Interrupts must be enabled
-    if (regs.irqd)
+    if (regs.cpsr.irqd)
         return;
 
     u32 cpsr = regs.cpsr;
-    u32 next = regs.pc - (regs.thumb ? 4 : 8);
+    u32 next = regs.pc - (regs.cpsr.thumb ? 4 : 8);
 
     regs.switchMode(MODE_IRQ);
     regs.spsr = cpsr;
@@ -36,8 +36,8 @@ void ARM::interrupt()
     // Interrupts return with subs pc, lr, 4
     regs.lr = next + 4;
 
-    regs.thumb = false;
-    regs.irqd = true;
+    regs.cpsr.thumb = false;
+    regs.cpsr.irqd = true;
 
     regs.pc = EXV_IRQ;
     advance();
@@ -60,7 +60,7 @@ int ARM::step()
 
 void ARM::execute()
 {
-    if (regs.thumb)
+    if (regs.cpsr.thumb)
     {
         u16 instr = mmu.readHalf(regs.pc - 4);
 
@@ -91,7 +91,7 @@ void ARM::execute()
     {
         u32 instr = mmu.readWord(regs.pc - 8);
 
-        if (regs.check(static_cast<Condition>(instr >> 28)))
+        if (regs.cpsr.matches(static_cast<PSR::Condition>(instr >> 28)))
         {
             switch (decodeArm(instr))
             {
@@ -117,16 +117,16 @@ void ARM::execute()
 
 void ARM::advance()
 {
-    regs.pc += (regs.thumb ? 2 : 4);
+    regs.pc += (regs.cpsr.thumb ? 2 : 4);
 }
 
 void ARM::debug()
 {
-    u32 pc = regs.thumb
+    u32 pc = regs.cpsr.thumb
         ? regs.pc - 4
         : regs.pc - 8;
 
-    u32 data = regs.thumb
+    u32 data = regs.cpsr.thumb
         ? mmu.readHalf(pc)
         : mmu.readWord(pc);
 
@@ -137,15 +137,15 @@ void ARM::debug()
 
 void ARM::logical(u32 result)
 {
-    regs.z = result == 0;
-    regs.n = result >> 31;
+    regs.cpsr.z = result == 0;
+    regs.cpsr.n = result >> 31;
 }
 
 void ARM::logical(u32 result, bool carry)
 {
-    regs.z = result == 0;
-    regs.n = result >> 31;
-    regs.c = carry;
+    regs.cpsr.z = result == 0;
+    regs.cpsr.n = result >> 31;
+    regs.cpsr.c = carry;
 }
 
 void ARM::arithmetic(u32 op1, u32 op2, bool addition)
@@ -154,17 +154,17 @@ void ARM::arithmetic(u32 op1, u32 op2, bool addition)
         ? op1 + op2
         : op1 - op2;
 
-    regs.z = result == 0;
-    regs.n = result >> 31;
+    regs.cpsr.z = result == 0;
+    regs.cpsr.n = result >> 31;
 
-    regs.c = addition
+    regs.cpsr.c = addition
         ? op2 > (0xFFFFFFFF - op1)
         : op2 <= op1;
 
     int msb_op1 = op1 >> 31;
     int msb_op2 = op2 >> 31;
 
-    regs.v = addition
+    regs.cpsr.v = addition
         ? msb_op1 == msb_op2 && (result >> 31) != msb_op1
         : msb_op1 != msb_op2 && (result >> 31) == msb_op2;
 }
@@ -190,7 +190,7 @@ u32 ARM::lsl(u32 value, int amount, bool& carry)
     }
     else  // Special case LSL #0
     {
-        carry = regs.c;
+        carry = regs.cpsr.c;
     }
     return value;
 }
@@ -219,7 +219,7 @@ u32 ARM::lsr(u32 value, int amount, bool& carry, bool immediate)
         }
         else
         {
-            carry = regs.c;
+            carry = regs.cpsr.c;
         }
     }
     return value;
@@ -249,7 +249,7 @@ u32 ARM::asr(u32 value, int amount, bool& carry, bool immediate)
         }
         else
         {
-            carry = regs.c;
+            carry = regs.cpsr.c;
         }
     }
     return value;
@@ -272,11 +272,11 @@ u32 ARM::ror(u32 value, int amount, bool& carry, bool immediate)
         {
             carry = value & 0x1;
             value >>= 1;
-            value |= regs.c << 31;
+            value |= regs.cpsr.c << 31;
         }
         else
         {
-            carry = regs.c;
+            carry = regs.cpsr.c;
         }
     }
     return value;

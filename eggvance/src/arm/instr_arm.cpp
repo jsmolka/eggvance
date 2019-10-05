@@ -18,7 +18,7 @@ void ARM::branchExchange(u32 instr)
     if (addr & 0x1)
     {
         addr = alignHalf(addr);
-        regs.thumb = true;
+        regs.cpsr.thumb = true;
     }
     else
     {
@@ -31,7 +31,7 @@ void ARM::branchExchange(u32 instr)
     advance();
 
     cycle(regs.pc, SEQ);
-    cycle(regs.pc + (regs.thumb ? 2 : 4), SEQ);
+    cycle(regs.pc + (regs.cpsr.thumb ? 2 : 4), SEQ);
 }
 
 void ARM::branchLink(u32 instr)
@@ -113,7 +113,7 @@ void ARM::dataProcessing(u32 instr)
         if (flags)
         {
             u32 spsr = regs.spsr;
-            regs.switchMode(static_cast<Mode>(spsr & CPSR_M));
+            regs.switchMode(static_cast<Mode>(spsr & 0x1F));
             regs.cpsr = spsr;
 
             flags = false;
@@ -159,7 +159,7 @@ void ARM::dataProcessing(u32 instr)
 
     // ADC
     case 0b0101:
-        op2 += regs.c;
+        op2 += regs.cpsr.c;
         dst = op1 + op2;
         if (flags) 
             arithmetic(op1, op2, true);
@@ -167,7 +167,7 @@ void ARM::dataProcessing(u32 instr)
 
     // SBC
     case 0b0110:
-        op2 += 1 - regs.c;
+        op2 += 1 - regs.cpsr.c;
         dst = op1 - op2;
         if (flags) 
             arithmetic(op1, op2, false);
@@ -175,7 +175,7 @@ void ARM::dataProcessing(u32 instr)
 
     // RBC
     case 0b0111:
-        op1 += 1 - regs.c;
+        op1 += 1 - regs.cpsr.c;
         dst = op2 - op1;
         if (flags) 
             arithmetic(op2, op1, false);
@@ -233,7 +233,7 @@ void ARM::dataProcessing(u32 instr)
     if (rd == 15)
     {
         // Interrupt return from ARM into THUMB possible
-        if (regs.thumb)
+        if (regs.cpsr.thumb)
             dst = alignHalf(dst);
         else
             dst = alignWord(dst);
@@ -287,11 +287,11 @@ void ARM::psrTransfer(u32 instr)
         else
         {
             if (mask & 0xFF)
-                regs.switchMode(static_cast<Mode>(op & CPSR_M));
+                regs.switchMode(static_cast<Mode>(op & 0x1F));
 
             regs.cpsr = (regs.cpsr & ~mask) | op;
 
-            if (regs.thumb)
+            if (regs.cpsr.thumb)
             {
                 // Undefined behavior
                 regs.pc = alignHalf(regs.pc);
@@ -369,8 +369,8 @@ void ARM::multiplyLong(u32 instr)
 
     if (flags)
     {
-        regs.z = result == 0;
-        regs.n = result >> 63;
+        regs.cpsr.z = result == 0;
+        regs.cpsr.n = result >> 63;
     }
 
     cycle();
@@ -739,7 +739,7 @@ void ARM::softwareInterruptArm(u32 instr)
     regs.spsr = cpsr;
     regs.lr = next;
 
-    regs.irqd = true;
+    regs.cpsr.irqd = true;
 
     regs.pc = EXV_SWI;
     advance();

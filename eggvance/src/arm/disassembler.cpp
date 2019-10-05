@@ -7,7 +7,7 @@
 
 std::string Disassembler::disassemble(u32 data, const Registers& regs)
 {
-    if (regs.thumb)
+    if (regs.cpsr.thumb)
     {
         u16 instr = static_cast<u16>(data);
 
@@ -114,24 +114,24 @@ std::string Disassembler::list(int rlist)
 
 std::string Disassembler::cond(u32 instr)
 {
-    switch (static_cast<Condition>(instr >> 28))
+    switch (static_cast<PSR::Condition>(instr >> 28))
     {
-    case Condition::EQ: return "eq"; break;
-    case Condition::NE: return "ne"; break;
-    case Condition::CS: return "cs"; break;
-    case Condition::CC: return "cc"; break;
-    case Condition::MI: return "mi"; break;
-    case Condition::PL: return "pl"; break;
-    case Condition::VS: return "vs"; break;
-    case Condition::VC: return "vc"; break;
-    case Condition::HI: return "hi"; break;
-    case Condition::LS: return "ls"; break;
-    case Condition::GE: return "ge"; break;
-    case Condition::LT: return "lt"; break;
-    case Condition::GT: return "gt"; break;
-    case Condition::LE: return "le"; break;
-    case Condition::AL: return ""  ; break;
-    case Condition::NV: return "nv"; break;
+    case PSR::Condition::EQ: return "eq"; break;
+    case PSR::Condition::NE: return "ne"; break;
+    case PSR::Condition::CS: return "cs"; break;
+    case PSR::Condition::CC: return "cc"; break;
+    case PSR::Condition::MI: return "mi"; break;
+    case PSR::Condition::PL: return "pl"; break;
+    case PSR::Condition::VS: return "vs"; break;
+    case PSR::Condition::VC: return "vc"; break;
+    case PSR::Condition::HI: return "hi"; break;
+    case PSR::Condition::LS: return "ls"; break;
+    case PSR::Condition::GE: return "ge"; break;
+    case PSR::Condition::LT: return "lt"; break;
+    case PSR::Condition::GT: return "gt"; break;
+    case PSR::Condition::LE: return "le"; break;
+    case PSR::Condition::AL: return ""  ; break;
+    case PSR::Condition::NV: return "nv"; break;
     }
     return "??";
 }
@@ -480,24 +480,24 @@ std::string Disassembler::conditionalBranch(u16 instr, u32 pc)
     offset <<= 1;
 
     std::string mnemonic;
-    switch (static_cast<Condition>(condition))
+    switch (static_cast<PSR::Condition>(condition))
     {
-    case Condition::EQ: mnemonic = "beq"; break;
-    case Condition::NE: mnemonic = "bne"; break;
-    case Condition::CS: mnemonic = "bcs"; break;
-    case Condition::CC: mnemonic = "bcc"; break;
-    case Condition::MI: mnemonic = "bmi"; break;
-    case Condition::PL: mnemonic = "bpl"; break;
-    case Condition::VS: mnemonic = "bvs"; break;
-    case Condition::VC: mnemonic = "bvc"; break;
-    case Condition::HI: mnemonic = "bhi"; break;
-    case Condition::LS: mnemonic = "bls"; break;
-    case Condition::GE: mnemonic = "bge"; break;
-    case Condition::LT: mnemonic = "blt"; break;
-    case Condition::GT: mnemonic = "bgt"; break;
-    case Condition::LE: mnemonic = "ble"; break;
-    case Condition::AL: mnemonic = "b";   break;
-    case Condition::NV: mnemonic = "b??"; break;
+    case PSR::Condition::EQ: mnemonic = "beq"; break;
+    case PSR::Condition::NE: mnemonic = "bne"; break;
+    case PSR::Condition::CS: mnemonic = "bcs"; break;
+    case PSR::Condition::CC: mnemonic = "bcc"; break;
+    case PSR::Condition::MI: mnemonic = "bmi"; break;
+    case PSR::Condition::PL: mnemonic = "bpl"; break;
+    case PSR::Condition::VS: mnemonic = "bvs"; break;
+    case PSR::Condition::VC: mnemonic = "bvc"; break;
+    case PSR::Condition::HI: mnemonic = "bhi"; break;
+    case PSR::Condition::LS: mnemonic = "bls"; break;
+    case PSR::Condition::GE: mnemonic = "bge"; break;
+    case PSR::Condition::LT: mnemonic = "blt"; break;
+    case PSR::Condition::GT: mnemonic = "bgt"; break;
+    case PSR::Condition::LE: mnemonic = "ble"; break;
+    case PSR::Condition::AL: mnemonic = "b";   break;
+    case PSR::Condition::NV: mnemonic = "b??"; break;
     }
 
     return fmt::format("{:<8}{}",
