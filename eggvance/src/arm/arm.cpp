@@ -23,10 +23,6 @@ void ARM::reset()
 
 void ARM::interrupt()
 {
-    // Interrupts must be enabled
-    if (regs.cpsr.irqd)
-        return;
-
     u32 cpsr = regs.cpsr;
     u32 next = regs.pc - (regs.cpsr.thumb ? 4 : 8);
 

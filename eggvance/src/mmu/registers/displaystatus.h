@@ -44,7 +44,7 @@ inline u8 DisplayStatus::read()
         break;
 
     default:
-        UNREACHABLE;
+        EGG_UNREACHABLE;
         break;
     }
     return byte;
@@ -68,7 +68,7 @@ inline void DisplayStatus::write(u8 byte)
         break;
 
     default:
-        UNREACHABLE;
+        EGG_UNREACHABLE;
         break;
     }
 }

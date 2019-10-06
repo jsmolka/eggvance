@@ -97,7 +97,7 @@ void PPU::scanline()
         break;
 
     default:
-        UNREACHABLE;
+        EGG_UNREACHABLE;
         break;
     }
 }

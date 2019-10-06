@@ -52,7 +52,7 @@ inline u8 DMAControl::read()
         break;
 
     default:
-        UNREACHABLE;
+        EGG_UNREACHABLE;
         break;
     }
     return byte;
@@ -90,7 +90,7 @@ inline void DMAControl::write(u8 byte)
         break;
 
     default:
-        UNREACHABLE;
+        EGG_UNREACHABLE;
         break;
     }
 }

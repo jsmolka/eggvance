@@ -127,7 +127,7 @@ int DMA::addressDelta(AddressControl control)
     case RELOAD:    return size;
 
     default:
-        UNREACHABLE;
+        EGG_UNREACHABLE;
         break;
     }
 }

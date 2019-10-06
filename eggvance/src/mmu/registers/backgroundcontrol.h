@@ -44,7 +44,7 @@ inline void BackgroundControl::write(u8 byte)
         break;
 
     default:
-        UNREACHABLE;
+        EGG_UNREACHABLE;
         break;
     }
 }

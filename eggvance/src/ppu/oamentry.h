@@ -72,7 +72,7 @@ inline void OAMEntry::write(u16 half)
         break;
 
     default:
-        UNREACHABLE;
+        EGG_UNREACHABLE;
         break;
     }
 }

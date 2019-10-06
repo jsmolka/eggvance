@@ -273,7 +273,7 @@ void Core::emulate(int cycles)
     {
         if (mmu.dmas_active.empty())
         {
-            if (Interrupt::requested())
+            if (Interrupt::requested() && !arm.regs.cpsr.irqd)
             {
                 arm.interrupt();
             }

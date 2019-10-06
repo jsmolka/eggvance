@@ -36,7 +36,7 @@ void PPU::renderBgMode0(int bg)
     case 0b11: block = 2 * (ref_y / 256) + ref_x / 256; break;
 
     default:
-        UNREACHABLE;
+        EGG_UNREACHABLE;
         break;
     }
 

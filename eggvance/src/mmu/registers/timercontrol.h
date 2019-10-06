@@ -56,7 +56,7 @@ inline void TimerControl::write(u8 byte)
         break;
 
     default:
-        UNREACHABLE;
+        EGG_UNREACHABLE;
         break;
     }
 }

@@ -18,7 +18,7 @@ Flash::Flash(const std::string& file, Save::Type type)
         break;
 
     default:
-        UNREACHABLE;
+        EGG_UNREACHABLE;
         break;
     }
 

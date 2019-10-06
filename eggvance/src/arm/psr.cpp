@@ -35,7 +35,7 @@ bool PSR::matches(Condition condition) const
     case Condition::NV: return false;
 
     default:
-        UNREACHABLE;
+        EGG_UNREACHABLE;
         break;
     }
 }

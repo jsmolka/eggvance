@@ -56,7 +56,7 @@ inline void WindowRange<limit>::write(u8 byte)
         break;
 
     default:
-        UNREACHABLE;
+        EGG_UNREACHABLE;
         break;
     }
     adjust();

@@ -14,7 +14,7 @@ void PPU::collapse(const std::vector<BackgroundLayer>& layers)
     case 0b11: collapseBW<obj_master>(layers); break;
 
     default:
-        UNREACHABLE;
+        EGG_UNREACHABLE;
         break;
     }
 }
@@ -45,7 +45,7 @@ void PPU::collapseNW(const std::vector<BackgroundLayer>& layers)
     case 0b111: collapseNW<obj_master, 0b111>(layers); break;
 
     default:
-        UNREACHABLE;
+        EGG_UNREACHABLE;
         break;
     }
 }
@@ -74,7 +74,7 @@ void PPU::collapseBN(const std::vector<BackgroundLayer>& layers)
     case 3: collapseBN<obj_master, 3>(layers); break;
 
     default:
-        UNREACHABLE;
+        EGG_UNREACHABLE;
         break;
     }
 }
@@ -121,7 +121,7 @@ void PPU::collapseBN(const std::vector<BackgroundLayer>& layers)
                 break;
 
             default:
-                UNREACHABLE;
+                EGG_UNREACHABLE;
                 break;
             }
         }
@@ -140,7 +140,7 @@ void PPU::collapseBW(const std::vector<BackgroundLayer>& layers)
     case 3: collapseBW<obj_master, 3>(layers); break;
 
     default:
-        UNREACHABLE;
+        EGG_UNREACHABLE;
         break;
     }
 }
@@ -160,7 +160,7 @@ void PPU::collapseBW(const std::vector<BackgroundLayer>& layers)
     case 0b111: collapseBW<obj_master, blend_mode, 0b111>(layers); break;
 
     default:
-        UNREACHABLE;
+        EGG_UNREACHABLE;
         break;
     }
 }
@@ -206,7 +206,7 @@ void PPU::collapseBW(const std::vector<BackgroundLayer>& layers)
                 break;
 
             default:
-                UNREACHABLE;
+                EGG_UNREACHABLE;
                 break;
             }
         }
