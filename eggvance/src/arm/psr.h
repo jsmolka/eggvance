@@ -4,7 +4,7 @@
 
 struct PSR
 {
-    enum class Condition
+    enum Condition
     {
         EQ = 0x0,  // Equal
         NE = 0x1,  // Not equal
@@ -22,6 +22,17 @@ struct PSR
         LE = 0xD,  // Less or equal
         AL = 0xE,  // Always
         NV = 0xF,  // Never
+    };
+
+    enum Mode
+    {
+        USR = 0b10000,  // User
+        FIQ = 0b10001,  // Fast interrupt request
+        IRQ = 0b10010,  // Interrupt request
+        SVC = 0b10011,  // Supervisor
+        ABT = 0b10111,  // Abort
+        SYS = 0b11111,  // System
+        UND = 0b11011   // Undefined
     };
 
     PSR& operator=(u32 value);
@@ -43,6 +54,6 @@ struct PSR
             u32 z      :  1;  // Zero
             u32 n      :  1;  // Negative
         };
-        u32 packed;
+        u32 value;
     };
 };

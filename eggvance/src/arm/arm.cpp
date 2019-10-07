@@ -26,7 +26,7 @@ void ARM::interrupt()
     u32 cpsr = regs.cpsr;
     u32 next = regs.pc - (regs.cpsr.thumb ? 4 : 8);
 
-    regs.switchMode(MODE_IRQ);
+    regs.switchMode(PSR::IRQ);
     regs.spsr = cpsr;
 
     // Interrupts return with subs pc, lr, 4

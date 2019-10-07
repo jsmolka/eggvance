@@ -113,7 +113,7 @@ void ARM::dataProcessing(u32 instr)
         if (flags)
         {
             u32 spsr = regs.spsr;
-            regs.switchMode(static_cast<Mode>(spsr & 0x1F));
+            regs.switchMode(static_cast<PSR::Mode>(spsr & 0x1F));
             regs.cpsr = spsr;
 
             flags = false;
@@ -274,7 +274,7 @@ void ARM::psrTransfer(u32 instr)
         if (instr & (1 << 16))
         {
             // Control bits are protected in USR mode
-            if (regs.mode() != MODE_USR)
+            if (regs.cpsr.mode != PSR::USR)
                 mask |= 0x000000FF;
         }
 
@@ -287,7 +287,7 @@ void ARM::psrTransfer(u32 instr)
         else
         {
             if (mask & 0xFF)
-                regs.switchMode(static_cast<Mode>(op & 0x1F));
+                regs.switchMode(static_cast<PSR::Mode>(op & 0x1F));
 
             regs.cpsr = (regs.cpsr & ~mask) | op;
 
@@ -606,9 +606,9 @@ void ARM::blockDataTransfer(u32 instr)
     u32 addr = regs[rn];
 
     // Force user register transfer
-    Mode mode = regs.mode();
+    PSR::Mode mode = static_cast<PSR::Mode>(regs.cpsr.mode);
     if (user)
-        regs.switchMode(MODE_USR);
+        regs.switchMode(PSR::USR);
 
     if (rlist != 0)
     {
@@ -735,7 +735,7 @@ void ARM::softwareInterruptArm(u32 instr)
     u32 cpsr = regs.cpsr;
     u32 next = regs.pc - 4;
 
-    regs.switchMode(MODE_SVC);
+    regs.switchMode(PSR::SVC);
     regs.spsr = cpsr;
     regs.lr = next;
 

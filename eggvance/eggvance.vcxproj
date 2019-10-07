@@ -140,7 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\arm\psr.cpp" />
-    <ClCompile Include="src\config.cpp" />
+    <ClCompile Include="src\common\config.cpp" />
     <ClCompile Include="src\mmu\dma\sounddma.cpp" />
     <ClCompile Include="src\mmu\dma\gamepakdma.cpp" />
     <ClCompile Include="src\mmu\dma\dma.cpp" />
@@ -177,7 +177,6 @@
     <ClCompile Include="src\ppu\oamentry.cpp" />
     <ClCompile Include="src\arm\disassembler.cpp" />
     <ClCompile Include="src\arm\registers.cpp" />
-    <ClCompile Include="src\arm\registerbank.cpp" />
     <ClCompile Include="src\mmu\registers\backgroundcontrol.cpp" />
     <ClCompile Include="src\ppu\ppu.cpp" />
     <ClCompile Include="src\core.cpp" />
@@ -190,7 +189,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\arm\psr.h" />
-    <ClInclude Include="src\config.h" />
+    <ClInclude Include="src\common\config.h" />
     <ClInclude Include="src\mmu\dma\sounddma.h" />
     <ClInclude Include="src\mmu\dma\gamepakdma.h" />
     <ClInclude Include="src\mmu\dma\dma.h" />
@@ -232,7 +231,6 @@
     <ClInclude Include="src\mmu\registers\keycontrol.h" />
     <ClInclude Include="src\arm\disassembler.h" />
     <ClInclude Include="src\arm\registers.h" />
-    <ClInclude Include="src\arm\registerbank.h" />
     <ClInclude Include="src\mmu\registers\backgroundcontrol.h" />
     <ClInclude Include="src\mmu\registers\displaycontrol.h" />
     <ClInclude Include="src\mmu\registers\displaystatus.h" />

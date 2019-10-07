@@ -4,13 +4,13 @@
 
 PSR& PSR::operator=(u32 value)
 {
-    packed = value;
+    this->value = value;
     return *this;
 }
 
 PSR::operator u32() const
 {
-    return packed;
+    return value;
 }
 
 bool PSR::matches(Condition condition) const

@@ -666,7 +666,7 @@ void ARM::softwareInterruptThumb(u16 instr)
     u32 cpsr = regs.cpsr;
     u32 next = regs.pc - 2;
 
-    regs.switchMode(MODE_SVC);
+    regs.switchMode(PSR::SVC);
     regs.spsr = cpsr;
     regs.lr = next;
 

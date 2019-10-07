@@ -36,12 +36,6 @@
     <ClCompile Include="src\ppu\ppu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\arm\registers.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\arm\registerbank.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\arm\disassembler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -156,7 +150,10 @@
     <ClCompile Include="src\arm\psr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\config.cpp">
+    <ClCompile Include="src\arm\registers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\config.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -174,12 +171,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ppu\ppu.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\arm\registers.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\arm\registerbank.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\arm\disassembler.h">
@@ -326,7 +317,10 @@
     <ClInclude Include="src\arm\psr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\config.h">
+    <ClInclude Include="src\arm\registers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common\config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
