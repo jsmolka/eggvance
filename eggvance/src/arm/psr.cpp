@@ -36,6 +36,6 @@ bool PSR::matches(Condition condition) const
 
     default:
         EGG_UNREACHABLE;
-        break;
+        return false;
     }
 }

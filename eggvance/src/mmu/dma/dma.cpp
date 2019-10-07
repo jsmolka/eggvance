@@ -128,6 +128,6 @@ int DMA::addressDelta(AddressControl control)
 
     default:
         EGG_UNREACHABLE;
-        break;
+        return 0;
     }
 }
