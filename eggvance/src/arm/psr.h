@@ -35,6 +35,7 @@ struct PSR
         UND = 0b11011   // Undefined
     };
 
+    PSR& operator=(const PSR& other);
     PSR& operator=(u32 value);
     operator u32() const;
 
@@ -44,15 +45,15 @@ struct PSR
     {
         struct
         {
-            u32 mode   :  5;  // Mode
-            u32 thumb  :  1;  // State
-            u32 fiqd   :  1;  // FIQ disable
-            u32 irqd   :  1;  // IRQ disable
-            u32 unused : 20;  // Reserved
-            u32 v      :  1;  // Overflow
-            u32 c      :  1;  // Carry
-            u32 z      :  1;  // Zero
-            u32 n      :  1;  // Negative
+            Mode mode   :  5;  // Mode
+            u32  thumb  :  1;  // State
+            u32  fiqd   :  1;  // FIQ disable
+            u32  irqd   :  1;  // IRQ disable
+            u32  unused : 20;  // Reserved
+            u32  v      :  1;  // Overflow
+            u32  c      :  1;  // Carry
+            u32  z      :  1;  // Zero
+            u32  n      :  1;  // Negative
         };
         u32 value;
     };

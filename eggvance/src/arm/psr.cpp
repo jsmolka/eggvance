@@ -2,6 +2,12 @@
 
 #include "common/macros.h"
 
+PSR& PSR::operator=(const PSR& other)
+{
+    this->value = other.value;
+    return *this;
+}
+
 PSR& PSR::operator=(u32 value)
 {
     this->value = value;

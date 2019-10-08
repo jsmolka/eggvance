@@ -112,8 +112,8 @@ void ARM::dataProcessing(u32 instr)
 
         if (flags)
         {
-            u32 spsr = regs.spsr;
-            regs.switchMode(static_cast<PSR::Mode>(spsr & 0x1F));
+            PSR spsr = regs.spsr;
+            regs.switchMode(spsr.mode);
             regs.cpsr = spsr;
 
             flags = false;
