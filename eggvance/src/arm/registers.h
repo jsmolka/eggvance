@@ -5,8 +5,6 @@
 class Registers
 {
 public:
-    Registers();
-
     u32  operator[](int index) const;
     u32& operator[](int index);
 
@@ -18,18 +16,18 @@ public:
     {
         struct
         {
-            u32 gpr[13];  // General Purpose Registers
-            u32 sp;       // Stack Pointer
-            u32 lr;       // Link Register
-            u32 pc;       // Program Counter
+            u32 gprs[13];  // General Purpose Registers
+            u32 sp;        // Stack Pointer
+            u32 lr;        // Link Register
+            u32 pc;        // Program Counter
         };
         u32 regs[16];
     };
 
-    PSR cpsr;
-    PSR spsr;
+    PSR cpsr;  // Current Program Status Register
+    PSR spsr;  // Saved Program Status Register
 
-protected:
+private:
     enum Bank
     {
         DEF = 0,
@@ -40,22 +38,8 @@ protected:
         UND = 5
     };
 
-    struct
-    {
-        u32 sp;
-        u32 lr;
-        u32 spsr;
-    } bank[6];
-
-    struct
-    {
-        u32 r8;
-        u32 r9;
-        u32 r10;
-        u32 r11;
-        u32 r12;
-    } bank_fiq[2];
-
-private:
     static Bank modeToBank(PSR::Mode mode);
+
+    u32 bank[6][3];
+    u32 bank_fiq[2][5];
 };
