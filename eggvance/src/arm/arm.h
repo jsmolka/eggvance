@@ -1,10 +1,9 @@
 #pragma once
 
-#include "common/integer.h"
 #include "mmu/mmu.h"
 #include "registers.h"
 
-class ARM
+class ARM : public Registers
 {
 public:
     ARM(MMU& mmu);
@@ -14,8 +13,6 @@ public:
     void interrupt();
 
     int step();
-
-    Registers regs;
 
 private:
     enum AccessType
@@ -33,6 +30,8 @@ private:
 
     MMU& mmu;
     MMIO& mmio;
+
+    int instrWidth() const;
 
     void execute();
     void advance();

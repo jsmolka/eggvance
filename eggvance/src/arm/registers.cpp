@@ -5,16 +5,6 @@
 #include "common/macros.h"
 #include "common/config.h"
 
-u32 Registers::operator[](int index) const
-{
-    return regs[index];
-}
-
-u32& Registers::operator[](int index)
-{
-    return regs[index];
-}
-
 void Registers::reset()
 {
     std::memset(regs,     0, sizeof(regs));

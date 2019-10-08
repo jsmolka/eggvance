@@ -20,7 +20,7 @@ Core::Core(std::unique_ptr<BIOS> bios)
     , limited(true)
 {
     Interrupt::init(&mmu.mmio);
-    mmu.bios->setPC(&arm.regs.pc);
+    mmu.bios->setPC(&arm.pc);
 
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 }
@@ -273,7 +273,7 @@ void Core::emulate(int cycles)
     {
         if (mmu.dmas_active.empty())
         {
-            if (Interrupt::requested() && !arm.regs.cpsr.irqd)
+            if (Interrupt::requested() && !arm.cpsr.irqd)
             {
                 arm.interrupt();
             }

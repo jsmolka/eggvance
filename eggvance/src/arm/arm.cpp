@@ -15,7 +15,7 @@ ARM::ARM(MMU& mmu)
 
 void ARM::reset()
 {
-    regs.reset();
+    Registers::reset();
 
     cycles = 0;
     cycles_total = 0;
@@ -23,19 +23,19 @@ void ARM::reset()
 
 void ARM::interrupt()
 {
-    u32 cpsr = regs.cpsr;
-    u32 next = regs.pc - (regs.cpsr.thumb ? 4 : 8);
+    u32 cpsr = this->cpsr;
+    u32 next = this->pc - 2 * instrWidth();
 
-    regs.switchMode(PSR::IRQ);
-    regs.spsr = cpsr;
+    switchMode(PSR::IRQ);
+    spsr = cpsr;
 
     // Interrupts return with subs pc, lr, 4
-    regs.lr = next + 4;
+    lr = next + 4;
 
-    regs.cpsr.thumb = false;
-    regs.cpsr.irqd = true;
+    this->cpsr.thumb = false;
+    this->cpsr.irqd  = true;
 
-    regs.pc = EXV_IRQ;
+    pc = EXV_IRQ;
     advance();
     advance();
 }
@@ -54,11 +54,18 @@ int ARM::step()
     return cycles;
 }
 
+int ARM::instrWidth() const
+{
+    static constexpr int widths[2] = { 4, 2 };
+
+    return widths[cpsr.thumb];
+}
+
 void ARM::execute()
 {
-    if (regs.cpsr.thumb)
+    if (cpsr.thumb)
     {
-        u16 instr = mmu.readHalf(regs.pc - 4);
+        u16 instr = mmu.readHalf(pc - 4);
 
         switch (decodeThumb(instr))
         {
@@ -85,9 +92,9 @@ void ARM::execute()
     }
     else
     {
-        u32 instr = mmu.readWord(regs.pc - 8);
+        u32 instr = mmu.readWord(pc - 8);
 
-        if (regs.cpsr.matches(static_cast<PSR::Condition>(instr >> 28)))
+        if (cpsr.matches(static_cast<PSR::Condition>(instr >> 28)))
         {
             switch (decodeArm(instr))
             {
@@ -106,42 +113,41 @@ void ARM::execute()
         }
         else
         {
-            cycle(regs.pc + 4, SEQ);
+            cycle(pc + 4, SEQ);
         }
     }
 }
 
 void ARM::advance()
 {
-    regs.pc += (regs.cpsr.thumb ? 2 : 4);
+    pc += instrWidth();
 }
 
 void ARM::debug()
 {
-    u32 pc = regs.cpsr.thumb
-        ? regs.pc - 4
-        : regs.pc - 8;
-
-    u32 data = regs.cpsr.thumb
-        ? mmu.readHalf(pc)
-        : mmu.readWord(pc);
+    u32 data = cpsr.thumb
+        ? mmu.readHalf(pc - 4)
+        : mmu.readWord(pc - 8);
 
     fmt::printf("%08X  %08X  %08X  %s\n", 
-        cycles_total, pc, data, Disassembler::disassemble(data, regs)
+        cycles_total, 
+        pc - 2 * instrWidth(), 
+        data, 
+        Disassembler::disassemble(data, *this)
     );
 }
 
 void ARM::logical(u32 result)
 {
-    regs.cpsr.z = result == 0;
-    regs.cpsr.n = result >> 31;
+    cpsr.z = result == 0;
+    cpsr.n = result >> 31;
 }
 
 void ARM::logical(u32 result, bool carry)
 {
-    regs.cpsr.z = result == 0;
-    regs.cpsr.n = result >> 31;
-    regs.cpsr.c = carry;
+    cpsr.z = result == 0;
+    cpsr.n = result >> 31;
+    cpsr.c = carry;
 }
 
 void ARM::arithmetic(u32 op1, u32 op2, bool addition)
@@ -150,17 +156,17 @@ void ARM::arithmetic(u32 op1, u32 op2, bool addition)
         ? op1 + op2
         : op1 - op2;
 
-    regs.cpsr.z = result == 0;
-    regs.cpsr.n = result >> 31;
+    cpsr.z = result == 0;
+    cpsr.n = result >> 31;
 
-    regs.cpsr.c = addition
+    cpsr.c = addition
         ? op2 > (0xFFFFFFFF - op1)
         : op2 <= op1;
 
     int msb_op1 = op1 >> 31;
     int msb_op2 = op2 >> 31;
 
-    regs.cpsr.v = addition
+    cpsr.v = addition
         ? msb_op1 == msb_op2 && (result >> 31) != msb_op1
         : msb_op1 != msb_op2 && (result >> 31) == msb_op2;
 }
@@ -186,7 +192,7 @@ u32 ARM::lsl(u32 value, int amount, bool& carry)
     }
     else  // Special case LSL #0
     {
-        carry = regs.cpsr.c;
+        carry = cpsr.c;
     }
     return value;
 }
@@ -215,7 +221,7 @@ u32 ARM::lsr(u32 value, int amount, bool& carry, bool immediate)
         }
         else
         {
-            carry = regs.cpsr.c;
+            carry = cpsr.c;
         }
     }
     return value;
@@ -245,7 +251,7 @@ u32 ARM::asr(u32 value, int amount, bool& carry, bool immediate)
         }
         else
         {
-            carry = regs.cpsr.c;
+            carry = cpsr.c;
         }
     }
     return value;
@@ -268,11 +274,11 @@ u32 ARM::ror(u32 value, int amount, bool& carry, bool immediate)
         {
             carry = value & 0x1;
             value >>= 1;
-            value |= regs.cpsr.c << 31;
+            value |= cpsr.c << 31;
         }
         else
         {
-            carry = regs.cpsr.c;
+            carry = cpsr.c;
         }
     }
     return value;

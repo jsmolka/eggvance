@@ -18,20 +18,20 @@ void ARM::branchExchange(u32 instr)
     if (addr & 0x1)
     {
         addr = alignHalf(addr);
-        regs.cpsr.thumb = true;
+        cpsr.thumb = true;
     }
     else
     {
         addr = alignWord(addr);
     }
 
-    cycle(regs.pc, NSEQ);
+    cycle(pc, NSEQ);
 
-    regs.pc = addr;
+    pc = addr;
     advance();
 
-    cycle(regs.pc, SEQ);
-    cycle(regs.pc + (regs.cpsr.thumb ? 2 : 4), SEQ);
+    cycle(pc, SEQ);
+    cycle(pc + (cpsr.thumb ? 2 : 4), SEQ);
 }
 
 void ARM::branchLink(u32 instr)
@@ -43,15 +43,15 @@ void ARM::branchLink(u32 instr)
     offset <<= 2;
 
     if (link) 
-        regs.lr = regs.pc - 4;
+        lr = pc - 4;
 
-    cycle(regs.pc, NSEQ);
+    cycle(pc, NSEQ);
 
-    regs.pc += offset;
+    pc += offset;
     advance();
 
-    cycle(regs.pc, SEQ);
-    cycle(regs.pc + 4, SEQ);
+    cycle(pc, SEQ);
+    cycle(pc + 4, SEQ);
 }
 
 void ARM::dataProcessing(u32 instr)
@@ -108,13 +108,13 @@ void ARM::dataProcessing(u32 instr)
 
     if (rd == 15)
     {
-        cycle(regs.pc, NSEQ);
+        cycle(pc, NSEQ);
 
         if (flags)
         {
-            PSR spsr = regs.spsr;
-            regs.switchMode(spsr.mode);
-            regs.cpsr = spsr;
+            PSR spsr = this->spsr;
+            switchMode(static_cast<PSR::Mode>(spsr.mode));
+            cpsr = spsr;
 
             flags = false;
         }
@@ -159,7 +159,7 @@ void ARM::dataProcessing(u32 instr)
 
     // ADC
     case 0b0101:
-        op2 += regs.cpsr.c;
+        op2 += cpsr.c;
         dst = op1 + op2;
         if (flags) 
             arithmetic(op1, op2, true);
@@ -167,7 +167,7 @@ void ARM::dataProcessing(u32 instr)
 
     // SBC
     case 0b0110:
-        op2 += 1 - regs.cpsr.c;
+        op2 += 1 - cpsr.c;
         dst = op1 - op2;
         if (flags) 
             arithmetic(op1, op2, false);
@@ -175,7 +175,7 @@ void ARM::dataProcessing(u32 instr)
 
     // RBC
     case 0b0111:
-        op1 += 1 - regs.cpsr.c;
+        op1 += 1 - cpsr.c;
         dst = op2 - op1;
         if (flags) 
             arithmetic(op2, op1, false);
@@ -233,15 +233,15 @@ void ARM::dataProcessing(u32 instr)
     if (rd == 15)
     {
         // Interrupt return from ARM into THUMB possible
-        if (regs.cpsr.thumb)
+        if (cpsr.thumb)
             dst = alignHalf(dst);
         else
             dst = alignWord(dst);
         advance();
 
-        cycle(regs.pc, SEQ);
+        cycle(pc, SEQ);
     }
-    cycle(regs.pc + 4, SEQ);
+    cycle(pc + 4, SEQ);
 }
 
 void ARM::psrTransfer(u32 instr)
@@ -274,7 +274,7 @@ void ARM::psrTransfer(u32 instr)
         if (instr & (1 << 16))
         {
             // Control bits are protected in USR mode
-            if (regs.cpsr.mode != PSR::USR)
+            if (cpsr.mode != PSR::USR)
                 mask |= 0x000000FF;
         }
 
@@ -282,19 +282,19 @@ void ARM::psrTransfer(u32 instr)
 
         if (use_spsr)
         {
-            regs.spsr = (regs.spsr & ~mask) | op;
+            spsr = (spsr & ~mask) | op;
         }
         else
         {
             if (mask & 0xFF)
-                regs.switchMode(static_cast<PSR::Mode>(op & 0x1F));
+                switchMode(static_cast<PSR::Mode>(op & 0x1F));
 
-            regs.cpsr = (regs.cpsr & ~mask) | op;
+            cpsr = (cpsr & ~mask) | op;
 
-            if (regs.cpsr.thumb)
+            if (cpsr.thumb)
             {
                 // Undefined behavior
-                regs.pc = alignHalf(regs.pc);
+                pc = alignHalf(pc);
                 advance();
             }
         }
@@ -302,9 +302,9 @@ void ARM::psrTransfer(u32 instr)
     else
     {
         int rd = bits<12, 4>(instr);
-        regs[rd] = use_spsr ? regs.spsr : regs.cpsr;
+        regs[rd] = use_spsr ? spsr : cpsr;
     }
-    cycle(regs.pc + 4, SEQ);
+    cycle(pc + 4, SEQ);
 }
 
 void ARM::multiply(u32 instr)
@@ -332,7 +332,7 @@ void ARM::multiply(u32 instr)
         logical(dst);
 
     cycleBooth(op1, true);
-    cycle(regs.pc + 4, SEQ);
+    cycle(pc + 4, SEQ);
 }
 
 void ARM::multiplyLong(u32 instr)
@@ -369,13 +369,13 @@ void ARM::multiplyLong(u32 instr)
 
     if (flags)
     {
-        regs.cpsr.z = result == 0;
-        regs.cpsr.n = result >> 63;
+        cpsr.z = result == 0;
+        cpsr.n = result >> 63;
     }
 
     cycle();
     cycleBooth(static_cast<u32>(op1), sign);
-    cycle(regs.pc + 4, SEQ);
+    cycle(pc + 4, SEQ);
 }
 
 void ARM::singleDataTransfer(u32 instr)
@@ -439,13 +439,13 @@ void ARM::singleDataTransfer(u32 instr)
             addr -= offset;
     }
 
-    cycle(regs.pc, NSEQ);
+    cycle(pc, NSEQ);
 
     if (load)
     {
         cycle();
         if (rd == 15)
-            cycle(regs.pc + 4, NSEQ);
+            cycle(pc + 4, NSEQ);
 
         if (byte)
             dst = mmu.readByte(addr);
@@ -461,9 +461,9 @@ void ARM::singleDataTransfer(u32 instr)
             dst = alignWord(dst);
             advance();
 
-            cycle(regs.pc, SEQ);
+            cycle(pc, SEQ);
         }
-        cycle(regs.pc + 4, SEQ);
+        cycle(pc + 4, SEQ);
     }
     else
     {
@@ -530,13 +530,13 @@ void ARM::halfwordSignedDataTransfer(u32 instr)
             addr -= offset;
     }
 
-    cycle(regs.pc, NSEQ);
+    cycle(pc, NSEQ);
 
     if (load)
     {
         cycle();
         if (rd == 15)
-            cycle(regs.pc + 4, NSEQ);
+            cycle(pc + 4, NSEQ);
 
         switch ((sign << 1) | half)
         {
@@ -566,9 +566,9 @@ void ARM::halfwordSignedDataTransfer(u32 instr)
             dst = alignWord(dst);
             advance();
 
-            cycle(regs.pc, SEQ);
+            cycle(pc, SEQ);
         }
-        cycle(regs.pc + 4, SEQ);
+        cycle(pc + 4, SEQ);
     }
     else  // STRH
     {
@@ -606,13 +606,13 @@ void ARM::blockDataTransfer(u32 instr)
     u32 addr = regs[rn];
 
     // Force user register transfer
-    PSR::Mode mode = static_cast<PSR::Mode>(regs.cpsr.mode);
+    PSR::Mode mode = static_cast<PSR::Mode>(cpsr.mode);
     if (user)
-        regs.switchMode(PSR::USR);
+        switchMode(PSR::USR);
 
     if (rlist != 0)
     {
-        cycle(regs.pc, NSEQ);
+        cycle(pc, NSEQ);
 
         // Register count needed for cycles
         int rcount = countBits(rlist) + countBits(rlist >> 8);
@@ -640,22 +640,22 @@ void ARM::blockDataTransfer(u32 instr)
                         cycle();
 
                     if (x == 15)
-                        cycle(regs.pc + 4, NSEQ);
+                        cycle(pc + 4, NSEQ);
 
                     regs[x] = mmu.readWord(addr);
 
                     if (x == 15)
                     {
-                        regs.pc = alignWord(regs.pc);
+                        pc = alignWord(pc);
                         advance();
 
-                        cycle(regs.pc, SEQ);
+                        cycle(pc, SEQ);
                     }
 
                     if (!full) addr += step;
                 }
             }
-            cycle(regs.pc + 4, SEQ);
+            cycle(pc + 4, SEQ);
         }
         else
         {
@@ -680,14 +680,14 @@ void ARM::blockDataTransfer(u32 instr)
     {
         if (load)
         {
-            regs.pc = mmu.readWord(addr);
-            regs.pc = alignWord(regs.pc);
+            pc = mmu.readWord(addr);
+            pc = alignWord(pc);
             advance();
         }
         else
         {
             // Save address of next instruction
-            mmu.writeWord(addr, regs.pc + 4);
+            mmu.writeWord(addr, pc + 4);
         }
         addr += ascending ? 0x40 : -0x40;
     }
@@ -696,7 +696,7 @@ void ARM::blockDataTransfer(u32 instr)
         regs[rn] = addr;
 
     if (user)
-        regs.switchMode(mode);
+        switchMode(mode);
 }
 
 void ARM::singleDataSwap(u32 instr)
@@ -710,7 +710,7 @@ void ARM::singleDataSwap(u32 instr)
     u32& dst = regs[rd];
     u32  src = regs[rm];
 
-    cycle(regs.pc, NSEQ);
+    cycle(pc, NSEQ);
     cycle(addr, NSEQ);
 
     if (byte)
@@ -725,25 +725,25 @@ void ARM::singleDataSwap(u32 instr)
     }
 
     cycle();
-    cycle(regs.pc + 4, SEQ);
+    cycle(pc + 4, SEQ);
 }
 
 void ARM::softwareInterruptArm(u32 instr)
 {
-    cycle(regs.pc, NSEQ);
+    cycle(pc, NSEQ);
 
-    u32 cpsr = regs.cpsr;
-    u32 next = regs.pc - 4;
+    u32 cpsr = this->cpsr;
+    u32 next = pc - 4;
 
-    regs.switchMode(PSR::SVC);
-    regs.spsr = cpsr;
-    regs.lr = next;
+    switchMode(PSR::SVC);
+    spsr = cpsr;
+    lr = next;
 
-    regs.cpsr.irqd = true;
+    this->cpsr.irqd = true;
 
-    regs.pc = EXV_SWI;
+    pc = EXV_SWI;
     advance();
 
-    cycle(regs.pc, SEQ);
-    cycle(regs.pc + 4, SEQ);
+    cycle(pc, SEQ);
+    cycle(pc + 4, SEQ);
 }

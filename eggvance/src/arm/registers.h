@@ -5,12 +5,7 @@
 class Registers
 {
 public:
-    u32  operator[](int index) const;
-    u32& operator[](int index);
-
     void reset();
-
-    void switchMode(PSR::Mode mode);
 
     union
     {
@@ -26,6 +21,9 @@ public:
 
     PSR cpsr;  // Current Program Status Register
     PSR spsr;  // Saved Program Status Register
+
+protected:
+    void switchMode(PSR::Mode mode);
 
 private:
     enum Bank
