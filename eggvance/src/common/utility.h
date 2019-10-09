@@ -5,6 +5,11 @@
 #include "integer.h"
 #include "tmp.h"
 
+inline u32 align(u32 addr, u32 length)
+{
+    return addr & ~(length - 1);
+}
+
 inline u32 alignHalf(u32 addr)
 {
     return addr & ~0x1;

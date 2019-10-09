@@ -37,7 +37,7 @@ int ARM::emulate()
 void ARM::hardwareInterrupt()
 {
     // Returns with subs pc, lr, 4
-    u32 lr = pc - 2 * instrWidth() + 4;
+    u32 lr = pc - 2 * length() + 4;
 
     interrupt(0x18, lr, PSR::Mode::IRQ);
 }
@@ -45,7 +45,7 @@ void ARM::hardwareInterrupt()
 void ARM::softwareInterrupt()
 {
     // Returns with movs pc, lr
-    u32 lr = pc - instrWidth();
+    u32 lr = pc - length();
 
     interrupt(0x08, lr, PSR::Mode::SVC);
 }
@@ -54,7 +54,7 @@ void ARM::interrupt(u32 pc, u32 lr, PSR::Mode mode)
 {
     cycle(this->pc, NSEQ);
 
-    PSR cpsr = this->cpsr;
+    u32 cpsr = this->cpsr;
     switchMode(mode);
     spsr = cpsr;
 
@@ -70,11 +70,11 @@ void ARM::interrupt(u32 pc, u32 lr, PSR::Mode mode)
     advance();
 }
 
-int ARM::instrWidth() const
+int ARM::length() const
 {
-    static constexpr int widths[2] = { 4, 2 };
+    static constexpr int lengths[2] = { 4, 2 };
 
-    return widths[cpsr.thumb];
+    return lengths[cpsr.thumb];
 }
 
 void ARM::execute()
@@ -85,6 +85,7 @@ void ARM::execute()
 
         switch (decodeThumb(instr))
         {
+        case InstructionThumb::Invalid: EGG_ASSERT(false, "Invalid instruction"); break;
         case InstructionThumb::MoveShiftedRegister: moveShiftedRegister(instr); break;
         case InstructionThumb::AddSubtractImmediate: addSubtractImmediate(instr); break;
         case InstructionThumb::AddSubtractMoveCompareImmediate: addSubtractMoveCompareImmediate(instr); break;
@@ -118,6 +119,7 @@ void ARM::execute()
         {
             switch (decodeArm(instr))
             {
+            case InstructionArm::Invalid: EGG_ASSERT(false, "Invalid instruction"); break;
             case InstructionArm::BranchExchange: branchExchange(instr); break;
             case InstructionArm::BranchLink: branchLink(instr); break;
             case InstructionArm::DataProcessing: dataProcessing(instr); break;
@@ -144,7 +146,7 @@ void ARM::execute()
 
 void ARM::advance()
 {
-    pc += instrWidth();
+    pc += length();
 }
 
 void ARM::debug()
@@ -155,7 +157,7 @@ void ARM::debug()
 
     fmt::printf("%08X  %08X  %08X  %s\n", 
         cycles, 
-        pc - 2 * instrWidth(), 
+        pc - 2 * length(), 
         instr, 
         Disassembler::disassemble(instr, *this)
     );

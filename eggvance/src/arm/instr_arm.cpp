@@ -1,37 +1,53 @@
 #include "arm.h"
 
+#include "common/macros.h"
 #include "common/utility.h"
 
-u32 ARM::rotatedImmediate(int data, bool& carry)
+enum class Operation
 {
-    u32 value    = bits<0, 8>(data);
-    int rotation = bits<8, 4>(data);
+    AND = 0b0000,
+    EOR = 0b0001,
+    SUB = 0b0010,
+    RSB = 0b0011,
+    ADD = 0b0100,
+    ADC = 0b0101,
+    SBC = 0b0110,
+    RSC = 0b0111,
+    TST = 0b1000,
+    TEQ = 0b1001,
+    CMP = 0b1010,
+    CMN = 0b1011,
+    ORR = 0b1100,
+    MOV = 0b1101,
+    BIC = 0b1110,
+    MVN = 0b1111
+};
 
-    return ror(value, rotation << 1, carry, false);
-}
+enum class Shift
+{
+    LSL = 0b00,
+    LSR = 0b01,
+    ASR = 0b10,
+    ROR = 0b11
+};
 
 void ARM::branchExchange(u32 instr)
 {
     int rn = bits<0, 4>(instr);
 
-    u32 addr = regs[rn];
-    if (addr & 0x1)
-    {
-        addr = alignHalf(addr);
-        cpsr.thumb = true;
-    }
-    else
-    {
-        addr = alignWord(addr);
-    }
+    EGG_ASSERT(rn != 15, "Undefined behavior");
 
-    cycle(pc, NSEQ);
+    u32 addr = regs[rn];
+    cpsr.thumb = addr & 0x1;
+    addr = align(addr, length());
+
+    cycle<NSEQ>(pc);
 
     pc = addr;
     advance();
 
-    cycle(pc, SEQ);
-    cycle(pc + (cpsr.thumb ? 2 : 4), SEQ);
+    cycle<SEQ>(pc);
+    cycle<SEQ>(pc + length());
 }
 
 void ARM::branchLink(u32 instr)
@@ -42,26 +58,25 @@ void ARM::branchLink(u32 instr)
     offset = signExtend<24>(offset);
     offset <<= 2;
 
-    if (link) 
+    if (link)
         lr = pc - 4;
 
-    cycle(pc, NSEQ);
+    cycle<NSEQ>(pc);
 
     pc += offset;
     advance();
 
-    cycle(pc, SEQ);
-    cycle(pc + 4, SEQ);
+    cycle<SEQ>(pc);
+    cycle<SEQ>(pc + 4);
 }
 
 void ARM::dataProcessing(u32 instr)
 {
-    int data    = bits< 0, 12>(instr);
-    int rd      = bits<12,  4>(instr);
-    int rn      = bits<16,  4>(instr);
-    int flags   = bits<20,  1>(instr);
-    int opcode  = bits<21,  4>(instr);
-    int use_imm = bits<25,  1>(instr);
+    int rd      = bits<12, 4>(instr);
+    int rn      = bits<16, 4>(instr);
+    int flags   = bits<20, 1>(instr);
+    int opcode  = bits<21, 4>(instr);
+    int use_imm = bits<25, 1>(instr);
 
     u32& dst = regs[rd];
     u32  op1 = regs[rn];
@@ -70,13 +85,16 @@ void ARM::dataProcessing(u32 instr)
     bool carry;
     if (use_imm)
     {
-        op2 = rotatedImmediate(data, carry);
+        u32 value    = bits<0, 8>(instr);
+        int rotation = bits<8, 4>(instr);
+
+        op2 = ror(value, rotation << 1, carry, false);
     }
     else
     {
-        int rm      = bits<0, 4>(data);
-        int use_reg = bits<4, 1>(data);
-        int type    = bits<5, 2>(data);
+        int rm      = bits<0, 4>(instr);
+        int use_reg = bits<4, 1>(instr);
+        int shift   = bits<5, 2>(instr);
 
         u32 value = regs[rm];
 
@@ -87,161 +105,154 @@ void ARM::dataProcessing(u32 instr)
             amount = regs[rs];
             amount &= 0xFF;
 
-            // Account for prefetch
             if (rn == 15) op1 += 4;
             if (rm == 15) value += 4;
         }
         else
         {
-            amount = bits<7, 5>(data);
+            amount = bits<7, 5>(instr);
         }
 
-        switch (type)
+        switch (static_cast<Shift>(shift))
         {
-        case 0b00: op2 = lsl(value, amount, carry); break;
-        case 0b01: op2 = lsr(value, amount, carry, !use_reg); break;
-        case 0b10: op2 = asr(value, amount, carry, !use_reg); break;
-        case 0b11: op2 = ror(value, amount, carry, !use_reg); break;
+        case Shift::LSL: op2 = lsl(value, amount, carry); break;
+        case Shift::LSR: op2 = lsr(value, amount, carry, !use_reg); break;
+        case Shift::ASR: op2 = asr(value, amount, carry, !use_reg); break;
+        case Shift::ROR: op2 = ror(value, amount, carry, !use_reg); break;
+
+        default:
+            EGG_UNREACHABLE;
+            break;
         }
         cycle();
     }
 
     if (rd == 15)
     {
-        cycle(pc, NSEQ);
+        cycle<NSEQ>(pc);
 
         if (flags)
         {
+            EGG_ASSERT(cpsr.mode != PSR::Mode::USR, "Requires privileged mode");
+
             PSR spsr = this->spsr;
-            switchMode(static_cast<PSR::Mode>(spsr.mode));
+            switchMode(spsr.mode);
             cpsr = spsr;
 
             flags = false;
         }
     }
 
-    switch (opcode)
+    switch (static_cast<Operation>(opcode))
     {
-    // AND
-    case 0b0000:
+    case Operation::AND:
         dst = op1 & op2;
         if (flags) 
             logical(dst, carry);
         break;
 
-    // EOR
-    case 0b0001:
+    case Operation::EOR:
         dst = op1 ^ op2;
         if (flags) 
             logical(dst, carry);
         break;
 
-    // SUB
-    case 0b0010:
+    case Operation::SUB:
         dst = op1 - op2;
         if (flags) 
-            arithmetic(op1, op2, false);
+            arithmetic<SUB>(op1, op2);
         break;
 
-    // RSB
-    case 0b0011:
+    case Operation::RSB:
         dst = op2 - op1;
         if (flags) 
-            arithmetic(op2, op1, false);
+            arithmetic<SUB>(op2, op1);
         break;
 
-    // ADD
-    case 0b0100:
+    case Operation::ADD:
         dst = op1 + op2;
         if (flags) 
-            arithmetic(op1, op2, true);
+            arithmetic<ADD>(op1, op2);
         break;
 
-    // ADC
-    case 0b0101:
+    case Operation::ADC:
         op2 += cpsr.c;
         dst = op1 + op2;
         if (flags) 
-            arithmetic(op1, op2, true);
+            arithmetic<ADD>(op1, op2);
         break;
 
-    // SBC
-    case 0b0110:
+    case Operation::SBC:
         op2 += 1 - cpsr.c;
         dst = op1 - op2;
         if (flags) 
-            arithmetic(op1, op2, false);
+            arithmetic<SUB>(op1, op2);
         break;
 
-    // RBC
-    case 0b0111:
+    case Operation::RSC:
         op1 += 1 - cpsr.c;
         dst = op2 - op1;
         if (flags) 
-            arithmetic(op2, op1, false);
+            arithmetic<SUB>(op2, op1);
         break;
 
-    // TST
-    case 0b1000:
+    case Operation::TST:
+        EGG_ASSERT(flags, "Flags should be set");
         logical(op1 & op2, carry);
         break;
 
-    // TEQ
-    case 0b1001:
+    case Operation::TEQ:
+        EGG_ASSERT(flags, "Flags should be set");
         logical(op1 ^ op2, carry);
         break;
 
-    // CMP
-    case 0b1010:
-        arithmetic(op1, op2, false);
+    case Operation::CMP:
+        EGG_ASSERT(flags, "Flags should be set");
+        arithmetic<SUB>(op1, op2);
         break;
 
-    // CMN
-    case 0b1011:
-        arithmetic(op1, op2, true);
+    case Operation::CMN:
+        EGG_ASSERT(flags, "Flags should be set");
+        arithmetic<ADD>(op1, op2);
         break;
 
-    // ORR
-    case 0b1100:
+    case Operation::ORR:
         dst = op1 | op2;
         if (flags) 
             logical(dst, carry);
         break;
 
-    // MOV
-    case 0b1101:
+    case Operation::MOV:
         dst = op2;
         if (flags) 
             logical(dst, carry);
         break;
 
-    // BIC
-    case 0b1110:
+    case Operation::BIC:
         dst = op1 & ~op2;
         if (flags) 
             logical(dst, carry);
         break;
 
-    // MVN
-    case 0b1111:
+    case Operation::MVN:
         dst = ~op2;
         if (flags) 
             logical(dst, carry);
+        break;
+
+    default:
+        EGG_UNREACHABLE;
         break;
     }
 
     if (rd == 15)
     {
-        // Interrupt return from ARM into THUMB possible
-        if (cpsr.thumb)
-            dst = alignHalf(dst);
-        else
-            dst = alignWord(dst);
+        dst = align(dst, length());
         advance();
 
-        cycle(pc, SEQ);
+        cycle<SEQ>(pc);
     }
-    cycle(pc + 4, SEQ);
+    cycle<SEQ>(pc + 4);
 }
 
 void ARM::psrTransfer(u32 instr)
@@ -257,8 +268,11 @@ void ARM::psrTransfer(u32 instr)
         u32 op;
         if (use_imm)
         {
+            u32 value    = bits<0, 8>(data);
+            int rotation = bits<8, 4>(data);
+            
             bool carry;
-            op = rotatedImmediate(data, carry);
+            op = ror(value, rotation << 1, carry, false);
         }
         else
         {
@@ -266,16 +280,14 @@ void ARM::psrTransfer(u32 instr)
             op = regs[rm];
         }
 
-        // Mask based on fsxc-bits
         u32 mask = 0;
-        if (instr & (1 << 19)) mask |= 0xFF000000;
-        if (instr & (1 << 18)) mask |= 0x00FF0000;
-        if (instr & (1 << 17)) mask |= 0x0000FF00;
+        if (instr & (1 << 19)) mask |= 0xFF00'0000;
+        if (instr & (1 << 18)) mask |= 0x00FF'0000;
+        if (instr & (1 << 17)) mask |= 0x0000'FF00;
         if (instr & (1 << 16))
         {
-            // Control bits are protected in USR mode
-            if (cpsr.mode != PSR::USR)
-                mask |= 0x000000FF;
+            EGG_ASSERT(cpsr.mode != PSR::Mode::USR, "Requires privileged mode");
+            mask |= 0x0000'00FF;
         }
 
         op &= mask;

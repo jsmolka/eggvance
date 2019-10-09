@@ -23,7 +23,7 @@ private:
     void softwareInterrupt();
     void interrupt(u32 pc, u32 lr, PSR::Mode mode);
 
-    int instrWidth() const;
+    int length() const;
 
     void execute();
     void advance();
@@ -32,6 +32,26 @@ private:
     void logical(u32 result);
     void logical(u32 result, bool carry);
     void arithmetic(u32 op1, u32 op2, bool addition);
+
+    enum Arithmetic
+    {
+        ADD,
+        SUB
+    };
+
+    // Temporary
+    template<Arithmetic arith>
+    void arithmetic(u32 op1, u32 op2)
+    {
+        arithmetic(op1, op2, arith == ADD);
+    }
+
+    // Temporary
+    template<AccessType type>
+    void cycle(u32 addr)
+    {
+        cycle(addr, type);
+    }
 
     u32 lsl(u32 value, int amount, bool& carry) const;
     u32 lsr(u32 value, int amount, bool& carry, bool immediate = true) const;
@@ -64,8 +84,6 @@ private:
     void conditionalBranch(u16 instr);
     void unconditionalBranch(u16 instr);
     void longBranchLink(u16 instr);
-
-    u32 rotatedImmediate(int data, bool& carry);
 
     void branchExchange(u32 instr);
     void branchLink(u32 instr);
