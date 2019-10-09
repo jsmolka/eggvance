@@ -727,23 +727,3 @@ void ARM::singleDataSwap(u32 instr)
     cycle();
     cycle(pc + 4, SEQ);
 }
-
-void ARM::softwareInterruptArm(u32 instr)
-{
-    cycle(pc, NSEQ);
-
-    u32 cpsr = this->cpsr;
-    u32 next = pc - 4;
-
-    switchMode(PSR::SVC);
-    spsr = cpsr;
-    lr = next;
-
-    this->cpsr.irqd = true;
-
-    pc = EXV_SWI;
-    advance();
-
-    cycle(pc, SEQ);
-    cycle(pc + 4, SEQ);
-}

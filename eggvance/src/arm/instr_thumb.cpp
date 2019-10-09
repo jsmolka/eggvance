@@ -662,27 +662,6 @@ void ARM::conditionalBranch(u16 instr)
     cycle(pc + 2, SEQ);
 }
 
-void ARM::softwareInterruptThumb(u16 instr)
-{
-    cycle(pc, NSEQ);
-
-    u32 cpsr = this->cpsr;
-    u32 next = pc - 2;
-
-    switchMode(PSR::SVC);
-    spsr = cpsr;
-    lr = next;
-
-    this->cpsr.thumb = false;
-    this->cpsr.irqd = true;
-
-    pc = EXV_SWI;
-    advance();
-
-    cycle(pc, SEQ);
-    cycle(pc + 4, SEQ);
-}
-
 void ARM::unconditionalBranch(u16 instr)
 {
     int offset = bits<0, 11>(instr);

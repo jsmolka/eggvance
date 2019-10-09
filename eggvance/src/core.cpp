@@ -273,10 +273,6 @@ void Core::emulate(int cycles)
     {
         if (mmu.dmas_active.empty())
         {
-            if (Interrupt::requested() && !arm.cpsr.irqd)
-            {
-                arm.interrupt();
-            }
             if (mmu.mmio.halt)
             {
                 // Todo: Emulate until first interrupt
@@ -286,7 +282,7 @@ void Core::emulate(int cycles)
             }
             else
             {
-                cycles = arm.step();
+                cycles = arm.emulate();
                 remaining -= cycles;
                 emulateTimers(cycles);
             }

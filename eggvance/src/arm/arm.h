@@ -10,9 +10,7 @@ public:
 
     void reset();
 
-    void interrupt();
-
-    int step();
+    int emulate();
 
 private:
     enum AccessType
@@ -28,31 +26,27 @@ private:
         EXV_IRQ = 0x18,
     };
 
-    MMU& mmu;
-    MMIO& mmio;
+    void interrupt();
+    void softwareInterrupt();
 
     int instrWidth() const;
 
     void execute();
     void advance();
-
     void debug();
 
     void logical(u32 result);
     void logical(u32 result, bool carry);
     void arithmetic(u32 op1, u32 op2, bool addition);
 
-    u32 lsl(u32 value, int offset, bool& carry);
-    u32 lsr(u32 value, int offset, bool& carry, bool immediate = true);
-    u32 asr(u32 value, int offset, bool& carry, bool immediate = true);
-    u32 ror(u32 value, int offset, bool& carry, bool immediate = true);
+    u32 lsl(u32 value, int amount, bool& carry);
+    u32 lsr(u32 value, int amount, bool& carry, bool immediate = true);
+    u32 asr(u32 value, int amount, bool& carry, bool immediate = true);
+    u32 ror(u32 value, int amount, bool& carry, bool immediate = true);
 
     u32 ldr(u32 addr);
     u32 ldrh(u32 addr);
     u32 ldrsh(u32 addr);
-
-    int cycles;
-    u64 cycles_total;
 
     void cycle();
     void cycle(u32 addr, AccessType access);
@@ -74,7 +68,6 @@ private:
     void pushPopRegisters(u16 instr);
     void loadStoreMultiple(u16 instr);
     void conditionalBranch(u16 instr);
-    void softwareInterruptThumb(u16 instr);
     void unconditionalBranch(u16 instr);
     void longBranchLink(u16 instr);
 
@@ -90,5 +83,10 @@ private:
     void halfwordSignedDataTransfer(u32 instr);
     void blockDataTransfer(u32 instr);
     void singleDataSwap(u32 instr);
-    void softwareInterruptArm(u32 instr);
+
+    MMU& mmu;
+    MMIO& mmio;
+
+    int cycles;
+    u64 cycles_total;
 };

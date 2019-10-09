@@ -3,6 +3,7 @@
 #include <fmt/printf.h>
 
 #include "common/utility.h"
+#include "mmu/interrupt.h"
 #include "disassembler.h"
 #include "decode.h"
 
@@ -19,6 +20,25 @@ void ARM::reset()
 
     cycles = 0;
     cycles_total = 0;
+}
+
+int ARM::emulate()
+{
+    cycles = 0;
+
+    if (!cpsr.irqd && Interrupt::requested())
+    {
+        interrupt();
+    }
+     
+    //debug();
+
+    execute();
+    advance();
+
+    cycles_total += cycles;
+
+    return cycles;
 }
 
 void ARM::interrupt()
@@ -40,18 +60,25 @@ void ARM::interrupt()
     advance();
 }
 
-int ARM::step()
+void ARM::softwareInterrupt()
 {
-    cycles = 0;
-     
-    //debug();
+    cycle(pc, NSEQ);
 
-    execute();
+    u32 cpsr = this->cpsr;
+    u32 next = pc - instrWidth();
+
+    switchMode(PSR::SVC);
+    spsr = cpsr;
+    lr = next;
+
+    this->cpsr.thumb = false;
+    this->cpsr.irqd  = true;
+
+    pc = EXV_SWI;
     advance();
 
-    cycles_total += cycles;
-
-    return cycles;
+    cycle(pc, SEQ);
+    cycle(pc + 4, SEQ);
 }
 
 int ARM::instrWidth() const
@@ -85,7 +112,7 @@ void ARM::execute()
         case InstructionThumb::PushPopRegisters: pushPopRegisters(instr); break;
         case InstructionThumb::LoadStoreMultiple: loadStoreMultiple(instr); break;
         case InstructionThumb::ConditionalBranch: conditionalBranch(instr); break;
-        case InstructionThumb::SoftwareInterrupt: softwareInterruptThumb(instr); break;
+        case InstructionThumb::SoftwareInterrupt: softwareInterrupt(); break;
         case InstructionThumb::UnconditionalBranch: unconditionalBranch(instr); break;
         case InstructionThumb::LongBranchLink: longBranchLink(instr); break;
         }
@@ -108,7 +135,7 @@ void ARM::execute()
             case InstructionArm::HalfwordSignedDataTransfer: halfwordSignedDataTransfer(instr); break;
             case InstructionArm::BlockDataTransfer: blockDataTransfer(instr); break;
             case InstructionArm::SingleDataSwap: singleDataSwap(instr); break;
-            case InstructionArm::SoftwareInterrupt: softwareInterruptArm(instr); break;
+            case InstructionArm::SoftwareInterrupt: softwareInterrupt(); break;
             }
         }
         else
