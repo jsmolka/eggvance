@@ -325,7 +325,18 @@ void MMU::writeByte(u32 addr, u8 byte)
         break;
 
     case PAGE_PALETTE:
+        addr &= 0x3FE;
+        palette.writeHalf(addr, byte * 0x0101);
+        break;
+
     case PAGE_VRAM:
+        addr &= 0x1'FFFE;
+        if (mmio.dispcnt.mode < 3
+                ? addr < 0x1'0000  
+                : addr < 0x1'4000)
+            vram.writeHalf(addr, byte * 0x0101);
+        break;
+
     case PAGE_OAM:
         break;
 

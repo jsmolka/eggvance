@@ -647,7 +647,7 @@ void ARM::conditionalBranch(u16 instr)
     int offset    = bits<0, 8>(instr);
     int condition = bits<8, 4>(instr);
 
-    if (cpsr.matches(static_cast<PSR::Condition>(condition)))
+    if (cpsr.check(static_cast<PSR::Condition>(condition)))
     {
         offset = signExtend<8>(offset);
         offset <<= 1;

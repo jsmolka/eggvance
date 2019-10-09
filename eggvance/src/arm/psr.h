@@ -39,7 +39,7 @@ struct PSR
     PSR& operator=(u32 value);
     operator u32() const;
 
-    bool matches(Condition condition) const;
+    bool check(Condition condition) const;
 
     union
     {
