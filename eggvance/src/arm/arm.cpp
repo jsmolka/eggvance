@@ -9,7 +9,6 @@
 
 ARM::ARM(MMU& mmu)
     : mmu(mmu)
-    , mmio(mmu.mmio)
 {
     reset();
 }
@@ -19,66 +18,56 @@ void ARM::reset()
     Registers::reset();
 
     cycles = 0;
-    cycles_total = 0;
 }
 
 int ARM::emulate()
 {
-    cycles = 0;
+    u64 last = cycles;
 
-    if (!cpsr.irqd && Interrupt::requested())
-    {
-        interrupt();
-    }
-     
-    //debug();
+    if (Interrupt::requested() && !cpsr.irqd)
+        hardwareInterrupt();
+    else
+        execute();
 
-    execute();
     advance();
 
-    cycles_total += cycles;
-
-    return cycles;
+    return static_cast<int>(cycles - last);
 }
 
-void ARM::interrupt()
+void ARM::hardwareInterrupt()
 {
-    u32 cpsr = this->cpsr;
-    u32 next = this->pc - 2 * instrWidth();
+    // Returns with subs pc, lr, 4
+    u32 lr = pc - 2 * instrWidth() + 4;
 
-    switchMode(PSR::IRQ);
-    spsr = cpsr;
-
-    // Interrupts return with subs pc, lr, 4
-    lr = next + 4;
-
-    this->cpsr.thumb = false;
-    this->cpsr.irqd  = true;
-
-    pc = EXV_IRQ;
-    advance();
-    advance();
+    interrupt(0x18, lr, PSR::Mode::IRQ);
 }
 
 void ARM::softwareInterrupt()
 {
-    cycle(pc, NSEQ);
+    // Returns with movs pc, lr
+    u32 lr = pc - instrWidth();
 
-    u32 cpsr = this->cpsr;
-    u32 next = pc - instrWidth();
+    interrupt(0x08, lr, PSR::Mode::SVC);
+}
 
-    switchMode(PSR::SVC);
+void ARM::interrupt(u32 pc, u32 lr, PSR::Mode mode)
+{
+    cycle(this->pc, NSEQ);
+
+    PSR cpsr = this->cpsr;
+    switchMode(mode);
     spsr = cpsr;
-    lr = next;
+
+    this->lr = lr;
+    this->pc = pc;
 
     this->cpsr.thumb = false;
     this->cpsr.irqd  = true;
 
-    pc = EXV_SWI;
-    advance();
+    cycle(this->pc, SEQ);
+    cycle(this->pc + 4, SEQ);
 
-    cycle(pc, SEQ);
-    cycle(pc + 4, SEQ);
+    advance();
 }
 
 int ARM::instrWidth() const
@@ -115,13 +104,17 @@ void ARM::execute()
         case InstructionThumb::SoftwareInterrupt: softwareInterrupt(); break;
         case InstructionThumb::UnconditionalBranch: unconditionalBranch(instr); break;
         case InstructionThumb::LongBranchLink: longBranchLink(instr); break;
+
+        default:
+            EGG_UNREACHABLE;
+            break;
         }
     }
     else
     {
         u32 instr = mmu.readWord(pc - 8);
 
-        if (cpsr.matches(static_cast<PSR::Condition>(instr >> 28)))
+        if (cpsr.check(static_cast<PSR::Condition>(instr >> 28)))
         {
             switch (decodeArm(instr))
             {
@@ -136,6 +129,10 @@ void ARM::execute()
             case InstructionArm::BlockDataTransfer: blockDataTransfer(instr); break;
             case InstructionArm::SingleDataSwap: singleDataSwap(instr); break;
             case InstructionArm::SoftwareInterrupt: softwareInterrupt(); break;
+
+            default:
+                EGG_UNREACHABLE;
+                break;
             }
         }
         else
@@ -152,15 +149,15 @@ void ARM::advance()
 
 void ARM::debug()
 {
-    u32 data = cpsr.thumb
+    u32 instr = cpsr.thumb
         ? mmu.readHalf(pc - 4)
         : mmu.readWord(pc - 8);
 
     fmt::printf("%08X  %08X  %08X  %s\n", 
-        cycles_total, 
+        cycles, 
         pc - 2 * instrWidth(), 
-        data, 
-        Disassembler::disassemble(data, *this)
+        instr, 
+        Disassembler::disassemble(instr, *this)
     );
 }
 
@@ -198,7 +195,7 @@ void ARM::arithmetic(u32 op1, u32 op2, bool addition)
         : msb_op1 != msb_op2 && (result >> 31) == msb_op2;
 }
 
-u32 ARM::lsl(u32 value, int amount, bool& carry)
+u32 ARM::lsl(u32 value, int amount, bool& carry) const
 {
     if (amount != 0)
     {
@@ -217,14 +214,14 @@ u32 ARM::lsl(u32 value, int amount, bool& carry)
             value = 0;
         }
     }
-    else  // Special case LSL #0
+    else
     {
         carry = cpsr.c;
     }
     return value;
 }
 
-u32 ARM::lsr(u32 value, int amount, bool& carry, bool immediate)
+u32 ARM::lsr(u32 value, int amount, bool& carry, bool immediate) const
 {
     if (amount != 0)
     {
@@ -239,7 +236,7 @@ u32 ARM::lsr(u32 value, int amount, bool& carry, bool immediate)
             value = 0;
         }
     }
-    else  // Special case LSR #0 / #32
+    else
     {
         if (immediate)
         {
@@ -254,7 +251,7 @@ u32 ARM::lsr(u32 value, int amount, bool& carry, bool immediate)
     return value;
 }
 
-u32 ARM::asr(u32 value, int amount, bool& carry, bool immediate)
+u32 ARM::asr(u32 value, int amount, bool& carry, bool immediate) const
 {
     if (amount != 0)
     {
@@ -269,7 +266,7 @@ u32 ARM::asr(u32 value, int amount, bool& carry, bool immediate)
             value = carry ? 0xFFFFFFFF : 0;
         }
     }
-    else  // Special case ASR #0 / #32
+    else
     {
         if (immediate)
         {
@@ -284,7 +281,7 @@ u32 ARM::asr(u32 value, int amount, bool& carry, bool immediate)
     return value;
 }
 
-u32 ARM::ror(u32 value, int amount, bool& carry, bool immediate)
+u32 ARM::ror(u32 value, int amount, bool& carry, bool immediate) const
 {
     if (amount != 0)
     {
@@ -295,7 +292,7 @@ u32 ARM::ror(u32 value, int amount, bool& carry, bool immediate)
 
         carry = value >> 31;
     }
-    else  // Special case RRX
+    else
     {
         if (immediate)
         {
@@ -357,6 +354,8 @@ void ARM::cycle()
 
 void ARM::cycle(u32 addr, AccessType access)
 {
+    const auto& mmio = mmu.mmio;
+
     cycles++;
 
     static constexpr int seq[3][2] = { { 1, 2 }, { 1, 4 }, { 1, 8} };

@@ -19,15 +19,9 @@ private:
         SEQ
     };
 
-    enum ExceptionVector
-    {
-        EXV_RST = 0x00,
-        EXV_SWI = 0x08,
-        EXV_IRQ = 0x18,
-    };
-
-    void interrupt();
+    void hardwareInterrupt();
     void softwareInterrupt();
+    void interrupt(u32 pc, u32 lr, PSR::Mode mode);
 
     int instrWidth() const;
 
@@ -39,10 +33,10 @@ private:
     void logical(u32 result, bool carry);
     void arithmetic(u32 op1, u32 op2, bool addition);
 
-    u32 lsl(u32 value, int amount, bool& carry);
-    u32 lsr(u32 value, int amount, bool& carry, bool immediate = true);
-    u32 asr(u32 value, int amount, bool& carry, bool immediate = true);
-    u32 ror(u32 value, int amount, bool& carry, bool immediate = true);
+    u32 lsl(u32 value, int amount, bool& carry) const;
+    u32 lsr(u32 value, int amount, bool& carry, bool immediate = true) const;
+    u32 asr(u32 value, int amount, bool& carry, bool immediate = true) const;
+    u32 ror(u32 value, int amount, bool& carry, bool immediate = true) const;
 
     u32 ldr(u32 addr);
     u32 ldrh(u32 addr);
@@ -85,8 +79,6 @@ private:
     void singleDataSwap(u32 instr);
 
     MMU& mmu;
-    MMIO& mmio;
 
-    int cycles;
-    u64 cycles_total;
+    u64 cycles;
 };

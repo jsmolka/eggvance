@@ -424,6 +424,11 @@ void ARM::singleDataTransfer(u32 instr)
         case 0b01: offset = lsr(value, amount, carry); break;
         case 0b10: offset = asr(value, amount, carry); break;
         case 0b11: offset = ror(value, amount, carry); break;
+
+        default:
+            EGG_UNREACHABLE;
+            offset = 0;
+            break;
         }
     }
     else

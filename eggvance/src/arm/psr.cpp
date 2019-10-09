@@ -19,7 +19,7 @@ PSR::operator u32() const
     return value;
 }
 
-bool PSR::matches(Condition condition) const
+bool PSR::check(Condition condition) const
 {
     switch (condition)
     {
