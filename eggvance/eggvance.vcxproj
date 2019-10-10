@@ -139,116 +139,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\arm\psr.cpp" />
-    <ClCompile Include="src\common\config.cpp" />
-    <ClCompile Include="src\mmu\dma\sounddma.cpp" />
-    <ClCompile Include="src\mmu\dma\gamepakdma.cpp" />
-    <ClCompile Include="src\mmu\dma\dma.cpp" />
-    <ClCompile Include="src\gamepak\eeprom.cpp" />
-    <ClCompile Include="src\gamepak\flash.cpp" />
-    <ClCompile Include="src\gamepak\fileutil.cpp" />
-    <ClCompile Include="src\gamepak\none.cpp" />
-    <ClCompile Include="src\gamepak\save.cpp" />
-    <ClCompile Include="src\gamepak\sram.cpp" />
-    <ClCompile Include="src\gamepak\gamepak.cpp" />
-    <ClCompile Include="src\microclock.cpp" />
-    <ClCompile Include="src\mmu\bios.cpp" />
     <ClCompile Include="icon\icon.cpp" />
-    <ClCompile Include="src\mmu\registers\blendfade.cpp" />
-    <ClCompile Include="src\input.cpp" />
-    <ClCompile Include="src\mmu\mmio.cpp" />
-    <ClCompile Include="src\mmu\registers\backgroundoffset.cpp" />
-    <ClCompile Include="src\mmu\registers\backgroundparameter.cpp" />
-    <ClCompile Include="src\mmu\registers\backgroundreference.cpp" />
-    <ClCompile Include="src\mmu\registers\blendalpha.cpp" />
-    <ClCompile Include="src\mmu\registers\blendcontrol.cpp" />
-    <ClCompile Include="src\mmu\registers\displaycontrol.cpp" />
-    <ClCompile Include="src\mmu\registers\displaystatus.cpp" />
-    <ClCompile Include="src\mmu\registers\dmaaddress.cpp" />
-    <ClCompile Include="src\mmu\registers\dmacontrol.cpp" />
-    <ClCompile Include="src\mmu\registers\keycontrol.cpp" />
-    <ClCompile Include="src\mmu\registers\mosaic.cpp" />
-    <ClCompile Include="src\mmu\registers\timercontrol.cpp" />
-    <ClCompile Include="src\mmu\registers\waitcontrol.cpp" />
-    <ClCompile Include="src\mmu\registers\window.cpp" />
-    <ClCompile Include="src\ppu\backend.cpp" />
-    <ClCompile Include="src\ppu\render.cpp" />
-    <ClCompile Include="src\arm\decode.cpp" />
-    <ClCompile Include="src\ppu\oamentry.cpp" />
-    <ClCompile Include="src\arm\disassembler.cpp" />
-    <ClCompile Include="src\arm\registers.cpp" />
-    <ClCompile Include="src\mmu\registers\backgroundcontrol.cpp" />
-    <ClCompile Include="src\ppu\ppu.cpp" />
-    <ClCompile Include="src\core.cpp" />
-    <ClCompile Include="src\arm\instr_arm.cpp" />
-    <ClCompile Include="src\arm\instr_thumb.cpp" />
-    <ClCompile Include="src\mmu\mmu.cpp" />
-    <ClCompile Include="src\arm\arm.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\mmu\timer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\arm\psr.h" />
-    <ClInclude Include="src\common\config.h" />
-    <ClInclude Include="src\mmu\dma\sounddma.h" />
-    <ClInclude Include="src\mmu\dma\gamepakdma.h" />
-    <ClInclude Include="src\mmu\dma\dma.h" />
-    <ClInclude Include="src\common\macros.h" />
-    <ClInclude Include="src\gamepak\eeprom.h" />
-    <ClInclude Include="src\gamepak\flash.h" />
-    <ClInclude Include="src\gamepak\fileutil.h" />
-    <ClInclude Include="src\gamepak\none.h" />
-    <ClInclude Include="src\gamepak\save.h" />
-    <ClInclude Include="src\gamepak\sram.h" />
-    <ClInclude Include="src\gamepak\gamepak.h" />
-    <ClInclude Include="src\microclock.h" />
-    <ClInclude Include="src\mmu\bios.h" />
     <ClInclude Include="icon\icon.h" />
-    <ClInclude Include="src\input.h" />
-    <ClInclude Include="src\common\tmp.h" />
-    <ClInclude Include="src\mmu\interrupt.h" />
-    <ClInclude Include="src\mmu\mmio.h" />
-    <ClInclude Include="src\mmu\registers\dmaaddress.h" />
-    <ClInclude Include="src\mmu\registers\dmacontrol.h" />
-    <ClInclude Include="src\mmu\registers\timercontrol.h" />
-    <ClInclude Include="src\mmu\registers\window.h" />
-    <ClInclude Include="src\mmu\registers\windowrange.h" />
-    <ClInclude Include="src\ppu\backend.h" />
-    <ClInclude Include="src\ppu\constants.h" />
-    <ClInclude Include="src\mmu\ram.h" />
-    <ClInclude Include="src\ppu\layers.h" />
-    <ClInclude Include="src\mmu\registers\blendalpha.h" />
-    <ClInclude Include="src\mmu\registers\blendcontrol.h" />
-    <ClInclude Include="src\mmu\registers\blendfade.h" />
-    <ClInclude Include="src\common\utility.h" />
-    <ClInclude Include="src\ppu\buffer.h" />
-    <ClInclude Include="src\mmu\registers\backgroundparameter.h" />
-    <ClInclude Include="src\mmu\registers\backgroundreference.h" />
-    <ClInclude Include="src\mmu\registers\mosaic.h" />
-    <ClInclude Include="src\arm\decode.h" />
-    <ClInclude Include="src\mmu\registers\backgroundoffset.h" />
-    <ClInclude Include="src\ppu\oamentry.h" />
-    <ClInclude Include="src\mmu\registers\keycontrol.h" />
-    <ClInclude Include="src\arm\disassembler.h" />
-    <ClInclude Include="src\arm\registers.h" />
-    <ClInclude Include="src\mmu\registers\backgroundcontrol.h" />
-    <ClInclude Include="src\mmu\registers\displaycontrol.h" />
-    <ClInclude Include="src\mmu\registers\displaystatus.h" />
-    <ClInclude Include="src\mmu\registers\include.h" />
-    <ClInclude Include="src\ppu\ppu.h" />
-    <ClInclude Include="src\core.h" />
-    <ClInclude Include="src\mmu\memmap.h" />
-    <ClInclude Include="src\mmu\mmu.h" />
-    <ClInclude Include="src\arm\arm.h" />
-    <ClInclude Include="src\common\integer.h" />
-    <ClInclude Include="src\mmu\registers\waitcontrol.h" />
-    <ClInclude Include="src\mmu\timer.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="eggvance.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="src\ppu\collapse.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
