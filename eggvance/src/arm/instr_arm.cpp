@@ -35,8 +35,6 @@ void ARM::branchExchange(u32 instr)
 {
     int rn = bits<0, 4>(instr);
 
-    EGG_ASSERT(rn != 15, "Undefined behavior");
-
     u32 addr = regs[rn];
     cpsr.thumb = addr & 0x1;
     addr = align(addr, length());
@@ -85,10 +83,10 @@ void ARM::dataProcessing(u32 instr)
     bool carry;
     if (use_imm)
     {
-        u32 value    = bits<0, 8>(instr);
-        int rotation = bits<8, 4>(instr);
+        u32 value  = bits<0, 8>(instr);
+        int amount = bits<8, 4>(instr);
 
-        op2 = ror(value, rotation << 1, carry, false);
+        op2 = ror(value, amount << 1, carry, false);
     }
     else
     {
@@ -133,8 +131,6 @@ void ARM::dataProcessing(u32 instr)
 
         if (flags)
         {
-            EGG_ASSERT(cpsr.mode != PSR::Mode::USR, "Requires privileged mode");
-
             PSR spsr = this->spsr;
             switchMode(spsr.mode);
             cpsr = spsr;
@@ -197,22 +193,18 @@ void ARM::dataProcessing(u32 instr)
         break;
 
     case Operation::TST:
-        EGG_ASSERT(flags, "Flags should be set");
         logical(op1 & op2, carry);
         break;
 
     case Operation::TEQ:
-        EGG_ASSERT(flags, "Flags should be set");
         logical(op1 ^ op2, carry);
         break;
 
     case Operation::CMP:
-        EGG_ASSERT(flags, "Flags should be set");
         arithmetic<SUB>(op1, op2);
         break;
 
     case Operation::CMN:
-        EGG_ASSERT(flags, "Flags should be set");
         arithmetic<ADD>(op1, op2);
         break;
 
@@ -262,33 +254,28 @@ void ARM::psrTransfer(u32 instr)
 
     if (write)
     {
-        int data    = bits< 0, 12>(instr);
         int use_imm = bits<25,  1>(instr);
 
         u32 op;
         if (use_imm)
         {
-            u32 value    = bits<0, 8>(data);
-            int rotation = bits<8, 4>(data);
+            u32 value  = bits<0, 8>(instr);
+            int amount = bits<8, 4>(instr);
             
             bool carry;
-            op = ror(value, rotation << 1, carry, false);
+            op = ror(value, amount << 1, carry, false);
         }
         else
         {
-            int rm = bits<0, 4>(data);
+            int rm = bits<0, 4>(instr);
             op = regs[rm];
         }
 
         u32 mask = 0;
-        if (instr & (1 << 19)) mask |= 0xFF00'0000;
-        if (instr & (1 << 18)) mask |= 0x00FF'0000;
+        if (instr & (1 << 16)) mask |= 0x0000'00FF;
         if (instr & (1 << 17)) mask |= 0x0000'FF00;
-        if (instr & (1 << 16))
-        {
-            EGG_ASSERT(cpsr.mode != PSR::Mode::USR, "Requires privileged mode");
-            mask |= 0x0000'00FF;
-        }
+        if (instr & (1 << 18)) mask |= 0x00FF'0000;
+        if (instr & (1 << 19)) mask |= 0xFF00'0000;
 
         op &= mask;
 
@@ -302,13 +289,6 @@ void ARM::psrTransfer(u32 instr)
                 switchMode(static_cast<PSR::Mode>(op & 0x1F));
 
             cpsr = (cpsr & ~mask) | op;
-
-            if (cpsr.thumb)
-            {
-                // Undefined behavior
-                pc = alignHalf(pc);
-                advance();
-            }
         }
     }
     else
@@ -316,7 +296,7 @@ void ARM::psrTransfer(u32 instr)
         int rd = bits<12, 4>(instr);
         regs[rd] = use_spsr ? spsr : cpsr;
     }
-    cycle(pc + 4, SEQ);
+    cycle<SEQ>(pc + 4);
 }
 
 void ARM::multiply(u32 instr)
@@ -344,7 +324,7 @@ void ARM::multiply(u32 instr)
         logical(dst);
 
     cycleBooth(op1, true);
-    cycle(pc + 4, SEQ);
+    cycle<SEQ>(pc + 4);
 }
 
 void ARM::multiplyLong(u32 instr)
@@ -370,6 +350,7 @@ void ARM::multiplyLong(u32 instr)
     }
     
     u64 result = op1 * op2;
+
     if (accumulate)
     {
         result += (static_cast<u64>(dsthi) << 32) | dstlo;
@@ -387,7 +368,7 @@ void ARM::multiplyLong(u32 instr)
 
     cycle();
     cycleBooth(static_cast<u32>(op1), sign);
-    cycle(pc + 4, SEQ);
+    cycle<SEQ>(pc + 4);
 }
 
 void ARM::singleDataTransfer(u32 instr)
@@ -413,7 +394,7 @@ void ARM::singleDataTransfer(u32 instr)
     {
         int rm      = bits<0, 4>(data);
         int use_reg = bits<4, 1>(data);
-        int type    = bits<5, 2>(data);
+        int shift   = bits<5, 2>(data);
 
         u32 value = regs[rm];
 
@@ -430,16 +411,15 @@ void ARM::singleDataTransfer(u32 instr)
         }
 
         bool carry;
-        switch (type)
+        switch (static_cast<Shift>(shift))
         {
-        case 0b00: offset = lsl(value, amount, carry); break;
-        case 0b01: offset = lsr(value, amount, carry); break;
-        case 0b10: offset = asr(value, amount, carry); break;
-        case 0b11: offset = ror(value, amount, carry); break;
+        case Shift::LSL: offset = lsl(value, amount, carry); break;
+        case Shift::LSR: offset = lsr(value, amount, carry); break;
+        case Shift::ASR: offset = asr(value, amount, carry); break;
+        case Shift::ROR: offset = ror(value, amount, carry); break;
 
         default:
             EGG_UNREACHABLE;
-            offset = 0;
             break;
         }
     }
@@ -557,6 +537,9 @@ void ARM::halfwordSignedDataTransfer(u32 instr)
 
         switch ((sign << 1) | half)
         {
+        case 0b00:
+            break;
+
         // LDRH
         case 0b01:
             dst = ldrh(addr);
@@ -571,6 +554,10 @@ void ARM::halfwordSignedDataTransfer(u32 instr)
         // LDRSH
         case 0b11:
             dst = ldrsh(addr);
+            break;
+
+        default:
+            EGG_UNREACHABLE;
             break;
         }
 
@@ -625,7 +612,7 @@ void ARM::blockDataTransfer(u32 instr)
     // Force user register transfer
     PSR::Mode mode = static_cast<PSR::Mode>(cpsr.mode);
     if (user)
-        switchMode(PSR::USR);
+        switchMode(PSR::Mode::USR);
 
     if (rlist != 0)
     {

@@ -85,7 +85,7 @@ void ARM::execute()
 
         switch (decodeThumb(instr))
         {
-        case InstructionThumb::Invalid: EGG_ASSERT(false, "Invalid instruction"); break;
+        case InstructionThumb::Invalid: break;
         case InstructionThumb::MoveShiftedRegister: moveShiftedRegister(instr); break;
         case InstructionThumb::AddSubtractImmediate: addSubtractImmediate(instr); break;
         case InstructionThumb::AddSubtractMoveCompareImmediate: addSubtractMoveCompareImmediate(instr); break;
@@ -119,7 +119,7 @@ void ARM::execute()
         {
             switch (decodeArm(instr))
             {
-            case InstructionArm::Invalid: EGG_ASSERT(false, "Invalid instruction"); break;
+            case InstructionArm::Invalid: break;
             case InstructionArm::BranchExchange: branchExchange(instr); break;
             case InstructionArm::BranchLink: branchLink(instr); break;
             case InstructionArm::DataProcessing: dataProcessing(instr); break;
