@@ -139,10 +139,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\cartridge\cartridge.cpp" />
+    <ClCompile Include="src\emulator.cpp" />
     <ClCompile Include="icon\icon.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\cartridge\cartridge.h" />
+    <ClInclude Include="src\cartridge\backup.h" />
+    <ClInclude Include="src\common\types.h" />
+    <ClInclude Include="src\emulator.h" />
     <ClInclude Include="icon\icon.h" />
   </ItemGroup>
   <ItemGroup>
