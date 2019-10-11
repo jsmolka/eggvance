@@ -1,5 +1,9 @@
 #pragma once
 
+// Todo:
+// - implement backup types
+// - test header checksum (CRC)
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -20,16 +24,13 @@ public:
     u16 readHalf(u32 addr);
     u32 readWord(u32 addr);
 
-    bool load(const std::string& path);
+    bool load(const std::string& file);
 
     std::size_t size() const;
 
     std::unique_ptr<Backup> backup;
 
 private:
-    bool FileRead(const std::string& path, std::vector<u8>& dst);
-    bool FileWrite(const std::string& path, std::vector<u8>& src);
-
-    std::string path;
+    std::string file;
     std::vector<u8> data;
 };

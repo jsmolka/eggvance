@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "common/types.h"
+#include "common/integer.h"
 
 class Backup
 {
