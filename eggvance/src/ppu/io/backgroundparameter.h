@@ -2,11 +2,11 @@
 
 #include "common/integer.h"
 
-struct BackgroundOffset
+struct BackgroundParameter
 {
     void reset();
 
     void writeByte(int index, u8 byte);
 
-    int offset;  // Offset (0..511)
+    s16 parameter;  // Affine parameter
 };

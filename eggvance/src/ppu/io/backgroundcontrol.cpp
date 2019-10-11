@@ -24,7 +24,7 @@ void BackgroundControl::reset()
 
 u8 BackgroundControl::readByte(int index)
 {
-    EGG_ASSERT(index >= 0 && index <= 1, "Invalid index");
+    EGG_ASSERT(index == 0 || index == 1, "Invalid index");
 
     u8 byte = 0;
     switch (index)
@@ -51,7 +51,7 @@ u8 BackgroundControl::readByte(int index)
 
 void BackgroundControl::writeByte(int index, u8 byte)
 {
-    EGG_ASSERT(index >= 0 && index <= 1 , "Invalid index");
+    EGG_ASSERT(index == 0 || index == 1, "Invalid index");
 
     switch (index)
     {

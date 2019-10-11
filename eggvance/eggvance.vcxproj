@@ -153,6 +153,7 @@
     <ClCompile Include="src\mmu\mmu.cpp" />
     <ClCompile Include="src\ppu\io\backgroundcontrol.cpp" />
     <ClCompile Include="src\ppu\io\backgroundoffset.cpp" />
+    <ClCompile Include="src\ppu\io\backgroundparameter.cpp" />
     <ClCompile Include="src\ppu\ppu.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -176,6 +177,7 @@
     <ClInclude Include="src\mmu\mmu.h" />
     <ClInclude Include="src\ppu\io\backgroundcontrol.h" />
     <ClInclude Include="src\ppu\io\backgroundoffset.h" />
+    <ClInclude Include="src\ppu\io\backgroundparameter.h" />
     <ClInclude Include="src\ppu\ppu.h" />
   </ItemGroup>
   <ItemGroup>

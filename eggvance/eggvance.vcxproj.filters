@@ -60,6 +60,9 @@
     <ClCompile Include="src\ppu\io\backgroundoffset.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\ppu\io\backgroundparameter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="icon\icon.h">
@@ -123,6 +126,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ppu\io\backgroundoffset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ppu\io\backgroundparameter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
