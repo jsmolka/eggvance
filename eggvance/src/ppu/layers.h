@@ -13,33 +13,44 @@ enum LayerFlag
     LF_BDP = 1 << 5
 };
 
-struct BackgroundLayer
+struct Layer
 {
-    BackgroundLayer(int id, u16* data, int priority)
-        : id(id)
-        , data(data)
-        , flag(1 << id)
-        , priority(priority)
-    {
-
+    Layer(int priority) 
+        : priority(priority)
+    { 
+    
     }
 
-    inline bool operator<(const BackgroundLayer& other) const
+    bool operator<(const Layer& other) const
     {
         return priority < other.priority;
     }
 
-    inline bool operator<=(const BackgroundLayer& other) const
+    bool operator<=(const Layer& other) const
     {
         return priority <= other.priority;
     }
 
-    inline u16 color(int x) const
+    int priority;
+};
+
+struct BackgroundLayer : public Layer
+{
+    BackgroundLayer(int id, u16* data, int priority)
+        : Layer(priority)
+        , id(id)
+        , data(data)
+        , flag(1 << id)
+    {
+
+    }
+
+    u16 color(int x) const
     {
         return data[x];
     }
 
-    inline bool opaque(int x) const
+    bool opaque(int x) const
     {
         return color(x) != TRANSPARENT;
     }
@@ -47,5 +58,22 @@ struct BackgroundLayer
     int  id;
     u16* data;
     int  flag;
-    int  priority;
+};
+
+struct ObjectLayer : public Layer
+{
+    ObjectLayer()
+        : Layer(4)
+        , color(TRANSPARENT)
+        , opaque(false)
+        , window(false)
+        , alpha(false)
+    {
+
+    }
+
+    u16  color;
+    bool opaque;
+    bool window;
+    bool alpha;
 };
