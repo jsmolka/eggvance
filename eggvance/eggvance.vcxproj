@@ -206,6 +206,9 @@
   <ItemGroup>
     <ResourceCompile Include="eggvance.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="src\arm\arm.inl" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

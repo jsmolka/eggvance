@@ -41,7 +41,7 @@ void Emulator::main()
         // Show drop screen
     }
 
-    int t = 3000;
+    int t = 1500;
     while (t--)
     {
         arm.emulate();

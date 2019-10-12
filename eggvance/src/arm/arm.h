@@ -14,6 +14,12 @@ public:
     Memory* mem;
 
 private:
+    enum class Access
+    {
+        Seq    = 0,
+        Nonseq = 1,
+    };
+
     u8  readByte(u32 addr);
     u16 readHalf(u32 addr);
     u32 readWord(u32 addr);
@@ -22,6 +28,7 @@ private:
     void writeHalf(u32 addr, u16 half);
     void writeWord(u32 addr, u32 word);
 
+    // Todo: remove
     enum AccessType
     {
         NSEQ,
@@ -35,11 +42,16 @@ private:
     int length() const;
 
     void execute();
-    void advance();
     void debug();
+
+    template<int width>
+    inline void advance();
+    inline void advance();
 
     void logical(u32 result);
     void logical(u32 result, bool carry);
+    void addition(u32 op1, u32 op2);
+    void subtraction(u32 op1, u32 op2);
     void arithmetic(u32 op1, u32 op2, bool addition);
 
     enum Arithmetic
@@ -55,17 +67,25 @@ private:
         arithmetic(op1, op2, arith == ADD);
     }
 
-    // Temporary
-    template<AccessType type>
+    template<Access access>
     void cycle(u32 addr)
     {
-        cycle(addr, type);
+        switch (access)
+        {
+        case Access::Seq:
+            cycle(addr, SEQ);
+            break;
+
+        case Access::Nonseq:
+            cycle(addr, NSEQ);
+            break;
+        }
     }
 
-    u32 lsl(u32 value, int amount, bool& carry) const;
-    u32 lsr(u32 value, int amount, bool& carry, bool immediate = true) const;
-    u32 asr(u32 value, int amount, bool& carry, bool immediate = true) const;
-    u32 ror(u32 value, int amount, bool& carry, bool immediate = true) const;
+    u32 lsl(u32 value, int shift, bool& carry) const;
+    u32 lsr(u32 value, int shift, bool& carry, bool immediate = true) const;
+    u32 asr(u32 value, int shift, bool& carry, bool immediate = true) const;
+    u32 ror(u32 value, int shift, bool& carry, bool immediate = true) const;
 
     u32 ldr(u32 addr);
     u32 ldrh(u32 addr);
@@ -107,3 +127,5 @@ private:
 
     u64 cycles;
 };
+
+#include "arm.inl"

@@ -33,39 +33,38 @@ enum class Shift
 
 void ARM::branchExchange(u32 instr)
 {
-    int rn = bits<0, 4>(instr);
+    u32 addr = regs[bits<0, 4>(instr)];
 
-    u32 addr = regs[rn];
-    cpsr.thumb = addr & 0x1;
-    addr = align(addr, length());
+    cycle<Access::Nonseq>(pc + 8);
 
-    cycle<NSEQ>(pc);
-
-    pc = addr;
-    advance();
-
-    cycle<SEQ>(pc);
-    cycle<SEQ>(pc + length());
+    if (cpsr.thumb = addr & 0x1)
+    {
+        pc = alignHalf(addr);
+        cycle<Access::Seq>(pc);
+        cycle<Access::Seq>(pc + 2);
+    }
+    else
+    {
+        pc = alignWord(addr);
+        cycle<Access::Seq>(pc);
+        cycle<Access::Seq>(pc + 4);
+    }
+    advance<4>();
 }
 
 void ARM::branchLink(u32 instr)
 {
-    int offset = bits< 0, 24>(instr);
-    int link   = bits<24,  1>(instr);
-
-    offset = signExtend<24>(offset);
-    offset <<= 2;
-
-    if (link)
+    if (isset<24>(instr))
         lr = pc - 4;
 
-    cycle<NSEQ>(pc);
+    cycle<Access::Nonseq>(pc + 8);
 
-    pc += offset;
-    advance();
+    pc += signExtend<24>(instr) << 2;
 
-    cycle<SEQ>(pc);
-    cycle<SEQ>(pc + 4);
+    cycle<Access::Seq>(pc);
+    cycle<Access::Seq>(pc + 4);
+
+    advance<4>();
 }
 
 void ARM::dataProcessing(u32 instr)
@@ -127,7 +126,7 @@ void ARM::dataProcessing(u32 instr)
 
     if (rd == 15)
     {
-        cycle<NSEQ>(pc);
+        cycle<Access::Nonseq>(pc);
 
         if (flags)
         {
@@ -242,9 +241,9 @@ void ARM::dataProcessing(u32 instr)
         dst = align(dst, length());
         advance();
 
-        cycle<SEQ>(pc);
+        cycle<Access::Seq>(pc);
     }
-    cycle<SEQ>(pc + 4);
+    cycle<Access::Seq>(pc + 4);
 }
 
 void ARM::psrTransfer(u32 instr)
@@ -296,7 +295,7 @@ void ARM::psrTransfer(u32 instr)
         int rd = bits<12, 4>(instr);
         regs[rd] = use_spsr ? spsr : cpsr;
     }
-    cycle<SEQ>(pc + 4);
+    cycle<Access::Seq>(pc + 4);
 }
 
 void ARM::multiply(u32 instr)
@@ -324,7 +323,7 @@ void ARM::multiply(u32 instr)
         logical(dst);
 
     cycleBooth(op1, true);
-    cycle<SEQ>(pc + 4);
+    cycle<Access::Seq>(pc + 4);
 }
 
 void ARM::multiplyLong(u32 instr)
@@ -368,7 +367,7 @@ void ARM::multiplyLong(u32 instr)
 
     cycle();
     cycleBooth(static_cast<u32>(op1), sign);
-    cycle<SEQ>(pc + 4);
+    cycle<Access::Seq>(pc + 4);
 }
 
 void ARM::singleDataTransfer(u32 instr)

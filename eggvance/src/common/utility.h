@@ -1,5 +1,7 @@
 #pragma once
 
+// Todo: proper template parameter types
+
 #include <type_traits>
 
 #include "integer.h"
@@ -41,10 +43,16 @@ inline int countBits(u8 byte)
     return counts[byte];
 }
 
-template<int position, int amount>
-inline int bits(int value)
+template<int position, int amount, typename T>
+inline int bits(T value)
 {
     return (value >> position) & ((1 << amount) - 1);
+}
+
+template<int position, typename T>
+inline bool isset(T value)
+{
+    return value & (1 << position);
 }
 
 template<int bits, typename T>
