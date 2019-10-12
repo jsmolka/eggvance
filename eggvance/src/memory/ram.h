@@ -5,7 +5,7 @@
 #include "common/integer.h"
 
 template<std::size_t N>
-struct Memory : public std::array<u8, N>
+struct RAM : public std::array<u8, N>
 {
     template<typename T>
     inline T* ptr(std::size_t index)

@@ -34,5 +34,5 @@ bool fileutil::write(const std::string& file, std::vector<u8>& src)
 
 bool fileutil::exists(const std::string& file)
 {
-    return fs::is_regular_file(file);
+    return fs::exists(file) && fs::is_regular_file(file);
 }
