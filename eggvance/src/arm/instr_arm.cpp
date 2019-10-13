@@ -23,14 +23,6 @@ enum class Operation
     MVN = 0b1111
 };
 
-enum class Shift
-{
-    LSL = 0b00,
-    LSR = 0b01,
-    ASR = 0b10,
-    ROR = 0b11
-};
-
 void ARM::branchExchange(u32 instr)
 {
     u32 addr = regs[bits<0, 4>(instr)];
@@ -42,14 +34,15 @@ void ARM::branchExchange(u32 instr)
         pc = alignHalf(addr);
         cycle<Access::Seq>(pc);
         cycle<Access::Seq>(pc + 2);
+        advance<2>();
     }
     else
     {
         pc = alignWord(addr);
         cycle<Access::Seq>(pc);
         cycle<Access::Seq>(pc + 4);
+        advance<4>();
     }
-    advance<4>();
 }
 
 void ARM::branchLink(u32 instr)
@@ -69,18 +62,17 @@ void ARM::branchLink(u32 instr)
 
 void ARM::dataProcessing(u32 instr)
 {
-    int rd      = bits<12, 4>(instr);
-    int rn      = bits<16, 4>(instr);
-    int flags   = bits<20, 1>(instr);
-    int opcode  = bits<21, 4>(instr);
-    int use_imm = bits<25, 1>(instr);
+    int rd = bits<12, 4>(instr);
+    int rn = bits<16, 4>(instr);
 
     u32& dst = regs[rd];
     u32  op1 = regs[rn];
-    u32  op2;
+    u32  op2 = 0;
 
-    bool carry;
-    if (use_imm)
+    cycle<Access::Nonseq>(pc + 8);
+
+    bool carry = cpsr.c;
+    if (isset<25>(instr))
     {
         u32 value  = bits<0, 8>(instr);
         int amount = bits<8, 4>(instr);
@@ -89,161 +81,79 @@ void ARM::dataProcessing(u32 instr)
     }
     else
     {
-        int rm      = bits<0, 4>(instr);
-        int use_reg = bits<4, 1>(instr);
-        int shift   = bits<5, 2>(instr);
+        int rm   = bits<0, 4>(instr);
+        int type = bits<5, 2>(instr);
 
-        u32 value = regs[rm];
-
-        int amount;
-        if (use_reg)
+        op2 = regs[rm];
+        if (isset<4>(instr))
         {
-            int rs = bits<8, 4>(instr);
-            amount = regs[rs];
-            amount &= 0xFF;
+            cycle();
 
             if (rn == 15) op1 += 4;
-            if (rm == 15) value += 4;
+            if (rm == 15) op2 += 4;
+
+            int amount = regs[bits<8, 4>(instr)] & 0xFF;
+            op2 = applyShift(Shift(type), op2, amount, carry, false);
         }
         else
         {
-            amount = bits<7, 5>(instr);
-        }
-
-        switch (static_cast<Shift>(shift))
-        {
-        case Shift::LSL: op2 = lsl(value, amount, carry); break;
-        case Shift::LSR: op2 = lsr(value, amount, carry, !use_reg); break;
-        case Shift::ASR: op2 = asr(value, amount, carry, !use_reg); break;
-        case Shift::ROR: op2 = ror(value, amount, carry, !use_reg); break;
-
-        default:
-            EGG_UNREACHABLE;
-            break;
-        }
-        cycle();
-    }
-
-    if (rd == 15)
-    {
-        cycle<Access::Nonseq>(pc);
-
-        if (flags)
-        {
-            PSR spsr = this->spsr;
-            switchMode(spsr.mode);
-            cpsr = spsr;
-
-            flags = false;
+            int amount = bits<7, 5>(instr);
+            op2 = applyShift(Shift(type), op2, amount, carry, true);
         }
     }
 
-    switch (static_cast<Operation>(opcode))
+    bool flags = isset<20>(instr);
+    if (rd == 15 && flags)
     {
-    case Operation::AND:
-        dst = op1 & op2;
-        if (flags) 
-            logical(dst, carry);
-        break;
+        PSR spsr = this->spsr;
+        switchMode(spsr.mode);
+        cpsr = spsr;
 
-    case Operation::EOR:
-        dst = op1 ^ op2;
-        if (flags) 
-            logical(dst, carry);
-        break;
+        flags = false;
+    }
 
-    case Operation::SUB:
-        dst = op1 - op2;
-        if (flags) 
-            arithmetic<SUB>(op1, op2);
-        break;
-
-    case Operation::RSB:
-        dst = op2 - op1;
-        if (flags) 
-            arithmetic<SUB>(op2, op1);
-        break;
-
-    case Operation::ADD:
-        dst = op1 + op2;
-        if (flags) 
-            arithmetic<ADD>(op1, op2);
-        break;
-
-    case Operation::ADC:
-        op2 += cpsr.c;
-        dst = op1 + op2;
-        if (flags) 
-            arithmetic<ADD>(op1, op2);
-        break;
-
-    case Operation::SBC:
-        op2 += 1 - cpsr.c;
-        dst = op1 - op2;
-        if (flags) 
-            arithmetic<SUB>(op1, op2);
-        break;
-
-    case Operation::RSC:
-        op1 += 1 - cpsr.c;
-        dst = op2 - op1;
-        if (flags) 
-            arithmetic<SUB>(op2, op1);
-        break;
-
-    case Operation::TST:
-        logical(op1 & op2, carry);
-        break;
-
-    case Operation::TEQ:
-        logical(op1 ^ op2, carry);
-        break;
-
-    case Operation::CMP:
-        arithmetic<SUB>(op1, op2);
-        break;
-
-    case Operation::CMN:
-        arithmetic<ADD>(op1, op2);
-        break;
-
-    case Operation::ORR:
-        dst = op1 | op2;
-        if (flags) 
-            logical(dst, carry);
-        break;
-
-    case Operation::MOV:
-        dst = op2;
-        if (flags) 
-            logical(dst, carry);
-        break;
-
-    case Operation::BIC:
-        dst = op1 & ~op2;
-        if (flags) 
-            logical(dst, carry);
-        break;
-
-    case Operation::MVN:
-        dst = ~op2;
-        if (flags) 
-            logical(dst, carry);
-        break;
+    int opcode = bits<21, 4>(instr);
+    switch (Operation(opcode))
+    {
+    case Operation::CMN:       add(op1, op2, flags); break;
+    case Operation::CMP:       sub(op1, op2, flags); break;
+    case Operation::ADD: dst = add(op1, op2, flags); break;
+    case Operation::SUB: dst = sub(op1, op2, flags); break;
+    case Operation::RSB: dst = sub(op2, op1, flags); break;
+    case Operation::ADC: dst = add(op1, op2 + cpsr.c + 0, flags); break;
+    case Operation::SBC: dst = sub(op1, op2 - cpsr.c + 1, flags); break;
+    case Operation::RSC: dst = sub(op2, op1 - cpsr.c + 1, flags); break;
+    case Operation::TST:       logical(op1 &  op2, carry, flags); break;
+    case Operation::TEQ:       logical(op1 ^  op2, carry, flags); break;
+    case Operation::AND: dst = logical(op1 &  op2, carry, flags); break;
+    case Operation::EOR: dst = logical(op1 ^  op2, carry, flags); break;
+    case Operation::ORR: dst = logical(op1 |  op2, carry, flags); break;
+    case Operation::MOV: dst = logical(       op2, carry, flags); break;
+    case Operation::BIC: dst = logical(op1 & ~op2, carry, flags); break;
+    case Operation::MVN: dst = logical(      ~op2, carry, flags); break;
 
     default:
         EGG_UNREACHABLE;
         break;
     }
 
-    if (rd == 15)
+    if (rd == 15 && (opcode >> 2) != 0b10)
     {
-        dst = align(dst, length());
-        advance();
-
-        cycle<Access::Seq>(pc);
+        if (cpsr.thumb)
+        {
+            dst = alignHalf(dst);
+            cycle<Access::Seq>(pc);
+            cycle<Access::Seq>(pc + 2);
+            advance<2>();
+        }
+        else
+        {
+            dst = alignWord(dst);
+            cycle<Access::Seq>(pc);
+            cycle<Access::Seq>(pc + 4);
+            advance<4>();
+        }
     }
-    cycle<Access::Seq>(pc + 4);
 }
 
 void ARM::psrTransfer(u32 instr)
@@ -320,7 +230,7 @@ void ARM::multiply(u32 instr)
     }
 
     if (flags)
-        logical(dst);
+        logical_old(dst);
 
     cycleBooth(op1, true);
     cycle<Access::Seq>(pc + 4);
@@ -409,7 +319,7 @@ void ARM::singleDataTransfer(u32 instr)
             amount = bits<7, 5>(data);
         }
 
-        bool carry;
+        bool carry = true;
         switch (static_cast<Shift>(shift))
         {
         case Shift::LSL: offset = lsl(value, amount, carry); break;

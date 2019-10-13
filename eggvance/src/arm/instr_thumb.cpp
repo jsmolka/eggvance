@@ -1,5 +1,6 @@
 #include "arm.h"
 
+#include "common/macros.h"
 #include "common/utility.h"
 
 void ARM::moveShiftedRegister(u16 instr)
@@ -12,18 +13,19 @@ void ARM::moveShiftedRegister(u16 instr)
     u32& dst = regs[rd];
     u32  src = regs[rs];
 
-    bool carry;
+    bool carry = cpsr.c;
     switch (opcode)
     {
     case 0b00: dst = lsl(src, offset, carry); break;
     case 0b01: dst = lsr(src, offset, carry); break;
     case 0b10: dst = asr(src, offset, carry); break;
-    
-    default: 
-        carry = cpsr.c; 
+    case 0b11: break;
+
+    default:
+        EGG_UNREACHABLE;
         break;
     }
-    logical(dst, carry);
+    logical_old(dst, carry);
 
     cycle(pc + 2, SEQ);
 }
@@ -63,7 +65,7 @@ void ARM::addSubtractMoveCompareImmediate(u16 instr)
     // MOV
     case 0b00: 
         dst = offset;
-        logical(dst);
+        logical_old(dst);
         break;
 
     // CMP
@@ -95,39 +97,39 @@ void ARM::aluOperations(u16 instr)
     u32& dst = regs[rd];
     u32  src = regs[rs];
 
-    bool carry;
+    bool carry = cpsr.c;
     switch (opcode)
     {
     // AND
     case 0b0000: 
         dst &= src;
-        logical(dst);
+        logical_old(dst);
         break;
 
     // EOR
     case 0b0001: 
         dst ^= src;
-        logical(dst);
+        logical_old(dst);
         break;
 
     // LSL
     case 0b0010: 
         dst = lsl(dst, src, carry); 
-        logical(dst, carry);
+        logical_old(dst, carry);
         cycle();
         break;
 
     // LSR
     case 0b0011: 
         dst = lsr(dst, src, carry, false); 
-        logical(dst, carry);
+        logical_old(dst, carry);
         cycle();
         break;
 
     // ASR
     case 0b0100:
         dst = asr(dst, src, carry, false); 
-        logical(dst, carry);
+        logical_old(dst, carry);
         cycle();
         break;
 
@@ -148,13 +150,13 @@ void ARM::aluOperations(u16 instr)
     // ROR
     case 0b0111:
         dst = ror(dst, src, carry, false);
-        logical(dst, carry);
+        logical_old(dst, carry);
         cycle();
         break;
 
     // TST
     case 0b1000:
-        logical(dst & src);
+        logical_old(dst & src);
         break;
 
     // NEG
@@ -176,26 +178,26 @@ void ARM::aluOperations(u16 instr)
     // ORR
     case 0b1100: 
         dst |= src;
-        logical(dst);
+        logical_old(dst);
         break;
 
     // MUL
     case 0b1101: 
         cycleBooth(dst, true);
         dst *= src;
-        logical(dst);
+        logical_old(dst);
         break;
 
     // BIC
     case 0b1110:
         dst &= ~src;
-        logical(dst);
+        logical_old(dst);
         break;
 
     // MVN
     case 0b1111: 
         dst = ~src;
-        logical(dst);
+        logical_old(dst);
         break;
     }
     cycle(pc + 2, SEQ);

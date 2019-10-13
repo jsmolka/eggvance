@@ -20,6 +20,14 @@ private:
         Nonseq = 1,
     };
 
+    enum class Shift
+    {
+        LSL = 0b00,
+        LSR = 0b01,
+        ASR = 0b10,
+        ROR = 0b11
+    };
+
     u8  readByte(u32 addr);
     u16 readHalf(u32 addr);
     u32 readWord(u32 addr);
@@ -48,10 +56,16 @@ private:
     inline void advance();
     inline void advance();
 
-    void logical(u32 result);
-    void logical(u32 result, bool carry);
-    void addition(u32 op1, u32 op2);
-    void subtraction(u32 op1, u32 op2);
+    // Todo: rename once finished
+    void logical_old(u32 result);
+    void logical_old(u32 result, bool carry);
+    
+    u32 logical(u32 result, bool flags);
+    u32 logical(u32 result, bool carry, bool flags);
+
+    u32 add(u32 op1, u32 op2, bool flags);
+    u32 sub(u32 op1, u32 op2, bool flags);
+
     void arithmetic(u32 op1, u32 op2, bool addition);
 
     enum Arithmetic
@@ -82,10 +96,11 @@ private:
         }
     }
 
-    u32 lsl(u32 value, int shift, bool& carry) const;
-    u32 lsr(u32 value, int shift, bool& carry, bool immediate = true) const;
-    u32 asr(u32 value, int shift, bool& carry, bool immediate = true) const;
-    u32 ror(u32 value, int shift, bool& carry, bool immediate = true) const;
+    u32 lsl(u32 value, int amount, bool& carry) const;
+    u32 lsr(u32 value, int amount, bool& carry, bool immediate = true) const;
+    u32 asr(u32 value, int amount, bool& carry, bool immediate = true) const;
+    u32 ror(u32 value, int amount, bool& carry, bool immediate = true) const;
+    u32 applyShift(Shift type, u32 value, int amount, bool& carry, bool immediate = true) const;
 
     u32 ldr(u32 addr);
     u32 ldrh(u32 addr);
