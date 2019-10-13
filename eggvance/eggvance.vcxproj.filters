@@ -96,6 +96,9 @@
     <ClCompile Include="src\arm\bus.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\arm\shifts.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="icon\icon.h">

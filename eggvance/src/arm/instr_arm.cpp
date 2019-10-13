@@ -173,8 +173,7 @@ void ARM::psrTransfer(u32 instr)
             u32 value  = bits<0, 8>(instr);
             int amount = bits<8, 4>(instr);
             
-            bool carry = false;
-            op = ror(value, amount << 1, carry, false);
+            op = ror(value, amount << 1, false);
         }
         else
         {
@@ -261,143 +260,120 @@ void ARM::multiplyLong(u32 instr)
     cycle<Access::Seq>(pc + 8);
 }
 
+#define INDEX           \
+    if (increment)      \
+        addr += offset; \
+    else                \
+        addr -= offset
+
+#define PRE_INDEX       \
+    if (pre_index)      \
+        INDEX
+
+#define POST_INDEX      \
+    if (!pre_index)     \
+        INDEX
+
 void ARM::singleDataTransfer(u32 instr)
 {
-    int data      = bits< 0, 12>(instr);
-    int rd        = bits<12,  4>(instr);
-    int rn        = bits<16,  4>(instr);
-    int load      = bits<20,  1>(instr);
-    int writeback = bits<21,  1>(instr);
-    int byte      = bits<22,  1>(instr);
-    int increment = bits<23,  1>(instr);
-    int pre_index = bits<24,  1>(instr);
-    int use_reg   = bits<25,  1>(instr);
+    int rd = bits<12, 4>(instr);
+    int rn = bits<16, 4>(instr);
 
-    u32& dst = regs[rd];
     u32 addr = regs[rn];
+    u32& dst = regs[rd];
 
-    // Post-indexing forces writeback
+    bool writeback = isset<21>(instr);
+    bool byte      = isset<22>(instr);
+    bool increment = isset<23>(instr);
+    bool pre_index = isset<24>(instr);
+
     writeback |= !pre_index;
 
-    u32 offset;
-    if (use_reg)
+    u32 offset = 0;
+    if (isset<25>(instr))
     {
-        int rm      = bits<0, 4>(data);
-        int use_reg = bits<4, 1>(data);
-        int shift   = bits<5, 2>(data);
+        int rm   = bits<0, 4>(instr);
+        int type = bits<5, 2>(instr);
 
-        u32 value = regs[rm];
-
-        int amount;
-        if (use_reg)
+        int amount = 0;
+        if (isset<4>(instr))
         {
-            int rs = bits<8, 4>(data);
-            amount = regs[rs];
+            amount = regs[bits<8, 4>(instr)];
             amount &= 0xFF;
         }
         else
         {
-            amount = bits<7, 5>(data);
+            amount = bits<7, 5>(instr);
         }
-
-        bool carry = true;
-        switch (static_cast<Shift>(shift))
-        {
-        case Shift::LSL: offset = lsl(value, amount, carry); break;
-        case Shift::LSR: offset = lsr(value, amount, carry); break;
-        case Shift::ASR: offset = asr(value, amount, carry); break;
-        case Shift::ROR: offset = ror(value, amount, carry); break;
-
-        default:
-            EGG_UNREACHABLE;
-            break;
-        }
+        offset = shift(Shift(type), regs[rm], amount, true);
     }
     else
     {
-        offset = data;
+        offset = bits<0, 12>(instr);
     }
 
-    if (pre_index)
-    {
-        if (increment)
-            addr += offset;
-        else
-            addr -= offset;
-    }
+    PRE_INDEX;
 
-    cycle(pc, NSEQ);
+    cycle<Access::Nonseq>(pc + 8);
 
-    if (load)
+    if (isset<20>(instr))
     {
+        dst = byte
+            ? readByte(addr)
+            : readWordRotated(addr);
+
         cycle();
-        if (rd == 15)
-            cycle(pc + 4, NSEQ);
-
-        if (byte)
-            dst = readByte(addr);
-        else
-            dst = ldr(addr);
-
-        // Prevent overwriting loaded value
-        if (rd == rn)
-            writeback = false;
 
         if (rd == 15)
         {
             dst = alignWord(dst);
-            advance();
-
-            cycle(pc, SEQ);
+            cycle<Access::Seq>(pc);
+            cycle<Access::Seq>(pc + 4);
+            advance<4>();
         }
-        cycle(pc + 4, SEQ);
+        else
+        {
+            cycle<Access::Nonseq>(addr);
+        }
     }
     else
     {
-        u32 value = dst;
-        // Account for prefetch
-        if (rd == 15) value += 4;
+        u32 value = (rd == 15)
+            ? dst + 4
+            : dst + 0;
 
         if (byte)
             writeByte(addr, value);
         else
             writeWord(addr, value);
 
-        cycle(addr, NSEQ);
+        cycle<Access::Nonseq>(addr);
     }
 
-    if (!pre_index)
+    if (rd != rn)
     {
-        if (increment)
-            addr += offset;
-        else
-            addr -= offset;
+        POST_INDEX;
+        if (writeback) 
+            regs[rn] = addr;
     }
-    
-    if (writeback)
-        regs[rn] = addr;
 }
 
 void ARM::halfwordSignedDataTransfer(u32 instr)
 {
-    int half      = bits< 5, 1>(instr);
-    int sign      = bits< 6, 1>(instr);
-    int rd        = bits<12, 4>(instr);
-    int rn        = bits<16, 4>(instr);
-    int load      = bits<20, 1>(instr);
-    int writeback = bits<21, 1>(instr);
-    int use_imm   = bits<22, 1>(instr);
-    int increment = bits<23, 1>(instr);
-    int pre_index = bits<24, 1>(instr);
+    int rd = bits<12, 4>(instr);
+    int rn = bits<16, 4>(instr);
 
     u32 addr = regs[rn];
     u32& dst = regs[rd];
 
-    // Post-indexing forces writeback
+    bool writeback = isset<21>(instr);
+    bool increment = isset<23>(instr);
+    bool pre_index = isset<24>(instr);
+
     writeback |= !pre_index;
 
-    u32 offset;
-    if (use_imm)
+    u32 offset = 0;
+    if (isset<22>(instr))
     {
         int lower = bits<0, 4>(instr);
         int upper = bits<8, 4>(instr);
@@ -405,122 +381,111 @@ void ARM::halfwordSignedDataTransfer(u32 instr)
     }
     else
     {
-        int rm = bits<0, 4>(instr);
-        offset = regs[rm];
+        offset = regs[bits<0, 4>(instr)];
     }
 
-    if (pre_index)
-    {
-        if (increment)
-            addr += offset;
-        else
-            addr -= offset;
-    }
+    PRE_INDEX;
 
-    cycle(pc, NSEQ);
+    cycle<Access::Nonseq>(pc + 8);
 
-    if (load)
+    if (isset<20>(instr))
     {
-        cycle();
         if (rd == 15)
             cycle(pc + 4, NSEQ);
 
-        switch ((sign << 1) | half)
+        switch (bits<5, 2>(instr))
         {
         case 0b00:
             break;
 
-        // LDRH
         case 0b01:
-            dst = ldrh(addr);
+            dst = readHalfRotated(addr);
             break;
 
-        // LDRSB
         case 0b10:
             dst = readByte(addr);
             dst = signExtend<8>(dst);
             break;
 
-        // LDRSH
         case 0b11:
-            dst = ldrsh(addr);
+            dst = readHalfSigned(addr);
             break;
 
         default:
             EGG_UNREACHABLE;
             break;
         }
-
-        // Prevent overwriting loaded value
-        if (rd == rn)
-            writeback = false;
+        cycle();
 
         if (rd == 15)
         {
             dst = alignWord(dst);
-            advance();
-
-            cycle(pc, SEQ);
+            cycle<Access::Seq>(pc);
+            cycle<Access::Seq>(pc + 4);
+            advance<4>();
         }
-        cycle(pc + 4, SEQ);
+        else
+        {
+            cycle<Access::Nonseq>(addr);
+        }
     }
-    else  // STRH
+    else
     {
-        u32 value = dst;
-        // Account for prefetch
-        if (rd == 15) value += 4;
+        u32 value = (rd == 15)
+            ? dst + 4
+            : dst + 0;
 
         writeHalf(addr, value);
 
-        cycle(addr, NSEQ);
+        cycle<Access::Nonseq>(addr);
     }
 
-    if (!pre_index)
+    if (rd != rn)
     {
-        if (increment)
-            addr += offset;
-        else
-            addr -= offset;
+        POST_INDEX;
+        if (writeback) 
+            regs[rn] = addr;
     }
-
-    if (writeback)
-        regs[rn] = addr;
 }
+
+#undef INDEX
+#undef PRE_INDEX
+#undef POST_INDEX
 
 void ARM::blockDataTransfer(u32 instr)
 {
-    int rlist     = bits< 0, 16>(instr);
-    int rn        = bits<16,  4>(instr);
-    int load      = bits<20,  1>(instr);
-    int writeback = bits<21,  1>(instr);
-    int user      = bits<22,  1>(instr);
-    int ascending = bits<23,  1>(instr);
-    int full      = bits<24,  1>(instr);
+    int rlist = bits< 0, 16>(instr);
+    int rn    = bits<16,  4>(instr);
 
     u32 addr = regs[rn];
 
-    // Force user register transfer
-    PSR::Mode mode = static_cast<PSR::Mode>(cpsr.mode);
+    bool load      = isset<20>(instr);
+    bool writeback = isset<21>(instr);
+    bool user      = isset<22>(instr);
+    bool ascending = isset<23>(instr);
+    bool full      = isset<24>(instr);
+
+    PSR::Mode mode = cpsr.mode;
     if (user)
         switchMode(PSR::Mode::USR);
 
+    cycle<Access::Nonseq>(pc + 8);
+
     if (rlist != 0)
     {
-        cycle(pc, NSEQ);
-
-        // Register count needed for cycles
         int rcount = countBits(rlist) + countBits(rlist >> 8);
 
         int init = ascending ? 0 : 15;
         int loop = ascending ? 1 : -1;
         int step = ascending ? 4 : -4;
 
-        // Lowest register is stored at the lowest address
         if (load)
         {
-            // Prevent overwriting loaded value
             if (rlist & (1 << rn))
                 writeback = false;
+
+            if (rlist & (1 << 15))
+                cycle<Access::Nonseq>(pc + 4);
 
             for (int x = init; rcount > 0; x += loop)
             {
@@ -529,27 +494,27 @@ void ARM::blockDataTransfer(u32 instr)
                     if (full) addr += step;
 
                     if (--rcount > 0)
-                        cycle(addr, SEQ);
+                        cycle<Access::Seq>(addr);
                     else
                         cycle();
 
-                    if (x == 15)
-                        cycle(pc + 4, NSEQ);
-
                     regs[x] = readWord(addr);
-
-                    if (x == 15)
-                    {
-                        pc = alignWord(pc);
-                        advance();
-
-                        cycle(pc, SEQ);
-                    }
 
                     if (!full) addr += step;
                 }
             }
-            cycle(pc + 4, SEQ);
+
+            if (rlist & (1 << 15))
+            {
+                pc = alignWord(pc);
+                cycle<Access::Seq>(pc);
+                cycle<Access::Seq>(pc + 4);
+                advance();
+            }
+            else
+            {
+                cycle<Access::Nonseq>(addr);
+            }
         }
         else
         {
@@ -560,27 +525,26 @@ void ARM::blockDataTransfer(u32 instr)
                     if (full) addr += step;
 
                     if (--rcount > 0)
-                        cycle(addr, SEQ);
+                        cycle<Access::Seq>(addr);
 
                     writeWord(addr, regs[x]);
 
                     if (!full) addr += step;
                 }
             }
-            cycle(addr, NSEQ);
+            cycle<Access::Nonseq>(addr);
         }
     }
-    else  // Special case empty rlist
+    else
     {
         if (load)
         {
             pc = readWord(addr);
             pc = alignWord(pc);
-            advance();
+            advance<4>();
         }
         else
         {
-            // Save address of next instruction
             writeWord(addr, pc + 4);
         }
         addr += ascending ? 0x40 : -0x40;
@@ -595,29 +559,24 @@ void ARM::blockDataTransfer(u32 instr)
 
 void ARM::singleDataSwap(u32 instr)
 {
-    int rm   = bits< 0, 4>(instr);
-    int rd   = bits<12, 4>(instr);
-    int rn   = bits<16, 4>(instr);
-    int byte = bits<22, 1>(instr);
+    u32  src = regs[bits< 0, 4>(instr)];
+    u32& dst = regs[bits<12, 4>(instr)];
+    u32 addr = regs[bits<16, 4>(instr)];
 
-    u32 addr = regs[rn];
-    u32& dst = regs[rd];
-    u32  src = regs[rm];
+    cycle<Access::Nonseq>(pc + 8);
 
-    cycle(pc, NSEQ);
-    cycle(addr, NSEQ);
-
-    if (byte)
+    if (isset<22>(instr))
     {
         dst = readByte(addr);
         writeByte(addr, src);
     }
     else
     {
-        dst = ldr(addr);
+        dst = readWordRotated(addr);
         writeWord(addr, src);
     }
 
+    cycle<Access::Nonseq>(addr);
+    cycle<Access::Seq>(pc + 4);
     cycle();
-    cycle(pc + 4, SEQ);
 }

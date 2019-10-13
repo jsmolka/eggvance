@@ -3,6 +3,7 @@
 // Todo: proper mmio
 // Todo: implement all read types
 
+#include "common/utility.h"
 #include "memory/memmap.h"
 #include "memory/memory.h"
 
@@ -459,4 +460,41 @@ void ARM::writeWord(u32 addr, u32 word)
     case PAGE_UNUSED:
         break;
     }
+}
+
+u32 ARM::readWordRotated(u32 addr)
+{
+    u32 value = readWord(addr);
+    if (misalignedWord(addr))
+    {
+        int rotation = (addr & 0x3) << 3;
+        value = ror(value, rotation, true);
+    }
+    return value;
+}
+
+u32 ARM::readHalfRotated(u32 addr)
+{
+    u32 value = readHalf(addr);
+    if (misalignedHalf(addr))
+    {
+        value = ror(value, 8, true);
+    }
+    return value;
+}
+
+u32 ARM::readHalfSigned(u32 addr)
+{
+    u32 value;
+    if (misalignedHalf(addr))
+    {
+        value = readByte(addr);
+        value = signExtend<8>(value);
+    }
+    else
+    {
+        value = readHalf(addr);
+        value = signExtend<16>(value);
+    }
+    return value;
 }

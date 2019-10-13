@@ -147,6 +147,7 @@
     <ClCompile Include="src\arm\instr_thumb.cpp" />
     <ClCompile Include="src\arm\psr.cpp" />
     <ClCompile Include="src\arm\registers.cpp" />
+    <ClCompile Include="src\arm\shifts.cpp" />
     <ClCompile Include="src\common\config.cpp" />
     <ClCompile Include="src\keypad.cpp" />
     <ClCompile Include="src\memory\cartridge\cartridge.cpp" />

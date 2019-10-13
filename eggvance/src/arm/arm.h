@@ -36,6 +36,28 @@ private:
     void writeHalf(u32 addr, u16 half);
     void writeWord(u32 addr, u32 word);
 
+    u32 readWordRotated(u32 addr);
+    u32 readHalfRotated(u32 addr);
+    u32 readHalfSigned(u32 addr);
+
+    u32 lsl(u32 value, int amount, bool& carry) const;
+    u32 lsr(u32 value, int amount, bool& carry, bool immediate) const;
+    u32 asr(u32 value, int amount, bool& carry, bool immediate) const;
+    u32 ror(u32 value, int amount, bool& carry, bool immediate) const;
+    u32 shift(Shift type, u32 value, int amount, bool& carry, bool immediate) const;
+
+    u32 lsl(u32 value, int amount) const;
+    u32 lsr(u32 value, int amount, bool immediate) const;
+    u32 asr(u32 value, int amount, bool immediate) const;
+    u32 ror(u32 value, int amount, bool immediate) const;
+    u32 shift(Shift type, u32 value, int amount, bool immediate) const;
+
+    u32 logical(u32 result, bool flags);
+    u32 logical(u32 result, bool carry, bool flags);
+
+    u32 add(u32 op1, u32 op2, bool flags);
+    u32 sub(u32 op1, u32 op2, bool flags);
+
     // Todo: remove
     enum AccessType
     {
@@ -52,6 +74,7 @@ private:
     void execute();
     void debug();
 
+    // Todo: should this be a function?
     template<int width>
     inline void advance();
     inline void advance();
@@ -59,12 +82,6 @@ private:
     // Todo: rename once finished
     void logical_old(u32 result);
     void logical_old(u32 result, bool carry);
-    
-    u32 logical(u32 result, bool flags);
-    u32 logical(u32 result, bool carry, bool flags);
-
-    u32 add(u32 op1, u32 op2, bool flags);
-    u32 sub(u32 op1, u32 op2, bool flags);
 
     void arithmetic(u32 op1, u32 op2, bool addition);
 
@@ -95,16 +112,6 @@ private:
             break;
         }
     }
-
-    u32 lsl(u32 value, int amount, bool& carry) const;
-    u32 lsr(u32 value, int amount, bool& carry, bool immediate = true) const;
-    u32 asr(u32 value, int amount, bool& carry, bool immediate = true) const;
-    u32 ror(u32 value, int amount, bool& carry, bool immediate = true) const;
-    u32 shift(Shift type, u32 value, int amount, bool& carry, bool immediate = true) const;
-
-    u32 ldr(u32 addr);
-    u32 ldrh(u32 addr);
-    u32 ldrsh(u32 addr);
 
     void cycle();
     void cycle(u32 addr, AccessType access);

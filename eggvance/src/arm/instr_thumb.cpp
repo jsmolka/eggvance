@@ -320,7 +320,7 @@ void ARM::loadStoreRegisterOffset(u16 instr)
         if (byte)
             dst = readByte(addr);
         else
-            dst = ldr(addr);
+            dst = readWordRotated(addr);
 
         cycle(pc + 2, SEQ);
     }
@@ -362,12 +362,12 @@ void ARM::loadStoreHalfwordSigned(u16 instr)
 
         // LDRH
         case 0b10:
-            dst = ldrh(addr);
+            dst = readHalfRotated(addr);
             break;
 
         // LDRSH
         case 0b11:
-            dst = ldrsh(addr);
+            dst = readHalfSigned(addr);
             break;
         }
         cycle(pc + 2, SEQ);
@@ -403,7 +403,7 @@ void ARM::loadStoreImmediateOffset(u16 instr)
         if (byte)
             dst = readByte(addr);
         else
-            dst = ldr(addr);
+            dst = readWordRotated(addr);
 
         cycle(pc + 2, SEQ);
     }
@@ -435,7 +435,7 @@ void ARM::loadStoreHalfword(u16 instr)
     if (load)
     {
         cycle();
-        dst = ldrh(addr);
+        dst = readHalfRotated(addr);
         cycle(pc + 2, SEQ);
     }
     else
@@ -461,7 +461,7 @@ void ARM::loadStoreSPRelative(u16 instr)
     if (load)
     {
         cycle();
-        dst = ldr(addr);
+        dst = readWordRotated(addr);
         cycle(pc + 2, SEQ);
     }
     else

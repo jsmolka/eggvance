@@ -32,6 +32,61 @@ int ARM::emulate()
     return static_cast<int>(cycles - last);
 }
 
+u32 ARM::logical(u32 result, bool flags)
+{
+    if (flags)
+    {
+        cpsr.z = result == 0;
+        cpsr.n = result >> 31;
+    }
+    return result;
+}
+
+u32 ARM::logical(u32 result, bool carry, bool flags)
+{
+    if (flags)
+    {
+        cpsr.z = result == 0;
+        cpsr.n = result >> 31;
+        cpsr.c = carry;
+    }
+    return result;
+}
+
+u32 ARM::add(u32 op1, u32 op2, bool flags)
+{
+    u32 result = op1 + op2;
+
+    if (flags)
+    {
+        int msb_op1 = op1 >> 31;
+        int msb_op2 = op2 >> 31;
+
+        cpsr.z = result == 0;
+        cpsr.n = result >> 31;
+        cpsr.c = op2 > (0xFFFFFFFF - op1);
+        cpsr.v = msb_op1 == msb_op2 && (result >> 31) != msb_op1;
+    }
+    return result;
+}
+
+u32 ARM::sub(u32 op1, u32 op2, bool flags)
+{
+    u32 result = op1 - op2;
+
+    if (flags)
+    {
+        int msb_op1 = op1 >> 31;
+        int msb_op2 = op2 >> 31;
+
+        cpsr.z = result == 0;
+        cpsr.n = result >> 31;
+        cpsr.c = op2 <= op1;
+        cpsr.v = msb_op1 != msb_op2 && (result >> 31) == msb_op2;
+    }
+    return result;
+}
+
 void ARM::hardwareInterrupt()
 {
     // Returns with subs pc, lr, 4
@@ -169,61 +224,6 @@ void ARM::logical_old(u32 result, bool carry)
     cpsr.c = carry;
 }
 
-u32 ARM::logical(u32 result, bool flags)
-{
-    if (flags)
-    {
-        cpsr.z = result == 0;
-        cpsr.n = result >> 31;
-    }
-    return result;
-}
-
-u32 ARM::logical(u32 result, bool carry, bool flags)
-{
-    if (flags)
-    {
-        cpsr.z = result == 0;
-        cpsr.n = result >> 31;
-        cpsr.c = carry;
-    }
-    return result;
-}
-
-u32 ARM::add(u32 op1, u32 op2, bool flags)
-{
-    u32 result = op1 + op2;
-
-    if (flags)
-    {
-        int msb_op1 = op1 >> 31;
-        int msb_op2 = op2 >> 31;
-
-        cpsr.z = result == 0;
-        cpsr.n = result >> 31;
-        cpsr.c = op2 > (0xFFFFFFFF - op1);
-        cpsr.v = msb_op1 == msb_op2 && (result >> 31) != msb_op1;
-    }
-    return result;
-}
-
-u32 ARM::sub(u32 op1, u32 op2, bool flags)
-{
-    u32 result = op1 - op2;
-
-    if (flags)
-    {
-        int msb_op1 = op1 >> 31;
-        int msb_op2 = op2 >> 31;
-
-        cpsr.z = result == 0;
-        cpsr.n = result >> 31;
-        cpsr.c = op2 <= op1;
-        cpsr.v = msb_op1 != msb_op2 && (result >> 31) == msb_op2;
-    }
-    return result;
-}
-
 void ARM::arithmetic(u32 op1, u32 op2, bool addition)
 {
     u32 result = addition
@@ -243,147 +243,6 @@ void ARM::arithmetic(u32 op1, u32 op2, bool addition)
     cpsr.v = addition
         ? msb_op1 == msb_op2 && (result >> 31) != msb_op1
         : msb_op1 != msb_op2 && (result >> 31) == msb_op2;
-}
-
-u32 ARM::lsl(u32 value, int amount, bool& carry) const
-{
-    if (amount != 0)
-    {
-        if (amount < 32)
-        {
-            carry = (value << (amount - 1)) >> 31;
-            value <<= amount;
-        }
-        else
-        {
-            if (amount == 32)
-                carry = value & 0x1;
-            else
-                carry = 0;
-
-            value = 0;
-        }
-    }
-    return value;
-}
-
-u32 ARM::lsr(u32 value, int amount, bool& carry, bool immediate) const
-{
-    if (amount != 0)
-    {
-        if (amount < 32)
-        {
-            carry = (value >> (amount - 1)) & 0x1;
-            value >>= amount;
-        }
-        else
-        {
-            carry = 0;
-            value = 0;
-        }
-    }
-    else if (immediate)
-    {
-        carry = value >> 31;
-        value = 0;
-    }
-    return value;
-}
-
-u32 ARM::asr(u32 value, int amount, bool& carry, bool immediate) const
-{
-    if (amount != 0)
-    {
-        if (amount < 32)
-        {
-            carry = (value >> (amount - 1)) & 0x1;
-            value = static_cast<s32>(value) >> amount;
-        }
-        else
-        {
-            carry = value >> 31;
-            value = carry ? 0xFFFFFFFF : 0;
-        }
-    }
-    else if (immediate)
-    {
-        carry = value >> 31;
-        value = carry ? 0xFFFFFFFF : 0;
-    }
-    return value;
-}
-
-u32 ARM::ror(u32 value, int amount, bool& carry, bool immediate) const
-{
-    if (amount != 0)
-    {
-        amount %= 32;
-
-        if (amount != 0)
-            value = (value << (32 - amount)) | (value >> amount);
-
-        carry = value >> 31;
-    }
-    else if (immediate)
-    {
-        carry = value & 0x1;
-        value = (cpsr.c << 31) | (value >> 1);
-    }
-    return value;
-}
-
-u32 ARM::shift(Shift type, u32 value, int amount, bool& carry, bool immediate) const
-{
-    switch (type)
-    {
-    case Shift::LSL: return lsl(value, amount, carry);
-    case Shift::LSR: return lsr(value, amount, carry, immediate);
-    case Shift::ASR: return asr(value, amount, carry, immediate);
-    case Shift::ROR: return ror(value, amount, carry, immediate);
-
-    default:
-        EGG_UNREACHABLE;
-        return value;
-    }
-}
-
-u32 ARM::ldr(u32 addr)
-{
-    u32 value = readWord(addr);
-    if (misalignedWord(addr))
-    {
-        bool carry;
-        int rotation = (addr & 0x3) << 3;
-        value = ror(value, rotation, carry);
-    }
-    return value;
-}
-
-u32 ARM::ldrh(u32 addr)
-{
-    u32 value = readHalf(addr);
-    if (misalignedHalf(addr))
-    {
-        bool carry;
-        value = ror(value, 8, carry);
-    }
-    return value;
-}
-
-u32 ARM::ldrsh(u32 addr)
-{
-    u32 value;
-    if (misalignedHalf(addr))
-    {
-        value = readByte(addr);
-        value = signExtend<8>(value);
-    }
-    else
-    {
-        value = readHalf(addr);
-        value = signExtend<16>(value);
-    }
-    return value;
 }
 
 void ARM::cycle()
