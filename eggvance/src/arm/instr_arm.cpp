@@ -69,7 +69,7 @@ void ARM::dataProcessing(u32 instr)
     u32  op1 = regs[rn];
     u32  op2 = 0;
 
-    cycle<Access::Nonseq>(pc + 8);
+    cycle<Access::Seq>(pc + 8);
 
     bool carry = cpsr.c;
     if (isset<25>(instr))
@@ -93,12 +93,12 @@ void ARM::dataProcessing(u32 instr)
             if (rm == 15) op2 += 4;
 
             int amount = regs[bits<8, 4>(instr)] & 0xFF;
-            op2 = applyShift(Shift(type), op2, amount, carry, false);
+            op2 = shift(Shift(type), op2, amount, carry, false);
         }
         else
         {
             int amount = bits<7, 5>(instr);
-            op2 = applyShift(Shift(type), op2, amount, carry, true);
+            op2 = shift(Shift(type), op2, amount, carry, true);
         }
     }
 
@@ -158,100 +158,82 @@ void ARM::dataProcessing(u32 instr)
 
 void ARM::psrTransfer(u32 instr)
 {
-    int write    = bits<21, 1>(instr);
-    int use_spsr = bits<22, 1>(instr);
+    bool use_spsr = isset<22>(instr);
 
-    if (write)
+    if (isset<21>(instr))
     {
-        int use_imm = bits<25,  1>(instr);
+        constexpr int f_bit = 1 << 19;
+        constexpr int s_bit = 1 << 18;
+        constexpr int x_bit = 1 << 17;
+        constexpr int c_bit = 1 << 16;
 
-        u32 op;
-        if (use_imm)
+        u32 op = 0;
+        if (isset<25>(instr))
         {
             u32 value  = bits<0, 8>(instr);
             int amount = bits<8, 4>(instr);
             
-            bool carry;
+            bool carry = false;
             op = ror(value, amount << 1, carry, false);
         }
         else
         {
-            int rm = bits<0, 4>(instr);
-            op = regs[rm];
+            op = regs[bits<0, 4>(instr)];
         }
 
         u32 mask = 0;
-        if (instr & (1 << 16)) mask |= 0x0000'00FF;
-        if (instr & (1 << 17)) mask |= 0x0000'FF00;
-        if (instr & (1 << 18)) mask |= 0x00FF'0000;
-        if (instr & (1 << 19)) mask |= 0xFF00'0000;
+        if (instr & f_bit) mask |= 0xFF00'0000;
+        if (instr & s_bit) mask |= 0x00FF'0000;
+        if (instr & x_bit) mask |= 0x0000'FF00;
+        if (instr & c_bit) mask |= 0x0000'00FF;
 
         op &= mask;
-
         if (use_spsr)
         {
             spsr = (spsr & ~mask) | op;
         }
         else
         {
-            if (mask & 0xFF)
-                switchMode(static_cast<PSR::Mode>(op & 0x1F));
+            if (instr & c_bit)
+                switchMode(PSR::Mode(op & 0x1F));
 
             cpsr = (cpsr & ~mask) | op;
         }
     }
     else
     {
-        int rd = bits<12, 4>(instr);
-        regs[rd] = use_spsr ? spsr : cpsr;
+        regs[bits<12, 4>(instr)] = use_spsr ? spsr : cpsr;
     }
-    cycle<Access::Seq>(pc + 4);
+    cycle<Access::Seq>(pc + 8);
 }
 
 void ARM::multiply(u32 instr)
 {
-    int rm         = bits< 0, 4>(instr);
-    int rs         = bits< 8, 4>(instr);
-    int rn         = bits<12, 4>(instr);
-    int rd         = bits<16, 4>(instr);
-    int flags      = bits<20, 1>(instr);
-    int accumulate = bits<21, 1>(instr);
-
-    u32& dst = regs[rd];
-    u32  op1 = regs[rs];
-    u32  op2 = regs[rm];
-    u32  acc = regs[rn];
+    u32  op1 = regs[bits< 0, 4>(instr)];
+    u32  op2 = regs[bits< 8, 4>(instr)];
+    u32  op3 = regs[bits<12, 4>(instr)];
+    u32& dst = regs[bits<16, 4>(instr)];
 
     dst = op1 * op2;
-    if (accumulate)
+    if (isset<21>(instr))
     {
-        dst += acc;
+        dst += op3;
         cycle();
     }
+    logical(dst, isset<20>(instr));
 
-    if (flags)
-        logical_old(dst);
-
-    cycleBooth(op1, true);
-    cycle<Access::Seq>(pc + 4);
+    cycleBooth(op2, true);
+    cycle<Access::Seq>(pc + 8);
 }
 
 void ARM::multiplyLong(u32 instr)
 {
-    int rm         = bits< 0, 4>(instr);
-    int rs         = bits< 8, 4>(instr);
-    int rdlo       = bits<12, 4>(instr);
-    int rdhi       = bits<16, 4>(instr);
-    int flags      = bits<20, 1>(instr);
-    int accumulate = bits<21, 1>(instr);
-    int sign       = bits<22, 1>(instr);
+    u64  op1  = regs[bits< 0, 4>(instr)];
+    u64  op2  = regs[bits< 8, 4>(instr)];
+    u32& dstl = regs[bits<12, 4>(instr)];
+    u32& dsth = regs[bits<16, 4>(instr)];
 
-    u32& dsthi = regs[rdhi];
-    u32& dstlo = regs[rdlo];
-
-    u64 op1 = regs[rs];
-    u64 op2 = regs[rm];
-
+    int sign = isset<22>(instr);
     if (sign)
     {
         op1 = signExtend<32>(op1);
@@ -259,25 +241,24 @@ void ARM::multiplyLong(u32 instr)
     }
     
     u64 result = op1 * op2;
-
-    if (accumulate)
+    if (isset<21>(instr))
     {
-        result += (static_cast<u64>(dsthi) << 32) | dstlo;
+        result += (static_cast<u64>(dsth) << 32) | dstl;
         cycle();
     }
 
-    dstlo = static_cast<u32>(result);
-    dsthi = static_cast<u32>(result >> 32);
-
-    if (flags)
+    if (isset<20>(instr))
     {
         cpsr.z = result == 0;
         cpsr.n = result >> 63;
     }
 
+    dstl = static_cast<u32>(result);
+    dsth = static_cast<u32>(result >> 32);
+
     cycle();
-    cycleBooth(static_cast<u32>(op1), sign);
-    cycle<Access::Seq>(pc + 4);
+    cycleBooth(static_cast<u32>(op2), sign);
+    cycle<Access::Seq>(pc + 8);
 }
 
 void ARM::singleDataTransfer(u32 instr)

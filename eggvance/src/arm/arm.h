@@ -100,7 +100,7 @@ private:
     u32 lsr(u32 value, int amount, bool& carry, bool immediate = true) const;
     u32 asr(u32 value, int amount, bool& carry, bool immediate = true) const;
     u32 ror(u32 value, int amount, bool& carry, bool immediate = true) const;
-    u32 applyShift(Shift type, u32 value, int amount, bool& carry, bool immediate = true) const;
+    u32 shift(Shift type, u32 value, int amount, bool& carry, bool immediate = true) const;
 
     u32 ldr(u32 addr);
     u32 ldrh(u32 addr);

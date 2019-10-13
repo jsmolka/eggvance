@@ -83,7 +83,7 @@ void ARM::execute()
 
         switch (decodeThumb(instr))
         {
-        case InstructionThumb::Invalid: break;
+        case InstructionThumb::Undefined: break;
         case InstructionThumb::MoveShiftedRegister: moveShiftedRegister(instr); break;
         case InstructionThumb::AddSubtractImmediate: addSubtractImmediate(instr); break;
         case InstructionThumb::AddSubtractMoveCompareImmediate: addSubtractMoveCompareImmediate(instr); break;
@@ -117,7 +117,7 @@ void ARM::execute()
         {
             switch (decodeArm(instr))
             {
-            case InstructionArm::Invalid: break;
+            case InstructionArm::Undefined: break;
             case InstructionArm::BranchExchange: branchExchange(instr); break;
             case InstructionArm::BranchLink: branchLink(instr); break;
             case InstructionArm::DataProcessing: dataProcessing(instr); break;
@@ -137,7 +137,7 @@ void ARM::execute()
         }
         else
         {
-            cycle(pc + 4, SEQ);
+            cycle<Access::Seq>(pc + 8);
         }
     }
 }
@@ -332,7 +332,7 @@ u32 ARM::ror(u32 value, int amount, bool& carry, bool immediate) const
     return value;
 }
 
-u32 ARM::applyShift(Shift type, u32 value, int amount, bool& carry, bool immediate) const
+u32 ARM::shift(Shift type, u32 value, int amount, bool& carry, bool immediate) const
 {
     switch (type)
     {
@@ -440,11 +440,11 @@ void ARM::cycle(u32 addr, AccessType access)
 
 void ARM::cycleBooth(u32 multiplier, bool allow_ones)
 {
-    static constexpr int masks[3] = 
+    static constexpr u32 masks[3] = 
     {
-        0xFF000000,
-        0xFFFF0000,
-        0xFFFFFF00
+        0xFF00'0000,
+        0xFFFF'0000,
+        0xFFFF'FF00
     };
 
     int internal = 4;

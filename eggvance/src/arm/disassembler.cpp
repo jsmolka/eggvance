@@ -57,7 +57,7 @@ std::string Disassembler::disassemble(u32 data, const Registers& regs)
         case InstructionArm::CoprocessorDataOperations:
         case InstructionArm::CoprocessorDataTransfers:
         case InstructionArm::CoprocessorRegisterTransfers: return fmt::format("Coprocessor instruction %08X", instr);
-        case InstructionArm::Invalid: return fmt::format("Invalid instruction %08X", instr);
+        case InstructionArm::Undefined: return fmt::format("Invalid instruction %08X", instr);
 
         default:
             return fmt::format("unknown arm instruction %08X", instr);

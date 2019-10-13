@@ -2,9 +2,9 @@
 
 #include "common/integer.h"
 
-enum class InstructionArm : char
+enum class InstructionArm
 {
-    Invalid,
+    Undefined,
     BranchExchange,
     BranchLink,
     DataProcessing,
@@ -18,13 +18,12 @@ enum class InstructionArm : char
     SoftwareInterrupt,
     CoprocessorDataOperations,
     CoprocessorDataTransfers,
-    CoprocessorRegisterTransfers,
-    Undefined
+    CoprocessorRegisterTransfers
 };
 
-enum class InstructionThumb : char
+enum class InstructionThumb
 {
-    Invalid,
+    Undefined,
     MoveShiftedRegister,
     AddSubtractImmediate,
     AddSubtractMoveCompareImmediate,

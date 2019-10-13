@@ -20,7 +20,7 @@ InstructionArm decodeHashArm(int hash)
     if ((hash & 0b1101'1001'0000) == 0b0001'0000'0000) return InstructionArm::PSRTransfer;
     if ((hash & 0b1100'0000'0000) == 0b0000'0000'0000) return InstructionArm::DataProcessing;
 
-    return InstructionArm::Invalid;
+    return InstructionArm::Undefined;
 }
 
 using LutArm = std::array<InstructionArm, 4096>;
@@ -68,7 +68,7 @@ InstructionThumb decodeHashThumb(int hash)
     if ((hash & 0b1111'1000) == 0b1110'0000) return InstructionThumb::UnconditionalBranch;
     if ((hash & 0b1111'0000) == 0b1111'0000) return InstructionThumb::LongBranchLink;
 
-    return InstructionThumb::Invalid;
+    return InstructionThumb::Undefined;
 }
 
 using LutThumb = std::array<InstructionThumb, 256>;

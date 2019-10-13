@@ -4,7 +4,7 @@
 
 struct PSR
 {
-    enum Condition
+    enum class Condition
     {
         EQ = 0x0,  // Equal
         NE = 0x1,  // Not equal
@@ -24,7 +24,7 @@ struct PSR
         NV = 0xF,  // Never
     };
 
-    enum Mode : u32
+    enum class Mode : u32
     {
         USR = 0b10000,  // User
         FIQ = 0b10001,  // Fast interrupt request
