@@ -254,7 +254,7 @@ void ARM::cycle(u32 addr, AccessType access)
 {
     cycles++;
 
-    static constexpr int seq[3][2] = { { 1, 2 }, { 1, 4 }, { 1, 8} };
+    static constexpr int seq[3][2] = { { 1, 2 }, { 1, 4 }, { 1, 8 } };
     static constexpr int nonseq[4] = { 4, 3, 2, 8 };
 
     //switch (addr >> 24)

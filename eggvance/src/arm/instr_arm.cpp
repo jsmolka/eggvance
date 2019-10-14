@@ -3,7 +3,7 @@
 #include "common/macros.h"
 #include "common/utility.h"
 
-enum class Operation
+enum class ALU
 {
     AND = 0b0000,
     EOR = 0b0001,
@@ -62,14 +62,13 @@ void ARM::branchLink(u32 instr)
 
 void ARM::dataProcessing(u32 instr)
 {
-    int rd = bits<12, 4>(instr);
-    int rn = bits<16, 4>(instr);
+    int rd     = bits<12, 4>(instr);
+    int rn     = bits<16, 4>(instr);
+    int opcode = bits<21, 4>(instr);
 
     u32& dst = regs[rd];
     u32  op1 = regs[rn];
     u32  op2 = 0;
-
-    cycle<Access::Seq>(pc + 8);
 
     bool carry = cpsr.c;
     if (isset<25>(instr))
@@ -85,6 +84,7 @@ void ARM::dataProcessing(u32 instr)
         int type = bits<5, 2>(instr);
 
         op2 = regs[rm];
+
         if (isset<4>(instr))
         {
             cycle();
@@ -103,41 +103,50 @@ void ARM::dataProcessing(u32 instr)
     }
 
     bool flags = isset<20>(instr);
-    if (rd == 15 && flags)
-    {
-        PSR spsr = this->spsr;
-        switchMode(spsr.mode);
-        cpsr = spsr;
+    bool write = (opcode >> 2) != 0b10;
 
-        flags = false;
+    if (rd == 15 && write)
+    {
+        if (flags)
+        {
+            PSR spsr = this->spsr;
+            switchMode(spsr.mode);
+            cpsr = spsr;
+
+            flags = false;
+        }
+        cycle<Access::Nonseq>(pc + 8);
+    }
+    else
+    {
+        cycle<Access::Seq>(pc + 8);
     }
 
-    int opcode = bits<21, 4>(instr);
-    switch (Operation(opcode))
+    switch (ALU(opcode))
     {
-    case Operation::CMN:       add(op1, op2, flags); break;
-    case Operation::CMP:       sub(op1, op2, flags); break;
-    case Operation::ADD: dst = add(op1, op2, flags); break;
-    case Operation::SUB: dst = sub(op1, op2, flags); break;
-    case Operation::RSB: dst = sub(op2, op1, flags); break;
-    case Operation::ADC: dst = add(op1, op2 + cpsr.c + 0, flags); break;
-    case Operation::SBC: dst = sub(op1, op2 - cpsr.c + 1, flags); break;
-    case Operation::RSC: dst = sub(op2, op1 - cpsr.c + 1, flags); break;
-    case Operation::TST:       logical(op1 &  op2, carry, flags); break;
-    case Operation::TEQ:       logical(op1 ^  op2, carry, flags); break;
-    case Operation::AND: dst = logical(op1 &  op2, carry, flags); break;
-    case Operation::EOR: dst = logical(op1 ^  op2, carry, flags); break;
-    case Operation::ORR: dst = logical(op1 |  op2, carry, flags); break;
-    case Operation::MOV: dst = logical(       op2, carry, flags); break;
-    case Operation::BIC: dst = logical(op1 & ~op2, carry, flags); break;
-    case Operation::MVN: dst = logical(      ~op2, carry, flags); break;
+    case ALU::CMN:       add(op1, op2, flags); break;
+    case ALU::CMP:       sub(op1, op2, flags); break;
+    case ALU::ADD: dst = add(op1, op2, flags); break;
+    case ALU::SUB: dst = sub(op1, op2, flags); break;
+    case ALU::RSB: dst = sub(op2, op1, flags); break;
+    case ALU::ADC: dst = add(op1, op2 + cpsr.c + 0, flags); break;
+    case ALU::SBC: dst = sub(op1, op2 - cpsr.c + 1, flags); break;
+    case ALU::RSC: dst = sub(op2, op1 - cpsr.c + 1, flags); break;
+    case ALU::TST:       logical(op1 &  op2, carry, flags); break;
+    case ALU::TEQ:       logical(op1 ^  op2, carry, flags); break;
+    case ALU::AND: dst = logical(op1 &  op2, carry, flags); break;
+    case ALU::EOR: dst = logical(op1 ^  op2, carry, flags); break;
+    case ALU::ORR: dst = logical(op1 |  op2, carry, flags); break;
+    case ALU::MOV: dst = logical(       op2, carry, flags); break;
+    case ALU::BIC: dst = logical(op1 & ~op2, carry, flags); break;
+    case ALU::MVN: dst = logical(      ~op2, carry, flags); break;
 
     default:
         EGG_UNREACHABLE;
         break;
     }
 
-    if (rd == 15 && (opcode >> 2) != 0b10)
+    if (rd == 15 && write)
     {
         if (cpsr.thumb)
         {
@@ -323,6 +332,7 @@ void ARM::singleDataTransfer(u32 instr)
             : readWordRotated(addr);
 
         cycle();
+        cycle<Access::Nonseq>(addr);
 
         if (rd == 15)
         {
@@ -330,10 +340,6 @@ void ARM::singleDataTransfer(u32 instr)
             cycle<Access::Seq>(pc);
             cycle<Access::Seq>(pc + 4);
             advance<4>();
-        }
-        else
-        {
-            cycle<Access::Nonseq>(addr);
         }
     }
     else
@@ -390,9 +396,6 @@ void ARM::halfwordSignedDataTransfer(u32 instr)
 
     if (isset<20>(instr))
     {
-        if (rd == 15)
-            cycle(pc + 4, NSEQ);
-
         switch (bits<5, 2>(instr))
         {
         case 0b00:
@@ -415,7 +418,9 @@ void ARM::halfwordSignedDataTransfer(u32 instr)
             EGG_UNREACHABLE;
             break;
         }
+
         cycle();
+        cycle<Access::Nonseq>(addr);
 
         if (rd == 15)
         {
@@ -423,10 +428,6 @@ void ARM::halfwordSignedDataTransfer(u32 instr)
             cycle<Access::Seq>(pc);
             cycle<Access::Seq>(pc + 4);
             advance<4>();
-        }
-        else
-        {
-            cycle<Access::Nonseq>(addr);
         }
     }
     else
@@ -511,10 +512,6 @@ void ARM::blockDataTransfer(u32 instr)
                 cycle<Access::Seq>(pc + 4);
                 advance();
             }
-            else
-            {
-                cycle<Access::Nonseq>(addr);
-            }
         }
         else
         {
@@ -564,6 +561,7 @@ void ARM::singleDataSwap(u32 instr)
     u32 addr = regs[bits<16, 4>(instr)];
 
     cycle<Access::Nonseq>(pc + 8);
+    cycle<Access::Nonseq>(addr);
 
     if (isset<22>(instr))
     {
@@ -576,7 +574,6 @@ void ARM::singleDataSwap(u32 instr)
         writeWord(addr, src);
     }
 
-    cycle<Access::Nonseq>(addr);
     cycle<Access::Seq>(pc + 4);
     cycle();
 }
