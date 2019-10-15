@@ -105,7 +105,7 @@ void ARM::softwareInterrupt()
 
 void ARM::interrupt(u32 pc, u32 lr, PSR::Mode mode)
 {
-    cycle(this->pc, NSEQ);
+    cycle<Access::Nonseq>(this->pc);
 
     u32 cpsr = this->cpsr;
     switchMode(mode);
@@ -117,10 +117,7 @@ void ARM::interrupt(u32 pc, u32 lr, PSR::Mode mode)
     this->cpsr.thumb = false;
     this->cpsr.irqd  = true;
 
-    cycle(this->pc, SEQ);
-    cycle(this->pc + 4, SEQ);
-
-    advance();
+    refill<State::Arm>();
 }
 
 int ARM::length() const
@@ -245,11 +242,6 @@ void ARM::arithmetic(u32 op1, u32 op2, bool addition)
         : msb_op1 != msb_op2 && (result >> 31) == msb_op2;
 }
 
-void ARM::cycle()
-{
-    cycles++;
-}
-
 void ARM::cycle(u32 addr, AccessType access)
 {
     cycles++;
@@ -295,25 +287,4 @@ void ARM::cycle(u32 addr, AccessType access)
     //        cycles += nonseq[mmio.waitcnt.sram];
     //    break;
     //}
-}
-
-void ARM::cycleBooth(u32 multiplier, bool allow_ones)
-{
-    static constexpr u32 masks[3] = 
-    {
-        0xFF00'0000,
-        0xFFFF'0000,
-        0xFFFF'FF00
-    };
-
-    int internal = 4;
-    for (u32 mask : masks)
-    {
-        u32 bits = multiplier & mask;
-        if (bits == 0 || (allow_ones && bits == mask))
-            internal--;
-        else
-            break;
-    }
-    cycles += internal;
 }

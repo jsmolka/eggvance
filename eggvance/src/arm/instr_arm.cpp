@@ -7,7 +7,7 @@
 #include "common/macros.h"
 #include "common/utility.h"
 
-enum class ALU
+enum class DataOperation
 {
     AND = 0b0000,
     EOR = 0b0001,
@@ -36,16 +36,12 @@ void ARM::branchExchange(u32 instr)
     if (cpsr.thumb = addr & 0x1)
     {
         pc = alignHalf(addr);
-        cycle<Access::Seq>(pc);
-        cycle<Access::Seq>(pc + 2);
-        advance<2>();
+        refill<State::Thumb>();
     }
     else
     {
         pc = alignWord(addr);
-        cycle<Access::Seq>(pc);
-        cycle<Access::Seq>(pc + 4);
-        advance<4>();
+        refill<State::Arm>();
     }
 }
 
@@ -58,10 +54,7 @@ void ARM::branchLink(u32 instr)
 
     pc += signExtend<24>(instr) << 2;
 
-    cycle<Access::Seq>(pc);
-    cycle<Access::Seq>(pc + 4);
-
-    advance<4>();
+    refill<State::Arm>();
 }
 
 void ARM::dataProcessing(u32 instr)
@@ -126,24 +119,24 @@ void ARM::dataProcessing(u32 instr)
         cycle<Access::Seq>(pc + 8);
     }
 
-    switch (ALU(opcode))
+    switch (DataOperation(opcode))
     {
-    case ALU::CMN:       add(op1, op2, flags); break;
-    case ALU::CMP:       sub(op1, op2, flags); break;
-    case ALU::ADD: dst = add(op1, op2, flags); break;
-    case ALU::SUB: dst = sub(op1, op2, flags); break;
-    case ALU::RSB: dst = sub(op2, op1, flags); break;
-    case ALU::ADC: dst = add(op1, op2 + cpsr.c + 0, flags); break;
-    case ALU::SBC: dst = sub(op1, op2 - cpsr.c + 1, flags); break;
-    case ALU::RSC: dst = sub(op2, op1 - cpsr.c + 1, flags); break;
-    case ALU::TST:       logical(op1 &  op2, carry, flags); break;
-    case ALU::TEQ:       logical(op1 ^  op2, carry, flags); break;
-    case ALU::AND: dst = logical(op1 &  op2, carry, flags); break;
-    case ALU::EOR: dst = logical(op1 ^  op2, carry, flags); break;
-    case ALU::ORR: dst = logical(op1 |  op2, carry, flags); break;
-    case ALU::MOV: dst = logical(       op2, carry, flags); break;
-    case ALU::BIC: dst = logical(op1 & ~op2, carry, flags); break;
-    case ALU::MVN: dst = logical(      ~op2, carry, flags); break;
+    case DataOperation::CMN:       add(op1, op2, flags); break;
+    case DataOperation::CMP:       sub(op1, op2, flags); break;
+    case DataOperation::ADD: dst = add(op1, op2, flags); break;
+    case DataOperation::SUB: dst = sub(op1, op2, flags); break;
+    case DataOperation::RSB: dst = sub(op2, op1, flags); break;
+    case DataOperation::ADC: dst = add(op1, op2 + cpsr.c + 0, flags); break;
+    case DataOperation::SBC: dst = sub(op1, op2 - cpsr.c + 1, flags); break;
+    case DataOperation::RSC: dst = sub(op2, op1 - cpsr.c + 1, flags); break;
+    case DataOperation::TST:       logical(op1 &  op2, carry, flags); break;
+    case DataOperation::TEQ:       logical(op1 ^  op2, carry, flags); break;
+    case DataOperation::AND: dst = logical(op1 &  op2, carry, flags); break;
+    case DataOperation::EOR: dst = logical(op1 ^  op2, carry, flags); break;
+    case DataOperation::ORR: dst = logical(op1 |  op2, carry, flags); break;
+    case DataOperation::MOV: dst = logical(       op2, carry, flags); break;
+    case DataOperation::BIC: dst = logical(op1 & ~op2, carry, flags); break;
+    case DataOperation::MVN: dst = logical(      ~op2, carry, flags); break;
 
     default:
         EGG_UNREACHABLE;
@@ -154,17 +147,13 @@ void ARM::dataProcessing(u32 instr)
     {
         if (cpsr.thumb)
         {
-            dst = alignHalf(dst);
-            cycle<Access::Seq>(pc);
-            cycle<Access::Seq>(pc + 2);
-            advance<2>();
+            pc = alignHalf(pc);
+            refill<State::Thumb>();
         }
         else
         {
-            dst = alignWord(dst);
-            cycle<Access::Seq>(pc);
-            cycle<Access::Seq>(pc + 4);
-            advance<4>();
+            pc = alignWord(pc);
+            refill<State::Arm>();
         }
     }
 }
@@ -340,9 +329,7 @@ void ARM::singleDataTransfer(u32 instr)
         if (rd == 15)
         {
             pc = alignWord(pc);
-            cycle<Access::Seq>(pc);
-            cycle<Access::Seq>(pc + 4);
-            advance<4>();
+            refill<State::Arm>();
         }
         cycle();
     }
@@ -426,9 +413,7 @@ void ARM::halfwordSignedDataTransfer(u32 instr)
         if (rd == 15)
         {
             pc = alignWord(pc);
-            cycle<Access::Seq>(pc);
-            cycle<Access::Seq>(pc + 4);
-            advance<4>();
+            refill<State::Arm>();
         }
         cycle();
     }
@@ -465,6 +450,7 @@ void ARM::blockDataTransfer(u32 instr)
     bool ascending  = isset<23>(instr);
     bool pre_index  = isset<24>(instr);
 
+    // (user_mode && (!load || !transfer_pc)) ???
     PSR::Mode mode = cpsr.mode;
     if (force_user)
         switchMode(PSR::Mode::USR);
@@ -487,7 +473,7 @@ void ARM::blockDataTransfer(u32 instr)
                 regs[rn] = addr;
                 writeback = false;
             }
-            pre_index != pre_index;
+            pre_index = !pre_index;
         }
 
         if (load)
@@ -498,7 +484,7 @@ void ARM::blockDataTransfer(u32 instr)
             if (rlist & (1 << 15))
                 cycle<Access::Nonseq>(pc + 4);
 
-            for (int x = begin; x <= end; ++x)
+            for (unsigned x = begin; x <= end; ++x)
             {
                 if (~rlist & (1 << x))
                     continue;
@@ -523,11 +509,21 @@ void ARM::blockDataTransfer(u32 instr)
                 cycle<Access::Seq>(pc);
                 cycle<Access::Seq>(pc + 4);
                 advance();
+
+                // Todo: Test this
+                if (force_user)
+                {
+                    EGG_ASSERT(cpsr.mode != PSR::Mode::USR, "Expected privileged mode");
+
+                    PSR spsr = this->spsr;
+                    switchMode(spsr.mode);
+                    cpsr = spsr;
+                }
             }
         }
         else
         {
-            for (int x = begin; x <= end; ++x)
+            for (unsigned x = begin; x <= end; ++x)
             {
                 if (~rlist & (1 << x))
                     continue;
@@ -541,6 +537,7 @@ void ARM::blockDataTransfer(u32 instr)
                 u32 value;
                 if (x == rn)
                 {
+                    // Todo: test all possible combinations for accuracy
                     value = (x == begin)
                         ? base
                         : addr - ((!ascending && !pre_index) ? 4 : 0);
@@ -566,7 +563,7 @@ void ARM::blockDataTransfer(u32 instr)
         {
             pc = readWord(addr);
             pc = alignWord(pc);
-            advance<4>();
+            refill<State::Arm>();
         }
         else
         {

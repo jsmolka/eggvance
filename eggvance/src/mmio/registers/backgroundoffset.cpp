@@ -15,5 +15,5 @@ void BackgroundOffset::writeByte(int index, u8 byte)
     if (index == 1)
         byte &= 0x1;
 
-    bytes(&offset)[index] = byte;
+    byteArray(offset)[index] = byte;
 }

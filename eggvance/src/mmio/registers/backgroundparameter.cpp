@@ -12,5 +12,5 @@ void BackgroundParameter::writeByte(int index, u8 byte)
 {
     EGG_ASSERT(index == 0 || index == 1, "Invalid index");
 
-    bytes(&parameter)[index] = byte;
+    byteArray(parameter)[index] = byte;
 }

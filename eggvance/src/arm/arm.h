@@ -2,7 +2,7 @@
 
 #include "registers.h"
 
-class Memory;
+struct Memory;
 
 class ARM : public Registers
 {
@@ -28,6 +28,12 @@ private:
         ROR = 0b11
     };
 
+    enum class State
+    {
+        Arm   = 0,
+        Thumb = 1
+    };
+
     u8  readByte(u32 addr);
     u16 readHalf(u32 addr);
     u32 readWord(u32 addr);
@@ -40,6 +46,7 @@ private:
     u32 readHalfRotated(u32 addr);
     u32 readHalfSigned(u32 addr);
 
+    // Todo: immediate could be templated
     u32 lsl(u32 value, int amount, bool& carry) const;
     u32 lsr(u32 value, int amount, bool& carry, bool immediate) const;
     u32 asr(u32 value, int amount, bool& carry, bool immediate) const;
@@ -58,65 +65,49 @@ private:
     u32 add(u32 op1, u32 op2, bool flags);
     u32 sub(u32 op1, u32 op2, bool flags);
 
-    // Todo: remove
-    enum AccessType
-    {
-        NSEQ,
-        SEQ
-    };
+    template<State state>
+    inline void advance();
+    inline void advance();
+    template<State state>
+    inline void refill();
 
     void hardwareInterrupt();
     void softwareInterrupt();
     void interrupt(u32 pc, u32 lr, PSR::Mode mode);
 
-    int length() const;
-
     void execute();
     void debug();
 
-    // Todo: should this be a function?
-    template<int width>
-    inline void advance();
-    inline void advance();
-
-    // Todo: rename once finished
+    // Todo: remove one finished
+    enum AccessType
+    {
+        NSEQ,
+        SEQ
+    };
+    int length() const;
+    void cycle(u32 addr, AccessType access);
     void logical_old(u32 result);
     void logical_old(u32 result, bool carry);
-
     void arithmetic(u32 op1, u32 op2, bool addition);
-
     enum Arithmetic
     {
         ADD,
         SUB
     };
-
-    // Temporary
     template<Arithmetic arith>
     void arithmetic(u32 op1, u32 op2)
     {
         arithmetic(op1, op2, arith == ADD);
     }
+    // end remove
 
     template<Access access>
-    void cycle(u32 addr)
-    {
-        switch (access)
-        {
-        case Access::Seq:
-            cycle(addr, SEQ);
-            break;
+    inline void cycle(u32 addr);
+    inline void cycle();
+    inline void cycleBooth(u32 multiplier, bool allow_ones);
 
-        case Access::Nonseq:
-            cycle(addr, NSEQ);
-            break;
-        }
-    }
-
-    void cycle();
-    void cycle(u32 addr, AccessType access);
-    void cycleBooth(u32 multiplier, bool allow_ones);
-
+    // Add prefixed for thumb and arm
+    // Add undefined instruction
     void moveShiftedRegister(u16 instr);
     void addSubtractImmediate(u16 instr);
     void addSubtractMoveCompareImmediate(u16 instr);
