@@ -291,6 +291,7 @@ void ARM::singleDataTransfer(u32 instr)
     u32 addr = regs[rn];
     u32& dst = regs[rd];
 
+    bool load      = isset<20>(instr);
     bool writeback = isset<21>(instr);
     bool byte      = isset<22>(instr);
     bool increment = isset<23>(instr);
@@ -323,44 +324,43 @@ void ARM::singleDataTransfer(u32 instr)
 
     PRE_INDEX;
 
+    cycle<Access::Nonseq>(addr);
     cycle<Access::Nonseq>(pc + 8);
 
-    if (isset<20>(instr))
+    if (load)
     {
         dst = byte
             ? readByte(addr)
             : readWordRotated(addr);
 
-        cycle();
-        cycle<Access::Nonseq>(addr);
-
         if (rd == 15)
         {
-            dst = alignWord(dst);
+            pc = alignWord(pc);
             cycle<Access::Seq>(pc);
             cycle<Access::Seq>(pc + 4);
             advance<4>();
         }
+        cycle();
     }
     else
     {
-        u32 value = (rd == 15)
-            ? dst + 4
-            : dst + 0;
+        u32 value = (rd == rn)
+            ? addr
+            : (rd == 15)
+                ? dst + 4
+                : dst + 0;
 
         if (byte)
             writeByte(addr, value);
         else
             writeWord(addr, value);
 
-        cycle<Access::Nonseq>(addr);
     }
 
-    if (rd != rn)
+    if (writeback && (rd != rn || !load))
     {
         POST_INDEX;
-        if (writeback) 
-            regs[rn] = addr;
+        regs[rn] = addr;
     }
 }
 
@@ -441,11 +441,10 @@ void ARM::halfwordSignedDataTransfer(u32 instr)
         cycle<Access::Nonseq>(addr);
     }
 
-    if (rd != rn)
+    if (writeback && rd != rn)
     {
         POST_INDEX;
-        if (writeback) 
-            regs[rn] = addr;
+        regs[rn] = addr;
     }
 }
 
