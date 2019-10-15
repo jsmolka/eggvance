@@ -1,5 +1,9 @@
 #include "arm.h"
 
+#ifdef _MSC_VER
+#include <intrin.h>
+#endif
+
 #include "common/macros.h"
 #include "common/utility.h"
 
@@ -453,12 +457,13 @@ void ARM::blockDataTransfer(u32 instr)
     int rn = bits<16, 4>(instr);
 
     u32 addr = regs[rn];
+    u32 base = regs[rn];
 
     bool load       = isset<20>(instr);
     bool writeback  = isset<21>(instr);
     bool force_user = isset<22>(instr);
     bool ascending  = isset<23>(instr);
-    bool full       = isset<24>(instr);
+    bool pre_index  = isset<24>(instr);
 
     PSR::Mode mode = cpsr.mode;
     if (force_user)
@@ -471,22 +476,18 @@ void ARM::blockDataTransfer(u32 instr)
     {
         unsigned long begin;
         unsigned long end;
-        int diff;
-        int loop;
+        EGG_MSVC(_BitScanForward(&begin, rlist));
+        EGG_MSVC(_BitScanReverse(&end, rlist));
 
-        if (ascending)
+        if (!ascending)
         {
-            EGG_MSVC(_BitScanForward(&begin, rlist));
-            EGG_MSVC(_BitScanReverse(&end, rlist));
-            diff = 4;
-            loop = 1;
-        }
-        else
-        {
-            EGG_MSVC(_BitScanReverse(&begin, rlist));
-            EGG_MSVC(_BitScanForward(&end, rlist));
-            diff = -4;
-            loop = -1;
+            addr -= 4 * EGG_MSVC(__popcnt16(rlist));
+            if (writeback)
+            {
+                regs[rn] = addr;
+                writeback = false;
+            }
+            pre_index != pre_index;
         }
 
         if (load)
@@ -497,21 +498,23 @@ void ARM::blockDataTransfer(u32 instr)
             if (rlist & (1 << 15))
                 cycle<Access::Nonseq>(pc + 4);
 
-            for (int x = begin; x != (end + loop); x += loop)
+            for (int x = begin; x <= end; ++x)
             {
-                if (rlist & (1 << x))
-                {
-                    if (full) addr += diff;
+                if (~rlist & (1 << x))
+                    continue;
 
-                    if (x != end)
-                        cycle<Access::Seq>(addr);
-                    else
-                        cycle();
+                if (pre_index) 
+                    addr += 4;
 
-                    regs[x] = readWord(addr);
+                if (x != end)
+                    cycle<Access::Seq>(addr);
+                else
+                    cycle();
 
-                    if (!full) addr += diff;
-                }
+                regs[x] = readWord(addr);
+
+                if (!pre_index) 
+                    addr += 4;
             }
 
             if (rlist & (1 << 15))
@@ -524,23 +527,35 @@ void ARM::blockDataTransfer(u32 instr)
         }
         else
         {
-            for (int x = begin; x != (end + loop); x += loop)
+            for (int x = begin; x <= end; ++x)
             {
-                if (rlist & (1 << x))
+                if (~rlist & (1 << x))
+                    continue;
+
+                if (pre_index) 
+                    addr += 4;
+
+                if (x != end)
+                    cycle<Access::Seq>(addr);
+
+                u32 value;
+                if (x == rn)
                 {
-                    if (full) addr += diff;
-
-                    if (x != end)
-                        cycle<Access::Seq>(addr);
-
-                    u32 value = (x == 15)
+                    value = (x == begin)
+                        ? base
+                        : addr - ((!ascending && !pre_index) ? 4 : 0);
+                }
+                else
+                {
+                    value = (x == 15)
                         ? regs[x] + 4
                         : regs[x] + 0;
-
-                    writeWord(addr, value);
-
-                    if (!full) addr += diff;
                 }
+
+                writeWord(addr, value);
+
+                if (!pre_index) 
+                    addr += 4;
             }
             cycle<Access::Nonseq>(addr);
         }
@@ -558,10 +573,9 @@ void ARM::blockDataTransfer(u32 instr)
             writeWord(addr, pc + 4);
         }
 
-        if (ascending)
-            addr += 0x40;
-        else
-            addr -= 0x40;
+        addr += ascending
+            ?  0x40
+            : -0x40;
     }
 
     if (writeback)
