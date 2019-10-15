@@ -32,17 +32,6 @@ inline bool misalignedWord(u32 addr)
     return addr & 0x3;
 }
 
-inline int countBits(u8 byte)
-{
-    static constexpr auto counts = makeArray<u8, 256>([](auto x) {
-        u8 count = 0;
-        for (int temp = static_cast<int>(x); temp != 0; temp >>= 1)
-            count += temp & 0x1;
-        return count;
-    });
-    return counts[byte];
-}
-
 template<int position, int amount, typename T>
 inline int bits(T value)
 {

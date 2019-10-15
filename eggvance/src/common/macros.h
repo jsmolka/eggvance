@@ -2,6 +2,12 @@
 
 #include <cassert>
 
+#ifdef _MSC_VER
+#  define EGG_MSVC(expr) expr
+#else
+#  error MSVC specific code
+#endif
+
 #ifdef EGG_DEBUG
 #  define EGG_ASSERT(cond, msg) assert((cond) && msg)
 #else
@@ -11,9 +17,5 @@
 #ifdef EGG_DEBUG
 #  define EGG_UNREACHABLE EGG_ASSERT(false, "Unreachable")
 #else
-#  ifdef _MSC_VER
-#    define EGG_UNREACHABLE __assume(0)
-#  else
-#    define EGG_UNREACHABLE static_cast<void>(0)
-#  endif
+#  define EGG_UNREACHABLE EGG_MSVC(__assume(0))
 #endif

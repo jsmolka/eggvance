@@ -450,30 +450,44 @@ void ARM::halfwordSignedDataTransfer(u32 instr)
 
 void ARM::blockDataTransfer(u32 instr)
 {
-    int rlist = bits< 0, 16>(instr);
-    int rn    = bits<16,  4>(instr);
+    int rn = bits<16, 4>(instr);
 
     u32 addr = regs[rn];
 
-    bool load      = isset<20>(instr);
-    bool writeback = isset<21>(instr);
-    bool user      = isset<22>(instr);
-    bool ascending = isset<23>(instr);
-    bool full      = isset<24>(instr);
+    bool load       = isset<20>(instr);
+    bool writeback  = isset<21>(instr);
+    bool force_user = isset<22>(instr);
+    bool ascending  = isset<23>(instr);
+    bool full       = isset<24>(instr);
 
     PSR::Mode mode = cpsr.mode;
-    if (user)
+    if (force_user)
         switchMode(PSR::Mode::USR);
 
     cycle<Access::Nonseq>(pc + 8);
 
+    int rlist = bits<0, 16>(instr);
     if (rlist != 0)
     {
-        int rcount = countBits(rlist) + countBits(rlist >> 8);
+        unsigned long begin;
+        unsigned long end;
+        int diff;
+        int loop;
 
-        int init = ascending ? 0 : 15;
-        int loop = ascending ? 1 : -1;
-        int step = ascending ? 4 : -4;
+        if (ascending)
+        {
+            EGG_MSVC(_BitScanForward(&begin, rlist));
+            EGG_MSVC(_BitScanReverse(&end, rlist));
+            diff = 4;
+            loop = 1;
+        }
+        else
+        {
+            EGG_MSVC(_BitScanReverse(&begin, rlist));
+            EGG_MSVC(_BitScanForward(&end, rlist));
+            diff = -4;
+            loop = -1;
+        }
 
         if (load)
         {
@@ -483,20 +497,20 @@ void ARM::blockDataTransfer(u32 instr)
             if (rlist & (1 << 15))
                 cycle<Access::Nonseq>(pc + 4);
 
-            for (int x = init; rcount > 0; x += loop)
+            for (int x = begin; x != (end + loop); x += loop)
             {
                 if (rlist & (1 << x))
                 {
-                    if (full) addr += step;
+                    if (full) addr += diff;
 
-                    if (--rcount > 0)
+                    if (x != end)
                         cycle<Access::Seq>(addr);
                     else
                         cycle();
 
                     regs[x] = readWord(addr);
 
-                    if (!full) addr += step;
+                    if (!full) addr += diff;
                 }
             }
 
@@ -510,18 +524,22 @@ void ARM::blockDataTransfer(u32 instr)
         }
         else
         {
-            for (int x = init; rcount > 0; x += loop)
+            for (int x = begin; x != (end + loop); x += loop)
             {
                 if (rlist & (1 << x))
                 {
-                    if (full) addr += step;
+                    if (full) addr += diff;
 
-                    if (--rcount > 0)
+                    if (x != end)
                         cycle<Access::Seq>(addr);
 
-                    writeWord(addr, regs[x]);
+                    u32 value = (x == 15)
+                        ? regs[x] + 4
+                        : regs[x] + 0;
 
-                    if (!full) addr += step;
+                    writeWord(addr, value);
+
+                    if (!full) addr += diff;
                 }
             }
             cycle<Access::Nonseq>(addr);
@@ -539,13 +557,17 @@ void ARM::blockDataTransfer(u32 instr)
         {
             writeWord(addr, pc + 4);
         }
-        addr += ascending ? 0x40 : -0x40;
+
+        if (ascending)
+            addr += 0x40;
+        else
+            addr -= 0x40;
     }
 
     if (writeback)
         regs[rn] = addr;
 
-    if (user)
+    if (force_user)
         switchMode(mode);
 }
 

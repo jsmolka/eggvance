@@ -1,5 +1,9 @@
 #include "arm.h"
 
+#ifdef _MSC_VER
+#include <intrin.h>
+#endif
+
 #include "common/macros.h"
 #include "common/utility.h"
 
@@ -511,7 +515,7 @@ void ARM::pushPopRegisters(u16 instr)
     int pop   = bits<11, 1>(instr);
 
     // Register count needed for cycles
-    int rcount = countBits(rlist);
+    int rcount = EGG_MSVC(__popcnt16(rlist));
 
     cycle(pc, NSEQ);
 
@@ -583,7 +587,7 @@ void ARM::loadStoreMultiple(u16 instr)
         cycle(pc, NSEQ);
     
         // Register count needed for cycles
-        int rcount = countBits(rlist);
+        int rcount = EGG_MSVC(__popcnt16(rlist));
 
         if (load)
         {
