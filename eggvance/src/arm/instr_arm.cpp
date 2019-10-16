@@ -203,7 +203,9 @@ void ARM::psrTransfer(u32 instr)
     }
     else
     {
-        regs[bits<12, 4>(instr)] = use_spsr ? spsr : cpsr;
+        regs[bits<12, 4>(instr)] = use_spsr 
+            ? spsr 
+            : cpsr;
     }
     cycle<Access::Seq>(pc + 8);
 }
@@ -281,8 +283,8 @@ void ARM::singleDataTransfer(u32 instr)
     int rd = bits<12, 4>(instr);
     int rn = bits<16, 4>(instr);
 
-    u32 addr = regs[rn];
     u32& dst = regs[rd];
+    u32 addr = regs[rn];
 
     bool load      = isset<20>(instr);
     bool writeback = isset<21>(instr);
@@ -343,7 +345,6 @@ void ARM::singleDataTransfer(u32 instr)
             writeByte(addr, value);
         else
             writeWord(addr, value);
-
     }
 
     if (writeback && (rd != rn || !load))
@@ -358,8 +359,8 @@ void ARM::halfwordSignedDataTransfer(u32 instr)
     int rd = bits<12, 4>(instr);
     int rn = bits<16, 4>(instr);
 
-    u32 addr = regs[rn];
     u32& dst = regs[rd];
+    u32 addr = regs[rn];
 
     bool load      = isset<20>(instr);
     bool writeback = isset<21>(instr);
@@ -444,15 +445,14 @@ void ARM::blockDataTransfer(u32 instr)
     u32 addr = regs[rn];
     u32 base = regs[rn];
 
-    bool load       = isset<20>(instr);
-    bool writeback  = isset<21>(instr);
-    bool force_user = isset<22>(instr);
-    bool ascending  = isset<23>(instr);
-    bool pre_index  = isset<24>(instr);
+    bool load      = isset<20>(instr);
+    bool writeback = isset<21>(instr);
+    bool user_mode = isset<22>(instr);
+    bool increment = isset<23>(instr);
+    bool pre_index = isset<24>(instr);
 
-    // (user_mode && (!load || !transfer_pc)) ???
     PSR::Mode mode = cpsr.mode;
-    if (force_user)
+    if (user_mode)
         switchMode(PSR::Mode::USR);
 
     cycle<Access::Nonseq>(pc + 8);
@@ -460,20 +460,22 @@ void ARM::blockDataTransfer(u32 instr)
     int rlist = bits<0, 16>(instr);
     if (rlist != 0)
     {
-        unsigned long begin;
-        unsigned long end;
-        EGG_MSVC(_BitScanForward(&begin, rlist));
+        unsigned long beg = 0;
+        unsigned long end = 0;
+        EGG_MSVC(_BitScanForward(&beg, rlist));
         EGG_MSVC(_BitScanReverse(&end, rlist));
 
-        if (!ascending)
+        int count = EGG_MSVC(__popcnt16(rlist));
+
+        if (!increment)
         {
-            addr -= 4 * EGG_MSVC(__popcnt16(rlist));
+            addr -= 4 * count;
             if (writeback)
             {
                 regs[rn] = addr;
                 writeback = false;
             }
-            pre_index = !pre_index;
+            pre_index ^= true;
         }
 
         if (load)
@@ -484,7 +486,7 @@ void ARM::blockDataTransfer(u32 instr)
             if (rlist & (1 << 15))
                 cycle<Access::Nonseq>(pc + 4);
 
-            for (unsigned x = begin; x <= end; ++x)
+            for (unsigned x = beg; x <= end; ++x)
             {
                 if (~rlist & (1 << x))
                     continue;
@@ -506,24 +508,15 @@ void ARM::blockDataTransfer(u32 instr)
             if (rlist & (1 << 15))
             {
                 pc = alignWord(pc);
-                cycle<Access::Seq>(pc);
-                cycle<Access::Seq>(pc + 4);
-                advance();
-
-                // Todo: Test this
-                if (force_user)
-                {
-                    EGG_ASSERT(cpsr.mode != PSR::Mode::USR, "Expected privileged mode");
-
-                    PSR spsr = this->spsr;
-                    switchMode(spsr.mode);
-                    cpsr = spsr;
-                }
+                refill<State::Arm>();
             }
         }
         else
         {
-            for (unsigned x = begin; x <= end; ++x)
+            if (rn == beg)
+                count = 0;
+
+            for (unsigned x = beg; x <= end; ++x)
             {
                 if (~rlist & (1 << x))
                     continue;
@@ -534,13 +527,12 @@ void ARM::blockDataTransfer(u32 instr)
                 if (x != end)
                     cycle<Access::Seq>(addr);
 
-                u32 value;
+                u32 value = 0;
                 if (x == rn)
                 {
-                    // Todo: test all possible combinations for accuracy
-                    value = (x == begin)
-                        ? base
-                        : addr - ((!ascending && !pre_index) ? 4 : 0);
+                    value = increment
+                        ? base + 4 * count
+                        : base - 4 * count;
                 }
                 else
                 {
@@ -569,8 +561,8 @@ void ARM::blockDataTransfer(u32 instr)
         {
             writeWord(addr, pc + 4);
         }
-
-        addr += ascending
+        
+        addr += increment
             ?  0x40
             : -0x40;
     }
@@ -578,7 +570,7 @@ void ARM::blockDataTransfer(u32 instr)
     if (writeback)
         regs[rn] = addr;
 
-    if (force_user)
+    if (user_mode)
         switchMode(mode);
 }
 
