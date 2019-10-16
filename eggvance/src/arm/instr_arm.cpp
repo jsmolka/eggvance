@@ -7,26 +7,6 @@
 #include "common/macros.h"
 #include "common/utility.h"
 
-enum class DataOperation
-{
-    AND = 0b0000,
-    EOR = 0b0001,
-    SUB = 0b0010,
-    RSB = 0b0011,
-    ADD = 0b0100,
-    ADC = 0b0101,
-    SBC = 0b0110,
-    RSC = 0b0111,
-    TST = 0b1000,
-    TEQ = 0b1001,
-    CMP = 0b1010,
-    CMN = 0b1011,
-    ORR = 0b1100,
-    MOV = 0b1101,
-    BIC = 0b1110,
-    MVN = 0b1111
-};
-
 void ARM::branchExchange(u32 instr)
 {
     u32 addr = regs[bits<0, 4>(instr)];
@@ -59,6 +39,26 @@ void ARM::branchLink(u32 instr)
 
 void ARM::dataProcessing(u32 instr)
 {
+    enum class Operation
+    {
+        AND = 0b0000,
+        EOR = 0b0001,
+        SUB = 0b0010,
+        RSB = 0b0011,
+        ADD = 0b0100,
+        ADC = 0b0101,
+        SBC = 0b0110,
+        RSC = 0b0111,
+        TST = 0b1000,
+        TEQ = 0b1001,
+        CMP = 0b1010,
+        CMN = 0b1011,
+        ORR = 0b1100,
+        MOV = 0b1101,
+        BIC = 0b1110,
+        MVN = 0b1111
+    };
+
     int rd     = bits<12, 4>(instr);
     int rn     = bits<16, 4>(instr);
     int opcode = bits<21, 4>(instr);
@@ -119,24 +119,24 @@ void ARM::dataProcessing(u32 instr)
         cycle<Access::Seq>(pc + 8);
     }
 
-    switch (DataOperation(opcode))
+    switch (Operation(opcode))
     {
-    case DataOperation::CMN:       add(op1, op2, flags); break;
-    case DataOperation::CMP:       sub(op1, op2, flags); break;
-    case DataOperation::ADD: dst = add(op1, op2, flags); break;
-    case DataOperation::SUB: dst = sub(op1, op2, flags); break;
-    case DataOperation::RSB: dst = sub(op2, op1, flags); break;
-    case DataOperation::ADC: dst = add(op1, op2 + cpsr.c + 0, flags); break;
-    case DataOperation::SBC: dst = sub(op1, op2 - cpsr.c + 1, flags); break;
-    case DataOperation::RSC: dst = sub(op2, op1 - cpsr.c + 1, flags); break;
-    case DataOperation::TST:       logical(op1 &  op2, carry, flags); break;
-    case DataOperation::TEQ:       logical(op1 ^  op2, carry, flags); break;
-    case DataOperation::AND: dst = logical(op1 &  op2, carry, flags); break;
-    case DataOperation::EOR: dst = logical(op1 ^  op2, carry, flags); break;
-    case DataOperation::ORR: dst = logical(op1 |  op2, carry, flags); break;
-    case DataOperation::MOV: dst = logical(       op2, carry, flags); break;
-    case DataOperation::BIC: dst = logical(op1 & ~op2, carry, flags); break;
-    case DataOperation::MVN: dst = logical(      ~op2, carry, flags); break;
+    case Operation::CMN:       add(op1, op2, flags); break;
+    case Operation::CMP:       sub(op1, op2, flags); break;
+    case Operation::ADD: dst = add(op1, op2, flags); break;
+    case Operation::SUB: dst = sub(op1, op2, flags); break;
+    case Operation::RSB: dst = sub(op2, op1, flags); break;
+    case Operation::ADC: dst = add(op1, op2 + cpsr.c + 0, flags); break;
+    case Operation::SBC: dst = sub(op1, op2 - cpsr.c + 1, flags); break;
+    case Operation::RSC: dst = sub(op2, op1 - cpsr.c + 1, flags); break;
+    case Operation::TST:       logical(op1 &  op2, carry, flags); break;
+    case Operation::TEQ:       logical(op1 ^  op2, carry, flags); break;
+    case Operation::AND: dst = logical(op1 &  op2, carry, flags); break;
+    case Operation::EOR: dst = logical(op1 ^  op2, carry, flags); break;
+    case Operation::ORR: dst = logical(op1 |  op2, carry, flags); break;
+    case Operation::MOV: dst = logical(       op2, carry, flags); break;
+    case Operation::BIC: dst = logical(op1 & ~op2, carry, flags); break;
+    case Operation::MVN: dst = logical(      ~op2, carry, flags); break;
 
     default:
         EGG_UNREACHABLE;
@@ -356,6 +356,14 @@ void ARM::singleDataTransfer(u32 instr)
 
 void ARM::halfwordSignedDataTransfer(u32 instr)
 {
+    enum class Operation
+    {
+        SWAP  = 0b00,
+        LDRH  = 0b01,
+        LDRSB = 0b10,
+        LDRSH = 0b11
+    };
+
     int rd = bits<12, 4>(instr);
     int rn = bits<16, 4>(instr);
 
@@ -388,21 +396,21 @@ void ARM::halfwordSignedDataTransfer(u32 instr)
 
     if (load)
     {
-        switch (bits<5, 2>(instr))
+        switch (Operation(bits<5, 2>(instr)))
         {
-        case 0b00:
+        case Operation::SWAP:
             break;
 
-        case 0b01:
+        case Operation::LDRH:
             dst = readHalfRotated(addr);
             break;
 
-        case 0b10:
+        case Operation::LDRSB:
             dst = readByte(addr);
             dst = signExtend<8>(dst);
             break;
 
-        case 0b11:
+        case Operation::LDRSH:
             dst = readHalfSigned(addr);
             break;
 
@@ -513,9 +521,6 @@ void ARM::blockDataTransfer(u32 instr)
         }
         else
         {
-            if (rn == beg)
-                count = 0;
-
             for (unsigned x = beg; x <= end; ++x)
             {
                 if (~rlist & (1 << x))
@@ -530,9 +535,16 @@ void ARM::blockDataTransfer(u32 instr)
                 u32 value = 0;
                 if (x == rn)
                 {
-                    value = increment
-                        ? base + 4 * count
-                        : base - 4 * count;
+                    if (x == beg)
+                    {
+                        value = base;
+                    }
+                    else
+                    {
+                        value = increment
+                            ? base + 4 * count
+                            : base - 4 * count;
+                    }
                 }
                 else
                 {
@@ -543,7 +555,7 @@ void ARM::blockDataTransfer(u32 instr)
 
                 writeWord(addr, value);
 
-                if (!pre_index) 
+                if (!pre_index)
                     addr += 4;
             }
             cycle<Access::Nonseq>(addr);

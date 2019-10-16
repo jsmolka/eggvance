@@ -9,211 +9,209 @@
 
 void ARM::moveShiftedRegister(u16 instr)
 {
-    int rd     = bits< 0, 3>(instr);
-    int rs     = bits< 3, 3>(instr);
-    int offset = bits< 6, 5>(instr);
-    int opcode = bits<11, 2>(instr);
+    int rd     = bits<0, 3>(instr);
+    int rs     = bits<3, 3>(instr);
+    int offset = bits<6, 5>(instr);
 
     u32& dst = regs[rd];
     u32  src = regs[rs];
 
     bool carry = cpsr.c;
-    switch (opcode)
+    switch (Shift(bits<11, 2>(instr)))
     {
-    case 0b00: dst = lsl(src, offset, carry); break;
-    case 0b01: dst = lsr(src, offset, carry); break;
-    case 0b10: dst = asr(src, offset, carry); break;
-    case 0b11: break;
+    case Shift::LSL: dst = lsl(src, offset, carry); break;
+    case Shift::LSR: dst = lsr(src, offset, carry, true); break;
+    case Shift::ASR: dst = asr(src, offset, carry, true); break;
+    case Shift::ROR: break;
 
     default:
         EGG_UNREACHABLE;
         break;
     }
-    logical_old(dst, carry);
+    logical(dst, carry, true);
 
-    cycle(pc + 2, SEQ);
+    cycle<Access::Seq>(pc + 4);
 }
 
 void ARM::addSubtractImmediate(u16 instr)
 {
-    int rd       = bits< 0, 3>(instr);
-    int rs       = bits< 3, 3>(instr);
-    int rn       = bits< 6, 3>(instr);
-    int subtract = bits< 9, 1>(instr);
-    int use_imm  = bits<10, 1>(instr);
+    enum class Operation
+    {
+        ADD_REG = 0b00,
+        SUB_REG = 0b01,
+        ADD_IMM = 0b10,
+        SUB_IMM = 0b11
+    };
 
-    u32& dst = regs[rd];
-    u32  src = regs[rs];
-    u32  op1 = use_imm ? rn : regs[rn];
+    int rn = bits<6, 3>(instr);
 
-    if (subtract)
-        dst = src - op1;
-    else
-        dst = src + op1;
+    u32& dst = regs[bits<0, 3>(instr)];
+    u32  src = regs[bits<3, 3>(instr)];
 
-    arithmetic(src, op1, !subtract);
+    switch (Operation(bits<9, 2>(instr)))
+    {
+    case Operation::ADD_REG: dst = add(src, regs[rn], true); break;
+    case Operation::SUB_REG: dst = sub(src, regs[rn], true); break;
+    case Operation::ADD_IMM: dst = add(src, rn, true); break;
+    case Operation::SUB_IMM: dst = sub(src, rn, true); break;
 
-    cycle(pc + 2, SEQ);
+    default:
+        EGG_UNREACHABLE;
+        break;
+    }
+    cycle<Access::Seq>(pc + 4);
 }
 
 void ARM::addSubtractMoveCompareImmediate(u16 instr)
 {
-    int offset = bits< 0, 8>(instr);
-    int rd     = bits< 8, 3>(instr);
-    int opcode = bits<11, 2>(instr);
-
-    u32& dst = regs[rd];
-
-    switch (opcode)
+    enum class Operation
     {
-    // MOV
-    case 0b00: 
-        dst = offset;
-        logical_old(dst);
-        break;
+        MOV = 0b00,
+        CMP = 0b01,
+        ADD = 0b10,
+        SUB = 0b11
+    };
 
-    // CMP
-    case 0b01: 
-        arithmetic(dst, offset, false);
-        break;
+    int offset = bits<0, 8>(instr);
 
-    // ADD
-    case 0b10: 
-        arithmetic(dst, offset, true);
-        dst += offset;
-        break;
+    u32& dst = regs[bits<8, 3>(instr)];
 
-    // SUB
-    case 0b11: 
-        arithmetic(dst, offset, false);
-        dst -= offset;
+    switch (Operation(bits<11, 2>(instr)))
+    {
+    case Operation::MOV: dst = logical(dst, true); break;
+    case Operation::CMP:       sub(dst, offset, true); break;
+    case Operation::ADD: dst = add(dst, offset, true); break;
+    case Operation::SUB: dst = sub(dst, offset, true); break;
+
+    default:
+        EGG_UNREACHABLE;
         break;
     }
-    cycle(pc + 2, SEQ);
+    cycle<Access::Seq>(pc + 4);
 }
 
 void ARM::aluOperations(u16 instr)
 {
-    int rd     = bits<0, 3>(instr);
-    int rs     = bits<3, 3>(instr);
-    int opcode = bits<6, 4>(instr);
+    enum class Operation
+    {
+        AND = 0b0000,
+        EOR = 0b0001,
+        LSL = 0b0010,
+        LSR = 0b0011,
+        ASR = 0b0100,
+        ADC = 0b0101,
+        SBC = 0b0110,
+        ROR = 0b0111,
+        TST = 0b1000,
+        NEG = 0b1001,
+        CMP = 0b1010,
+        CMN = 0b1011,
+        ORR = 0b1100,
+        MUL = 0b1101,
+        BIC = 0b1110,
+        MVN = 0b1111
+    };
 
-    u32& dst = regs[rd];
-    u32  src = regs[rs];
+    u32& dst = regs[bits<0, 3>(instr)];
+    u32  src = regs[bits<3, 3>(instr)];
 
     bool carry = cpsr.c;
-    switch (opcode)
+    switch (Operation(bits<6, 4>(instr)))
     {
-    // AND
-    case 0b0000: 
-        dst &= src;
-        logical_old(dst);
+    case Operation::AND:
+        dst = logical(dst & src, true);
         break;
 
-    // EOR
-    case 0b0001: 
-        dst ^= src;
-        logical_old(dst);
+    case Operation::ORR:
+        dst = logical(dst | src, true);
         break;
 
-    // LSL
-    case 0b0010: 
+    case Operation::EOR:
+        dst = logical(dst ^ src, true);
+        break;
+
+    case Operation::LSL:
         dst = lsl(dst, src, carry); 
-        logical_old(dst, carry);
+        logical(dst, carry, true);
         cycle();
         break;
 
-    // LSR
-    case 0b0011: 
+    case Operation::LSR:
         dst = lsr(dst, src, carry, false); 
-        logical_old(dst, carry);
+        logical(dst, carry, true);
         cycle();
         break;
 
-    // ASR
-    case 0b0100:
+    case Operation::ASR:
         dst = asr(dst, src, carry, false); 
-        logical_old(dst, carry);
+        logical(dst, carry, true);
         cycle();
         break;
 
-    // ADC
-    case 0b0101: 
-        src += cpsr.c;
-        arithmetic(dst, src, true);
-        dst += src;
-        break;
-
-    // SBC
-    case 0b0110: 
-        src += 1 - cpsr.c;
-        arithmetic(dst, src, false);
-        dst -= src;
-        break;
-
-    // ROR
-    case 0b0111:
+    case Operation::ROR:
         dst = ror(dst, src, carry, false);
-        logical_old(dst, carry);
+        logical(dst, carry, true);
         cycle();
         break;
 
-    // TST
-    case 0b1000:
-        logical_old(dst & src);
-        break;
-
-    // NEG
-    case 0b1001:
-        dst = 0 - src;
-        arithmetic(0, src, false);
-        break;
-
-    // CMP
-    case 0b1010:
-        arithmetic(dst, src, false);
-        break;
-
-    // CMN
-    case 0b1011:       
-        arithmetic(dst, src, true);
-        break;
-
-    // ORR
-    case 0b1100: 
-        dst |= src;
-        logical_old(dst);
-        break;
-
-    // MUL
-    case 0b1101: 
+    case Operation::MUL:
         cycleBooth(dst, true);
-        dst *= src;
-        logical_old(dst);
+        dst = logical(dst * src, true);
         break;
 
-    // BIC
-    case 0b1110:
-        dst &= ~src;
-        logical_old(dst);
+    case Operation::ADC: 
+        dst = add(dst, src + cpsr.c, true);
         break;
 
-    // MVN
-    case 0b1111: 
-        dst = ~src;
-        logical_old(dst);
+    case Operation::SBC: 
+        dst = sub(dst, src - cpsr.c + 1, true);
+        break;
+
+    case Operation::TST:
+        logical(dst & src, true);
+        break;
+
+    case Operation::NEG:
+        dst = sub(0, src, true);
+        break;
+
+    case Operation::CMP:
+        sub(dst, src, false);
+        break;
+
+    case Operation::CMN:       
+        add(dst, src, true);
+        break;
+
+    case Operation::BIC:
+        dst = logical(dst & ~src, true);
+        break;
+
+    case Operation::MVN: 
+        dst = logical(~src, true);
+        break;
+
+    default:
+        EGG_UNREACHABLE;
         break;
     }
-    cycle(pc + 2, SEQ);
+    cycle<Access::Seq>(pc + 4);
 }
 
 void ARM::highRegisterBranchExchange(u16 instr)
 {
-    int rd     = bits<0, 3>(instr);
-    int rs     = bits<3, 3>(instr);
-    int hs     = bits<6, 1>(instr);
-    int hd     = bits<7, 1>(instr);
-    int opcode = bits<8, 2>(instr);
+    enum class Operation
+    {
+        ADD = 0b00,
+        CMP = 0b01,
+        MOV = 0b10,
+        BX  = 0b11
+    };
+
+    int rd = bits<0, 3>(instr);
+    int rs = bits<3, 3>(instr);
+    int hs = bits<6, 1>(instr);
+    int hd = bits<7, 1>(instr);
 
     rs |= hs << 3;
     rd |= hd << 3;
@@ -221,112 +219,97 @@ void ARM::highRegisterBranchExchange(u16 instr)
     u32& dst = regs[rd];
     u32  src = regs[rs];
 
-    switch (opcode)
+    switch (Operation(bits<8, 2>(instr)))
     {
-    // ADD
-    case 0b00: 
+    case Operation::ADD:
         if (rd != 15)
         {
             dst += src;
+            cycle<Access::Seq>(pc + 4);
         }
         else
         {
-            cycle(pc, NSEQ);
-
-            dst += src;
-            dst = alignHalf(dst);
-            advance();
-
-            cycle(pc, SEQ);
+            cycle<Access::Nonseq>(pc + 4);
+            dst = alignHalf(dst + src);
+            refill<State::Thumb>();
         }
         break;
 
-    // CMP
-    case 0b01:
-        arithmetic(dst, src, false);
+    case Operation::CMP:
+        sub(dst, src, true);
+        cycle<Access::Seq>(pc + 4);
         break;
 
-    // MOV
-    case 0b10: 
+    case Operation::MOV:
         if (rd != 15)
         {
             dst = src;
+            cycle<Access::Seq>(pc + 4);
         }
         else
         {
-            cycle(pc, NSEQ);
-
+            cycle<Access::Nonseq>(pc + 4);
             dst = alignHalf(src);
-            advance();
-
-            cycle(pc, SEQ);
+            refill<State::Thumb>();
         }
         break;
 
-    // BX
-    case 0b11:
-        if (src & 0x1)
+    case Operation::BX:
+        cycle<Access::Nonseq>(pc + 4);
+        if (cpsr.thumb = src & 0x1)
         {
-            src = alignHalf(src);
+            pc = alignHalf(src);
+            refill<State::Thumb>();
         }
         else
         {
-            src = alignWord(src);
-            cpsr.thumb = false;
+            pc = alignWord(src);
+            refill<State::Arm>();
         }
+        break;
 
-        cycle(pc, NSEQ);
-
-        pc = src;
-        advance();
-
-        cycle(pc, SEQ);
+    default:
+        EGG_UNREACHABLE;
         break;
     }
-    cycle(pc + (cpsr.thumb ? 2 : 4), SEQ);
 }
 
 void ARM::loadPCRelative(u16 instr)
 {
     int offset = bits<0, 8>(instr);
-    int rd     = bits<8, 3>(instr);
 
-    offset <<= 2;
-
-    cycle(pc, NSEQ);
-    cycle();
-
-    u32& dst = regs[rd];
-    u32 addr = alignWord(pc) + offset;
+    u32& dst = regs[bits<8, 3>(instr)];
+    u32 addr = alignWord(pc) + (offset << 2);
 
     dst = readWord(addr);
 
-    cycle(pc + 2, SEQ);
+    cycle<Access::Nonseq>(addr);
+    cycle<Access::Seq>(pc + 4);
+    cycle();
 }
 
 void ARM::loadStoreRegisterOffset(u16 instr)
 {
-    int rd   = bits< 0, 3>(instr);
-    int rb   = bits< 3, 3>(instr);
-    int ro   = bits< 6, 3>(instr);
-    int byte = bits<10, 1>(instr);
-    int load = bits<11, 1>(instr);
+    int rd = bits<0, 3>(instr);
+    int rb = bits<3, 3>(instr);
+    int ro = bits<6, 3>(instr);
 
     u32& dst = regs[rd];
     u32 addr = regs[rb] + regs[ro];
 
-    cycle(pc, NSEQ);
+    bool byte = isset<10>(instr);
+    bool load = isset<11>(instr);
+
+    cycle<Access::Nonseq>(pc + 4);
 
     if (load)
     {
+        dst = byte
+            ? readByte(addr)
+            : readWordRotated(addr);
+
+        cycle<Access::Seq>(pc + 4);
         cycle();
-
-        if (byte)
-            dst = readByte(addr);
-        else
-            dst = readWordRotated(addr);
-
-        cycle(pc + 2, SEQ);
     }
     else
     {
@@ -335,12 +318,20 @@ void ARM::loadStoreRegisterOffset(u16 instr)
         else
             writeWord(addr, dst);
 
-        cycle(addr, NSEQ);
+        cycle<Access::Nonseq>(addr);
     }
 }
 
 void ARM::loadStoreHalfwordSigned(u16 instr)
 {
+    enum class Operation
+    {
+        STRH  = 0b00,
+        LDRSB = 0b01,
+        LDRH  = 0b10,
+        LDRSH = 0b11
+    };
+
     int rd     = bits< 0, 3>(instr);
     int rb     = bits< 3, 3>(instr);
     int ro     = bits< 6, 3>(instr);
@@ -349,76 +340,90 @@ void ARM::loadStoreHalfwordSigned(u16 instr)
     u32& dst = regs[rd];
     u32 addr = regs[rb] + regs[ro];
 
-    cycle(pc, NSEQ);
+    cycle<Access::Nonseq>(pc + 4);
 
-    if (opcode != 0b00)
+    switch (Operation(opcode))
     {
-        cycle();
-
-        switch (opcode)
-        {
-        // LDRSB
-        case 0b01:
-            dst = readByte(addr);
-            if (dst & (1 << 7))
-                dst |= 0xFFFFFF00;
-            break;
-
-        // LDRH
-        case 0b10:
-            dst = readHalfRotated(addr);
-            break;
-
-        // LDRSH
-        case 0b11:
-            dst = readHalfSigned(addr);
-            break;
-        }
-        cycle(pc + 2, SEQ);
-    }
-    else  // STRH
-    {
+    case Operation::STRH:
         writeHalf(addr, dst);
+        cycle<Access::Nonseq>(addr);
+        break;
 
-        cycle(addr, NSEQ);
+    case Operation::LDRSB:
+        dst = readByte(addr);
+        dst = signExtend<8>(dst);
+        cycle<Access::Seq>(pc + 4);
+        cycle();
+        break;
+
+    case Operation::LDRH:
+        dst = readHalfRotated(addr);
+        cycle<Access::Seq>(pc + 4);
+        cycle();
+        break;
+
+    case Operation::LDRSH:
+        dst = readHalfSigned(addr);
+        cycle<Access::Seq>(pc + 4);
+        cycle();
+        break;
+
+    default:
+        EGG_UNREACHABLE;
+        break;
     }
 }
 
 void ARM::loadStoreImmediateOffset(u16 instr)
 {
+    enum Operation
+    {
+        STR  = 0b00,
+        LDR  = 0b01,
+        STRB = 0b10,
+        LDRB = 0b11
+    };
+
     int rd     = bits< 0, 3>(instr);
     int rb     = bits< 3, 3>(instr);
     int offset = bits< 6, 5>(instr);
-    int load   = bits<11, 1>(instr);
-    int byte   = bits<12, 1>(instr);
+    int opcode = bits<11, 2>(instr);
 
-    if (!byte)
+    if (~opcode & 0x2)
         offset <<= 2;
 
     u32& dst = regs[rd];
     u32 addr = regs[rb] + offset;
 
-    cycle(pc, NSEQ);
+    cycle<Access::Nonseq>(pc + 4);
 
-    if (load)
+    switch (Operation(opcode))
     {
+    case Operation::STR:
+        writeWord(addr, dst);
+        cycle<Access::Nonseq>(addr);
+        break;
+
+    case Operation::STRB:
+        writeByte(addr, dst);
+        cycle<Access::Nonseq>(addr);
+        break;
+
+    case Operation::LDR:
+        dst = readWordRotated(addr);
+        cycle<Access::Seq>(pc + 4);
         cycle();
+        break;
 
-        if (byte)
-            dst = readByte(addr);
-        else
-            dst = readWordRotated(addr);
+    case Operation::LDRB:
+        dst = readByte(addr);
+        cycle<Access::Seq>(pc + 4);
+        cycle();
+        break;
 
-        cycle(pc + 2, SEQ);
-    }
-    else
-    {
-        if (byte)
-            writeByte(addr, dst);
-        else
-            writeWord(addr, dst);
-
-        cycle(addr, NSEQ);
+    default:
+        EGG_UNREACHABLE;
+        break;
     }
 }
 
@@ -427,25 +432,26 @@ void ARM::loadStoreHalfword(u16 instr)
     int rd     = bits< 0, 3>(instr);
     int rb     = bits< 3, 3>(instr);
     int offset = bits< 6, 5>(instr);
-    int load   = bits<11, 1>(instr);
+
+    bool load = isset<11>(instr);
 
     offset <<= 1;
 
     u32& dst = regs[rd];
     u32 addr = regs[rb] + offset;
 
-    cycle(pc, NSEQ);
+    cycle<Access::Nonseq>(pc + 4);
 
     if (load)
     {
-        cycle();
         dst = readHalfRotated(addr);
-        cycle(pc + 2, SEQ);
+        cycle<Access::Seq>(pc + 4);
+        cycle();
     }
     else
     {
         writeHalf(addr, dst);
-        cycle(addr, NSEQ);
+        cycle<Access::Nonseq>(addr);
     }
 }
 
