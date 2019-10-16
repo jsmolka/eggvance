@@ -78,29 +78,6 @@ private:
     void execute();
     void debug();
 
-    // Todo: remove one finished
-    enum AccessType
-    {
-        NSEQ,
-        SEQ
-    };
-    int length() const;
-    void cycle(u32 addr, AccessType access);
-    void logical_old(u32 result);
-    void logical_old(u32 result, bool carry);
-    void arithmetic(u32 op1, u32 op2, bool addition);
-    enum Arithmetic
-    {
-        ADD,
-        SUB
-    };
-    template<Arithmetic arith>
-    void arithmetic(u32 op1, u32 op2)
-    {
-        arithmetic(op1, op2, arith == ADD);
-    }
-    // end remove
-
     template<Access access>
     inline void cycle(u32 addr);
     inline void cycle();

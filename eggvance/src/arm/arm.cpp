@@ -90,7 +90,7 @@ u32 ARM::sub(u32 op1, u32 op2, bool flags)
 void ARM::hardwareInterrupt()
 {
     // Returns with subs pc, lr, 4
-    u32 lr = pc - 2 * length() + 4;
+    u32 lr = pc - 2 * (cpsr.thumb ? 2 : 4) + 4;
 
     interrupt(0x18, lr, PSR::Mode::IRQ);
 }
@@ -98,7 +98,7 @@ void ARM::hardwareInterrupt()
 void ARM::softwareInterrupt()
 {
     // Returns with movs pc, lr
-    u32 lr = pc - length();
+    u32 lr = pc - (cpsr.thumb ? 2 : 4);
 
     interrupt(0x08, lr, PSR::Mode::SVC);
 }
@@ -118,13 +118,6 @@ void ARM::interrupt(u32 pc, u32 lr, PSR::Mode mode)
     this->cpsr.irqd  = true;
 
     refill<State::Arm>();
-}
-
-int ARM::length() const
-{
-    static constexpr int lengths[2] = { 4, 2 };
-
-    return lengths[cpsr.thumb];
 }
 
 void ARM::execute()
@@ -202,89 +195,8 @@ void ARM::debug()
 
     fmt::printf("%08X  %08X  %08X  %s\n", 
         cycles, 
-        pc - 2 * length(), 
+        pc - 2 * (cpsr.thumb ? 2 : 4), 
         instr, 
         Disassembler::disassemble(instr, *this)
     );
-}
-
-void ARM::logical_old(u32 result)
-{
-    cpsr.z = result == 0;
-    cpsr.n = result >> 31;
-}
-
-void ARM::logical_old(u32 result, bool carry)
-{
-    cpsr.z = result == 0;
-    cpsr.n = result >> 31;
-    cpsr.c = carry;
-}
-
-void ARM::arithmetic(u32 op1, u32 op2, bool addition)
-{
-    u32 result = addition
-        ? op1 + op2
-        : op1 - op2;
-
-    cpsr.z = result == 0;
-    cpsr.n = result >> 31;
-
-    cpsr.c = addition
-        ? op2 > (0xFFFFFFFF - op1)
-        : op2 <= op1;
-
-    int msb_op1 = op1 >> 31;
-    int msb_op2 = op2 >> 31;
-
-    cpsr.v = addition
-        ? msb_op1 == msb_op2 && (result >> 31) != msb_op1
-        : msb_op1 != msb_op2 && (result >> 31) == msb_op2;
-}
-
-void ARM::cycle(u32 addr, AccessType access)
-{
-    cycles++;
-
-    static constexpr int seq[3][2] = { { 1, 2 }, { 1, 4 }, { 1, 8 } };
-    static constexpr int nonseq[4] = { 4, 3, 2, 8 };
-
-    //switch (addr >> 24)
-    //{
-    //case PAGE_PALETTE:
-    //case PAGE_VRAM:
-    //case PAGE_OAM:
-    //    if (!mmio.dispstat.hblank && !mmio.dispstat.vblank)
-    //        cycles++;
-    //    break;
-
-    //case PAGE_GAMEPAK_0:
-    //case PAGE_GAMEPAK_0+1:
-    //    if (access == SEQ)
-    //        cycles += seq[0][mmio.waitcnt.ws0.s];
-    //    else
-    //        cycles += nonseq[mmio.waitcnt.ws0.n];
-    //    break;
-
-    //case PAGE_GAMEPAK_1:
-    //case PAGE_GAMEPAK_1+1:
-    //    if (access == SEQ)
-    //        cycles += seq[1][mmio.waitcnt.ws1.s];
-    //    else
-    //        cycles += nonseq[mmio.waitcnt.ws1.n];
-    //    break;
-
-    //case PAGE_GAMEPAK_2:
-    //case PAGE_GAMEPAK_2+1:
-    //    if (access == SEQ)
-    //        cycles += seq[2][mmio.waitcnt.ws2.s];
-    //    else
-    //        cycles += nonseq[mmio.waitcnt.ws2.n];
-    //    break;
-
-    //default:
-    //    if (addr >= MAP_GAMEPAK_SRAM)
-    //        cycles += nonseq[mmio.waitcnt.sram];
-    //    break;
-    //}
 }

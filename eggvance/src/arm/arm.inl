@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/macros.h"
-#include "arm.h"
 
 template<ARM::State state>
 inline void ARM::advance()
@@ -9,7 +8,7 @@ inline void ARM::advance()
     switch (state)
     {
     case State::Arm: 
-        pc += 4; 
+        pc += 4;
         break;
 
     case State::Thumb:
@@ -67,7 +66,7 @@ inline void ARM::cycle()
 
 inline void ARM::cycleBooth(u32 multiplier, bool allow_ones)
 {
-    static constexpr u32 masks[3] = 
+    static constexpr u32 masks[3] =
     {
         0xFF00'0000,
         0xFFFF'0000,
