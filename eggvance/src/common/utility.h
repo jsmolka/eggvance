@@ -3,12 +3,7 @@
 #include <type_traits>
 
 #include "integer.h"
-
-// Todo: remove
-inline u32 align(u32 value, u32 length)
-{
-    return value & ~(length - 1);
-}
+#include "macros.h"
 
 inline u32 alignHalf(u32 value)
 {
@@ -39,6 +34,7 @@ inline int bits(T value)
     return (value >> position) & ((1 << amount) - 1);
 }
 
+// Todo: remove
 template<unsigned position, typename T>
 inline bool isset(T value)
 {
@@ -47,6 +43,70 @@ inline bool isset(T value)
 
     return value & (1 << position);
 }
+
+// Todo: check if properly optimized in release
+#ifdef _MSC_VER
+#include <intrin.h>
+
+template<typename T>
+inline int bitScanForward(T value)
+{
+    static_assert(std::is_integral_v<T>, "Expected integral");
+
+    unsigned long index = 0;
+    if (sizeof(T) <= 4)
+    {
+        _BitScanForward(&index, value);
+        return static_cast<int>(index);
+    }
+    if (sizeof(T) <= 8)
+    {
+        _BitScanForward64(&index, value);
+        return static_cast<int>(index);
+    }
+
+    static_assert("Unreachable");
+    EGG_UNREACHABLE;
+    return 0;
+}
+
+template<typename T>
+inline int bitScanReverse(T value)
+{
+    static_assert(std::is_integral_v<T>, "Expected integral");
+
+    unsigned long index = 0;
+    if (sizeof(T) <= 4)
+    {
+        _BitScanReverse(&index, value);
+        return static_cast<int>(index);
+    }
+    if (sizeof(T) <= 8)
+    {
+        _BitScanReverse64(&index, value);
+        return static_cast<int>(index);
+    }
+
+    static_assert("Unreachable");
+    EGG_UNREACHABLE;
+    return 0;
+}
+
+template<typename T>
+inline int bitCount(T value)
+{
+    if (sizeof(T) <= 2) return static_cast<int>(__popcnt16(value));
+    if (sizeof(T) <= 4) return static_cast<int>(__popcnt(value));
+    if (sizeof(T) <= 8) return static_cast<int>(__popcnt64(value));
+
+    static_assert("Unreachable");
+    EGG_UNREACHABLE;
+    return 0;
+}
+
+#else
+#error MSVC specific code
+#endif
 
 template<unsigned bits, typename T>
 inline T signExtend(T value)

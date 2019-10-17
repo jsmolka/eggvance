@@ -1,9 +1,5 @@
 #include "arm.h"
 
-#ifdef _MSC_VER
-#include <intrin.h>
-#endif
-
 #include "common/macros.h"
 #include "common/utility.h"
 
@@ -544,21 +540,16 @@ void ARM::addOffsetSP(u16 instr)
 
 void ARM::pushPopRegisters(u16 instr)
 {
-    int rlist = bits< 0, 8>(instr);
-    int pc_lr = bits< 8, 1>(instr);
-    int pop   = bits<11, 1>(instr);
+    int rlist   = bits< 0, 8>(instr);
+    int special = bits< 8, 1>(instr);
+    int pop     = bits<11, 1>(instr);
 
     cycle<Access::Nonseq>(pc + 4);
 
     if (pop)
     {
-        unsigned long begl = 0;
-        unsigned long endl = 0;
-        EGG_MSVC(_BitScanForward(&begl, rlist));
-        EGG_MSVC(_BitScanReverse(&endl, rlist));
-
-        int beg = static_cast<int>(begl);
-        int end = static_cast<int>(endl);
+        int beg = bitScanForward(rlist);
+        int end = bitScanReverse(rlist);
 
         for (int x = beg; x <= end; ++x)
         {
@@ -575,7 +566,7 @@ void ARM::pushPopRegisters(u16 instr)
             sp += 4;
         }
 
-        if (pc_lr)
+        if (special)
         {
             cycle<Access::Nonseq>(pc + 4);
 
@@ -592,15 +583,10 @@ void ARM::pushPopRegisters(u16 instr)
     }
     else
     {
-        unsigned long begl = 0;
-        unsigned long endl = 0;
-        EGG_MSVC(_BitScanReverse(&begl, rlist));
-        EGG_MSVC(_BitScanForward(&endl, rlist));
+        int beg = bitScanReverse(rlist);
+        int end = bitScanForward(rlist);
 
-        int beg = static_cast<int>(begl);
-        int end = static_cast<int>(endl);
-
-        if (pc_lr)
+        if (special)
         {
             sp -= 4;
             writeWord(sp, lr);
@@ -611,10 +597,11 @@ void ARM::pushPopRegisters(u16 instr)
             if (~rlist & (1 << x))
                 continue;
 
+            sp -= 4;
+
             if (beg != end)
                 cycle<Access::Seq>(sp);
 
-            sp -= 4;
             writeWord(sp, regs[x]);
         }
         cycle<Access::Nonseq>(sp);
@@ -636,13 +623,8 @@ void ARM::loadStoreMultiple(u16 instr)
 
     if (rlist != 0)
     {
-        unsigned long begl = 0;
-        unsigned long endl = 0;
-        EGG_MSVC(_BitScanForward(&begl, rlist));
-        EGG_MSVC(_BitScanReverse(&endl, rlist));
-
-        int beg = static_cast<int>(begl);
-        int end = static_cast<int>(endl);
+        int beg = bitScanForward(rlist);
+        int end = bitScanReverse(rlist);
 
         if (load)
         {
@@ -709,10 +691,10 @@ void ARM::conditionalBranch(u16 instr)
 
     if (cpsr.check(PSR::Condition(condition)))
     {
+        cycle<Access::Nonseq>(pc + 4);
+
         offset = signExtend<8>(offset);
         offset <<= 1;
-
-        cycle<Access::Nonseq>(pc + 4);
 
         pc += offset;
         refill<State::Thumb>();
@@ -727,10 +709,10 @@ void ARM::unconditionalBranch(u16 instr)
 {
     int offset = bits<0, 11>(instr);
     
+    cycle<Access::Nonseq>(pc + 4);
+
     offset = signExtend<11>(offset);
     offset <<= 1;
-
-    cycle<Access::Nonseq>(pc + 4);
 
     pc += offset;
     refill<State::Thumb>();
@@ -738,13 +720,13 @@ void ARM::unconditionalBranch(u16 instr)
 
 void ARM::longBranchLink(u16 instr)
 {
-    int offset = bits<0, 11>(instr);
-    int second = bits<11, 1>(instr);
-
-    cycle<Access::Nonseq>(pc + 4);
+    int offset = bits< 0, 11>(instr);
+    int second = bits<11,  1>(instr);
 
     if (second)
     {
+        cycle<Access::Nonseq>(pc + 4);
+
         offset <<= 1;
 
         u32 next = (pc - 2) | 1;
@@ -759,5 +741,7 @@ void ARM::longBranchLink(u16 instr)
         offset <<= 12;
 
         lr = pc + offset;
+
+        cycle<Access::Seq>(pc + 4);
     }
 }

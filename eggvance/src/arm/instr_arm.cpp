@@ -1,9 +1,5 @@
 #include "arm.h"
 
-#ifdef _MSC_VER
-#include <intrin.h>
-#endif
-
 #include "common/macros.h"
 #include "common/utility.h"
 
@@ -468,12 +464,9 @@ void ARM::blockDataTransfer(u32 instr)
     int rlist = bits<0, 16>(instr);
     if (rlist != 0)
     {
-        unsigned long beg = 0;
-        unsigned long end = 0;
-        EGG_MSVC(_BitScanForward(&beg, rlist));
-        EGG_MSVC(_BitScanReverse(&end, rlist));
-
-        int count = EGG_MSVC(__popcnt16(rlist));
+        int beg   = bitScanForward(rlist);
+        int end   = bitScanReverse(rlist);
+        int count = bitCount(rlist);
 
         if (!increment)
         {
@@ -494,7 +487,7 @@ void ARM::blockDataTransfer(u32 instr)
             if (rlist & (1 << 15))
                 cycle<Access::Nonseq>(pc + 4);
 
-            for (unsigned x = beg; x <= end; ++x)
+            for (int x = beg; x <= end; ++x)
             {
                 if (~rlist & (1 << x))
                     continue;
@@ -521,7 +514,7 @@ void ARM::blockDataTransfer(u32 instr)
         }
         else
         {
-            for (unsigned x = beg; x <= end; ++x)
+            for (int x = beg; x <= end; ++x)
             {
                 if (~rlist & (1 << x))
                     continue;

@@ -2,12 +2,6 @@
 
 #include <cassert>
 
-#ifdef _MSC_VER
-#  define EGG_MSVC(expr) expr
-#else
-#  error MSVC specific code
-#endif
-
 #ifdef EGG_DEBUG
 #  define EGG_ASSERT(cond, msg) assert((cond) && msg)
 #else
