@@ -11,5 +11,9 @@
 #ifdef EGG_DEBUG
 #  define EGG_UNREACHABLE EGG_ASSERT(false, "Unreachable")
 #else
-#  define EGG_UNREACHABLE EGG_MSVC(__assume(0))
+#  ifdef _MSC_VER
+#    define EGG_UNREACHABLE __assume(0)
+#  else
+#    define EGG_UNREACHABLE static_cast<void>(0)
+#  endif
 #endif

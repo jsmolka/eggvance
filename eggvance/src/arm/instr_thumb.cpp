@@ -608,14 +608,14 @@ void ARM::pushPopRegisters(u16 instr)
     }
 }
 
-// Todo: block data transfer addr? :)
 void ARM::loadStoreMultiple(u16 instr)
 {
     int rlist = bits< 0, 8>(instr);
     int rb    = bits< 8, 3>(instr);
     int load  = bits<11, 1>(instr);
 
-    u32 addr = alignWord(regs[rb]);
+    u32 addr = regs[rb];
+    u32 base = regs[rb];
 
     bool writeback = true;
 
@@ -649,6 +649,7 @@ void ARM::loadStoreMultiple(u16 instr)
         }
         else
         {
+            int count = bitCount(rlist);
             for (int x = beg; x <= end; ++x)
             {
                 if (~rlist & (1 << x))
@@ -657,7 +658,10 @@ void ARM::loadStoreMultiple(u16 instr)
                 if (beg != end)
                     cycle<Access::Seq>(addr);
 
-                writeWord(addr, regs[x]);
+                if (x == rb)
+                    writeWord(addr, base + 4 * count);
+                else
+                    writeWord(addr, regs[x]);
 
                 addr += 4;
             }
@@ -666,16 +670,15 @@ void ARM::loadStoreMultiple(u16 instr)
     }
     else
     {
-        // Todo: need to align here?
         if (load)
         {
-            pc = readWord(alignWord(addr));
+            pc = readWord(addr);
             pc = alignHalf(pc);
             refill<State::Thumb>();
         }
         else
         {
-            writeWord(alignWord(addr), pc + 2);
+            writeWord(addr, pc + 2);
         }
         addr += 0x40;
     }
