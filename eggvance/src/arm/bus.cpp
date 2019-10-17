@@ -485,7 +485,7 @@ u32 ARM::readHalfRotated(u32 addr)
 
 u32 ARM::readHalfSigned(u32 addr)
 {
-    u32 value;
+    u32 value = 0;
     if (misalignedHalf(addr))
     {
         value = readByte(addr);

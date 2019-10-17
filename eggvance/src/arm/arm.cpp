@@ -87,7 +87,7 @@ u32 ARM::sub(u32 op1, u32 op2, bool flags)
     return result;
 }
 
-void ARM::hardwareInterrupt()
+void ARM::HWI()
 {
     // Returns with subs pc, lr, 4
     u32 lr = pc - 2 * (cpsr.thumb ? 2 : 4) + 4;
@@ -95,7 +95,7 @@ void ARM::hardwareInterrupt()
     interrupt(0x18, lr, PSR::Mode::IRQ);
 }
 
-void ARM::softwareInterrupt()
+void ARM::SWI()
 {
     // Returns with movs pc, lr
     u32 lr = pc - (cpsr.thumb ? 2 : 4);
@@ -129,25 +129,25 @@ void ARM::execute()
         switch (decodeThumb(instr))
         {
         case InstructionThumb::Undefined: break;
-        case InstructionThumb::MoveShiftedRegister: moveShiftedRegister(instr); break;
-        case InstructionThumb::AddSubtractImmediate: addSubtractImmediate(instr); break;
-        case InstructionThumb::AddSubtractMoveCompareImmediate: addSubtractMoveCompareImmediate(instr); break;
-        case InstructionThumb::ALUOperations: aluOperations(instr); break;
-        case InstructionThumb::HighRegisterBranchExchange: highRegisterBranchExchange(instr); break;
-        case InstructionThumb::LoadPCRelative: loadPCRelative(instr); break;
-        case InstructionThumb::LoadStoreRegisterOffset: loadStoreRegisterOffset(instr); break;
-        case InstructionThumb::LoadStoreHalfwordSigned: loadStoreHalfwordSigned(instr); break;
-        case InstructionThumb::LoadStoreImmediateOffset: loadStoreImmediateOffset(instr); break;
-        case InstructionThumb::LoadStoreHalfword: loadStoreHalfword(instr); break;
-        case InstructionThumb::LoadStoreSPRelative: loadStoreSPRelative(instr); break;
-        case InstructionThumb::LoadAddress: loadAddress(instr); break;
-        case InstructionThumb::AddOffsetSP: addOffsetSP(instr); break;
-        case InstructionThumb::PushPopRegisters: pushPopRegisters(instr); break;
-        case InstructionThumb::LoadStoreMultiple: loadStoreMultiple(instr); break;
-        case InstructionThumb::ConditionalBranch: conditionalBranch(instr); break;
-        case InstructionThumb::SoftwareInterrupt: softwareInterrupt(); break;
-        case InstructionThumb::UnconditionalBranch: unconditionalBranch(instr); break;
-        case InstructionThumb::LongBranchLink: longBranchLink(instr); break;
+        case InstructionThumb::MoveShiftedRegister: Thumb_MoveShiftedRegister(instr); break;
+        case InstructionThumb::AddSubtractImmediate: Thumb_AddSubtract(instr); break;
+        case InstructionThumb::AddSubtractMoveCompareImmediate: Thumb_ImmediateOperation(instr); break;
+        case InstructionThumb::ALUOperations: Thumb_ALUOperations(instr); break;
+        case InstructionThumb::HighRegisterBranchExchange: Thumb_HighRegisterOperations(instr); break;
+        case InstructionThumb::LoadPCRelative: Thumb_LoadPCRelative(instr); break;
+        case InstructionThumb::LoadStoreRegisterOffset: Thumb_LoadStoreRegister(instr); break;
+        case InstructionThumb::LoadStoreHalfwordSigned: Thumb_TransferHalfSigned(instr); break;
+        case InstructionThumb::LoadStoreImmediateOffset: Thumb_TransferImmediate(instr); break;
+        case InstructionThumb::LoadStoreHalfword: Thumb_TransferHalf(instr); break;
+        case InstructionThumb::LoadStoreSPRelative: Thumb_TransferSPRelative(instr); break;
+        case InstructionThumb::LoadAddress: Thumb_LoadRelativeAddress(instr); break;
+        case InstructionThumb::AddOffsetSP: Thumb_ModifySP(instr); break;
+        case InstructionThumb::PushPopRegisters: Thumb_DataTransferStack(instr); break;
+        case InstructionThumb::LoadStoreMultiple: Thumb_DataTransferBlock(instr); break;
+        case InstructionThumb::ConditionalBranch: Thumb_BranchConditional(instr); break;
+        case InstructionThumb::SoftwareInterrupt: Thumb_SoftwareInterrupt(instr); break;
+        case InstructionThumb::UnconditionalBranch: Thumb_BranchUnconditional(instr); break;
+        case InstructionThumb::LongBranchLink: Thumb_BranchLongLink(instr); break;
 
         default:
             EGG_UNREACHABLE;
@@ -158,22 +158,22 @@ void ARM::execute()
     {
         u32 instr = readWord(pc - 8);
 
-        if (cpsr.check(static_cast<PSR::Condition>(instr >> 28)))
+        if (cpsr.check(PSR::Condition(instr >> 28)))
         {
             switch (decodeArm(instr))
             {
             case InstructionArm::Undefined: break;
-            case InstructionArm::BranchExchange: branchExchange(instr); break;
-            case InstructionArm::BranchLink: branchLink(instr); break;
-            case InstructionArm::DataProcessing: dataProcessing(instr); break;
-            case InstructionArm::PSRTransfer: psrTransfer(instr); break;
-            case InstructionArm::Multiply: multiply(instr); break;
-            case InstructionArm::MultiplyLong: multiplyLong(instr); break;
-            case InstructionArm::SingleDataTransfer: singleDataTransfer(instr); break;
-            case InstructionArm::HalfwordSignedDataTransfer: halfwordSignedDataTransfer(instr); break;
-            case InstructionArm::BlockDataTransfer: blockDataTransfer(instr); break;
-            case InstructionArm::SingleDataSwap: singleDataSwap(instr); break;
-            case InstructionArm::SoftwareInterrupt: softwareInterrupt(); break;
+            case InstructionArm::BranchExchange: Arm_BranchExchange(instr); break;
+            case InstructionArm::BranchLink: Arm_BranchLink(instr); break;
+            case InstructionArm::DataProcessing: Arm_DataProcessing(instr); break;
+            case InstructionArm::PSRTransfer: Arm_StatusTransfer(instr); break;
+            case InstructionArm::Multiply: Arm_Multiply(instr); break;
+            case InstructionArm::MultiplyLong: Arm_MultiplyLong(instr); break;
+            case InstructionArm::SingleDataTransfer: Arm_SingleDataTransfer(instr); break;
+            case InstructionArm::HalfwordSignedDataTransfer: Arm_HalfSignedDataTransfer(instr); break;
+            case InstructionArm::BlockDataTransfer: Arm_BlockDataTransfer(instr); break;
+            case InstructionArm::SingleDataSwap: Arm_SingleDataSwap(instr); break;
+            case InstructionArm::SoftwareInterrupt: Arm_SoftwareInterrupt(instr); break;
 
             default:
                 EGG_UNREACHABLE;

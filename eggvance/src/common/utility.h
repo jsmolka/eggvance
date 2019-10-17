@@ -3,7 +3,6 @@
 #include <type_traits>
 
 #include "integer.h"
-#include "macros.h"
 
 inline u32 alignHalf(u32 value)
 {
@@ -34,17 +33,6 @@ inline int bits(T value)
     return (value >> position) & ((1 << amount) - 1);
 }
 
-// Todo: remove
-template<unsigned position, typename T>
-inline bool isset(T value)
-{
-    static_assert(std::is_integral_v<T>, "Expected integral");
-    static_assert(position < 8 * sizeof(T), "Invalid parameter");
-
-    return value & (1 << position);
-}
-
-// Todo: check if properly optimized in release
 #ifdef _MSC_VER
 #include <intrin.h>
 
@@ -64,9 +52,7 @@ inline int bitScanForward(T value)
         _BitScanForward64(&index, value);
         return static_cast<int>(index);
     }
-
     static_assert("Unreachable");
-    EGG_UNREACHABLE;
     return 0;
 }
 
@@ -86,9 +72,7 @@ inline int bitScanReverse(T value)
         _BitScanReverse64(&index, value);
         return static_cast<int>(index);
     }
-
     static_assert("Unreachable");
-    EGG_UNREACHABLE;
     return 0;
 }
 
@@ -100,7 +84,6 @@ inline int bitCount(T value)
     if (sizeof(T) <= 8) return static_cast<int>(__popcnt64(value));
 
     static_assert("Unreachable");
-    EGG_UNREACHABLE;
     return 0;
 }
 

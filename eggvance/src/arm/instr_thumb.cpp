@@ -3,7 +3,7 @@
 #include "common/macros.h"
 #include "common/utility.h"
 
-void ARM::moveShiftedRegister(u16 instr)
+void ARM::Thumb_MoveShiftedRegister(u16 instr)
 {
     int rd     = bits< 0, 3>(instr);
     int rs     = bits< 3, 3>(instr);
@@ -30,7 +30,7 @@ void ARM::moveShiftedRegister(u16 instr)
     cycle<Access::Seq>(pc + 4);
 }
 
-void ARM::addSubtractImmediate(u16 instr)
+void ARM::Thumb_AddSubtract(u16 instr)
 {
     enum class Operation
     {
@@ -62,7 +62,7 @@ void ARM::addSubtractImmediate(u16 instr)
     cycle<Access::Seq>(pc + 4);
 }
 
-void ARM::addSubtractMoveCompareImmediate(u16 instr)
+void ARM::Thumb_ImmediateOperations(u16 instr)
 {
     enum class Operation
     {
@@ -92,7 +92,7 @@ void ARM::addSubtractMoveCompareImmediate(u16 instr)
     cycle<Access::Seq>(pc + 4);
 }
 
-void ARM::aluOperations(u16 instr)
+void ARM::Thumb_ALUOperations(u16 instr)
 {
     enum class Operation
     {
@@ -204,7 +204,7 @@ void ARM::aluOperations(u16 instr)
     cycle<Access::Seq>(pc + 4);
 }
 
-void ARM::highRegisterBranchExchange(u16 instr)
+void ARM::Thumb_HighRegisterOperations(u16 instr)
 {
     enum class Operation
     {
@@ -281,7 +281,7 @@ void ARM::highRegisterBranchExchange(u16 instr)
     }
 }
 
-void ARM::loadPCRelative(u16 instr)
+void ARM::Thumb_LoadPCRelative(u16 instr)
 {
     int offset = bits<0, 8>(instr);
     int rd     = bits<8, 3>(instr);
@@ -297,7 +297,7 @@ void ARM::loadPCRelative(u16 instr)
     cycle();
 }
 
-void ARM::loadStoreRegisterOffset(u16 instr)
+void ARM::Thumb_LoadStoreRegister(u16 instr)
 {
     enum class Operation
     {
@@ -347,7 +347,7 @@ void ARM::loadStoreRegisterOffset(u16 instr)
     }
 }
 
-void ARM::loadStoreHalfwordSigned(u16 instr)
+void ARM::Thumb_TransferHalfSigned(u16 instr)
 {
     enum class Operation
     {
@@ -399,7 +399,7 @@ void ARM::loadStoreHalfwordSigned(u16 instr)
     }
 }
 
-void ARM::loadStoreImmediateOffset(u16 instr)
+void ARM::Thumb_TransferImmediate(u16 instr)
 {
     enum class Operation
     {
@@ -452,7 +452,7 @@ void ARM::loadStoreImmediateOffset(u16 instr)
     }
 }
 
-void ARM::loadStoreHalfword(u16 instr)
+void ARM::Thumb_TransferHalf(u16 instr)
 {
     int rd     = bits< 0, 3>(instr);
     int rb     = bits< 3, 3>(instr);
@@ -479,7 +479,7 @@ void ARM::loadStoreHalfword(u16 instr)
     }
 }
 
-void ARM::loadStoreSPRelative(u16 instr)
+void ARM::Thumb_TransferSPRelative(u16 instr)
 {
     int offset = bits< 0, 8>(instr);
     int rd     = bits< 8, 3>(instr);
@@ -505,7 +505,7 @@ void ARM::loadStoreSPRelative(u16 instr)
     }
 }
 
-void ARM::loadAddress(u16 instr)
+void ARM::Thumb_LoadRelativeAddress(u16 instr)
 {
     int offset = bits< 0, 8>(instr);
     int rd     = bits< 8, 3>(instr);
@@ -523,7 +523,7 @@ void ARM::loadAddress(u16 instr)
     cycle<Access::Seq>(pc + 4);
 }
 
-void ARM::addOffsetSP(u16 instr)
+void ARM::Thumb_ModifySP(u16 instr)
 {
     int offset = bits<0, 7>(instr);
     int sign   = bits<7, 1>(instr);
@@ -538,15 +538,15 @@ void ARM::addOffsetSP(u16 instr)
     cycle<Access::Seq>(pc + 4);
 }
 
-void ARM::pushPopRegisters(u16 instr)
+void ARM::Thumb_DataTransferStack(u16 instr)
 {
     int rlist   = bits< 0, 8>(instr);
     int special = bits< 8, 1>(instr);
-    int pop     = bits<11, 1>(instr);
+    int load    = bits<11, 1>(instr);
 
     cycle<Access::Nonseq>(pc + 4);
 
-    if (pop)
+    if (load)
     {
         int beg = bitScanForward(rlist);
         int end = bitScanReverse(rlist);
@@ -608,7 +608,7 @@ void ARM::pushPopRegisters(u16 instr)
     }
 }
 
-void ARM::loadStoreMultiple(u16 instr)
+void ARM::Thumb_DataTransferBlock(u16 instr)
 {
     int rlist = bits< 0, 8>(instr);
     int rb    = bits< 8, 3>(instr);
@@ -649,7 +649,6 @@ void ARM::loadStoreMultiple(u16 instr)
         }
         else
         {
-            int count = bitCount(rlist);
             for (int x = beg; x <= end; ++x)
             {
                 if (~rlist & (1 << x))
@@ -659,7 +658,7 @@ void ARM::loadStoreMultiple(u16 instr)
                     cycle<Access::Seq>(addr);
 
                 if (x == rb)
-                    writeWord(addr, base + 4 * count);
+                    writeWord(addr, base + 4 * bitCount(rlist));
                 else
                     writeWord(addr, regs[x]);
 
@@ -687,7 +686,7 @@ void ARM::loadStoreMultiple(u16 instr)
         regs[rb] = addr;
 }
 
-void ARM::conditionalBranch(u16 instr)
+void ARM::Thumb_BranchConditional(u16 instr)
 {
     int offset    = bits<0, 8>(instr);
     int condition = bits<8, 4>(instr);
@@ -708,7 +707,12 @@ void ARM::conditionalBranch(u16 instr)
     }
 }
 
-void ARM::unconditionalBranch(u16 instr)
+void ARM::Thumb_Interrupt(u16 instr)
+{
+    SWI();
+}
+
+void ARM::Thumb_BranchUnconditional(u16 instr)
 {
     int offset = bits<0, 11>(instr);
     
@@ -721,7 +725,7 @@ void ARM::unconditionalBranch(u16 instr)
     refill<State::Thumb>();
 }
 
-void ARM::longBranchLink(u16 instr)
+void ARM::Thumb_BranchLongLink(u16 instr)
 {
     int offset = bits< 0, 11>(instr);
     int second = bits<11,  1>(instr);

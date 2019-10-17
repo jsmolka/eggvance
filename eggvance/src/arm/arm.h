@@ -46,7 +46,6 @@ private:
     u32 readHalfRotated(u32 addr);
     u32 readHalfSigned(u32 addr);
 
-    // Todo: immediate could be templated
     u32 lsl(u32 value, int amount, bool& carry) const;
     u32 lsr(u32 value, int amount, bool& carry, bool immediate) const;
     u32 asr(u32 value, int amount, bool& carry, bool immediate) const;
@@ -71,8 +70,8 @@ private:
     template<State state>
     inline void refill();
 
-    void hardwareInterrupt();
-    void softwareInterrupt();
+    void HWI();
+    void SWI();
     void interrupt(u32 pc, u32 lr, PSR::Mode mode);
 
     void execute();
@@ -83,37 +82,37 @@ private:
     inline void cycle();
     inline void cycleBooth(u32 multiplier, bool allow_ones);
 
-    // Add prefixed for thumb and arm
-    // Add undefined instruction
-    void moveShiftedRegister(u16 instr);
-    void addSubtractImmediate(u16 instr);
-    void addSubtractMoveCompareImmediate(u16 instr);
-    void aluOperations(u16 instr);
-    void highRegisterBranchExchange(u16 instr);
-    void loadPCRelative(u16 instr);
-    void loadStoreRegisterOffset(u16 instr);
-    void loadStoreHalfwordSigned(u16 instr);
-    void loadStoreImmediateOffset(u16 instr);
-    void loadStoreHalfword(u16 instr);
-    void loadStoreSPRelative(u16 instr);
-    void loadAddress(u16 instr);
-    void addOffsetSP(u16 instr);
-    void pushPopRegisters(u16 instr);
-    void loadStoreMultiple(u16 instr);
-    void conditionalBranch(u16 instr);
-    void unconditionalBranch(u16 instr);
-    void longBranchLink(u16 instr);
+    void Arm_BranchExchange(u32 instr);
+    void Arm_BranchLink(u32 instr);
+    void Arm_DataProcessing(u32 instr);
+    void Arm_StatusTransfer(u32 instr);
+    void Arm_Multiply(u32 instr);
+    void Arm_MultiplyLong(u32 instr);
+    void Arm_SingleDataTransfer(u32 instr);
+    void Arm_HalfSignedDataTransfer(u32 instr);
+    void Arm_BlockDataTransfer(u32 instr);
+    void Arm_SingleDataSwap(u32 instr);
+    void Arm_SoftwareInterrupt(u32 instr);
 
-    void branchExchange(u32 instr);
-    void branchLink(u32 instr);
-    void dataProcessing(u32 instr);
-    void psrTransfer(u32 instr);
-    void multiply(u32 instr);
-    void multiplyLong(u32 instr);
-    void singleDataTransfer(u32 instr);
-    void halfwordSignedDataTransfer(u32 instr);
-    void blockDataTransfer(u32 instr);
-    void singleDataSwap(u32 instr);
+    void Thumb_MoveShiftedRegister(u16 instr);
+    void Thumb_AddSubtract(u16 instr);
+    void Thumb_ImmediateOperations(u16 instr);
+    void Thumb_ALUOperations(u16 instr);
+    void Thumb_HighRegisterOperations(u16 instr);
+    void Thumb_LoadPCRelative(u16 instr);
+    void Thumb_LoadStoreRegisterOffset(u16 instr);
+    void Thumb_LoadStoreByteHalf(u16 instr);
+    void Thumb_LoadStoreImmediateOffset(u16 instr);
+    void Thumb_LoadStoreHalf(u16 instr);
+    void Thumb_LoadStoreSPRelative(u16 instr);
+    void Thumb_LoadRelativeAddress(u16 instr);
+    void Thumb_AddOffsetSP(u16 instr);
+    void Thumb_PushPopRegisters(u16 instr);
+    void Thumb_LoadStoreMultiple(u16 instr);
+    void Thumb_ConditionalBranch(u16 instr);
+    void Thumb_SoftwareInterrupt(u16 instr);
+    void Thumb_UnconditionalBranch(u16 instr);
+    void Thumb_LongBranchLink(u16 instr);
 
     u64 cycles;
 };

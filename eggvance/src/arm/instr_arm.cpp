@@ -3,9 +3,11 @@
 #include "common/macros.h"
 #include "common/utility.h"
 
-void ARM::branchExchange(u32 instr)
+void ARM::Arm_BranchExchange(u32 instr)
 {
-    u32 addr = regs[bits<0, 4>(instr)];
+    int rn = bits<0, 4>(instr);
+
+    u32 addr = regs[rn];
 
     cycle<Access::Nonseq>(pc + 8);
 
@@ -21,19 +23,23 @@ void ARM::branchExchange(u32 instr)
     }
 }
 
-void ARM::branchLink(u32 instr)
+void ARM::Arm_BranchLink(u32 instr)
 {
-    if (isset<24>(instr))
-        lr = pc - 4;
+    int offset = bits< 0, 24>(instr);
+    int link   = bits<24,  1>(instr);
 
     cycle<Access::Nonseq>(pc + 8);
 
-    pc += signExtend<24>(instr) << 2;
+    if (link) lr = pc - 4;
 
+    offset = signExtend<24>(offset);
+    offset <<= 2;
+
+    pc += offset;
     refill<State::Arm>();
 }
 
-void ARM::dataProcessing(u32 instr)
+void ARM::Arm_DataProcessing(u32 instr)
 {
     enum class Operation
     {
@@ -57,14 +63,16 @@ void ARM::dataProcessing(u32 instr)
 
     int rd     = bits<12, 4>(instr);
     int rn     = bits<16, 4>(instr);
+    int flags  = bits<20, 1>(instr);
     int opcode = bits<21, 4>(instr);
+    int imm_op = bits<25, 1>(instr);
 
     u32& dst = regs[rd];
     u32  op1 = regs[rn];
     u32  op2 = 0;
 
     bool carry = cpsr.c;
-    if (isset<25>(instr))
+    if (imm_op)
     {
         u32 value  = bits<0, 8>(instr);
         int amount = bits<8, 4>(instr);
@@ -73,32 +81,33 @@ void ARM::dataProcessing(u32 instr)
     }
     else
     {
-        int rm   = bits<0, 4>(instr);
-        int type = bits<5, 2>(instr);
+        int rm      = bits<0, 4>(instr);
+        int use_reg = bits<4, 1>(instr);
+        int type    = bits<5, 2>(instr);
 
         op2 = regs[rm];
 
-        if (isset<4>(instr))
+        int amount = 0;
+        if (use_reg)
         {
-            cycle();
+            int rs = bits<8, 4>(instr);
+
+            amount = regs[rs];
+            amount &= 0xFF;
 
             if (rn == 15) op1 += 4;
             if (rm == 15) op2 += 4;
 
-            int amount = regs[bits<8, 4>(instr)] & 0xFF;
-            op2 = shift(Shift(type), op2, amount, carry, false);
+            cycle();
         }
         else
         {
-            int amount = bits<7, 5>(instr);
-            op2 = shift(Shift(type), op2, amount, carry, true);
+            amount = bits<7, 5>(instr);
         }
+        op2 = shift(Shift(type), op2, amount, carry, !use_reg);
     }
 
-    bool flags = isset<20>(instr);
-    bool write = (opcode >> 2) != 0b10;
-
-    if (rd == 15 && write)
+    if (rd == 15)
     {
         if (flags)
         {
@@ -139,7 +148,7 @@ void ARM::dataProcessing(u32 instr)
         break;
     }
 
-    if (rd == 15 && write)
+    if (rd == 15)
     {
         if (cpsr.thumb)
         {
@@ -154,19 +163,22 @@ void ARM::dataProcessing(u32 instr)
     }
 }
 
-void ARM::psrTransfer(u32 instr)
+void ARM::Arm_StatusTransfer(u32 instr)
 {
-    bool use_spsr = isset<22>(instr);
+    int write    = bits<21, 1>(instr);
+    int use_spsr = bits<22, 1>(instr);
 
-    if (isset<21>(instr))
+    if (write)
     {
+        int imm_op = bits<25, 1>(instr);
+
         constexpr int f_bit = 1 << 19;
         constexpr int s_bit = 1 << 18;
         constexpr int x_bit = 1 << 17;
         constexpr int c_bit = 1 << 16;
 
         u32 op = 0;
-        if (isset<25>(instr))
+        if (imm_op)
         {
             u32 value  = bits<0, 8>(instr);
             int amount = bits<8, 4>(instr);
@@ -175,7 +187,9 @@ void ARM::psrTransfer(u32 instr)
         }
         else
         {
-            op = regs[bits<0, 4>(instr)];
+            int rm = bits<0, 4>(instr);
+
+            op = regs[rm];
         }
 
         u32 mask = 0;
@@ -199,40 +213,54 @@ void ARM::psrTransfer(u32 instr)
     }
     else
     {
-        regs[bits<12, 4>(instr)] = use_spsr 
-            ? spsr 
-            : cpsr;
+        int rd = bits<12, 4>(instr);
+
+        regs[rd] = use_spsr ? spsr : cpsr;
     }
     cycle<Access::Seq>(pc + 8);
 }
 
-void ARM::multiply(u32 instr)
+void ARM::Arm_Multiply(u32 instr)
 {
-    u32  op1 = regs[bits< 0, 4>(instr)];
-    u32  op2 = regs[bits< 8, 4>(instr)];
-    u32  op3 = regs[bits<12, 4>(instr)];
-    u32& dst = regs[bits<16, 4>(instr)];
+    int rm         = bits< 0, 4>(instr);
+    int rs         = bits< 8, 4>(instr);
+    int rn         = bits<12, 4>(instr);
+    int rd         = bits<16, 4>(instr);
+    int flags      = bits<20, 1>(instr);
+    int accumulate = bits<21, 1>(instr);
+
+    u32  op1 = regs[rm];
+    u32  op2 = regs[rs];
+    u32  op3 = regs[rn];
+    u32& dst = regs[rd];
 
     dst = op1 * op2;
-    if (isset<21>(instr))
+    if (accumulate)
     {
         dst += op3;
         cycle();
     }
-    logical(dst, isset<20>(instr));
+    logical(dst, flags);
 
     cycleBooth(op2, true);
     cycle<Access::Seq>(pc + 8);
 }
 
-void ARM::multiplyLong(u32 instr)
+void ARM::Arm_MultiplyLong(u32 instr)
 {
-    u64  op1  = regs[bits< 0, 4>(instr)];
-    u64  op2  = regs[bits< 8, 4>(instr)];
-    u32& dstl = regs[bits<12, 4>(instr)];
-    u32& dsth = regs[bits<16, 4>(instr)];
+    int rm         = bits< 0, 4>(instr);
+    int rs         = bits< 8, 4>(instr);
+    int rdl        = bits<12, 4>(instr);
+    int rdh        = bits<16, 4>(instr);
+    int flags      = bits<20, 1>(instr);
+    int accumulate = bits<21, 1>(instr);
+    int sign       = bits<22, 1>(instr);
 
-    int sign = isset<22>(instr);
+    u64  op1  = regs[rm];
+    u64  op2  = regs[rs];
+    u32& dstl = regs[rdl];
+    u32& dsth = regs[rdh];
+
     if (sign)
     {
         op1 = signExtend<32>(op1);
@@ -240,13 +268,13 @@ void ARM::multiplyLong(u32 instr)
     }
     
     u64 result = op1 * op2;
-    if (isset<21>(instr))
+    if (accumulate)
     {
         result += (static_cast<u64>(dsth) << 32) | dstl;
         cycle();
     }
 
-    if (isset<20>(instr))
+    if (flags)
     {
         cpsr.z = result == 0;
         cpsr.n = result >> 63;
@@ -274,32 +302,35 @@ void ARM::multiplyLong(u32 instr)
     if (!pre_index)     \
         INDEX
 
-void ARM::singleDataTransfer(u32 instr)
+void ARM::Arm_SingleDataTransfer(u32 instr)
 {
-    int rd = bits<12, 4>(instr);
-    int rn = bits<16, 4>(instr);
+    int rd         = bits<12, 4>(instr);
+    int rn         = bits<16, 4>(instr);
+    int load       = bits<20, 1>(instr);
+    int writeback  = bits<21, 1>(instr);
+    int byte       = bits<22, 1>(instr);
+    int increment  = bits<23, 1>(instr);
+    int pre_index  = bits<24, 1>(instr);
+    int imm_offset = bits<25, 1>(instr);
 
     u32& dst = regs[rd];
     u32 addr = regs[rn];
 
-    bool load      = isset<20>(instr);
-    bool writeback = isset<21>(instr);
-    bool byte      = isset<22>(instr);
-    bool increment = isset<23>(instr);
-    bool pre_index = isset<24>(instr);
-
     writeback |= !pre_index;
 
     u32 offset = 0;
-    if (isset<25>(instr))
+    if (imm_offset)
     {
-        int rm   = bits<0, 4>(instr);
-        int type = bits<5, 2>(instr);
+        int rm      = bits<0, 4>(instr);
+        int use_reg = bits<4, 1>(instr);
+        int type    = bits<5, 2>(instr);
 
         int amount = 0;
-        if (isset<4>(instr))
+        if (use_reg)
         {
-            amount = regs[bits<8, 4>(instr)];
+            int rs = bits<8, 4>(instr);
+
+            amount = regs[rs];
             amount &= 0xFF;
         }
         else
@@ -350,7 +381,7 @@ void ARM::singleDataTransfer(u32 instr)
     }
 }
 
-void ARM::halfwordSignedDataTransfer(u32 instr)
+void ARM::Arm_HalfSignedDataTransfer(u32 instr)
 {
     enum class Operation
     {
@@ -360,21 +391,22 @@ void ARM::halfwordSignedDataTransfer(u32 instr)
         LDRSH = 0b11
     };
 
-    int rd = bits<12, 4>(instr);
-    int rn = bits<16, 4>(instr);
+    int opcode     = bits< 5, 2>(instr);
+    int rd         = bits<12, 4>(instr);
+    int rn         = bits<16, 4>(instr);
+    int load       = bits<20, 1>(instr);
+    int writeback  = bits<21, 1>(instr);
+    int imm_offset = bits<22, 1>(instr);
+    int increment  = bits<23, 1>(instr);
+    int pre_index  = bits<24, 1>(instr);
 
     u32& dst = regs[rd];
     u32 addr = regs[rn];
 
-    bool load      = isset<20>(instr);
-    bool writeback = isset<21>(instr);
-    bool increment = isset<23>(instr);
-    bool pre_index = isset<24>(instr);
-
     writeback |= !pre_index;
 
     u32 offset = 0;
-    if (isset<22>(instr))
+    if (imm_offset)
     {
         int lower = bits<0, 4>(instr);
         int upper = bits<8, 4>(instr);
@@ -382,7 +414,8 @@ void ARM::halfwordSignedDataTransfer(u32 instr)
     }
     else
     {
-        offset = regs[bits<0, 4>(instr)];
+        int rm = bits<0, 4>(instr);
+        offset = regs[rm];
     }
 
     PRE_INDEX;
@@ -392,7 +425,7 @@ void ARM::halfwordSignedDataTransfer(u32 instr)
 
     if (load)
     {
-        switch (Operation(bits<5, 2>(instr)))
+        switch (Operation(opcode))
         {
         case Operation::SWAP:
             break;
@@ -442,18 +475,18 @@ void ARM::halfwordSignedDataTransfer(u32 instr)
 #undef PRE_INDEX
 #undef POST_INDEX
 
-void ARM::blockDataTransfer(u32 instr)
+void ARM::Arm_BlockDataTransfer(u32 instr)
 {
-    int rn = bits<16, 4>(instr);
+    int rlist     = bits< 0, 16>(instr);
+    int rn        = bits<16,  4>(instr);
+    int load      = bits<20,  1>(instr);
+    int writeback = bits<21,  1>(instr);
+    int user_mode = bits<22,  1>(instr);
+    int increment = bits<23,  1>(instr);
+    int pre_index = bits<24,  1>(instr);
 
     u32 addr = regs[rn];
     u32 base = regs[rn];
-
-    bool load      = isset<20>(instr);
-    bool writeback = isset<21>(instr);
-    bool user_mode = isset<22>(instr);
-    bool increment = isset<23>(instr);
-    bool pre_index = isset<24>(instr);
 
     PSR::Mode mode = cpsr.mode;
     if (user_mode)
@@ -461,7 +494,6 @@ void ARM::blockDataTransfer(u32 instr)
 
     cycle<Access::Nonseq>(pc + 8);
 
-    int rlist = bits<0, 16>(instr);
     if (rlist != 0)
     {
         int beg   = bitScanForward(rlist);
@@ -579,16 +611,21 @@ void ARM::blockDataTransfer(u32 instr)
         switchMode(mode);
 }
 
-void ARM::singleDataSwap(u32 instr)
+void ARM::Arm_SingleDataSwap(u32 instr)
 {
-    u32  src = regs[bits< 0, 4>(instr)];
-    u32& dst = regs[bits<12, 4>(instr)];
-    u32 addr = regs[bits<16, 4>(instr)];
+    int rm   = bits< 0, 4>(instr);
+    int rd   = bits<12, 4>(instr);
+    int rn   = bits<16, 4>(instr);
+    int byte = bits<22, 1>(instr);
+
+    u32  src = regs[rm];
+    u32& dst = regs[rd];
+    u32 addr = regs[rn];
 
     cycle<Access::Nonseq>(pc + 8);
     cycle<Access::Nonseq>(addr);
 
-    if (isset<22>(instr))
+    if (byte)
     {
         dst = readByte(addr);
         writeByte(addr, src);
@@ -601,4 +638,9 @@ void ARM::singleDataSwap(u32 instr)
 
     cycle<Access::Seq>(pc + 4);
     cycle();
+}
+
+void ARM::Arm_SoftwareInterrupt(u32 instr)
+{
+    SWI();
 }
