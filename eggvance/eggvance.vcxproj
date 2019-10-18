@@ -209,6 +209,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="src\arm\arm.inl" />
+    <None Include="src\arm\isa_thumb.inl" />
     <None Include="src\arm\lut_thumb.py" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

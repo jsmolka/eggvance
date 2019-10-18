@@ -27,8 +27,6 @@ int ARM::emulate()
     //else
         execute();
 
-    advance();
-
     return static_cast<int>(cycles - last);
 }
 
@@ -126,7 +124,7 @@ void ARM::execute()
     {
         u16 instr = readHalf(pc - 4);
 
-        (this->*lut_thumb[instr >> 8])(instr);
+        (this->*lut_thumb[instr >> 6])(instr);
     }
     else
     {
@@ -159,6 +157,7 @@ void ARM::execute()
             cycle<Access::Seq>(pc + 8);
         }
     }
+    advance();
 }
 
 void ARM::debug()

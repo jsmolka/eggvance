@@ -1,14 +1,8 @@
-#include "arm.h"
-
-#include "common/macros.h"
-#include "common/utility.h"
-
-void ARM::Thumb_MoveShiftedRegister(u16 instr)
+template<int offset, int opcode>
+void Thumb_MoveShiftedRegister(u16 instr)
 {
-    int rd     = bits< 0, 3>(instr);
-    int rs     = bits< 3, 3>(instr);
-    int offset = bits< 6, 5>(instr);
-    int opcode = bits<11, 2>(instr);
+    int rd = bits<0, 3>(instr);
+    int rs = bits<3, 3>(instr);
 
     u32& dst = regs[rd];
     u32  src = regs[rs];
@@ -30,7 +24,8 @@ void ARM::Thumb_MoveShiftedRegister(u16 instr)
     cycle<Access::Seq>(pc + 4);
 }
 
-void ARM::Thumb_AddSubtract(u16 instr)
+template<int rn, int opcode>
+void Thumb_AddSubtract(u16 instr)
 {
     enum class Operation
     {
@@ -40,10 +35,8 @@ void ARM::Thumb_AddSubtract(u16 instr)
         SUB_IMM = 0b11
     };
 
-    int rd     = bits<0, 3>(instr);
-    int rs     = bits<3, 3>(instr);
-    int rn     = bits<6, 3>(instr);
-    int opcode = bits<9, 2>(instr);
+    int rd = bits<0, 3>(instr);
+    int rs = bits<3, 3>(instr);
 
     u32& dst = regs[rd];
     u32  src = regs[rs];
@@ -62,7 +55,8 @@ void ARM::Thumb_AddSubtract(u16 instr)
     cycle<Access::Seq>(pc + 4);
 }
 
-void ARM::Thumb_ImmediateOperations(u16 instr)
+template<int rd, int opcode>
+void Thumb_ImmediateOperations(u16 instr)
 {
     enum class Operation
     {
@@ -72,9 +66,7 @@ void ARM::Thumb_ImmediateOperations(u16 instr)
         SUB = 0b11
     };
 
-    int offset = bits< 0, 8>(instr);
-    int rd     = bits< 8, 3>(instr); 
-    int opcode = bits<11, 2>(instr);
+    int offset = bits<0, 8>(instr);
 
     u32& dst = regs[rd];
 
@@ -92,7 +84,8 @@ void ARM::Thumb_ImmediateOperations(u16 instr)
     cycle<Access::Seq>(pc + 4);
 }
 
-void ARM::Thumb_ALUOperations(u16 instr)
+template<int opcode>
+void Thumb_ALUOperations(u16 instr)
 {
     enum class Operation
     {
@@ -114,9 +107,8 @@ void ARM::Thumb_ALUOperations(u16 instr)
         MVN = 0b1111
     };
 
-    int rd     = bits<0, 3>(instr);
-    int rs     = bits<3, 3>(instr);
-    int opcode = bits<6, 4>(instr);
+    int rd = bits<0, 3>(instr);
+    int rs = bits<3, 3>(instr);
 
     u32& dst = regs[rd];
     u32  src = regs[rs];
@@ -204,7 +196,8 @@ void ARM::Thumb_ALUOperations(u16 instr)
     cycle<Access::Seq>(pc + 4);
 }
 
-void ARM::Thumb_HighRegisterOperations(u16 instr)
+template<int hs, int hd, int opcode>
+void Thumb_HighRegisterOperations(u16 instr)
 {
     enum class Operation
     {
@@ -214,11 +207,8 @@ void ARM::Thumb_HighRegisterOperations(u16 instr)
         BX  = 0b11
     };
 
-    int rd     = bits<0, 3>(instr);
-    int rs     = bits<3, 3>(instr);
-    int hs     = bits<6, 1>(instr);
-    int hd     = bits<7, 1>(instr);
-    int opcode = bits<8, 2>(instr);
+    int rd = bits<0, 3>(instr);
+    int rs = bits<3, 3>(instr);
 
     rs |= hs << 3;
     rd |= hd << 3;
@@ -281,10 +271,10 @@ void ARM::Thumb_HighRegisterOperations(u16 instr)
     }
 }
 
-void ARM::Thumb_LoadPCRelative(u16 instr)
+template<int rd>
+void Thumb_LoadPCRelative(u16 instr)
 {
     int offset = bits<0, 8>(instr);
-    int rd     = bits<8, 3>(instr);
 
     offset <<= 2;
 
@@ -297,7 +287,8 @@ void ARM::Thumb_LoadPCRelative(u16 instr)
     cycle();
 }
 
-void ARM::Thumb_LoadStoreRegisterOffset(u16 instr)
+template<int ro, int opcode>
+void Thumb_LoadStoreRegisterOffset(u16 instr)
 {
     enum class Operation
     {
@@ -307,10 +298,8 @@ void ARM::Thumb_LoadStoreRegisterOffset(u16 instr)
         LDRB = 0b11
     };
 
-    int rd     = bits< 0, 3>(instr);
-    int rb     = bits< 3, 3>(instr);
-    int ro     = bits< 6, 3>(instr);
-    int opcode = bits<10, 2>(instr);
+    int rd = bits<0, 3>(instr);
+    int rb = bits<3, 3>(instr);
 
     u32& dst = regs[rd];
     u32 addr = regs[rb] + regs[ro];
@@ -347,7 +336,8 @@ void ARM::Thumb_LoadStoreRegisterOffset(u16 instr)
     }
 }
 
-void ARM::Thumb_LoadStoreByteHalf(u16 instr)
+template<int ro, int opcode>
+void Thumb_LoadStoreByteHalf(u16 instr)
 {
     enum class Operation
     {
@@ -357,10 +347,8 @@ void ARM::Thumb_LoadStoreByteHalf(u16 instr)
         LDRSH = 0b11
     };
 
-    int rd     = bits< 0, 3>(instr);
-    int rb     = bits< 3, 3>(instr);
-    int ro     = bits< 6, 3>(instr);
-    int opcode = bits<10, 2>(instr);
+    int rd = bits<0, 3>(instr);
+    int rb = bits<3, 3>(instr);
 
     u32& dst = regs[rd];
     u32 addr = regs[rb] + regs[ro];
@@ -399,7 +387,8 @@ void ARM::Thumb_LoadStoreByteHalf(u16 instr)
     }
 }
 
-void ARM::Thumb_LoadStoreImmediateOffset(u16 instr)
+template<int offset, int opcode>
+void Thumb_LoadStoreImmediateOffset(u16 instr)
 {
     enum class Operation
     {
@@ -409,16 +398,13 @@ void ARM::Thumb_LoadStoreImmediateOffset(u16 instr)
         LDRB = 0b11
     };
 
-    int rd     = bits< 0, 3>(instr);
-    int rb     = bits< 3, 3>(instr);
-    int offset = bits< 6, 5>(instr);
-    int opcode = bits<11, 2>(instr);
-
-    if (~opcode & 0x2)
-        offset <<= 2;
+    int rd = bits<0, 3>(instr);
+    int rb = bits<3, 3>(instr);
 
     u32& dst = regs[rd];
-    u32 addr = regs[rb] + offset;
+    u32 addr = (~opcode & (1 << 1)) 
+        ? regs[rb] + (offset << 2)
+        : regs[rb] + (offset << 0);
 
     cycle<Access::Nonseq>(pc + 4);
 
@@ -452,17 +438,14 @@ void ARM::Thumb_LoadStoreImmediateOffset(u16 instr)
     }
 }
 
-void ARM::Thumb_LoadStoreHalf(u16 instr)
+template<int offset, int load>
+void Thumb_LoadStoreHalf(u16 instr)
 {
-    int rd     = bits< 0, 3>(instr);
-    int rb     = bits< 3, 3>(instr);
-    int offset = bits< 6, 5>(instr);
-    int load   = bits<11, 1>(instr);
-
-    offset <<= 1;
+    int rd = bits<0, 3>(instr);
+    int rb = bits<3, 3>(instr);
 
     u32& dst = regs[rd];
-    u32 addr = regs[rb] + offset;
+    u32 addr = regs[rb] + (offset << 1);
 
     cycle<Access::Nonseq>(pc + 4);
 
@@ -479,17 +462,14 @@ void ARM::Thumb_LoadStoreHalf(u16 instr)
     }
 }
 
-void ARM::Thumb_LoadStoreSPRelative(u16 instr)
+template<int rd, int load>
+void Thumb_LoadStoreSPRelative(u16 instr)
 {
-    int offset = bits< 0, 8>(instr);
-    int rd     = bits< 8, 3>(instr);
-    int load   = bits<11, 1>(instr);
-
-    offset <<= 2;
+    int offset = bits<0, 8>(instr);
 
     u32& dst = regs[rd];
-    u32 addr = sp + offset;
-    
+    u32 addr = sp + (offset << 2);
+
     cycle<Access::Nonseq>(pc + 4);
 
     if (load)
@@ -505,11 +485,10 @@ void ARM::Thumb_LoadStoreSPRelative(u16 instr)
     }
 }
 
-void ARM::Thumb_LoadRelativeAddress(u16 instr)
+template<int rd, int use_sp>
+void Thumb_LoadRelativeAddress(u16 instr)
 {
-    int offset = bits< 0, 8>(instr);
-    int rd     = bits< 8, 3>(instr);
-    int use_sp = bits<11, 1>(instr);
+    int offset = bits<0, 8>(instr);
 
     offset <<= 2;
 
@@ -523,10 +502,10 @@ void ARM::Thumb_LoadRelativeAddress(u16 instr)
     cycle<Access::Seq>(pc + 4);
 }
 
-void ARM::Thumb_AddOffsetSP(u16 instr)
+template<int sign>
+void Thumb_AddOffsetSP(u16 instr)
 {
     int offset = bits<0, 7>(instr);
-    int sign   = bits<7, 1>(instr);
 
     offset <<= 2;
 
@@ -538,11 +517,10 @@ void ARM::Thumb_AddOffsetSP(u16 instr)
     cycle<Access::Seq>(pc + 4);
 }
 
-void ARM::Thumb_PushPopRegisters(u16 instr)
+template<int special, int load>
+void Thumb_PushPopRegisters(u16 instr)
 {
-    int rlist   = bits< 0, 8>(instr);
-    int special = bits< 8, 1>(instr);
-    int load    = bits<11, 1>(instr);
+    int rlist = bits< 0, 8>(instr);
 
     cycle<Access::Nonseq>(pc + 4);
 
@@ -608,11 +586,10 @@ void ARM::Thumb_PushPopRegisters(u16 instr)
     }
 }
 
-void ARM::Thumb_LoadStoreMultiple(u16 instr)
+template<int rb, int load>
+void Thumb_LoadStoreMultiple(u16 instr)
 {
-    int rlist = bits< 0, 8>(instr);
-    int rb    = bits< 8, 3>(instr);
-    int load  = bits<11, 1>(instr);
+    int rlist = bits<0, 8>(instr);
 
     u32 addr = regs[rb];
     u32 base = regs[rb];
@@ -686,13 +663,13 @@ void ARM::Thumb_LoadStoreMultiple(u16 instr)
         regs[rb] = addr;
 }
 
-void ARM::Thumb_ConditionalBranch(u16 instr)
+template<int condition>
+void Thumb_ConditionalBranch(u16 instr)
 {
-    int offset    = bits<0, 8>(instr);
-    int condition = bits<8, 4>(instr);
-
     if (cpsr.check(PSR::Condition(condition)))
     {
+        int offset = bits<0, 8>(instr);
+
         cycle<Access::Nonseq>(pc + 4);
 
         offset = signExtend<8>(offset);
@@ -707,28 +684,10 @@ void ARM::Thumb_ConditionalBranch(u16 instr)
     }
 }
 
-void ARM::Thumb_SoftwareInterrupt(u16 instr)
-{
-    SWI();
-}
-
-void ARM::Thumb_UnconditionalBranch(u16 instr)
+template<int second>
+void Thumb_LongBranchLink(u16 instr)
 {
     int offset = bits<0, 11>(instr);
-    
-    cycle<Access::Nonseq>(pc + 4);
-
-    offset = signExtend<11>(offset);
-    offset <<= 1;
-
-    pc += offset;
-    refill<State::Thumb>();
-}
-
-void ARM::Thumb_LongBranchLink(u16 instr)
-{
-    int offset = bits< 0, 11>(instr);
-    int second = bits<11,  1>(instr);
 
     if (second)
     {
@@ -751,9 +710,4 @@ void ARM::Thumb_LongBranchLink(u16 instr)
 
         cycle<Access::Seq>(pc + 4);
     }
-}
-
-void ARM::Thumb_Undefined(u16 instr)
-{
-
 }

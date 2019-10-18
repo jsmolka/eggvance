@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common/macros.h"
+#include "common/utility.h"
 #include "registers.h"
 
 struct Memory;
@@ -97,30 +99,14 @@ private:
     void Arm_SingleDataSwap(u32 instr);
     void Arm_SoftwareInterrupt(u32 instr);
 
-    void Thumb_MoveShiftedRegister(u16 instr);
-    void Thumb_AddSubtract(u16 instr);
-    void Thumb_ImmediateOperations(u16 instr);
-    void Thumb_ALUOperations(u16 instr);
-    void Thumb_HighRegisterOperations(u16 instr);
-    void Thumb_LoadPCRelative(u16 instr);
-    void Thumb_LoadStoreRegisterOffset(u16 instr);
-    void Thumb_LoadStoreByteHalf(u16 instr);
-    void Thumb_LoadStoreImmediateOffset(u16 instr);
-    void Thumb_LoadStoreHalf(u16 instr);
-    void Thumb_LoadStoreSPRelative(u16 instr);
-    void Thumb_LoadRelativeAddress(u16 instr);
-    void Thumb_AddOffsetSP(u16 instr);
-    void Thumb_PushPopRegisters(u16 instr);
-    void Thumb_LoadStoreMultiple(u16 instr);
-    void Thumb_ConditionalBranch(u16 instr);
+    #include "isa_thumb.inl"
     void Thumb_SoftwareInterrupt(u16 instr);
     void Thumb_UnconditionalBranch(u16 instr);
-    void Thumb_LongBranchLink(u16 instr);
     void Thumb_Undefined(u16 instr);
 
     u64 cycles;
 
-    static HandlerThumb lut_thumb[256];
+    static HandlerThumb lut_thumb[1024];
 };
 
 #include "arm.inl"

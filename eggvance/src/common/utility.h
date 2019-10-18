@@ -36,55 +36,24 @@ inline int bits(T value)
 #ifdef _MSC_VER
 #include <intrin.h>
 
-template<typename T>
-inline int bitScanForward(T value)
+inline int bitScanForward(u16 value)
 {
-    static_assert(std::is_integral_v<T>, "Expected integral");
-
     unsigned long index = 0;
-    if (sizeof(T) <= 4)
-    {
-        _BitScanForward(&index, value);
-        return static_cast<int>(index);
-    }
-    if (sizeof(T) <= 8)
-    {
-        _BitScanForward64(&index, value);
-        return static_cast<int>(index);
-    }
-    static_assert("Unreachable");
-    return 0;
+    _BitScanForward(&index, value);
+    return static_cast<int>(index);
 }
 
-template<typename T>
-inline int bitScanReverse(T value)
+inline int bitScanReverse(u16 value)
 {
-    static_assert(std::is_integral_v<T>, "Expected integral");
-
     unsigned long index = 0;
-    if (sizeof(T) <= 4)
-    {
-        _BitScanReverse(&index, value);
-        return static_cast<int>(index);
-    }
-    if (sizeof(T) <= 8)
-    {
-        _BitScanReverse64(&index, value);
-        return static_cast<int>(index);
-    }
-    static_assert("Unreachable");
-    return 0;
+    _BitScanReverse(&index, value);
+    return static_cast<int>(index);
 }
 
 template<typename T>
 inline int bitCount(T value)
 {
-    if (sizeof(T) <= 2) return static_cast<int>(__popcnt16(value));
-    if (sizeof(T) <= 4) return static_cast<int>(__popcnt(value));
-    if (sizeof(T) <= 8) return static_cast<int>(__popcnt64(value));
-
-    static_assert("Unreachable");
-    return 0;
+    return __popcnt16(value);
 }
 
 #else

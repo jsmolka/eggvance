@@ -214,5 +214,8 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="src\arm\lut_thumb.py" />
+    <None Include="src\arm\isa_thumb.inl">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
