@@ -20,5 +20,5 @@ void ARM::Thumb_UnconditionalBranch(u16 instr)
 
 void ARM::Thumb_Undefined(u16 instr)
 {
-
+    EGG_ASSERT(false, "Undefined");
 }

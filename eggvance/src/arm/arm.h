@@ -16,12 +16,12 @@ public:
     Memory* mem;
 
 private:
-    using HandlerArm   = void(ARM::*)(u32);
+    using HandlerArm = void(ARM::*)(u32);
     using HandlerThumb = void(ARM::*)(u16);
 
     enum class Access
     {
-        Seq    = 0,
+        Seq = 0,
         Nonseq = 1,
     };
 
@@ -35,7 +35,7 @@ private:
 
     enum class State
     {
-        Arm   = 0,
+        Arm = 0,
         Thumb = 1
     };
 
@@ -98,6 +98,7 @@ private:
     void Arm_BlockDataTransfer(u32 instr);
     void Arm_SingleDataSwap(u32 instr);
     void Arm_SoftwareInterrupt(u32 instr);
+    void Arm_Undefined(u32 instr);
 
     #include "isa_thumb.inl"
     void Thumb_SoftwareInterrupt(u16 instr);
@@ -107,6 +108,7 @@ private:
     u64 cycles;
 
     static HandlerThumb lut_thumb[1024];
+    static HandlerArm   lut_arm[4096];
 };
 
 #include "arm.inl"

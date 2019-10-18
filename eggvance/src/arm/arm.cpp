@@ -132,25 +132,9 @@ void ARM::execute()
 
         if (cpsr.check(PSR::Condition(instr >> 28)))
         {
-            switch (decodeArm(instr))
-            {
-            case InstructionArm::Undefined: break;
-            case InstructionArm::BranchExchange: Arm_BranchExchange(instr); break;
-            case InstructionArm::BranchLink: Arm_BranchLink(instr); break;
-            case InstructionArm::DataProcessing: Arm_DataProcessing(instr); break;
-            case InstructionArm::PSRTransfer: Arm_StatusTransfer(instr); break;
-            case InstructionArm::Multiply: Arm_Multiply(instr); break;
-            case InstructionArm::MultiplyLong: Arm_MultiplyLong(instr); break;
-            case InstructionArm::SingleDataTransfer: Arm_SingleDataTransfer(instr); break;
-            case InstructionArm::HalfwordSignedDataTransfer: Arm_HalfSignedDataTransfer(instr); break;
-            case InstructionArm::BlockDataTransfer: Arm_BlockDataTransfer(instr); break;
-            case InstructionArm::SingleDataSwap: Arm_SingleDataSwap(instr); break;
-            case InstructionArm::SoftwareInterrupt: Arm_SoftwareInterrupt(instr); break;
+            int hash = ((instr >> 16) & 0xFF0) | ((instr >> 4) & 0xF);
 
-            default:
-                EGG_UNREACHABLE;
-                break;
-            }
+            (this->*lut_arm[hash])(instr);
         }
         else
         {

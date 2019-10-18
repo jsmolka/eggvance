@@ -182,7 +182,7 @@ void ARM::Arm_StatusTransfer(u32 instr)
         {
             u32 value  = bits<0, 8>(instr);
             int amount = bits<8, 4>(instr);
-            
+
             op = ror(value, amount << 1, false);
         }
         else
@@ -266,7 +266,7 @@ void ARM::Arm_MultiplyLong(u32 instr)
         op1 = signExtend<32>(op1);
         op2 = signExtend<32>(op2);
     }
-    
+
     u64 result = op1 * op2;
     if (accumulate)
     {
@@ -598,7 +598,7 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
         {
             writeWord(addr, pc + 4);
         }
-        
+
         addr += increment
             ?  0x40
             : -0x40;
@@ -643,4 +643,9 @@ void ARM::Arm_SingleDataSwap(u32 instr)
 void ARM::Arm_SoftwareInterrupt(u32 instr)
 {
     SWI();
+}
+
+void ARM::Arm_Undefined(u32 instr)
+{
+    EGG_ASSERT(false, "Undefined");
 }

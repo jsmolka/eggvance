@@ -87,12 +87,6 @@
     <ClCompile Include="src\arm\disassembler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\arm\instr_arm.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\arm\instr_thumb.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\arm\bus.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -100,6 +94,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\arm\lut_thumb.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\arm\isa_thumb.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\arm\lut_arm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\arm\isa_arm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -203,6 +206,9 @@
     <ClInclude Include="src\arm\disassembler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\arm\isa_arm.inl">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="eggvance.rc">
@@ -217,5 +223,6 @@
     <None Include="src\arm\isa_thumb.inl">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="src\arm\lut_arm.py" />
   </ItemGroup>
 </Project>

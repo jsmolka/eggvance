@@ -12,7 +12,7 @@ def matches(pattern, value):
 
 
 def decode(x):
-    """Decodes thumb instruction hash"""
+    """Decodes instruction hash"""
     if matches("00011xxxxx", x): 
         rn     = bits(0, 3, x)
         opcode = bits(3, 2, x)
