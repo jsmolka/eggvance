@@ -99,6 +99,9 @@
     <ClCompile Include="src\arm\shifts.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\arm\lut_thumb.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="icon\icon.h">
@@ -123,9 +126,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\common\macros.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\common\tmp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\common\utility.h">
@@ -213,5 +213,6 @@
     <None Include="src\arm\arm.inl">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="src\arm\lut_thumb.py" />
   </ItemGroup>
 </Project>

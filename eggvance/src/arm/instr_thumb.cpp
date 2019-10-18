@@ -297,7 +297,7 @@ void ARM::Thumb_LoadPCRelative(u16 instr)
     cycle();
 }
 
-void ARM::Thumb_LoadStoreRegister(u16 instr)
+void ARM::Thumb_LoadStoreRegisterOffset(u16 instr)
 {
     enum class Operation
     {
@@ -347,7 +347,7 @@ void ARM::Thumb_LoadStoreRegister(u16 instr)
     }
 }
 
-void ARM::Thumb_TransferHalfSigned(u16 instr)
+void ARM::Thumb_LoadStoreByteHalf(u16 instr)
 {
     enum class Operation
     {
@@ -399,7 +399,7 @@ void ARM::Thumb_TransferHalfSigned(u16 instr)
     }
 }
 
-void ARM::Thumb_TransferImmediate(u16 instr)
+void ARM::Thumb_LoadStoreImmediateOffset(u16 instr)
 {
     enum class Operation
     {
@@ -452,7 +452,7 @@ void ARM::Thumb_TransferImmediate(u16 instr)
     }
 }
 
-void ARM::Thumb_TransferHalf(u16 instr)
+void ARM::Thumb_LoadStoreHalf(u16 instr)
 {
     int rd     = bits< 0, 3>(instr);
     int rb     = bits< 3, 3>(instr);
@@ -479,7 +479,7 @@ void ARM::Thumb_TransferHalf(u16 instr)
     }
 }
 
-void ARM::Thumb_TransferSPRelative(u16 instr)
+void ARM::Thumb_LoadStoreSPRelative(u16 instr)
 {
     int offset = bits< 0, 8>(instr);
     int rd     = bits< 8, 3>(instr);
@@ -523,7 +523,7 @@ void ARM::Thumb_LoadRelativeAddress(u16 instr)
     cycle<Access::Seq>(pc + 4);
 }
 
-void ARM::Thumb_ModifySP(u16 instr)
+void ARM::Thumb_AddOffsetSP(u16 instr)
 {
     int offset = bits<0, 7>(instr);
     int sign   = bits<7, 1>(instr);
@@ -538,7 +538,7 @@ void ARM::Thumb_ModifySP(u16 instr)
     cycle<Access::Seq>(pc + 4);
 }
 
-void ARM::Thumb_DataTransferStack(u16 instr)
+void ARM::Thumb_PushPopRegisters(u16 instr)
 {
     int rlist   = bits< 0, 8>(instr);
     int special = bits< 8, 1>(instr);
@@ -608,7 +608,7 @@ void ARM::Thumb_DataTransferStack(u16 instr)
     }
 }
 
-void ARM::Thumb_DataTransferBlock(u16 instr)
+void ARM::Thumb_LoadStoreMultiple(u16 instr)
 {
     int rlist = bits< 0, 8>(instr);
     int rb    = bits< 8, 3>(instr);
@@ -686,7 +686,7 @@ void ARM::Thumb_DataTransferBlock(u16 instr)
         regs[rb] = addr;
 }
 
-void ARM::Thumb_BranchConditional(u16 instr)
+void ARM::Thumb_ConditionalBranch(u16 instr)
 {
     int offset    = bits<0, 8>(instr);
     int condition = bits<8, 4>(instr);
@@ -707,12 +707,12 @@ void ARM::Thumb_BranchConditional(u16 instr)
     }
 }
 
-void ARM::Thumb_Interrupt(u16 instr)
+void ARM::Thumb_SoftwareInterrupt(u16 instr)
 {
     SWI();
 }
 
-void ARM::Thumb_BranchUnconditional(u16 instr)
+void ARM::Thumb_UnconditionalBranch(u16 instr)
 {
     int offset = bits<0, 11>(instr);
     
@@ -725,7 +725,7 @@ void ARM::Thumb_BranchUnconditional(u16 instr)
     refill<State::Thumb>();
 }
 
-void ARM::Thumb_BranchLongLink(u16 instr)
+void ARM::Thumb_LongBranchLink(u16 instr)
 {
     int offset = bits< 0, 11>(instr);
     int second = bits<11,  1>(instr);
@@ -751,4 +751,9 @@ void ARM::Thumb_BranchLongLink(u16 instr)
 
         cycle<Access::Seq>(pc + 4);
     }
+}
+
+void ARM::Thumb_Undefined(u16 instr)
+{
+
 }

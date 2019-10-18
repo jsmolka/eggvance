@@ -14,6 +14,9 @@ public:
     Memory* mem;
 
 private:
+    using HandlerArm   = void(ARM::*)(u32);
+    using HandlerThumb = void(ARM::*)(u16);
+
     enum class Access
     {
         Seq    = 0,
@@ -113,8 +116,11 @@ private:
     void Thumb_SoftwareInterrupt(u16 instr);
     void Thumb_UnconditionalBranch(u16 instr);
     void Thumb_LongBranchLink(u16 instr);
+    void Thumb_Undefined(u16 instr);
 
     u64 cycles;
+
+    static HandlerThumb lut_thumb[256];
 };
 
 #include "arm.inl"

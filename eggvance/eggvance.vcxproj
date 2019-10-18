@@ -145,6 +145,7 @@
     <ClCompile Include="src\arm\disassembler.cpp" />
     <ClCompile Include="src\arm\instr_arm.cpp" />
     <ClCompile Include="src\arm\instr_thumb.cpp" />
+    <ClCompile Include="src\arm\lut_thumb.cpp" />
     <ClCompile Include="src\arm\psr.cpp" />
     <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\arm\shifts.cpp" />
@@ -179,7 +180,6 @@
     <ClInclude Include="src\memory\memmap.h" />
     <ClInclude Include="src\memory\ram.h" />
     <ClInclude Include="src\mmio\ppuio.h" />
-    <ClInclude Include="src\common\tmp.h" />
     <ClInclude Include="src\common\utility.h" />
     <ClInclude Include="src\keypad.h" />
     <ClInclude Include="src\memory\cartridge\cartridge.h" />
@@ -209,6 +209,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="src\arm\arm.inl" />
+    <None Include="src\arm\lut_thumb.py" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -126,33 +126,7 @@ void ARM::execute()
     {
         u16 instr = readHalf(pc - 4);
 
-        switch (decodeThumb(instr))
-        {
-        case InstructionThumb::Undefined: break;
-        case InstructionThumb::MoveShiftedRegister: Thumb_MoveShiftedRegister(instr); break;
-        case InstructionThumb::AddSubtractImmediate: Thumb_AddSubtract(instr); break;
-        case InstructionThumb::AddSubtractMoveCompareImmediate: Thumb_ImmediateOperation(instr); break;
-        case InstructionThumb::ALUOperations: Thumb_ALUOperations(instr); break;
-        case InstructionThumb::HighRegisterBranchExchange: Thumb_HighRegisterOperations(instr); break;
-        case InstructionThumb::LoadPCRelative: Thumb_LoadPCRelative(instr); break;
-        case InstructionThumb::LoadStoreRegisterOffset: Thumb_LoadStoreRegister(instr); break;
-        case InstructionThumb::LoadStoreHalfwordSigned: Thumb_TransferHalfSigned(instr); break;
-        case InstructionThumb::LoadStoreImmediateOffset: Thumb_TransferImmediate(instr); break;
-        case InstructionThumb::LoadStoreHalfword: Thumb_TransferHalf(instr); break;
-        case InstructionThumb::LoadStoreSPRelative: Thumb_TransferSPRelative(instr); break;
-        case InstructionThumb::LoadAddress: Thumb_LoadRelativeAddress(instr); break;
-        case InstructionThumb::AddOffsetSP: Thumb_ModifySP(instr); break;
-        case InstructionThumb::PushPopRegisters: Thumb_DataTransferStack(instr); break;
-        case InstructionThumb::LoadStoreMultiple: Thumb_DataTransferBlock(instr); break;
-        case InstructionThumb::ConditionalBranch: Thumb_BranchConditional(instr); break;
-        case InstructionThumb::SoftwareInterrupt: Thumb_SoftwareInterrupt(instr); break;
-        case InstructionThumb::UnconditionalBranch: Thumb_BranchUnconditional(instr); break;
-        case InstructionThumb::LongBranchLink: Thumb_BranchLongLink(instr); break;
-
-        default:
-            EGG_UNREACHABLE;
-            break;
-        }
+        (this->*lut_thumb[instr >> 8])(instr);
     }
     else
     {
