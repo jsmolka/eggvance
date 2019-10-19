@@ -11,6 +11,9 @@ void MMU::reset()
 
     ewram.fill(0);
     iwram.fill(0);
+    ioram.fill(0);
+
+    ioram.writeHalf(REG_KEYINPUT, 0xFFFF);
 }
 
 u8 MMU::readByte(u32 addr)
@@ -36,7 +39,7 @@ u8 MMU::readByte(u32 addr)
         if (addr < (MAP_IO + 0x400))
         {
             addr &= 0x3FF;
-            //return mmio.readByte(addr);
+            return readByteIO(addr);
         }
         return 0;
 
@@ -115,7 +118,8 @@ u16 MMU::readHalf(u32 addr)
         if (addr < (MAP_IO + 0x400))
         {
             addr &= 0x3FE;
-            //return mmio.readHalf(addr);
+            return readByteIO(addr + 0) << 0
+                 | readByteIO(addr + 1) << 8;
         }
         return 0;
 
@@ -166,18 +170,19 @@ u32 MMU::readWord(u32 addr)
         return 0;
 
     case PAGE_EWRAM:
-        addr &= 0x3'FFFC;
         return ewram.readWord(addr);
 
     case PAGE_IWRAM:
-        addr &= 0x7FFC;
         return iwram.readWord(addr);
 
     case PAGE_IO:
         if (addr < (MAP_IO + 0x400))
         {
             addr &= 0x3FC;
-            //return mmio.readWord(addr);
+            return readByteIO(addr + 0) <<  0
+                 | readByteIO(addr + 1) <<  8
+                 | readByteIO(addr + 2) << 16
+                 | readByteIO(addr + 3) << 24;
         }
         return 0;
 
@@ -234,17 +239,7 @@ void MMU::writeByte(u32 addr, u8 byte)
         if (addr < (MAP_IO + 0x400))
         {
             addr &= 0x3FF;
-            //mmio.writeByte(addr, byte);
-
-            //switch (addr)
-            //{
-            //case REG_DMA0CNT_H+1:
-            //case REG_DMA1CNT_H+1:
-            //case REG_DMA2CNT_H+1:
-            //case REG_DMA3CNT_H+1:
-            //    signalDMA(DMA::Timing::IMMEDIATE);
-            //    break;
-            //}
+            writeByteIO(addr, byte);
         }
         break;
 
@@ -314,17 +309,8 @@ void MMU::writeHalf(u32 addr, u16 half)
         if (addr < (MAP_IO + 0x400))
         {
             addr &= 0x3FE;
-            //mmio.writeHalf(addr, half);
-
-            //switch (addr)
-            //{
-            //case REG_DMA0CNT_H:
-            //case REG_DMA1CNT_H:
-            //case REG_DMA2CNT_H:
-            //case REG_DMA3CNT_H:
-            //    signalDMA(DMA::Timing::IMMEDIATE);
-            //    break;
-            //}
+            writeByteIO(addr + 0, (half >> 0) & 0xFF);
+            writeByteIO(addr + 1, (half >> 8) & 0xFF);
         }
         break;
 
@@ -374,17 +360,10 @@ void MMU::writeWord(u32 addr, u32 word)
         if (addr < (MAP_IO + 0x400))
         {
             addr &= 0x3FC;
-            //mmio.writeWord(addr, word);
-
-            //switch (addr)
-            //{
-            //case REG_DMA0CNT_L:
-            //case REG_DMA1CNT_L:
-            //case REG_DMA2CNT_L:
-            //case REG_DMA3CNT_L:
-            //    signalDMA(DMA::Timing::IMMEDIATE);
-            //    break;
-            //}
+            writeByteIO(addr + 0, (word >>  0) & 0xFF);
+            writeByteIO(addr + 1, (word >>  8) & 0xFF);
+            writeByteIO(addr + 2, (word >> 16) & 0xFF);
+            writeByteIO(addr + 3, (word >> 24) & 0xFF);
         }
         break;
 
@@ -434,6 +413,9 @@ u8 MMU::readByteIO(u32 addr)
     {
     case REG_VCOUNT:
         return ppu.io.vcount;
+
+    case REG_VCOUNT+1:
+        return 0;
 
     READ_REG2(REG_DISPCNT,  ppu.io.dispcnt);
     READ_REG2(REG_DISPSTAT, ppu.io.dispstat);
@@ -512,7 +494,6 @@ void MMU::writeByteIO(u32 addr, u8 byte)
     WRITE_REG2(REG_BLDCNT,   ppu.io.bldcnt);
     WRITE_REG2(REG_BLDALPHA, ppu.io.bldalpha);
     }
-
     ioram.writeByte(addr, byte);
 }
 

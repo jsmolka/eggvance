@@ -5,10 +5,10 @@
 class Config
 {
 public:
-    void init();
+    void init(const std::string& dir);
 
-    bool bios_skip = true;
-    std::string bios_file = "bios.bin";
+    bool bios_skip;
+    std::string bios_file;
 };
 
 extern Config config;

@@ -63,7 +63,7 @@ int ARM::execute()
     advance();
 
     #ifdef EGG_DEBUG
-    disasm();
+    //disasm();
     #endif
 
     return static_cast<int>(cycles - last);

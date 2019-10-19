@@ -1,68 +1,71 @@
 #include "emulator.h"
 
-#include <filesystem>
-
-// Todo: remove once finished
 #include <SDL2/SDL.h>
-#include <fmt/printf.h>
 
+#include "common/config.h"
 #include "arm/arm.h"
 #include "mmu/mmu.h"
-
-namespace fs = std::filesystem;
+#include "ppu/ppu.h"
 
 void Emulator::reset()
 {
     arm.reset();
+    mmu.reset();
+    ppu.reset();
 }
 
-bool Emulator::init(int argc, char* argv[])
+bool Emulator::init(const Args& args)
 {
-    // Don't use cwd
-    //if (!mmu.bios.init())
-        // Show error
-        //return false;
+    config.init(args.dir);
 
-    if (argc > 1)
-    {
-        std::string file(argv[1]);
-        if (fs::is_regular_file(file))
-            mmu.gamepak.load(file);
-    }
+    if (!mmu.bios.init())
+        return false;
+
+    if (!ppu.backend.init())
+        return false;
+
+    if (!args.rom.empty())
+        mmu.gamepak.load(args.rom);
+
     return true;
 }
 
 void Emulator::run()
 {
-    if (mmu.gamepak.size() == 0)
-    {
-        // Show drop screen
-    }
     reset();
 
-    arm.run(5000);
+    while (true)
+    {
+        SDL_Event event;
+        while (SDL_PollEvent(&event))
+        {
+            switch (event.type)
+            {
+            case SDL_QUIT:
+                return;
+            }
+        }
 
-    fmt::printf("r7: %d, r12: %d\n", arm.regs[7], arm.regs[12]);
-
-    while (true);
+        frame();
+    }
 }
 
 void Emulator::frame()
 {
     for (int line = 0; line < 160; ++line)
     {
-        //arm.emulate(960);
-        //ppu.scanline();
-        //ppu.hblank();
-        //arm.emulate(272);
-        //ppu.next();
+        arm.run(960);
+        ppu.scanline();
+        ppu.hblank();
+        arm.run(272);
+        ppu.next();
     }
 
-    //ppu.vblank();
+    ppu.vblank();
     for (int line = 0; line < 68; ++line)
     {
-        //arm.emulate(960 + 272);
-        //ppu.next();
+        arm.run(960 + 272);
+        ppu.next();
     }
-    //ppu.present();
+    ppu.present();
 }

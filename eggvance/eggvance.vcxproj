@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\args.cpp" />
     <ClCompile Include="src\arm\arm.cpp" />
     <ClCompile Include="src\arm\bus.cpp" />
     <ClCompile Include="src\arm\decode.cpp" />
@@ -149,10 +150,10 @@
     <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\arm\shifts.cpp" />
     <ClCompile Include="src\common\config.cpp" />
+    <ClCompile Include="src\emulator.cpp" />
     <ClCompile Include="src\keypad.cpp" />
     <ClCompile Include="src\mmu\bios.cpp" />
     <ClCompile Include="src\mmu\gamepak\gamepak.cpp" />
-    <ClCompile Include="src\emulator.cpp" />
     <ClCompile Include="icon\icon.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\mmu\gamepak\fileutil.cpp" />
@@ -168,7 +169,7 @@
     <ClCompile Include="src\mmu\registers\displaystatus.cpp" />
     <ClCompile Include="src\mmu\registers\mosaic.cpp" />
     <ClCompile Include="src\mmu\registers\window.cpp" />
-    <ClCompile Include="src\ppu\backend.cpp" />
+    <ClCompile Include="src\ppu\videobackend.cpp" />
     <ClCompile Include="src\ppu\ppuio.cpp" />
     <ClCompile Include="src\ppu\oam.cpp" />
     <ClCompile Include="src\ppu\oamentry.cpp" />
@@ -178,6 +179,7 @@
     <ClCompile Include="src\ppu\vram.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\args.h" />
     <ClInclude Include="src\arm\arm.h" />
     <ClInclude Include="src\arm\decode.h" />
     <ClInclude Include="src\arm\diasm.h" />
@@ -210,7 +212,7 @@
     <ClInclude Include="src\mmu\registers\mosaic.h" />
     <ClInclude Include="src\mmu\registers\window.h" />
     <ClInclude Include="src\mmu\registers\windowrange.h" />
-    <ClInclude Include="src\ppu\backend.h" />
+    <ClInclude Include="src\ppu\videobackend.h" />
     <ClInclude Include="src\ppu\buffer.h" />
     <ClInclude Include="src\ppu\ppuio.h" />
     <ClInclude Include="src\ppu\layers.h" />

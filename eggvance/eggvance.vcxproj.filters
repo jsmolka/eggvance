@@ -21,9 +21,6 @@
     <ClCompile Include="icon\icon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\emulator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\keypad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -120,10 +117,16 @@
     <ClCompile Include="src\ppu\ppuio.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ppu\backend.cpp">
+    <ClCompile Include="src\ppu\render.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ppu\render.cpp">
+    <ClCompile Include="src\ppu\videobackend.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\emulator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\args.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -245,10 +248,13 @@
     <ClInclude Include="src\ppu\ppuio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\ppu\backend.h">
+    <ClInclude Include="src\ppu\buffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\ppu\buffer.h">
+    <ClInclude Include="src\ppu\videobackend.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\args.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

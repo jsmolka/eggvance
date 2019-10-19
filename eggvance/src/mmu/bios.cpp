@@ -1,6 +1,7 @@
 #include "bios.h"
 
 #include <fstream>
+#include <SDL2/SDL_messagebox.h>
 
 #include "arm/arm.h"
 #include "common/config.h"
@@ -15,10 +16,15 @@ bool BIOS::init()
     static constexpr u64 expected_hash = 0xECCF5E4CEA50816E;
 
     if (!read(config.bios_file))
+    {
+        SDL_ShowSimpleMessageBox(0, "Missing BIOS", "Please place a GBA bios.bin next to the emulator.", nullptr);
         return false;
-
+    }
     if (hash(data.ptr<u32>(0), 0x1000) != expected_hash)
+    {
+        SDL_ShowSimpleMessageBox(0, "Invalid BIOS", "The BIOS does not match the requirements.", nullptr);
         return false;
+    }
 
     return true;
 }

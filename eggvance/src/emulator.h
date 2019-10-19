@@ -1,11 +1,13 @@
 #pragma once
 
+#include "args.h"
+
 class Emulator
 {
 public:
     void reset();
 
-    bool init(int argc, char* argv[]);
+    bool init(const Args& args);
     
     void run();
 

@@ -24,6 +24,7 @@ u32 VRAM::readWord(u32 addr)
 
 void VRAM::writeByte(u32 addr, u8 byte)
 {
+    addr &= 0x17'FFE;
     if (ppu.io.dispcnt.mode < 3
             ? addr < 0x1'0000  
             : addr < 0x1'4000)
@@ -56,7 +57,12 @@ u16 VRAM::readPixel(u32 addr, int x, int y, Palette::Format format)
     }
 }
 
-u32 VRAM::Memory::mirror(u32 addr)
+u32 VRAM::Memory::alignSize() const
+{
+    return 0x2'0000;
+}
+
+u32 VRAM::Memory::mirror(u32 addr) const
 {
     if (addr >= 0x1'8000)
         addr -= 0x8000;

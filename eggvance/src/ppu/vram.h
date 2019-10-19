@@ -28,6 +28,7 @@ private:
     class Memory : public RAM<0x18000>
     {
     private:
-        virtual u32 mirror(u32 addr) final;
+        virtual u32 alignSize() const override final;
+        virtual u32 mirror(u32 addr) const override final;
     } data;
 };

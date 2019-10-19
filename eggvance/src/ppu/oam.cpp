@@ -38,6 +38,7 @@ void OAM::writeByte(u32 addr, u8 byte)
 
 void OAM::writeHalf(u32 addr, u16 half)
 {
+    addr &= 0x3FE;
     int attr = addr & 0x7;
     if (attr != 0x6)
     {

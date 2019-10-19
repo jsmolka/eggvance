@@ -1,8 +1,21 @@
-#include "backend.h"
+#include "videobackend.h"
 
-Backend::Backend()
+VideoBackend::~VideoBackend()
 {
-    SDL_InitSubSystem(SDL_INIT_VIDEO);
+    if (initialized)
+    {
+        SDL_DestroyTexture(texture);
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+
+        SDL_QuitSubSystem(SDL_INIT_VIDEO);
+    }
+}
+
+bool VideoBackend::init()
+{
+    if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0)
+        return false;
 
     window = SDL_CreateWindow(
         "eggvance",
@@ -24,18 +37,11 @@ Backend::Backend()
         SDL_TEXTUREACCESS_STREAMING,
         240, 160
     );
+
+    return initialized = (window && renderer && texture);
 }
 
-Backend::~Backend()
-{
-    SDL_DestroyTexture(texture);
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-
-    SDL_QuitSubSystem(SDL_INIT_VIDEO);
-}
-
-void Backend::present()
+void VideoBackend::present()
 {
     SDL_UpdateTexture(
         texture, nullptr,
@@ -46,7 +52,7 @@ void Backend::present()
     SDL_RenderPresent(renderer);
 }
 
-void Backend::fullscreen()
+void VideoBackend::fullscreen()
 {
     u32 flag = SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN_DESKTOP;
     SDL_SetWindowFullscreen(window, flag ^ SDL_WINDOW_FULLSCREEN_DESKTOP);

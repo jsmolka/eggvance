@@ -8,6 +8,7 @@ PPU ppu;
 
 void PPU::reset()
 {
+    io.reset();
     oam.reset();
     vram.reset();
     palette.reset();
@@ -135,6 +136,12 @@ void PPU::next()
         arm.irq(Interrupt::VMatch);
     }
     io.vcount = (io.vcount + 1) % 228;
+}
+
+void PPU::present()
+{
+    if (io.dispcnt.enabled())
+        backend.present();
 }
 
 void PPU::renderBg(RenderFunc func, int bg)

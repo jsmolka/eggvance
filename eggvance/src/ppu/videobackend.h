@@ -5,11 +5,12 @@
 
 #include "common/integer.h"
 
-struct Backend
+class VideoBackend
 {
-    Backend();
-    ~Backend();
+public:
+    ~VideoBackend();
 
+    bool init();
     void present();
     void fullscreen();
 
@@ -18,4 +19,7 @@ struct Backend
     SDL_Texture* texture;
 
     std::array<u32, 240 * 160> buffer;
+
+private:
+    bool initialized = false;
 };

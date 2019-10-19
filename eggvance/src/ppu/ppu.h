@@ -2,13 +2,13 @@
 
 #include <vector>
 
-#include "backend.h"
 #include "buffer.h"
 #include "layers.h"
 #include "oam.h"
 #include "palette.h"
 #include "ppuio.h"
 #include "vram.h"
+#include "videobackend.h"
 
 class PPU
 {
@@ -23,7 +23,9 @@ public:
     void vblank();
     void next();
 
-    Backend backend;
+    void present();
+
+    VideoBackend backend;
 
 private:
     enum WindowFlag
