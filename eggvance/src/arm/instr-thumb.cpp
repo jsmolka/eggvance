@@ -1,6 +1,6 @@
 #include "arm.h"
 
-ARM::HandlerThumb ARM::lut_thumb[1024] =
+ARM::InstructionTableThumb ARM::instr_thumb =
 {
     &ARM::Thumb_MoveShiftedRegister< 0, 0>,
     &ARM::Thumb_MoveShiftedRegister< 1, 0>,

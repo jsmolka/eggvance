@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 #include "common/macros.h"
 #include "common/utility.h"
 #include "registers.h"
@@ -16,8 +18,11 @@ public:
     Memory* mem;
 
 private:
-    using HandlerArm = void(ARM::*)(u32);
-    using HandlerThumb = void(ARM::*)(u16);
+    using InstructionArm = void(ARM::*)(u32);
+    using InstructionThumb = void(ARM::*)(u16);
+
+    using InstructionTableArm = std::array<InstructionArm, 4096>;
+    using InstructionTableThumb = std::array<InstructionThumb, 1024>;
 
     enum class Access
     {
@@ -63,11 +68,11 @@ private:
     u32 ror(u32 value, int amount, bool immediate) const;
     u32 shift(Shift type, u32 value, int amount, bool immediate) const;
 
-    u32 logical(u32 result, bool flags);
-    u32 logical(u32 result, bool carry, bool flags);
+    inline u32 logical(u32 result, bool flags);
+    inline u32 logical(u32 result, bool carry, bool flags);
 
-    u32 add(u32 op1, u32 op2, bool flags);
-    u32 sub(u32 op1, u32 op2, bool flags);
+    inline u32 add(u32 op1, u32 op2, bool flags);
+    inline u32 sub(u32 op1, u32 op2, bool flags);
 
     template<State state>
     inline void advance();
@@ -79,7 +84,7 @@ private:
     void SWI();
     void interrupt(u32 pc, u32 lr, PSR::Mode mode);
 
-    void execute();
+    void dispatch();
     void debug();
 
     template<Access access>
@@ -87,28 +92,13 @@ private:
     inline void cycle();
     inline void cycleBooth(u32 multiplier, bool allow_ones);
 
-    void Arm_BranchExchange(u32 instr);
-    void Arm_BranchLink(u32 instr);
-    void Arm_DataProcessing(u32 instr);
-    void Arm_StatusTransfer(u32 instr);
-    void Arm_Multiply(u32 instr);
-    void Arm_MultiplyLong(u32 instr);
-    void Arm_SingleDataTransfer(u32 instr);
-    void Arm_HalfSignedDataTransfer(u32 instr);
-    void Arm_BlockDataTransfer(u32 instr);
-    void Arm_SingleDataSwap(u32 instr);
-    void Arm_SoftwareInterrupt(u32 instr);
-    void Arm_Undefined(u32 instr);
-
-    #include "isa_thumb.inl"
-    void Thumb_SoftwareInterrupt(u16 instr);
-    void Thumb_UnconditionalBranch(u16 instr);
-    void Thumb_Undefined(u16 instr);
+    #include "isa-arm.inl"
+    #include "isa-thumb.inl"
 
     u64 cycles;
 
-    static HandlerThumb lut_thumb[1024];
-    static HandlerArm   lut_arm[4096];
+    static InstructionTableArm instr_arm;
+    static InstructionTableThumb instr_thumb;
 };
 
 #include "arm.inl"

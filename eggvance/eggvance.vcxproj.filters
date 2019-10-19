@@ -84,25 +84,22 @@
     <ClCompile Include="src\arm\decode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\arm\disassembler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\arm\bus.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\arm\shifts.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\arm\lut_thumb.cpp">
+    <ClCompile Include="src\arm\instr_thumb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\arm\isa_thumb.cpp">
+    <ClCompile Include="src\arm\instr-arm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\arm\lut_arm.cpp">
+    <ClCompile Include="src\arm\instr-thumb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\arm\isa_arm.cpp">
+    <ClCompile Include="src\arm\diasm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -203,10 +200,10 @@
     <ClInclude Include="src\arm\decode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\arm\disassembler.h">
+    <ClInclude Include="src\arm\isa-arm.inl">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\arm\isa_arm.inl">
+    <ClInclude Include="src\arm\diasm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -219,10 +216,10 @@
     <None Include="src\arm\arm.inl">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="src\arm\lut_thumb.py" />
-    <None Include="src\arm\isa_thumb.inl">
+    <None Include="src\arm\instr-arm.py" />
+    <None Include="src\arm\instr-thumb.py" />
+    <None Include="src\arm\isa-thumb.inl">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="src\arm\lut_arm.py" />
   </ItemGroup>
 </Project>

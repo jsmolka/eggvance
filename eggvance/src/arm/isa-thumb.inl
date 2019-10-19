@@ -684,6 +684,24 @@ void Thumb_ConditionalBranch(u16 instr)
     }
 }
 
+void Thumb_SoftwareInterrupt(u16 instr)
+{
+    SWI();
+}
+
+void Thumb_UnconditionalBranch(u16 instr)
+{
+    int offset = bits<0, 11>(instr);
+
+    cycle<Access::Nonseq>(pc + 4);
+
+    offset = signExtend<11>(offset);
+    offset <<= 1;
+
+    pc += offset;
+    refill<State::Thumb>();
+}
+
 template<int second>
 void Thumb_LongBranchLink(u16 instr)
 {
@@ -710,4 +728,9 @@ void Thumb_LongBranchLink(u16 instr)
 
         cycle<Access::Seq>(pc + 4);
     }
+}
+
+void Thumb_Undefined(u16 instr)
+{
+    EGG_ASSERT(false, "Undefined");
 }

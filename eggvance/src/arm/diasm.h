@@ -8,6 +8,24 @@
 class Disassembler
 {
 public:
+    struct DisasmData
+    {
+        u32 sp;
+        u32 lr;
+        u32 pc;
+        u32 thumb;
+        union
+        {
+            int arm;
+            int thumb;
+        } format;
+        union
+        {
+            u32 arm;
+            u16 thumb;
+        } instr;
+    };
+
     static std::string disassemble(u32 data, const Registers& regs);
 
 private:

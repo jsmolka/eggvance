@@ -161,12 +161,12 @@ def decode(x):
 prefix = "    &ARM::Thumb_"
 template = """#include "arm.h"
 
-ARM::HandlerThumb ARM::lut_thumb[1024] =
+ARM::InstructionTableThumb ARM::instr_thumb =
 {{
 {}
 }};
 """
 
 lut = [prefix + decode(x) for x in range(1024)]
-with open("lut_thumb.cpp", "w") as output:
+with open("instr-thumb.cpp", "w") as output:
     output.write(template.format(",\n".join(lut)))
