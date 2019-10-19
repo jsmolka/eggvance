@@ -13,18 +13,17 @@ def matches(pattern, value):
 
 def decode(x):
     """Decodes instruction hash"""
-    #  0 ->  4
-    #  1 ->  5
-    #  2 ->  6
-    #  3 ->  7
-    #  4 -> 20
-    #  5 -> 21
-    #  6 -> 22
-    #  7 -> 23
-    #  8 -> 24
-    #  9 -> 25
-    # 10 -> 26
-    # 11 -> 27
+    if matches("1111xxxxxxxx", x):
+        return "SoftwareInterrupt"
+
+    if matches("110xxxxxxxxx", x):
+        return "CoprocessorDataTransfers"
+        
+    if matches("1110xxxxxxx0", x):
+        return "CoprocessorDataOperations"
+
+    if matches("1110xxxxxxx1", x): 
+        return "CoprocessorRegisterTransfers"
 
     if matches("101xxxxxxxxx", x):
         link = bits(8, 1, x)
@@ -45,18 +44,6 @@ def decode(x):
             increment=increment,
             pre_index=pre_index
         )
-
-    if matches("110xxxxxxxxx", x):
-        return "CoprocessorDataTransfers"
-        
-    if matches("1110xxxxxxx0", x):
-        return "CoprocessorDataOperations"
-
-    if matches("1110xxxxxxx1", x): 
-        return "CoprocessorRegisterTransfers"
-
-    if matches("1111xxxxxxxx", x):
-        return "SoftwareInterrupt"
 
     if matches("011xxxxxxxx1", x):
         return "Undefined"
@@ -146,7 +133,7 @@ def decode(x):
 prefix = "    &ARM::Arm_"
 template = """#include "arm.h"
 
-ARM::InstructionTableArm ARM::instr_arm =
+std::array<void(ARM::*)(u32), 4096> ARM::instr_arm =
 {{
 {}
 }};

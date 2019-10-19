@@ -1,6 +1,6 @@
 #include "arm.h"
 
-ARM::InstructionTableThumb ARM::instr_thumb =
+std::array<void(ARM::*)(u16), 1024> ARM::instr_thumb =
 {
     &ARM::Thumb_MoveShiftedRegister< 0, 0>,
     &ARM::Thumb_MoveShiftedRegister< 1, 0>,

@@ -280,7 +280,7 @@ void Thumb_LoadPCRelative(u16 instr)
 
     u32 addr = alignWord(pc + offset);
 
-    regs[rd] = readWord(addr);
+    regs[rd] = mmu.readWord(addr);
 
     cycle<Access::Nonseq>(addr);
     cycle<Access::Seq>(pc + 4);
@@ -309,12 +309,12 @@ void Thumb_LoadStoreRegisterOffset(u16 instr)
     switch (Operation(opcode))
     {
     case Operation::STR:
-        writeWord(addr, dst);
+        mmu.writeWord(addr, dst);
         cycle<Access::Nonseq>(addr);
         break;
 
     case Operation::STRB:
-        writeByte(addr, dst);
+        mmu.writeByte(addr, dst);
         cycle<Access::Nonseq>(addr);
         break;
 
@@ -325,7 +325,7 @@ void Thumb_LoadStoreRegisterOffset(u16 instr)
         break;
 
     case Operation::LDRB:
-        dst = readByte(addr);
+        dst = mmu.readByte(addr);
         cycle<Access::Seq>(pc + 4);
         cycle();
         break;
@@ -358,12 +358,12 @@ void Thumb_LoadStoreByteHalf(u16 instr)
     switch (Operation(opcode))
     {
     case Operation::STRH:
-        writeHalf(addr, dst);
+        mmu.writeHalf(addr, dst);
         cycle<Access::Nonseq>(addr);
         break;
 
     case Operation::LDRSB:
-        dst = readByte(addr);
+        dst = mmu.readByte(addr);
         dst = signExtend<8>(dst);
         cycle<Access::Seq>(pc + 4);
         cycle();
@@ -411,12 +411,12 @@ void Thumb_LoadStoreImmediateOffset(u16 instr)
     switch (Operation(opcode))
     {
     case Operation::STR:
-        writeWord(addr, dst);
+        mmu.writeWord(addr, dst);
         cycle<Access::Nonseq>(addr);
         break;
 
     case Operation::STRB:
-        writeByte(addr, dst);
+        mmu.writeByte(addr, dst);
         cycle<Access::Nonseq>(addr);
         break;
 
@@ -427,7 +427,7 @@ void Thumb_LoadStoreImmediateOffset(u16 instr)
         break;
 
     case Operation::LDRB:
-        dst = readByte(addr);
+        dst = mmu.readByte(addr);
         cycle<Access::Seq>(pc + 4);
         cycle();
         break;
@@ -457,7 +457,7 @@ void Thumb_LoadStoreHalf(u16 instr)
     }
     else
     {
-        writeHalf(addr, dst);
+        mmu.writeHalf(addr, dst);
         cycle<Access::Nonseq>(addr);
     }
 }
@@ -480,7 +480,7 @@ void Thumb_LoadStoreSPRelative(u16 instr)
     }
     else
     {
-        writeWord(addr, dst);
+        mmu.writeWord(addr, dst);
         cycle<Access::Nonseq>(addr);
     }
 }
@@ -539,7 +539,7 @@ void Thumb_PushPopRegisters(u16 instr)
             else
                 cycle();
 
-            regs[x] = readWord(sp);
+            regs[x] = mmu.readWord(sp);
 
             sp += 4;
         }
@@ -548,7 +548,7 @@ void Thumb_PushPopRegisters(u16 instr)
         {
             cycle<Access::Nonseq>(pc + 4);
 
-            pc = readWord(sp);
+            pc = mmu.readWord(sp);
             pc = alignHalf(pc);
             refill<State::Thumb>();
 
@@ -567,7 +567,7 @@ void Thumb_PushPopRegisters(u16 instr)
         if (special)
         {
             sp -= 4;
-            writeWord(sp, lr);
+            mmu.writeWord(sp, lr);
         }
 
         for (int x = beg; x >= end; --x)
@@ -580,7 +580,7 @@ void Thumb_PushPopRegisters(u16 instr)
             if (beg != end)
                 cycle<Access::Seq>(sp);
 
-            writeWord(sp, regs[x]);
+            mmu.writeWord(sp, regs[x]);
         }
         cycle<Access::Nonseq>(sp);
     }
@@ -618,7 +618,7 @@ void Thumb_LoadStoreMultiple(u16 instr)
                 else
                     cycle();
 
-                regs[x] = readWord(addr);
+                regs[x] = mmu.readWord(addr);
 
                 addr += 4;
             }
@@ -635,9 +635,9 @@ void Thumb_LoadStoreMultiple(u16 instr)
                     cycle<Access::Seq>(addr);
 
                 if (x == rb)
-                    writeWord(addr, base + 4 * bitCount(rlist));
+                    mmu.writeWord(addr, base + 4 * bitCount(rlist));
                 else
-                    writeWord(addr, regs[x]);
+                    mmu.writeWord(addr, regs[x]);
 
                 addr += 4;
             }
@@ -648,13 +648,13 @@ void Thumb_LoadStoreMultiple(u16 instr)
     {
         if (load)
         {
-            pc = readWord(addr);
+            pc = mmu.readWord(addr);
             pc = alignHalf(pc);
             refill<State::Thumb>();
         }
         else
         {
-            writeWord(addr, pc + 2);
+            mmu.writeWord(addr, pc + 2);
         }
         addr += 0x40;
     }
@@ -686,7 +686,7 @@ void Thumb_ConditionalBranch(u16 instr)
 
 void Thumb_SoftwareInterrupt(u16 instr)
 {
-    SWI();
+    interruptSW();
 }
 
 void Thumb_UnconditionalBranch(u16 instr)

@@ -11,7 +11,7 @@ void Registers::reset()
     std::memset(bank,     0, sizeof(bank));
     std::memset(bank_fiq, 0, sizeof(bank_fiq));
 
-    if (cfg.skip_bios)
+    if (config.bios_skip)
     {
         sp   = 0x0300'7F00;
         lr   = 0x0800'0000;

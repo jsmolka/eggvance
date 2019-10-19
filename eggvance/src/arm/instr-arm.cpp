@@ -1,6 +1,6 @@
 #include "arm.h"
 
-ARM::InstructionTableArm ARM::instr_arm =
+std::array<void(ARM::*)(u32), 4096> ARM::instr_arm =
 {
     &ARM::Arm_DataProcessing<0,  0, 0>,
     &ARM::Arm_DataProcessing<0,  0, 0>,

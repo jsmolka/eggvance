@@ -340,7 +340,7 @@ void Arm_SingleDataTransfer(u32 instr)
     if (load)
     {
         dst = byte
-            ? readByte(addr)
+            ? mmu.readByte(addr)
             : readWordRotated(addr);
 
         if (rd == 15)
@@ -357,9 +357,9 @@ void Arm_SingleDataTransfer(u32 instr)
             : dst + 0;
 
         if (byte)
-            writeByte(addr, value);
+            mmu.writeByte(addr, value);
         else
-            writeWord(addr, value);
+            mmu.writeWord(addr, value);
     }
 
     if (writeback && (rd != rn || !load))
@@ -424,7 +424,7 @@ void Arm_HalfSignedDataTransfer(u32 instr)
             break;
 
         case Operation::LDRSB:
-            dst = readByte(addr);
+            dst = mmu.readByte(addr);
             dst = signExtend<8>(dst);
             break;
 
@@ -450,7 +450,7 @@ void Arm_HalfSignedDataTransfer(u32 instr)
             ? dst + 4
             : dst + 0;
 
-        writeHalf(addr, value);
+        mmu.writeHalf(addr, value);
     }
 
     if (writeback && (rd != rn || !load))
@@ -520,7 +520,7 @@ template<int load,
                 else
                     cycle();
 
-                regs[x] = readWord(addr);
+                regs[x] = mmu.readWord(addr);
 
                 if (!pre_index) 
                     addr += 4;
@@ -566,7 +566,7 @@ template<int load,
                         : regs[x] + 0;
                 }
 
-                writeWord(addr, value);
+                mmu.writeWord(addr, value);
 
                 if (!pre_index)
                     addr += 4;
@@ -578,13 +578,13 @@ template<int load,
     {
         if (load)
         {
-            pc = readWord(addr);
+            pc = mmu.readWord(addr);
             pc = alignWord(pc);
             refill<State::Arm>();
         }
         else
         {
-            writeWord(addr, pc + 4);
+            mmu.writeWord(addr, pc + 4);
         }
 
         addr += increment
@@ -619,13 +619,13 @@ void Arm_SingleDataSwap(u32 instr)
 
     if (byte)
     {
-        dst = readByte(addr);
-        writeByte(addr, src);
+        dst = mmu.readByte(addr);
+        mmu.writeByte(addr, src);
     }
     else
     {
         dst = readWordRotated(addr);
-        writeWord(addr, src);
+        mmu.writeWord(addr, src);
     }
 
     cycle<Access::Seq>(pc + 4);
@@ -634,7 +634,7 @@ void Arm_SingleDataSwap(u32 instr)
 
 void Arm_SoftwareInterrupt(u32 instr)
 {
-    SWI();
+    interruptSW();
 }
 
 void Arm_CoprocessorDataOperations(u32 instr)

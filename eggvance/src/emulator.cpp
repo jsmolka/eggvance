@@ -1,20 +1,15 @@
 #include "emulator.h"
 
-// Todo: remove once finished
-#include <SDL2/SDL.h>
-
 #include <filesystem>
 
+// Todo: remove once finished
+#include <SDL2/SDL.h>
+#include <fmt/printf.h>
+
+#include "arm/arm.h"
+#include "mmu/mmu.h"
+
 namespace fs = std::filesystem;
-
-#undef main
-
-Emulator::Emulator()
-{
-    reset();
-
-    arm.mem = &mem;
-}
 
 void Emulator::reset()
 {
@@ -23,36 +18,35 @@ void Emulator::reset()
 
 bool Emulator::init(int argc, char* argv[])
 {
+    // Don't use cwd
+    //if (!mmu.bios.init())
+        // Show error
+        //return false;
+
     if (argc > 1)
     {
-        if (fs::exists(argv[1]) && fs::is_regular_file(argv[1]))
-        {
-            mem.cartridge.load(argv[1]);
-        }
+        std::string file(argv[1]);
+        if (fs::is_regular_file(file))
+            mmu.gamepak.load(file);
     }
     return true;
 }
 
-#include <fmt/printf.h>
-void Emulator::main()
+void Emulator::run()
 {
-    if (mem.cartridge.size() == 0)
+    if (mmu.gamepak.size() == 0)
     {
         // Show drop screen
     }
+    reset();
 
-    int t = 1500;
-    while (t--)
-    {
-        arm.emulate();
-    }
+    arm.run(5000);
 
     fmt::printf("r7: %d, r12: %d\n", arm.regs[7], arm.regs[12]);
 
     while (true);
 }
 
-// Todo: leftovers are possible
 void Emulator::frame()
 {
     for (int line = 0; line < 160; ++line)

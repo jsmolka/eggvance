@@ -1,8 +1,8 @@
-#include "cartridge.h"
+#include "gamepak.h"
 
 #include "fileutil.h"
 
-u8 Cartridge::readByte(u32 addr)
+u8 GamePak::readByte(u32 addr)
 {
     if (addr < data.size())
         return *reinterpret_cast<u8*>(&data[addr]);
@@ -10,7 +10,7 @@ u8 Cartridge::readByte(u32 addr)
         return 0;
 }
 
-u16 Cartridge::readHalf(u32 addr)
+u16 GamePak::readHalf(u32 addr)
 {
     if (addr < data.size())
         return *reinterpret_cast<u16*>(&data[addr]);
@@ -18,7 +18,7 @@ u16 Cartridge::readHalf(u32 addr)
         return 0;
 }
 
-u32 Cartridge::readWord(u32 addr)
+u32 GamePak::readWord(u32 addr)
 {
     if (addr < data.size())
         return *reinterpret_cast<u32*>(&data[addr]);
@@ -27,7 +27,7 @@ u32 Cartridge::readWord(u32 addr)
 }
 
 // Todo: check if cartridge exists
-bool Cartridge::load(const std::string& file)
+bool GamePak::load(const std::string& file)
 {
     if (this->file != file)
     {
@@ -37,7 +37,7 @@ bool Cartridge::load(const std::string& file)
     return true;
 }
 
-std::size_t Cartridge::size() const
+std::size_t GamePak::size() const
 {
     return data.size();
 }

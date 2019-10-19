@@ -1,14 +1,14 @@
 #pragma once
 
+#include <string>
+
 class Config
 {
 public:
-    static Config& instance();
+    void init();
 
-    bool skip_bios = true;
-
-private:
-    Config() = default;
+    bool bios_skip = true;
+    std::string bios_file = "bios.bin";
 };
 
-#define cfg Config::instance()
+extern Config config;

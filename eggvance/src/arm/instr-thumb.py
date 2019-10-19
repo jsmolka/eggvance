@@ -161,7 +161,7 @@ def decode(x):
 prefix = "    &ARM::Thumb_"
 template = """#include "arm.h"
 
-ARM::InstructionTableThumb ARM::instr_thumb =
+std::array<void(ARM::*)(u16), 1024> ARM::instr_thumb =
 {{
 {}
 }};

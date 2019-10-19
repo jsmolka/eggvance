@@ -8,8 +8,7 @@ int main(int argc, char* argv[])
     if (!emulator->init(argc, argv))
         return 1;
 
-    #undef main
-    emulator->main();
+    emulator->run();
 
     return 0;
 }

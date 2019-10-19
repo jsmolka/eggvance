@@ -7,10 +7,10 @@
 #include <memory>
 #include <string>
 #include <vector>
-
+ 
 #include "backup.h"
 
-class Cartridge
+class GamePak
 {
 public:
     struct Header

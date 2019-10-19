@@ -1,7 +1,8 @@
 #include "config.h"
 
-Config& Config::instance()
+Config config;
+
+void Config::init()
 {
-    static Config config;
-    return config;
+
 }

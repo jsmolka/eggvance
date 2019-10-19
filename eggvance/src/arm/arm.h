@@ -4,29 +4,39 @@
 
 #include "common/macros.h"
 #include "common/utility.h"
+#include "mmu/mmu.h"
 #include "registers.h"
 
-struct Memory;
+enum class Interrupt
+{
+    VBlank  = 1 <<  0,
+    HBlank  = 1 <<  1,
+    VMatch  = 1 <<  2,
+    Timer0  = 1 <<  3,
+    Timer1  = 1 <<  4,
+    Timer2  = 1 <<  5,
+    Timer3  = 1 <<  6,
+    Serial  = 1 <<  7,
+    DMA0    = 1 <<  8,
+    DMA1    = 1 <<  9,
+    DMA2    = 1 << 10,
+    DMA3    = 1 << 11,
+    Keypad  = 1 << 12,
+    GamePak = 1 << 13
+};
 
 class ARM : public Registers
 {
 public:
     void reset();
 
-    int emulate();
-
-    Memory* mem;
+    void run(int cycles);
+    void irq(Interrupt flag);
 
 private:
-    using InstructionArm = void(ARM::*)(u32);
-    using InstructionThumb = void(ARM::*)(u16);
-
-    using InstructionTableArm = std::array<InstructionArm, 4096>;
-    using InstructionTableThumb = std::array<InstructionThumb, 1024>;
-
     enum class Access
     {
-        Seq = 0,
+        Seq    = 0,
         Nonseq = 1,
     };
 
@@ -40,17 +50,9 @@ private:
 
     enum class State
     {
-        Arm = 0,
+        Arm   = 0,
         Thumb = 1
     };
-
-    u8  readByte(u32 addr);
-    u16 readHalf(u32 addr);
-    u32 readWord(u32 addr);
-
-    void writeByte(u32 addr, u8  byte);
-    void writeHalf(u32 addr, u16 half);
-    void writeWord(u32 addr, u32 word);
 
     u32 readWordRotated(u32 addr);
     u32 readHalfRotated(u32 addr);
@@ -74,18 +76,19 @@ private:
     inline u32 add(u32 op1, u32 op2, bool flags);
     inline u32 sub(u32 op1, u32 op2, bool flags);
 
+    int execute();
+
     template<State state>
     inline void advance();
     inline void advance();
     template<State state>
     inline void refill();
 
-    void HWI();
-    void SWI();
     void interrupt(u32 pc, u32 lr, PSR::Mode mode);
+    void interruptHW();
+    void interruptSW();
 
-    void dispatch();
-    void debug();
+    void disasm();
 
     template<Access access>
     inline void cycle(u32 addr);
@@ -97,8 +100,10 @@ private:
 
     u64 cycles;
 
-    static InstructionTableArm instr_arm;
-    static InstructionTableThumb instr_thumb;
+    static std::array<void(ARM::*)(u32), 4096> instr_arm;
+    static std::array<void(ARM::*)(u16), 1024> instr_thumb;
 };
+
+extern ARM arm;
 
 #include "arm.inl"
