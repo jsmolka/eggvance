@@ -1,10 +1,9 @@
 #pragma once
 
-#include "gamepak/gamepak.h"
-#include "bios.h"
-#include "memmap.h"
+#include "common/ram.h"
+#include "palette.h"
 
-class MMU
+class VRAM
 {
 public:
     void reset();
@@ -17,12 +16,10 @@ public:
     void writeHalf(u32 addr, u16 half);
     void writeWord(u32 addr, u32 word);
 
-    BIOS bios;
-    GamePak gamepak;
+    u16 readPixel(u32 addr, int x, int y, Palette::Format format);
 
 private:
-    RAM<0x40000> ewram;
-    RAM<0x08000> iwram;
-};
+    virtual u32 mirror(u32 addr) final;
 
-extern MMU mmu;
+    RAM<0x18000> data;
+};

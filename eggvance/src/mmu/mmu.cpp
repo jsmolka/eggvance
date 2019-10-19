@@ -1,6 +1,7 @@
 #include "mmu.h"
 
 #include "common/utility.h"
+#include "ppu/ppu.h"
 
 MMU mmu;
 
@@ -10,9 +11,6 @@ void MMU::reset()
 
     ewram.fill(0);
     iwram.fill(0);
-    palette.fill(0);
-    vram.fill(0);
-    oam.fill(0);
 }
 
 u8 MMU::readByte(u32 addr)
@@ -29,11 +27,9 @@ u8 MMU::readByte(u32 addr)
         return 0;
 
     case PAGE_EWRAM:
-        addr &= 0x3'FFFF;
         return ewram.readByte(addr);
 
     case PAGE_IWRAM:
-        addr &= 0x7FFF;
         return iwram.readByte(addr);
 
     case PAGE_IO:
@@ -45,18 +41,13 @@ u8 MMU::readByte(u32 addr)
         return 0;
 
     case PAGE_PALETTE:
-        addr &= 0x3FF;
-        return palette.readByte(addr);
+        return ppu.palette.readByte(addr);
 
     case PAGE_VRAM:
-        addr &= 0x1'FFFF;
-        if (addr >= 0x1'8000)
-            addr -= 0x8000;
-        return vram.readByte(addr);
+        return ppu.vram.readByte(addr);
 
     case PAGE_OAM:
-        addr &= 0x3FF;
-        return oam.readByte(addr);
+        return ppu.oam.readByte(addr);
 
     case PAGE_GAMEPAK_0:
     case PAGE_GAMEPAK_0+1:
@@ -107,21 +98,17 @@ u16 MMU::readHalf(u32 addr)
     {
     case PAGE_BIOS:
         if (addr < 0x4000)
-        {
-            addr &= 0x3FFE;
             return bios.readHalf(addr);
-        }
-        return 0;
+        else
+            return 0;
 
     case PAGE_BIOS+1:
         return 0;
 
     case PAGE_EWRAM:
-        addr &= 0x3'FFFE;
         return ewram.readHalf(addr);
 
     case PAGE_IWRAM:
-        addr &= 0x7FFE;
         return iwram.readHalf(addr);
 
     case PAGE_IO:
@@ -133,18 +120,13 @@ u16 MMU::readHalf(u32 addr)
         return 0;
 
     case PAGE_PALETTE:
-        addr &= 0x3FE;
-        return palette.readHalf(addr);
+        return ppu.palette.readHalf(addr);
 
     case PAGE_VRAM:
-        addr &= 0x1'FFFE;
-        if (addr >= 0x1'8000)
-            addr -= 0x8000;
-        return vram.readHalf(addr);
+        return ppu.vram.readHalf(addr);
 
     case PAGE_OAM:
-        addr &= 0x3FE;
-        return oam.readHalf(addr);
+        return ppu.oam.readHalf(addr);
 
     case PAGE_GAMEPAK_0:
     case PAGE_GAMEPAK_0+1:
@@ -176,11 +158,9 @@ u32 MMU::readWord(u32 addr)
     {
     case PAGE_BIOS:
         if (addr < 0x4000)
-        {
-            addr &= 0x3FFC;
             return bios.readWord(addr);
-        }
-        return 0;
+        else
+            return 0;
 
     case PAGE_BIOS+1:
         return 0;
@@ -202,18 +182,13 @@ u32 MMU::readWord(u32 addr)
         return 0;
 
     case PAGE_PALETTE:
-        addr &= 0x3FC;
-        return palette.readWord(addr);
+        return ppu.palette.readWord(addr);
 
     case PAGE_VRAM:
-        addr &= 0x1'FFFC;
-        if (addr >= 0x1'8000)
-            addr -= 0x8000;
-        return vram.readWord(addr);
+        return ppu.vram.readWord(addr);
 
     case PAGE_OAM:
-        addr &= 0x3FC;
-        return oam.readWord(addr);
+        return ppu.oam.readWord(addr);
 
     case PAGE_GAMEPAK_0:
     case PAGE_GAMEPAK_0+1:
@@ -248,12 +223,10 @@ void MMU::writeByte(u32 addr, u8 byte)
         break;
 
     case PAGE_EWRAM:
-        addr &= 0x3'FFFF;
         ewram.writeByte(addr, byte);
         break;
 
     case PAGE_IWRAM:
-        addr &= 0x7FFF;
         iwram.writeByte(addr, byte);
         break;
 
@@ -276,19 +249,15 @@ void MMU::writeByte(u32 addr, u8 byte)
         break;
 
     case PAGE_PALETTE:
-        addr &= 0x3FE;
-        palette.writeHalf(addr, byte * 0x0101);
+        ppu.palette.writeByte(addr, byte);
         break;
 
     case PAGE_VRAM:
-        addr &= 0x1'FFFE;
-        //if (mmio.dispcnt.mode < 3
-        //        ? addr < 0x1'0000  
-        //        : addr < 0x1'4000)
-        //    vram.writeHalf(addr, byte * 0x0101);
+        ppu.vram.writeByte(addr, byte);
         break;
 
     case PAGE_OAM:
+        ppu.oam.writeByte(addr, byte);
         break;
 
     case PAGE_GAMEPAK_0:
@@ -334,12 +303,10 @@ void MMU::writeHalf(u32 addr, u16 half)
         break;
 
     case PAGE_EWRAM:
-        addr &= 0x3'FFFE;
         ewram.writeHalf(addr, half);
         break;
 
     case PAGE_IWRAM:
-        addr &= 0x7FFE;
         iwram.writeHalf(addr, half);
         break;
 
@@ -362,20 +329,15 @@ void MMU::writeHalf(u32 addr, u16 half)
         break;
 
     case PAGE_PALETTE:
-        addr &= 0x3FE;
-        palette.writeHalf(addr, half);
+        ppu.palette.writeHalf(addr, half);
         break;
 
     case PAGE_VRAM:
-        addr &= 0x1'FFFE;
-        if (addr >= 0x1'8000)
-            addr -= 0x8000;
-        vram.writeHalf(addr, half);
+        ppu.vram.writeHalf(addr, half);
         break;
 
     case PAGE_OAM:
-        addr &= 0x3FE;
-        writeOAM(addr, half);
+        ppu.oam.writeHalf(addr, half);
         break;
 
     case PAGE_GAMEPAK_0:
@@ -401,12 +363,10 @@ void MMU::writeWord(u32 addr, u32 word)
         break;
 
     case PAGE_EWRAM:
-        addr &= 0x3'FFFC;
         ewram.writeWord(addr, word);
         break;
 
     case PAGE_IWRAM:
-        addr &= 0x7FFC;
         iwram.writeWord(addr, word);
         break;
 
@@ -429,21 +389,15 @@ void MMU::writeWord(u32 addr, u32 word)
         break;
 
     case PAGE_PALETTE:
-        addr &= 0x3FC;
-        palette.writeWord(addr, word);
+        ppu.palette.writeWord(addr, word);
         break;
 
     case PAGE_VRAM:
-        addr &= 0x1'FFFC;
-        if (addr >= 0x1'8000)
-            addr -= 0x8000;
-        vram.writeWord(addr, word);
+        ppu.vram.writeWord(addr, word);
         break;
 
     case PAGE_OAM:
-        addr &= 0x3FC;
-        writeOAM(addr + 0, (word >>  0) & 0xFFFF);
-        writeOAM(addr + 2, (word >> 16) & 0xFFFF);
+        ppu.oam.writeWord(addr, word);
         break;
 
     case PAGE_GAMEPAK_0:
@@ -458,19 +412,4 @@ void MMU::writeWord(u32 addr, u32 word)
     case PAGE_UNUSED:
         break;
     }
-}
-
-void MMU::writeOAM(u32 addr, u16 half)
-{
-    //if ((addr & 0b110) != 0b110)
-    //{
-    //    auto& entry = oam_entries[addr >> 3];
-    //    switch (addr & 0x7)
-    //    {
-    //    case 0: entry.write<0>(half); break;
-    //    case 2: entry.write<2>(half); break;
-    //    case 4: entry.write<4>(half); break;
-    //    }
-    //}
-    //oam.writeHalf(addr, half);
 }

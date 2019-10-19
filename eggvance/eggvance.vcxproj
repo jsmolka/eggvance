@@ -168,6 +168,11 @@
     <ClCompile Include="src\mmu\registers\displaystatus.cpp" />
     <ClCompile Include="src\mmu\registers\mosaic.cpp" />
     <ClCompile Include="src\mmu\registers\window.cpp" />
+    <ClCompile Include="src\ppu\oam.cpp" />
+    <ClCompile Include="src\ppu\oamentry.cpp" />
+    <ClCompile Include="src\ppu\palette.cpp" />
+    <ClCompile Include="src\ppu\ppu.cpp" />
+    <ClCompile Include="src\ppu\vram.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\arm\arm.h" />
@@ -180,7 +185,7 @@
     <ClInclude Include="src\common\macros.h" />
     <ClInclude Include="src\mmu\bios.h" />
     <ClInclude Include="src\mmu\memmap.h" />
-    <ClInclude Include="src\mmu\ram.h" />
+    <ClInclude Include="src\common\ram.h" />
     <ClInclude Include="src\common\utility.h" />
     <ClInclude Include="src\keypad.h" />
     <ClInclude Include="src\mmu\gamepak\gamepak.h" />
@@ -204,6 +209,11 @@
     <ClInclude Include="src\mmu\registers\windowrange.h" />
     <ClInclude Include="src\ppu\constants.h" />
     <ClInclude Include="src\ppu\layers.h" />
+    <ClInclude Include="src\ppu\oam.h" />
+    <ClInclude Include="src\ppu\oamentry.h" />
+    <ClInclude Include="src\ppu\palette.h" />
+    <ClInclude Include="src\ppu\ppu.h" />
+    <ClInclude Include="src\ppu\vram.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="eggvance.rc" />

@@ -1,12 +1,18 @@
 #pragma once
 
-#include "gamepak/gamepak.h"
-#include "bios.h"
-#include "memmap.h"
+#include "common/ram.h"
 
-class MMU
+class Palette
 {
 public:
+    enum class Format
+    {
+        F16,
+        F256
+    };
+
+    static constexpr u32 transparent = 0x8000;
+
     void reset();
 
     u8  readByte(u32 addr);
@@ -17,12 +23,9 @@ public:
     void writeHalf(u32 addr, u16 half);
     void writeWord(u32 addr, u32 word);
 
-    BIOS bios;
-    GamePak gamepak;
+    u16 readColorFG(int index, int bank = 0);
+    u16 readColorBG(int index, int bank = 0);
 
 private:
-    RAM<0x40000> ewram;
-    RAM<0x08000> iwram;
+    RAM<0x400> data;
 };
-
-extern MMU mmu;

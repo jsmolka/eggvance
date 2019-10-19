@@ -17,3 +17,5 @@
 #    define EGG_UNREACHABLE static_cast<void>(0)
 #  endif
 #endif
+
+#define EGG_UNSUPPORTED static_cast<void>(0)

@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "ram.h"
+#include "common/ram.h"
 
 class BIOS
 {
