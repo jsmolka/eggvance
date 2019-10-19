@@ -21,6 +21,10 @@ public:
     GamePak gamepak;
 
 private:
+    u8 readByteIO(u32 addr);
+    void writeByteIO(u32 addr, u8 byte);
+
+    RAM<0x00400> ioram;
     RAM<0x40000> ewram;
     RAM<0x08000> iwram;
 };

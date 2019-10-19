@@ -2,7 +2,6 @@
 
 #include "common/integer.h"
 #include "common/macros.h"
-#include "ppu/constants.h"
 
 template<int limit>
 class WindowRange

@@ -1,5 +1,7 @@
 #include "blendbrightness.h"
 
+#include <algorithm>
+
 #include "common/utility.h"
 
 void BlendBrightness::reset()
@@ -9,5 +11,6 @@ void BlendBrightness::reset()
 
 void BlendBrightness::write(u8 byte)
 {
-    evy = bits<0, 5>(byte);
+    regs.evy = bits<0, 5>(byte);
+    evy = std::min(16, regs.evy);
 }

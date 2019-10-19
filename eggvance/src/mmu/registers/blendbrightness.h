@@ -2,11 +2,18 @@
 
 #include "common/integer.h"
 
-struct BlendBrightness
+class BlendBrightness
 {
+public:
     void reset();
 
     void write(u8 byte);
 
-    int evy;  // EVY coefficient for brightness (0..16)
+    int evy;  // Adjusted EVY value
+
+private:
+    struct
+    {
+        int evy;  // EVY coefficient for brightness (0..16)
+    } regs;
 };

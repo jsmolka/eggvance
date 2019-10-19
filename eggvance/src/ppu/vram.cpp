@@ -56,7 +56,7 @@ u16 VRAM::readPixel(u32 addr, int x, int y, Palette::Format format)
     }
 }
 
-u32 VRAM::mirror(u32 addr)
+u32 VRAM::Memory::mirror(u32 addr)
 {
     if (addr >= 0x1'8000)
         addr -= 0x8000;

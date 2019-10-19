@@ -1,5 +1,7 @@
 #include "blendalpha.h"
 
+#include <algorithm>
+
 #include "common/macros.h"
 #include "common/utility.h"
 
@@ -15,8 +17,8 @@ u8 BlendAlpha::readByte(int index)
 
     switch (index)
     {
-    case 0: return eva;
-    case 1: return evb;
+    case 0: return regs.eva;
+    case 1: return regs.evb;
 
     default:
         EGG_UNREACHABLE;
@@ -30,8 +32,15 @@ void BlendAlpha::writeByte(int index, u8 byte)
 
     switch (index)
     {
-    case 0: eva = bits<0, 5>(byte); break;
-    case 1: evb = bits<0, 5>(byte); break;
+    case 0: 
+        regs.eva = bits<0, 5>(byte);
+        eva = std::min(16, regs.eva);
+        break;
+
+    case 1: 
+        regs.evb = bits<0, 5>(byte);
+        evb = std::min(16, regs.evb);
+        break;
 
     default:
         EGG_UNREACHABLE;

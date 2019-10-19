@@ -276,18 +276,18 @@ void Arm_MultiplyLong(u32 instr)
     cycle<Access::Seq>(pc + 8);
 }
 
-#define INDEX           \
-    if (increment)      \
-        addr += offset; \
-    else                \
+#define INDEX            \
+    if (increment)       \
+        addr += offset;  \
+    else                 \
         addr -= offset
 
-#define PRE_INDEX       \
-    if (pre_index)      \
+#define PRE_INDEX        \
+    if (pre_index)       \
         INDEX
 
-#define POST_INDEX      \
-    if (!pre_index)     \
+#define POST_INDEX       \
+    if (!pre_index)      \
         INDEX
 
 template<int load, 

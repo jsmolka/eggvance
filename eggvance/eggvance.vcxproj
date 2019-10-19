@@ -168,10 +168,13 @@
     <ClCompile Include="src\mmu\registers\displaystatus.cpp" />
     <ClCompile Include="src\mmu\registers\mosaic.cpp" />
     <ClCompile Include="src\mmu\registers\window.cpp" />
+    <ClCompile Include="src\ppu\backend.cpp" />
+    <ClCompile Include="src\ppu\ppuio.cpp" />
     <ClCompile Include="src\ppu\oam.cpp" />
     <ClCompile Include="src\ppu\oamentry.cpp" />
     <ClCompile Include="src\ppu\palette.cpp" />
     <ClCompile Include="src\ppu\ppu.cpp" />
+    <ClCompile Include="src\ppu\render.cpp" />
     <ClCompile Include="src\ppu\vram.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -207,7 +210,9 @@
     <ClInclude Include="src\mmu\registers\mosaic.h" />
     <ClInclude Include="src\mmu\registers\window.h" />
     <ClInclude Include="src\mmu\registers\windowrange.h" />
-    <ClInclude Include="src\ppu\constants.h" />
+    <ClInclude Include="src\ppu\backend.h" />
+    <ClInclude Include="src\ppu\buffer.h" />
+    <ClInclude Include="src\ppu\ppuio.h" />
     <ClInclude Include="src\ppu\layers.h" />
     <ClInclude Include="src\ppu\oam.h" />
     <ClInclude Include="src\ppu\oamentry.h" />
@@ -223,6 +228,7 @@
     <None Include="src\arm\isa-thumb.inl" />
     <None Include="src\arm\instr-arm.py" />
     <None Include="src\arm\instr-thumb.py" />
+    <None Include="src\ppu\collapse.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
