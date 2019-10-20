@@ -315,18 +315,18 @@ bool PPU::findBlendLayers(const std::vector<BackgroundLayer>& layers, int x, int
     return flags_upper & LF_BDP;
 }
 
-#define PROCESS_BLEND_LAYER(color, flag) \
-    if (upper_found)                     \
-    {                                    \
-        lower = color;                   \
-        return flags_lower & flag;       \
-    }                                    \
-    else                                 \
-    {                                    \
-        upper = color;                   \
-        upper_found = true;              \
-        if ((flags_upper & flag) == 0)   \
-            return false;                \
+#define PROCESS_BLEND_LAYER(color, flag)  \
+    if (upper_found)                      \
+    {                                     \
+        lower = color;                    \
+        return flags_lower & flag;        \
+    }                                     \
+    else                                  \
+    {                                     \
+        upper = color;                    \
+        upper_found = true;               \
+        if (~flags_upper & flag)          \
+            return false;                 \
     }
 
 template<int obj_master>

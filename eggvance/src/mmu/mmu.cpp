@@ -1,6 +1,6 @@
 #include "mmu.h"
 
-#include "common/utility.h"
+#include "arm/arm.h"
 #include "ppu/ppu.h"
 #include "keypad.h"
 
@@ -447,6 +447,9 @@ u8 MMU::readByteIO(u32 addr)
     READ_REG2(REG_BLDY,     ppu.io.bldy);
     READ_REG2(REG_KEYINPUT, keypad.io.keyinput);
     READ_REG2(REG_KEYCNT,   keypad.io.keycnt);
+    READ_REG2(REG_IME,      arm.io.int_master);
+    READ_REG2(REG_IE,       arm.io.int_enabled);
+    READ_REG2(REG_IF,       arm.io.int_request);
     }
     return ioram.readByte(addr);
 }
@@ -507,6 +510,13 @@ void MMU::writeByteIO(u32 addr, u8 byte)
     WRITE_REG2(REG_BLDY,     ppu.io.bldy);
     WRITE_REG2(REG_KEYINPUT, keypad.io.keyinput);
     WRITE_REG2(REG_KEYCNT,   keypad.io.keycnt);
+    WRITE_REG2(REG_IME,      arm.io.int_master);
+    WRITE_REG2(REG_IE,       arm.io.int_enabled);
+    WRITE_REG2(REG_IF,       arm.io.int_request);
+
+    case REG_HALTCNT:
+        arm.io.halt = true;
+        break;
     }
     ioram.writeByte(addr, byte);
 }

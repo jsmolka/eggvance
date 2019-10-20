@@ -167,6 +167,9 @@
     <ClCompile Include="src\mmu\registers\bldy.cpp" />
     <ClCompile Include="src\mmu\registers\dispcnt.cpp" />
     <ClCompile Include="src\mmu\registers\dispstat.cpp" />
+    <ClCompile Include="src\mmu\registers\intenabled.cpp" />
+    <ClCompile Include="src\mmu\registers\intmaster.cpp" />
+    <ClCompile Include="src\mmu\registers\intrequest.cpp" />
     <ClCompile Include="src\mmu\registers\keycnt.cpp" />
     <ClCompile Include="src\mmu\registers\keyinput.cpp" />
     <ClCompile Include="src\mmu\registers\mosaic.cpp" />
@@ -212,6 +215,9 @@
     <ClInclude Include="src\mmu\registers\bldy.h" />
     <ClInclude Include="src\mmu\registers\dispcnt.h" />
     <ClInclude Include="src\mmu\registers\dispstat.h" />
+    <ClInclude Include="src\mmu\registers\intenabled.h" />
+    <ClInclude Include="src\mmu\registers\intmaster.h" />
+    <ClInclude Include="src\mmu\registers\intrequest.h" />
     <ClInclude Include="src\mmu\registers\keycnt.h" />
     <ClInclude Include="src\mmu\registers\keyinput.h" />
     <ClInclude Include="src\mmu\registers\mosaic.h" />
@@ -245,6 +251,9 @@
     <None Include="src\mmu\registers\bldy.inl" />
     <None Include="src\mmu\registers\dispcnt.inl" />
     <None Include="src\mmu\registers\dispstat.inl" />
+    <None Include="src\mmu\registers\intenabled.inl" />
+    <None Include="src\mmu\registers\intmaster.inl" />
+    <None Include="src\mmu\registers\intrequest.inl" />
     <None Include="src\mmu\registers\keycnt.inl" />
     <None Include="src\mmu\registers\keyinput.inl" />
     <None Include="src\mmu\registers\mosaic.inl" />

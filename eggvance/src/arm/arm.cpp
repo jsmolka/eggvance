@@ -5,7 +5,6 @@
 #include "common/integer.h"
 #include "common/macros.h"
 #include "common/utility.h"
-//#include "mmu/interrupt.h"
 #include "diasm.h"
 
 ARM arm;
@@ -14,6 +13,11 @@ void ARM::reset()
 {
     Registers::reset();
 
+    io.int_master.reset();
+    io.int_enabled.reset();
+    io.int_request.reset();
+    io.halt = false;
+
     cycles = 0;
 }
 
@@ -21,17 +25,22 @@ void ARM::run(int cycles)
 {
     while (cycles > 0)
     {
+        if (io.halt)
+        {
+            return;
+        }
         cycles -= execute();
     }
 }
 
 void ARM::irq(Interrupt flag)
 {
-    // Set and check irq registers
-
-    if (!cpsr.irqd)
+    if (io.int_master)
     {
-        interruptHW();
+        if (io.int_request & io.int_enabled)
+            io.halt = false;
+
+        io.int_request |= static_cast<int>(flag);
     }
 }
 
@@ -39,32 +48,39 @@ int ARM::execute()
 {
     u64 last = cycles;
 
-    if (cpsr.thumb)
-    {
-        u16 instr = mmu.readHalf(pc - 4);
+    //#ifdef EGG_DEBUG
+    //disasm();
+    //#endif
 
-        (this->*instr_thumb[instr >> 6])(instr);
+    if (io.int_master && (io.int_enabled & io.int_request) && !cpsr.irqd)
+    {
+        interruptHW();
     }
     else
     {
-        u32 instr = mmu.readWord(pc - 8);
-
-        if (cpsr.check(PSR::Condition(instr >> 28)))
+        if (cpsr.thumb)
         {
-            int hash = ((instr >> 16) & 0xFF0) | ((instr >> 4) & 0xF);
+            u16 instr = mmu.readHalf(pc - 4);
 
-            (this->*instr_arm[hash])(instr);
+            (this->*instr_thumb[instr >> 6])(instr);
         }
         else
         {
-            cycle<Access::Seq>(pc + 8);
+            u32 instr = mmu.readWord(pc - 8);
+
+            if (cpsr.check(PSR::Condition(instr >> 28)))
+            {
+                int hash = ((instr >> 16) & 0xFF0) | ((instr >> 4) & 0xF);
+
+                (this->*instr_arm[hash])(instr);
+            }
+            else
+            {
+                cycle<Access::Seq>(pc + 8);
+            }
         }
     }
     advance();
-
-    #ifdef EGG_DEBUG
-    //disasm();
-    #endif
 
     return static_cast<int>(cycles - last);
 }

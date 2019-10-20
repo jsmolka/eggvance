@@ -39,14 +39,16 @@ inline int bits(T value)
 inline int bitScanForward(u16 value)
 {
     unsigned long index = 0;
-    _BitScanForward(&index, value);
+    if (_BitScanForward(&index, value) == 0)
+        return 0;
     return static_cast<int>(index);
 }
 
 inline int bitScanReverse(u16 value)
 {
     unsigned long index = 0;
-    _BitScanReverse(&index, value);
+    if (_BitScanReverse(&index, value) == 0)
+        return 0;
     return static_cast<int>(index);
 }
 

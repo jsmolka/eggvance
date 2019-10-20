@@ -45,7 +45,7 @@ u16 VRAM::readPixel(u32 addr, int x, int y, Palette::Format format)
 {
     if (format == Palette::Format::F16)
     {
-        u8 byte = data.readByte(addr + 4 * y + x / 2);
+        u8 byte = data[addr + 4 * y + x / 2];
 
         return (x & 0x1)
             ? (byte >> 4) & 0xF
@@ -53,7 +53,7 @@ u16 VRAM::readPixel(u32 addr, int x, int y, Palette::Format format)
     }
     else
     {
-        return data.readByte(addr + 8 * y + x);
+        return data[addr + 8 * y + x];
     }
 }
 

@@ -1,9 +1,14 @@
 #pragma once
 
+#include <fmt/printf.h>
+
 #include <array>
 
 #include "common/macros.h"
 #include "common/utility.h"
+#include "mmu/registers/intenabled.h"
+#include "mmu/registers/intmaster.h"
+#include "mmu/registers/intrequest.h"
 #include "mmu/mmu.h"
 #include "registers.h"
 
@@ -27,6 +32,8 @@ enum class Interrupt
 
 class ARM : public Registers
 {
+    friend class MMU;
+
 public:
     void reset();
 
@@ -53,6 +60,14 @@ private:
         Arm   = 0,
         Thumb = 1
     };
+
+    struct IO
+    {
+        IntMaster int_master;
+        IntEnabled int_enabled;
+        IntRequest int_request;
+        bool halt;
+    } io;
 
     u32 readWordRotated(u32 addr);
     u32 readHalfRotated(u32 addr);
