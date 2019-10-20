@@ -7,8 +7,8 @@
 #include "oam.h"
 #include "palette.h"
 #include "ppuio.h"
-#include "vram.h"
 #include "videobackend.h"
+#include "vram.h"
 
 class PPU
 {

@@ -2,19 +2,19 @@
 
 VideoBackend::~VideoBackend()
 {
-    if (initialized)
-    {
-        SDL_DestroyTexture(texture);
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
+    if (SDL_WasInit(SDL_INIT_VIDEO) == 0)
+        return;
 
-        SDL_QuitSubSystem(SDL_INIT_VIDEO);
-    }
+    SDL_DestroyTexture(texture);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+
+    SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
 
 bool VideoBackend::init()
 {
-    if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0)
+    if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0)
         return false;
 
     window = SDL_CreateWindow(
@@ -38,7 +38,7 @@ bool VideoBackend::init()
         240, 160
     );
 
-    return initialized = (window && renderer && texture);
+    return window && renderer && texture;
 }
 
 void VideoBackend::present()

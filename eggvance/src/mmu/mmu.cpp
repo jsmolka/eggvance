@@ -2,6 +2,7 @@
 
 #include "common/utility.h"
 #include "ppu/ppu.h"
+#include "keypad.h"
 
 MMU mmu;
 
@@ -416,6 +417,12 @@ u8 MMU::readByteIO(u32 addr)
 
     case REG_VCOUNT+1:
         return 0;
+
+    case REG_KEYINPUT:
+        return bits<0, 8>(keypad.io.keyinput);
+
+    case REG_KEYINPUT + 1:
+        return bits<8, 8>(keypad.io.keyinput);
 
     READ_REG2(REG_DISPCNT,  ppu.io.dispcnt);
     READ_REG2(REG_DISPSTAT, ppu.io.dispstat);

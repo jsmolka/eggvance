@@ -120,13 +120,16 @@
     <ClCompile Include="src\ppu\render.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ppu\videobackend.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\emulator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\args.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ppu\videobackend.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mmu\registers\keycontrol.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -251,10 +254,13 @@
     <ClInclude Include="src\ppu\buffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\args.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="src\ppu\videobackend.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\args.h">
+    <ClInclude Include="src\mmu\registers\keycontrol.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -167,6 +167,7 @@
     <ClCompile Include="src\mmu\registers\blendcontrol.cpp" />
     <ClCompile Include="src\mmu\registers\displaycontrol.cpp" />
     <ClCompile Include="src\mmu\registers\displaystatus.cpp" />
+    <ClCompile Include="src\mmu\registers\keycontrol.cpp" />
     <ClCompile Include="src\mmu\registers\mosaic.cpp" />
     <ClCompile Include="src\mmu\registers\window.cpp" />
     <ClCompile Include="src\ppu\videobackend.cpp" />
@@ -209,6 +210,7 @@
     <ClInclude Include="src\mmu\registers\blendcontrol.h" />
     <ClInclude Include="src\mmu\registers\displaycontrol.h" />
     <ClInclude Include="src\mmu\registers\displaystatus.h" />
+    <ClInclude Include="src\mmu\registers\keycontrol.h" />
     <ClInclude Include="src\mmu\registers\mosaic.h" />
     <ClInclude Include="src\mmu\registers\window.h" />
     <ClInclude Include="src\mmu\registers\windowrange.h" />
