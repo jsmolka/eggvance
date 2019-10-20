@@ -291,7 +291,7 @@ bool PPU::findBlendLayers(const std::vector<BackgroundLayer>& layers, int x, int
 {
     const auto& object = objects[x];
     
-    int flags_upper = object.alpha ? LF_OBJ : io.bldcnt.upper.flags;
+    int flags_upper = object.alpha ? LF_OBJ : io.bldcnt.upper;
     
     for (const auto& layer : layers)
     {
@@ -334,8 +334,8 @@ bool PPU::findBlendLayers(const std::vector<BackgroundLayer>& layers, int x, int
 {
     const auto& object = objects[x];
     
-    int flags_upper = object.alpha ? LF_OBJ : io.bldcnt.upper.flags;
-    int flags_lower = io.bldcnt.lower.flags;
+    int flags_upper = object.alpha ? LF_OBJ : io.bldcnt.upper;
+    int flags_lower = io.bldcnt.lower;
     
     bool upper_found = false;
     bool object_used = false;

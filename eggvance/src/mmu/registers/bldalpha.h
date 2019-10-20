@@ -3,17 +3,9 @@
 #include "common/macros.h"
 #include "common/utility.h"
 
-class Mosaic
+class BldAlpha
 {
 public:
-    struct Stretch
-    {
-        void reset();
-
-        int x;
-        int y;
-    };
-
     void reset();
 
     template<int index>
@@ -21,8 +13,17 @@ public:
     template<int index>
     inline void writeByte(u8 byte);
 
-    Stretch bgs;
-    Stretch obj;
+    int eva;
+    int evb;
+
+private:
+    struct Register
+    {
+        int eva;
+        int evb;
+    } reg;
+
+    void update();
 };
 
-#include "mosaic.inl"
+#include "bldalpha.inl"

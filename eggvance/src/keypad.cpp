@@ -20,8 +20,8 @@ Keypad::~Keypad()
 
 void Keypad::reset()
 {
-    io.keyinput = 0x3FF;
-    io.keyinput_raw = 0x3FF;
+    io.keyinput.reset();
+    io.keyinput_raw.reset();
     io.keycnt.reset();
 }
 

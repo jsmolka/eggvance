@@ -66,33 +66,6 @@
     <ClCompile Include="src\mmu\gamepak\gamepak.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\mmu\registers\backgroundcontrol.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mmu\registers\backgroundoffset.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mmu\registers\backgroundparameter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mmu\registers\backgroundreference.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mmu\registers\blendalpha.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mmu\registers\blendbrightness.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mmu\registers\blendcontrol.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mmu\registers\displaycontrol.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mmu\registers\displaystatus.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\mmu\registers\mosaic.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -129,7 +102,40 @@
     <ClCompile Include="src\ppu\videobackend.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\mmu\registers\keycontrol.cpp">
+    <ClCompile Include="src\mmu\registers\dispcnt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mmu\registers\dispstat.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mmu\registers\vcount.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mmu\registers\bgcnt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mmu\registers\bgoffset.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mmu\registers\bgparam.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mmu\registers\bgref.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mmu\registers\bldcnt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mmu\registers\bldalpha.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mmu\registers\bldy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mmu\registers\keyinput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mmu\registers\keycnt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -194,40 +200,10 @@
     <ClInclude Include="src\mmu\gamepak\gamepak.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\backgroundcontrol.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\registers\backgroundoffset.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\registers\backgroundparameter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\registers\backgroundreference.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\registers\blendalpha.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\registers\blendbrightness.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\registers\blendcontrol.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\registers\displaycontrol.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\registers\displaystatus.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\mmu\registers\mosaic.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\mmu\registers\window.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\registers\windowrange.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ppu\oam.h">
@@ -260,7 +236,43 @@
     <ClInclude Include="src\ppu\videobackend.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\registers\keycontrol.h">
+    <ClInclude Include="src\mmu\registers\dispcnt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\dispstat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\vcount.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\bgcnt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\bgoffset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\bgparam.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\bgref.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\windim.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\bldcnt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\bldalpha.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\bldy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\keyinput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\keycnt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -279,6 +291,51 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="src\ppu\collapse.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="src\mmu\registers\dispcnt.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="src\mmu\registers\dispstat.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="src\mmu\registers\vcount.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="src\mmu\registers\bgcnt.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="src\mmu\registers\bgoffset.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="src\mmu\registers\bgparam.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="src\mmu\registers\bgref.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="src\mmu\registers\windim.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="src\mmu\registers\window.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="src\mmu\registers\mosaic.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="src\mmu\registers\bldcnt.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="src\mmu\registers\bldalpha.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="src\mmu\registers\bldy.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="src\mmu\registers\keyinput.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="src\mmu\registers\keycnt.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

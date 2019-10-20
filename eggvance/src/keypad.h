@@ -2,7 +2,8 @@
 
 #include <SDL2/SDL_events.h>
 
-#include "mmu/registers/keycontrol.h"
+#include "mmu/registers/keycnt.h"
+#include "mmu/registers/keyinput.h"
 
 class Keypad
 {
@@ -37,9 +38,9 @@ public:
 private:
     struct IO
     {
-        int keyinput;
-        int keyinput_raw;
-        KeyControl keycnt;
+        KeyCnt keycnt;
+        KeyInput keyinput;
+        KeyInput keyinput_raw;
     } io;
 
     void processOpposingButtons(Button b1, Button b2);

@@ -3,17 +3,9 @@
 #include "common/macros.h"
 #include "common/utility.h"
 
-class Mosaic
+class KeyCnt
 {
 public:
-    struct Stretch
-    {
-        void reset();
-
-        int x;
-        int y;
-    };
-
     void reset();
 
     template<int index>
@@ -21,8 +13,9 @@ public:
     template<int index>
     inline void writeByte(u8 byte);
 
-    Stretch bgs;
-    Stretch obj;
+    int keys;
+    int irq;
+    int irq_logic;
 };
 
-#include "mosaic.inl"
+#include "keycnt.inl"

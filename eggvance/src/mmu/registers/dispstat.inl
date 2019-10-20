@@ -1,22 +1,7 @@
-#include "displaystatus.h"
-
-#include "common/macros.h"
-#include "common/utility.h"
-
-void DisplayStatus::reset()
+template<int index>
+inline u8 DispStat::readByte()
 {
-    vblank         = 0;
-    hblank         = 0;
-    vmatch         = 0;
-    vblank_irq     = 0;
-    hblank_irq     = 0;
-    vmatch_irq     = 0;
-    vcount_compare = 0;
-}
-
-u8 DisplayStatus::readByte(int index)
-{
-    EGG_ASSERT(index == 0 || index == 1, "Invalid index");
+    static_assert(index <= 1, "Invalid index");
 
     u8 byte = 0;
     switch (index)
@@ -31,7 +16,7 @@ u8 DisplayStatus::readByte(int index)
         break;
 
     case 1:
-        byte = vcount_compare;
+        byte = vcompare;
         break;
 
     default:
@@ -41,9 +26,10 @@ u8 DisplayStatus::readByte(int index)
     return byte;
 }
 
-void DisplayStatus::writeByte(int index, u8 byte)
+template<int index>
+inline void DispStat::writeByte(u8 byte)
 {
-    EGG_ASSERT(index == 0 || index == 1, "Invalid index");
+    static_assert(index <= 1, "Invalid index");
 
     switch (index)
     {
@@ -54,7 +40,7 @@ void DisplayStatus::writeByte(int index, u8 byte)
         break;
 
     case 1:
-        vcount_compare = byte;
+        vcompare = byte;
         break;
 
     default:

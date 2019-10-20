@@ -10,13 +10,13 @@ void PPU::renderBgMode0(int bg)
         { 7, 6, 5, 4, 3, 2, 1, 0 }
     };
 
-    const BackgroundControl& bgcnt = io.bgcnt[bg];
+    const auto& bgcnt = io.bgcnt[bg];
 
     int ref_x = io.bghofs[bg].offset;
     int ref_y = io.bgvofs[bg].offset + io.vcount;
 
-    int tile_size = bgcnt.palette_type ? 0x40 : 0x20;
-    Palette::Format pformat = bgcnt.palette_type ? Palette::Format::F256 : Palette::Format::F16;
+    int tile_size = bgcnt.pformat ? 0x40 : 0x20;
+    auto pformat = Palette::Format(bgcnt.pformat);
 
     // Amount of blocks along axis
     int blocks_x = (bgcnt.screen_size & 0x1) ? 2 : 1;
@@ -102,13 +102,13 @@ void PPU::renderBgMode0(int bg)
 
 void PPU::renderBgMode2(int bg)
 {
-    const BackgroundControl& bgcnt = io.bgcnt[bg];
+    const auto& bgcnt = io.bgcnt[bg];
 
-    s16 pa = io.bgpa[bg - 2].parameter;
-    s16 pc = io.bgpc[bg - 2].parameter;
+    s16 pa = io.bgpa[bg - 2].param;
+    s16 pc = io.bgpc[bg - 2].param;
 
-    int ref_x = io.bgx[bg - 2].internal;
-    int ref_y = io.bgy[bg - 2].internal;
+    int ref_x = io.bgx[bg - 2].reg;
+    int ref_y = io.bgy[bg - 2].reg;
 
     int size = bgcnt.size();
 
@@ -190,8 +190,8 @@ void PPU::renderObjects()
 {
     int line = io.vcount;
 
-    int mosaic_x = io.mosaic.obj.x + 1;
-    int mosaic_y = io.mosaic.obj.y + 1;
+    int mosaic_x = io.mosaic.obj.x;
+    int mosaic_y = io.mosaic.obj.y;
 
     for (int e = 127; e >= 0; --e)
     {

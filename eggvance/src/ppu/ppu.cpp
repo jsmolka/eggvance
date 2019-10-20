@@ -101,10 +101,10 @@ void PPU::hblank()
     io.dispstat.hblank = true;
     io.dispstat.vblank = false;
 
-    io.bgx[0].internal += io.bgpb[0].parameter;
-    io.bgx[1].internal += io.bgpb[1].parameter;
-    io.bgy[0].internal += io.bgpd[0].parameter;
-    io.bgy[1].internal += io.bgpd[1].parameter;
+    io.bgx[0].reg += io.bgpb[0].param;
+    io.bgx[1].reg += io.bgpb[1].param;
+    io.bgy[0].reg += io.bgpd[0].param;
+    io.bgy[1].reg += io.bgpd[1].param;
 
     if (io.dispstat.hblank_irq)
     {
@@ -117,10 +117,10 @@ void PPU::vblank()
     io.dispstat.vblank = true;
     io.dispstat.hblank = false;
 
-    io.bgx[0].internal = io.bgx[0].reference;
-    io.bgx[1].internal = io.bgx[1].reference;
-    io.bgy[0].internal = io.bgy[0].reference;
-    io.bgy[1].internal = io.bgy[1].reference;
+    io.bgx[0].reg = io.bgx[0].ref;
+    io.bgx[1].reg = io.bgx[1].ref;
+    io.bgy[0].reg = io.bgy[0].ref;
+    io.bgy[1].reg = io.bgy[1].ref;
 
     if (io.dispstat.vblank_irq)
     {
@@ -130,7 +130,7 @@ void PPU::vblank()
 
 void PPU::next()
 {
-    io.dispstat.vmatch = io.vcount == io.dispstat.vcount_compare;
+    io.dispstat.vmatch = io.vcount == io.dispstat.vcompare;
     if (io.dispstat.vmatch && io.dispstat.vmatch_irq)
     {
         arm.irq(Interrupt::VMatch);
@@ -140,7 +140,7 @@ void PPU::next()
 
 void PPU::present()
 {
-    if (io.dispcnt.enabled())
+    if (io.dispcnt.has_content)
         backend.present();
 }
 
@@ -169,7 +169,7 @@ void PPU::renderBg(RenderFunc func, int bg)
 
 void PPU::mosaic(int bg)
 {
-    int mosaic_x = io.mosaic.bg.x + 1;
+    int mosaic_x = io.mosaic.bgs.x;
     if (mosaic_x == 1)
         return;
 
@@ -186,12 +186,12 @@ void PPU::mosaic(int bg)
 
 bool PPU::mosaicAffected(int bg) const
 {
-    return io.bgcnt[bg].mosaic && (io.mosaic.bg.x > 0 || io.mosaic.bg.y > 0);
+    return io.bgcnt[bg].mosaic && (io.mosaic.bgs.x > 1 || io.mosaic.bgs.y > 1);
 }
 
 bool PPU::mosaicDominant() const
 {
-    return io.vcount % (io.mosaic.bg.y + 1) == 0;
+    return io.vcount % io.mosaic.bgs.y == 0;
 }
 
 void PPU::collapse(int begin, int end)

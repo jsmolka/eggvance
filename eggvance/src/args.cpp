@@ -15,6 +15,6 @@ Args::Args(int argc, char* argv[])
     {
         std::string rom = argv[1];
         if (fs::exists(rom) && fs::is_regular_file(rom))
-            this->rom = argv[1];
+            this->rom = rom;
     }
 }

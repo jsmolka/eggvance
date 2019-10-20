@@ -3,26 +3,21 @@
 #include "common/macros.h"
 #include "common/utility.h"
 
-class Mosaic
+class KeyInput
 {
 public:
-    struct Stretch
-    {
-        void reset();
-
-        int x;
-        int y;
-    };
-
     void reset();
+
+    inline operator int() const;
+    inline KeyInput& operator|=(int value);
+    inline KeyInput& operator&=(int value);
 
     template<int index>
     inline u8 readByte();
     template<int index>
     inline void writeByte(u8 byte);
 
-    Stretch bgs;
-    Stretch obj;
+    int keys;
 };
 
-#include "mosaic.inl"
+#include "keyinput.inl"

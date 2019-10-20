@@ -1,42 +1,46 @@
 #pragma once
 
-#include "common/integer.h"
+#include "common/macros.h"
+#include "common/utility.h"
 
-struct Window
+class Window
 {
+public:
     void reset();
 
     u8 readByte();
     void writeByte(u8 byte);
 
-    int bg0;  // BG0 enabled
-    int bg1;  // BG1 enabled
-    int bg2;  // BG2 enabled
-    int bg3;  // BG3 enabled
-    int obj;  // OBJ enabled
-    int sfx;  // SFX enabled
-
     int flags;
+    int sfx;
 };
 
-struct WindowInside
+class WinIn
 {
+public:
     void reset();
 
-    u8 readByte(int index);
-    void writeByte(int index, u8 byte);
+    template<int index>
+    inline u8 readByte();
+    template<int index>
+    inline void writeByte(u8 byte);
 
     Window win0;
     Window win1;
 };
 
-struct WindowOutside
+class WinOut
 {
+public:
     void reset();
 
-    u8 readByte(int index);
-    void writeByte(int index, u8 byte);
+    template<int index>
+    inline u8 readByte();
+    template<int index>
+    inline void writeByte(u8 byte);
 
     Window winout;
     Window winobj;
 };
+
+#include "window.inl"

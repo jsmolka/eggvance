@@ -3,17 +3,9 @@
 #include "common/macros.h"
 #include "common/utility.h"
 
-class Mosaic
+class DispStat
 {
 public:
-    struct Stretch
-    {
-        void reset();
-
-        int x;
-        int y;
-    };
-
     void reset();
 
     template<int index>
@@ -21,8 +13,13 @@ public:
     template<int index>
     inline void writeByte(u8 byte);
 
-    Stretch bgs;
-    Stretch obj;
+    int vblank;
+    int hblank;
+    int vmatch;
+    int vblank_irq;
+    int hblank_irq;
+    int vmatch_irq;
+    int vcompare;
 };
 
-#include "mosaic.inl"
+#include "dispstat.inl"

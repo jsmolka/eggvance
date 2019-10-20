@@ -394,79 +394,83 @@ void MMU::writeWord(u32 addr, u32 word)
     }
 }
 
-#define READ_REG(label, reg, index)  \
-    case label + index:              \
-        return reg.readByte(index)
+#define READ_REG2(label, reg)                  \
+    case label + 0: return reg.readByte<0>();  \
+    case label + 1: return reg.readByte<1>()
 
-#define READ_REG2(label, reg)  \
-    READ_REG(label, reg, 0);   \
-    READ_REG(label, reg, 1)
-
-#define READ_REG4(label, reg)  \
-    READ_REG(label, reg, 0);   \
-    READ_REG(label, reg, 1);   \
-    READ_REG(label, reg, 2);   \
-    READ_REG(label, reg, 3);
+#define READ_REG4(label, reg)                  \
+    case label + 0: return reg.readByte<0>();  \
+    case label + 1: return reg.readByte<1>();  \
+    case label + 2: return reg.readByte<2>();  \
+    case label + 3: return reg.readByte<3>()
 
 u8 MMU::readByteIO(u32 addr)
 {
     switch (addr)
     {
-    case REG_VCOUNT:
-        return ppu.io.vcount;
-
-    case REG_VCOUNT+1:
-        return 0;
-
-    case REG_KEYINPUT:
-        return bits<0, 8>(keypad.io.keyinput);
-
-    case REG_KEYINPUT + 1:
-        return bits<8, 8>(keypad.io.keyinput);
-
     READ_REG2(REG_DISPCNT,  ppu.io.dispcnt);
     READ_REG2(REG_DISPSTAT, ppu.io.dispstat);
+    READ_REG2(REG_VCOUNT,   ppu.io.vcount);
     READ_REG2(REG_BG0CNT,   ppu.io.bgcnt[0]);
     READ_REG2(REG_BG1CNT,   ppu.io.bgcnt[1]);
     READ_REG2(REG_BG2CNT,   ppu.io.bgcnt[2]);
     READ_REG2(REG_BG3CNT,   ppu.io.bgcnt[3]);
+    READ_REG2(REG_BG0HOFS,  ppu.io.bghofs[0]);
+    READ_REG2(REG_BG1HOFS,  ppu.io.bghofs[1]);
+    READ_REG2(REG_BG2HOFS,  ppu.io.bghofs[2]);
+    READ_REG2(REG_BG3HOFS,  ppu.io.bghofs[3]);
+    READ_REG2(REG_BG0VOFS,  ppu.io.bgvofs[0]);
+    READ_REG2(REG_BG1VOFS,  ppu.io.bgvofs[1]);
+    READ_REG2(REG_BG2VOFS,  ppu.io.bgvofs[2]);
+    READ_REG2(REG_BG3VOFS,  ppu.io.bgvofs[3]);
+    READ_REG2(REG_BG2PA,    ppu.io.bgpa[0]);
+    READ_REG2(REG_BG2PB,    ppu.io.bgpb[0]);
+    READ_REG2(REG_BG2PC,    ppu.io.bgpc[0]);
+    READ_REG2(REG_BG2PD,    ppu.io.bgpd[0]);
+    READ_REG2(REG_BG3PA,    ppu.io.bgpa[1]);
+    READ_REG2(REG_BG3PB,    ppu.io.bgpb[1]);
+    READ_REG2(REG_BG3PC,    ppu.io.bgpc[1]);
+    READ_REG2(REG_BG3PD,    ppu.io.bgpd[1]);
+    READ_REG4(REG_BG2X,     ppu.io.bgx[0]);
+    READ_REG4(REG_BG2Y,     ppu.io.bgy[0]);
+    READ_REG4(REG_BG3X,     ppu.io.bgx[1]);
+    READ_REG4(REG_BG3Y,     ppu.io.bgy[1]);
+    READ_REG2(REG_WIN0H,    ppu.io.winh[0]);
+    READ_REG2(REG_WIN0V,    ppu.io.winv[0]);
+    READ_REG2(REG_WIN1H,    ppu.io.winh[1]);
+    READ_REG2(REG_WIN1V,    ppu.io.winv[1]);
     READ_REG2(REG_WININ,    ppu.io.winin);
     READ_REG2(REG_WINOUT,   ppu.io.winout);
+    READ_REG2(REG_MOSAIC,   ppu.io.mosaic);
     READ_REG2(REG_BLDCNT,   ppu.io.bldcnt);
     READ_REG2(REG_BLDALPHA, ppu.io.bldalpha);
+    READ_REG2(REG_BLDY,     ppu.io.bldy);
+    READ_REG2(REG_KEYINPUT, keypad.io.keyinput);
+    READ_REG2(REG_KEYCNT,   keypad.io.keycnt);
     }
     return ioram.readByte(addr);
 }
 
-#undef READ_REG
-#undef READ_REG2
 #undef READ_REG4
+#undef READ_REG2
 
-#define WRITE_REG(label, reg, index)  \
-    case label + index:               \
-        reg.writeByte(index, byte);   \
-        break
+#define WRITE_REG2(label, reg)                       \
+    case label + 0: reg.writeByte<0>(byte); return;  \
+    case label + 1: reg.writeByte<1>(byte); return
 
-#define WRITE_REG2(label, reg)  \
-    WRITE_REG(label, reg, 0);   \
-    WRITE_REG(label, reg, 1)
-
-#define WRITE_REG4(label, reg)  \
-    WRITE_REG(label, reg, 0);   \
-    WRITE_REG(label, reg, 1);   \
-    WRITE_REG(label, reg, 2);   \
-    WRITE_REG(label, reg, 3);
+#define WRITE_REG4(label, reg)                       \
+    case label + 0: reg.writeByte<0>(byte); return;  \
+    case label + 1: reg.writeByte<1>(byte); return;  \
+    case label + 2: reg.writeByte<2>(byte); return;  \
+    case label + 3: reg.writeByte<3>(byte); return
 
 void MMU::writeByteIO(u32 addr, u8 byte)
 {
     switch (addr)
     {
-    case REG_BLDY:
-        ppu.io.bldy.write(byte);
-        break;
-
     WRITE_REG2(REG_DISPCNT,  ppu.io.dispcnt);
     WRITE_REG2(REG_DISPSTAT, ppu.io.dispstat);
+    WRITE_REG2(REG_VCOUNT,   ppu.io.vcount);
     WRITE_REG2(REG_BG0CNT,   ppu.io.bgcnt[0]);
     WRITE_REG2(REG_BG1CNT,   ppu.io.bgcnt[1]);
     WRITE_REG2(REG_BG2CNT,   ppu.io.bgcnt[2]);
@@ -500,10 +504,12 @@ void MMU::writeByteIO(u32 addr, u8 byte)
     WRITE_REG2(REG_MOSAIC,   ppu.io.mosaic);
     WRITE_REG2(REG_BLDCNT,   ppu.io.bldcnt);
     WRITE_REG2(REG_BLDALPHA, ppu.io.bldalpha);
+    WRITE_REG2(REG_BLDY,     ppu.io.bldy);
+    WRITE_REG2(REG_KEYINPUT, keypad.io.keyinput);
+    WRITE_REG2(REG_KEYCNT,   keypad.io.keycnt);
     }
     ioram.writeByte(addr, byte);
 }
 
-#undef WRITE_REG
-#undef WRITE_REG2
 #undef WRITE_REG4
+#undef WRITE_REG2
