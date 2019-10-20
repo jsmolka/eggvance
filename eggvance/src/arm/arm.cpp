@@ -33,15 +33,12 @@ void ARM::run(int cycles)
     }
 }
 
-void ARM::irq(Interrupt flag)
+void ARM::request(Interrupt flag)
 {
-    if (io.int_master)
-    {
-        if (io.int_request & io.int_enabled)
-            io.halt = false;
+    if (io.int_enabled & static_cast<int>(flag))
+        io.halt = false;
 
-        io.int_request |= static_cast<int>(flag);
-    }
+    io.int_request |= static_cast<int>(flag);
 }
 
 int ARM::execute()

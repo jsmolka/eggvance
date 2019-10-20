@@ -136,7 +136,7 @@ void Keypad::processButton(Button button, bool pressed)
 
         if (interrupt)
         {
-            arm.irq(Interrupt::Keypad);
+            arm.request(Interrupt::Keypad);
         }
     }
 }

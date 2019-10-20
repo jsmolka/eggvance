@@ -38,7 +38,7 @@ public:
     void reset();
 
     void run(int cycles);
-    void irq(Interrupt flag);
+    void request(Interrupt flag);
 
 private:
     enum class Access

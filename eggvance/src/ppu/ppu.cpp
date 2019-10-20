@@ -108,7 +108,7 @@ void PPU::hblank()
 
     if (io.dispstat.hblank_irq)
     {
-        arm.irq(Interrupt::HBlank);
+        arm.request(Interrupt::HBlank);
     }
 }
 
@@ -124,7 +124,7 @@ void PPU::vblank()
 
     if (io.dispstat.vblank_irq)
     {
-        arm.irq(Interrupt::VBlank);
+        arm.request(Interrupt::VBlank);
     }
 }
 
@@ -133,7 +133,7 @@ void PPU::next()
     io.dispstat.vmatch = io.vcount == io.dispstat.vcompare;
     if (io.dispstat.vmatch && io.dispstat.vmatch_irq)
     {
-        arm.irq(Interrupt::VMatch);
+        arm.request(Interrupt::VMatch);
     }
     io.vcount = (io.vcount + 1) % 228;
 }
