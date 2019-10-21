@@ -153,6 +153,18 @@
     <ClCompile Include="src\mmu\registers\tmcnt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\dma.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mmu\registers\dmaaddr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mmu\registers\dmacnt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dmacontroller.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="icon\icon.h">
@@ -305,6 +317,18 @@
     <ClInclude Include="src\mmu\registers\tmcnt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\dma.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\dmaaddr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\dmacnt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dmacontroller.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="eggvance.rc">
@@ -378,6 +402,12 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="src\mmu\registers\tmcnt.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="src\mmu\registers\dmaaddr.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="src\mmu\registers\dmacnt.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

@@ -33,6 +33,8 @@ void ARM::reset()
     for (auto& timer : timers)
         timer.reset();
 
+    dma.reset();
+
     cycles = 0;
 }
 
@@ -40,16 +42,24 @@ void ARM::run(int cycles)
 {
     while (cycles > 0)
     {
-        if (io.halt)
+        if (dma.active)
         {
-            for (auto& timer : timers)
-                timer.run(cycles);
-            return;
+            // Todo: timers
+            dma.run(cycles);
         }
-        int c = execute();
-        for (auto& timer : timers)
-            timer.run(c);
-        cycles -= c;
+        else
+        {
+            if (io.halt)
+            {
+                for (auto& timer : timers)
+                    timer.run(cycles);
+                return;
+            }
+            int c = execute();
+            for (auto& timer : timers)
+                timer.run(c);
+            cycles -= c;
+        }
     }
 }
 

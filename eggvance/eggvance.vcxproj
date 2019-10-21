@@ -150,6 +150,7 @@
     <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\arm\shifts.cpp" />
     <ClCompile Include="src\common\config.cpp" />
+    <ClCompile Include="src\dmacontroller.cpp" />
     <ClCompile Include="src\emulator.cpp" />
     <ClCompile Include="src\keypad.cpp" />
     <ClCompile Include="src\mmu\bios.cpp" />
@@ -167,6 +168,8 @@
     <ClCompile Include="src\mmu\registers\bldy.cpp" />
     <ClCompile Include="src\mmu\registers\dispcnt.cpp" />
     <ClCompile Include="src\mmu\registers\dispstat.cpp" />
+    <ClCompile Include="src\mmu\registers\dmaaddr.cpp" />
+    <ClCompile Include="src\mmu\registers\dmacnt.cpp" />
     <ClCompile Include="src\mmu\registers\intenabled.cpp" />
     <ClCompile Include="src\mmu\registers\intmaster.cpp" />
     <ClCompile Include="src\mmu\registers\intrequest.cpp" />
@@ -176,6 +179,7 @@
     <ClCompile Include="src\mmu\registers\tmcnt.cpp" />
     <ClCompile Include="src\mmu\registers\vcount.cpp" />
     <ClCompile Include="src\mmu\registers\window.cpp" />
+    <ClCompile Include="src\dma.cpp" />
     <ClCompile Include="src\ppu\videobackend.cpp" />
     <ClCompile Include="src\ppu\ppuio.cpp" />
     <ClCompile Include="src\ppu\oam.cpp" />
@@ -196,6 +200,8 @@
     <ClInclude Include="src\arm\registers.h" />
     <ClInclude Include="src\common\config.h" />
     <ClInclude Include="src\common\macros.h" />
+    <ClInclude Include="src\dma.h" />
+    <ClInclude Include="src\dmacontroller.h" />
     <ClInclude Include="src\mmu\bios.h" />
     <ClInclude Include="src\mmu\memmap.h" />
     <ClInclude Include="src\common\ram.h" />
@@ -217,6 +223,8 @@
     <ClInclude Include="src\mmu\registers\bldy.h" />
     <ClInclude Include="src\mmu\registers\dispcnt.h" />
     <ClInclude Include="src\mmu\registers\dispstat.h" />
+    <ClInclude Include="src\mmu\registers\dmaaddr.h" />
+    <ClInclude Include="src\mmu\registers\dmacnt.h" />
     <ClInclude Include="src\mmu\registers\intenabled.h" />
     <ClInclude Include="src\mmu\registers\intmaster.h" />
     <ClInclude Include="src\mmu\registers\intrequest.h" />
@@ -255,6 +263,8 @@
     <None Include="src\mmu\registers\bldy.inl" />
     <None Include="src\mmu\registers\dispcnt.inl" />
     <None Include="src\mmu\registers\dispstat.inl" />
+    <None Include="src\mmu\registers\dmaaddr.inl" />
+    <None Include="src\mmu\registers\dmacnt.inl" />
     <None Include="src\mmu\registers\intenabled.inl" />
     <None Include="src\mmu\registers\intmaster.inl" />
     <None Include="src\mmu\registers\intrequest.inl" />

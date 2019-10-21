@@ -8,6 +8,7 @@
 #include "mmu/registers/intmaster.h"
 #include "mmu/registers/intrequest.h"
 #include "mmu/mmu.h"
+#include "dmacontroller.h"
 #include "registers.h"
 #include "timer.h"
 
@@ -32,6 +33,7 @@ enum class Interrupt
 class ARM : public Registers
 {
     friend class MMU;
+    friend class PPU;
 
 public:
     ARM();
@@ -117,6 +119,7 @@ private:
     u64 cycles;
 
     Timer timers[4];
+    DMAController dma;
 
     static std::array<void(ARM::*)(u32), 4096> instr_arm;
     static std::array<void(ARM::*)(u16), 1024> instr_thumb;

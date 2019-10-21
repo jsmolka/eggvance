@@ -467,6 +467,56 @@ u8 MMU::readByteIO(u32 addr)
     case REG_TM3CNT_L + 1: return arm.timers[3].readByte(1);
     case REG_TM3CNT_H + 0: return arm.timers[3].readByte(2);
     case REG_TM3CNT_H + 1: return arm.timers[3].readByte(3);
+
+    case REG_DMA0SAD + 0:
+    case REG_DMA0SAD + 1:
+    case REG_DMA0SAD + 2:
+    case REG_DMA0SAD + 3:
+    case REG_DMA1SAD + 0:
+    case REG_DMA1SAD + 1:
+    case REG_DMA1SAD + 2:
+    case REG_DMA1SAD + 3:
+    case REG_DMA2SAD + 0:
+    case REG_DMA2SAD + 1:
+    case REG_DMA2SAD + 2:
+    case REG_DMA2SAD + 3:
+    case REG_DMA3SAD + 0:
+    case REG_DMA3SAD + 1:
+    case REG_DMA3SAD + 2:
+    case REG_DMA3SAD + 3:
+    case REG_DMA0DAD + 0:
+    case REG_DMA0DAD + 1:
+    case REG_DMA0DAD + 2:
+    case REG_DMA0DAD + 3:
+    case REG_DMA1DAD + 0:
+    case REG_DMA1DAD + 1:
+    case REG_DMA1DAD + 2:
+    case REG_DMA1DAD + 3:
+    case REG_DMA2DAD + 0:
+    case REG_DMA2DAD + 1:
+    case REG_DMA2DAD + 2:
+    case REG_DMA2DAD + 3:
+    case REG_DMA3DAD + 0:
+    case REG_DMA3DAD + 1:
+    case REG_DMA3DAD + 2:
+    case REG_DMA3DAD + 3:
+    case REG_DMA0CNT_L + 0:
+    case REG_DMA0CNT_L + 1:
+    case REG_DMA0CNT_H + 0:
+    case REG_DMA0CNT_H + 1:
+    case REG_DMA1CNT_L + 0:
+    case REG_DMA1CNT_L + 1:
+    case REG_DMA1CNT_H + 0:
+    case REG_DMA1CNT_H + 1:
+    case REG_DMA2CNT_L + 0:
+    case REG_DMA2CNT_L + 1:
+    case REG_DMA2CNT_H + 0:
+    case REG_DMA2CNT_H + 1:
+    case REG_DMA3CNT_L + 0:
+    case REG_DMA3CNT_L + 1:
+    case REG_DMA3CNT_H + 0:
+    case REG_DMA3CNT_H + 1:
+        return arm.dma.readByte(addr);
     }
     return ioram.readByte(addr);
 }
@@ -551,6 +601,57 @@ void MMU::writeByteIO(u32 addr, u8 byte)
     case REG_TM3CNT_L + 1: arm.timers[3].writeByte(1, byte); return;
     case REG_TM3CNT_H + 0: arm.timers[3].writeByte(2, byte); return;
     case REG_TM3CNT_H + 1: arm.timers[3].writeByte(3, byte); return;
+
+    case REG_DMA0SAD + 0:
+    case REG_DMA0SAD + 1:
+    case REG_DMA0SAD + 2:
+    case REG_DMA0SAD + 3:
+    case REG_DMA1SAD + 0:
+    case REG_DMA1SAD + 1:
+    case REG_DMA1SAD + 2:
+    case REG_DMA1SAD + 3:
+    case REG_DMA2SAD + 0:
+    case REG_DMA2SAD + 1:
+    case REG_DMA2SAD + 2:
+    case REG_DMA2SAD + 3:
+    case REG_DMA3SAD + 0:
+    case REG_DMA3SAD + 1:
+    case REG_DMA3SAD + 2:
+    case REG_DMA3SAD + 3:
+    case REG_DMA0DAD + 0:
+    case REG_DMA0DAD + 1:
+    case REG_DMA0DAD + 2:
+    case REG_DMA0DAD + 3:
+    case REG_DMA1DAD + 0:
+    case REG_DMA1DAD + 1:
+    case REG_DMA1DAD + 2:
+    case REG_DMA1DAD + 3:
+    case REG_DMA2DAD + 0:
+    case REG_DMA2DAD + 1:
+    case REG_DMA2DAD + 2:
+    case REG_DMA2DAD + 3:
+    case REG_DMA3DAD + 0:
+    case REG_DMA3DAD + 1:
+    case REG_DMA3DAD + 2:
+    case REG_DMA3DAD + 3:
+    case REG_DMA0CNT_L + 0:
+    case REG_DMA0CNT_L + 1:
+    case REG_DMA0CNT_H + 0:
+    case REG_DMA0CNT_H + 1:
+    case REG_DMA1CNT_L + 0:
+    case REG_DMA1CNT_L + 1:
+    case REG_DMA1CNT_H + 0:
+    case REG_DMA1CNT_H + 1:
+    case REG_DMA2CNT_L + 0:
+    case REG_DMA2CNT_L + 1:
+    case REG_DMA2CNT_H + 0:
+    case REG_DMA2CNT_H + 1:
+    case REG_DMA3CNT_L + 0:
+    case REG_DMA3CNT_L + 1:
+    case REG_DMA3CNT_H + 0:
+    case REG_DMA3CNT_H + 1:
+        arm.dma.writeByte(addr, byte);
+        return;
     }
     ioram.writeByte(addr, byte);
 }

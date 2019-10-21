@@ -110,6 +110,7 @@ void PPU::hblank()
     {
         arm.request(Interrupt::HBlank);
     }
+    arm.dma.signal(DMA::Timing::HBlank);
 }
 
 void PPU::vblank()
@@ -126,6 +127,7 @@ void PPU::vblank()
     {
         arm.request(Interrupt::VBlank);
     }
+    arm.dma.signal(DMA::Timing::VBlank);
 }
 
 void PPU::next()
