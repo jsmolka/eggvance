@@ -450,6 +450,23 @@ u8 MMU::readByteIO(u32 addr)
     READ_REG2(REG_IME,      arm.io.int_master);
     READ_REG2(REG_IE,       arm.io.int_enabled);
     READ_REG2(REG_IF,       arm.io.int_request);
+
+    case REG_TM0CNT_L + 0: return arm.timers[0].readByte(0);
+    case REG_TM0CNT_L + 1: return arm.timers[0].readByte(1);
+    case REG_TM0CNT_H + 0: return arm.timers[0].readByte(2);
+    case REG_TM0CNT_H + 1: return arm.timers[0].readByte(3);
+    case REG_TM1CNT_L + 0: return arm.timers[1].readByte(0);
+    case REG_TM1CNT_L + 1: return arm.timers[1].readByte(1);
+    case REG_TM1CNT_H + 0: return arm.timers[1].readByte(2);
+    case REG_TM1CNT_H + 1: return arm.timers[1].readByte(3);
+    case REG_TM2CNT_L + 0: return arm.timers[2].readByte(0);
+    case REG_TM2CNT_L + 1: return arm.timers[2].readByte(1);
+    case REG_TM2CNT_H + 0: return arm.timers[2].readByte(2);
+    case REG_TM2CNT_H + 1: return arm.timers[2].readByte(3);
+    case REG_TM3CNT_L + 0: return arm.timers[3].readByte(0);
+    case REG_TM3CNT_L + 1: return arm.timers[3].readByte(1);
+    case REG_TM3CNT_H + 0: return arm.timers[3].readByte(2);
+    case REG_TM3CNT_H + 1: return arm.timers[3].readByte(3);
     }
     return ioram.readByte(addr);
 }
@@ -517,6 +534,23 @@ void MMU::writeByteIO(u32 addr, u8 byte)
     case REG_HALTCNT:
         arm.io.halt = true;
         break;
+
+    case REG_TM0CNT_L + 0: arm.timers[0].writeByte(0, byte); return;
+    case REG_TM0CNT_L + 1: arm.timers[0].writeByte(1, byte); return;
+    case REG_TM0CNT_H + 0: arm.timers[0].writeByte(2, byte); return;
+    case REG_TM0CNT_H + 1: arm.timers[0].writeByte(3, byte); return;
+    case REG_TM1CNT_L + 0: arm.timers[1].writeByte(0, byte); return;
+    case REG_TM1CNT_L + 1: arm.timers[1].writeByte(1, byte); return;
+    case REG_TM1CNT_H + 0: arm.timers[1].writeByte(2, byte); return;
+    case REG_TM1CNT_H + 1: arm.timers[1].writeByte(3, byte); return;
+    case REG_TM2CNT_L + 0: arm.timers[2].writeByte(0, byte); return;
+    case REG_TM2CNT_L + 1: arm.timers[2].writeByte(1, byte); return;
+    case REG_TM2CNT_H + 0: arm.timers[2].writeByte(2, byte); return;
+    case REG_TM2CNT_H + 1: arm.timers[2].writeByte(3, byte); return;
+    case REG_TM3CNT_L + 0: arm.timers[3].writeByte(0, byte); return;
+    case REG_TM3CNT_L + 1: arm.timers[3].writeByte(1, byte); return;
+    case REG_TM3CNT_H + 0: arm.timers[3].writeByte(2, byte); return;
+    case REG_TM3CNT_H + 1: arm.timers[3].writeByte(3, byte); return;
     }
     ioram.writeByte(addr, byte);
 }

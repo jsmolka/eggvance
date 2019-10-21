@@ -1,7 +1,5 @@
 #pragma once
 
-#include <fmt/printf.h>
-
 #include <array>
 
 #include "common/macros.h"
@@ -11,6 +9,7 @@
 #include "mmu/registers/intrequest.h"
 #include "mmu/mmu.h"
 #include "registers.h"
+#include "timer.h"
 
 enum class Interrupt
 {
@@ -35,6 +34,8 @@ class ARM : public Registers
     friend class MMU;
 
 public:
+    ARM();
+
     void reset();
 
     void run(int cycles);
@@ -114,6 +115,8 @@ private:
     #include "isa-thumb.inl"
 
     u64 cycles;
+
+    Timer timers[4];
 
     static std::array<void(ARM::*)(u32), 4096> instr_arm;
     static std::array<void(ARM::*)(u16), 1024> instr_thumb;

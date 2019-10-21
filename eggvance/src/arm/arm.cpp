@@ -9,6 +9,18 @@
 
 ARM arm;
 
+ARM::ARM()
+{
+    timers[0].id = 0;
+    timers[1].id = 1;
+    timers[2].id = 2;
+    timers[3].id = 3;
+
+    timers[0].next = &timers[1];
+    timers[1].next = &timers[2];
+    timers[2].next = &timers[3];
+}
+
 void ARM::reset()
 {
     Registers::reset();
@@ -17,6 +29,9 @@ void ARM::reset()
     io.int_enabled.reset();
     io.int_request.reset();
     io.halt = false;
+
+    for (auto& timer : timers)
+        timer.reset();
 
     cycles = 0;
 }
@@ -27,9 +42,14 @@ void ARM::run(int cycles)
     {
         if (io.halt)
         {
+            for (auto& timer : timers)
+                timer.run(cycles);
             return;
         }
-        cycles -= execute();
+        int c = execute();
+        for (auto& timer : timers)
+            timer.run(c);
+        cycles -= c;
     }
 }
 

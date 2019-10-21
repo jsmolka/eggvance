@@ -147,6 +147,12 @@
     <ClCompile Include="src\mmu\registers\intenabled.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\timer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mmu\registers\tmcnt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="icon\icon.h">
@@ -293,6 +299,12 @@
     <ClInclude Include="src\mmu\registers\intenabled.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\timer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\registers\tmcnt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="eggvance.rc">
@@ -363,6 +375,9 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="src\mmu\registers\intenabled.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="src\mmu\registers\tmcnt.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
