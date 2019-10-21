@@ -72,7 +72,7 @@ void Timer::runInternal(int cycles)
             arm.request(flags[id]);
         }
 
-        counter = control.initial + (counter % overflow);
+        counter = prescalers[control.prescaler] * control.initial + (counter % overflow);
     }
 }
 
