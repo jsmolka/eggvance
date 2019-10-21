@@ -394,11 +394,11 @@ void MMU::writeWord(u32 addr, u32 word)
     }
 }
 
-#define READ_REG2(label, reg)                  \
+#define READ2(label, reg)                      \
     case label + 0: return reg.readByte<0>();  \
     case label + 1: return reg.readByte<1>()
 
-#define READ_REG4(label, reg)                  \
+#define READ4(label, reg)                      \
     case label + 0: return reg.readByte<0>();  \
     case label + 1: return reg.readByte<1>();  \
     case label + 2: return reg.readByte<2>();  \
@@ -406,129 +406,73 @@ void MMU::writeWord(u32 addr, u32 word)
 
 u8 MMU::readByteIO(u32 addr)
 {
+    if (addr >= REG_DMA0SAD && addr < REG_TM0CNT)
+    {
+        return arm.dma.readByte(addr);
+    }
+
     switch (addr)
     {
-    READ_REG2(REG_DISPCNT,  ppu.io.dispcnt);
-    READ_REG2(REG_DISPSTAT, ppu.io.dispstat);
-    READ_REG2(REG_VCOUNT,   ppu.io.vcount);
-    READ_REG2(REG_BG0CNT,   ppu.io.bgcnt[0]);
-    READ_REG2(REG_BG1CNT,   ppu.io.bgcnt[1]);
-    READ_REG2(REG_BG2CNT,   ppu.io.bgcnt[2]);
-    READ_REG2(REG_BG3CNT,   ppu.io.bgcnt[3]);
-    READ_REG2(REG_BG0HOFS,  ppu.io.bghofs[0]);
-    READ_REG2(REG_BG1HOFS,  ppu.io.bghofs[1]);
-    READ_REG2(REG_BG2HOFS,  ppu.io.bghofs[2]);
-    READ_REG2(REG_BG3HOFS,  ppu.io.bghofs[3]);
-    READ_REG2(REG_BG0VOFS,  ppu.io.bgvofs[0]);
-    READ_REG2(REG_BG1VOFS,  ppu.io.bgvofs[1]);
-    READ_REG2(REG_BG2VOFS,  ppu.io.bgvofs[2]);
-    READ_REG2(REG_BG3VOFS,  ppu.io.bgvofs[3]);
-    READ_REG2(REG_BG2PA,    ppu.io.bgpa[0]);
-    READ_REG2(REG_BG2PB,    ppu.io.bgpb[0]);
-    READ_REG2(REG_BG2PC,    ppu.io.bgpc[0]);
-    READ_REG2(REG_BG2PD,    ppu.io.bgpd[0]);
-    READ_REG2(REG_BG3PA,    ppu.io.bgpa[1]);
-    READ_REG2(REG_BG3PB,    ppu.io.bgpb[1]);
-    READ_REG2(REG_BG3PC,    ppu.io.bgpc[1]);
-    READ_REG2(REG_BG3PD,    ppu.io.bgpd[1]);
-    READ_REG4(REG_BG2X,     ppu.io.bgx[0]);
-    READ_REG4(REG_BG2Y,     ppu.io.bgy[0]);
-    READ_REG4(REG_BG3X,     ppu.io.bgx[1]);
-    READ_REG4(REG_BG3Y,     ppu.io.bgy[1]);
-    READ_REG2(REG_WIN0H,    ppu.io.winh[0]);
-    READ_REG2(REG_WIN0V,    ppu.io.winv[0]);
-    READ_REG2(REG_WIN1H,    ppu.io.winh[1]);
-    READ_REG2(REG_WIN1V,    ppu.io.winv[1]);
-    READ_REG2(REG_WININ,    ppu.io.winin);
-    READ_REG2(REG_WINOUT,   ppu.io.winout);
-    READ_REG2(REG_MOSAIC,   ppu.io.mosaic);
-    READ_REG2(REG_BLDCNT,   ppu.io.bldcnt);
-    READ_REG2(REG_BLDALPHA, ppu.io.bldalpha);
-    READ_REG2(REG_BLDY,     ppu.io.bldy);
-    READ_REG2(REG_KEYINPUT, keypad.io.keyinput);
-    READ_REG2(REG_KEYCNT,   keypad.io.keycnt);
-    READ_REG2(REG_IME,      arm.io.int_master);
-    READ_REG2(REG_IE,       arm.io.int_enabled);
-    READ_REG2(REG_IF,       arm.io.int_request);
-
-    case REG_TM0CNT_L + 0: return arm.timers[0].readByte(0);
-    case REG_TM0CNT_L + 1: return arm.timers[0].readByte(1);
-    case REG_TM0CNT_H + 0: return arm.timers[0].readByte(2);
-    case REG_TM0CNT_H + 1: return arm.timers[0].readByte(3);
-    case REG_TM1CNT_L + 0: return arm.timers[1].readByte(0);
-    case REG_TM1CNT_L + 1: return arm.timers[1].readByte(1);
-    case REG_TM1CNT_H + 0: return arm.timers[1].readByte(2);
-    case REG_TM1CNT_H + 1: return arm.timers[1].readByte(3);
-    case REG_TM2CNT_L + 0: return arm.timers[2].readByte(0);
-    case REG_TM2CNT_L + 1: return arm.timers[2].readByte(1);
-    case REG_TM2CNT_H + 0: return arm.timers[2].readByte(2);
-    case REG_TM2CNT_H + 1: return arm.timers[2].readByte(3);
-    case REG_TM3CNT_L + 0: return arm.timers[3].readByte(0);
-    case REG_TM3CNT_L + 1: return arm.timers[3].readByte(1);
-    case REG_TM3CNT_H + 0: return arm.timers[3].readByte(2);
-    case REG_TM3CNT_H + 1: return arm.timers[3].readByte(3);
-
-    case REG_DMA0SAD + 0:
-    case REG_DMA0SAD + 1:
-    case REG_DMA0SAD + 2:
-    case REG_DMA0SAD + 3:
-    case REG_DMA1SAD + 0:
-    case REG_DMA1SAD + 1:
-    case REG_DMA1SAD + 2:
-    case REG_DMA1SAD + 3:
-    case REG_DMA2SAD + 0:
-    case REG_DMA2SAD + 1:
-    case REG_DMA2SAD + 2:
-    case REG_DMA2SAD + 3:
-    case REG_DMA3SAD + 0:
-    case REG_DMA3SAD + 1:
-    case REG_DMA3SAD + 2:
-    case REG_DMA3SAD + 3:
-    case REG_DMA0DAD + 0:
-    case REG_DMA0DAD + 1:
-    case REG_DMA0DAD + 2:
-    case REG_DMA0DAD + 3:
-    case REG_DMA1DAD + 0:
-    case REG_DMA1DAD + 1:
-    case REG_DMA1DAD + 2:
-    case REG_DMA1DAD + 3:
-    case REG_DMA2DAD + 0:
-    case REG_DMA2DAD + 1:
-    case REG_DMA2DAD + 2:
-    case REG_DMA2DAD + 3:
-    case REG_DMA3DAD + 0:
-    case REG_DMA3DAD + 1:
-    case REG_DMA3DAD + 2:
-    case REG_DMA3DAD + 3:
-    case REG_DMA0CNT_L + 0:
-    case REG_DMA0CNT_L + 1:
-    case REG_DMA0CNT_H + 0:
-    case REG_DMA0CNT_H + 1:
-    case REG_DMA1CNT_L + 0:
-    case REG_DMA1CNT_L + 1:
-    case REG_DMA1CNT_H + 0:
-    case REG_DMA1CNT_H + 1:
-    case REG_DMA2CNT_L + 0:
-    case REG_DMA2CNT_L + 1:
-    case REG_DMA2CNT_H + 0:
-    case REG_DMA2CNT_H + 1:
-    case REG_DMA3CNT_L + 0:
-    case REG_DMA3CNT_L + 1:
-    case REG_DMA3CNT_H + 0:
-    case REG_DMA3CNT_H + 1:
-        return arm.dma.readByte(addr);
+    READ2(REG_DISPCNT,  ppu.io.dispcnt);
+    READ2(REG_DISPSTAT, ppu.io.dispstat);
+    READ2(REG_VCOUNT,   ppu.io.vcount);
+    READ2(REG_BG0CNT,   ppu.io.bgcnt[0]);
+    READ2(REG_BG1CNT,   ppu.io.bgcnt[1]);
+    READ2(REG_BG2CNT,   ppu.io.bgcnt[2]);
+    READ2(REG_BG3CNT,   ppu.io.bgcnt[3]);
+    READ2(REG_BG0HOFS,  ppu.io.bghofs[0]);
+    READ2(REG_BG1HOFS,  ppu.io.bghofs[1]);
+    READ2(REG_BG2HOFS,  ppu.io.bghofs[2]);
+    READ2(REG_BG3HOFS,  ppu.io.bghofs[3]);
+    READ2(REG_BG0VOFS,  ppu.io.bgvofs[0]);
+    READ2(REG_BG1VOFS,  ppu.io.bgvofs[1]);
+    READ2(REG_BG2VOFS,  ppu.io.bgvofs[2]);
+    READ2(REG_BG3VOFS,  ppu.io.bgvofs[3]);
+    READ2(REG_BG2PA,    ppu.io.bgpa[0]);
+    READ2(REG_BG2PB,    ppu.io.bgpb[0]);
+    READ2(REG_BG2PC,    ppu.io.bgpc[0]);
+    READ2(REG_BG2PD,    ppu.io.bgpd[0]);
+    READ2(REG_BG3PA,    ppu.io.bgpa[1]);
+    READ2(REG_BG3PB,    ppu.io.bgpb[1]);
+    READ2(REG_BG3PC,    ppu.io.bgpc[1]);
+    READ2(REG_BG3PD,    ppu.io.bgpd[1]);
+    READ4(REG_BG2X,     ppu.io.bgx[0]);
+    READ4(REG_BG2Y,     ppu.io.bgy[0]);
+    READ4(REG_BG3X,     ppu.io.bgx[1]);
+    READ4(REG_BG3Y,     ppu.io.bgy[1]);
+    READ2(REG_WIN0H,    ppu.io.winh[0]);
+    READ2(REG_WIN0V,    ppu.io.winv[0]);
+    READ2(REG_WIN1H,    ppu.io.winh[1]);
+    READ2(REG_WIN1V,    ppu.io.winv[1]);
+    READ2(REG_WININ,    ppu.io.winin);
+    READ2(REG_WINOUT,   ppu.io.winout);
+    READ2(REG_MOSAIC,   ppu.io.mosaic);
+    READ2(REG_BLDCNT,   ppu.io.bldcnt);
+    READ2(REG_BLDALPHA, ppu.io.bldalpha);
+    READ2(REG_BLDY,     ppu.io.bldy);
+    READ2(REG_KEYINPUT, keypad.io.keyinput);
+    READ2(REG_KEYCNT,   keypad.io.keycnt);
+    READ2(REG_IME,      arm.io.int_master);
+    READ2(REG_IE,       arm.io.int_enabled);
+    READ2(REG_IF,       arm.io.int_request);
+    READ4(REG_DMA0SAD,  arm.dma.dmas[0].sad);
+    READ4(REG_DMA1SAD,  arm.dma.dmas[1].sad);
+    READ4(REG_TM0CNT,   arm.timers[0]);
+    READ4(REG_TM1CNT,   arm.timers[1]);
+    READ4(REG_TM2CNT,   arm.timers[2]);
+    READ4(REG_TM3CNT,   arm.timers[3]);
     }
     return ioram.readByte(addr);
 }
 
-#undef READ_REG4
-#undef READ_REG2
+#undef READ4
+#undef READ2
 
-#define WRITE_REG2(label, reg)                       \
+#define WRITE2(label, reg)                           \
     case label + 0: reg.writeByte<0>(byte); return;  \
     case label + 1: reg.writeByte<1>(byte); return
 
-#define WRITE_REG4(label, reg)                       \
+#define WRITE4(label, reg)                           \
     case label + 0: reg.writeByte<0>(byte); return;  \
     case label + 1: reg.writeByte<1>(byte); return;  \
     case label + 2: reg.writeByte<2>(byte); return;  \
@@ -536,125 +480,67 @@ u8 MMU::readByteIO(u32 addr)
 
 void MMU::writeByteIO(u32 addr, u8 byte)
 {
+    if (addr >= REG_DMA0SAD && addr < REG_TM0CNT)
+    {
+        arm.dma.writeByte(addr, byte);
+        return;
+    }
+
     switch (addr)
     {
-    WRITE_REG2(REG_DISPCNT,  ppu.io.dispcnt);
-    WRITE_REG2(REG_DISPSTAT, ppu.io.dispstat);
-    WRITE_REG2(REG_VCOUNT,   ppu.io.vcount);
-    WRITE_REG2(REG_BG0CNT,   ppu.io.bgcnt[0]);
-    WRITE_REG2(REG_BG1CNT,   ppu.io.bgcnt[1]);
-    WRITE_REG2(REG_BG2CNT,   ppu.io.bgcnt[2]);
-    WRITE_REG2(REG_BG3CNT,   ppu.io.bgcnt[3]);
-    WRITE_REG2(REG_BG0HOFS,  ppu.io.bghofs[0]);
-    WRITE_REG2(REG_BG1HOFS,  ppu.io.bghofs[1]);
-    WRITE_REG2(REG_BG2HOFS,  ppu.io.bghofs[2]);
-    WRITE_REG2(REG_BG3HOFS,  ppu.io.bghofs[3]);
-    WRITE_REG2(REG_BG0VOFS,  ppu.io.bgvofs[0]);
-    WRITE_REG2(REG_BG1VOFS,  ppu.io.bgvofs[1]);
-    WRITE_REG2(REG_BG2VOFS,  ppu.io.bgvofs[2]);
-    WRITE_REG2(REG_BG3VOFS,  ppu.io.bgvofs[3]);
-    WRITE_REG2(REG_BG2PA,    ppu.io.bgpa[0]);
-    WRITE_REG2(REG_BG2PB,    ppu.io.bgpb[0]);
-    WRITE_REG2(REG_BG2PC,    ppu.io.bgpc[0]);
-    WRITE_REG2(REG_BG2PD,    ppu.io.bgpd[0]);
-    WRITE_REG2(REG_BG3PA,    ppu.io.bgpa[1]);
-    WRITE_REG2(REG_BG3PB,    ppu.io.bgpb[1]);
-    WRITE_REG2(REG_BG3PC,    ppu.io.bgpc[1]);
-    WRITE_REG2(REG_BG3PD,    ppu.io.bgpd[1]);
-    WRITE_REG4(REG_BG2X,     ppu.io.bgx[0]);
-    WRITE_REG4(REG_BG2Y,     ppu.io.bgy[0]);
-    WRITE_REG4(REG_BG3X,     ppu.io.bgx[1]);
-    WRITE_REG4(REG_BG3Y,     ppu.io.bgy[1]);
-    WRITE_REG2(REG_WIN0H,    ppu.io.winh[0]);
-    WRITE_REG2(REG_WIN0V,    ppu.io.winv[0]);
-    WRITE_REG2(REG_WIN1H,    ppu.io.winh[1]);
-    WRITE_REG2(REG_WIN1V,    ppu.io.winv[1]);
-    WRITE_REG2(REG_WININ,    ppu.io.winin);
-    WRITE_REG2(REG_WINOUT,   ppu.io.winout);
-    WRITE_REG2(REG_MOSAIC,   ppu.io.mosaic);
-    WRITE_REG2(REG_BLDCNT,   ppu.io.bldcnt);
-    WRITE_REG2(REG_BLDALPHA, ppu.io.bldalpha);
-    WRITE_REG2(REG_BLDY,     ppu.io.bldy);
-    WRITE_REG2(REG_KEYINPUT, keypad.io.keyinput);
-    WRITE_REG2(REG_KEYCNT,   keypad.io.keycnt);
-    WRITE_REG2(REG_IME,      arm.io.int_master);
-    WRITE_REG2(REG_IE,       arm.io.int_enabled);
-    WRITE_REG2(REG_IF,       arm.io.int_request);
+    WRITE2(REG_DISPCNT,  ppu.io.dispcnt);
+    WRITE2(REG_DISPSTAT, ppu.io.dispstat);
+    WRITE2(REG_VCOUNT,   ppu.io.vcount);
+    WRITE2(REG_BG0CNT,   ppu.io.bgcnt[0]);
+    WRITE2(REG_BG1CNT,   ppu.io.bgcnt[1]);
+    WRITE2(REG_BG2CNT,   ppu.io.bgcnt[2]);
+    WRITE2(REG_BG3CNT,   ppu.io.bgcnt[3]);
+    WRITE2(REG_BG0HOFS,  ppu.io.bghofs[0]);
+    WRITE2(REG_BG1HOFS,  ppu.io.bghofs[1]);
+    WRITE2(REG_BG2HOFS,  ppu.io.bghofs[2]);
+    WRITE2(REG_BG3HOFS,  ppu.io.bghofs[3]);
+    WRITE2(REG_BG0VOFS,  ppu.io.bgvofs[0]);
+    WRITE2(REG_BG1VOFS,  ppu.io.bgvofs[1]);
+    WRITE2(REG_BG2VOFS,  ppu.io.bgvofs[2]);
+    WRITE2(REG_BG3VOFS,  ppu.io.bgvofs[3]);
+    WRITE2(REG_BG2PA,    ppu.io.bgpa[0]);
+    WRITE2(REG_BG2PB,    ppu.io.bgpb[0]);
+    WRITE2(REG_BG2PC,    ppu.io.bgpc[0]);
+    WRITE2(REG_BG2PD,    ppu.io.bgpd[0]);
+    WRITE2(REG_BG3PA,    ppu.io.bgpa[1]);
+    WRITE2(REG_BG3PB,    ppu.io.bgpb[1]);
+    WRITE2(REG_BG3PC,    ppu.io.bgpc[1]);
+    WRITE2(REG_BG3PD,    ppu.io.bgpd[1]);
+    WRITE4(REG_BG2X,     ppu.io.bgx[0]);
+    WRITE4(REG_BG2Y,     ppu.io.bgy[0]);
+    WRITE4(REG_BG3X,     ppu.io.bgx[1]);
+    WRITE4(REG_BG3Y,     ppu.io.bgy[1]);
+    WRITE2(REG_WIN0H,    ppu.io.winh[0]);
+    WRITE2(REG_WIN0V,    ppu.io.winv[0]);
+    WRITE2(REG_WIN1H,    ppu.io.winh[1]);
+    WRITE2(REG_WIN1V,    ppu.io.winv[1]);
+    WRITE2(REG_WININ,    ppu.io.winin);
+    WRITE2(REG_WINOUT,   ppu.io.winout);
+    WRITE2(REG_MOSAIC,   ppu.io.mosaic);
+    WRITE2(REG_BLDCNT,   ppu.io.bldcnt);
+    WRITE2(REG_BLDALPHA, ppu.io.bldalpha);
+    WRITE2(REG_BLDY,     ppu.io.bldy);
+    WRITE2(REG_KEYINPUT, keypad.io.keyinput);
+    WRITE2(REG_KEYCNT,   keypad.io.keycnt);
+    WRITE2(REG_IME,      arm.io.int_master);
+    WRITE2(REG_IE,       arm.io.int_enabled);
+    WRITE2(REG_IF,       arm.io.int_request);
+    WRITE4(REG_TM0CNT,   arm.timers[0]);
+    WRITE4(REG_TM1CNT,   arm.timers[1]);
+    WRITE4(REG_TM2CNT,   arm.timers[2]);
+    WRITE4(REG_TM3CNT,   arm.timers[3]);
 
     case REG_HALTCNT:
         arm.io.halt = true;
         break;
-
-    case REG_TM0CNT_L + 0: arm.timers[0].writeByte(0, byte); return;
-    case REG_TM0CNT_L + 1: arm.timers[0].writeByte(1, byte); return;
-    case REG_TM0CNT_H + 0: arm.timers[0].writeByte(2, byte); return;
-    case REG_TM0CNT_H + 1: arm.timers[0].writeByte(3, byte); return;
-    case REG_TM1CNT_L + 0: arm.timers[1].writeByte(0, byte); return;
-    case REG_TM1CNT_L + 1: arm.timers[1].writeByte(1, byte); return;
-    case REG_TM1CNT_H + 0: arm.timers[1].writeByte(2, byte); return;
-    case REG_TM1CNT_H + 1: arm.timers[1].writeByte(3, byte); return;
-    case REG_TM2CNT_L + 0: arm.timers[2].writeByte(0, byte); return;
-    case REG_TM2CNT_L + 1: arm.timers[2].writeByte(1, byte); return;
-    case REG_TM2CNT_H + 0: arm.timers[2].writeByte(2, byte); return;
-    case REG_TM2CNT_H + 1: arm.timers[2].writeByte(3, byte); return;
-    case REG_TM3CNT_L + 0: arm.timers[3].writeByte(0, byte); return;
-    case REG_TM3CNT_L + 1: arm.timers[3].writeByte(1, byte); return;
-    case REG_TM3CNT_H + 0: arm.timers[3].writeByte(2, byte); return;
-    case REG_TM3CNT_H + 1: arm.timers[3].writeByte(3, byte); return;
-
-    case REG_DMA0SAD + 0:
-    case REG_DMA0SAD + 1:
-    case REG_DMA0SAD + 2:
-    case REG_DMA0SAD + 3:
-    case REG_DMA1SAD + 0:
-    case REG_DMA1SAD + 1:
-    case REG_DMA1SAD + 2:
-    case REG_DMA1SAD + 3:
-    case REG_DMA2SAD + 0:
-    case REG_DMA2SAD + 1:
-    case REG_DMA2SAD + 2:
-    case REG_DMA2SAD + 3:
-    case REG_DMA3SAD + 0:
-    case REG_DMA3SAD + 1:
-    case REG_DMA3SAD + 2:
-    case REG_DMA3SAD + 3:
-    case REG_DMA0DAD + 0:
-    case REG_DMA0DAD + 1:
-    case REG_DMA0DAD + 2:
-    case REG_DMA0DAD + 3:
-    case REG_DMA1DAD + 0:
-    case REG_DMA1DAD + 1:
-    case REG_DMA1DAD + 2:
-    case REG_DMA1DAD + 3:
-    case REG_DMA2DAD + 0:
-    case REG_DMA2DAD + 1:
-    case REG_DMA2DAD + 2:
-    case REG_DMA2DAD + 3:
-    case REG_DMA3DAD + 0:
-    case REG_DMA3DAD + 1:
-    case REG_DMA3DAD + 2:
-    case REG_DMA3DAD + 3:
-    case REG_DMA0CNT_L + 0:
-    case REG_DMA0CNT_L + 1:
-    case REG_DMA0CNT_H + 0:
-    case REG_DMA0CNT_H + 1:
-    case REG_DMA1CNT_L + 0:
-    case REG_DMA1CNT_L + 1:
-    case REG_DMA1CNT_H + 0:
-    case REG_DMA1CNT_H + 1:
-    case REG_DMA2CNT_L + 0:
-    case REG_DMA2CNT_L + 1:
-    case REG_DMA2CNT_H + 0:
-    case REG_DMA2CNT_H + 1:
-    case REG_DMA3CNT_L + 0:
-    case REG_DMA3CNT_L + 1:
-    case REG_DMA3CNT_H + 0:
-    case REG_DMA3CNT_H + 1:
-        arm.dma.writeByte(addr, byte);
-        return;
     }
     ioram.writeByte(addr, byte);
 }
 
-#undef WRITE_REG4
-#undef WRITE_REG2
+#undef WRITE4
+#undef WRITE2

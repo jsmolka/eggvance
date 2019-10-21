@@ -13,18 +13,18 @@ public:
     template<int index>
     inline void writeByte(u8 byte);
 
-    int sad_ctrl;
-    int dad_ctrl;
+    int sad_delta;
+    int dad_delta;
     int repeat;
     int word;
     int drq;
     int timing;
     int irq;
-    int enable;
+    int enabled;
     int count;
     int count_mask;
 
-    bool reload;
+    bool update;
 };
 
 #include "dmacnt.inl"

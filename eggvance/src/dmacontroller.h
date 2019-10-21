@@ -16,7 +16,5 @@ public:
     void writeByte(u32 addr, u8 byte);
 
     DMA* active;
-
-private:
     DMA dmas[4];
 };

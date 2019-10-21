@@ -22,20 +22,19 @@ public:
 
     void reset();
     void start();
+
     void run(int& cycles);
 
     int id;
     int count;
     int sad_delta;
     int dad_delta;
-    struct Regs
-    {
-        u32 sad;
-        u32 dad;
-    } regs;
+    u32 sad_addr;
+    u32 dad_addr;
+
     DMAAddr sad;
     DMAAddr dad;
-    DMACnt ctrl;
+    DMACnt control;
 
 private:
     static int deltas[4];

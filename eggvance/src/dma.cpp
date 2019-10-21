@@ -9,73 +9,63 @@ void DMA::reset()
 {
     sad.reset();
     dad.reset();
-    ctrl.reset();
+    control.reset();
 }
 
 void DMA::start()
 {
     state = State::Running;
-    count = ctrl.count;
+    count = control.count;
 
-    if (ctrl.reload)
+    if (control.update)
     {
-        regs.sad = sad.addr;
-        regs.dad = dad.addr;
-        ctrl.reload = false;
+        sad_addr = sad.addr;
+        dad_addr = dad.addr;
+        control.update = false;
     }
-    else if (ctrl.repeat && ctrl.dad_ctrl == 0b11)
+    else if (control.repeat && control.dad_delta == 0b11)
     {
-        regs.dad = dad.addr;
+        dad_addr = dad.addr;
     }
 
-    sad_delta = (ctrl.word ? 4 : 2) * deltas[ctrl.sad_ctrl];
-    dad_delta = (ctrl.word ? 4 : 2) * deltas[ctrl.dad_ctrl];
+    sad_delta = (control.word ? 4 : 2) * deltas[control.sad_delta];
+    dad_delta = (control.word ? 4 : 2) * deltas[control.dad_delta];
 }
 
 void DMA::run(int& cycles)
 {
-    if (ctrl.word)
+    while (count-- > 0)
     {
-        while (count-- > 0)
+        if (control.word)
         {
-            u32 word = mmu.readWord(regs.sad);
-            mmu.writeWord(regs.dad, word);
-
-            regs.sad += sad_delta;
-            regs.dad += dad_delta;
-
-            cycles -= 2 + 2 * 2;
-            if (cycles <= 0)
-                return;
+            u32 word = mmu.readWord(sad_addr);
+            mmu.writeWord(dad_addr, word);
         }
-    }
-    else
-    {
-        while (count-- > 0)
+        else
         {
-            u32 half = mmu.readHalf(regs.sad);
-            mmu.writeHalf(regs.dad, half);
-
-            regs.sad += sad_delta;
-            regs.dad += dad_delta;
-
-            cycles -= 2 + 2 * 2;
-            if (cycles <= 0)
-                return;
+            u32 half = mmu.readHalf(sad_addr);
+            mmu.writeHalf(dad_addr, half);
         }
+
+        sad_addr += sad_delta;
+        dad_addr += dad_delta;
+
+        cycles -= 2 + 2 * 2;
+        if (cycles <= 0)
+            return;
     }
 
-    state = State::Finished;
+    control.enabled = control.repeat;
 
-    ctrl.enable = ctrl.repeat;
-    
-    static constexpr Interrupt flags[4] = {
-        Interrupt::DMA0,
-        Interrupt::DMA1,
-        Interrupt::DMA2,
-        Interrupt::DMA3
-    };
-
-    if (ctrl.irq)
+    if (control.irq)
+    {
+        static constexpr Interrupt flags[4] = {
+            Interrupt::DMA0,
+            Interrupt::DMA1,
+            Interrupt::DMA2,
+            Interrupt::DMA3
+        };
         arm.request(flags[id]);
+    }
+    state = State::Finished;
 }

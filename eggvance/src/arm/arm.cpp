@@ -51,6 +51,7 @@ void ARM::run(int cycles)
         {
             if (io.halt)
             {
+                // Todo: run till first interrupt
                 for (auto& timer : timers)
                     timer.run(cycles);
                 return;

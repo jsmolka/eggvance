@@ -19,10 +19,10 @@ DMAController::DMAController()
     dmas[2].dad.addr_mask = 0x7FF'FFFF;
     dmas[3].dad.addr_mask = 0x7FF'FFFF;
 
-    dmas[0].ctrl.count_mask = 0x3FFF;
-    dmas[1].ctrl.count_mask = 0x3FFF;
-    dmas[2].ctrl.count_mask = 0x3FFF;
-    dmas[3].ctrl.count_mask = 0xFFFF;
+    dmas[0].control.count_mask = 0x3FFF;
+    dmas[1].control.count_mask = 0x3FFF;
+    dmas[2].control.count_mask = 0x3FFF;
+    dmas[3].control.count_mask = 0xFFFF;
 }
 
 void DMAController::reset()
@@ -59,9 +59,9 @@ void DMAController::signal(DMA::Timing timing)
 {
     for (auto& dma : dmas)
     {
-        if (DMA::Timing(dma.ctrl.timing) == timing)
+        if (DMA::Timing(dma.control.timing) == timing)
         {
-            if (dma.ctrl.enable && dma.state != DMA::State::Running)
+            if (dma.control.enabled && dma.state != DMA::State::Running)
             {
                 dma.start();
                 if (!active || dma.id < active->id)
@@ -71,115 +71,67 @@ void DMAController::signal(DMA::Timing timing)
     }
 }
 
+#define READ(label, reg)                       \
+    case label + 0: return reg.readByte<0>();  \
+    case label + 1: return reg.readByte<1>();  \
+    case label + 2: return reg.readByte<2>();  \
+    case label + 3: return reg.readByte<3>()
+
 u8 DMAController::readByte(u32 addr)
 {    
     switch (addr)
     {
-    case REG_DMA0SAD + 0: return dmas[0].sad.readByte<0>();
-    case REG_DMA0SAD + 1: return dmas[0].sad.readByte<1>();
-    case REG_DMA0SAD + 2: return dmas[0].sad.readByte<2>();
-    case REG_DMA0SAD + 3: return dmas[0].sad.readByte<3>();
-    case REG_DMA1SAD + 0: return dmas[1].sad.readByte<0>();
-    case REG_DMA1SAD + 1: return dmas[1].sad.readByte<1>();
-    case REG_DMA1SAD + 2: return dmas[1].sad.readByte<2>();
-    case REG_DMA1SAD + 3: return dmas[1].sad.readByte<3>();
-    case REG_DMA2SAD + 0: return dmas[2].sad.readByte<0>();
-    case REG_DMA2SAD + 1: return dmas[2].sad.readByte<1>();
-    case REG_DMA2SAD + 2: return dmas[2].sad.readByte<2>();
-    case REG_DMA2SAD + 3: return dmas[2].sad.readByte<3>();
-    case REG_DMA3SAD + 0: return dmas[3].sad.readByte<0>();
-    case REG_DMA3SAD + 1: return dmas[3].sad.readByte<1>();
-    case REG_DMA3SAD + 2: return dmas[3].sad.readByte<2>();
-    case REG_DMA3SAD + 3: return dmas[3].sad.readByte<3>();
-    case REG_DMA0DAD + 0: return dmas[0].dad.readByte<0>();
-    case REG_DMA0DAD + 1: return dmas[0].dad.readByte<1>();
-    case REG_DMA0DAD + 2: return dmas[0].dad.readByte<2>();
-    case REG_DMA0DAD + 3: return dmas[0].dad.readByte<3>();
-    case REG_DMA1DAD + 0: return dmas[1].dad.readByte<0>();
-    case REG_DMA1DAD + 1: return dmas[1].dad.readByte<1>();
-    case REG_DMA1DAD + 2: return dmas[1].dad.readByte<2>();
-    case REG_DMA1DAD + 3: return dmas[1].dad.readByte<3>();
-    case REG_DMA2DAD + 0: return dmas[2].dad.readByte<0>();
-    case REG_DMA2DAD + 1: return dmas[2].dad.readByte<1>();
-    case REG_DMA2DAD + 2: return dmas[2].dad.readByte<2>();
-    case REG_DMA2DAD + 3: return dmas[2].dad.readByte<3>();
-    case REG_DMA3DAD + 0: return dmas[3].dad.readByte<0>();
-    case REG_DMA3DAD + 1: return dmas[3].dad.readByte<1>();
-    case REG_DMA3DAD + 2: return dmas[3].dad.readByte<2>();
-    case REG_DMA3DAD + 3: return dmas[3].dad.readByte<3>();
-
-    case REG_DMA0CNT_L + 0: return dmas[0].ctrl.readByte<0>();
-    case REG_DMA0CNT_L + 1: return dmas[0].ctrl.readByte<1>();
-    case REG_DMA0CNT_H + 0: return dmas[0].ctrl.readByte<2>();
-    case REG_DMA0CNT_H + 1: return dmas[0].ctrl.readByte<3>();
-    case REG_DMA1CNT_L + 0: return dmas[1].ctrl.readByte<0>();
-    case REG_DMA1CNT_L + 1: return dmas[1].ctrl.readByte<1>();
-    case REG_DMA1CNT_H + 0: return dmas[1].ctrl.readByte<2>();
-    case REG_DMA1CNT_H + 1: return dmas[1].ctrl.readByte<3>();
-    case REG_DMA2CNT_L + 0: return dmas[2].ctrl.readByte<0>();
-    case REG_DMA2CNT_L + 1: return dmas[2].ctrl.readByte<1>();
-    case REG_DMA2CNT_H + 0: return dmas[2].ctrl.readByte<2>();
-    case REG_DMA2CNT_H + 1: return dmas[2].ctrl.readByte<3>();
-    case REG_DMA3CNT_L + 0: return dmas[3].ctrl.readByte<0>();
-    case REG_DMA3CNT_L + 1: return dmas[3].ctrl.readByte<1>();
-    case REG_DMA3CNT_H + 0: return dmas[3].ctrl.readByte<2>();
-    case REG_DMA3CNT_H + 1: return dmas[3].ctrl.readByte<3>();
+    READ(REG_DMA0SAD, dmas[0].sad);
+    READ(REG_DMA1SAD, dmas[1].sad);
+    READ(REG_DMA2SAD, dmas[2].sad);
+    READ(REG_DMA3SAD, dmas[3].sad);
+    READ(REG_DMA0DAD, dmas[0].dad);
+    READ(REG_DMA1DAD, dmas[1].dad);
+    READ(REG_DMA2DAD, dmas[2].dad);
+    READ(REG_DMA3DAD, dmas[3].dad);
+    READ(REG_DMA0CNT, dmas[0].control);
+    READ(REG_DMA1CNT, dmas[1].control);
+    READ(REG_DMA2CNT, dmas[2].control);
+    READ(REG_DMA3CNT, dmas[3].control);
     }
     return 0;
 }
+
+#undef READ
+
+#define WRITE(label, reg)                           \
+    case label + 0: reg.writeByte<0>(byte); break;  \
+    case label + 1: reg.writeByte<1>(byte); break;  \
+    case label + 2: reg.writeByte<2>(byte); break;  \
+    case label + 3: reg.writeByte<3>(byte); break
 
 void DMAController::writeByte(u32 addr, u8 byte)
 {
     switch (addr)
     {
-    case REG_DMA0SAD + 0: dmas[0].sad.writeByte<0>(byte); break;
-    case REG_DMA0SAD + 1: dmas[0].sad.writeByte<1>(byte); break;
-    case REG_DMA0SAD + 2: dmas[0].sad.writeByte<2>(byte); break;
-    case REG_DMA0SAD + 3: dmas[0].sad.writeByte<3>(byte); break;
-    case REG_DMA1SAD + 0: dmas[1].sad.writeByte<0>(byte); break;
-    case REG_DMA1SAD + 1: dmas[1].sad.writeByte<1>(byte); break;
-    case REG_DMA1SAD + 2: dmas[1].sad.writeByte<2>(byte); break;
-    case REG_DMA1SAD + 3: dmas[1].sad.writeByte<3>(byte); break;
-    case REG_DMA2SAD + 0: dmas[2].sad.writeByte<0>(byte); break;
-    case REG_DMA2SAD + 1: dmas[2].sad.writeByte<1>(byte); break;
-    case REG_DMA2SAD + 2: dmas[2].sad.writeByte<2>(byte); break;
-    case REG_DMA2SAD + 3: dmas[2].sad.writeByte<3>(byte); break;
-    case REG_DMA3SAD + 0: dmas[3].sad.writeByte<0>(byte); break;
-    case REG_DMA3SAD + 1: dmas[3].sad.writeByte<1>(byte); break;
-    case REG_DMA3SAD + 2: dmas[3].sad.writeByte<2>(byte); break;
-    case REG_DMA3SAD + 3: dmas[3].sad.writeByte<3>(byte); break;    
-    case REG_DMA0DAD + 0: dmas[0].dad.writeByte<0>(byte); break;
-    case REG_DMA0DAD + 1: dmas[0].dad.writeByte<1>(byte); break;
-    case REG_DMA0DAD + 2: dmas[0].dad.writeByte<2>(byte); break;
-    case REG_DMA0DAD + 3: dmas[0].dad.writeByte<3>(byte); break;
-    case REG_DMA1DAD + 0: dmas[1].dad.writeByte<0>(byte); break;
-    case REG_DMA1DAD + 1: dmas[1].dad.writeByte<1>(byte); break;
-    case REG_DMA1DAD + 2: dmas[1].dad.writeByte<2>(byte); break;
-    case REG_DMA1DAD + 3: dmas[1].dad.writeByte<3>(byte); break;
-    case REG_DMA2DAD + 0: dmas[2].dad.writeByte<0>(byte); break;
-    case REG_DMA2DAD + 1: dmas[2].dad.writeByte<1>(byte); break;
-    case REG_DMA2DAD + 2: dmas[2].dad.writeByte<2>(byte); break;
-    case REG_DMA2DAD + 3: dmas[2].dad.writeByte<3>(byte); break;
-    case REG_DMA3DAD + 0: dmas[3].dad.writeByte<0>(byte); break;
-    case REG_DMA3DAD + 1: dmas[3].dad.writeByte<1>(byte); break;
-    case REG_DMA3DAD + 2: dmas[3].dad.writeByte<2>(byte); break;
-    case REG_DMA3DAD + 3: dmas[3].dad.writeByte<3>(byte); break;
+    WRITE(REG_DMA0SAD, dmas[0].sad);
+    WRITE(REG_DMA1SAD, dmas[1].sad);
+    WRITE(REG_DMA2SAD, dmas[2].sad);
+    WRITE(REG_DMA3SAD, dmas[3].sad);
+    WRITE(REG_DMA0DAD, dmas[0].dad);
+    WRITE(REG_DMA1DAD, dmas[1].dad);
+    WRITE(REG_DMA2DAD, dmas[2].dad);
+    WRITE(REG_DMA3DAD, dmas[3].dad);
+    WRITE(REG_DMA0CNT, dmas[0].control);
+    WRITE(REG_DMA1CNT, dmas[1].control);
+    WRITE(REG_DMA2CNT, dmas[2].control);
+    WRITE(REG_DMA3CNT, dmas[3].control);
+    }
 
-    case REG_DMA0CNT_L + 0: dmas[0].ctrl.writeByte<0>(byte); break;
-    case REG_DMA0CNT_L + 1: dmas[0].ctrl.writeByte<1>(byte); break;
-    case REG_DMA0CNT_H + 0: dmas[0].ctrl.writeByte<2>(byte); break;
-    case REG_DMA0CNT_H + 1: dmas[0].ctrl.writeByte<3>(byte); signal(DMA::Timing::Immediate); break;
-    case REG_DMA1CNT_L + 0: dmas[1].ctrl.writeByte<0>(byte); break;
-    case REG_DMA1CNT_L + 1: dmas[1].ctrl.writeByte<1>(byte); break;
-    case REG_DMA1CNT_H + 0: dmas[1].ctrl.writeByte<2>(byte); break;
-    case REG_DMA1CNT_H + 1: dmas[1].ctrl.writeByte<3>(byte); signal(DMA::Timing::Immediate); break;
-    case REG_DMA2CNT_L + 0: dmas[2].ctrl.writeByte<0>(byte); break;
-    case REG_DMA2CNT_L + 1: dmas[2].ctrl.writeByte<1>(byte); break;
-    case REG_DMA2CNT_H + 0: dmas[2].ctrl.writeByte<2>(byte); break;
-    case REG_DMA2CNT_H + 1: dmas[2].ctrl.writeByte<3>(byte); signal(DMA::Timing::Immediate); break;
-    case REG_DMA3CNT_L + 0: dmas[3].ctrl.writeByte<0>(byte); break;
-    case REG_DMA3CNT_L + 1: dmas[3].ctrl.writeByte<1>(byte); break;
-    case REG_DMA3CNT_H + 0: dmas[3].ctrl.writeByte<2>(byte); break;
-    case REG_DMA3CNT_H + 1: dmas[3].ctrl.writeByte<3>(byte); signal(DMA::Timing::Immediate); break;
+    switch (addr)
+    {
+    case REG_DMA0CNT + 3:
+    case REG_DMA1CNT + 3:
+    case REG_DMA2CNT + 3:
+    case REG_DMA3CNT + 3:
+        signal(DMA::Timing::Immediate);
+        break;
     }
 }
+
+#undef WRITE
