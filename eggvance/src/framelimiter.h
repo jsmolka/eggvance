@@ -13,8 +13,6 @@ public:
     void end();
 
 private:
-    void reset();
-
     u64 frame_beg;
     u64 frame_end;
     u64 frame_time;

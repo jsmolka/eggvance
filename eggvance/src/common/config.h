@@ -16,6 +16,9 @@ public:
     std::string bios_file;
     std::unordered_map<SDL_Keycode, Keypad::Button> keyboard_map;
     std::unordered_map<SDL_GameControllerButton, Keypad::Button> controller_map;
+    std::unordered_map<SDL_Keycode, double> fps_map;
+    SDL_Keycode fullscreen;
+    SDL_Keycode reset;
 };
 
 extern Config config;

@@ -1,20 +1,19 @@
 #include "framelimiter.h"
 
-#include <fmt/printf.h>
-
 #include "microclock.h"
 
 namespace micro = micro_clock;
 
 FrameLimiter::FrameLimiter()
 {
-    reset();
+    frame_time  = 0;
+    frame_beg   = 0;
+    frame_end   = 0;
+    frame_delta = 0;
 }
 
 void FrameLimiter::setFPS(double fps)
 {
-    reset();
-
     frame_time = 1.0e6 / fps;
 }
 
@@ -36,12 +35,4 @@ void FrameLimiter::end()
         frame_delta += micro::now() - sleep_begin;
     }
     frame_delta -= frame_time;
-}
-
-void FrameLimiter::reset()
-{
-    frame_time  = 0;
-    frame_beg   = 0;
-    frame_end   = 0;
-    frame_delta = 0;
 }

@@ -17,6 +17,8 @@ namespace fs = std::filesystem;
 
 Emulator::Emulator()
 {
+    limiter.setFPS(59.737);
+
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 }
 
@@ -60,10 +62,6 @@ void Emulator::run()
         reset();
     }
 
-    FrameLimiter limiter;
-
-    limiter.setFPS(59.737);
-
     u32 fps_frame = 0;
     u32 fps_begin = SDL_GetTicks();
 
@@ -79,8 +77,11 @@ void Emulator::run()
             case SDL_QUIT:
                 return;
 
-            case SDL_KEYUP:
             case SDL_KEYDOWN:
+                keyboardEvent(event.key);
+                [[falltrough]]
+
+            case SDL_KEYUP:
                 keypad.keyboardEvent(event.key);
                 break;
 
@@ -164,6 +165,23 @@ bool Emulator::dropAwait()
                 break;
             }
         }
+    }
+}
+
+void Emulator::keyboardEvent(const SDL_KeyboardEvent& event)
+{
+    auto key = event.keysym.sym;
+
+    if (key == config.fullscreen)
+        ppu.backend.fullscreen();
+
+    if (key == config.reset)
+        reset();
+
+    auto pair = config.fps_map.find(key);
+    if (pair != config.fps_map.end())
+    {
+        limiter.setFPS(pair->second);
     }
 }
 
