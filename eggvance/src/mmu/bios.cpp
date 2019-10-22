@@ -34,7 +34,7 @@ u8 BIOS::readByte(u32 addr)
     if (arm.pc >= data.size())
         return static_cast<u8>(last);
     else
-        return data.readWord(addr);
+        return data.readByte(addr);
 }
 
 u16 BIOS::readHalf(u32 addr)
