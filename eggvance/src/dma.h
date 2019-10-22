@@ -37,5 +37,8 @@ public:
     DMACnt control;
 
 private:
+    bool readEEPROM(int& cycles);
+    bool writeEEPROM(int& cycles);
+
     static int deltas[4];
 };

@@ -1,9 +1,5 @@
 #pragma once
 
-// Todo:
-// - implement backup types
-// - test header checksum (CRC)
-
 #include <memory>
 #include <string>
 #include <vector>
@@ -31,6 +27,12 @@ public:
     std::unique_ptr<Backup> backup;
 
 private:
+    static std::string toBackupFile(const std::string& file);
+    static std::string makeString(u8* data, int size);
+
+    Header parseHeader();
+    Backup::Type parseBackupType();
+
     std::string file;
     std::vector<u8> data;
 };

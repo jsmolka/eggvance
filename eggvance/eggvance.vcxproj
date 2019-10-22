@@ -154,10 +154,14 @@
     <ClCompile Include="src\emulator.cpp" />
     <ClCompile Include="src\keypad.cpp" />
     <ClCompile Include="src\mmu\bios.cpp" />
+    <ClCompile Include="src\mmu\gamepak\backup.cpp" />
+    <ClCompile Include="src\mmu\gamepak\eeprom.cpp" />
+    <ClCompile Include="src\mmu\gamepak\flash.cpp" />
     <ClCompile Include="src\mmu\gamepak\gamepak.cpp" />
     <ClCompile Include="icon\icon.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\mmu\gamepak\fileutil.cpp" />
+    <ClCompile Include="src\mmu\gamepak\sram.cpp" />
     <ClCompile Include="src\mmu\mmu.cpp" />
     <ClCompile Include="src\mmu\registers\bgcnt.cpp" />
     <ClCompile Include="src\mmu\registers\bgoffset.cpp" />
@@ -203,6 +207,9 @@
     <ClInclude Include="src\dma.h" />
     <ClInclude Include="src\dmacontroller.h" />
     <ClInclude Include="src\mmu\bios.h" />
+    <ClInclude Include="src\mmu\gamepak\eeprom.h" />
+    <ClInclude Include="src\mmu\gamepak\flash.h" />
+    <ClInclude Include="src\mmu\gamepak\sram.h" />
     <ClInclude Include="src\mmu\memmap.h" />
     <ClInclude Include="src\common\ram.h" />
     <ClInclude Include="src\common\utility.h" />

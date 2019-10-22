@@ -44,6 +44,7 @@ void ARM::run(int cycles)
     {
         if (dma.active)
         {
+
             // Todo: timers
             dma.run(cycles);
         }
@@ -85,7 +86,7 @@ int ARM::execute()
         interruptHW();
     }
     else
-    {
+    {            
         if (cpsr.thumb)
         {
             u16 instr = mmu.readHalf(pc - 4);

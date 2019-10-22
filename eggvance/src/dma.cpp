@@ -34,25 +34,68 @@ void DMA::start()
 
 void DMA::run(int& cycles)
 {
-    while (count-- > 0)
+    bool eeprom_w = id == 3 && dad_addr >= 0xD00'0000 && dad_addr < 0xE00'0000;
+    bool eeprom_r = id == 3 && sad_addr >= 0xD00'0000 && sad_addr < 0xE00'0000;
+
+    if ((eeprom_r || eeprom_w) && mmu.gamepak.backup->type == Backup::Type::EEPROM)
     {
-        if (control.word)
+        if (eeprom_w)
         {
-            u32 word = mmu.readWord(sad_addr);
-            mmu.writeWord(dad_addr, word);
+            // Guessing EEPROM size in advance seems to be pretty much impossible.
+            // That's why we base the size on the first write (which should happen
+            // before the first read).
+            if (mmu.gamepak.backup->data.empty())
+            {
+                switch (control.count)
+                {
+                    // Bus width 6
+                case  9:  // Set address for reading
+                case 73:  // Write data to address
+                    mmu.gamepak.backup->data.resize(0x0200, 0);
+                    break;
+
+                    // Bus width 14
+                case 17:  // Set address for reading
+                case 81:  // Write data to address
+                    mmu.gamepak.backup->data.resize(0x2000, 0);
+                    break;
+
+                default:
+                    break;
+                }
+            }
+            
+            if (!writeEEPROM(cycles))
+                return;
         }
         else
         {
-            u32 half = mmu.readHalf(sad_addr);
-            mmu.writeHalf(dad_addr, half);
+            if (!readEEPROM(cycles))
+                return;
         }
+    }
+    else
+    {
+        while (count-- > 0)
+        {
+            if (control.word)
+            {
+                u32 word = mmu.readWord(sad_addr);
+                mmu.writeWord(dad_addr, word);
+            }
+            else
+            {
+                u32 half = mmu.readHalf(sad_addr);
+                mmu.writeHalf(dad_addr, half);
+            }
 
-        sad_addr += sad_delta;
-        dad_addr += dad_delta;
+            sad_addr += sad_delta;
+            dad_addr += dad_delta;
 
-        cycles -= 2 + 2 * 2;
-        if (cycles <= 0)
-            return;
+            cycles -= 2 + 2 * 2;
+            if (cycles <= 0)
+                return;
+        }
     }
 
     control.enabled = control.repeat;
@@ -68,4 +111,38 @@ void DMA::run(int& cycles)
         arm.request(flags[id]);
     }
     state = State::Finished;
+}
+
+bool DMA::readEEPROM(int& cycles)
+{
+    while (count-- > 0)
+    {
+        u8 byte = mmu.gamepak.backup->readByte(sad_addr);
+        mmu.writeHalf(dad_addr, byte);
+
+        sad_addr += sad_delta;
+        dad_addr += dad_delta;
+
+        cycles -= 2 + 2 * 2;
+        if (cycles <= 0)
+            return false;
+    }
+    return true;
+}
+
+bool DMA::writeEEPROM(int& cycles)
+{
+    while (count-- > 0)
+    {
+        u8 byte = static_cast<u8>(mmu.readHalf(sad_addr));
+        mmu.gamepak.backup->writeByte(dad_addr, byte);
+
+        sad_addr += sad_delta;
+        dad_addr += dad_delta;
+
+        cycles -= 2 + 2 * 2;
+        if (cycles <= 0)
+            return false;
+    }
+    return true;
 }

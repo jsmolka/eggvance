@@ -1,22 +1,32 @@
 #pragma once
 
 #include <vector>
+#include <string>
 
 #include "common/integer.h"
 
 class Backup
 {
 public:
-    u8 readByte(u32 addr) { return 0; };
-    void writeByte(u32 addr, u8 byte) { };
-
     enum class Type
     {
-        EEPROM,
+        NONE,
         SRAM,
+        EEPROM,
         FLASH64,
         FLASH128
-    } type;
+    };
 
+    Backup();
+    Backup(const std::string& file, Type type);
+    virtual ~Backup();
+
+    virtual u8 readByte(u32 addr);
+    virtual void writeByte(u32 addr, u8 byte);
+
+    Type type;
     std::vector<u8> data;
+
+private:
+    std::string file;
 };

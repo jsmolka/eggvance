@@ -14,10 +14,10 @@ DMAController::DMAController()
     dmas[2].sad.addr_mask = 0xFFF'FFFF;
     dmas[3].sad.addr_mask = 0xFFF'FFFF;
 
-    dmas[0].dad.addr_mask = 0xFFF'FFFF;
+    dmas[0].dad.addr_mask = 0x7FF'FFFF;
     dmas[1].dad.addr_mask = 0x7FF'FFFF;
     dmas[2].dad.addr_mask = 0x7FF'FFFF;
-    dmas[3].dad.addr_mask = 0x7FF'FFFF;
+    dmas[3].dad.addr_mask = 0xFFF'FFFF;
 
     dmas[0].control.count_mask = 0x3FFF;
     dmas[1].control.count_mask = 0x3FFF;
