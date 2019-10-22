@@ -152,7 +152,9 @@
     <ClCompile Include="src\common\config.cpp" />
     <ClCompile Include="src\dmacontroller.cpp" />
     <ClCompile Include="src\emulator.cpp" />
+    <ClCompile Include="src\framelimiter.cpp" />
     <ClCompile Include="src\keypad.cpp" />
+    <ClCompile Include="src\microclock.cpp" />
     <ClCompile Include="src\mmu\bios.cpp" />
     <ClCompile Include="src\mmu\gamepak\backup.cpp" />
     <ClCompile Include="src\mmu\gamepak\eeprom.cpp" />
@@ -206,6 +208,8 @@
     <ClInclude Include="src\common\macros.h" />
     <ClInclude Include="src\dma.h" />
     <ClInclude Include="src\dmacontroller.h" />
+    <ClInclude Include="src\framelimiter.h" />
+    <ClInclude Include="src\microclock.h" />
     <ClInclude Include="src\mmu\bios.h" />
     <ClInclude Include="src\mmu\gamepak\eeprom.h" />
     <ClInclude Include="src\mmu\gamepak\flash.h" />
