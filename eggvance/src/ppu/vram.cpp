@@ -45,7 +45,7 @@ u16 VRAM::readPixel(u32 addr, int x, int y, Palette::Format format)
 {
     if (format == Palette::Format::F16)
     {
-        u8 byte = data[addr + 4 * y + x / 2];
+        u8 byte = data.readByteFast(addr + 4 * y + x / 2);
 
         return (x & 0x1)
             ? (byte >> 4) & 0xF
@@ -53,19 +53,6 @@ u16 VRAM::readPixel(u32 addr, int x, int y, Palette::Format format)
     }
     else
     {
-        return data[addr + 8 * y + x];
+        return data.readByteFast(addr + 8 * y + x);
     }
-}
-
-u32 VRAM::Memory::alignSize() const
-{
-    return 0x2'0000;
-}
-
-u32 VRAM::Memory::mirror(u32 addr) const
-{
-    if (addr >= 0x1'8000)
-        addr -= 0x8000;
-
-    return addr;
 }

@@ -20,7 +20,7 @@ bool BIOS::init()
         SDL_ShowSimpleMessageBox(0, "Missing BIOS", "Please place a GBA bios.bin next to the emulator.", nullptr);
         return false;
     }
-    if (hash(data.ptr<u32>(0), 0x1000) != expected_hash)
+    if (hash(data.data<u32>(0), 0x1000) != expected_hash)
     {
         SDL_ShowSimpleMessageBox(0, "Invalid BIOS", "The BIOS does not match the requirements.", nullptr);
         return false;
@@ -66,7 +66,7 @@ bool BIOS::read(const std::string& file)
     if (size != data.size())
         return false;
 
-    stream.read(data.ptr<char>(0), size);
+    stream.read(data.data<char>(0), size);
 
     return true;
 }

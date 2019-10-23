@@ -11,7 +11,7 @@ public:
     template<typename T>
     inline T* ptr(std::size_t index)
     {
-        return data.ptr<T>(index);
+        return data.data<T>(index);
     }
 
     u8  readByte(u32 addr);
@@ -25,10 +25,14 @@ public:
     u16 readPixel(u32 addr, int x, int y, Palette::Format format);
 
 private:
-    class Memory : public RAM<0x18000>
+    class Data : public RAM<0x2'0000>
     {
     private:
-        virtual u32 alignSize() const override final;
-        virtual u32 mirror(u32 addr) const override final;
+        inline u32 mirror(u32 addr) const override final
+        {
+            if (addr >= 0x1'8000)
+                addr -= 0x8000;
+            return addr;
+        }
     } data;
 };

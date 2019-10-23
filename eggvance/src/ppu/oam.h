@@ -19,7 +19,7 @@ public:
     void writeWord(u32 addr, u32 word);
 
 private:
-    std::array<OAMEntry, 128> entries;
+    OAMEntry entries[128];
 
     RAM<0x400> data;
 };

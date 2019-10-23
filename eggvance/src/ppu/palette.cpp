@@ -40,7 +40,7 @@ u16 Palette::readColorFG(int index, int bank)
     if (index == 0)
         return transparent;
     else
-        return *data.ptr<u16>(0x200 + 0x20 * bank + 2 * index);
+        return *data.data<u16>(0x200 + 0x20 * bank + 2 * index);
 }
 
 u16 Palette::readColorBG(int index, int bank)
@@ -48,5 +48,5 @@ u16 Palette::readColorBG(int index, int bank)
     if (index == 0)
         return transparent;
     else
-        return *data.ptr<u16>(0x20 * bank + 2 * index);
+        return *data.data<u16>(0x20 * bank + 2 * index);
 }
