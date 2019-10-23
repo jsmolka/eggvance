@@ -7,7 +7,9 @@
 #include "mmu/registers/intenabled.h"
 #include "mmu/registers/intmaster.h"
 #include "mmu/registers/intrequest.h"
+#include "mmu/registers/waitcnt.h"
 #include "mmu/mmu.h"
+#include "ppu/ppu.h"
 #include "dmacontroller.h"
 #include "registers.h"
 #include "timer.h"
@@ -69,6 +71,7 @@ private:
         IntMaster int_master;
         IntEnabled int_enabled;
         IntRequest int_request;
+        WaitCnt waitcnt;
         bool halt;
     } io;
 

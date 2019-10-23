@@ -79,8 +79,6 @@ void Emulator::run()
 
             case SDL_KEYDOWN:
                 keyboardEvent(event.key);
-                [[falltrough]]
-
             case SDL_KEYUP:
                 keypad.keyboardEvent(event.key);
                 break;
@@ -97,6 +95,10 @@ void Emulator::run()
             case SDL_CONTROLLERDEVICEADDED:
             case SDL_CONTROLLERDEVICEREMOVED:
                 keypad.controllerDeviceEvent(event.cdevice);
+                break;
+
+            case SDL_DROPFILE:
+                dropEvent(event.drop);
                 break;
             }
         }
@@ -215,21 +217,10 @@ void Emulator::updateWindowTitle()
     }
     switch (mmu.gamepak.backup->type)
     {
-    case Backup::Type::SRAM:
-        sstream << " - SRAM";
-        break;
-
-    case Backup::Type::FLASH64:
-        sstream << " - FLASH64";
-        break;
-
-    case Backup::Type::FLASH128:
-        sstream << " - FLASH128";
-        break;
-
-    case Backup::Type::EEPROM:
-        sstream << " - EEPROM";
-        break;
+    case Backup::Type::SRAM:     sstream << " - SRAM";     break;
+    case Backup::Type::FLASH64:  sstream << " - FLASH64";  break;
+    case Backup::Type::FLASH128: sstream << " - FLASH128"; break;
+    case Backup::Type::EEPROM:   sstream << " - EEPROM";   break;
     }
     title = sstream.str();
     SDL_SetWindowTitle(ppu.backend.window, title.c_str());

@@ -461,6 +461,7 @@ u8 MMU::readByteIO(u32 addr)
     READ4(REG_TM1CNT,   arm.timers[1]);
     READ4(REG_TM2CNT,   arm.timers[2]);
     READ4(REG_TM3CNT,   arm.timers[3]);
+    READ2(REG_WAITCNT,  arm.io.waitcnt);
     }
     return ioram.readByte(addr);
 }
@@ -534,6 +535,7 @@ void MMU::writeByteIO(u32 addr, u8 byte)
     WRITE4(REG_TM1CNT,   arm.timers[1]);
     WRITE4(REG_TM2CNT,   arm.timers[2]);
     WRITE4(REG_TM3CNT,   arm.timers[3]);
+    WRITE2(REG_WAITCNT,  arm.io.waitcnt);
 
     case REG_HALTCNT:
         arm.io.halt = true;

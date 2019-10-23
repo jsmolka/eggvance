@@ -28,6 +28,7 @@ void ARM::reset()
     io.int_master.reset();
     io.int_enabled.reset();
     io.int_request.reset();
+    io.waitcnt.reset();
     io.halt = false;
 
     for (auto& timer : timers)
@@ -44,23 +45,37 @@ void ARM::run(int cycles)
     {
         if (dma.active)
         {
-
-            // Todo: timers
+            // Todo: temporary
+            int prev = cycles;
             dma.run(cycles);
+            for (int i = 0; i < (prev - cycles); ++i)
+            {
+                for (auto& timer : timers)
+                    timer.run(1);
+            }
         }
         else
         {
             if (io.halt)
             {
-                // Todo: run till first interrupt
-                for (auto& timer : timers)
-                    timer.run(cycles);
-                return;
+                // Todo: temporary
+                while (cycles--)
+                {
+                    for (auto& timer : timers)
+                        timer.run(1);
+                    if (io.int_enabled & io.int_request)
+                        break;
+                }
+                if (!(io.int_enabled & io.int_request))
+                    break;
             }
-            int c = execute();
-            for (auto& timer : timers)
-                timer.run(c);
-            cycles -= c;
+            else
+            {
+                int c = execute();
+                for (auto& timer : timers)
+                    timer.run(c);
+                cycles -= c;
+            }
         }
     }
 }

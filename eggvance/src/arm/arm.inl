@@ -106,10 +106,14 @@ inline void ARM::refill()
 template<ARM::Access access>
 inline void ARM::cycle(u32 addr)
 {
-    // Todo: actually implement
-    // Check if last cycle was on same page, use previous result if possible
+    cycles++;
 
-    cycles += 3;
+    int page = addr >> 28;
+
+    cycles += io.waitcnt.cycles32[static_cast<int>(access)][page];
+
+    if (page >= 0x5 && page < 0x8 && !ppu.io.dispstat.vblank && !ppu.io.dispstat.hblank)
+        cycles++;
 }
 
 inline void ARM::cycle()

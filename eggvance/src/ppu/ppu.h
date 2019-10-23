@@ -12,6 +12,7 @@
 
 class PPU
 {
+    friend class ARM;
     friend class MMU;
     friend class VRAM;
 

@@ -184,6 +184,7 @@
     <ClCompile Include="src\mmu\registers\mosaic.cpp" />
     <ClCompile Include="src\mmu\registers\tmcnt.cpp" />
     <ClCompile Include="src\mmu\registers\vcount.cpp" />
+    <ClCompile Include="src\mmu\registers\waitcnt.cpp" />
     <ClCompile Include="src\mmu\registers\window.cpp" />
     <ClCompile Include="src\dma.cpp" />
     <ClCompile Include="src\ppu\videobackend.cpp" />
@@ -244,6 +245,7 @@
     <ClInclude Include="src\mmu\registers\mosaic.h" />
     <ClInclude Include="src\mmu\registers\tmcnt.h" />
     <ClInclude Include="src\mmu\registers\vcount.h" />
+    <ClInclude Include="src\mmu\registers\waitcnt.h" />
     <ClInclude Include="src\mmu\registers\windim.h" />
     <ClInclude Include="src\mmu\registers\window.h" />
     <ClInclude Include="src\ppu\videobackend.h" />
@@ -284,6 +286,7 @@
     <None Include="src\mmu\registers\mosaic.inl" />
     <None Include="src\mmu\registers\tmcnt.inl" />
     <None Include="src\mmu\registers\vcount.inl" />
+    <None Include="src\mmu\registers\waitcnt.inl" />
     <None Include="src\mmu\registers\windim.inl" />
     <None Include="src\mmu\registers\window.inl" />
     <None Include="src\ppu\collapse.inl" />

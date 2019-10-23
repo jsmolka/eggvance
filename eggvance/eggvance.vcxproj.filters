@@ -183,6 +183,9 @@
     <ClCompile Include="src\framelimiter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\mmu\registers\waitcnt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="icon\icon.h">
@@ -362,6 +365,9 @@
     <ClInclude Include="src\framelimiter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\mmu\registers\waitcnt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="eggvance.rc">
@@ -441,6 +447,9 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="src\mmu\registers\dmacnt.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="src\mmu\registers\waitcnt.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
