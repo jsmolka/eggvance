@@ -5,6 +5,7 @@
 #include "common/integer.h"
 #include "common/macros.h"
 #include "common/utility.h"
+#include "decode.h"
 #include "diasm.h"
 
 ARM arm;
@@ -106,7 +107,33 @@ int ARM::execute()
         {
             u16 instr = mmu.readHalf(pc - 4);
 
-            (this->*instr_thumb[instr >> 6])(instr);
+            switch (decodeThumb(instr))
+            {
+            case InstructionThumb::MoveShiftedRegister: Thumb_MoveShiftedRegister(instr); break;
+            case InstructionThumb::AddSubtract: Thumb_AddSubtract(instr); break;
+            case InstructionThumb::ImmediateOperations: Thumb_ImmediateOperations(instr); break;
+            case InstructionThumb::ALUOperations: Thumb_ALUOperations(instr); break;
+            case InstructionThumb::HighRegisterOperations: Thumb_HighRegisterOperations(instr); break;
+            case InstructionThumb::LoadPCRelative: Thumb_LoadPCRelative(instr); break;
+            case InstructionThumb::LoadStoreRegisterOffset: Thumb_LoadStoreRegisterOffset(instr); break;
+            case InstructionThumb::LoadStoreByteHalf: Thumb_LoadStoreByteHalf(instr); break;
+            case InstructionThumb::LoadStoreImmediateOffset: Thumb_LoadStoreImmediateOffset(instr); break;
+            case InstructionThumb::LoadStoreHalf: Thumb_LoadStoreHalf(instr); break;
+            case InstructionThumb::LoadStoreSPRelative: Thumb_LoadStoreSPRelative(instr); break;
+            case InstructionThumb::LoadRelativeAddress: Thumb_LoadRelativeAddress(instr); break;
+            case InstructionThumb::AddOffsetSP: Thumb_AddOffsetSP(instr); break;
+            case InstructionThumb::PushPopRegisters: Thumb_PushPopRegisters(instr); break;
+            case InstructionThumb::LoadStoreMultiple: Thumb_LoadStoreMultiple(instr); break;
+            case InstructionThumb::ConditionalBranch: Thumb_ConditionalBranch(instr); break;
+            case InstructionThumb::SoftwareInterrupt: Thumb_SoftwareInterrupt(instr); break;
+            case InstructionThumb::UnconditionalBranch: Thumb_UnconditionalBranch(instr); break;
+            case InstructionThumb::LongBranchLink: Thumb_LongBranchLink(instr); break;
+            case InstructionThumb::Undefined: Thumb_Undefined(instr); break;
+
+            default:
+                EGG_UNREACHABLE;
+                break;
+            }
         }
         else
         {
@@ -114,9 +141,28 @@ int ARM::execute()
 
             if (cpsr.check(PSR::Condition(instr >> 28)))
             {
-                int hash = ((instr >> 16) & 0xFF0) | ((instr >> 4) & 0xF);
+                switch (decodeArm(instr))
+                {
+                case InstructionArm::BranchExchange: Arm_BranchExchange(instr); break;
+                case InstructionArm::BranchLink: Arm_BranchLink(instr); break;
+                case InstructionArm::DataProcessing: Arm_DataProcessing(instr); break;
+                case InstructionArm::StatusTransfer: Arm_StatusTransfer(instr); break;
+                case InstructionArm::Multiply: Arm_Multiply(instr); break;
+                case InstructionArm::MultiplyLong: Arm_MultiplyLong(instr); break;
+                case InstructionArm::SingleDataTransfer: Arm_SingleDataTransfer(instr); break;
+                case InstructionArm::HalfSignedDataTransfer: Arm_HalfSignedDataTransfer(instr); break;
+                case InstructionArm::BlockDataTransfer: Arm_BlockDataTransfer(instr); break;
+                case InstructionArm::SingleDataSwap: Arm_SingleDataSwap(instr); break;
+                case InstructionArm::SoftwareInterrupt: Arm_SoftwareInterrupt(instr); break;
+                case InstructionArm::CoprocessorDataOperations: Arm_CoprocessorDataOperations(instr); break;
+                case InstructionArm::CoprocessorDataTransfers: Arm_CoprocessorDataTransfers(instr); break;
+                case InstructionArm::CoprocessorRegisterTransfers: Arm_CoprocessorRegisterTransfers(instr); break;
+                case InstructionArm::Undefined: Arm_Undefined(instr); break;
 
-                (this->*instr_arm[hash])(instr);
+                default:
+                    EGG_UNREACHABLE;
+                    break;
+                }
             }
             else
             {

@@ -1,4 +1,9 @@
-void Arm_BranchExchange(u32 instr)
+#include "arm.h"
+
+#include "common/macros.h"
+#include "common/utility.h"
+
+void ARM::Arm_BranchExchange(u32 instr)
 {
     int rn = bits<0, 4>(instr);
 
@@ -18,10 +23,10 @@ void Arm_BranchExchange(u32 instr)
     }
 }
 
-template<int link>
-void Arm_BranchLink(u32 instr)
+void ARM::Arm_BranchLink(u32 instr)
 {
-    int offset = bits<0, 24>(instr);
+    int offset = bits< 0, 24>(instr);
+    int link   = bits<24,  1>(instr);
 
     cycle<Access::Nonseq>(pc + 8);
 
@@ -34,8 +39,7 @@ void Arm_BranchLink(u32 instr)
     refill<State::Arm>();
 }
 
-template<int flags_, int opcode, int imm_op>
-void Arm_DataProcessing(u32 instr)
+void ARM::Arm_DataProcessing(u32 instr)
 {
     enum class Operation
     {
@@ -57,14 +61,15 @@ void Arm_DataProcessing(u32 instr)
         MVN = 0b1111
     };
 
-    int rd = bits<12, 4>(instr);
-    int rn = bits<16, 4>(instr);
+    int rd     = bits<12, 4>(instr);
+    int rn     = bits<16, 4>(instr);
+    int flags  = bits<20, 1>(instr);
+    int opcode = bits<21, 4>(instr);
+    int imm_op = bits<25, 1>(instr);
 
     u32& dst = regs[rd];
     u32  op1 = regs[rn];
     u32  op2 = 0;
-
-    bool flags = flags_;
 
     bool carry = cpsr.c;
     if (imm_op)
@@ -158,11 +163,15 @@ void Arm_DataProcessing(u32 instr)
     }
 }
 
-template<int write, int use_spsr, int imm_op>
-void Arm_StatusTransfer(u32 instr)
+void ARM::Arm_StatusTransfer(u32 instr)
 {
+    int write    = bits<21, 1>(instr);
+    int use_spsr = bits<22, 1>(instr);
+
     if (write)
     {
+        int imm_op = bits<25,  1>(instr);
+
         constexpr int f_bit = 1 << 19;
         constexpr int s_bit = 1 << 18;
         constexpr int x_bit = 1 << 17;
@@ -211,13 +220,14 @@ void Arm_StatusTransfer(u32 instr)
     cycle<Access::Seq>(pc + 8);
 }
 
-template<int flags, int accumulate>
-void Arm_Multiply(u32 instr)
+void ARM::Arm_Multiply(u32 instr)
 {
-    int rm = bits< 0, 4>(instr);
-    int rs = bits< 8, 4>(instr);
-    int rn = bits<12, 4>(instr);
-    int rd = bits<16, 4>(instr);
+    int rm         = bits< 0, 4>(instr);
+    int rs         = bits< 8, 4>(instr);
+    int rn         = bits<12, 4>(instr);
+    int rd         = bits<16, 4>(instr);
+    int flags      = bits<20, 1>(instr);
+    int accumulate = bits<21, 1>(instr);
 
     u32  op1 = regs[rm];
     u32  op2 = regs[rs];
@@ -236,13 +246,15 @@ void Arm_Multiply(u32 instr)
     cycle<Access::Seq>(pc + 8);
 }
 
-template<int flags, int accumulate, int sign>
-void Arm_MultiplyLong(u32 instr)
+void ARM::Arm_MultiplyLong(u32 instr)
 {
-    int rm  = bits< 0, 4>(instr);
-    int rs  = bits< 8, 4>(instr);
-    int rdl = bits<12, 4>(instr);
-    int rdh = bits<16, 4>(instr);
+    int rm         = bits< 0, 4>(instr);
+    int rs         = bits< 8, 4>(instr);
+    int rdl        = bits<12, 4>(instr);
+    int rdh        = bits<16, 4>(instr);
+    int flags      = bits<20, 1>(instr);
+    int accumulate = bits<21, 1>(instr);
+    int sign       = bits<22, 1>(instr);
 
     u64  op1  = regs[rm];
     u64  op2  = regs[rs];
@@ -290,21 +302,19 @@ void Arm_MultiplyLong(u32 instr)
     if (!pre_index)      \
         INDEX
 
-template<int load, 
-         int writeback_, 
-         int byte, 
-         int increment, 
-         int pre_index, 
-         int imm_offset>
-void Arm_SingleDataTransfer(u32 instr)
+void ARM::Arm_SingleDataTransfer(u32 instr)
 {
-    int rd = bits<12, 4>(instr);
-    int rn = bits<16, 4>(instr);
+    int rd         = bits<12, 4>(instr);
+    int rn         = bits<16, 4>(instr);
+    int load       = bits<20, 1>(instr);
+    int writeback  = bits<21, 1>(instr);
+    int byte       = bits<22, 1>(instr);
+    int increment  = bits<23, 1>(instr);
+    int pre_index  = bits<24, 1>(instr);
+    int imm_offset = bits<25, 1>(instr);
 
     u32& dst = regs[rd];
     u32 addr = regs[rn];
-
-    bool writeback = writeback_ || !pre_index;
 
     u32 offset = 0;
     if (imm_offset)
@@ -369,14 +379,7 @@ void Arm_SingleDataTransfer(u32 instr)
     }
 }
 
-template<
-    int opcode, 
-    int load, 
-    int writeback_, 
-    int imm_offset, 
-    int increment, 
-    int pre_index>
-void Arm_HalfSignedDataTransfer(u32 instr)
+void ARM::Arm_HalfSignedDataTransfer(u32 instr)
 {
     enum class Operation
     {
@@ -386,13 +389,17 @@ void Arm_HalfSignedDataTransfer(u32 instr)
         LDRSH = 0b11
     };
 
-    int rd = bits<12, 4>(instr);
-    int rn = bits<16, 4>(instr);
+    int opcode     = bits< 5, 2>(instr);
+    int rd         = bits<12, 4>(instr);
+    int rn         = bits<16, 4>(instr);
+    int load       = bits<20, 1>(instr);
+    int writeback  = bits<21, 1>(instr);
+    int imm_offset = bits<22, 1>(instr);
+    int increment  = bits<23, 1>(instr);
+    int pre_index  = bits<24, 1>(instr);
 
     u32& dst = regs[rd];
     u32 addr = regs[rn];
-
-    bool writeback = writeback_ || !pre_index;
 
     u32 offset = 0;
     if (imm_offset)
@@ -460,18 +467,19 @@ void Arm_HalfSignedDataTransfer(u32 instr)
     }
 }
 
-template<int load, 
-    int writeback_, 
-    int user_mode, 
-    int increment, 
-    int pre_index_>
-    void Arm_BlockDataTransfer(u32 instr)
-{
-    int rlist = bits< 0, 16>(instr);
-    int rn    = bits<16,  4>(instr);
+#undef INDEX
+#undef PRE_INDEX
+#undef POST_INDEX
 
-    bool writeback = writeback_;
-    bool pre_index = pre_index_;
+void ARM::Arm_BlockDataTransfer(u32 instr)
+{
+    int rlist     = bits< 0, 16>(instr);
+    int rn        = bits<16,  4>(instr);
+    int load      = bits<20,  1>(instr);
+    int writeback = bits<21,  1>(instr);
+    int user_mode = bits<22,  1>(instr);
+    int increment = bits<23,  1>(instr);
+    int pre_index = bits<24,  1>(instr);
 
     u32 addr = regs[rn];
     u32 base = regs[rn];
@@ -599,16 +607,12 @@ template<int load,
         switchMode(mode);
 }
 
-#undef INDEX
-#undef PRE_INDEX
-#undef POST_INDEX
-
-template<int byte>
-void Arm_SingleDataSwap(u32 instr)
+void ARM::Arm_SingleDataSwap(u32 instr)
 {
-    int rm = bits< 0, 4>(instr);
-    int rd = bits<12, 4>(instr);
-    int rn = bits<16, 4>(instr);
+    int rm   = bits< 0, 4>(instr);
+    int rd   = bits<12, 4>(instr);
+    int rn   = bits<16, 4>(instr);
+    int byte = bits<22, 1>(instr);
 
     u32  src = regs[rm];
     u32& dst = regs[rd];
@@ -632,27 +636,27 @@ void Arm_SingleDataSwap(u32 instr)
     cycle();
 }
 
-void Arm_SoftwareInterrupt(u32 instr)
+void ARM::Arm_SoftwareInterrupt(u32 instr)
 {
     interruptSW();
 }
 
-void Arm_CoprocessorDataOperations(u32 instr)
+void ARM::Arm_CoprocessorDataOperations(u32 instr)
 {
-    EGG_ASSERT(false, "Undefined");
+    EGG_ASSERT(false, __FUNCTION__);
 }
 
-void Arm_CoprocessorDataTransfers(u32 instr)
+void ARM::Arm_CoprocessorDataTransfers(u32 instr)
 {
-    EGG_ASSERT(false, "Undefined");
+    EGG_ASSERT(false, __FUNCTION__);
 }
 
-void Arm_CoprocessorRegisterTransfers(u32 instr)
+void ARM::Arm_CoprocessorRegisterTransfers(u32 instr)
 {
-    EGG_ASSERT(false, "Undefined");
+    EGG_ASSERT(false, __FUNCTION__);
 }
 
-void Arm_Undefined(u32 instr)
+void ARM::Arm_Undefined(u32 instr)
 {
-    EGG_ASSERT(false, "Undefined");
+    EGG_ASSERT(false, __FUNCTION__);
 }

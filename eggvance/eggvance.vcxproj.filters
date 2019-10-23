@@ -45,12 +45,6 @@
     <ClCompile Include="src\arm\shifts.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\arm\instr-arm.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\arm\instr-thumb.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\arm\diasm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -186,6 +180,12 @@
     <ClCompile Include="src\mmu\registers\waitcnt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\arm\isa_arm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\arm\isa_thumb.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="icon\icon.h">
@@ -222,9 +222,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\arm\decode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\arm\isa-arm.inl">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\arm\diasm.h">
@@ -376,11 +373,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="src\arm\arm.inl">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="src\arm\instr-arm.py" />
-    <None Include="src\arm\instr-thumb.py" />
-    <None Include="src\arm\isa-thumb.inl">
       <Filter>Header Files</Filter>
     </None>
     <None Include="src\ppu\collapse.inl">

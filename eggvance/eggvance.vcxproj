@@ -144,8 +144,8 @@
     <ClCompile Include="src\arm\bus.cpp" />
     <ClCompile Include="src\arm\decode.cpp" />
     <ClCompile Include="src\arm\diasm.cpp" />
-    <ClCompile Include="src\arm\instr-arm.cpp" />
-    <ClCompile Include="src\arm\instr-thumb.cpp" />
+    <ClCompile Include="src\arm\isa_arm.cpp" />
+    <ClCompile Include="src\arm\isa_thumb.cpp" />
     <ClCompile Include="src\arm\psr.cpp" />
     <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\arm\shifts.cpp" />
@@ -202,7 +202,6 @@
     <ClInclude Include="src\arm\arm.h" />
     <ClInclude Include="src\arm\decode.h" />
     <ClInclude Include="src\arm\diasm.h" />
-    <ClInclude Include="src\arm\isa-arm.inl" />
     <ClInclude Include="src\arm\psr.h" />
     <ClInclude Include="src\arm\registers.h" />
     <ClInclude Include="src\common\config.h" />
@@ -264,9 +263,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="src\arm\arm.inl" />
-    <None Include="src\arm\isa-thumb.inl" />
-    <None Include="src\arm\instr-arm.py" />
-    <None Include="src\arm\instr-thumb.py" />
     <None Include="src\mmu\registers\bgcnt.inl" />
     <None Include="src\mmu\registers\bgoffset.inl" />
     <None Include="src\mmu\registers\bgparam.inl" />

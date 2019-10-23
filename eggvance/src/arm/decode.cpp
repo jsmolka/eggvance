@@ -16,8 +16,8 @@ InstructionArm decodeHashArm(int hash)
     if ((hash & 0b1111'1100'1111) == 0b0000'0000'1001) return InstructionArm::Multiply;
     if ((hash & 0b1111'1000'1111) == 0b0000'1000'1001) return InstructionArm::MultiplyLong;
     if ((hash & 0b1111'1011'1111) == 0b0001'0000'1001) return InstructionArm::SingleDataSwap;
-    if ((hash & 0b1110'0000'1001) == 0b0000'0000'1001) return InstructionArm::HalfwordSignedDataTransfer;
-    if ((hash & 0b1101'1001'0000) == 0b0001'0000'0000) return InstructionArm::PSRTransfer;
+    if ((hash & 0b1110'0000'1001) == 0b0000'0000'1001) return InstructionArm::HalfSignedDataTransfer;
+    if ((hash & 0b1101'1001'0000) == 0b0001'0000'0000) return InstructionArm::StatusTransfer;
     if ((hash & 0b1100'0000'0000) == 0b0000'0000'0000) return InstructionArm::DataProcessing;
 
     return InstructionArm::Undefined;
@@ -48,18 +48,18 @@ InstructionArm decodeArm(u32 instr)
 
 InstructionThumb decodeHashThumb(int hash)
 {
-    if ((hash & 0b1111'1000) == 0b0001'1000) return InstructionThumb::AddSubtractImmediate;
+    if ((hash & 0b1111'1000) == 0b0001'1000) return InstructionThumb::AddSubtract;
     if ((hash & 0b1110'0000) == 0b0000'0000) return InstructionThumb::MoveShiftedRegister;
-    if ((hash & 0b1110'0000) == 0b0010'0000) return InstructionThumb::AddSubtractMoveCompareImmediate;
+    if ((hash & 0b1110'0000) == 0b0010'0000) return InstructionThumb::ImmediateOperations;
     if ((hash & 0b1111'1100) == 0b0100'0000) return InstructionThumb::ALUOperations;
-    if ((hash & 0b1111'1100) == 0b0100'0100) return InstructionThumb::HighRegisterBranchExchange;
+    if ((hash & 0b1111'1100) == 0b0100'0100) return InstructionThumb::HighRegisterOperations;
     if ((hash & 0b1111'1000) == 0b0100'1000) return InstructionThumb::LoadPCRelative;
     if ((hash & 0b1111'0010) == 0b0101'0000) return InstructionThumb::LoadStoreRegisterOffset;
-    if ((hash & 0b1111'0010) == 0b0101'0010) return InstructionThumb::LoadStoreHalfwordSigned;
+    if ((hash & 0b1111'0010) == 0b0101'0010) return InstructionThumb::LoadStoreByteHalf;
     if ((hash & 0b1110'0000) == 0b0110'0000) return InstructionThumb::LoadStoreImmediateOffset;
-    if ((hash & 0b1111'0000) == 0b1000'0000) return InstructionThumb::LoadStoreHalfword;
+    if ((hash & 0b1111'0000) == 0b1000'0000) return InstructionThumb::LoadStoreHalf;
     if ((hash & 0b1111'0000) == 0b1001'0000) return InstructionThumb::LoadStoreSPRelative;
-    if ((hash & 0b1111'0000) == 0b1010'0000) return InstructionThumb::LoadAddress;
+    if ((hash & 0b1111'0000) == 0b1010'0000) return InstructionThumb::LoadRelativeAddress;
     if ((hash & 0b1111'1111) == 0b1011'0000) return InstructionThumb::AddOffsetSP;
     if ((hash & 0b1111'0110) == 0b1011'0100) return InstructionThumb::PushPopRegisters;
     if ((hash & 0b1111'0000) == 0b1100'0000) return InstructionThumb::LoadStoreMultiple;

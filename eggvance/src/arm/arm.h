@@ -2,8 +2,6 @@
 
 #include <array>
 
-#include "common/macros.h"
-#include "common/utility.h"
 #include "mmu/registers/intenabled.h"
 #include "mmu/registers/intmaster.h"
 #include "mmu/registers/intrequest.h"
@@ -116,16 +114,47 @@ private:
     inline void cycle();
     inline void cycleBooth(u32 multiplier, bool allow_ones);
 
-    #include "isa-arm.inl"
-    #include "isa-thumb.inl"
+    void Arm_BranchExchange(u32 instr);
+    void Arm_BranchLink(u32 instr);
+    void Arm_DataProcessing(u32 instr);
+    void Arm_StatusTransfer(u32 instr);
+    void Arm_Multiply(u32 instr);
+    void Arm_MultiplyLong(u32 instr);
+    void Arm_SingleDataTransfer(u32 instr);
+    void Arm_HalfSignedDataTransfer(u32 instr);
+    void Arm_BlockDataTransfer(u32 instr);
+    void Arm_SingleDataSwap(u32 instr);
+    void Arm_SoftwareInterrupt(u32 instr);
+    void Arm_CoprocessorDataOperations(u32 instr);
+    void Arm_CoprocessorDataTransfers(u32 instr);
+    void Arm_CoprocessorRegisterTransfers(u32 instr);
+    void Arm_Undefined(u32 instr);
+
+    void Thumb_MoveShiftedRegister(u16 instr);
+    void Thumb_AddSubtract(u16 instr);
+    void Thumb_ImmediateOperations(u16 instr);
+    void Thumb_ALUOperations(u16 instr);
+    void Thumb_HighRegisterOperations(u16 instr);
+    void Thumb_LoadPCRelative(u16 instr);
+    void Thumb_LoadStoreRegisterOffset(u16 instr);
+    void Thumb_LoadStoreByteHalf(u16 instr);
+    void Thumb_LoadStoreImmediateOffset(u16 instr);
+    void Thumb_LoadStoreHalf(u16 instr);
+    void Thumb_LoadStoreSPRelative(u16 instr);
+    void Thumb_LoadRelativeAddress(u16 instr);
+    void Thumb_AddOffsetSP(u16 instr);
+    void Thumb_PushPopRegisters(u16 instr);
+    void Thumb_LoadStoreMultiple(u16 instr);
+    void Thumb_ConditionalBranch(u16 instr);
+    void Thumb_SoftwareInterrupt(u16 instr);
+    void Thumb_UnconditionalBranch(u16 instr);
+    void Thumb_LongBranchLink(u16 instr);
+    void Thumb_Undefined(u16 instr);
 
     u64 cycles;
 
     Timer timers[4];
     DMAController dma;
-
-    static std::array<void(ARM::*)(u32), 4096> instr_arm;
-    static std::array<void(ARM::*)(u16), 1024> instr_thumb;
 };
 
 extern ARM arm;

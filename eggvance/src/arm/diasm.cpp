@@ -14,17 +14,17 @@ std::string Disassembler::disassemble(u32 data, const Registers& regs)
         switch (decodeThumb(instr))
         {
         case InstructionThumb::MoveShiftedRegister: return moveShiftedRegister(instr);;
-        case InstructionThumb::AddSubtractImmediate: return addSubImmediate(instr);;
-        case InstructionThumb::AddSubtractMoveCompareImmediate: return addSubMovCmpImmediate(instr);;
+        case InstructionThumb::AddSubtract: return addSubImmediate(instr);;
+        case InstructionThumb::ImmediateOperations: return addSubMovCmpImmediate(instr);;
         case InstructionThumb::ALUOperations: return aluOperations(instr);;
-        case InstructionThumb::HighRegisterBranchExchange: return highRegisterBranchExchange(instr);;
+        case InstructionThumb::HighRegisterOperations: return highRegisterBranchExchange(instr);;
         case InstructionThumb::LoadPCRelative: return loadPcRelative(instr, regs.pc);;
         case InstructionThumb::LoadStoreRegisterOffset: return loadStoreRegisterOffset(instr);;
-        case InstructionThumb::LoadStoreHalfwordSigned: return loadStoreHalfSigned(instr);;
+        case InstructionThumb::LoadStoreByteHalf: return loadStoreHalfSigned(instr);;
         case InstructionThumb::LoadStoreImmediateOffset: return loadStoreImmediateOffset(instr);;
-        case InstructionThumb::LoadStoreHalfword: return loadStoreHalf(instr);;
+        case InstructionThumb::LoadStoreHalf: return loadStoreHalf(instr);;
         case InstructionThumb::LoadStoreSPRelative: return loadStoreSpRelative(instr);;
-        case InstructionThumb::LoadAddress: return loadAddress(instr, regs.pc);;
+        case InstructionThumb::LoadRelativeAddress: return loadAddress(instr, regs.pc);;
         case InstructionThumb::AddOffsetSP: return addOffsetSp(instr);;
         case InstructionThumb::PushPopRegisters: return pushPopRegisters(instr);;
         case InstructionThumb::LoadStoreMultiple: return loadStoreMultiple(instr);;
@@ -46,11 +46,11 @@ std::string Disassembler::disassemble(u32 data, const Registers& regs)
         case InstructionArm::BranchExchange: return branchExchange(instr);
         case InstructionArm::BranchLink: return branchLink(instr, regs.pc);
         case InstructionArm::DataProcessing: return dataProcessing(instr, regs.pc);
-        case InstructionArm::PSRTransfer: return psrTransfer(instr);
+        case InstructionArm::StatusTransfer: return psrTransfer(instr);
         case InstructionArm::Multiply: return multiply(instr);
         case InstructionArm::MultiplyLong: return multiplyLong(instr);
         case InstructionArm::SingleDataTransfer: return singleTransfer(instr);
-        case InstructionArm::HalfwordSignedDataTransfer: return halfSignedTransfer(instr);
+        case InstructionArm::HalfSignedDataTransfer: return halfSignedTransfer(instr);
         case InstructionArm::BlockDataTransfer: return blockTransfer(instr);
         case InstructionArm::SingleDataSwap: return singleSwap(instr);
         case InstructionArm::SoftwareInterrupt: return swiArm(instr);
