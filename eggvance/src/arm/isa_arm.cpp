@@ -313,6 +313,8 @@ void ARM::Arm_SingleDataTransfer(u32 instr)
     int pre_index  = bits<24, 1>(instr);
     int imm_offset = bits<25, 1>(instr);
 
+    writeback |= !pre_index;
+
     u32& dst = regs[rd];
     u32 addr = regs[rn];
 
@@ -397,6 +399,8 @@ void ARM::Arm_HalfSignedDataTransfer(u32 instr)
     int imm_offset = bits<22, 1>(instr);
     int increment  = bits<23, 1>(instr);
     int pre_index  = bits<24, 1>(instr);
+
+    writeback |= !pre_index;
 
     u32& dst = regs[rd];
     u32 addr = regs[rn];
