@@ -34,7 +34,7 @@ bool Emulator::init(const Args& args)
 {
     config.init(args.dir);
 
-    if (!mmu.bios.init())
+    if (!mmu.bios.init(config.bios_file))
         return false;
 
     if (!keypad.init())

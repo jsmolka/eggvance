@@ -2,11 +2,10 @@
 
 #include "gamepak/gamepak.h"
 #include "bios.h"
-#include "io.h"
-#include "memmap.h"
-#include "oam.h"
 #include "palette.h"
 #include "vram.h"
+#include "oam.h"
+#include "io.h"
 
 class MMU
 {
@@ -23,13 +22,12 @@ public:
 
     BIOS bios;
     GamePak gamepak;
-    IO io;
     Palette palette;
     VRAM vram;
     OAM oam;
+    IO io;
 
 private:
-    RAM<0x00400> ioram;
     RAM<0x40000> ewram;
     RAM<0x08000> iwram;
 };

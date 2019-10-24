@@ -14,9 +14,9 @@ void PPU::reset()
 
     for (auto& background : backgrounds)
     {
-        background.fill(Palette::transparent);
+        background.fill(TRANS);
         background.flip();
-        background.fill(Palette::transparent);
+        background.fill(TRANS);
     }
     objects.fill(ObjectLayer());
     objects_exist = false;

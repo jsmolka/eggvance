@@ -3,23 +3,20 @@
 #include "arm/arm.h"
 #include "ppu/ppu.h"
 #include "sys/keypad.h"
+#include "memmap.h"
 
 MMU mmu;
 
 void MMU::reset()
 {
     bios.reset();
-
-    ewram.fill(0);
-    iwram.fill(0);
-    ioram.fill(0);
-
-    io.reset();
     palette.reset();
     vram.reset();
     oam.reset();
+    io.reset();
 
-    ioram.writeHalf(REG_KEYINPUT, 0xFFFF);
+    ewram.fill(0);
+    iwram.fill(0);
 }
 
 u8 MMU::readByte(u32 addr)
@@ -27,13 +24,8 @@ u8 MMU::readByte(u32 addr)
     switch (addr >> 24)
     {
     case PAGE_BIOS:
-        if (addr < 0x4000)
-            return bios.readByte(addr);
-        else
-            return 0;
-
     case PAGE_BIOS+1:
-        return 0;
+        return bios.readByte(addr);
 
     case PAGE_EWRAM:
         return ewram.readByte(addr);
@@ -42,7 +34,7 @@ u8 MMU::readByte(u32 addr)
         return iwram.readByte(addr);
 
     case PAGE_IO:
-        if (addr < 0x0400'0400)
+        if (addr < 0x400'0400)
             return io.readByte(addr);
         return 0;
 
@@ -66,8 +58,8 @@ u8 MMU::readByte(u32 addr)
     case PAGE_GAMEPAK_2+1:
         if (gamepak.backup->type == Backup::Type::EEPROM)
         {
-            // Todo: DMA running?
-            if (gamepak.size() <= 0x100'0000 || (addr >= 0xDFF'FF00 && addr < 0xE00'0000))
+            // Todo: should this always be one?
+            if (gamepak.size() <= 0x100'0000 || addr >= 0xDFF'FF00)
                 return 1;
         }
         addr &= 0x1FF'FFFF;
@@ -103,13 +95,8 @@ u16 MMU::readHalf(u32 addr)
     switch (addr >> 24)
     {
     case PAGE_BIOS:
-        if (addr < 0x4000)
-            return bios.readHalf(addr);
-        else
-            return 0;
-
     case PAGE_BIOS+1:
-        return 0;
+        return bios.readHalf(addr);
 
     case PAGE_EWRAM:
         return ewram.readHalf(addr);
@@ -118,7 +105,7 @@ u16 MMU::readHalf(u32 addr)
         return iwram.readHalf(addr);
 
     case PAGE_IO:
-        if (addr < 0x0400'0400)
+        if (addr < 0x400'0400)
             return io.readHalf(addr);
         return 0;
 
@@ -142,14 +129,14 @@ u16 MMU::readHalf(u32 addr)
     case PAGE_GAMEPAK_2+1:
         if (gamepak.backup->type == Backup::Type::EEPROM)
         {
-            if (gamepak.size() <= 0x100'0000 || (addr >= 0xDFF'FF00 && addr < 0xE00'0000))
+            // Todo: should this always be one?
+            if (gamepak.size() <= 0x100'0000 || addr >= 0xDFF'FF00)
                 return 1;
         }
         addr &= 0x1FF'FFFE;
         return gamepak.readHalf(addr);
 
     case PAGE_GAMEPAK_SRAM:
-    case PAGE_UNUSED:
         return 0;
     }
     return 0;
@@ -160,13 +147,8 @@ u32 MMU::readWord(u32 addr)
     switch (addr >> 24)
     {
     case PAGE_BIOS:
-        if (addr < 0x4000)
-            return bios.readWord(addr);
-        else
-            return 0;
-
     case PAGE_BIOS+1:
-        return 0;
+        return bios.readWord(addr);
 
     case PAGE_EWRAM:
         return ewram.readWord(addr);
@@ -175,7 +157,7 @@ u32 MMU::readWord(u32 addr)
         return iwram.readWord(addr);
 
     case PAGE_IO:
-        if (addr < 0x0400'0400)
+        if (addr < 0x400'0400)
             return io.readWord(addr);
         return 0;
 
@@ -199,14 +181,14 @@ u32 MMU::readWord(u32 addr)
     case PAGE_GAMEPAK_2+1:
         if (gamepak.backup->type == Backup::Type::EEPROM)
         {
-            if (gamepak.size() <= 0x100'0000 || (addr >= 0xDFF'FF00 && addr < 0xE00'0000))
+            // Todo: should this always be one?
+            if (gamepak.size() <= 0x100'0000 || addr >= 0xDFF'FF00)
                 return 1;
         }
         addr &= 0x1FF'FFFC;
         return gamepak.readWord(addr);
 
     case PAGE_GAMEPAK_SRAM:
-    case PAGE_UNUSED:
         return 0;
     }
     return 0;
@@ -229,7 +211,7 @@ void MMU::writeByte(u32 addr, u8 byte)
         break;
 
     case PAGE_IO:
-        if (addr < 0x0400'0400)
+        if (addr < 0x400'0400)
             io.writeByte(addr, byte);
         break;
 
@@ -242,7 +224,6 @@ void MMU::writeByte(u32 addr, u8 byte)
         break;
 
     case PAGE_OAM:
-        oam.writeByte(addr, byte);
         break;
 
     case PAGE_GAMEPAK_0:
@@ -296,7 +277,7 @@ void MMU::writeHalf(u32 addr, u16 half)
         break;
 
     case PAGE_IO:
-        if (addr < 0x0400'0400)
+        if (addr < 0x400'0400)
             io.writeHalf(addr, half);
         break;
 
@@ -318,10 +299,7 @@ void MMU::writeHalf(u32 addr, u16 half)
     case PAGE_GAMEPAK_1+1:
     case PAGE_GAMEPAK_2:
     case PAGE_GAMEPAK_2+1:
-        break;
-
     case PAGE_GAMEPAK_SRAM:
-    case PAGE_UNUSED:
         break;
     }
 }
@@ -343,7 +321,7 @@ void MMU::writeWord(u32 addr, u32 word)
         break;
 
     case PAGE_IO:
-        if (addr < 0x0400'0400)
+        if (addr < 0x400'0400)
             io.writeWord(addr, word);
         break;
 
@@ -365,10 +343,7 @@ void MMU::writeWord(u32 addr, u32 word)
     case PAGE_GAMEPAK_1+1:
     case PAGE_GAMEPAK_2:
     case PAGE_GAMEPAK_2+1:
-        break;
-
     case PAGE_GAMEPAK_SRAM:
-    case PAGE_UNUSED:
         break;
     }
 }

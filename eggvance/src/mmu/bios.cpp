@@ -1,56 +1,67 @@
 #include "bios.h"
 
 #include <fstream>
-#include <SDL2/SDL_messagebox.h>
 
 #include "arm/arm.h"
 #include "common/config.h"
+#include "common/message.h"
 
 void BIOS::reset()
 {
-    last = data.readWord(0xDC);
+    if (config.bios_skip)
+        last_fetched = data.readWordFast(0xE4);
+    else
+        last_fetched = 0;
 }
 
-bool BIOS::init()
+bool BIOS::init(const std::string& file)
 {
     static constexpr u64 expected_hash = 0xECCF5E4CEA50816E;
 
-    if (!read(config.bios_file))
+    if (!read(file))
     {
-        SDL_ShowSimpleMessageBox(0, "Missing BIOS", "Please place a GBA bios.bin next to the emulator.", nullptr);
+        showMessage("Cannot read BIOS file.");
         return false;
     }
     if (hash(data.data<u32>(0), 0x1000) != expected_hash)
     {
-        SDL_ShowSimpleMessageBox(0, "Invalid BIOS", "The BIOS does not match the requirements.", nullptr);
+        showMessage("BIOS hash is invalid.");
         return false;
     }
-
     return true;
 }
 
 u8 BIOS::readByte(u32 addr)
 {
+    if (addr >= data.size())
+        return 0;
+
     if (arm.pc >= data.size())
-        return static_cast<u8>(last);
-    else
-        return data.readByte(addr);
+        return static_cast<u8>(last_fetched);
+
+    return data.readByte(addr);
 }
 
 u16 BIOS::readHalf(u32 addr)
 {
+    if (addr >= data.size())
+        return 0;
+
     if (arm.pc >= data.size())
-        return static_cast<u16>(last);
-    else
-        return data.readHalf(addr);
+        return static_cast<u16>(last_fetched);
+
+    return data.readHalf(addr);
 }
 
 u32 BIOS::readWord(u32 addr)
 {
+    if (addr >= data.size())
+        return 0;
+
     if (arm.pc >= data.size())
-        return last;
-    else
-        return last = data.readWord(addr);
+        return last_fetched;
+
+    return last_fetched = data.readWord(addr);
 }
 
 bool BIOS::read(const std::string& file)

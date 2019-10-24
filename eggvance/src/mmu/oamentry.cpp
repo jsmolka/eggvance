@@ -33,27 +33,12 @@ static constexpr int sizes[4][4][2] =
 
 void OAMEntry::reset()
 {
-    y            = 0;
-    affine       = 0;
-    double_size  = 0;
-    disabled     = 0;
-    gfx_mode     = 0;
-    mosaic       = 0;
-    color_mode   = 0;
-    shape        = 0;
-    x            = 0;
-    paramter     = 0;
-    flip_x       = 0;
-    flip_y       = 0;
-    size         = 0;
-    tile         = 0;
-    priority     = 0;
-    palette_bank = 0;
+    *this = {};
 }
 
 void OAMEntry::writeHalf(int attr, u16 half)
 {
-    EGG_ASSERT(attr == 0 || attr == 2 || attr == 4, "Invalid attribute");
+    EGG_ASSERT(attr % 2 == 0 && attr <= 4, "Invalid attribute");
 
     switch (attr)
     {

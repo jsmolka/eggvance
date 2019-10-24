@@ -150,6 +150,7 @@
     <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\arm\shifts.cpp" />
     <ClCompile Include="src\common\config.cpp" />
+    <ClCompile Include="src\common\message.cpp" />
     <ClCompile Include="src\mmu\io.cpp" />
     <ClCompile Include="src\sys\dmacontroller.cpp" />
     <ClCompile Include="src\emulator.cpp" />
@@ -207,7 +208,9 @@
     <ClInclude Include="src\arm\registers.h" />
     <ClInclude Include="src\common\config.h" />
     <ClInclude Include="src\common\constants.h" />
+    <ClInclude Include="src\common\critical.h" />
     <ClInclude Include="src\common\macros.h" />
+    <ClInclude Include="src\common\message.h" />
     <ClInclude Include="src\mmu\io.h" />
     <ClInclude Include="src\sys\dma.h" />
     <ClInclude Include="src\sys\dmacontroller.h" />

@@ -1,39 +1,16 @@
 #include "oam.h"
-#include "common/macros.h"
-
-void OAM::reset()
+void OAM::reset()
 {
-    data.fill(0);
-    
     for (auto& entry : entries)
     {
         entry.reset();
     }
+    fill(0);
 }
 
 const OAMEntry& OAM::entry(int index) const
 {
     return entries[index];
-}
-
-u8 OAM::readByte(u32 addr)
-{
-    return data.readByte(addr);
-}
-
-u16 OAM::readHalf(u32 addr)
-{
-    return data.readHalf(addr);
-}
-
-u32 OAM::readWord(u32 addr)
-{
-    return data.readWord(addr);
-}
-
-void OAM::writeByte(u32 addr, u8 byte)
-{
-
 }
 
 void OAM::writeHalf(u32 addr, u16 half)
@@ -43,7 +20,7 @@ void OAM::writeHalf(u32 addr, u16 half)
     if (attr != 0x6)
         entries[addr >> 3].writeHalf(attr, half);
 
-    data.writeHalf(addr, half);
+    RAM::writeHalf(addr, half);
 }
 
 void OAM::writeWord(u32 addr, u32 word)
