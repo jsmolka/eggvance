@@ -1,5 +1,7 @@
 #include "waitcnt.h"
 
+#include "ppu/ppu.h"
+
 void WaitCnt::WaitState::reset()
 {
     *this = {};
@@ -19,12 +21,12 @@ void WaitCnt::reset()
 
 int WaitCnt::cyclesHalf(u32 addr, int sequential) const
 {
-    return cycles_half[sequential][addr >> 28];
+    return cycles_half[sequential][addr >> 24];
 }
 
 int WaitCnt::cyclesWord(u32 addr, int sequential) const
 {
-    return cycles_word[sequential][addr >> 28];
+    return cycles_word[sequential][addr >> 24];
 }
 
 void WaitCnt::update()

@@ -2,7 +2,7 @@
 
 #include "arm/arm.h"
 #include "ppu/ppu.h"
-#include "keypad.h"
+#include "sys/keypad.h"
 
 MMU mmu;
 

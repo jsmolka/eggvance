@@ -21,9 +21,6 @@
     <ClCompile Include="icon\icon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\keypad.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\arm\psr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -141,22 +138,13 @@
     <ClCompile Include="src\mmu\registers\intenabled.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\timer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\mmu\registers\tmcnt.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\dma.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\mmu\registers\dmaaddr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\mmu\registers\dmacnt.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\dmacontroller.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\mmu\gamepak\eeprom.cpp">
@@ -186,6 +174,18 @@
     <ClCompile Include="src\arm\isa_thumb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\sys\dma.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sys\dmacontroller.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sys\keypad.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sys\timer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="icon\icon.h">
@@ -195,9 +195,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\common\integer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\keypad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\arm\psr.h">
@@ -329,22 +326,13 @@
     <ClInclude Include="src\mmu\registers\intenabled.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\timer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\mmu\registers\tmcnt.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\dma.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\mmu\registers\dmaaddr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\mmu\registers\dmacnt.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\dmacontroller.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\mmu\gamepak\eeprom.h">
@@ -363,6 +351,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\mmu\registers\waitcnt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sys\dma.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sys\dmacontroller.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sys\keypad.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sys\timer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -28,6 +28,8 @@ public:
 
     VideoBackend backend;
 
+    PPUIO io;
+
 private:
     enum WindowFlag
     {
@@ -100,7 +102,6 @@ private:
     OAM oam;
     Palette palette;
     VRAM vram;
-    PPUIO io;
 };
 
 #include "collapse.inl"

@@ -25,7 +25,6 @@ void Timer::runInternal(int cycles)
     // Todo: check if multiple overflows?
     if (counter >= overflow)
     {
-        // Todo: check if timer is enabled?
         if (next && next->control.cascade)
             next->runInternal(1);
 

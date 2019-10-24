@@ -12,12 +12,12 @@ void ARM::Arm_BranchExchange(u32 instr)
     if (cpsr.thumb = addr & 0x1)
     {
         pc = alignHalf(addr);
-        flushThumb();
+        flushPipeHalf();
     }
     else
     {
         pc = alignWord(addr);
-        flushArm();
+        flushPipeWord();
     }
 }
 
@@ -32,7 +32,7 @@ void ARM::Arm_BranchLink(u32 instr)
     offset <<= 2;
 
     pc += offset;
-    flushArm();
+    flushPipeWord();
 }
 
 void ARM::Arm_DataProcessing(u32 instr)
@@ -94,7 +94,7 @@ void ARM::Arm_DataProcessing(u32 instr)
             if (rn == 15) op1 += 4;
             if (rm == 15) op2 += 4;
 
-            cycles--;
+            idle();
         }
         else
         {
@@ -141,12 +141,12 @@ void ARM::Arm_DataProcessing(u32 instr)
         if (cpsr.thumb)
         {
             pc = alignHalf(pc);
-            flushThumb();
+            flushPipeHalf();
         }
         else
         {
             pc = alignWord(pc);
-            flushArm();
+            flushPipeWord();
         }
     }
 }
@@ -225,11 +225,11 @@ void ARM::Arm_Multiply(u32 instr)
     if (accumulate)
     {
         dst += op3;
-        cycles--;
+        idle();
     }
     logical(dst, flags);
 
-    cycleBooth(op2, true);
+    booth(op2, true);
 }
 
 void ARM::Arm_MultiplyLong(u32 instr)
@@ -257,7 +257,7 @@ void ARM::Arm_MultiplyLong(u32 instr)
     if (accumulate)
     {
         result += (static_cast<u64>(dsth) << 32) | dstl;
-        cycles--;
+        idle();
     }
 
     if (flags)
@@ -269,7 +269,7 @@ void ARM::Arm_MultiplyLong(u32 instr)
     dstl = static_cast<u32>(result);
     dsth = static_cast<u32>(result >> 32);
 
-    cycleBooth(static_cast<u32>(op2), sign);
+    booth(static_cast<u32>(op2), sign);
 }
 
 #define INDEX            \
@@ -339,9 +339,9 @@ void ARM::Arm_SingleDataTransfer(u32 instr)
         if (rd == 15)
         {
             pc = alignWord(pc);
-            flushArm();
+            flushPipeWord();
         }
-        cycles--;
+        idle();
     }
     else
     {
@@ -429,9 +429,9 @@ void ARM::Arm_HalfSignedDataTransfer(u32 instr)
         if (rd == 15)
         {
             pc = alignWord(pc);
-            flushArm();
+            flushPipeWord();
         }
-        cycles--;
+        idle();
     }
     else
     {
@@ -500,19 +500,18 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
                 if (pre_index) 
                     addr += 4;
 
-                if (x == end)
-                    cycles--;
-
                 regs[x] = readWord(addr);
 
                 if (!pre_index) 
                     addr += 4;
             }
 
+            idle();
+
             if (rlist & (1 << 15))
             {
                 pc = alignWord(pc);
-                flushArm();
+                flushPipeWord();
             }
         }
         else
@@ -559,7 +558,7 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
         {
             pc = readWord(addr);
             pc = alignWord(pc);
-            flushArm();
+            flushPipeWord();
         }
         else
         {
@@ -599,7 +598,7 @@ void ARM::Arm_SingleDataSwap(u32 instr)
         dst = readWordRotated(addr);
         writeWord(addr, src);
     }
-    cycles--;
+    idle();
 }
 
 void ARM::Arm_SoftwareInterrupt(u32 instr)

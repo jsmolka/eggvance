@@ -40,7 +40,7 @@ void ARM::reset()
 
     cycles = 0;
 
-    flushArm();
+    flushPipeWord();
     advance();
 }
 
@@ -182,18 +182,51 @@ void ARM::execute()
     advance();
 }
 
-void ARM::flushArm()
+void ARM::flushPipeHalf()
+{
+    pipe[0] = readHalf(pc + 0);
+    pipe[1] = readHalf(pc + 2);
+    pc += 2;
+}
+
+void ARM::flushPipeWord()
 {
     pipe[0] = readWord(pc + 0);
     pipe[1] = readWord(pc + 4);
     pc += 4;
 }
 
-void ARM::flushThumb()
+void ARM::advance()
 {
-    pipe[0] = readHalf(pc + 0);
-    pipe[1] = readHalf(pc + 2);
-    pc += 2;
+    static constexpr u32 offsets[2] = { 4, 2 };
+
+    pc += offsets[cpsr.thumb];
+}
+
+void ARM::idle()
+{
+    cycles--;
+}
+
+void ARM::booth(u32 multiplier, bool allow_ones)
+{
+    static constexpr u32 masks[3] =
+    {
+        0xFF00'0000,
+        0xFFFF'0000,
+        0xFFFF'FF00
+    };
+
+    int internal = 4;
+    for (u32 mask : masks)
+    {
+        u32 bits = multiplier & mask;
+        if (bits == 0 || (allow_ones && bits == mask))
+            internal--;
+        else
+            break;
+    }
+    cycles -= internal;
 }
 
 void ARM::interrupt(u32 pc, u32 lr, PSR::Mode mode)
@@ -208,7 +241,7 @@ void ARM::interrupt(u32 pc, u32 lr, PSR::Mode mode)
     this->cpsr.thumb = false;
     this->cpsr.irqd  = true;
 
-    flushArm();
+    flushPipeWord();
 }
 
 void ARM::interruptHW()

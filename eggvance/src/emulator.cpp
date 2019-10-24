@@ -9,9 +9,9 @@
 #include "arm/arm.h"
 #include "mmu/mmu.h"
 #include "ppu/ppu.h"
+#include "sys/keypad.h"
 #include "framelimiter.h"
 #include "icon.h"
-#include "keypad.h"
 
 namespace fs = std::filesystem;
 

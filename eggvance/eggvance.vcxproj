@@ -150,10 +150,10 @@
     <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\arm\shifts.cpp" />
     <ClCompile Include="src\common\config.cpp" />
-    <ClCompile Include="src\dmacontroller.cpp" />
+    <ClCompile Include="src\sys\dmacontroller.cpp" />
     <ClCompile Include="src\emulator.cpp" />
     <ClCompile Include="src\framelimiter.cpp" />
-    <ClCompile Include="src\keypad.cpp" />
+    <ClCompile Include="src\sys\keypad.cpp" />
     <ClCompile Include="src\microclock.cpp" />
     <ClCompile Include="src\mmu\bios.cpp" />
     <ClCompile Include="src\mmu\gamepak\backup.cpp" />
@@ -186,7 +186,7 @@
     <ClCompile Include="src\mmu\registers\vcount.cpp" />
     <ClCompile Include="src\mmu\registers\waitcnt.cpp" />
     <ClCompile Include="src\mmu\registers\window.cpp" />
-    <ClCompile Include="src\dma.cpp" />
+    <ClCompile Include="src\sys\dma.cpp" />
     <ClCompile Include="src\ppu\videobackend.cpp" />
     <ClCompile Include="src\ppu\ppuio.cpp" />
     <ClCompile Include="src\ppu\oam.cpp" />
@@ -195,7 +195,7 @@
     <ClCompile Include="src\ppu\ppu.cpp" />
     <ClCompile Include="src\ppu\render.cpp" />
     <ClCompile Include="src\ppu\vram.cpp" />
-    <ClCompile Include="src\timer.cpp" />
+    <ClCompile Include="src\sys\timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\args.h" />
@@ -206,8 +206,8 @@
     <ClInclude Include="src\arm\registers.h" />
     <ClInclude Include="src\common\config.h" />
     <ClInclude Include="src\common\macros.h" />
-    <ClInclude Include="src\dma.h" />
-    <ClInclude Include="src\dmacontroller.h" />
+    <ClInclude Include="src\sys\dma.h" />
+    <ClInclude Include="src\sys\dmacontroller.h" />
     <ClInclude Include="src\framelimiter.h" />
     <ClInclude Include="src\microclock.h" />
     <ClInclude Include="src\mmu\bios.h" />
@@ -217,7 +217,7 @@
     <ClInclude Include="src\mmu\memmap.h" />
     <ClInclude Include="src\common\ram.h" />
     <ClInclude Include="src\common\utility.h" />
-    <ClInclude Include="src\keypad.h" />
+    <ClInclude Include="src\sys\keypad.h" />
     <ClInclude Include="src\mmu\gamepak\gamepak.h" />
     <ClInclude Include="src\mmu\gamepak\backup.h" />
     <ClInclude Include="src\common\integer.h" />
@@ -256,7 +256,7 @@
     <ClInclude Include="src\ppu\palette.h" />
     <ClInclude Include="src\ppu\ppu.h" />
     <ClInclude Include="src\ppu\vram.h" />
-    <ClInclude Include="src\timer.h" />
+    <ClInclude Include="src\sys\timer.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="eggvance.rc" />

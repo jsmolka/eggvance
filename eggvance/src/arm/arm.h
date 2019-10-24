@@ -7,9 +7,9 @@
 #include "mmu/registers/intrequest.h"
 #include "mmu/registers/waitcnt.h"
 #include "ppu/ppu.h"
-#include "dmacontroller.h"
+#include "sys/dmacontroller.h"
+#include "sys/timer.h"
 #include "registers.h"
-#include "timer.h"
 
 enum class Interrupt
 {
@@ -104,20 +104,18 @@ private:
 
     void execute();
 
-    void flushArm();
-    void flushThumb();
+    void flushPipeHalf();
+    void flushPipeWord();
+    void advance();
 
-    template<State state>
-    inline void advance();
-    inline void advance();
+    void idle();
+    void booth(u32 multiplier, bool allow_ones);
 
     void interrupt(u32 pc, u32 lr, PSR::Mode mode);
     void interruptHW();
     void interruptSW();
 
     void disasm();
-
-    inline void cycleBooth(u32 multiplier, bool allow_ones);
 
     void Arm_BranchExchange(u32 instr);
     void Arm_BranchLink(u32 instr);
