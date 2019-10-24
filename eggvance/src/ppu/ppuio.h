@@ -1,18 +1,18 @@
 #pragma once
 
-#include "mmu/registers/bgcnt.h"
-#include "mmu/registers/bgoffset.h"
-#include "mmu/registers/bgparam.h"
-#include "mmu/registers/bgref.h"
-#include "mmu/registers/bldalpha.h"
-#include "mmu/registers/bldcnt.h"
-#include "mmu/registers/bldy.h"
-#include "mmu/registers/dispcnt.h"
-#include "mmu/registers/dispstat.h"
-#include "mmu/registers/mosaic.h"
-#include "mmu/registers/vcount.h"
-#include "mmu/registers/windim.h"
-#include "mmu/registers/window.h"
+#include "regs/bgcnt.h"
+#include "regs/bgoffset.h"
+#include "regs/bgparam.h"
+#include "regs/bgref.h"
+#include "regs/bldalpha.h"
+#include "regs/bldcnt.h"
+#include "regs/bldy.h"
+#include "regs/dispcnt.h"
+#include "regs/dispstat.h"
+#include "regs/mosaic.h"
+#include "regs/vcount.h"
+#include "regs/windim.h"
+#include "regs/window.h"
 
 class PPUIO
 {

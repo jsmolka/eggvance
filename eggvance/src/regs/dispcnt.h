@@ -18,7 +18,7 @@ public:
     int oam_hblank;
     int mapping_1d;
     int force_blank;
-    int bg[4];
+    int bg[4];  // Todo: could this be used as mask? if (bg & (1 << num))
     int obj;
     int win0;
     int win1;

@@ -67,7 +67,7 @@ void Emulator::run()
 
     while (true)
     {
-        limiter.begin();
+        limiter.frameBegin();
 
         SDL_Event event;
         while (SDL_PollEvent(&event))
@@ -104,7 +104,7 @@ void Emulator::run()
         }
         frame();
 
-        limiter.end();
+        limiter.frameSleep();
 
         fps_frame++;
         u32 delta = SDL_GetTicks() - fps_begin;

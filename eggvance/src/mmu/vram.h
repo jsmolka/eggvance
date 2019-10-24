@@ -25,7 +25,7 @@ public:
     u16 readPixel(u32 addr, int x, int y, Palette::Format format);
 
 private:
-    class Data : public RAM<0x2'0000>
+    class Data : public RAM<0x1'8000, 0x2'0000>
     {
     private:
         inline u32 mirror(u32 addr) const override final

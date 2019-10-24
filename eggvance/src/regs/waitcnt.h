@@ -6,6 +6,7 @@
 class WaitCnt
 {
 public:
+    // Todo: remove this
     struct WaitState
     {
         void reset();
@@ -34,7 +35,7 @@ public:
 private:
     void update();
 
-    int cycles_half[2][256] 
+    int cycles_half[2][256]
     {
         { 1, 1, 3, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 },
         { 1, 1, 3, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 }

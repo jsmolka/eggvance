@@ -1,6 +1,7 @@
 #pragma once
 
-#include "palette.h"
+#include "common/integer.h"
+#include "common/constants.h"
 
 enum LayerFlag
 {
@@ -51,7 +52,7 @@ struct BackgroundLayer : public Layer
 
     bool opaque(int x) const
     {
-        return color(x) != Palette::transparent;
+        return color(x) != TRANS;
     }
 
     int  id;
@@ -63,7 +64,7 @@ struct ObjectLayer : public Layer
 {
     ObjectLayer()
         : Layer(4)
-        , color(Palette::transparent)
+        , color(TRANS)
         , opaque(false)
         , window(false)
         , alpha(false)

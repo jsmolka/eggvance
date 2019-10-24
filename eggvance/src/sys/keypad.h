@@ -2,8 +2,8 @@
 
 #include <SDL2/SDL_events.h>
 
-#include "mmu/registers/keycnt.h"
-#include "mmu/registers/keyinput.h"
+#include "regs/keycnt.h"
+#include "regs/keyinput.h"
 
 class Keypad
 {
@@ -35,7 +35,6 @@ public:
     void controllerButtonEvent(const SDL_ControllerButtonEvent& event);
     void controllerDeviceEvent(const SDL_ControllerDeviceEvent& event);
 
-private:
     struct IO
     {
         KeyCnt keycnt;
@@ -43,6 +42,7 @@ private:
         KeyInput keyinput_raw;
     } io;
 
+private:
     void processOpposingButtons(Button b1, Button b2);
     void processButton(Button button, bool pressed);
 

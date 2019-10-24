@@ -6,33 +6,39 @@ namespace micro = micro_clock;
 
 FrameLimiter::FrameLimiter()
 {
-    frame_time  = 0;
-    frame_beg   = 0;
-    frame_end   = 0;
-    frame_delta = 0;
+    reset();
 }
 
 void FrameLimiter::setFPS(double fps)
 {
-    frame_time = 1.0e6 / fps;
+    reset();
+
+    frame = static_cast<u64>(1.0e6 / fps);
 }
 
-void FrameLimiter::begin()
+void FrameLimiter::frameBegin()
 {
-    frame_beg = micro::now();
+    begin = micro::now();
 }
 
-void FrameLimiter::end()
+void FrameLimiter::frameSleep()
 {
-    frame_end = micro::now();
+    if (begin == 0)
+        return;
 
-    frame_delta += frame_end - frame_beg;
-
-    if (frame_delta < static_cast<s64>(frame_time))
+    delta += micro::now() - begin;
+    if (delta < static_cast<s64>(frame))
     {
         u64 sleep_begin = micro::now();
-        micro::sleep(static_cast<u32>(frame_time - frame_delta));
-        frame_delta += micro::now() - sleep_begin;
+        micro::sleep(static_cast<u32>(frame - delta));
+        delta += micro::now() - sleep_begin;
     }
-    frame_delta -= frame_time;
+    delta -= frame;
+}
+
+void FrameLimiter::reset()
+{
+    frame = 0;
+    begin = 0;
+    delta = 0;
 }

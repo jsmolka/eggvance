@@ -21,11 +21,17 @@ void WaitCnt::reset()
 
 int WaitCnt::cyclesHalf(u32 addr, int sequential) const
 {
+    // Todo: Check if SRAM
+    // Todo: Cycles for unused memory > 0?
+
     return cycles_half[sequential][addr >> 24];
 }
 
 int WaitCnt::cyclesWord(u32 addr, int sequential) const
 {
+    // Todo: Check if SRAM
+    // Todo: Cycles for unused memory > 0?
+
     return cycles_word[sequential][addr >> 24];
 }
 

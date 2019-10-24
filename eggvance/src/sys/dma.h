@@ -1,7 +1,7 @@
 #pragma once
 
-#include "mmu/registers/dmaaddr.h"
-#include "mmu/registers/dmacnt.h"
+#include "regs/dmaaddr.h"
+#include "regs/dmacnt.h"
 
 class DMA
 {

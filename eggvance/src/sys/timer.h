@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mmu/registers/tmcnt.h"
+#include "regs/tmcnt.h"
 
 class Timer
 {

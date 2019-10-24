@@ -41,7 +41,7 @@ void ARM::reset()
     cycles = 0;
 
     flushPipeWord();
-    advance();
+    pc += 4;
 }
 
 void ARM::run(int cycles_)
@@ -179,7 +179,7 @@ void ARM::execute()
             }
         }
     }
-    advance();
+    pc += cpsr.thumb ? 2 : 4;
 }
 
 void ARM::flushPipeHalf()
@@ -196,19 +196,12 @@ void ARM::flushPipeWord()
     pc += 4;
 }
 
-void ARM::advance()
-{
-    static constexpr u32 offsets[2] = { 4, 2 };
-
-    pc += offsets[cpsr.thumb];
-}
-
 void ARM::idle()
 {
     cycles--;
 }
 
-void ARM::booth(u32 multiplier, bool allow_ones)
+void ARM::booth(u32 multiplier, bool ones)
 {
     static constexpr u32 masks[3] =
     {
@@ -221,7 +214,7 @@ void ARM::booth(u32 multiplier, bool allow_ones)
     for (u32 mask : masks)
     {
         u32 bits = multiplier & mask;
-        if (bits == 0 || (allow_ones && bits == mask))
+        if (bits == 0 || (ones && bits == mask))
             internal--;
         else
             break;

@@ -9,12 +9,13 @@ public:
 
     void setFPS(double fps);
 
-    void begin();
-    void end();
+    void frameBegin();
+    void frameSleep();
 
 private:
-    u64 frame_beg;
-    u64 frame_end;
-    u64 frame_time;
-    s64 frame_delta;
+    void reset();
+
+    u64 begin;
+    u64 frame;
+    s64 delta;
 };

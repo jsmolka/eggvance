@@ -1,6 +1,7 @@
 #include "ppu.h"
 
 #include "common/utility.h"
+#include "mmu/mmu.h"
 
 void PPU::renderBgMode0(int bg)
 {
@@ -58,7 +59,7 @@ void PPU::renderBgMode0(int bg)
         // Loop over all horizontal tiles in the block
         while (tile_x++ < 32)
         {
-            int entry = vram.readHalf(addr_map);
+            int entry = mmu.vram.readHalf(addr_map);
             int tile  = bits<0, 10>(entry);
 
             u32 addr = base_addr + tile_size * tile;
@@ -70,13 +71,13 @@ void PPU::renderBgMode0(int bg)
 
                 for (; pixel_x < 8; ++pixel_x)
                 {
-                    int index = vram.readPixel(
+                    int index = mmu.vram.readPixel(
                         addr,
                         flip_lut[flip_x][pixel_x],
                         flip_lut[flip_y][pixel_y],
                         pformat
                     );
-                    backgrounds[bg][screen_x] = palette.readColorBG(index, bank);
+                    backgrounds[bg][screen_x] = mmu.palette.readColorBG(index, bank);
                     if (++screen_x == 240)
                         return;
                 }
@@ -143,13 +144,13 @@ void PPU::renderBgMode2(int bg)
         int tile_y = tex_y / 8;
 
         u32 addr_map = base_map + tile_y * tiles_per_row + tile_x;
-        u32 addr = base_addr + 0x40 * vram.readByte(addr_map);
+        u32 addr = base_addr + 0x40 * mmu.vram.readByte(addr_map);
 
         int pixel_x = tex_x % 8;
         int pixel_y = tex_y % 8;
 
-        backgrounds[bg][screen_x] = palette.readColorBG(
-            vram.readPixel(addr, pixel_x, pixel_y, Palette::Format::F256)
+        backgrounds[bg][screen_x] = mmu.palette.readColorBG(
+            mmu.vram.readPixel(addr, pixel_x, pixel_y, Palette::Format::F256)
         );
     }
 }
@@ -157,17 +158,17 @@ void PPU::renderBgMode2(int bg)
 void PPU::renderBgMode3(int bg)
 {
     u32 addr = 2 * 240 * io.vcount;
-    u16* pixel = vram.ptr<u16>(addr);
+    u16* pixel = mmu.vram.ptr<u16>(addr);
     std::copy_n(pixel, 240, &backgrounds[bg][0]);
 }
 
 void PPU::renderBgMode4(int bg)
 {
     u32 addr = (0xA000 * io.dispcnt.frame) + (240 * io.vcount);
-    u8* index = vram.ptr<u8>(addr);
+    u8* index = mmu.vram.ptr<u8>(addr);
     for (int x = 0; x < 240; ++x, ++index)
     {
-        backgrounds[bg][x] = palette.readColorBG(*index);
+        backgrounds[bg][x] = mmu.palette.readColorBG(*index);
     }
 }
 
@@ -176,7 +177,7 @@ void PPU::renderBgMode5(int bg)
     if (io.vcount < 128)
     {
         u32 addr = (0xA000 * io.dispcnt.frame) + (2 * 160 * io.vcount);
-        u16* pixel = vram.ptr<u16>(addr);
+        u16* pixel = mmu.vram.ptr<u16>(addr);
         pixel = std::copy_n(pixel, 160, &backgrounds[bg][0]);
         std::fill_n(pixel, 80, Palette::transparent);
     }
@@ -195,7 +196,7 @@ void PPU::renderObjects()
 
     for (int e = 127; e >= 0; --e)
     {
-        const auto& entry = oam.entry(e);
+        const auto& entry = mmu.oam.entry(e);
         if (!entry.affine && entry.disabled)
             continue;
 
@@ -243,10 +244,10 @@ void PPU::renderObjects()
 
         if (entry.affine)
         {
-            pa = oam.readHalf(0x20 * entry.paramter + 0x06);
-            pb = oam.readHalf(0x20 * entry.paramter + 0x0E);
-            pc = oam.readHalf(0x20 * entry.paramter + 0x16);
-            pd = oam.readHalf(0x20 * entry.paramter + 0x1E);
+            pa = mmu.oam.readHalf(0x20 * entry.paramter + 0x06);
+            pb = mmu.oam.readHalf(0x20 * entry.paramter + 0x0E);
+            pc = mmu.oam.readHalf(0x20 * entry.paramter + 0x16);
+            pd = mmu.oam.readHalf(0x20 * entry.paramter + 0x1E);
         }
 
         // Rotation center
@@ -308,7 +309,7 @@ void PPU::renderObjects()
                 int pixel_x = tex_x % 8;
                 int pixel_y = tex_y % 8;
 
-                int index = vram.readPixel(addr, pixel_x, pixel_y, pformat);
+                int index = mmu.vram.readPixel(addr, pixel_x, pixel_y, pformat);
                 if (index != 0)
                 {
                     auto& object = objects[screen_x];
@@ -319,7 +320,7 @@ void PPU::renderObjects()
                     case GFX_ALPHA:
                         if (entry.priority <= object.priority)
                         {
-                            object.color    = palette.readColorFG(index, bank);
+                            object.color    = mmu.palette.readColorFG(index, bank);
                             object.opaque   = true;
                             object.priority = entry.priority;
                             object.alpha    = entry.gfx_mode == GFX_ALPHA;

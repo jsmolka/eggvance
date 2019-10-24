@@ -4,11 +4,8 @@
 
 #include "buffer.h"
 #include "layers.h"
-#include "oam.h"
-#include "palette.h"
 #include "ppuio.h"
 #include "videobackend.h"
-#include "vram.h"
 
 class PPU
 {
@@ -98,10 +95,6 @@ private:
     Buffer<ObjectLayer> objects;
     bool objects_exist;
     bool objects_alpha;
-
-    OAM oam;
-    Palette palette;
-    VRAM vram;
 };
 
 #include "collapse.inl"

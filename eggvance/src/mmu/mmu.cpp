@@ -14,6 +14,11 @@ void MMU::reset()
     iwram.fill(0);
     ioram.fill(0);
 
+    io.reset();
+    palette.reset();
+    vram.reset();
+    oam.reset();
+
     ioram.writeHalf(REG_KEYINPUT, 0xFFFF);
 }
 
@@ -37,21 +42,18 @@ u8 MMU::readByte(u32 addr)
         return iwram.readByte(addr);
 
     case PAGE_IO:
-        if (addr < (MAP_IO + 0x400))
-        {
-            addr &= 0x3FF;
-            return readByteIO(addr);
-        }
+        if (addr < 0x0400'0400)
+            return io.readByte(addr);
         return 0;
 
     case PAGE_PALETTE:
-        return ppu.palette.readByte(addr);
+        return palette.readByte(addr);
 
     case PAGE_VRAM:
-        return ppu.vram.readByte(addr);
+        return vram.readByte(addr);
 
     case PAGE_OAM:
-        return ppu.oam.readByte(addr);
+        return oam.readByte(addr);
 
     case PAGE_GAMEPAK_0:
     case PAGE_GAMEPAK_0+1:
@@ -116,22 +118,18 @@ u16 MMU::readHalf(u32 addr)
         return iwram.readHalf(addr);
 
     case PAGE_IO:
-        if (addr < (MAP_IO + 0x400))
-        {
-            addr &= 0x3FE;
-            return readByteIO(addr + 0) << 0
-                 | readByteIO(addr + 1) << 8;
-        }
+        if (addr < 0x0400'0400)
+            return io.readHalf(addr);
         return 0;
 
     case PAGE_PALETTE:
-        return ppu.palette.readHalf(addr);
+        return palette.readHalf(addr);
 
     case PAGE_VRAM:
-        return ppu.vram.readHalf(addr);
+        return vram.readHalf(addr);
 
     case PAGE_OAM:
-        return ppu.oam.readHalf(addr);
+        return oam.readHalf(addr);
 
     case PAGE_GAMEPAK_0:
     case PAGE_GAMEPAK_0+1:
@@ -177,24 +175,18 @@ u32 MMU::readWord(u32 addr)
         return iwram.readWord(addr);
 
     case PAGE_IO:
-        if (addr < (MAP_IO + 0x400))
-        {
-            addr &= 0x3FC;
-            return readByteIO(addr + 0) <<  0
-                 | readByteIO(addr + 1) <<  8
-                 | readByteIO(addr + 2) << 16
-                 | readByteIO(addr + 3) << 24;
-        }
+        if (addr < 0x0400'0400)
+            return io.readWord(addr);
         return 0;
 
     case PAGE_PALETTE:
-        return ppu.palette.readWord(addr);
+        return palette.readWord(addr);
 
     case PAGE_VRAM:
-        return ppu.vram.readWord(addr);
+        return vram.readWord(addr);
 
     case PAGE_OAM:
-        return ppu.oam.readWord(addr);
+        return oam.readWord(addr);
 
     case PAGE_GAMEPAK_0:
     case PAGE_GAMEPAK_0+1:
@@ -237,23 +229,20 @@ void MMU::writeByte(u32 addr, u8 byte)
         break;
 
     case PAGE_IO:
-        if (addr < (MAP_IO + 0x400))
-        {
-            addr &= 0x3FF;
-            writeByteIO(addr, byte);
-        }
+        if (addr < 0x0400'0400)
+            io.writeByte(addr, byte);
         break;
 
     case PAGE_PALETTE:
-        ppu.palette.writeByte(addr, byte);
+        palette.writeByte(addr, byte);
         break;
 
     case PAGE_VRAM:
-        ppu.vram.writeByte(addr, byte);
+        vram.writeByte(addr, byte);
         break;
 
     case PAGE_OAM:
-        ppu.oam.writeByte(addr, byte);
+        oam.writeByte(addr, byte);
         break;
 
     case PAGE_GAMEPAK_0:
@@ -307,24 +296,20 @@ void MMU::writeHalf(u32 addr, u16 half)
         break;
 
     case PAGE_IO:
-        if (addr < (MAP_IO + 0x400))
-        {
-            addr &= 0x3FE;
-            writeByteIO(addr + 0, (half >> 0) & 0xFF);
-            writeByteIO(addr + 1, (half >> 8) & 0xFF);
-        }
+        if (addr < 0x0400'0400)
+            io.writeHalf(addr, half);
         break;
 
     case PAGE_PALETTE:
-        ppu.palette.writeHalf(addr, half);
+        palette.writeHalf(addr, half);
         break;
 
     case PAGE_VRAM:
-        ppu.vram.writeHalf(addr, half);
+        vram.writeHalf(addr, half);
         break;
 
     case PAGE_OAM:
-        ppu.oam.writeHalf(addr, half);
+        oam.writeHalf(addr, half);
         break;
 
     case PAGE_GAMEPAK_0:
@@ -358,26 +343,20 @@ void MMU::writeWord(u32 addr, u32 word)
         break;
 
     case PAGE_IO:
-        if (addr < (MAP_IO + 0x400))
-        {
-            addr &= 0x3FC;
-            writeByteIO(addr + 0, (word >>  0) & 0xFF);
-            writeByteIO(addr + 1, (word >>  8) & 0xFF);
-            writeByteIO(addr + 2, (word >> 16) & 0xFF);
-            writeByteIO(addr + 3, (word >> 24) & 0xFF);
-        }
+        if (addr < 0x0400'0400)
+            io.writeWord(addr, word);
         break;
 
     case PAGE_PALETTE:
-        ppu.palette.writeWord(addr, word);
+        palette.writeWord(addr, word);
         break;
 
     case PAGE_VRAM:
-        ppu.vram.writeWord(addr, word);
+        vram.writeWord(addr, word);
         break;
 
     case PAGE_OAM:
-        ppu.oam.writeWord(addr, word);
+        oam.writeWord(addr, word);
         break;
 
     case PAGE_GAMEPAK_0:
@@ -393,156 +372,3 @@ void MMU::writeWord(u32 addr, u32 word)
         break;
     }
 }
-
-#define READ2(label, reg)                      \
-    case label + 0: return reg.readByte<0>();  \
-    case label + 1: return reg.readByte<1>()
-
-#define READ4(label, reg)                      \
-    case label + 0: return reg.readByte<0>();  \
-    case label + 1: return reg.readByte<1>();  \
-    case label + 2: return reg.readByte<2>();  \
-    case label + 3: return reg.readByte<3>()
-
-u8 MMU::readByteIO(u32 addr)
-{
-    if (addr >= REG_DMA0SAD && addr < REG_TM0CNT)
-    {
-        return arm.dma.readByte(addr);
-    }
-
-    switch (addr)
-    {
-    READ2(REG_DISPCNT,  ppu.io.dispcnt);
-    READ2(REG_DISPSTAT, ppu.io.dispstat);
-    READ2(REG_VCOUNT,   ppu.io.vcount);
-    READ2(REG_BG0CNT,   ppu.io.bgcnt[0]);
-    READ2(REG_BG1CNT,   ppu.io.bgcnt[1]);
-    READ2(REG_BG2CNT,   ppu.io.bgcnt[2]);
-    READ2(REG_BG3CNT,   ppu.io.bgcnt[3]);
-    READ2(REG_BG0HOFS,  ppu.io.bghofs[0]);
-    READ2(REG_BG1HOFS,  ppu.io.bghofs[1]);
-    READ2(REG_BG2HOFS,  ppu.io.bghofs[2]);
-    READ2(REG_BG3HOFS,  ppu.io.bghofs[3]);
-    READ2(REG_BG0VOFS,  ppu.io.bgvofs[0]);
-    READ2(REG_BG1VOFS,  ppu.io.bgvofs[1]);
-    READ2(REG_BG2VOFS,  ppu.io.bgvofs[2]);
-    READ2(REG_BG3VOFS,  ppu.io.bgvofs[3]);
-    READ2(REG_BG2PA,    ppu.io.bgpa[0]);
-    READ2(REG_BG2PB,    ppu.io.bgpb[0]);
-    READ2(REG_BG2PC,    ppu.io.bgpc[0]);
-    READ2(REG_BG2PD,    ppu.io.bgpd[0]);
-    READ2(REG_BG3PA,    ppu.io.bgpa[1]);
-    READ2(REG_BG3PB,    ppu.io.bgpb[1]);
-    READ2(REG_BG3PC,    ppu.io.bgpc[1]);
-    READ2(REG_BG3PD,    ppu.io.bgpd[1]);
-    READ4(REG_BG2X,     ppu.io.bgx[0]);
-    READ4(REG_BG2Y,     ppu.io.bgy[0]);
-    READ4(REG_BG3X,     ppu.io.bgx[1]);
-    READ4(REG_BG3Y,     ppu.io.bgy[1]);
-    READ2(REG_WIN0H,    ppu.io.winh[0]);
-    READ2(REG_WIN0V,    ppu.io.winv[0]);
-    READ2(REG_WIN1H,    ppu.io.winh[1]);
-    READ2(REG_WIN1V,    ppu.io.winv[1]);
-    READ2(REG_WININ,    ppu.io.winin);
-    READ2(REG_WINOUT,   ppu.io.winout);
-    READ2(REG_MOSAIC,   ppu.io.mosaic);
-    READ2(REG_BLDCNT,   ppu.io.bldcnt);
-    READ2(REG_BLDALPHA, ppu.io.bldalpha);
-    READ2(REG_BLDY,     ppu.io.bldy);
-    READ2(REG_KEYINPUT, keypad.io.keyinput);
-    READ2(REG_KEYCNT,   keypad.io.keycnt);
-    READ2(REG_IME,      arm.io.int_master);
-    READ2(REG_IE,       arm.io.int_enabled);
-    READ2(REG_IF,       arm.io.int_request);
-    READ4(REG_DMA0SAD,  arm.dma.dmas[0].sad);
-    READ4(REG_DMA1SAD,  arm.dma.dmas[1].sad);
-    READ4(REG_TM0CNT,   arm.timers[0]);
-    READ4(REG_TM1CNT,   arm.timers[1]);
-    READ4(REG_TM2CNT,   arm.timers[2]);
-    READ4(REG_TM3CNT,   arm.timers[3]);
-    READ2(REG_WAITCNT,  arm.io.waitcnt);
-    }
-    return ioram.readByte(addr);
-}
-
-#undef READ4
-#undef READ2
-
-#define WRITE2(label, reg)                           \
-    case label + 0: reg.writeByte<0>(byte); return;  \
-    case label + 1: reg.writeByte<1>(byte); return
-
-#define WRITE4(label, reg)                           \
-    case label + 0: reg.writeByte<0>(byte); return;  \
-    case label + 1: reg.writeByte<1>(byte); return;  \
-    case label + 2: reg.writeByte<2>(byte); return;  \
-    case label + 3: reg.writeByte<3>(byte); return
-
-void MMU::writeByteIO(u32 addr, u8 byte)
-{
-    if (addr >= REG_DMA0SAD && addr < REG_TM0CNT)
-    {
-        arm.dma.writeByte(addr, byte);
-        return;
-    }
-
-    switch (addr)
-    {
-    WRITE2(REG_DISPCNT,  ppu.io.dispcnt);
-    WRITE2(REG_DISPSTAT, ppu.io.dispstat);
-    WRITE2(REG_VCOUNT,   ppu.io.vcount);
-    WRITE2(REG_BG0CNT,   ppu.io.bgcnt[0]);
-    WRITE2(REG_BG1CNT,   ppu.io.bgcnt[1]);
-    WRITE2(REG_BG2CNT,   ppu.io.bgcnt[2]);
-    WRITE2(REG_BG3CNT,   ppu.io.bgcnt[3]);
-    WRITE2(REG_BG0HOFS,  ppu.io.bghofs[0]);
-    WRITE2(REG_BG1HOFS,  ppu.io.bghofs[1]);
-    WRITE2(REG_BG2HOFS,  ppu.io.bghofs[2]);
-    WRITE2(REG_BG3HOFS,  ppu.io.bghofs[3]);
-    WRITE2(REG_BG0VOFS,  ppu.io.bgvofs[0]);
-    WRITE2(REG_BG1VOFS,  ppu.io.bgvofs[1]);
-    WRITE2(REG_BG2VOFS,  ppu.io.bgvofs[2]);
-    WRITE2(REG_BG3VOFS,  ppu.io.bgvofs[3]);
-    WRITE2(REG_BG2PA,    ppu.io.bgpa[0]);
-    WRITE2(REG_BG2PB,    ppu.io.bgpb[0]);
-    WRITE2(REG_BG2PC,    ppu.io.bgpc[0]);
-    WRITE2(REG_BG2PD,    ppu.io.bgpd[0]);
-    WRITE2(REG_BG3PA,    ppu.io.bgpa[1]);
-    WRITE2(REG_BG3PB,    ppu.io.bgpb[1]);
-    WRITE2(REG_BG3PC,    ppu.io.bgpc[1]);
-    WRITE2(REG_BG3PD,    ppu.io.bgpd[1]);
-    WRITE4(REG_BG2X,     ppu.io.bgx[0]);
-    WRITE4(REG_BG2Y,     ppu.io.bgy[0]);
-    WRITE4(REG_BG3X,     ppu.io.bgx[1]);
-    WRITE4(REG_BG3Y,     ppu.io.bgy[1]);
-    WRITE2(REG_WIN0H,    ppu.io.winh[0]);
-    WRITE2(REG_WIN0V,    ppu.io.winv[0]);
-    WRITE2(REG_WIN1H,    ppu.io.winh[1]);
-    WRITE2(REG_WIN1V,    ppu.io.winv[1]);
-    WRITE2(REG_WININ,    ppu.io.winin);
-    WRITE2(REG_WINOUT,   ppu.io.winout);
-    WRITE2(REG_MOSAIC,   ppu.io.mosaic);
-    WRITE2(REG_BLDCNT,   ppu.io.bldcnt);
-    WRITE2(REG_BLDALPHA, ppu.io.bldalpha);
-    WRITE2(REG_BLDY,     ppu.io.bldy);
-    WRITE2(REG_KEYINPUT, keypad.io.keyinput);
-    WRITE2(REG_KEYCNT,   keypad.io.keycnt);
-    WRITE2(REG_IME,      arm.io.int_master);
-    WRITE2(REG_IE,       arm.io.int_enabled);
-    WRITE2(REG_IF,       arm.io.int_request);
-    WRITE4(REG_TM0CNT,   arm.timers[0]);
-    WRITE4(REG_TM1CNT,   arm.timers[1]);
-    WRITE4(REG_TM2CNT,   arm.timers[2]);
-    WRITE4(REG_TM3CNT,   arm.timers[3]);
-    WRITE2(REG_WAITCNT,  arm.io.waitcnt);
-
-    case REG_HALTCNT:
-        arm.io.halt = true;
-        break;
-    }
-    ioram.writeByte(addr, byte);
-}
-
-#undef WRITE4
-#undef WRITE2

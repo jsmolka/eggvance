@@ -2,16 +2,15 @@
 
 #include <algorithm>
 
+#include "common/constants.h"
 #include "arm/arm.h"
+#include "mmu/mmu.h"
 
 PPU ppu;
 
 void PPU::reset()
 {
     io.reset();
-    oam.reset();
-    vram.reset();
-    palette.reset();
 
     for (auto& background : backgrounds)
     {

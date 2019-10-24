@@ -2,10 +2,10 @@
 
 #include <array>
 
-#include "mmu/registers/intenabled.h"
-#include "mmu/registers/intmaster.h"
-#include "mmu/registers/intrequest.h"
-#include "mmu/registers/waitcnt.h"
+#include "regs/intenabled.h"
+#include "regs/intmaster.h"
+#include "regs/intrequest.h"
+#include "regs/waitcnt.h"
 #include "ppu/ppu.h"
 #include "sys/dmacontroller.h"
 #include "sys/timer.h"
@@ -42,26 +42,8 @@ public:
     void run(int cycles);
     void request(Interrupt flag);
 
-private:
-    enum class Access
-    {
-        Seq    = 0,
-        Nonseq = 1,
-    };
-
-    enum class Shift
-    {
-        LSL = 0b00,
-        LSR = 0b01,
-        ASR = 0b10,
-        ROR = 0b11
-    };
-
-    enum class State
-    {
-        Arm   = 0,
-        Thumb = 1
-    };
+    Timer timers[4];
+    DMAController dma;
 
     struct IO
     {
@@ -71,6 +53,15 @@ private:
         WaitCnt waitcnt;
         bool halt;
     } io;
+
+private:
+    enum class Shift
+    {
+        LSL = 0b00,
+        LSR = 0b01,
+        ASR = 0b10,
+        ROR = 0b11
+    };
 
     u8  readByte(u32 addr);
     u16 readHalf(u32 addr);
@@ -106,10 +97,9 @@ private:
 
     void flushPipeHalf();
     void flushPipeWord();
-    void advance();
 
     void idle();
-    void booth(u32 multiplier, bool allow_ones);
+    void booth(u32 multiplier, bool ones);
 
     void interrupt(u32 pc, u32 lr, PSR::Mode mode);
     void interruptHW();
@@ -154,13 +144,9 @@ private:
     void Thumb_LongBranchLink(u16 instr);
     void Thumb_Undefined(u16 instr);
 
-    u32 pipe[2];
-
     int cycles;
+    u32 pipe[2];
     u32 last_addr;
-
-    Timer timers[4];
-    DMAController dma;
 };
 
 extern ARM arm;

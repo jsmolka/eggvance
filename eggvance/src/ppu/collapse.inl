@@ -1,3 +1,5 @@
+#include "mmu/mmu.h"
+
 #define MISSING_PIXEL 0x6C3F
 
 template<int obj_master>
@@ -264,7 +266,7 @@ u16 PPU::upperLayer(const std::vector<BackgroundLayer>& layers, int x)
     if (obj_master && object.opaque)
         return object.color;
     
-    return palette.readHalf(0);
+    return mmu.palette.readHalf(0);
 }
 
 template<int obj_master>
@@ -283,7 +285,7 @@ u16 PPU::upperLayer(const std::vector<BackgroundLayer>& layers, int x, int flags
     if (obj_master && flags & LF_OBJ && object.opaque)
         return object.color;
     
-    return palette.readHalf(0);
+    return mmu.palette.readHalf(0);
 }
 
 template<int obj_master>
@@ -311,7 +313,7 @@ bool PPU::findBlendLayers(const std::vector<BackgroundLayer>& layers, int x, int
         upper = object.color;
         return flags_upper & LF_OBJ;
     }
-    upper = palette.readHalf(0);
+    upper = mmu.palette.readHalf(0);
     return flags_upper & LF_BDP;
 }
 
@@ -358,12 +360,12 @@ bool PPU::findBlendLayers(const std::vector<BackgroundLayer>& layers, int x, int
     }
     if (upper_found)
     {
-        lower = palette.readHalf(0);
+        lower = mmu.palette.readHalf(0);
         return flags_lower & LF_BDP;
     }
     else
     {
-        upper = palette.readHalf(0);
+        upper = mmu.palette.readHalf(0);
         return false;
     }
 }
