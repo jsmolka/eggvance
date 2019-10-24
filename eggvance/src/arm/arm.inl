@@ -81,46 +81,6 @@ inline void ARM::advance()
     pc += offsets[cpsr.thumb];
 }
 
-template<ARM::State state>
-inline void ARM::refill()
-{
-    switch (state)
-    {
-    case State::Arm:
-        cycle<Access::Seq>(pc);
-        cycle<Access::Seq>(pc + 4);
-        break;
-
-    case State::Thumb:
-        cycle<Access::Seq>(pc);
-        cycle<Access::Seq>(pc + 2);
-        break;
-
-    default:
-        EGG_UNREACHABLE;
-        break;
-    }
-    advance<state>();
-}
-
-template<ARM::Access access>
-inline void ARM::cycle(u32 addr)
-{
-    cycles++;
-
-    int page = addr >> 28;
-
-    cycles += io.waitcnt.cycles32[static_cast<int>(access)][page];
-
-    if (page >= 0x5 && page < 0x8 && !ppu.io.dispstat.vblank && !ppu.io.dispstat.hblank)
-        cycles++;
-}
-
-inline void ARM::cycle()
-{
-    cycles++;
-}
-
 inline void ARM::cycleBooth(u32 multiplier, bool allow_ones)
 {
     static constexpr u32 masks[3] =

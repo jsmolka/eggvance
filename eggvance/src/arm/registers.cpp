@@ -15,7 +15,7 @@ void Registers::reset()
     {
         sp   = 0x0300'7F00;
         lr   = 0x0800'0000;
-        pc   = 0x0800'0008;
+        pc   = 0x0800'0000;
         cpsr = 0x0000'005F;
 
         bank[Bank::FIQ][0] = 0x0300'7F00;
@@ -26,7 +26,7 @@ void Registers::reset()
     }
     else 
     {
-        pc   = 0x0000'0008;
+        pc   = 0x0000'0000;
         cpsr = 0x0000'00D3;
     }
 }

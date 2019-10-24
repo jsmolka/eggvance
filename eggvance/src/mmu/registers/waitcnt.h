@@ -21,6 +21,9 @@ public:
     template<int index>
     inline void writeByte(u8 byte);
 
+    int cyclesHalf(u32 addr, int sequential) const;
+    int cyclesWord(u32 addr, int sequential) const;
+
     int sram;
     WaitState ws0;
     WaitState ws1;
@@ -28,19 +31,19 @@ public:
     int phi;
     int prefetch;
 
-    int cycles16[2][256] 
-    {
-        { 1, 1, 3, 1, 1, 1, 1, 1 },
-        { 1, 1, 3, 1, 1, 1, 1, 1 }
-    };
-    int cycles32[2][256]
-    {
-        { 1, 1, 6, 1, 1, 2, 2, 1 },
-        { 1, 1, 6, 1, 1, 2, 2, 1 }
-    };
-
 private:
     void update();
+
+    int cycles_half[2][256] 
+    {
+        { 1, 1, 3, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 },
+        { 1, 1, 3, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 }
+    };
+    int cycles_word[2][256]
+    {
+        { 1, 1, 6, 1, 1, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0 },
+        { 1, 1, 6, 1, 1, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0 }
+    };
 };
 
 #include "waitcnt.inl"

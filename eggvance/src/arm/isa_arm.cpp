@@ -9,17 +9,15 @@ void ARM::Arm_BranchExchange(u32 instr)
 
     u32 addr = regs[rn];
 
-    cycle<Access::Nonseq>(pc + 8);
-
     if (cpsr.thumb = addr & 0x1)
     {
         pc = alignHalf(addr);
-        refill<State::Thumb>();
+        flushThumb();
     }
     else
     {
         pc = alignWord(addr);
-        refill<State::Arm>();
+        flushArm();
     }
 }
 
@@ -28,15 +26,13 @@ void ARM::Arm_BranchLink(u32 instr)
     int offset = bits< 0, 24>(instr);
     int link   = bits<24,  1>(instr);
 
-    cycle<Access::Nonseq>(pc + 8);
-
     if (link) lr = pc - 4;
 
     offset = signExtend<24>(offset);
     offset <<= 2;
 
     pc += offset;
-    refill<State::Arm>();
+    flushArm();
 }
 
 void ARM::Arm_DataProcessing(u32 instr)
@@ -98,7 +94,7 @@ void ARM::Arm_DataProcessing(u32 instr)
             if (rn == 15) op1 += 4;
             if (rm == 15) op2 += 4;
 
-            cycle();
+            cycles--;
         }
         else
         {
@@ -107,21 +103,13 @@ void ARM::Arm_DataProcessing(u32 instr)
         op2 = shift(Shift(type), op2, amount, carry, !use_reg);
     }
 
-    if (rd == 15)
+    if (rd == 15 && flags)
     {
-        if (flags)
-        {
-            PSR spsr = this->spsr;
-            switchMode(spsr.mode);
-            cpsr = spsr;
+        PSR spsr = this->spsr;
+        switchMode(spsr.mode);
+        cpsr = spsr;
 
-            flags = false;
-        }
-        cycle<Access::Nonseq>(pc + 8);
-    }
-    else
-    {
-        cycle<Access::Seq>(pc + 8);
+        flags = false;
     }
 
     switch (Operation(opcode))
@@ -153,12 +141,12 @@ void ARM::Arm_DataProcessing(u32 instr)
         if (cpsr.thumb)
         {
             pc = alignHalf(pc);
-            refill<State::Thumb>();
+            flushThumb();
         }
         else
         {
             pc = alignWord(pc);
-            refill<State::Arm>();
+            flushArm();
         }
     }
 }
@@ -217,7 +205,6 @@ void ARM::Arm_StatusTransfer(u32 instr)
 
         regs[rd] = use_spsr ? spsr : cpsr;
     }
-    cycle<Access::Seq>(pc + 8);
 }
 
 void ARM::Arm_Multiply(u32 instr)
@@ -238,12 +225,11 @@ void ARM::Arm_Multiply(u32 instr)
     if (accumulate)
     {
         dst += op3;
-        cycle();
+        cycles--;
     }
     logical(dst, flags);
 
     cycleBooth(op2, true);
-    cycle<Access::Seq>(pc + 8);
 }
 
 void ARM::Arm_MultiplyLong(u32 instr)
@@ -271,7 +257,7 @@ void ARM::Arm_MultiplyLong(u32 instr)
     if (accumulate)
     {
         result += (static_cast<u64>(dsth) << 32) | dstl;
-        cycle();
+        cycles--;
     }
 
     if (flags)
@@ -283,9 +269,7 @@ void ARM::Arm_MultiplyLong(u32 instr)
     dstl = static_cast<u32>(result);
     dsth = static_cast<u32>(result >> 32);
 
-    cycle();
     cycleBooth(static_cast<u32>(op2), sign);
-    cycle<Access::Seq>(pc + 8);
 }
 
 #define INDEX            \
@@ -346,21 +330,18 @@ void ARM::Arm_SingleDataTransfer(u32 instr)
 
     PRE_INDEX;
 
-    cycle<Access::Nonseq>(addr);
-    cycle<Access::Nonseq>(pc + 8);
-
     if (load)
     {
         dst = byte
-            ? mmu.readByte(addr)
+            ? readByte(addr)
             : readWordRotated(addr);
 
         if (rd == 15)
         {
             pc = alignWord(pc);
-            refill<State::Arm>();
+            flushArm();
         }
-        cycle();
+        cycles--;
     }
     else
     {
@@ -369,9 +350,9 @@ void ARM::Arm_SingleDataTransfer(u32 instr)
             : dst + 0;
 
         if (byte)
-            mmu.writeByte(addr, value);
+            writeByte(addr, value);
         else
-            mmu.writeWord(addr, value);
+            writeWord(addr, value);
     }
 
     if (writeback && (rd != rn || !load))
@@ -420,9 +401,6 @@ void ARM::Arm_HalfSignedDataTransfer(u32 instr)
 
     PRE_INDEX;
 
-    cycle<Access::Nonseq>(addr);
-    cycle<Access::Nonseq>(pc + 8);
-
     if (load)
     {
         switch (Operation(opcode))
@@ -435,7 +413,7 @@ void ARM::Arm_HalfSignedDataTransfer(u32 instr)
             break;
 
         case Operation::LDRSB:
-            dst = mmu.readByte(addr);
+            dst = readByte(addr);
             dst = signExtend<8>(dst);
             break;
 
@@ -451,9 +429,9 @@ void ARM::Arm_HalfSignedDataTransfer(u32 instr)
         if (rd == 15)
         {
             pc = alignWord(pc);
-            refill<State::Arm>();
+            flushArm();
         }
-        cycle();
+        cycles--;
     }
     else
     {
@@ -461,7 +439,7 @@ void ARM::Arm_HalfSignedDataTransfer(u32 instr)
             ? dst + 4
             : dst + 0;
 
-        mmu.writeHalf(addr, value);
+        writeHalf(addr, value);
     }
 
     if (writeback && (rd != rn || !load))
@@ -492,8 +470,6 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
     if (user_mode)
         switchMode(PSR::Mode::USR);
 
-    cycle<Access::Nonseq>(pc + 8);
-
     if (rlist != 0)
     {
         int beg   = bitScanForward(rlist);
@@ -516,9 +492,6 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
             if (rlist & (1 << rn))
                 writeback = false;
 
-            if (rlist & (1 << 15))
-                cycle<Access::Nonseq>(pc + 4);
-
             for (int x = beg; x <= end; ++x)
             {
                 if (~rlist & (1 << x))
@@ -527,12 +500,10 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
                 if (pre_index) 
                     addr += 4;
 
-                if (x != end)
-                    cycle<Access::Seq>(addr);
-                else
-                    cycle();
+                if (x == end)
+                    cycles--;
 
-                regs[x] = mmu.readWord(addr);
+                regs[x] = readWord(addr);
 
                 if (!pre_index) 
                     addr += 4;
@@ -541,7 +512,7 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
             if (rlist & (1 << 15))
             {
                 pc = alignWord(pc);
-                refill<State::Arm>();
+                flushArm();
             }
         }
         else
@@ -553,9 +524,6 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
 
                 if (pre_index) 
                     addr += 4;
-
-                if (x != end)
-                    cycle<Access::Seq>(addr);
 
                 u32 value = 0;
                 if (x == rn)
@@ -578,25 +546,24 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
                         : regs[x] + 0;
                 }
 
-                mmu.writeWord(addr, value);
+                writeWord(addr, value);
 
                 if (!pre_index)
                     addr += 4;
             }
-            cycle<Access::Nonseq>(addr);
         }
     }
     else
     {
         if (load)
         {
-            pc = mmu.readWord(addr);
+            pc = readWord(addr);
             pc = alignWord(pc);
-            refill<State::Arm>();
+            flushArm();
         }
         else
         {
-            mmu.writeWord(addr, pc + 4);
+            writeWord(addr, pc + 4);
         }
 
         addr += increment
@@ -622,22 +589,17 @@ void ARM::Arm_SingleDataSwap(u32 instr)
     u32& dst = regs[rd];
     u32 addr = regs[rn];
 
-    cycle<Access::Nonseq>(pc + 8);
-    cycle<Access::Nonseq>(addr);
-
     if (byte)
     {
-        dst = mmu.readByte(addr);
-        mmu.writeByte(addr, src);
+        dst = readByte(addr);
+        writeByte(addr, src);
     }
     else
     {
         dst = readWordRotated(addr);
-        mmu.writeWord(addr, src);
+        writeWord(addr, src);
     }
-
-    cycle<Access::Seq>(pc + 4);
-    cycle();
+    cycles--;
 }
 
 void ARM::Arm_SoftwareInterrupt(u32 instr)

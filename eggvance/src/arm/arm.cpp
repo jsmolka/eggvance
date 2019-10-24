@@ -5,6 +5,7 @@
 #include "common/integer.h"
 #include "common/macros.h"
 #include "common/utility.h"
+#include "mmu/mmu.h"
 #include "decode.h"
 #include "diasm.h"
 
@@ -38,18 +39,23 @@ void ARM::reset()
     dma.reset();
 
     cycles = 0;
+
+    flushArm();
+    advance();
 }
 
-void ARM::run(int cycles)
+void ARM::run(int cycles_)
 {
+    cycles += cycles_;
+
     while (cycles > 0)
     {
         if (dma.active)
         {
             // Todo: temporary
-            int prev = cycles;
+            int p = cycles;
             dma.run(cycles);
-            for (int i = 0; i < (prev - cycles); ++i)
+            for (int i = 0; i < (p - cycles); ++i)
             {
                 for (auto& timer : timers)
                     timer.run(1);
@@ -72,10 +78,13 @@ void ARM::run(int cycles)
             }
             else
             {
-                int c = execute();
-                for (auto& timer : timers)
-                    timer.run(c);
-                cycles -= c;
+                int p = cycles;
+                execute();
+                for (int i = 0; i < (p - cycles); ++i)
+                {
+                    for (auto& timer : timers)
+                        timer.run(1);
+                }
             }
         }
     }
@@ -89,10 +98,8 @@ void ARM::request(Interrupt flag)
     io.int_request |= static_cast<int>(flag);
 }
 
-int ARM::execute()
+void ARM::execute()
 {
-    u64 last = cycles;
-
     //#ifdef EGG_DEBUG
     //disasm();
     //#endif
@@ -105,7 +112,10 @@ int ARM::execute()
     {            
         if (cpsr.thumb)
         {
-            u16 instr = mmu.readHalf(pc - 4);
+            u16 instr = pipe[0];
+
+            pipe[0] = pipe[1];
+            pipe[1] = readHalf(pc);
 
             switch (decodeThumb(instr))
             {
@@ -137,7 +147,10 @@ int ARM::execute()
         }
         else
         {
-            u32 instr = mmu.readWord(pc - 8);
+            u32 instr = pipe[0];
+
+            pipe[0] = pipe[1];
+            pipe[1] = readWord(pc);
 
             if (cpsr.check(PSR::Condition(instr >> 28)))
             {
@@ -164,21 +177,27 @@ int ARM::execute()
                     break;
                 }
             }
-            else
-            {
-                cycle<Access::Seq>(pc + 8);
-            }
         }
     }
     advance();
+}
 
-    return static_cast<int>(cycles - last);
+void ARM::flushArm()
+{
+    pipe[0] = readWord(pc + 0);
+    pipe[1] = readWord(pc + 4);
+    pc += 4;
+}
+
+void ARM::flushThumb()
+{
+    pipe[0] = readHalf(pc + 0);
+    pipe[1] = readHalf(pc + 2);
+    pc += 2;
 }
 
 void ARM::interrupt(u32 pc, u32 lr, PSR::Mode mode)
 {
-    cycle<Access::Nonseq>(this->pc);
-
     u32 cpsr = this->cpsr;
     switchMode(mode);
     spsr = cpsr;
@@ -189,7 +208,7 @@ void ARM::interrupt(u32 pc, u32 lr, PSR::Mode mode)
     this->cpsr.thumb = false;
     this->cpsr.irqd  = true;
 
-    refill<State::Arm>();
+    flushArm();
 }
 
 void ARM::interruptHW()

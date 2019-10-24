@@ -26,8 +26,6 @@ void ARM::Thumb_MoveShiftedRegister(u16 instr)
         break;
     }
     logical(dst, carry, true);
-
-    cycle<Access::Seq>(pc + 4);
 }
 
 void ARM::Thumb_AddSubtract(u16 instr)
@@ -59,7 +57,6 @@ void ARM::Thumb_AddSubtract(u16 instr)
         EGG_UNREACHABLE;
         break;
     }
-    cycle<Access::Seq>(pc + 4);
 }
 
 void ARM::Thumb_ImmediateOperations(u16 instr)
@@ -89,7 +86,6 @@ void ARM::Thumb_ImmediateOperations(u16 instr)
         EGG_UNREACHABLE;
         break;
     }
-    cycle<Access::Seq>(pc + 4);
 }
 
 void ARM::Thumb_ALUOperations(u16 instr)
@@ -139,25 +135,25 @@ void ARM::Thumb_ALUOperations(u16 instr)
     case Operation::LSL:
         dst = lsl(dst, src, carry);
         logical(dst, carry, true);
-        cycle();
+        cycles--;
         break;
 
     case Operation::LSR:
         dst = lsr(dst, src, carry, false); 
         logical(dst, carry, true);
-        cycle();
+        cycles--;
         break;
 
     case Operation::ASR:
         dst = asr(dst, src, carry, false); 
         logical(dst, carry, true);
-        cycle();
+        cycles--;
         break;
 
     case Operation::ROR:
         dst = ror(dst, src, carry, false);
         logical(dst, carry, true);
-        cycle();
+        cycles--;
         break;
 
     case Operation::MUL:
@@ -201,7 +197,6 @@ void ARM::Thumb_ALUOperations(u16 instr)
         EGG_UNREACHABLE;
         break;
     }
-    cycle<Access::Seq>(pc + 4);
 }
 
 void ARM::Thumb_HighRegisterOperations(u16 instr)
@@ -231,47 +226,41 @@ void ARM::Thumb_HighRegisterOperations(u16 instr)
     case Operation::ADD:
         if (rd == 15)
         {
-            cycle<Access::Nonseq>(pc + 4);
             dst = alignHalf(dst + src);
-            refill<State::Thumb>();
+            flushThumb();
         }
         else
         {
             dst += src;
-            cycle<Access::Seq>(pc + 4);
         }
         break;
 
     case Operation::MOV:
         if (rd == 15)
         {
-            cycle<Access::Nonseq>(pc + 4);
             dst = alignHalf(src);
-            refill<State::Thumb>();
+            flushThumb();
         }
         else
         {
             dst = src;
-            cycle<Access::Seq>(pc + 4);
         }
         break;
 
     case Operation::CMP:
         sub(dst, src, true);
-        cycle<Access::Seq>(pc + 4);
         break;
 
     case Operation::BX:
-        cycle<Access::Nonseq>(pc + 4);
         if (cpsr.thumb = src & 0x1)
         {
             pc = alignHalf(src);
-            refill<State::Thumb>();
+            flushThumb();
         }
         else
         {
             pc = alignWord(src);
-            refill<State::Arm>();
+            flushArm();
         }
         break;
 
@@ -290,11 +279,9 @@ void ARM::Thumb_LoadPCRelative(u16 instr)
 
     u32 addr = alignWord(pc + offset);
 
-    regs[rd] = mmu.readWord(addr);
+    regs[rd] = readWord(addr);
 
-    cycle<Access::Nonseq>(addr);
-    cycle<Access::Seq>(pc + 4);
-    cycle();
+    cycles--;
 }
 
 void ARM::Thumb_LoadStoreRegisterOffset(u16 instr)
@@ -315,30 +302,24 @@ void ARM::Thumb_LoadStoreRegisterOffset(u16 instr)
     u32& dst = regs[rd];
     u32 addr = regs[rb] + regs[ro];
 
-    cycle<Access::Nonseq>(pc + 4);
-
     switch (Operation(opcode))
     {
     case Operation::STR:
-        mmu.writeWord(addr, dst);
-        cycle<Access::Nonseq>(addr);
+        writeWord(addr, dst);
         break;
 
     case Operation::STRB:
-        mmu.writeByte(addr, dst);
-        cycle<Access::Nonseq>(addr);
+        writeByte(addr, dst);
         break;
 
     case Operation::LDR:
         dst = readWordRotated(addr);
-        cycle<Access::Seq>(pc + 4);
-        cycle();
+        cycles--;
         break;
 
     case Operation::LDRB:
-        dst = mmu.readByte(addr);
-        cycle<Access::Seq>(pc + 4);
-        cycle();
+        dst = readByte(addr);
+        cycles--;
         break;
 
     default:
@@ -365,32 +346,26 @@ void ARM::Thumb_LoadStoreByteHalf(u16 instr)
     u32& dst = regs[rd];
     u32 addr = regs[rb] + regs[ro];
 
-    cycle<Access::Nonseq>(pc + 4);
-
     switch (Operation(opcode))
     {
     case Operation::STRH:
-        mmu.writeHalf(addr, dst);
-        cycle<Access::Nonseq>(addr);
+        writeHalf(addr, dst);
         break;
 
     case Operation::LDRSB:
-        dst = mmu.readByte(addr);
+        dst = readByte(addr);
         dst = signExtend<8>(dst);
-        cycle<Access::Seq>(pc + 4);
-        cycle();
+        cycles--;
         break;
 
     case Operation::LDRH:
         dst = readHalfRotated(addr);
-        cycle<Access::Seq>(pc + 4);
-        cycle();
+        cycles--;
         break;
 
     case Operation::LDRSH:
         dst = readHalfSigned(addr);
-        cycle<Access::Seq>(pc + 4);
-        cycle();
+        cycles--;
         break;
 
     default:
@@ -420,30 +395,24 @@ void ARM::Thumb_LoadStoreImmediateOffset(u16 instr)
     u32& dst = regs[rd];
     u32 addr = regs[rb] + offset;
 
-    cycle<Access::Nonseq>(pc + 4);
-
     switch (Operation(opcode))
     {
     case Operation::STR:
-        mmu.writeWord(addr, dst);
-        cycle<Access::Nonseq>(addr);
+        writeWord(addr, dst);
         break;
 
     case Operation::STRB:
-        mmu.writeByte(addr, dst);
-        cycle<Access::Nonseq>(addr);
+        writeByte(addr, dst);
         break;
 
     case Operation::LDR:
         dst = readWordRotated(addr);
-        cycle<Access::Seq>(pc + 4);
-        cycle();
+        cycles--;
         break;
 
     case Operation::LDRB:
-        dst = mmu.readByte(addr);
-        cycle<Access::Seq>(pc + 4);
-        cycle();
+        dst = readByte(addr);
+        cycles--;
         break;
 
     default:
@@ -464,18 +433,14 @@ void ARM::Thumb_LoadStoreHalf(u16 instr)
     u32& dst = regs[rd];
     u32 addr = regs[rb] + offset;
 
-    cycle<Access::Nonseq>(pc + 4);
-
     if (load)
     {
         dst = readHalfRotated(addr);
-        cycle<Access::Seq>(pc + 4);
-        cycle();
+        cycles--;
     }
     else
     {
-        mmu.writeHalf(addr, dst);
-        cycle<Access::Nonseq>(addr);
+        writeHalf(addr, dst);
     }
 }
 
@@ -488,18 +453,14 @@ void ARM::Thumb_LoadStoreSPRelative(u16 instr)
     u32& dst = regs[rd];
     u32 addr = sp + (offset << 2);
 
-    cycle<Access::Nonseq>(pc + 4);
-
     if (load)
     {
         dst = readWordRotated(addr);
-        cycle<Access::Seq>(pc + 4);
-        cycle();
+        cycles--;
     }
     else
     {
-        mmu.writeWord(addr, dst);
-        cycle<Access::Nonseq>(addr);
+        writeWord(addr, dst);
     }
 }
 
@@ -517,8 +478,6 @@ void ARM::Thumb_LoadRelativeAddress(u16 instr)
         dst = sp + offset;
     else
         dst = alignWord(pc + offset);
-
-    cycle<Access::Seq>(pc + 4);
 }
 
 void ARM::Thumb_AddOffsetSP(u16 instr)
@@ -532,8 +491,6 @@ void ARM::Thumb_AddOffsetSP(u16 instr)
         sp -= offset;
     else
         sp += offset; 
-
-    cycle<Access::Seq>(pc + 4);
 }
 
 void ARM::Thumb_PushPopRegisters(u16 instr)
@@ -542,8 +499,6 @@ void ARM::Thumb_PushPopRegisters(u16 instr)
     int special = bits< 8, 1>(instr);
     int pop     = bits<11, 1>(instr);
      
-    cycle<Access::Nonseq>(pc + 4);
-
     if (pop)
     {
         int beg = bitScanForward(rlist);
@@ -554,29 +509,21 @@ void ARM::Thumb_PushPopRegisters(u16 instr)
             if (~rlist & (1 << x))
                 continue;
 
-            if (beg != end)
-                cycle<Access::Seq>(sp);
-            else
-                cycle();
+            if (beg == end)
+                cycles--;
 
-            regs[x] = mmu.readWord(sp);
+            regs[x] = readWord(sp);
 
             sp += 4;
         }
 
         if (special)
         {
-            cycle<Access::Nonseq>(pc + 4);
-
-            pc = mmu.readWord(sp);
+            pc = readWord(sp);
             pc = alignHalf(pc);
-            refill<State::Thumb>();
+            flushThumb();
 
             sp += 4;
-        }
-        else
-        {
-            cycle<Access::Seq>(pc + 4);
         }
     }
     else
@@ -587,7 +534,7 @@ void ARM::Thumb_PushPopRegisters(u16 instr)
         if (special)
         {
             sp -= 4;
-            mmu.writeWord(sp, lr);
+            writeWord(sp, lr);
         }
 
         for (int x = beg; x >= end; --x)
@@ -597,12 +544,8 @@ void ARM::Thumb_PushPopRegisters(u16 instr)
 
             sp -= 4;
 
-            if (beg != end)
-                cycle<Access::Seq>(sp);
-
-            mmu.writeWord(sp, regs[x]);
+            writeWord(sp, regs[x]);
         }
-        cycle<Access::Nonseq>(sp);
     }
 }
 
@@ -616,8 +559,6 @@ void ARM::Thumb_LoadStoreMultiple(u16 instr)
     u32 base = regs[rb];
 
     bool writeback = true;
-
-    cycle<Access::Nonseq>(pc + 4);
 
     if (rlist != 0)
     {
@@ -634,16 +575,13 @@ void ARM::Thumb_LoadStoreMultiple(u16 instr)
                 if (~rlist & (1 << x))
                     continue;
 
-                if (beg != end)
-                    cycle<Access::Seq>(addr);
-                else
-                    cycle();
+                if (beg == end)
+                    cycles--;
 
-                regs[x] = mmu.readWord(addr);
+                regs[x] = readWord(addr);
 
                 addr += 4;
             }
-            cycle<Access::Seq>(pc + 4);
         }
         else
         {
@@ -652,30 +590,26 @@ void ARM::Thumb_LoadStoreMultiple(u16 instr)
                 if (~rlist & (1 << x))
                     continue;
 
-                if (beg != end)
-                    cycle<Access::Seq>(addr);
-
                 if (x == rb)
-                    mmu.writeWord(addr, base + 4 * bitCount(rlist));
+                    writeWord(addr, base + 4 * bitCount(rlist));
                 else
-                    mmu.writeWord(addr, regs[x]);
+                    writeWord(addr, regs[x]);
 
                 addr += 4;
             }
-            cycle<Access::Nonseq>(addr);
         }
     }
     else
     {
         if (load)
         {
-            pc = mmu.readWord(addr);
+            pc = readWord(addr);
             pc = alignHalf(pc);
-            refill<State::Thumb>();
+            flushThumb();
         }
         else
         {
-            mmu.writeWord(addr, pc + 2);
+            writeWord(addr, pc + 2);
         }
         addr += 0x40;
     }
@@ -692,17 +626,11 @@ void ARM::Thumb_ConditionalBranch(u16 instr)
     {
         int offset = bits<0, 8>(instr);
 
-        cycle<Access::Nonseq>(pc + 4);
-
         offset = signExtend<8>(offset);
         offset <<= 1;
 
         pc += offset;
-        refill<State::Thumb>();
-    }
-    else
-    {
-        cycle<Access::Seq>(pc + 4);
+        flushThumb();
     }
 }
 
@@ -715,13 +643,11 @@ void ARM::Thumb_UnconditionalBranch(u16 instr)
 {
     int offset = bits<0, 11>(instr);
 
-    cycle<Access::Nonseq>(pc + 4);
-
     offset = signExtend<11>(offset);
     offset <<= 1;
 
     pc += offset;
-    refill<State::Thumb>();
+    flushThumb();
 }
 
 void ARM::Thumb_LongBranchLink(u16 instr)
@@ -731,15 +657,13 @@ void ARM::Thumb_LongBranchLink(u16 instr)
 
     if (second)
     {
-        cycle<Access::Nonseq>(pc + 4);
-
         offset <<= 1;
 
         u32 next = (pc - 2) | 1;
         pc = lr + offset;
         lr = next;
 
-        refill<State::Thumb>();
+        flushThumb();
     }
     else
     {
@@ -747,8 +671,6 @@ void ARM::Thumb_LongBranchLink(u16 instr)
         offset <<= 12;
 
         lr = pc + offset;
-
-        cycle<Access::Seq>(pc + 4);
     }
 }
 

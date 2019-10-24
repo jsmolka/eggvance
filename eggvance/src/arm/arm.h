@@ -6,7 +6,6 @@
 #include "mmu/registers/intmaster.h"
 #include "mmu/registers/intrequest.h"
 #include "mmu/registers/waitcnt.h"
-#include "mmu/mmu.h"
 #include "ppu/ppu.h"
 #include "dmacontroller.h"
 #include "registers.h"
@@ -73,6 +72,14 @@ private:
         bool halt;
     } io;
 
+    u8  readByte(u32 addr);
+    u16 readHalf(u32 addr);
+    u32 readWord(u32 addr);
+
+    void writeByte(u32 addr, u8  byte);
+    void writeHalf(u32 addr, u16 half);
+    void writeWord(u32 addr, u32 word);
+
     u32 readWordRotated(u32 addr);
     u32 readHalfRotated(u32 addr);
     u32 readHalfSigned(u32 addr);
@@ -95,13 +102,14 @@ private:
     inline u32 add(u32 op1, u32 op2, bool flags);
     inline u32 sub(u32 op1, u32 op2, bool flags);
 
-    int execute();
+    void execute();
+
+    void flushArm();
+    void flushThumb();
 
     template<State state>
     inline void advance();
     inline void advance();
-    template<State state>
-    inline void refill();
 
     void interrupt(u32 pc, u32 lr, PSR::Mode mode);
     void interruptHW();
@@ -109,9 +117,6 @@ private:
 
     void disasm();
 
-    template<Access access>
-    inline void cycle(u32 addr);
-    inline void cycle();
     inline void cycleBooth(u32 multiplier, bool allow_ones);
 
     void Arm_BranchExchange(u32 instr);
@@ -151,7 +156,10 @@ private:
     void Thumb_LongBranchLink(u16 instr);
     void Thumb_Undefined(u16 instr);
 
-    u64 cycles;
+    u32 pipe[2];
+
+    int cycles;
+    u32 last_addr;
 
     Timer timers[4];
     DMAController dma;
