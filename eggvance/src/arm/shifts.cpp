@@ -76,10 +76,7 @@ u32 ARM::ror(u32 value, int amount, bool& carry, bool immediate) const
 {
     if (amount != 0)
     {
-        amount %= 32;
-        if (amount != 0)
-            value = (value << (32 - amount)) | (value >> amount);
-
+        value = rotateRight(value, amount);
         carry = value >> 31;
     }
     else if (immediate)
@@ -150,9 +147,7 @@ u32 ARM::ror(u32 value, int amount, bool immediate) const
 {
     if (amount != 0)
     {
-        amount %= 32;
-        if (amount != 0)
-            value = (value << (32 - amount)) | (value >> amount);
+        value = rotateRight(value, amount);
     }
     else if (immediate)
     {

@@ -52,10 +52,14 @@ inline int bitScanReverse(u16 value)
     return static_cast<int>(index);
 }
 
-template<typename T>
-inline int bitCount(T value)
+inline int bitCount(u16 value)
 {
     return __popcnt16(value);
+}
+
+inline u32 rotateRight(u32 value, int amount)
+{
+    return _rotr(value, amount);
 }
 
 #else

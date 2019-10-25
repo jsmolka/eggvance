@@ -1,5 +1,6 @@
 #include "oam.h"
-void OAM::reset()
+
+void OAM::reset()
 {
     for (auto& entry : entries)
     {

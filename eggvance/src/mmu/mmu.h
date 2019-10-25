@@ -28,6 +28,8 @@ public:
     IO io;
 
 private:
+    u32 readUnused(u32 addr);
+
     RAM<0x40000> ewram;
     RAM<0x08000> iwram;
 };

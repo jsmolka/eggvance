@@ -1,8 +1,7 @@
 #include "mmu.h"
 
 #include "arm/arm.h"
-#include "ppu/ppu.h"
-#include "sys/keypad.h"
+#include "common/utility.h"
 #include "memmap.h"
 
 MMU mmu;
@@ -23,39 +22,42 @@ u8 MMU::readByte(u32 addr)
 {
     switch (addr >> 24)
     {
-    case PAGE_BIOS:
-    case PAGE_BIOS+1:
-        return bios.readByte(addr);
+    case REGION_BIOS:
+        if (addr < 0x4000)
+            return bios.readByte(addr);
+        else
+            return readUnused(addr);
 
-    case PAGE_EWRAM:
+    case REGION_EWRAM:
         return ewram.readByte(addr);
 
-    case PAGE_IWRAM:
+    case REGION_IWRAM:
         return iwram.readByte(addr);
 
-    case PAGE_IO:
+    case REGION_IO:
         if (addr < 0x400'0400)
             return io.readByte(addr);
-        return 0;
+        else
+            return 0;
 
-    case PAGE_PALETTE:
+    case REGION_PALETTE:
         return palette.readByte(addr);
 
-    case PAGE_VRAM:
+    case REGION_VRAM:
         return vram.readByte(addr);
 
-    case PAGE_OAM:
+    case REGION_OAM:
         return oam.readByte(addr);
 
-    case PAGE_GAMEPAK_0:
-    case PAGE_GAMEPAK_0+1:
-    case PAGE_GAMEPAK_1:
-    case PAGE_GAMEPAK_1+1:
-    case PAGE_GAMEPAK_2:
+    case REGION_GAMEPAK0:
+    case REGION_GAMEPAK0_EX:
+    case REGION_GAMEPAK1:
+    case REGION_GAMEPAK1_EX:
+    case REGION_GAMEPAK2:
         addr &= 0x1FF'FFFF;
         return gamepak.readByte(addr);
 
-    case PAGE_GAMEPAK_2+1:
+    case REGION_GAMEPAK2_EX:
         if (gamepak.backup->type == Backup::Type::EEPROM)
         {
             // Todo: should this always be one?
@@ -65,7 +67,7 @@ u8 MMU::readByte(u32 addr)
         addr &= 0x1FF'FFFF;
         return gamepak.readByte(addr);
     
-    case PAGE_GAMEPAK_SRAM:
+    case REGION_SRAM:
         switch (gamepak.backup->type)
         {
         case Backup::Type::SRAM:
@@ -79,7 +81,7 @@ u8 MMU::readByte(u32 addr)
         }
         return 0;
 
-    default:
+    case REGION_SRAM_MIRROR:
         if (gamepak.backup->type == Backup::Type::SRAM)
         {
             addr &= 0x7FFF;
@@ -87,46 +89,49 @@ u8 MMU::readByte(u32 addr)
         }
         return 0;
     }
-    return 0;
+    return readUnused(addr);
 }
 
 u16 MMU::readHalf(u32 addr)
 {
     switch (addr >> 24)
     {
-    case PAGE_BIOS:
-    case PAGE_BIOS+1:
-        return bios.readHalf(addr);
+    case REGION_BIOS:
+        if (addr < 0x4000)
+            return bios.readHalf(addr);
+        else
+            return readUnused(addr);
 
-    case PAGE_EWRAM:
+    case REGION_EWRAM:
         return ewram.readHalf(addr);
 
-    case PAGE_IWRAM:
+    case REGION_IWRAM:
         return iwram.readHalf(addr);
 
-    case PAGE_IO:
+    case REGION_IO:
         if (addr < 0x400'0400)
             return io.readHalf(addr);
-        return 0;
+        else
+            return 0;
 
-    case PAGE_PALETTE:
+    case REGION_PALETTE:
         return palette.readHalf(addr);
 
-    case PAGE_VRAM:
+    case REGION_VRAM:
         return vram.readHalf(addr);
 
-    case PAGE_OAM:
+    case REGION_OAM:
         return oam.readHalf(addr);
 
-    case PAGE_GAMEPAK_0:
-    case PAGE_GAMEPAK_0+1:
-    case PAGE_GAMEPAK_1:
-    case PAGE_GAMEPAK_1+1:
-    case PAGE_GAMEPAK_2:
+    case REGION_GAMEPAK0:
+    case REGION_GAMEPAK0_EX:
+    case REGION_GAMEPAK1:
+    case REGION_GAMEPAK1_EX:
+    case REGION_GAMEPAK2:
         addr &= 0x1FF'FFFE;
         return gamepak.readHalf(addr);
 
-    case PAGE_GAMEPAK_2+1:
+    case REGION_GAMEPAK2_EX:
         if (gamepak.backup->type == Backup::Type::EEPROM)
         {
             // Todo: should this always be one?
@@ -136,49 +141,58 @@ u16 MMU::readHalf(u32 addr)
         addr &= 0x1FF'FFFE;
         return gamepak.readHalf(addr);
 
-    case PAGE_GAMEPAK_SRAM:
+    case REGION_SRAM:
+    case REGION_SRAM_MIRROR:
+        if (gamepak.backup->type == Backup::Type::SRAM)
+        {
+            addr &= 0x7FFF;
+            return gamepak.backup->readByte(addr) * 0x0101;
+        }
         return 0;
     }
-    return 0;
+    return readUnused(addr);
 }
 
 u32 MMU::readWord(u32 addr)
 {
     switch (addr >> 24)
     {
-    case PAGE_BIOS:
-    case PAGE_BIOS+1:
-        return bios.readWord(addr);
+    case REGION_BIOS:
+        if (addr < 0x4000)
+            return bios.readWord(addr);
+        else
+            return readUnused(addr);
 
-    case PAGE_EWRAM:
+    case REGION_EWRAM:
         return ewram.readWord(addr);
 
-    case PAGE_IWRAM:
+    case REGION_IWRAM:
         return iwram.readWord(addr);
 
-    case PAGE_IO:
+    case REGION_IO:
         if (addr < 0x400'0400)
             return io.readWord(addr);
-        return 0;
+        else
+            return 0;
 
-    case PAGE_PALETTE:
+    case REGION_PALETTE:
         return palette.readWord(addr);
 
-    case PAGE_VRAM:
+    case REGION_VRAM:
         return vram.readWord(addr);
 
-    case PAGE_OAM:
+    case REGION_OAM:
         return oam.readWord(addr);
 
-    case PAGE_GAMEPAK_0:
-    case PAGE_GAMEPAK_0+1:
-    case PAGE_GAMEPAK_1:
-    case PAGE_GAMEPAK_1+1:
-    case PAGE_GAMEPAK_2:
+    case REGION_GAMEPAK0:
+    case REGION_GAMEPAK0_EX:
+    case REGION_GAMEPAK1:
+    case REGION_GAMEPAK1_EX:
+    case REGION_GAMEPAK2:
         addr &= 0x1FF'FFFC;
         return gamepak.readWord(addr);
 
-    case PAGE_GAMEPAK_2+1:
+    case REGION_GAMEPAK2_EX:
         if (gamepak.backup->type == Backup::Type::EEPROM)
         {
             // Todo: should this always be one?
@@ -188,53 +202,58 @@ u32 MMU::readWord(u32 addr)
         addr &= 0x1FF'FFFC;
         return gamepak.readWord(addr);
 
-    case PAGE_GAMEPAK_SRAM:
+    case REGION_SRAM:
+    case REGION_SRAM_MIRROR:
+        if (gamepak.backup->type == Backup::Type::SRAM)
+        {
+            addr &= 0x7FFF;
+            return gamepak.backup->readByte(addr) * 0x01010101;
+        }
         return 0;
     }
-    return 0;
+    return readUnused(addr);
 }
 
 void MMU::writeByte(u32 addr, u8 byte)
 {
     switch (addr >> 24)
     {
-    case PAGE_BIOS:
-    case PAGE_BIOS+1:
+    case REGION_BIOS:
         break;
 
-    case PAGE_EWRAM:
+    case REGION_EWRAM:
         ewram.writeByte(addr, byte);
         break;
 
-    case PAGE_IWRAM:
+    case REGION_IWRAM:
         iwram.writeByte(addr, byte);
         break;
 
-    case PAGE_IO:
+    case REGION_IO:
         if (addr < 0x400'0400)
             io.writeByte(addr, byte);
         break;
 
-    case PAGE_PALETTE:
+    case REGION_PALETTE:
         palette.writeByte(addr, byte);
         break;
 
-    case PAGE_VRAM:
+    case REGION_VRAM:
         vram.writeByte(addr, byte);
         break;
 
-    case PAGE_OAM:
+    case REGION_OAM:
         break;
 
-    case PAGE_GAMEPAK_0:
-    case PAGE_GAMEPAK_0+1:
-    case PAGE_GAMEPAK_1:
-    case PAGE_GAMEPAK_1+1:
-    case PAGE_GAMEPAK_2:
-    case PAGE_GAMEPAK_2+1:
+    case REGION_GAMEPAK0:
+    case REGION_GAMEPAK0_EX:
+    case REGION_GAMEPAK1:
+    case REGION_GAMEPAK1_EX:
+    case REGION_GAMEPAK2:
+    case REGION_GAMEPAK2_EX:
         break;
 
-    case PAGE_GAMEPAK_SRAM:
+    case REGION_SRAM:
         switch (gamepak.backup->type)
         {
         case Backup::Type::SRAM:
@@ -250,7 +269,7 @@ void MMU::writeByte(u32 addr, u8 byte)
         }
         break;
 
-    default:
+    case REGION_SRAM_MIRROR:
         if (gamepak.backup->type == Backup::Type::SRAM)
         {
             addr &= 0x7FFF;
@@ -264,42 +283,50 @@ void MMU::writeHalf(u32 addr, u16 half)
 {
     switch (addr >> 24)
     {
-    case PAGE_BIOS:
-    case PAGE_BIOS+1:
+    case REGION_BIOS:
         break;
 
-    case PAGE_EWRAM:
+    case REGION_EWRAM:
         ewram.writeHalf(addr, half);
         break;
 
-    case PAGE_IWRAM:
+    case REGION_IWRAM:
         iwram.writeHalf(addr, half);
         break;
 
-    case PAGE_IO:
+    case REGION_IO:
         if (addr < 0x400'0400)
             io.writeHalf(addr, half);
         break;
 
-    case PAGE_PALETTE:
+    case REGION_PALETTE:
         palette.writeHalf(addr, half);
         break;
 
-    case PAGE_VRAM:
+    case REGION_VRAM:
         vram.writeHalf(addr, half);
         break;
 
-    case PAGE_OAM:
+    case REGION_OAM:
         oam.writeHalf(addr, half);
         break;
 
-    case PAGE_GAMEPAK_0:
-    case PAGE_GAMEPAK_0+1:
-    case PAGE_GAMEPAK_1:
-    case PAGE_GAMEPAK_1+1:
-    case PAGE_GAMEPAK_2:
-    case PAGE_GAMEPAK_2+1:
-    case PAGE_GAMEPAK_SRAM:
+    case REGION_GAMEPAK0:
+    case REGION_GAMEPAK0_EX:
+    case REGION_GAMEPAK1:
+    case REGION_GAMEPAK1_EX:
+    case REGION_GAMEPAK2:
+    case REGION_GAMEPAK2_EX:
+        break;
+
+    case REGION_SRAM:
+    case REGION_SRAM_MIRROR:
+        if (gamepak.backup->type == Backup::Type::SRAM)
+        {
+            addr &= 0x7FFF;
+            half = rotateRight(half, (addr & 0x3) << 3);
+            gamepak.backup->writeByte(addr, half);
+        }
         break;
     }
 }
@@ -308,42 +335,79 @@ void MMU::writeWord(u32 addr, u32 word)
 {
     switch (addr >> 24)
     {
-    case PAGE_BIOS:
-    case PAGE_BIOS+1:
+    case REGION_BIOS:
         break;
 
-    case PAGE_EWRAM:
+    case REGION_EWRAM:
         ewram.writeWord(addr, word);
         break;
 
-    case PAGE_IWRAM:
+    case REGION_IWRAM:
         iwram.writeWord(addr, word);
         break;
 
-    case PAGE_IO:
+    case REGION_IO:
         if (addr < 0x400'0400)
             io.writeWord(addr, word);
         break;
 
-    case PAGE_PALETTE:
+    case REGION_PALETTE:
         palette.writeWord(addr, word);
         break;
 
-    case PAGE_VRAM:
+    case REGION_VRAM:
         vram.writeWord(addr, word);
         break;
 
-    case PAGE_OAM:
+    case REGION_OAM:
         oam.writeWord(addr, word);
         break;
 
-    case PAGE_GAMEPAK_0:
-    case PAGE_GAMEPAK_0+1:
-    case PAGE_GAMEPAK_1:
-    case PAGE_GAMEPAK_1+1:
-    case PAGE_GAMEPAK_2:
-    case PAGE_GAMEPAK_2+1:
-    case PAGE_GAMEPAK_SRAM:
+    case REGION_GAMEPAK0:
+    case REGION_GAMEPAK0_EX:
+    case REGION_GAMEPAK1:
+    case REGION_GAMEPAK1_EX:
+    case REGION_GAMEPAK2:
+    case REGION_GAMEPAK2_EX:
         break;
+
+    case REGION_SRAM:
+    case REGION_SRAM_MIRROR:
+        if (gamepak.backup->type == Backup::Type::SRAM)
+        {
+            addr &= 0x7FFF;
+            word = rotateRight(word, (addr & 0x3) << 3);
+            gamepak.backup->writeByte(addr, word);
+        }
+        break;
+    }
+}
+
+u32 MMU::readUnused(u32 addr)
+{
+    if (arm.cpsr.thumb)
+    {
+        u32 lsw = arm.pipe[1];
+        u32 msw = arm.pipe[1];
+
+        switch (addr >> 24)
+        {
+        case REGION_BIOS:
+        case REGION_OAM:
+            lsw = arm.pipe[0];
+            break;
+
+        case REGION_IWRAM:
+            if (misalignedWord(addr))
+                lsw = arm.pipe[0];
+            else
+                msw = arm.pipe[0];
+            break;
+        }
+        return (msw << 16) | lsw;
+    }
+    else
+    {
+        return arm.pipe[1];
     }
 }

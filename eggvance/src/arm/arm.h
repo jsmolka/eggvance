@@ -54,6 +54,8 @@ public:
         bool halt;
     } io;
 
+    u32 pipe[2];
+
 private:
     enum class Shift
     {
@@ -145,7 +147,6 @@ private:
     void Thumb_Undefined(u16 instr);
 
     int cycles;
-    u32 pipe[2];
     u32 last_addr;
 };
 

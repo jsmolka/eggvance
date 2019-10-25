@@ -28,6 +28,10 @@ void DMA::start()
         dad_addr = dad.addr;
     }
 
+    u32 mask = control.word ? ~0x3 : ~0x1;
+    sad_addr &= mask;
+    dad_addr &= mask;
+
     sad_delta = (control.word ? 4 : 2) * deltas[control.sad_delta];
     dad_delta = (control.word ? 4 : 2) * deltas[control.dad_delta];
 }

@@ -29,6 +29,7 @@ public:
 private:
     static std::string toBackupFile(const std::string& file);
     static std::string makeString(u8* data, int size);
+    static u32 readUnused(u32 addr);
 
     Header parseHeader();
     Backup::Type parseBackupType();

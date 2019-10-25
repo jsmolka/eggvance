@@ -15,7 +15,7 @@ u8 GamePak::readByte(u32 addr)
     if (addr < data.size())
         return *reinterpret_cast<u8*>(&data[addr]);
     else
-        return 0;
+        return readUnused(addr);
 }
 
 u16 GamePak::readHalf(u32 addr)
@@ -23,7 +23,7 @@ u16 GamePak::readHalf(u32 addr)
     if (addr < data.size())
         return *reinterpret_cast<u16*>(&data[addr]);
     else
-        return 0;
+        return readUnused(addr);
 }
 
 u32 GamePak::readWord(u32 addr)
@@ -31,7 +31,7 @@ u32 GamePak::readWord(u32 addr)
     if (addr < data.size())
         return *reinterpret_cast<u32*>(&data[addr]);
     else
-        return 0;
+        return readUnused(addr);
 }
 
 bool GamePak::load(const std::string& file)
@@ -85,6 +85,12 @@ std::string GamePak::makeString(u8* data, int size)
     std::string str(reinterpret_cast<char*>(data), size);
     str.erase(std::find(str.begin(), str.end(), '\0'), str.end());
     return str;
+}
+
+u32 GamePak::readUnused(u32 addr)
+{
+    addr = (addr & ~0x3) >> 1;
+    return (addr & 0xFFFF) | ((addr + 1) & 0xFFFF) << 16;
 }
 
 GamePak::Header GamePak::parseHeader()

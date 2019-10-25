@@ -1,36 +1,25 @@
 #pragma once
 
-enum Page
+enum
 {
-    PAGE_BIOS         = 0x0,
-    PAGE_EWRAM        = 0x2,
-    PAGE_IWRAM        = 0x3,
-    PAGE_IO           = 0x4,
-    PAGE_PALETTE      = 0x5,
-    PAGE_VRAM         = 0x6,
-    PAGE_OAM          = 0x7,
-    PAGE_GAMEPAK_0    = 0x8,
-    PAGE_GAMEPAK_1    = 0xA,
-    PAGE_GAMEPAK_2    = 0xC,
-    PAGE_GAMEPAK_SRAM = 0xE
+    REGION_BIOS        = 0x0,
+    REGION_EWRAM       = 0x2,
+    REGION_IWRAM       = 0x3,
+    REGION_IO          = 0x4,
+    REGION_PALETTE     = 0x5,
+    REGION_VRAM        = 0x6,
+    REGION_OAM         = 0x7,
+    REGION_GAMEPAK0    = 0x8,
+    REGION_GAMEPAK0_EX = 0x9,
+    REGION_GAMEPAK1    = 0xA,
+    REGION_GAMEPAK1_EX = 0xB,
+    REGION_GAMEPAK2    = 0xC,
+    REGION_GAMEPAK2_EX = 0xD,
+    REGION_SRAM        = 0xE,
+    REGION_SRAM_MIRROR = 0xF
 };
 
-enum Map
-{
-    MAP_BIOS         = 0x0000'0000,
-    MAP_EWRAM        = 0x0200'0000,
-    MAP_IWRAM        = 0x0300'0000,
-    MAP_IO           = 0x0400'0000,
-    MAP_PALETTE      = 0x0500'0000,
-    MAP_VRAM         = 0x0600'0000,
-    MAP_OAM          = 0x0700'0000,
-    MAP_GAMEPAK_0    = 0x0800'0000,
-    MAP_GAMEPAK_1    = 0x0A00'0000,
-    MAP_GAMEPAK_2    = 0x0C00'0000,
-    MAP_GAMEPAK_SRAM = 0x0E00'0000
-};
-
-enum Register
+enum
 {
     REG_DISPCNT  = 0x000,
     REG_DISPSTAT = 0x004,
