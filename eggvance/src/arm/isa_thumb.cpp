@@ -162,11 +162,11 @@ void ARM::Thumb_ALUOperations(u16 instr)
         break;
 
     case Operation::ADC:
-        dst = add(dst, src + cpsr.c, true);
+        dst = adc(dst, src, true);
         break;
 
     case Operation::SBC:
-        dst = sub(dst, src - cpsr.c + 1, true);
+        dst = sbc(dst, src, true);
         break;
 
     case Operation::TST:

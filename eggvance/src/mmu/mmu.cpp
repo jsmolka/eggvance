@@ -325,7 +325,7 @@ void MMU::writeHalf(u32 addr, u16 half)
         {
             addr &= 0x7FFF;
             half = rotateRight(half, (addr & 0x3) << 3);
-            gamepak.backup->writeByte(addr, half);
+            gamepak.backup->writeByte(addr, half & 0xFF);
         }
         break;
     }
@@ -377,7 +377,7 @@ void MMU::writeWord(u32 addr, u32 word)
         {
             addr &= 0x7FFF;
             word = rotateRight(word, (addr & 0x3) << 3);
-            gamepak.backup->writeByte(addr, word);
+            gamepak.backup->writeByte(addr, word & 0xFF);
         }
         break;
     }

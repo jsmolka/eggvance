@@ -26,6 +26,7 @@ void OAM::writeHalf(u32 addr, u16 half)
 
 void OAM::writeWord(u32 addr, u32 word)
 {
+    addr &= 0x3FC;
     writeHalf(addr + 0, (word >>  0) & 0xFFFF);
     writeHalf(addr + 2, (word >> 16) & 0xFFFF);
 }

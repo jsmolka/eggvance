@@ -9,7 +9,6 @@ void VRAM::reset()
 
 void VRAM::writeByte(u32 addr, u8 byte)
 {
-    addr &= 0x17'FFE;
     if (ppu.io.dispcnt.mode < 3
             ? addr < 0x1'0000  
             : addr < 0x1'4000)

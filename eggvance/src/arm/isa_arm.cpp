@@ -119,9 +119,9 @@ void ARM::Arm_DataProcessing(u32 instr)
     case Operation::ADD: dst = add(op1, op2, flags); break;
     case Operation::SUB: dst = sub(op1, op2, flags); break;
     case Operation::RSB: dst = sub(op2, op1, flags); break;
-    case Operation::ADC: dst = add(op1, op2 + cpsr.c + 0, flags); break;
-    case Operation::SBC: dst = sub(op1, op2 - cpsr.c + 1, flags); break;
-    case Operation::RSC: dst = sub(op2, op1 - cpsr.c + 1, flags); break;
+    case Operation::ADC: dst = adc(op1, op2, flags); break;
+    case Operation::SBC: dst = sbc(op1, op2, flags); break;
+    case Operation::RSC: dst = sbc(op2, op1, flags); break;
     case Operation::TST:       logical(op1 &  op2, carry, flags); break;
     case Operation::TEQ:       logical(op1 ^  op2, carry, flags); break;
     case Operation::AND: dst = logical(op1 &  op2, carry, flags); break;

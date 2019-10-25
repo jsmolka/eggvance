@@ -94,6 +94,8 @@ private:
 
     inline u32 add(u32 op1, u32 op2, bool flags);
     inline u32 sub(u32 op1, u32 op2, bool flags);
+    inline u32 adc(u64 op1, u64 op2, bool flags);
+    inline u32 sbc(u64 op1, u64 op2, bool flags);
 
     void execute();
 
