@@ -5,7 +5,10 @@
 
 void Mosaic::reset()
 {
-    *this = {};
+    bgs.x = 1;
+    bgs.y = 1;
+    obj.x = 1;
+    obj.y = 1;
 }
 
 u8 Mosaic::readByte(int index)

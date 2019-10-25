@@ -90,10 +90,10 @@ u8 DMAController::readByte(u32 addr)
     READ(REG_DMA1DAD, dmas[1].dad);
     READ(REG_DMA2DAD, dmas[2].dad);
     READ(REG_DMA3DAD, dmas[3].dad);
-    READ(REG_DMA0CNT, dmas[0].control);
-    READ(REG_DMA1CNT, dmas[1].control);
-    READ(REG_DMA2CNT, dmas[2].control);
-    READ(REG_DMA3CNT, dmas[3].control);
+    READ(REG_DMA0CNT_L, dmas[0].control);
+    READ(REG_DMA1CNT_L, dmas[1].control);
+    READ(REG_DMA2CNT_L, dmas[2].control);
+    READ(REG_DMA3CNT_L, dmas[3].control);
 
     default:
         EGG_UNREACHABLE;
@@ -122,10 +122,10 @@ void DMAController::writeByte(u32 addr, u8 byte)
     WRITE(REG_DMA1DAD, dmas[1].dad);
     WRITE(REG_DMA2DAD, dmas[2].dad);
     WRITE(REG_DMA3DAD, dmas[3].dad);
-    WRITE(REG_DMA0CNT, dmas[0].control);
-    WRITE(REG_DMA1CNT, dmas[1].control);
-    WRITE(REG_DMA2CNT, dmas[2].control);
-    WRITE(REG_DMA3CNT, dmas[3].control);
+    WRITE(REG_DMA0CNT_L, dmas[0].control);
+    WRITE(REG_DMA1CNT_L, dmas[1].control);
+    WRITE(REG_DMA2CNT_L, dmas[2].control);
+    WRITE(REG_DMA3CNT_L, dmas[3].control);
 
     default:
         EGG_UNREACHABLE;
@@ -134,10 +134,10 @@ void DMAController::writeByte(u32 addr, u8 byte)
 
     switch (addr)
     {
-    case REG_DMA0CNT + 3:
-    case REG_DMA1CNT + 3:
-    case REG_DMA2CNT + 3:
-    case REG_DMA3CNT + 3:
+    case REG_DMA0CNT_L + 3:
+    case REG_DMA1CNT_L + 3:
+    case REG_DMA2CNT_L + 3:
+    case REG_DMA3CNT_L + 3:
         signal(DMA::Timing::Immediate);
         break;
     }
