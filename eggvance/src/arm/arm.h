@@ -2,10 +2,10 @@
 
 #include <array>
 
-#include "regs/intenabled.h"
-#include "regs/intmaster.h"
-#include "regs/intrequest.h"
-#include "regs/waitcnt.h"
+#include "regs/irqenabled.h"
+#include "regs/irqmaster.h"
+#include "regs/irqrequest.h"
+#include "regs/waitcontrol.h"
 #include "ppu/ppu.h"
 #include "sys/dmacontroller.h"
 #include "sys/timer.h"
@@ -47,10 +47,10 @@ public:
 
     struct IO
     {
-        IntMaster int_master;
-        IntEnabled int_enabled;
-        IntRequest int_request;
-        WaitCnt waitcnt;
+        IRQMaster irq_master;
+        IRQEnabled irq_enabled;
+        IRQRequest irq_request;
+        WaitControl waitcnt;
         bool halt;
     } io;
 

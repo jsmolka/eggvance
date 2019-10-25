@@ -193,7 +193,7 @@ void PPU::collapseBW(const std::vector<BackgroundLayer>& layers)
                     upper = blendAlpha(upper, lower);
                 break;
 
-            case BLD_WHITE: 
+            case BLD_WHITE:
                 if (findBlendLayers<obj_master>(layers, x, window.flags, upper))
                     upper = blendWhite(upper);
                 break;

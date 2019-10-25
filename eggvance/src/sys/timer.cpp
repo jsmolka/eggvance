@@ -18,6 +18,26 @@ void Timer::run(int cycles)
     runInternal(cycles);
 }
 
+u8 Timer::readByte(int index)
+{
+    if (index <= 1)
+        updateData();
+
+    return control.readByte(index);
+}
+
+void Timer::writeByte(int index, u8 byte)
+{
+    updateData();
+
+    int enabled = control.enabled;
+    control.writeByte(index, byte);
+    if (!enabled && control.enabled)
+        control.data = control.initial;
+
+    calculate();
+}
+
 void Timer::runInternal(int cycles)
 {
     counter += cycles;

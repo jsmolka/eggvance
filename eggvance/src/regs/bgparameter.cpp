@@ -1,22 +1,21 @@
-#include "bgoffset.h"
+#include "bgparameter.h"
 
 #include "common/macros.h"
 #include "common/utility.h"
 
-void BGOffset::reset()
+void BGParameter::reset()
 {
     *this = {};
 }
 
-u8 BGOffset::readByte(int index)
+u8 BGParameter::readByte(int index)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
     return 0;
 }
 
-void BGOffset::writeByte(int index, u8 byte)
+void BGParameter::writeByte(int index, u8 byte)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
-    byteArray(offset)[index] = byte;
-    offset &= 0x1FF;
+    byteArray(parameter)[index] = byte;
 }

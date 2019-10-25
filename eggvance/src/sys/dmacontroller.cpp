@@ -1,5 +1,6 @@
 #include "dmacontroller.h"
 
+#include "common/macros.h"
 #include "mmu/memmap.h"
 
 DMAController::DMAController()
@@ -71,11 +72,11 @@ void DMAController::signal(DMA::Timing timing)
     }
 }
 
-#define READ(label, reg)                       \
-    case label + 0: return reg.readByte<0>();  \
-    case label + 1: return reg.readByte<1>();  \
-    case label + 2: return reg.readByte<2>();  \
-    case label + 3: return reg.readByte<3>()
+#define READ(label, reg)                     \
+    case label + 0: return reg.readByte(0);  \
+    case label + 1: return reg.readByte(1);  \
+    case label + 2: return reg.readByte(2);  \
+    case label + 3: return reg.readByte(3)
 
 u8 DMAController::readByte(u32 addr)
 {    
@@ -93,6 +94,10 @@ u8 DMAController::readByte(u32 addr)
     READ(REG_DMA1CNT, dmas[1].control);
     READ(REG_DMA2CNT, dmas[2].control);
     READ(REG_DMA3CNT, dmas[3].control);
+
+    default:
+        EGG_UNREACHABLE;
+        break;
     }
     return 0;
 }
@@ -100,10 +105,10 @@ u8 DMAController::readByte(u32 addr)
 #undef READ
 
 #define WRITE(label, reg)                           \
-    case label + 0: reg.writeByte<0>(byte); break;  \
-    case label + 1: reg.writeByte<1>(byte); break;  \
-    case label + 2: reg.writeByte<2>(byte); break;  \
-    case label + 3: reg.writeByte<3>(byte); break
+    case label + 0: reg.writeByte(0, byte); break;  \
+    case label + 1: reg.writeByte(1, byte); break;  \
+    case label + 2: reg.writeByte(2, byte); break;  \
+    case label + 3: reg.writeByte(3, byte); break
 
 void DMAController::writeByte(u32 addr, u8 byte)
 {
@@ -121,6 +126,10 @@ void DMAController::writeByte(u32 addr, u8 byte)
     WRITE(REG_DMA1CNT, dmas[1].control);
     WRITE(REG_DMA2CNT, dmas[2].control);
     WRITE(REG_DMA3CNT, dmas[3].control);
+
+    default:
+        EGG_UNREACHABLE;
+        break;
     }
 
     switch (addr)

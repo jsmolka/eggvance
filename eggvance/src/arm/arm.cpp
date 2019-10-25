@@ -27,9 +27,9 @@ void ARM::reset()
 {
     Registers::reset();
 
-    io.int_master.reset();
-    io.int_enabled.reset();
-    io.int_request.reset();
+    io.irq_master.reset();
+    io.irq_enabled.reset();
+    io.irq_request.reset();
     io.waitcnt.reset();
     io.halt = false;
 
@@ -70,10 +70,10 @@ void ARM::run(int cycles_)
                 {
                     for (auto& timer : timers)
                         timer.run(1);
-                    if (io.int_enabled & io.int_request)
+                    if (io.irq_enabled & io.irq_request)
                         break;
                 }
-                if (!(io.int_enabled & io.int_request))
+                if (!(io.irq_enabled & io.irq_request))
                     break;
             }
             else
@@ -92,10 +92,10 @@ void ARM::run(int cycles_)
 
 void ARM::request(Interrupt flag)
 {
-    if (io.int_enabled & static_cast<int>(flag))
+    if (io.irq_enabled & static_cast<int>(flag))
         io.halt = false;
 
-    io.int_request |= static_cast<int>(flag);
+    io.irq_request |= static_cast<int>(flag);
 }
 
 void ARM::execute()
@@ -104,7 +104,7 @@ void ARM::execute()
     //disasm();
     //#endif
 
-    if (io.int_master && (io.int_enabled & io.int_request) && !cpsr.irqd)
+    if (io.irq_master && (io.irq_enabled & io.irq_request) && !cpsr.irqd)
     {
         interruptHW();
     }

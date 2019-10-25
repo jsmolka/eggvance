@@ -1,7 +1,7 @@
 #pragma once
 
-#include "regs/dmaaddr.h"
-#include "regs/dmacnt.h"
+#include "regs/dmaaddress.h"
+#include "regs/dmacontrol.h"
 
 class DMA
 {
@@ -32,9 +32,9 @@ public:
     u32 sad_addr;
     u32 dad_addr;
 
-    DMAAddr sad;
-    DMAAddr dad;
-    DMACnt control;
+    DMAAddress sad;
+    DMAAddress dad;
+    DMAControl control;
 
 private:
     bool readEEPROM(int& cycles);

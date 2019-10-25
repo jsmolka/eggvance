@@ -10,21 +10,21 @@ void IO::reset()
     data.fill(0);
 }
 
-#define READ2(label, reg)                      \
-    case label + 0: return reg.readByte<0>();  \
-    case label + 1: return reg.readByte<1>()
+#define READ2(label, reg)                    \
+    case label + 0: return reg.readByte(0);  \
+    case label + 1: return reg.readByte(1)
 
-#define READ4(label, reg)                      \
-    case label + 0: return reg.readByte<0>();  \
-    case label + 1: return reg.readByte<1>();  \
-    case label + 2: return reg.readByte<2>();  \
-    case label + 3: return reg.readByte<3>()
+#define READ4(label, reg)                    \
+    case label + 0: return reg.readByte(0);  \
+    case label + 1: return reg.readByte(1);  \
+    case label + 2: return reg.readByte(2);  \
+    case label + 3: return reg.readByte(3)
 
 u8 IO::readByte(u32 addr)
 {
     addr &= 0x3FF;
 
-    if (addr >= REG_DMA0SAD && addr < REG_TM0CNT)
+    if (addr >= 0xB0 && addr < 0xE0)
     {
         return arm.dma.readByte(addr);
     }
@@ -68,9 +68,9 @@ u8 IO::readByte(u32 addr)
     READ2(REG_BLDCNT,   ppu.io.bldcnt);
     READ2(REG_BLDALPHA, ppu.io.bldalpha);
     READ2(REG_BLDY,     ppu.io.bldy);
-    READ2(REG_IME,      arm.io.int_master);
-    READ2(REG_IE,       arm.io.int_enabled);
-    READ2(REG_IF,       arm.io.int_request);
+    READ2(REG_IME,      arm.io.irq_master);
+    READ2(REG_IE,       arm.io.irq_enabled);
+    READ2(REG_IF,       arm.io.irq_request);
     READ2(REG_WAITCNT,  arm.io.waitcnt);
     READ4(REG_TM0CNT,   arm.timers[0]);
     READ4(REG_TM1CNT,   arm.timers[1]);
@@ -101,20 +101,20 @@ u32 IO::readWord(u32 addr)
 }
 
 #define WRITE2(label, reg)                           \
-    case label + 0: reg.writeByte<0>(byte); return;  \
-    case label + 1: reg.writeByte<1>(byte); return
+    case label + 0: reg.writeByte(0, byte); return;  \
+    case label + 1: reg.writeByte(1, byte); return
 
 #define WRITE4(label, reg)                           \
-    case label + 0: reg.writeByte<0>(byte); return;  \
-    case label + 1: reg.writeByte<1>(byte); return;  \
-    case label + 2: reg.writeByte<2>(byte); return;  \
-    case label + 3: reg.writeByte<3>(byte); return
+    case label + 0: reg.writeByte(0, byte); return;  \
+    case label + 1: reg.writeByte(1, byte); return;  \
+    case label + 2: reg.writeByte(2, byte); return;  \
+    case label + 3: reg.writeByte(3, byte); return
 
 void IO::writeByte(u32 addr, u8 byte)
 {
     addr &= 0x3FF;
 
-    if (addr >= REG_DMA0SAD && addr < REG_TM0CNT)
+    if (addr >= 0xB0 && addr < 0xE0)
     {
         arm.dma.writeByte(addr, byte);
         return;
@@ -159,9 +159,9 @@ void IO::writeByte(u32 addr, u8 byte)
     WRITE2(REG_BLDCNT,   ppu.io.bldcnt);
     WRITE2(REG_BLDALPHA, ppu.io.bldalpha);
     WRITE2(REG_BLDY,     ppu.io.bldy);
-    WRITE2(REG_IME,      arm.io.int_master);
-    WRITE2(REG_IE,       arm.io.int_enabled);
-    WRITE2(REG_IF,       arm.io.int_request);
+    WRITE2(REG_IME,      arm.io.irq_master);
+    WRITE2(REG_IE,       arm.io.irq_enabled);
+    WRITE2(REG_IF,       arm.io.irq_request);
     WRITE2(REG_WAITCNT,  arm.io.waitcnt);
     WRITE4(REG_TM0CNT,   arm.timers[0]);
     WRITE4(REG_TM1CNT,   arm.timers[1]);

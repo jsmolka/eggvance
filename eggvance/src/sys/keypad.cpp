@@ -126,7 +126,7 @@ void Keypad::handleInput(Button button, bool pressed)
 
     if (io.keycnt.irq)
     {
-        bool interrupt = io.keycnt.irq_logic
+        bool interrupt = io.keycnt.logic
             ? (~io.keyinput == io.keycnt.keys)
             : (~io.keyinput &  io.keycnt.keys);
 

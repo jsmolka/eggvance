@@ -1,19 +1,14 @@
 #pragma once
 
-#include "common/macros.h"
-#include "common/utility.h"
+#include "register.h"
 
-class BgOffset
+class BGOffset : public Register<2>
 {
 public:
     void reset();
 
-    template<int index>
-    inline u8 readByte();
-    template<int index>
-    inline void writeByte(u8 byte);
+    u8 readByte(int index);
+    void writeByte(int index, u8 byte);
 
     int offset;
 };
-
-#include "bgoffset.inl"

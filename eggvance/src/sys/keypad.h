@@ -2,7 +2,7 @@
 
 #include <SDL2/SDL_events.h>
 
-#include "regs/keycnt.h"
+#include "regs/keycontrol.h"
 #include "regs/keyinput.h"
 
 class Keypad
@@ -37,7 +37,7 @@ public:
 
     struct IO
     {
-        KeyCnt keycnt;
+        KeyControl keycnt;
         KeyInput keyinput;
         KeyInput keyinput_raw;
     } io;

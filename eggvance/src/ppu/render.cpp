@@ -105,11 +105,11 @@ void PPU::renderBgMode2(int bg)
 {
     const auto& bgcnt = io.bgcnt[bg];
 
-    s16 pa = io.bgpa[bg - 2].param;
-    s16 pc = io.bgpc[bg - 2].param;
+    s16 pa = io.bgpa[bg - 2].parameter;
+    s16 pc = io.bgpc[bg - 2].parameter;
 
-    int ref_x = io.bgx[bg - 2].reg;
-    int ref_y = io.bgy[bg - 2].reg;
+    int ref_x = io.bgx[bg - 2].internal;
+    int ref_y = io.bgy[bg - 2].internal;
 
     int size = bgcnt.size();
 
