@@ -19,4 +19,9 @@ public:
     SDL_Texture* texture;
 
     std::array<u32, 240 * 160> buffer;
+
+private:
+    bool createWindow();
+    bool createRenderer();
+    bool createTexture();
 };

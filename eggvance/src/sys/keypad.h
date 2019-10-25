@@ -43,8 +43,8 @@ public:
     } io;
 
 private:
-    void processOpposingButtons(Button b1, Button b2);
-    void processButton(Button button, bool pressed);
+    void handleInput(Button button, bool pressed);
+    void handleOppositeInputs(Button b1, Button b2);
 
     SDL_GameController* controller;
 };

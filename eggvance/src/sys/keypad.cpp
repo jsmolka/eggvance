@@ -4,6 +4,7 @@
 
 #include "arm/arm.h"
 #include "common/config.h"
+#include "common/message.h"
 
 Keypad keypad;
 
@@ -20,15 +21,18 @@ Keypad::~Keypad()
 
 void Keypad::reset()
 {
+    io.keycnt.reset();
     io.keyinput.reset();
     io.keyinput_raw.reset();
-    io.keycnt.reset();
 }
 
 bool Keypad::init()
 {
     if (SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER) != 0)
+    {
+        showMessage("Cannot init controller backend.");
         return false;
+    }
 
     if (SDL_NumJoysticks() > 0)
         controller = SDL_GameControllerOpen(0);
@@ -44,11 +48,14 @@ void Keypad::keyboardEvent(const SDL_KeyboardEvent& event)
     if (pair == config.keyboard_map.end())
         return;
 
-    processButton(pair->second, event.state == SDL_PRESSED);
+    handleInput(pair->second, event.state == SDL_PRESSED);
 }
 
 void Keypad::controllerAxisEvent(const SDL_ControllerAxisEvent& event)
 {
+    static constexpr u32 clear_ud = static_cast<int>(Button::Up) | static_cast<int>(Button::Down);
+    static constexpr u32 clear_lr = static_cast<int>(Button::Left) | static_cast<int>(Button::Right);
+
     Button button;
     switch (event.axis)
     {
@@ -61,12 +68,16 @@ void Keypad::controllerAxisEvent(const SDL_ControllerAxisEvent& event)
         break;
 
     case SDL_CONTROLLER_AXIS_LEFTX:
+        io.keyinput |= clear_lr;
+        io.keyinput_raw |= clear_lr;
         button = event.value < 0 
             ? Button::Left
             : Button::Right;
         break;
 
     case SDL_CONTROLLER_AXIS_LEFTY:
+        io.keyinput |= clear_ud;
+        io.keyinput_raw |= clear_ud;
         button = event.value < 0 
             ? Button::Up
             : Button::Down;
@@ -75,7 +86,7 @@ void Keypad::controllerAxisEvent(const SDL_ControllerAxisEvent& event)
     default:
         return;
     }
-    processButton(button, std::abs(event.value) > config.deadzone);
+    handleInput(button, std::abs(event.value) > config.deadzone);
 }
 
 void Keypad::controllerButtonEvent(const SDL_ControllerButtonEvent& event)
@@ -84,7 +95,7 @@ void Keypad::controllerButtonEvent(const SDL_ControllerButtonEvent& event)
     if (pair == config.controller_map.end())
         return;
 
-    processButton(pair->second, event.state == SDL_PRESSED);
+    handleInput(pair->second, event.state == SDL_PRESSED);
 }
 
 void Keypad::controllerDeviceEvent(const SDL_ControllerDeviceEvent& event)
@@ -95,22 +106,7 @@ void Keypad::controllerDeviceEvent(const SDL_ControllerDeviceEvent& event)
         controller = nullptr;
 }
 
-void Keypad::processOpposingButtons(Button b1, Button b2)
-{
-    int mask = static_cast<int>(b1) | static_cast<int>(b2);
-
-    if ((mask & io.keyinput_raw) == 0)
-    {
-        io.keyinput |= mask;
-    }
-    else
-    {
-        io.keyinput &= ~mask;
-        io.keyinput |= io.keyinput_raw & mask;
-    }
-}
-
-void Keypad::processButton(Button button, bool pressed)
+void Keypad::handleInput(Button button, bool pressed)
 {
     int mask = static_cast<int>(button);
 
@@ -125,8 +121,8 @@ void Keypad::processButton(Button button, bool pressed)
         io.keyinput_raw |= mask;
     }
 
-    processOpposingButtons(Button::Up, Button::Down);
-    processOpposingButtons(Button::Left, Button::Right);
+    handleOppositeInputs(Button::Up, Button::Down);
+    handleOppositeInputs(Button::Left, Button::Right);
 
     if (io.keycnt.irq)
     {
@@ -138,5 +134,20 @@ void Keypad::processButton(Button button, bool pressed)
         {
             arm.request(Interrupt::Keypad);
         }
+    }
+}
+
+void Keypad::handleOppositeInputs(Button b1, Button b2)
+{
+    int mask = static_cast<int>(b1) | static_cast<int>(b2);
+
+    if ((mask & io.keyinput_raw) == 0)
+    {
+        io.keyinput |= mask;
+    }
+    else
+    {
+        io.keyinput &= ~mask;
+        io.keyinput |= io.keyinput_raw & mask;
     }
 }
