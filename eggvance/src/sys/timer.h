@@ -10,8 +10,8 @@ public:
 
     void run(int cycles);
 
-    u8 readByte(int index);
-    void writeByte(int index, u8 byte);
+    u8 read(int index);
+    void write(int index, u8 byte);
 
     int id;
     Timer* next;

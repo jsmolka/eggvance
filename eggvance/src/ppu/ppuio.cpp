@@ -4,7 +4,7 @@ void PPUIO::reset()
 {
     dispcnt.reset();
     dispstat.reset();
-    vcount = 0;
+    vcount.reset();
 
     for (int x = 0; x < 4; ++x)
     {

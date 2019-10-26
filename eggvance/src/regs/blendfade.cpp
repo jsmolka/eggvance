@@ -10,7 +10,7 @@ void BlendFade::reset()
     *this = {};
 }
 
-void BlendFade::writeByte(int index, u8 byte)
+void BlendFade::write(int index, u8 byte)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 

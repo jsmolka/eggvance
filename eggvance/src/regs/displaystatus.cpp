@@ -8,25 +8,17 @@ void DisplayStatus::reset()
     *this = {};
 }
 
-u8 DisplayStatus::readByte(int index)
+u8 DisplayStatus::read(int index)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 
     if (index == 0)
-    {
-        u8 byte = data[0];
-        byte |= vblank << 0;
-        byte |= hblank << 1;
-        byte |= vmatch << 2;
-        return byte;
-    }
+        return data[0] | (vblank << 0) | (hblank << 1) | (vmatch << 2);
     else
-    {
         return data[1];
-    }
 }
 
-void DisplayStatus::writeByte(int index, u8 byte)
+void DisplayStatus::write(int index, u8 byte)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 

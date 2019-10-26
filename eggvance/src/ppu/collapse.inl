@@ -185,7 +185,7 @@ void PPU::collapseBW(const std::vector<BackgroundLayer>& layers)
         {
             upper = blendAlpha(upper, lower);
         }
-        else if (window.sfx)
+        else if (window.effects)
         {
             switch (blend_mode)
             {

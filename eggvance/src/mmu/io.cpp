@@ -10,17 +10,17 @@
 #define CASE2(label) case label + 0: case label + 1:
 #define CASE4(label) case label + 0: case label + 1: case label + 2: case label + 3:
 
-#define READ1(label, reg) CASE1(label) return reg.readByte(addr - label)
-#define READ2(label, reg) CASE2(label) return reg.readByte(addr - label)
-#define READ4(label, reg) CASE4(label) return reg.readByte(addr - label)
+#define READ1(label, reg) CASE1(label) return reg.read(addr - label)
+#define READ2(label, reg) CASE2(label) return reg.read(addr - label)
+#define READ4(label, reg) CASE4(label) return reg.read(addr - label)
 
 #define READ1_UNIMP(label) CASE1(label) return data.readByte(addr)
 #define READ2_UNIMP(label) CASE2(label) return data.readByte(addr)
 #define READ4_UNIMP(label) CASE4(label) return data.readByte(addr)
 
-#define WRITE1(label, reg) CASE1(label) reg.writeByte(addr - label, byte); break
-#define WRITE2(label, reg) CASE2(label) reg.writeByte(addr - label, byte); break
-#define WRITE4(label, reg) CASE4(label) reg.writeByte(addr - label, byte); break
+#define WRITE1(label, reg) CASE1(label) reg.write(addr - label, byte); break
+#define WRITE2(label, reg) CASE2(label) reg.write(addr - label, byte); break
+#define WRITE4(label, reg) CASE4(label) reg.write(addr - label, byte); break
 
 #define WRITE1_UNIMP(label) CASE1(label) data.writeByte(addr, byte); break
 #define WRITE2_UNIMP(label) CASE2(label) data.writeByte(addr, byte); break
@@ -139,9 +139,9 @@ u8 IO::readByte(u32 addr)
     READ2(REG_WINOUT,   ppu.io.winout);
     READ2(REG_BLDCNT,   ppu.io.bldcnt);
     READ2(REG_BLDALPHA, ppu.io.bldalpha);
-    READ2(REG_IME,      arm.io.irq_master);
     READ2(REG_IE,       arm.io.irq_enabled);
     READ2(REG_IF,       arm.io.irq_request);
+    READ2(REG_IME,      arm.io.irq_master);
     READ2(REG_WAITCNT,  arm.io.waitcnt);
     READ4(REG_TM0CNT_L, arm.timers[0]);
     READ4(REG_TM1CNT_L, arm.timers[1]);
@@ -273,9 +273,9 @@ void IO::writeByte(u32 addr, u8 byte)
     WRITE2(REG_BLDCNT,   ppu.io.bldcnt);
     WRITE2(REG_BLDALPHA, ppu.io.bldalpha);
     WRITE2(REG_BLDY,     ppu.io.bldy);
-    WRITE2(REG_IME,      arm.io.irq_master);
     WRITE2(REG_IE,       arm.io.irq_enabled);
     WRITE2(REG_IF,       arm.io.irq_request);
+    WRITE2(REG_IME,      arm.io.irq_master);
     WRITE1(REG_HALTCNT,  arm.io.haltcnt);
     WRITE2(REG_WAITCNT,  arm.io.waitcnt);
     WRITE4(REG_TM0CNT_L, arm.timers[0]);

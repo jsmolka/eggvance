@@ -7,8 +7,8 @@ class DMAControl : public Register<2>
 public:
     void reset();
 
-    u8 readByte(int index);
-    void writeByte(int index, u8 byte);
+    u8 read(int index);
+    void write(int index, u8 byte);
 
     int sad_delta;
     int dad_delta;
@@ -18,5 +18,5 @@ public:
     int irq;
     int enabled;
 
-    bool update;
+    bool reload;
 };

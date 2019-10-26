@@ -8,7 +8,7 @@ void DMAControl::reset()
     *this = {};
 }
 
-u8 DMAControl::readByte(int index)
+u8 DMAControl::read(int index)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 
@@ -18,7 +18,7 @@ u8 DMAControl::readByte(int index)
         return (data[1] & ~0x80) | (enabled << 7);
 }
 
-void DMAControl::writeByte(int index, u8 byte)
+void DMAControl::write(int index, u8 byte)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 
@@ -35,7 +35,7 @@ void DMAControl::writeByte(int index, u8 byte)
         timing    = bits<4, 2>(byte);
         irq       = bits<6, 1>(byte);
         enabled   = bits<7, 1>(byte);
-        update    = enabled;
+        reload    = enabled;
     }
     data[index] = byte;
 }

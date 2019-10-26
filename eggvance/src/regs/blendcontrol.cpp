@@ -8,14 +8,14 @@ void BlendControl::reset()
     *this = {};
 }
 
-u8 BlendControl::readByte(int index)
+u8 BlendControl::read(int index)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 
     return data[index];
 }
 
-void BlendControl::writeByte(int index, u8 byte)
+void BlendControl::write(int index, u8 byte)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 

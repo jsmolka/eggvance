@@ -19,7 +19,7 @@ void HaltControl::reset()
     *this = {};
 }
 
-void HaltControl::writeByte(int index, u8 byte)
+void HaltControl::write(int index, u8 byte)
 {
     EGG_ASSERT(index <= 0, "Invalid index");
 

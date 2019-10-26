@@ -16,14 +16,14 @@ void BGControl::reset()
     *this = {};
 }
 
-u8 BGControl::readByte(int index)
+u8 BGControl::read(int index)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 
     return data[index];
 }
 
-void BGControl::writeByte(int index, u8 byte)
+void BGControl::write(int index, u8 byte)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 

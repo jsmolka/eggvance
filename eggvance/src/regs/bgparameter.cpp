@@ -7,7 +7,7 @@ void BGParameter::reset()
     *this = {};
 }
 
-void BGParameter::writeByte(int index, u8 byte)
+void BGParameter::write(int index, u8 byte)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 

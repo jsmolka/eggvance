@@ -13,14 +13,14 @@ void IRQMaster::reset()
     *this = {};
 }
 
-u8 IRQMaster::readByte(int index)
+u8 IRQMaster::read(int index)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 
     return bcast(master)[index];
 }
 
-void IRQMaster::writeByte(int index, u8 byte)
+void IRQMaster::write(int index, u8 byte)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 

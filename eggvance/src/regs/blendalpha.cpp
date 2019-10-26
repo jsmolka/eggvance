@@ -10,14 +10,14 @@ void BlendAlpha::reset()
     *this = {};
 }
 
-u8 BlendAlpha::readByte(int index)
+u8 BlendAlpha::read(int index)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 
     return data[index];
 }
 
-void BlendAlpha::writeByte(int index, u8 byte)
+void BlendAlpha::write(int index, u8 byte)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 

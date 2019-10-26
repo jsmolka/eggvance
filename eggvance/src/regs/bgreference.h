@@ -7,7 +7,7 @@ class BGReference : public Register<4>
 public:
     void reset();
 
-    void writeByte(int index, u8 byte);
+    void write(int index, u8 byte);
 
     int reference;
     int internal;

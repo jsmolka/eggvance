@@ -17,11 +17,11 @@ void DMA::start()
     state = State::Running;
     remaining = count.count();
 
-    if (control.update)
+    if (control.reload)
     {
         sad_addr = sad.addr;
         dad_addr = dad.addr;
-        control.update = false;
+        control.reload = false;
     }
     else if (control.repeat && control.dad_delta == 0b11)
     {

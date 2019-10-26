@@ -137,7 +137,7 @@ void PPU::next()
     {
         arm.request(Interrupt::VMatch);
     }
-    io.vcount = (io.vcount + 1) % 228;
+    io.vcount.next();
 }
 
 void PPU::present()

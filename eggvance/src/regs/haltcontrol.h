@@ -10,8 +10,7 @@ public:
 
     void reset();
 
-    void writeByte(int index, u8 byte);
+    void write(int index, u8 byte);
 
-private:
     bool halt;
 };

@@ -277,7 +277,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="src\arm\arm.inl" />
-    <None Include="src\regs\keyinput.inl" />
     <None Include="src\ppu\collapse.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -11,7 +11,7 @@ void Mosaic::reset()
     obj.y = 1;
 }
 
-void Mosaic::writeByte(int index, u8 byte)
+void Mosaic::write(int index, u8 byte)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 

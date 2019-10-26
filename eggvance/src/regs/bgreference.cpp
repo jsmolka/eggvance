@@ -8,7 +8,7 @@ void BGReference::reset()
     *this = {};
 }
 
-void BGReference::writeByte(int index, u8 byte)
+void BGReference::write(int index, u8 byte)
 {
     EGG_ASSERT(index <= 3, "Invalid index");
 

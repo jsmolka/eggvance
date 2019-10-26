@@ -420,8 +420,5 @@
     <None Include="src\ppu\collapse.inl">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="src\regs\keyinput.inl">
-      <Filter>Header Files</Filter>
-    </None>
   </ItemGroup>
 </Project>

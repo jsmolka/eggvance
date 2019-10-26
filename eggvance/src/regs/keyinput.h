@@ -11,7 +11,7 @@ public:
 
     void reset();
 
-    u8 readByte(int index);
+    u8 read(int index);
 
-    int keys;
+    int input;
 };

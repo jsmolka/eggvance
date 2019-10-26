@@ -5,26 +5,26 @@
 
 void WaitControl::reset()
 {
-    int sram     = 0;
-    int ws0_n    = 0;
-    int ws0_s    = 0;
-    int ws1_n    = 0;
-    int ws1_s    = 0;
-    int ws2_n    = 0;
-    int ws2_s    = 0;
-    int prefetch = 0;
+    sram     = 0;
+    ws0_n    = 0;
+    ws0_s    = 0;
+    ws1_n    = 0;
+    ws1_s    = 0;
+    ws2_n    = 0;
+    ws2_s    = 0;
+    prefetch = 0;
 
     updateCycles();
 }
 
-u8 WaitControl::readByte(int index)
+u8 WaitControl::read(int index)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 
-    return bytes[index];
+    return data[index];
 }
 
-void WaitControl::writeByte(int index, u8 byte)
+void WaitControl::write(int index, u8 byte)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 
@@ -42,22 +42,18 @@ void WaitControl::writeByte(int index, u8 byte)
         ws2_s    = bits<2, 1>(byte);
         prefetch = bits<6, 1>(byte);
     }
-    bytes[index] = byte;
+    data[index] = byte;
 
     updateCycles();
 }
 
 int WaitControl::cyclesHalf(u32 addr, int sequential) const
 {
-    // Todo: Check if SRAM
-    // Todo: Cycles for unused memory > 0?
     return cycles_half[sequential][addr >> 24];
 }
 
 int WaitControl::cyclesWord(u32 addr, int sequential) const
 {
-    // Todo: Check if SRAM
-    // Todo: Cycles for unused memory > 0?
     return cycles_word[sequential][addr >> 24];
 }
 
@@ -82,8 +78,8 @@ void WaitControl::updateCycles()
     cycles_word[0][0xC] = cycles_word[0][0xD] = 2 * nonseq[ws2_n] + 1;
     cycles_word[1][0xC] = cycles_word[1][0xD] = 2 * ws2seq[ws2_s] + 1;
 
-    cycles_half[0][0xE] = nonseq[sram] + 1;
-    cycles_half[1][0xE] = nonseq[sram] + 1;
-    cycles_word[0][0xE] = nonseq[sram] + 1;
-    cycles_word[1][0xE] = nonseq[sram] + 1;
+    cycles_half[0][0xE] = cycles_half[0][0xF] = nonseq[sram] + 1;
+    cycles_half[1][0xE] = cycles_half[1][0xF] = nonseq[sram] + 1;
+    cycles_word[0][0xE] = cycles_word[0][0xF] = nonseq[sram] + 1;
+    cycles_word[1][0xE] = cycles_word[1][0xF] = nonseq[sram] + 1;
 }

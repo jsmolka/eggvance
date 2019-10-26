@@ -12,7 +12,7 @@ void WindowDimension::reset()
     *this = { limit };
 }
 
-void WindowDimension::writeByte(int index, u8 byte)
+void WindowDimension::write(int index, u8 byte)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 

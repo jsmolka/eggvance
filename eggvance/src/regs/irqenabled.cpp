@@ -12,14 +12,14 @@ void IRQEnabled::reset()
     *this = {};
 }
 
-u8 IRQEnabled::readByte(int index)
+u8 IRQEnabled::read(int index)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 
     return bcast(enabled)[index];
 }
 
-void IRQEnabled::writeByte(int index, u8 byte)
+void IRQEnabled::write(int index, u8 byte)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 
