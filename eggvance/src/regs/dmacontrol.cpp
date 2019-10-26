@@ -34,8 +34,8 @@ void DMAControl::write(int index, u8 byte)
         word      = bits<2, 1>(byte);
         timing    = bits<4, 2>(byte);
         irq       = bits<6, 1>(byte);
+        reload    = bits<7, 1>(byte) != enabled;
         enabled   = bits<7, 1>(byte);
-        reload    = enabled;
     }
     data[index] = byte;
 }

@@ -5,8 +5,6 @@
 class DMAController
 {
 public:
-    DMAController();
-
     void reset();
 
     void run(int& cycles);
@@ -16,5 +14,7 @@ public:
     void writeByte(u32 addr, u8 byte);
 
     DMA* active;
-    DMA dmas[4];
+
+private:
+    DMA dmas[4] = { 0, 1, 2, 3 };
 };

@@ -7,8 +7,6 @@
 
 class Keypad
 {
-    friend class MMU;
-
 public:
     enum class Button
     {

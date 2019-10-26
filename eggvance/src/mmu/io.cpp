@@ -30,8 +30,8 @@ IO::IO()
 {
     std::memset(masks, 0xFF, sizeof(masks));
 
-    masks[REG_DISPCNT     + 0] = 0xEF;
-    masks[REG_DISPSTAT    + 0] = 0x1C;
+    masks[REG_DISPCNT     + 0] = 0xF7;
+    masks[REG_DISPSTAT    + 0] = 0x38;
     masks[REG_BG0CNT      + 1] = 0xDF;
     masks[REG_BG1CNT      + 1] = 0xDF;
     masks[REG_BG0HOFS     + 1] = 0x01;
@@ -42,6 +42,10 @@ IO::IO()
     masks[REG_BG2VOFS     + 1] = 0x01;
     masks[REG_BG3HOFS     + 1] = 0x01;
     masks[REG_BG3VOFS     + 1] = 0x01;
+    masks[REG_BG2X        + 3] = 0x0F;    
+    masks[REG_BG2Y        + 3] = 0x0F;    
+    masks[REG_BG3X        + 3] = 0x0F;    
+    masks[REG_BG3Y        + 3] = 0x0F;    
     masks[REG_WININ       + 0] = 0x3F;
     masks[REG_WININ       + 1] = 0x3F;
     masks[REG_WINOUT      + 0] = 0x3F;
@@ -68,11 +72,14 @@ IO::IO()
     masks[REG_DMA2CNT_L   + 1] = 0x3F;
     masks[REG_DMA2CNT_H   + 0] = 0xE0;
     masks[REG_DMA2CNT_H   + 1] = 0xF7;
-    masks[REG_DMA3CNT_L   + 1] = 0x3F;
     masks[REG_DMA3CNT_H   + 0] = 0xE0;
+    masks[REG_TM0CNT_H    + 0] = 0xC7;
     masks[REG_TM0CNT_H    + 1] = 0x00;
+    masks[REG_TM1CNT_H    + 0] = 0xC7;
     masks[REG_TM1CNT_H    + 1] = 0x00;
+    masks[REG_TM2CNT_H    + 0] = 0xC7;
     masks[REG_TM2CNT_H    + 1] = 0x00;
+    masks[REG_TM3CNT_H    + 0] = 0xC7;
     masks[REG_TM3CNT_H    + 1] = 0x00;
     masks[REG_SOUND1CNT_L + 0] = 0x7F;
     masks[REG_SOUND1CNT_L + 1] = 0x00;
@@ -95,7 +102,7 @@ IO::IO()
     masks[REG_SOUNDCNT_H  + 1] = 0x77;
     masks[REG_SOUNDCNT_X  + 0] = 0x80;
     masks[REG_SOUNDCNT_X  + 1] = 0x00;
-    masks[REG_KEYCNT      + 1] = 0xC3; 
+    masks[REG_KEYCNT      + 1] = 0xC3;
     masks[REG_IE          + 1] = 0x3F;
     masks[REG_IF          + 1] = 0x3F;
     masks[REG_WAITCNT     + 1] = 0x5F;

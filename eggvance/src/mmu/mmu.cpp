@@ -57,7 +57,6 @@ u8 MMU::readByte(u32 addr)
     case REGION_GAMEPAK2_EX:
         if (gamepak.backup->type == Backup::Type::EEPROM)
         {
-            // Todo: should this always be one?
             if (gamepak.size() <= 0x100'0000 || addr >= 0xDFF'FF00)
                 return 1;
         }
@@ -128,7 +127,6 @@ u16 MMU::readHalf(u32 addr)
     case REGION_GAMEPAK2_EX:
         if (gamepak.backup->type == Backup::Type::EEPROM)
         {
-            // Todo: should this always be one?
             if (gamepak.size() <= 0x100'0000 || addr >= 0xDFF'FF00)
                 return 1;
         }
@@ -186,7 +184,6 @@ u32 MMU::readWord(u32 addr)
     case REGION_GAMEPAK2_EX:
         if (gamepak.backup->type == Backup::Type::EEPROM)
         {
-            // Todo: should this always be one?
             if (gamepak.size() <= 0x100'0000 || addr >= 0xDFF'FF00)
                 return 1;
         }

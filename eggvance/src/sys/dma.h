@@ -7,19 +7,15 @@
 class DMA
 {
 public:
+    DMA(int id);
+
     enum class Timing
     {
         Immediate = 0,
         VBlank    = 1,
         HBlank    = 2,
-        Refresh   = 3
+        Special   = 3
     };
-
-    enum class State
-    {
-        Finished,
-        Running
-    } state;
 
     void reset();
     void start();
@@ -27,20 +23,35 @@ public:
     void run(int& cycles);
 
     int id;
-    int remaining;
-    int sad_delta;
-    int dad_delta;
-    u32 sad_addr;
-    u32 dad_addr;
-
+    bool running;
     DMACount count;
     DMAAddress sad;
     DMAAddress dad;
     DMAControl control;
 
 private:
-    bool readEEPROM(int& cycles);
-    bool writeEEPROM(int& cycles);
+    using TransferFunc = void(DMA::*)(void);
 
-    static int deltas[4];
+    static bool inEEPROM(u32 addr);
+    static bool inGamePak(u32 addr);
+
+    void updateCycles();
+    void updateTransfer();
+
+    void transferHalf();
+    void transferWord();
+
+    void initEEPROM();
+    void readEEPROM();
+    void writeEEPROM();
+
+    TransferFunc transfer;
+
+    int remaining;
+    u32 sad_addr;
+    u32 dad_addr;
+    int sad_delta;
+    int dad_delta;
+    int cycles_s;
+    int cycles_n;
 };

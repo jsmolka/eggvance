@@ -12,19 +12,6 @@
 #define WRITE2(label, reg) CASE2(label) reg.write(addr - label, byte); break
 #define WRITE4(label, reg) CASE4(label) reg.write(addr - label, byte); break
 
-DMAController::DMAController()
-{
-    dmas[0].id = 0;
-    dmas[1].id = 1;
-    dmas[2].id = 2;
-    dmas[3].id = 3;
-
-    dmas[0].count.limit = 0x04000;
-    dmas[1].count.limit = 0x04000;
-    dmas[2].count.limit = 0x04000;
-    dmas[3].count.limit = 0x10000;
-}
-
 void DMAController::reset()
 {
     active = nullptr;
@@ -39,34 +26,32 @@ void DMAController::run(int& cycles)
 {
     active->run(cycles);
 
-    if (active->state == DMA::State::Finished)
+    if (!active->running)
     {
         active = nullptr;
 
         for (auto& dma : dmas)
         {
-            if (dma.state == DMA::State::Running)
+            if (dma.running)
             {
                 active = &dma;
                 break;
             }
         }
     }
-
 }
 
 void DMAController::signal(DMA::Timing timing)
 {
     for (auto& dma : dmas)
     {
-        if (DMA::Timing(dma.control.timing) == timing)
+        const auto& control = dma.control;
+
+        if (!dma.running && control.enabled && DMA::Timing(control.timing) == timing)
         {
-            if (dma.control.enabled && dma.state != DMA::State::Running)
-            {
-                dma.start();
-                if (!active || dma.id < active->id)
-                    active = &dma;
-            }
+            dma.start();
+            if (!active || dma.id < active->id)
+                active = &dma;
         }
     }
 }
@@ -82,23 +67,22 @@ u8 DMAController::readByte(u32 addr)
 
     default:
         EGG_UNREACHABLE;
-        break;
+        return 0;
     }
-    return 0;
 }
 
 void DMAController::writeByte(u32 addr, u8 byte)
 {
     switch (addr)
     {
-    WRITE4(REG_DMA0SAD, dmas[0].sad);
-    WRITE4(REG_DMA1SAD, dmas[1].sad);
-    WRITE4(REG_DMA2SAD, dmas[2].sad);
-    WRITE4(REG_DMA3SAD, dmas[3].sad);
-    WRITE4(REG_DMA0DAD, dmas[0].dad);
-    WRITE4(REG_DMA1DAD, dmas[1].dad);
-    WRITE4(REG_DMA2DAD, dmas[2].dad);
-    WRITE4(REG_DMA3DAD, dmas[3].dad);
+    WRITE4(REG_DMA0SAD,   dmas[0].sad);
+    WRITE4(REG_DMA1SAD,   dmas[1].sad);
+    WRITE4(REG_DMA2SAD,   dmas[2].sad);
+    WRITE4(REG_DMA3SAD,   dmas[3].sad);
+    WRITE4(REG_DMA0DAD,   dmas[0].dad);
+    WRITE4(REG_DMA1DAD,   dmas[1].dad);
+    WRITE4(REG_DMA2DAD,   dmas[2].dad);
+    WRITE4(REG_DMA3DAD,   dmas[3].dad);
     WRITE2(REG_DMA0CNT_L, dmas[0].count);
     WRITE2(REG_DMA1CNT_L, dmas[1].count);
     WRITE2(REG_DMA2CNT_L, dmas[2].count);
@@ -113,13 +97,9 @@ void DMAController::writeByte(u32 addr, u8 byte)
         break;
     }
 
-    switch (addr)
-    {
-    case REG_DMA0CNT_L + 3:
-    case REG_DMA1CNT_L + 3:
-    case REG_DMA2CNT_L + 3:
-    case REG_DMA3CNT_L + 3:
+    if (dmas[0].control.reload 
+            || dmas[1].control.reload 
+            || dmas[2].control.reload 
+            || dmas[3].control.reload)
         signal(DMA::Timing::Immediate);
-        break;
-    }
 }
