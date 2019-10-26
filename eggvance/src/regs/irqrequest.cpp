@@ -5,12 +5,13 @@
 
 IRQRequest::operator int() const
 {
-    return value;
+    return request;
 }
 
 IRQRequest& IRQRequest::operator|=(int value)
 {
-    this->value |= value;
+    this->request |= value;
+
     return *this;
 }
 
@@ -23,14 +24,12 @@ u8 IRQRequest::readByte(int index)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 
-    if (index == 0)
-        return bits<0, 8>(value);
-    else
-        return bits<8, 8>(value);
+    return bcast(request)[index];
 }
 
 void IRQRequest::writeByte(int index, u8 byte)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
-    byteArray(value)[index] &= ~byte;
+    
+    bcast(request)[index] &= ~byte;
 }

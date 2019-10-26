@@ -5,7 +5,7 @@
 
 IRQMaster::operator bool() const
 {
-    return bytes[0] & 0x1;
+    return master;
 }
 
 void IRQMaster::reset()
@@ -15,12 +15,14 @@ void IRQMaster::reset()
 
 u8 IRQMaster::readByte(int index)
 {
-    EGG_ASSERT(index <= 3, "Invalid index");
-    return bytes[index];
+    EGG_ASSERT(index <= 1, "Invalid index");
+
+    return bcast(master)[index];
 }
 
 void IRQMaster::writeByte(int index, u8 byte)
 {
-    EGG_ASSERT(index <= 3, "Invalid index");
-    bytes[index] = byte;
+    EGG_ASSERT(index <= 1, "Invalid index");
+
+    bcast(master)[index] = byte;
 }

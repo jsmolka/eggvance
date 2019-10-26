@@ -1,11 +1,10 @@
 #include "irqenabled.h"
 
 #include "common/macros.h"
-#include "common/utility.h"
 
 IRQEnabled::operator int() const
 {
-    return value;
+    return enabled;
 }
 
 void IRQEnabled::reset()
@@ -16,12 +15,13 @@ void IRQEnabled::reset()
 u8 IRQEnabled::readByte(int index)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
-    return bytes[index];
+
+    return bcast(enabled)[index];
 }
 
 void IRQEnabled::writeByte(int index, u8 byte)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
-    byteArray(value)[index] = byte;
-    bytes[index] = byte;
+
+    bcast(enabled)[index] = byte;
 }

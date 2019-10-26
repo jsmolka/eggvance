@@ -15,7 +15,7 @@ void DMA::reset()
 void DMA::start()
 {
     state = State::Running;
-    count = control.count;
+    remaining = count.count();
 
     if (control.update)
     {
@@ -50,7 +50,7 @@ void DMA::run(int& cycles)
             // before the first read).
             if (mmu.gamepak.backup->data.empty())
             {
-                switch (control.count)
+                switch (remaining)
                 {
                     // Bus width 6
                 case  9:  // Set address for reading
@@ -80,7 +80,7 @@ void DMA::run(int& cycles)
     }
     else
     {
-        while (count-- > 0)
+        while (remaining-- > 0)
         {
             if (control.word)
             {
@@ -119,7 +119,7 @@ void DMA::run(int& cycles)
 
 bool DMA::readEEPROM(int& cycles)
 {
-    while (count-- > 0)
+    while (remaining-- > 0)
     {
         u8 byte = mmu.gamepak.backup->readByte(sad_addr);
         mmu.writeHalf(dad_addr, byte);
@@ -136,7 +136,7 @@ bool DMA::readEEPROM(int& cycles)
 
 bool DMA::writeEEPROM(int& cycles)
 {
-    while (count-- > 0)
+    while (remaining-- > 0)
     {
         u8 byte = static_cast<u8>(mmu.readHalf(sad_addr));
         mmu.gamepak.backup->writeByte(dad_addr, byte);

@@ -11,34 +11,18 @@ void Mosaic::reset()
     obj.y = 1;
 }
 
-u8 Mosaic::readByte(int index)
-{
-    EGG_ASSERT(index <= 3, "Invalid index");
-    return 0;
-}
-
 void Mosaic::writeByte(int index, u8 byte)
 {
-    EGG_ASSERT(index <= 3, "Invalid index");
+    EGG_ASSERT(index <= 1, "Invalid index");
 
-    switch (index)
+    if (index == 0)
     {
-    case 0:
         bgs.x = bits<0, 4>(byte) + 1;
         bgs.y = bits<4, 4>(byte) + 1;
-        break;
-
-    case 1:
+    }
+    else
+    {
         obj.x = bits<0, 4>(byte) + 1;
         obj.y = bits<4, 4>(byte) + 1;
-        break;
-
-    case 2:
-    case 3:
-        break;
-
-    default:
-        EGG_UNREACHABLE;
-        break;
     }
 }

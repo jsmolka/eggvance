@@ -20,10 +20,18 @@ void Timer::run(int cycles)
 
 u8 Timer::readByte(int index)
 {
-    if (index <= 1)
+    switch (index)
+    {
+    case 0:
+    case 1:
         updateData();
+        return data.readByte(index);
 
-    return control.readByte(index);
+    case 2:
+    case 3:
+        return control.readByte(index - 2);
+    }
+    return 0;
 }
 
 void Timer::writeByte(int index, u8 byte)
@@ -31,9 +39,19 @@ void Timer::writeByte(int index, u8 byte)
     updateData();
 
     int enabled = control.enabled;
-    control.writeByte(index, byte);
+    switch (index)
+    {
+    case 0:
+    case 1:
+        data.writeByte(index, byte);
+        break;
+    case 2:
+    case 3:
+        control.writeByte(index - 2, byte);
+        break;
+    }
     if (!enabled && control.enabled)
-        control.data = control.initial;
+        data.data = data.initial;
 
     calculate();
 }
@@ -59,17 +77,17 @@ void Timer::runInternal(int cycles)
             arm.request(flags[id]);
         }
 
-        counter = prescalers[control.prescaler] * control.initial + (counter % overflow);
+        counter = prescalers[control.prescaler] * data.initial + (counter % overflow);
     }
 }
 
 void Timer::updateData()
 {
-    control.data = counter / prescalers[control.prescaler];
+    data.data = counter / prescalers[control.prescaler];
 }
 
 void Timer::calculate()
 {
     overflow = prescalers[control.prescaler] * 0x1'0000;
-    counter  = prescalers[control.prescaler] * control.data;
+    counter  = prescalers[control.prescaler] * data.data;
 }

@@ -1,3 +1,4 @@
+#include "common/macros.h"
 #include "mmu/mmu.h"
 
 #define MISSING_PIXEL 0x6C3F
@@ -6,7 +7,7 @@ template<int obj_master>
 void PPU::collapse(const std::vector<BackgroundLayer>& layers)
 {
     int windows = io.dispcnt.win0 || io.dispcnt.win1 || io.dispcnt.winobj;
-    int effects = io.bldcnt.mode != BLD_DISABLED || objects_alpha;
+    int effects = io.bldcnt.mode != BlendControl::Mode::DISABLED || objects_alpha;
 
     switch ((effects << 1) | (windows << 0))
     {
@@ -103,22 +104,22 @@ void PPU::collapseBN(const std::vector<BackgroundLayer>& layers)
         {
             switch (blend_mode)
             {
-            case BLD_ALPHA:
+            case BlendControl::Mode::ALPHA:
                 if (findBlendLayers<obj_master>(layers, x, flags, upper, lower))
                     upper = blendAlpha(upper, lower);
                 break;
 
-            case BLD_WHITE:
+            case BlendControl::Mode::WHITE:
                 if (findBlendLayers<obj_master>(layers, x, flags, upper))
                     upper = blendWhite(upper);
                 break;
 
-            case BLD_BLACK:
+            case BlendControl::Mode::BLACK:
                 if (findBlendLayers<obj_master>(layers, x, flags, upper))
                     upper = blendBlack(upper);
                 break;
 
-            case BLD_DISABLED:
+            case BlendControl::Mode::DISABLED:
                 upper = upperLayer<obj_master>(layers, x);
                 break;
 
@@ -188,22 +189,22 @@ void PPU::collapseBW(const std::vector<BackgroundLayer>& layers)
         {
             switch (blend_mode)
             {
-            case BLD_ALPHA:
+            case BlendControl::Mode::ALPHA:
                 if (findBlendLayers<obj_master>(layers, x, window.flags, upper, lower))
                     upper = blendAlpha(upper, lower);
                 break;
 
-            case BLD_WHITE:
+            case BlendControl::Mode::WHITE:
                 if (findBlendLayers<obj_master>(layers, x, window.flags, upper))
                     upper = blendWhite(upper);
                 break;
 
-            case BLD_BLACK:
+            case BlendControl::Mode::BLACK:
                 if (findBlendLayers<obj_master>(layers, x, window.flags, upper))
                     upper = blendBlack(upper);
                 break;
 
-            case BLD_DISABLED:
+            case BlendControl::Mode::DISABLED:
                 upper = upperLayer<obj_master>(layers, x, window.flags);
                 break;
 

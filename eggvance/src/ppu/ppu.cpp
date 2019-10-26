@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include "common/constants.h"
+#include "common/utility.h"
 #include "arm/arm.h"
 #include "mmu/mmu.h"
 

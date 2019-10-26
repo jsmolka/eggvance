@@ -2,6 +2,7 @@
 
 #include <array>
 
+#include "regs/haltcontrol.h"
 #include "regs/irqenabled.h"
 #include "regs/irqmaster.h"
 #include "regs/irqrequest.h"
@@ -51,7 +52,7 @@ public:
         IRQEnabled irq_enabled;
         IRQRequest irq_request;
         WaitControl waitcnt;
-        bool halt;
+        HaltControl haltcnt;
     } io;
 
     u32 pipe[2];

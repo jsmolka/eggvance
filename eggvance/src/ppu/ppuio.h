@@ -36,8 +36,8 @@ public:
 
     WindowIn winin;
     WindowOut winout;
-    WindowDimension<LCD_W> winh[2];
-    WindowDimension<LCD_H> winv[2];
+    WindowDimension winh[2] = { LCD_W, LCD_W };
+    WindowDimension winv[2] = { LCD_H, LCD_H };
 
     Mosaic mosaic;
     BlendControl bldcnt;

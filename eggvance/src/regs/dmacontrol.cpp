@@ -5,58 +5,30 @@
 
 void DMAControl::reset()
 {
-    int mask = count_mask;
     *this = {};
-    count_mask = mask;
 }
 
 u8 DMAControl::readByte(int index)
 {
-    EGG_ASSERT(index <= 3, "Invalid index");
+    EGG_ASSERT(index <= 1, "Invalid index");
 
-    u8 byte = 0;
-    switch (index)
-    {
-    case 0:
-    case 1:
-        break;
-
-    case 2:
-        byte = bytes[2];
-        break;
-
-    case 3:
-        byte = bytes[3] & ~0x80;
-        byte |= enabled << 7;
-        break;
-
-    default:
-        EGG_UNREACHABLE;
-        break;
-    }
-    return byte;
+    if (index == 0)
+        return data[0];
+    else
+        return (data[1] & ~0x80) | (enabled << 7);
 }
 
 void DMAControl::writeByte(int index, u8 byte)
 {
-    EGG_ASSERT(index <= 3, "Invalid index");
+    EGG_ASSERT(index <= 1, "Invalid index");
 
-    switch (index)
+    if (index == 0)
     {
-    case 0:
-    case 1:
-        byteArray(count)[index] = byte;
-        count &= count_mask;
-        if (count == 0)
-            count = count_mask + 1;
-        break;
-
-    case 2:
         dad_delta = bits<5, 2>(byte);
         sad_delta = bits<7, 1>(byte) << 0 | (sad_delta & ~0x1);
-        break;
-
-    case 3:
+    }
+    else
+    {
         sad_delta = bits<0, 1>(byte) << 1 | (sad_delta & ~0x2);
         repeat    = bits<1, 1>(byte);
         word      = bits<2, 1>(byte);
@@ -64,11 +36,6 @@ void DMAControl::writeByte(int index, u8 byte)
         irq       = bits<6, 1>(byte);
         enabled   = bits<7, 1>(byte);
         update    = enabled;
-        break;
-
-    default:
-        EGG_UNREACHABLE;
-        break;
     }
-    bytes[index] = byte;
+    data[index] = byte;
 }

@@ -161,11 +161,15 @@
     <ClCompile Include="src\regs\displaystatus.cpp" />
     <ClCompile Include="src\regs\dmaaddress.cpp" />
     <ClCompile Include="src\regs\dmacontrol.cpp" />
+    <ClCompile Include="src\regs\dmacount.cpp" />
+    <ClCompile Include="src\regs\haltcontrol.cpp" />
     <ClCompile Include="src\regs\irqmaster.cpp" />
     <ClCompile Include="src\regs\irqrequest.cpp" />
     <ClCompile Include="src\regs\keycontrol.cpp" />
     <ClCompile Include="src\regs\timercontrol.cpp" />
+    <ClCompile Include="src\regs\timerdata.cpp" />
     <ClCompile Include="src\regs\waitcontrol.cpp" />
+    <ClCompile Include="src\regs\windowdimension.cpp" />
     <ClCompile Include="src\sys\dmacontroller.cpp" />
     <ClCompile Include="src\emulator.cpp" />
     <ClCompile Include="src\framelimiter.cpp" />
@@ -221,11 +225,14 @@
     <ClInclude Include="src\regs\displaystatus.h" />
     <ClInclude Include="src\regs\dmaaddress.h" />
     <ClInclude Include="src\regs\dmacontrol.h" />
+    <ClInclude Include="src\regs\dmacount.h" />
+    <ClInclude Include="src\regs\haltcontrol.h" />
     <ClInclude Include="src\regs\irqmaster.h" />
     <ClInclude Include="src\regs\irqrequest.h" />
     <ClInclude Include="src\regs\keycontrol.h" />
     <ClInclude Include="src\regs\register.h" />
     <ClInclude Include="src\regs\timercontrol.h" />
+    <ClInclude Include="src\regs\timerdata.h" />
     <ClInclude Include="src\regs\waitcontrol.h" />
     <ClInclude Include="src\regs\windowdimension.h" />
     <ClInclude Include="src\sys\dma.h" />
@@ -272,7 +279,6 @@
     <None Include="src\arm\arm.inl" />
     <None Include="src\regs\keyinput.inl" />
     <None Include="src\ppu\collapse.inl" />
-    <None Include="src\regs\windowdimension.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

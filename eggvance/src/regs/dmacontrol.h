@@ -2,7 +2,7 @@
 
 #include "register.h"
 
-class DMAControl : public Register<4>
+class DMAControl : public Register<2>
 {
 public:
     void reset();
@@ -17,8 +17,6 @@ public:
     int timing;
     int irq;
     int enabled;
-    int count;
-    int count_mask;
 
     bool update;
 };

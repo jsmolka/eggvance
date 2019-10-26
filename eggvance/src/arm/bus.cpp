@@ -1,5 +1,6 @@
 #include "arm.h"
 
+#include "common/utility.h"
 #include "mmu/mmu.h"
 
 u8 ARM::readByte(u32 addr)

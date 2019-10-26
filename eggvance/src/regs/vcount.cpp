@@ -1,16 +1,16 @@
 #include "vcount.h"
 
 #include "common/macros.h"
-#include "common/utility.h"
 
 VCount::operator int() const
 {
-    return line;
+    return data[0];
 }
 
 VCount& VCount::operator=(int value)
 {
-    line = value;
+    data[0] = value;
+
     return *this;
 }
 
@@ -23,13 +23,5 @@ u8 VCount::readByte(int index)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 
-    if (index == 0)
-        return line;
-    else
-        return 0;
-}
-
-void VCount::writeByte(int index, u8 byte)
-{
-    EGG_ASSERT(index <= 1, "Invalid index");
+    return data[index];
 }

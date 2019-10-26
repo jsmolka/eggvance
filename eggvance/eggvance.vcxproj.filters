@@ -192,6 +192,18 @@
     <ClCompile Include="src\regs\waitcontrol.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\regs\dmacount.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\regs\timerdata.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\regs\windowdimension.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\regs\haltcontrol.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="icon\icon.h">
@@ -386,6 +398,15 @@
     <ClInclude Include="src\regs\windowdimension.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\regs\dmacount.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\regs\timerdata.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\regs\haltcontrol.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="eggvance.rc">
@@ -400,9 +421,6 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="src\regs\keyinput.inl">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="src\regs\windowdimension.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

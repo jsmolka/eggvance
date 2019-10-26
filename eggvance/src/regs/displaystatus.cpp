@@ -14,7 +14,7 @@ u8 DisplayStatus::readByte(int index)
 
     if (index == 0)
     {
-        u8 byte = bytes[0] & ~0x7;
+        u8 byte = data[0];
         byte |= vblank << 0;
         byte |= hblank << 1;
         byte |= vmatch << 2;
@@ -22,7 +22,7 @@ u8 DisplayStatus::readByte(int index)
     }
     else
     {
-        return bytes[1];
+        return data[1];
     }
 }
 
@@ -40,5 +40,5 @@ void DisplayStatus::writeByte(int index, u8 byte)
     {
         vcompare = byte;
     }
-    bytes[index] = byte;
+    data[index] = byte;
 }

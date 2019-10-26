@@ -75,9 +75,3 @@ inline T signExtend(T value)
     constexpr int amount = 8 * sizeof(T) - bits;
     return static_cast<T>(static_cast<S>(value << amount) >> amount);
 }
-
-template<typename T>
-inline u8* byteArray(T& data)
-{
-    return reinterpret_cast<u8*>(&data);
-}

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "regs/timerdata.h"
 #include "regs/timercontrol.h"
 
 class Timer
@@ -15,6 +16,10 @@ public:
     int id;
     Timer* next;
 
+    TimerData data;
+    TimerControl control;
+
+
 private:
     void runInternal(int cycles);
     void updateData();
@@ -24,6 +29,4 @@ private:
 
     int counter;
     int overflow;
-
-    TimerControl control;
 };

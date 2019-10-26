@@ -9,18 +9,17 @@ void Window::reset()
     *this = {};
 }
 
-u8 Window::readByte(int index)
+u8 Window::readByte()
 {
-    EGG_ASSERT(index == 0, "Invalid index");
     return bytes[0];
 }
 
-void Window::writeByte(int index, u8 byte)
+void Window::writeByte(u8 byte)
 {
-    EGG_ASSERT(index == 0, "Invalid index");
-    bytes[0] = byte;
     flags = bits<0, 5>(byte) | LF_BDP;
     sfx   = bits<5, 1>(byte);
+
+    bytes[0] = byte;
 }
 
 void WindowIn::reset()
@@ -34,9 +33,9 @@ u8 WindowIn::readByte(int index)
     EGG_ASSERT(index <= 1, "Invalid index");
 
     if (index == 0)
-        return win0.readByte(0);
+        return win0.readByte();
     else
-        return win1.readByte(0);
+        return win1.readByte();
 }
 
 void WindowIn::writeByte(int index, u8 byte)
@@ -44,9 +43,9 @@ void WindowIn::writeByte(int index, u8 byte)
     EGG_ASSERT(index <= 1, "Invalid index");
 
     if (index == 0)
-        return win0.writeByte(0, byte);
+        return win0.writeByte(byte);
     else
-        return win1.writeByte(0, byte);
+        return win1.writeByte(byte);
 }
 
 void WindowOut::reset()
@@ -60,9 +59,9 @@ u8 WindowOut::readByte(int index)
     EGG_ASSERT(index <= 1, "Invalid index");
 
     if (index == 0)
-        return winout.readByte(0);
+        return winout.readByte();
     else
-        return winobj.readByte(0);
+        return winobj.readByte();
 }
 
 void WindowOut::writeByte(int index, u8 byte)
@@ -70,7 +69,7 @@ void WindowOut::writeByte(int index, u8 byte)
     EGG_ASSERT(index <= 1, "Invalid index");
 
     if (index == 0)
-        return winout.writeByte(0, byte);
+        return winout.writeByte(byte);
     else
-        return winobj.writeByte(0, byte);
+        return winobj.writeByte(byte);
 }

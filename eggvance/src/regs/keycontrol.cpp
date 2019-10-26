@@ -11,7 +11,8 @@ void KeyControl::reset()
 u8 KeyControl::readByte(int index)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
-    return bytes[index];
+
+    return data[index];
 }
 
 void KeyControl::writeByte(int index, u8 byte)
@@ -20,13 +21,13 @@ void KeyControl::writeByte(int index, u8 byte)
 
     if (index == 0)
     {
-        byteArray(keys)[0] = byte;
+        bcast(keys)[0] = byte;
     }
     else
     {
-        byteArray(keys)[1] = bits<0, 2>(byte);
-        irq                = bits<6, 1>(byte);
-        logic              = bits<7, 1>(byte);
+        bcast(keys)[1] = bits<0, 2>(byte);
+        irq            = bits<6, 1>(byte);
+        logic          = bits<7, 1>(byte);
     }
-    bytes[index] = byte;
+    data[index] = byte;
 }

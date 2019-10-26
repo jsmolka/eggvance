@@ -3,6 +3,15 @@
 #include "common/macros.h"
 #include "mmu/memmap.h"
 
+#define CASE2(label) case label + 0: case label + 1:
+#define CASE4(label) case label + 0: case label + 1: case label + 2: case label + 3:
+
+#define READ2(label, reg) CASE2(label) return reg.readByte(addr - label)
+#define READ4(label, reg) CASE4(label) return reg.readByte(addr - label)
+
+#define WRITE2(label, reg) CASE2(label) reg.writeByte(addr - label, byte); break
+#define WRITE4(label, reg) CASE4(label) reg.writeByte(addr - label, byte); break
+
 DMAController::DMAController()
 {
     dmas[0].id = 0;
@@ -10,20 +19,10 @@ DMAController::DMAController()
     dmas[2].id = 2;
     dmas[3].id = 3;
 
-    dmas[0].sad.addr_mask = 0x7FF'FFFF;
-    dmas[1].sad.addr_mask = 0xFFF'FFFF;
-    dmas[2].sad.addr_mask = 0xFFF'FFFF;
-    dmas[3].sad.addr_mask = 0xFFF'FFFF;
-
-    dmas[0].dad.addr_mask = 0x7FF'FFFF;
-    dmas[1].dad.addr_mask = 0x7FF'FFFF;
-    dmas[2].dad.addr_mask = 0x7FF'FFFF;
-    dmas[3].dad.addr_mask = 0xFFF'FFFF;
-
-    dmas[0].control.count_mask = 0x3FFF;
-    dmas[1].control.count_mask = 0x3FFF;
-    dmas[2].control.count_mask = 0x3FFF;
-    dmas[3].control.count_mask = 0xFFFF;
+    dmas[0].count.max = 0x04000;
+    dmas[1].count.max = 0x04000;
+    dmas[2].count.max = 0x04000;
+    dmas[3].count.max = 0x10000;
 }
 
 void DMAController::reset()
@@ -72,28 +71,14 @@ void DMAController::signal(DMA::Timing timing)
     }
 }
 
-#define READ(label, reg)                     \
-    case label + 0: return reg.readByte(0);  \
-    case label + 1: return reg.readByte(1);  \
-    case label + 2: return reg.readByte(2);  \
-    case label + 3: return reg.readByte(3)
-
 u8 DMAController::readByte(u32 addr)
 {    
     switch (addr)
     {
-    READ(REG_DMA0SAD, dmas[0].sad);
-    READ(REG_DMA1SAD, dmas[1].sad);
-    READ(REG_DMA2SAD, dmas[2].sad);
-    READ(REG_DMA3SAD, dmas[3].sad);
-    READ(REG_DMA0DAD, dmas[0].dad);
-    READ(REG_DMA1DAD, dmas[1].dad);
-    READ(REG_DMA2DAD, dmas[2].dad);
-    READ(REG_DMA3DAD, dmas[3].dad);
-    READ(REG_DMA0CNT_L, dmas[0].control);
-    READ(REG_DMA1CNT_L, dmas[1].control);
-    READ(REG_DMA2CNT_L, dmas[2].control);
-    READ(REG_DMA3CNT_L, dmas[3].control);
+    READ2(REG_DMA0CNT_H, dmas[0].control);
+    READ2(REG_DMA1CNT_H, dmas[1].control);
+    READ2(REG_DMA2CNT_H, dmas[2].control);
+    READ2(REG_DMA3CNT_H, dmas[3].control);
 
     default:
         EGG_UNREACHABLE;
@@ -102,30 +87,26 @@ u8 DMAController::readByte(u32 addr)
     return 0;
 }
 
-#undef READ
-
-#define WRITE(label, reg)                           \
-    case label + 0: reg.writeByte(0, byte); break;  \
-    case label + 1: reg.writeByte(1, byte); break;  \
-    case label + 2: reg.writeByte(2, byte); break;  \
-    case label + 3: reg.writeByte(3, byte); break
-
 void DMAController::writeByte(u32 addr, u8 byte)
 {
     switch (addr)
     {
-    WRITE(REG_DMA0SAD, dmas[0].sad);
-    WRITE(REG_DMA1SAD, dmas[1].sad);
-    WRITE(REG_DMA2SAD, dmas[2].sad);
-    WRITE(REG_DMA3SAD, dmas[3].sad);
-    WRITE(REG_DMA0DAD, dmas[0].dad);
-    WRITE(REG_DMA1DAD, dmas[1].dad);
-    WRITE(REG_DMA2DAD, dmas[2].dad);
-    WRITE(REG_DMA3DAD, dmas[3].dad);
-    WRITE(REG_DMA0CNT_L, dmas[0].control);
-    WRITE(REG_DMA1CNT_L, dmas[1].control);
-    WRITE(REG_DMA2CNT_L, dmas[2].control);
-    WRITE(REG_DMA3CNT_L, dmas[3].control);
+    WRITE4(REG_DMA0SAD, dmas[0].sad);
+    WRITE4(REG_DMA1SAD, dmas[1].sad);
+    WRITE4(REG_DMA2SAD, dmas[2].sad);
+    WRITE4(REG_DMA3SAD, dmas[3].sad);
+    WRITE4(REG_DMA0DAD, dmas[0].dad);
+    WRITE4(REG_DMA1DAD, dmas[1].dad);
+    WRITE4(REG_DMA2DAD, dmas[2].dad);
+    WRITE4(REG_DMA3DAD, dmas[3].dad);
+    WRITE2(REG_DMA0CNT_L, dmas[0].count);
+    WRITE2(REG_DMA1CNT_L, dmas[1].count);
+    WRITE2(REG_DMA2CNT_L, dmas[2].count);
+    WRITE2(REG_DMA3CNT_L, dmas[3].count);
+    WRITE2(REG_DMA0CNT_H, dmas[0].control);
+    WRITE2(REG_DMA1CNT_H, dmas[1].control);
+    WRITE2(REG_DMA2CNT_H, dmas[2].control);
+    WRITE2(REG_DMA3CNT_H, dmas[3].control);
 
     default:
         EGG_UNREACHABLE;
@@ -142,5 +123,3 @@ void DMAController::writeByte(u32 addr, u8 byte)
         break;
     }
 }
-
-#undef WRITE

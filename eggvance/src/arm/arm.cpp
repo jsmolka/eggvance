@@ -31,7 +31,7 @@ void ARM::reset()
     io.irq_enabled.reset();
     io.irq_request.reset();
     io.waitcnt.reset();
-    io.halt = false;
+    io.haltcnt.reset();
 
     for (auto& timer : timers)
         timer.reset();
@@ -63,7 +63,7 @@ void ARM::run(int cycles_)
         }
         else
         {
-            if (io.halt)
+            if (io.haltcnt)
             {
                 // Todo: temporary
                 while (cycles--)
@@ -93,7 +93,7 @@ void ARM::run(int cycles_)
 void ARM::request(Interrupt flag)
 {
     if (io.irq_enabled & static_cast<int>(flag))
-        io.halt = false;
+        io.haltcnt = false;
 
     io.irq_request |= static_cast<int>(flag);
 }

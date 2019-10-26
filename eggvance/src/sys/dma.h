@@ -2,6 +2,7 @@
 
 #include "regs/dmaaddress.h"
 #include "regs/dmacontrol.h"
+#include "regs/dmacount.h"
 
 class DMA
 {
@@ -26,12 +27,13 @@ public:
     void run(int& cycles);
 
     int id;
-    int count;
+    int remaining;
     int sad_delta;
     int dad_delta;
     u32 sad_addr;
     u32 dad_addr;
 
+    DMACount count;
     DMAAddress sad;
     DMAAddress dad;
     DMAControl control;

@@ -2,7 +2,7 @@
 
 #include "register.h"
 
-class TimerControl : public Register<2>
+class TimerData : public Register<2>
 {
 public:
     void reset();
@@ -10,8 +10,6 @@ public:
     u8 readByte(int index);
     void writeByte(int index, u8 byte);
 
-    int prescaler;
-    int cascade;
-    int irq;
-    int enabled;
+    u16 data;
+    u16 initial;
 };

@@ -2,7 +2,7 @@
 
 #include "register.h"
 
-class WaitControl : public Register<4>
+class WaitControl : public Register<2>
 {
 public:
     void reset();

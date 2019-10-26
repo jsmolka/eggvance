@@ -30,8 +30,18 @@ IO::IO()
 {
     std::memset(masks, 0xFF, sizeof(masks));
 
+    masks[REG_DISPCNT     + 0] = 0xEF;
+    masks[REG_DISPSTAT    + 0] = 0x1C;
     masks[REG_BG0CNT      + 1] = 0xDF;
     masks[REG_BG1CNT      + 1] = 0xDF;
+    masks[REG_BG0HOFS     + 1] = 0x01;
+    masks[REG_BG0VOFS     + 1] = 0x01;
+    masks[REG_BG1HOFS     + 1] = 0x01;
+    masks[REG_BG1VOFS     + 1] = 0x01;
+    masks[REG_BG2HOFS     + 1] = 0x01;
+    masks[REG_BG2VOFS     + 1] = 0x01;
+    masks[REG_BG3HOFS     + 1] = 0x01;
+    masks[REG_BG3VOFS     + 1] = 0x01;
     masks[REG_WININ       + 0] = 0x3F;
     masks[REG_WININ       + 1] = 0x3F;
     masks[REG_WINOUT      + 0] = 0x3F;
@@ -39,6 +49,31 @@ IO::IO()
     masks[REG_BLDCNT      + 1] = 0x3F;
     masks[REG_BLDALPHA    + 0] = 0x1F;
     masks[REG_BLDALPHA    + 1] = 0x1F;
+    masks[REG_BLDY        + 0] = 0x1F;
+    masks[REG_BLDY        + 1] = 0x00;
+    masks[REG_DMA0SAD     + 3] = 0x07;
+    masks[REG_DMA1SAD     + 3] = 0x0F;
+    masks[REG_DMA2SAD     + 3] = 0x0F;
+    masks[REG_DMA3SAD     + 3] = 0x0F;
+    masks[REG_DMA0DAD     + 3] = 0x07;
+    masks[REG_DMA1DAD     + 3] = 0x07;
+    masks[REG_DMA2DAD     + 3] = 0x07;
+    masks[REG_DMA3DAD     + 3] = 0x0F;
+    masks[REG_DMA0CNT_L   + 1] = 0x3F;
+    masks[REG_DMA0CNT_H   + 0] = 0xE0;
+    masks[REG_DMA0CNT_H   + 1] = 0xF7;
+    masks[REG_DMA1CNT_L   + 1] = 0x3F;
+    masks[REG_DMA1CNT_H   + 0] = 0xE0;
+    masks[REG_DMA1CNT_H   + 1] = 0xF7;
+    masks[REG_DMA2CNT_L   + 1] = 0x3F;
+    masks[REG_DMA2CNT_H   + 0] = 0xE0;
+    masks[REG_DMA2CNT_H   + 1] = 0xF7;
+    masks[REG_DMA3CNT_L   + 1] = 0x3F;
+    masks[REG_DMA3CNT_H   + 0] = 0xE0;
+    masks[REG_TM0CNT_H    + 1] = 0x00;
+    masks[REG_TM1CNT_H    + 1] = 0x00;
+    masks[REG_TM2CNT_H    + 1] = 0x00;
+    masks[REG_TM3CNT_H    + 1] = 0x00;
     masks[REG_SOUND1CNT_L + 0] = 0x7F;
     masks[REG_SOUND1CNT_L + 1] = 0x00;
     masks[REG_SOUND1CNT_H + 0] = 0xC0;
@@ -60,13 +95,12 @@ IO::IO()
     masks[REG_SOUNDCNT_H  + 1] = 0x77;
     masks[REG_SOUNDCNT_X  + 0] = 0x80;
     masks[REG_SOUNDCNT_X  + 1] = 0x00;
-    masks[REG_DMA0CNT_H   + 0] = 0xE0;
-    masks[REG_DMA0CNT_H   + 1] = 0xF7;
-    masks[REG_DMA1CNT_H   + 0] = 0xE0;
-    masks[REG_DMA1CNT_H   + 1] = 0xF7;
-    masks[REG_DMA2CNT_H   + 0] = 0xE0;
-    masks[REG_DMA2CNT_H   + 1] = 0xF7;
-    masks[REG_DMA3CNT_H   + 0] = 0xE0;
+    masks[REG_KEYCNT      + 1] = 0xC3; 
+    masks[REG_IE          + 1] = 0x3F;
+    masks[REG_IF          + 1] = 0x3F;
+    masks[REG_WAITCNT     + 1] = 0x5F;
+    masks[REG_IME         + 0] = 0x01;
+    masks[REG_IME         + 1] = 0x00;
 }
 
 void IO::reset()
@@ -242,16 +276,13 @@ void IO::writeByte(u32 addr, u8 byte)
     WRITE2(REG_IME,      arm.io.irq_master);
     WRITE2(REG_IE,       arm.io.irq_enabled);
     WRITE2(REG_IF,       arm.io.irq_request);
+    WRITE1(REG_HALTCNT,  arm.io.haltcnt);
     WRITE2(REG_WAITCNT,  arm.io.waitcnt);
     WRITE4(REG_TM0CNT_L, arm.timers[0]);
     WRITE4(REG_TM1CNT_L, arm.timers[1]);
     WRITE4(REG_TM2CNT_L, arm.timers[2]);
     WRITE4(REG_TM3CNT_L, arm.timers[3]);
     WRITE2(REG_KEYCNT,   keypad.io.keycnt);
-
-    case REG_HALTCNT:
-        arm.io.halt = true;
-        break;
 
     WRITE2_UNIMP(REG_GREENSWAP);
     WRITE2_UNIMP(REG_SOUND1CNT_L);

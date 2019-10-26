@@ -7,8 +7,8 @@ class Window : Register<1>
 public:
     void reset();
 
-    u8 readByte(int index);
-    void writeByte(int index, u8 byte);
+    u8 readByte();
+    void writeByte(u8 byte);
 
     int flags;
     int sfx;

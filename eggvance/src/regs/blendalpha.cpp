@@ -13,7 +13,8 @@ void BlendAlpha::reset()
 u8 BlendAlpha::readByte(int index)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
-    return bytes[index];
+
+    return data[index];
 }
 
 void BlendAlpha::writeByte(int index, u8 byte)
@@ -25,5 +26,5 @@ void BlendAlpha::writeByte(int index, u8 byte)
     else
         evb = std::min(16, bits<0, 5>(byte));
 
-    bytes[index] = byte;
+    data[index] = byte;
 }

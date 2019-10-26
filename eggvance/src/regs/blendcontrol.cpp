@@ -11,7 +11,8 @@ void BlendControl::reset()
 u8 BlendControl::readByte(int index)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
-    return bytes[index];
+
+    return data[index];
 }
 
 void BlendControl::writeByte(int index, u8 byte)
@@ -27,5 +28,5 @@ void BlendControl::writeByte(int index, u8 byte)
     {
         lower = bits<0, 6>(byte);
     }
-    bytes[index] = byte;
+    data[index] = byte;
 }

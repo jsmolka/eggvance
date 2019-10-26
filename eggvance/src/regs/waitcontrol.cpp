@@ -19,13 +19,14 @@ void WaitControl::reset()
 
 u8 WaitControl::readByte(int index)
 {
-    EGG_ASSERT(index <= 3, "Invalid index");
+    EGG_ASSERT(index <= 1, "Invalid index");
+
     return bytes[index];
 }
 
 void WaitControl::writeByte(int index, u8 byte)
 {
-    EGG_ASSERT(index <= 3, "Invalid index");
+    EGG_ASSERT(index <= 1, "Invalid index");
 
     if (index == 0)
     {
@@ -34,18 +35,16 @@ void WaitControl::writeByte(int index, u8 byte)
         ws0_s = bits<4, 1>(byte);
         ws1_n = bits<5, 2>(byte);
         ws1_s = bits<7, 1>(byte);
-
-        updateCycles();
     }
-    else if (index == 1)
+    else
     {
         ws2_n    = bits<0, 2>(byte);
         ws2_s    = bits<2, 1>(byte);
         prefetch = bits<6, 1>(byte);
-
-        updateCycles();
     }
     bytes[index] = byte;
+
+    updateCycles();
 }
 
 int WaitControl::cyclesHalf(u32 addr, int sequential) const

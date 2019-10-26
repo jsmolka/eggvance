@@ -19,7 +19,8 @@ void BGControl::reset()
 u8 BGControl::readByte(int index)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
-    return bytes[index];
+
+    return data[index];
 }
 
 void BGControl::writeByte(int index, u8 byte)
@@ -39,7 +40,7 @@ void BGControl::writeByte(int index, u8 byte)
         wraparound  = bits<5, 1>(byte);
         screen_size = bits<6, 2>(byte);
     }
-    bytes[index] = byte;
+    data[index] = byte;
 }
 
 int BGControl::size() const

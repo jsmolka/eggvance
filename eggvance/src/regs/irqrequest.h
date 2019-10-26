@@ -13,5 +13,5 @@ public:
     u8 readByte(int index);
     void writeByte(int index, u8 byte);
 
-    int value;
+    int request;
 };
