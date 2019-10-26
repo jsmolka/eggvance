@@ -5,6 +5,8 @@
 class IO
 {
 public:
+    IO();
+
     void reset();
 
     u8  readByte(u32 addr);
@@ -17,4 +19,7 @@ public:
 
 private:
     RAM<0x400> data;
+
+    u8 masks[1024];
+    u8 memcontrol[4];
 };

@@ -20,6 +20,8 @@ public:
     void writeHalf(u32 addr, u16 half);
     void writeWord(u32 addr, u32 word);
 
+    u32 readUnused(u32 addr);
+
     BIOS bios;
     GamePak gamepak;
     Palette palette;
@@ -28,8 +30,6 @@ public:
     IO io;
 
 private:
-    u32 readUnused(u32 addr);
-
     RAM<0x40000> ewram;
     RAM<0x08000> iwram;
 };

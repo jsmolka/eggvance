@@ -35,10 +35,7 @@ u8 MMU::readByte(u32 addr)
         return iwram.readByte(addr);
 
     case REGION_IO:
-        if (addr < 0x400'0400)
-            return io.readByte(addr);
-        else
-            return 0;
+        return io.readByte(addr);
 
     case REGION_PALETTE:
         return palette.readByte(addr);
@@ -109,10 +106,7 @@ u16 MMU::readHalf(u32 addr)
         return iwram.readHalf(addr);
 
     case REGION_IO:
-        if (addr < 0x400'0400)
-            return io.readHalf(addr);
-        else
-            return 0;
+        return io.readHalf(addr);
 
     case REGION_PALETTE:
         return palette.readHalf(addr);
@@ -170,10 +164,7 @@ u32 MMU::readWord(u32 addr)
         return iwram.readWord(addr);
 
     case REGION_IO:
-        if (addr < 0x400'0400)
-            return io.readWord(addr);
-        else
-            return 0;
+        return io.readWord(addr);
 
     case REGION_PALETTE:
         return palette.readWord(addr);
@@ -230,8 +221,7 @@ void MMU::writeByte(u32 addr, u8 byte)
         break;
 
     case REGION_IO:
-        if (addr < 0x400'0400)
-            io.writeByte(addr, byte);
+        io.writeByte(addr, byte);
         break;
 
     case REGION_PALETTE:
@@ -295,8 +285,7 @@ void MMU::writeHalf(u32 addr, u16 half)
         break;
 
     case REGION_IO:
-        if (addr < 0x400'0400)
-            io.writeHalf(addr, half);
+        io.writeHalf(addr, half);
         break;
 
     case REGION_PALETTE:
@@ -347,8 +336,7 @@ void MMU::writeWord(u32 addr, u32 word)
         break;
 
     case REGION_IO:
-        if (addr < 0x400'0400)
-            io.writeWord(addr, word);
+        io.writeWord(addr, word);
         break;
 
     case REGION_PALETTE:
@@ -385,6 +373,7 @@ void MMU::writeWord(u32 addr, u32 word)
 
 u32 MMU::readUnused(u32 addr)
 {
+    u32 value = 0;
     if (arm.cpsr.thumb)
     {
         u32 lsw = arm.pipe[1];
@@ -404,10 +393,11 @@ u32 MMU::readUnused(u32 addr)
                 msw = arm.pipe[0];
             break;
         }
-        return (msw << 16) | lsw;
+        value = (msw << 16) | lsw;
     }
     else
     {
-        return arm.pipe[1];
+        value = arm.pipe[1];
     }
+    return value >> ((addr & 0x3) << 3);
 }

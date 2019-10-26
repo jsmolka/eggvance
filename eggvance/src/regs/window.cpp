@@ -18,6 +18,7 @@ u8 Window::readByte(int index)
 void Window::writeByte(int index, u8 byte)
 {
     EGG_ASSERT(index == 0, "Invalid index");
+    bytes[0] = byte;
     flags = bits<0, 5>(byte) | LF_BDP;
     sfx   = bits<5, 1>(byte);
 }
