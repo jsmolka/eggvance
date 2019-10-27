@@ -9,7 +9,7 @@
 #include "regs/waitcontrol.h"
 #include "ppu/ppu.h"
 #include "sys/dmacontroller.h"
-#include "sys/timer.h"
+#include "sys/timercontroller.h"
 #include "registers.h"
 
 enum class Interrupt
@@ -36,14 +36,12 @@ class ARM : public Registers
     friend class PPU;
 
 public:
-    ARM();
-
     void reset();
 
     void run(int cycles);
     void request(Interrupt flag);
 
-    Timer timers[4];
+    TimerController timer;
     DMAController dma;
 
     struct IO

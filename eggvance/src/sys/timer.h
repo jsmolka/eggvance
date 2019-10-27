@@ -6,27 +6,34 @@
 class Timer
 {
 public:
+    Timer(int id);
+
     void reset();
 
-    void run(int cycles);
+    void run(u64 accumulated);
+    
+    void start();
+    void update();
 
-    u8 read(int index);
-    void write(int index, u8 byte);
+    bool canChange() const;
+    bool canCauseInterrupt() const;
+
+    u64 interruptsAfter() const;
 
     int id;
+    Timer* prev;
     Timer* next;
 
     TimerData data;
     TimerControl control;
 
-
 private:
-    void runInternal(int cycles);
-    void updateData();
-    void calculate();
+    bool inActiveCascadeChain() const;
 
-    constexpr static int prescalers[4] = { 1, 64, 256, 1024 };
+    u64 cyclesRemaining() const;
 
-    int counter;
-    int overflow;
+    u64 cycles;
+    u64 cycles_max;
+    u64 cycles_inital;
+    u64 cycles_overflow;
 };

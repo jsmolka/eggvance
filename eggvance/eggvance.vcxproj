@@ -202,6 +202,7 @@
     <ClCompile Include="src\ppu\render.cpp" />
     <ClCompile Include="src\mmu\vram.cpp" />
     <ClCompile Include="src\sys\timer.cpp" />
+    <ClCompile Include="src\sys\timercontroller.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\args.h" />
@@ -271,6 +272,7 @@
     <ClInclude Include="src\ppu\ppu.h" />
     <ClInclude Include="src\mmu\vram.h" />
     <ClInclude Include="src\sys\timer.h" />
+    <ClInclude Include="src\sys\timercontroller.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="eggvance.rc" />

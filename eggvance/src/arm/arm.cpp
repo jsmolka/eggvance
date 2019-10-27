@@ -11,18 +11,6 @@
 
 ARM arm;
 
-ARM::ARM()
-{
-    timers[0].id = 0;
-    timers[1].id = 1;
-    timers[2].id = 2;
-    timers[3].id = 3;
-
-    timers[0].next = &timers[1];
-    timers[1].next = &timers[2];
-    timers[2].next = &timers[3];
-}
-
 void ARM::reset()
 {
     Registers::reset();
@@ -33,10 +21,8 @@ void ARM::reset()
     io.waitcnt.reset();
     io.haltcnt.reset();
 
-    for (auto& timer : timers)
-        timer.reset();
-
     dma.reset();
+    timer.reset();
 
     cycles = 0;
 
@@ -50,41 +36,23 @@ void ARM::run(int cycles_)
 
     while (cycles > 0)
     {
+        int last = cycles;
+
         if (dma.active)
         {
-            // Todo: temporary
-            int p = cycles;
             dma.run(cycles);
-            for (int i = 0; i < (p - cycles); ++i)
-            {
-                for (auto& timer : timers)
-                    timer.run(1);
-            }
+            timer.run(last - cycles);
         }
         else
         {
             if (io.haltcnt)
             {
-                // Todo: temporary
-                while (cycles--)
-                {
-                    for (auto& timer : timers)
-                        timer.run(1);
-                    if (io.irq_enabled & io.irq_request)
-                        break;
-                }
-                if (!(io.irq_enabled & io.irq_request))
-                    break;
+                timer.runUntil(cycles);
             }
             else
             {
-                int p = cycles;
                 execute();
-                for (int i = 0; i < (p - cycles); ++i)
-                {
-                    for (auto& timer : timers)
-                        timer.run(1);
-                }
+                timer.run(last - cycles);
             }
         }
     }

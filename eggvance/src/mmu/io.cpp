@@ -150,10 +150,6 @@ u8 IO::readByte(u32 addr)
     READ2(REG_IF,       arm.io.irq_request);
     READ2(REG_IME,      arm.io.irq_master);
     READ2(REG_WAITCNT,  arm.io.waitcnt);
-    READ4(REG_TM0CNT_L, arm.timers[0]);
-    READ4(REG_TM1CNT_L, arm.timers[1]);
-    READ4(REG_TM2CNT_L, arm.timers[2]);
-    READ4(REG_TM3CNT_L, arm.timers[3]);
     READ2(REG_KEYINPUT, keypad.io.keyinput);
     READ2(REG_KEYCNT,   keypad.io.keycnt);
 
@@ -199,6 +195,20 @@ u8 IO::readByte(u32 addr)
     CASE2(REG_DMA3CNT_H)
         return arm.dma.readByte(addr);
 
+    CASE2(REG_TM0CNT_L)
+    CASE1(REG_TM0CNT_H)
+    CASE2(REG_TM1CNT_L)
+    CASE1(REG_TM1CNT_H)
+    CASE2(REG_TM2CNT_L)
+    CASE1(REG_TM2CNT_H)
+    CASE2(REG_TM3CNT_L)
+    CASE1(REG_TM3CNT_H)
+        return arm.timer.readByte(addr);
+
+    CASE1(REG_TM0CNT_H + 1)
+    CASE1(REG_TM1CNT_H + 1)
+    CASE1(REG_TM2CNT_H + 1)
+    CASE1(REG_TM3CNT_H + 1)
     CASE2(REG_DMA0CNT_L)
     CASE2(REG_DMA1CNT_L)
     CASE2(REG_DMA2CNT_L)
@@ -285,10 +295,6 @@ void IO::writeByte(u32 addr, u8 byte)
     WRITE2(REG_IME,      arm.io.irq_master);
     WRITE1(REG_HALTCNT,  arm.io.haltcnt);
     WRITE2(REG_WAITCNT,  arm.io.waitcnt);
-    WRITE4(REG_TM0CNT_L, arm.timers[0]);
-    WRITE4(REG_TM1CNT_L, arm.timers[1]);
-    WRITE4(REG_TM2CNT_L, arm.timers[2]);
-    WRITE4(REG_TM3CNT_L, arm.timers[3]);
     WRITE2(REG_KEYCNT,   keypad.io.keycnt);
 
     WRITE2_UNIMP(REG_GREENSWAP);
@@ -346,6 +352,17 @@ void IO::writeByte(u32 addr, u8 byte)
     CASE2(REG_DMA3CNT_L)
     CASE2(REG_DMA3CNT_H)
         arm.dma.writeByte(addr, byte);
+        break;
+
+    CASE2(REG_TM0CNT_L)
+    CASE1(REG_TM0CNT_H)
+    CASE2(REG_TM1CNT_L)
+    CASE1(REG_TM1CNT_H)
+    CASE2(REG_TM2CNT_L)
+    CASE1(REG_TM2CNT_H)
+    CASE2(REG_TM3CNT_L)
+    CASE1(REG_TM3CNT_H)
+        arm.timer.writeByte(addr, byte);
         break;
     }
 }

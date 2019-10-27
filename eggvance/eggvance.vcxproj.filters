@@ -204,6 +204,9 @@
     <ClCompile Include="src\regs\haltcontrol.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\sys\timercontroller.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="icon\icon.h">
@@ -405,6 +408,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\regs\haltcontrol.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sys\timercontroller.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
