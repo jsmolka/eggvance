@@ -2,15 +2,7 @@
 
 #include "common/macros.h"
 #include "mmu/memmap.h"
-
-#define CASE2(label) case label + 0: case label + 1:
-#define CASE4(label) case label + 0: case label + 1: case label + 2: case label + 3:
-
-#define READ2(label, reg) CASE2(label) return reg.read(addr - label)
-#define READ4(label, reg) CASE4(label) return reg.read(addr - label)
-
-#define WRITE2(label, reg) CASE2(label) reg.write(addr - label, byte); break
-#define WRITE4(label, reg) CASE4(label) reg.write(addr - label, byte); break
+#include "regs/macros.h"
 
 void DMAController::reset()
 {
@@ -71,6 +63,13 @@ u8 DMAController::readByte(u32 addr)
     }
 }
 
+#define WRITE_DMA_CONTROL(label, control)    \
+    CASE2(label):                            \
+        control.write(addr - label, byte);   \
+        if (control.reload)                  \
+            signal(DMA::Timing::Immediate);  \
+        break
+
 void DMAController::writeByte(u32 addr, u8 byte)
 {
     switch (addr)
@@ -87,19 +86,14 @@ void DMAController::writeByte(u32 addr, u8 byte)
     WRITE2(REG_DMA1CNT_L, dmas[1].count);
     WRITE2(REG_DMA2CNT_L, dmas[2].count);
     WRITE2(REG_DMA3CNT_L, dmas[3].count);
-    WRITE2(REG_DMA0CNT_H, dmas[0].control);
-    WRITE2(REG_DMA1CNT_H, dmas[1].control);
-    WRITE2(REG_DMA2CNT_H, dmas[2].control);
-    WRITE2(REG_DMA3CNT_H, dmas[3].control);
+
+    WRITE_DMA_CONTROL(REG_DMA0CNT_H, dmas[0].control);
+    WRITE_DMA_CONTROL(REG_DMA1CNT_H, dmas[1].control);
+    WRITE_DMA_CONTROL(REG_DMA2CNT_H, dmas[2].control);
+    WRITE_DMA_CONTROL(REG_DMA3CNT_H, dmas[3].control);
 
     default:
         EGG_UNREACHABLE;
         break;
     }
-
-    if (dmas[0].control.reload 
-            || dmas[1].control.reload 
-            || dmas[2].control.reload 
-            || dmas[3].control.reload)
-        signal(DMA::Timing::Immediate);
 }

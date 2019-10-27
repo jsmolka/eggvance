@@ -20,6 +20,7 @@ public:
 private:
     void runTimers();
     void schedule();
+    void reschedule();
 
     int overflow;
     int counter;

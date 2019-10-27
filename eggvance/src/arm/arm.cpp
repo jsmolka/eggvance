@@ -2,9 +2,7 @@
 
 #include <fmt/printf.h>
 
-#include "common/integer.h"
 #include "common/macros.h"
-#include "common/utility.h"
 #include "mmu/mmu.h"
 #include "decode.h"
 #include "diasm.h"
@@ -60,10 +58,12 @@ void ARM::run(int cycles_)
 
 void ARM::request(Interrupt flag)
 {
-    if (io.irq_enabled & static_cast<int>(flag))
+    int mask = static_cast<int>(flag);
+
+    if (io.irq_enabled & mask)
         io.haltcnt = false;
 
-    io.irq_request |= static_cast<int>(flag);
+    io.irq_request |= mask;
 }
 
 void ARM::execute()

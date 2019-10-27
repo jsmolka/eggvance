@@ -11,7 +11,7 @@ u8 TimerData::read(int index)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 
-    return bcast(data)[index];
+    return bcast(counter)[index];
 }
 
 void TimerData::write(int index, u8 byte)

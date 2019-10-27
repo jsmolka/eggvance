@@ -17,13 +17,6 @@ void Timer::reset()
     overflow = 0;
 }
 
-void Timer::init()
-{
-    counter = 0;
-
-    updateReload();
-}
-
 void Timer::run(int cycles)
 {
     counter += cycles;
@@ -31,9 +24,7 @@ void Timer::run(int cycles)
     if (counter >= overflow)
     {
         if (next && next->control.cascade)
-        {
             next->run(counter / overflow);
-        }
 
         if (control.irq)
         {
@@ -45,20 +36,28 @@ void Timer::run(int cycles)
             };
             arm.request(flags[id]);
         }
-        counter %= overflow;
 
-        updateReload();
+        counter %= overflow;
+        reload   = data.reload;
+        overflow = control.prescaler * (0x10000 - reload);
     }
-    data.data = counter / control.prescaler + reload;
+    data.counter = counter / control.prescaler + reload;
+}
+
+void Timer::start()
+{
+    counter  = 0;
+    reload   = data.reload;
+    overflow = control.prescaler * (0x10000 - reload);
+}
+
+void Timer::update()
+{
+    counter  = control.prescaler * (data.counter - reload);
+    overflow = control.prescaler * (0x10000 - reload);
 }
 
 int Timer::nextOverflow() const
 {
     return overflow - counter;
-}
-
-void Timer::updateReload()
-{
-    reload   = data.reload;
-    overflow = control.prescaler * (0x10000 - reload);
 }

@@ -7,8 +7,6 @@
 class DMA
 {
 public:
-    DMA(int id);
-
     enum class Timing
     {
         Immediate = 0,
@@ -17,9 +15,11 @@ public:
         Special   = 3
     };
 
-    void reset();
-    void start();
+    DMA(int id);
 
+    void reset();
+
+    void start();
     void run(int& cycles);
 
     int id;
@@ -45,8 +45,6 @@ private:
     void readEEPROM();
     void writeEEPROM();
 
-    TransferFunc transfer;
-
     int remaining;
     u32 sad_addr;
     u32 dad_addr;
@@ -54,4 +52,6 @@ private:
     int dad_delta;
     int cycles_s;
     int cycles_n;
+
+    TransferFunc transfer;
 };

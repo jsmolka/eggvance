@@ -2,29 +2,10 @@
 
 #include "arm/arm.h"
 #include "ppu/ppu.h"
+#include "regs/macros.h"
 #include "sys/keypad.h"
 #include "memmap.h"
 #include "mmu.h"
-
-#define CASE1(label) case label + 0:
-#define CASE2(label) case label + 0: case label + 1:
-#define CASE4(label) case label + 0: case label + 1: case label + 2: case label + 3:
-
-#define READ1(label, reg) CASE1(label) return reg.read(addr - label)
-#define READ2(label, reg) CASE2(label) return reg.read(addr - label)
-#define READ4(label, reg) CASE4(label) return reg.read(addr - label)
-
-#define READ1_UNIMP(label) CASE1(label) return data.readByte(addr)
-#define READ2_UNIMP(label) CASE2(label) return data.readByte(addr)
-#define READ4_UNIMP(label) CASE4(label) return data.readByte(addr)
-
-#define WRITE1(label, reg) CASE1(label) reg.write(addr - label, byte); break
-#define WRITE2(label, reg) CASE2(label) reg.write(addr - label, byte); break
-#define WRITE4(label, reg) CASE4(label) reg.write(addr - label, byte); break
-
-#define WRITE1_UNIMP(label) CASE1(label) data.writeByte(addr, byte); break
-#define WRITE2_UNIMP(label) CASE2(label) data.writeByte(addr, byte); break
-#define WRITE4_UNIMP(label) CASE4(label) data.writeByte(addr, byte); break
 
 IO::IO()
 {
@@ -189,41 +170,41 @@ u8 IO::readByte(u32 addr)
     READ2_UNIMP(REG_JOYSTAT);
     READ1_UNIMP(REG_POSTFLG);
 
-    CASE2(REG_DMA0CNT_H)
-    CASE2(REG_DMA1CNT_H)
-    CASE2(REG_DMA2CNT_H)
-    CASE2(REG_DMA3CNT_H)
+    CASE2(REG_DMA0CNT_H):
+    CASE2(REG_DMA1CNT_H):
+    CASE2(REG_DMA2CNT_H):
+    CASE2(REG_DMA3CNT_H):
         return arm.dma.readByte(addr);
 
-    CASE2(REG_TM0CNT_L)
-    CASE1(REG_TM0CNT_H)
-    CASE2(REG_TM1CNT_L)
-    CASE1(REG_TM1CNT_H)
-    CASE2(REG_TM2CNT_L)
-    CASE1(REG_TM2CNT_H)
-    CASE2(REG_TM3CNT_L)
-    CASE1(REG_TM3CNT_H)
+    CASE2(REG_TM0CNT_L):
+    CASE1(REG_TM0CNT_H):
+    CASE2(REG_TM1CNT_L):
+    CASE1(REG_TM1CNT_H):
+    CASE2(REG_TM2CNT_L):
+    CASE1(REG_TM2CNT_H):
+    CASE2(REG_TM3CNT_L):
+    CASE1(REG_TM3CNT_H):
         return arm.timer.readByte(addr);
 
-    CASE1(REG_TM0CNT_H + 1)
-    CASE1(REG_TM1CNT_H + 1)
-    CASE1(REG_TM2CNT_H + 1)
-    CASE1(REG_TM3CNT_H + 1)
-    CASE2(REG_DMA0CNT_L)
-    CASE2(REG_DMA1CNT_L)
-    CASE2(REG_DMA2CNT_L)
-    CASE2(REG_DMA3CNT_L)
-    CASE2(0x066)
-    CASE2(0x06E)
-    CASE2(0x076)
-    CASE2(0x07A)
-    CASE2(0x07E)
-    CASE2(0x086)
-    CASE2(0x08A)
-    CASE2(0x136)
-    CASE2(0x142)
-    CASE2(0x15A)
-    CASE2(0x206)
+    CASE1(REG_TM0CNT_H + 1):
+    CASE1(REG_TM1CNT_H + 1):
+    CASE1(REG_TM2CNT_H + 1):
+    CASE1(REG_TM3CNT_H + 1):
+    CASE2(REG_DMA0CNT_L):
+    CASE2(REG_DMA1CNT_L):
+    CASE2(REG_DMA2CNT_L):
+    CASE2(REG_DMA3CNT_L):
+    CASE2(0x066):
+    CASE2(0x06E):
+    CASE2(0x076):
+    CASE2(0x07A):
+    CASE2(0x07E):
+    CASE2(0x086):
+    CASE2(0x08A):
+    CASE2(0x136):
+    CASE2(0x142):
+    CASE2(0x15A):
+    CASE2(0x206):
         return 0;
     }
     return mmu.readUnused(unused);
@@ -335,33 +316,33 @@ void IO::writeByte(u32 addr, u8 byte)
     WRITE2_UNIMP(REG_JOYSTAT);
     WRITE1_UNIMP(REG_POSTFLG);
 
-    CASE4(REG_DMA0SAD)
-    CASE4(REG_DMA0DAD)
-    CASE4(REG_DMA1SAD)
-    CASE4(REG_DMA1DAD)
-    CASE4(REG_DMA2SAD)
-    CASE4(REG_DMA2DAD)
-    CASE4(REG_DMA3SAD)
-    CASE4(REG_DMA3DAD)
-    CASE2(REG_DMA0CNT_L)
-    CASE2(REG_DMA0CNT_H)
-    CASE2(REG_DMA1CNT_L)
-    CASE2(REG_DMA1CNT_H)
-    CASE2(REG_DMA2CNT_L)
-    CASE2(REG_DMA2CNT_H)
-    CASE2(REG_DMA3CNT_L)
-    CASE2(REG_DMA3CNT_H)
+    CASE4(REG_DMA0SAD):
+    CASE4(REG_DMA0DAD):
+    CASE4(REG_DMA1SAD):
+    CASE4(REG_DMA1DAD):
+    CASE4(REG_DMA2SAD):
+    CASE4(REG_DMA2DAD):
+    CASE4(REG_DMA3SAD):
+    CASE4(REG_DMA3DAD):
+    CASE2(REG_DMA0CNT_L):
+    CASE2(REG_DMA0CNT_H):
+    CASE2(REG_DMA1CNT_L):
+    CASE2(REG_DMA1CNT_H):
+    CASE2(REG_DMA2CNT_L):
+    CASE2(REG_DMA2CNT_H):
+    CASE2(REG_DMA3CNT_L):
+    CASE2(REG_DMA3CNT_H):
         arm.dma.writeByte(addr, byte);
         break;
 
-    CASE2(REG_TM0CNT_L)
-    CASE1(REG_TM0CNT_H)
-    CASE2(REG_TM1CNT_L)
-    CASE1(REG_TM1CNT_H)
-    CASE2(REG_TM2CNT_L)
-    CASE1(REG_TM2CNT_H)
-    CASE2(REG_TM3CNT_L)
-    CASE1(REG_TM3CNT_H)
+    CASE2(REG_TM0CNT_L):
+    CASE1(REG_TM0CNT_H):
+    CASE2(REG_TM1CNT_L):
+    CASE1(REG_TM1CNT_H):
+    CASE2(REG_TM2CNT_L):
+    CASE1(REG_TM2CNT_H):
+    CASE2(REG_TM3CNT_L):
+    CASE1(REG_TM3CNT_H):
         arm.timer.writeByte(addr, byte);
         break;
     }

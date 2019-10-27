@@ -9,20 +9,19 @@ public:
     Timer(int id);
 
     void reset();
-    void init();
+
     void run(int cycles);
+    void start();
+    void update();
 
     int nextOverflow() const;
 
     int id;
     Timer* next;
-
     TimerData data;
     TimerControl control;
 
 private:
-    void updateReload();
-
     int reload;
     int counter;
     int overflow;

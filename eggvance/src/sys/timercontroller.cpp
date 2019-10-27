@@ -1,20 +1,10 @@
 #include "timercontroller.h"
 
-// Todo: REMOVE???!?!?
 #include <algorithm>
-#include <fmt/printf.h>
 
 #include "common/macros.h"
 #include "mmu/memmap.h"
-
-#define CASE2(label) case label + 0: case label + 1:
-#define CASE4(label) case label + 0: case label + 1: case label + 2: case label + 3:
-
-#define READ2(label, reg) CASE2(label) return reg.read(addr - label)
-#define READ4(label, reg) CASE4(label) return reg.read(addr - label)
-
-#define WRITE2(label, reg) CASE2(label) reg.write(addr - label, byte); break
-#define WRITE4(label, reg) CASE4(label) reg.write(addr - label, byte); break
+#include "regs/macros.h"
 
 TimerController::TimerController()
 {
@@ -31,9 +21,8 @@ void TimerController::reset()
     {
         timer.reset();
     }
-
     counter  = 0;
-    overflow = 0x3FFF'FFFF;
+    overflow = 0x7FFF'FFFF;
 }
 
 void TimerController::run(int cycles)
@@ -43,51 +32,43 @@ void TimerController::run(int cycles)
     if (counter >= overflow)
     {
         runTimers();
-        schedule();
+        reschedule();
     }
 }
 
 void TimerController::runUntil(int& cycles)
 {
     int remaining = overflow - counter;
-
-    if (cycles <= remaining)
-    {
-        run(cycles);
-        cycles = 0;
-    }
-    else
+    if (remaining < cycles)
     {
         run(remaining);
         cycles -= remaining;
     }
+    else
+    {
+        run(cycles);
+        cycles = 0;
+    }
 }
+
+#define READ_TIMER_DATA(label, data)    \
+    CASE2(label):                       \
+        runTimers();                    \
+        return data.read(addr - label)  
 
 u8 TimerController::readByte(u32 addr)
 {
     switch (addr)
     {
-    CASE2(REG_TM0CNT_L)
-        runTimers();
-        return timers[0].data.read(addr - REG_TM0CNT_L);
+    READ_TIMER_DATA(REG_TM0CNT_L, timers[0].data);
+    READ_TIMER_DATA(REG_TM1CNT_L, timers[1].data);
+    READ_TIMER_DATA(REG_TM2CNT_L, timers[2].data);
+    READ_TIMER_DATA(REG_TM3CNT_L, timers[3].data);
 
-    CASE2(REG_TM1CNT_L)
-        runTimers();
-        return timers[1].data.read(addr - REG_TM1CNT_L);
-
-    CASE2(REG_TM2CNT_L)
-        runTimers();
-        return timers[2].data.read(addr - REG_TM2CNT_L);
-
-    CASE2(REG_TM3CNT_L)
-        runTimers();
-        return timers[3].data.read(addr - REG_TM3CNT_L);
-
-    // Todo: read 1
-    READ2(REG_TM0CNT_H, timers[0].control);
-    READ2(REG_TM1CNT_H, timers[1].control);
-    READ2(REG_TM2CNT_H, timers[2].control);
-    READ2(REG_TM3CNT_H, timers[3].control);
+    READ1(REG_TM0CNT_H, timers[0].control);
+    READ1(REG_TM1CNT_H, timers[1].control);
+    READ1(REG_TM2CNT_H, timers[2].control);
+    READ1(REG_TM3CNT_H, timers[3].control);
 
     default:
         EGG_UNREACHABLE;
@@ -95,12 +76,22 @@ u8 TimerController::readByte(u32 addr)
     }
 }
 
+#define WRITE_TIMER_CONTROL(label, timer)       \
+    case label:                                 \
+    {                                           \
+        runTimers();                            \
+        int enabled = timer.control.enabled;    \
+        timer.control.write(0, byte);           \
+        if (!enabled && timer.control.enabled)  \
+            timer.start();                      \
+        else if (enabled)                       \
+            timer.update();                     \
+        schedule();                             \
+        break;                                  \
+    }
+
 void TimerController::writeByte(u32 addr, u8 byte)
 {
-    runTimers();
-
-    int enabled;
-
     switch (addr)
     {
     WRITE2(REG_TM0CNT_L, timers[0].data);
@@ -108,35 +99,15 @@ void TimerController::writeByte(u32 addr, u8 byte)
     WRITE2(REG_TM2CNT_L, timers[2].data);
     WRITE2(REG_TM3CNT_L, timers[3].data);
 
-    case REG_TM0CNT_H:
-        enabled = timers[0].control.enabled;
-        timers[0].control.write(0, byte);
-        if (!enabled && timers[0].control.enabled)
-            timers[0].init();
-        break;
+    WRITE_TIMER_CONTROL(REG_TM0CNT_H, timers[0]);
+    WRITE_TIMER_CONTROL(REG_TM1CNT_H, timers[1]);
+    WRITE_TIMER_CONTROL(REG_TM2CNT_H, timers[2]);
+    WRITE_TIMER_CONTROL(REG_TM3CNT_H, timers[3]);
 
-    case REG_TM1CNT_H:
-        enabled = timers[1].control.enabled;
-        timers[1].control.write(0, byte);
-        if (!enabled && timers[1].control.enabled)
-            timers[1].init();
-        break;
-
-    case REG_TM2CNT_H:
-        enabled = timers[2].control.enabled;
-        timers[2].control.write(0, byte);
-        if (!enabled && timers[2].control.enabled)
-            timers[2].init();
-        break;
-
-    case REG_TM3CNT_H:
-        enabled = timers[3].control.enabled;
-        timers[3].control.write(0, byte);
-        if (!enabled && timers[3].control.enabled)
-            timers[3].init();
+    default:
+        EGG_UNREACHABLE;
         break;
     }
-    schedule();
 }
 
 void TimerController::runTimers()
@@ -153,7 +124,7 @@ void TimerController::schedule()
 {
     active.clear();
 
-    overflow = 0x3FFF'FFFF;
+    overflow = 0x7FFF'FFFF;
 
     for (auto& timer : timers)
     {
@@ -163,5 +134,15 @@ void TimerController::schedule()
 
             overflow = std::min(overflow, timer.nextOverflow());
         }
+    }
+}
+
+void TimerController::reschedule()
+{
+    overflow = 0x7FFF'FFFF;
+
+    for (auto& timer : active)
+    {
+        overflow = std::min(overflow, timer->nextOverflow());
     }
 }

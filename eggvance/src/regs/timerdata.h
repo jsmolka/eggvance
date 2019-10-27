@@ -10,6 +10,6 @@ public:
     u8 read(int index);
     void write(int index, u8 byte);
 
-    u16 data;
+    u16 counter;
     u16 reload;
 };

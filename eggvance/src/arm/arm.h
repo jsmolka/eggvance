@@ -7,7 +7,6 @@
 #include "regs/irqmaster.h"
 #include "regs/irqrequest.h"
 #include "regs/waitcontrol.h"
-#include "ppu/ppu.h"
 #include "sys/dmacontroller.h"
 #include "sys/timercontroller.h"
 #include "registers.h"

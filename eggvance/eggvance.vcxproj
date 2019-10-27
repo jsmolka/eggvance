@@ -231,6 +231,7 @@
     <ClInclude Include="src\regs\irqmaster.h" />
     <ClInclude Include="src\regs\irqrequest.h" />
     <ClInclude Include="src\regs\keycontrol.h" />
+    <ClInclude Include="src\regs\macros.h" />
     <ClInclude Include="src\regs\register.h" />
     <ClInclude Include="src\regs\timercontrol.h" />
     <ClInclude Include="src\regs\timerdata.h" />
