@@ -21,10 +21,6 @@ TimerController::TimerController()
     timers[0].next = &timers[1];
     timers[1].next = &timers[2];
     timers[2].next = &timers[3];
-
-    timers[1].prev = &timers[0];
-    timers[2].prev = &timers[1];
-    timers[3].prev = &timers[2];
 }
 
 void TimerController::reset()
@@ -36,36 +32,34 @@ void TimerController::reset()
         timer.reset();
     }
 
-    threshold   = 0xFFFFFFFF;
-    counter = 0;
+    counter  = 0;
+    overflow = 0x3FFF'FFFF;
 }
 
-void TimerController::run(u64 cycles)
+void TimerController::run(int cycles)
 {
     counter += cycles;
 
-    if (counter >= threshold)
+    if (counter >= overflow)
     {
-        update();
-
-        counter = 0;
-        last    = 0;
+        runTimers();
+        schedule();
     }
 }
 
 void TimerController::runUntil(int& cycles)
 {
-    u64 rem = threshold - counter;
+    int remaining = overflow - counter;
 
-    if (cycles <= rem)
+    if (cycles <= remaining)
     {
         run(cycles);
         cycles = 0;
     }
     else
     {
-        run(cycles - rem);
-        cycles -= rem;
+        run(remaining);
+        cycles -= remaining;
     }
 }
 
@@ -74,35 +68,19 @@ u8 TimerController::readByte(u32 addr)
     switch (addr)
     {
     CASE2(REG_TM0CNT_L)
-        if (timers[0].canChange())
-        {
-            update();
-            timers[0].update();
-        }
+        runTimers();
         return timers[0].data.read(addr - REG_TM0CNT_L);
 
     CASE2(REG_TM1CNT_L)
-        if (timers[1].canChange())
-        {
-            update();
-            timers[1].update();
-        }
+        runTimers();
         return timers[1].data.read(addr - REG_TM1CNT_L);
 
     CASE2(REG_TM2CNT_L)
-        if (timers[2].canChange())
-        {
-            update();
-            timers[2].update();
-        }
+        runTimers();
         return timers[2].data.read(addr - REG_TM2CNT_L);
 
     CASE2(REG_TM3CNT_L)
-        if (timers[3].canChange())
-        {
-            update();
-            timers[3].update();
-        }
+        runTimers();
         return timers[3].data.read(addr - REG_TM3CNT_L);
 
     // Todo: read 1
@@ -119,7 +97,9 @@ u8 TimerController::readByte(u32 addr)
 
 void TimerController::writeByte(u32 addr, u8 byte)
 {
-    update();
+    runTimers();
+
+    int enabled;
 
     switch (addr)
     {
@@ -129,70 +109,59 @@ void TimerController::writeByte(u32 addr, u8 byte)
     WRITE2(REG_TM3CNT_L, timers[3].data);
 
     case REG_TM0CNT_H:
-    {
-        int enabled = timers[0].control.enabled;
+        enabled = timers[0].control.enabled;
         timers[0].control.write(0, byte);
         if (!enabled && timers[0].control.enabled)
-            timers[0].start();
+            timers[0].init();
         break;
-    }
 
     case REG_TM1CNT_H:
-    {
-        int enabled = timers[1].control.enabled;
+        enabled = timers[1].control.enabled;
         timers[1].control.write(0, byte);
         if (!enabled && timers[1].control.enabled)
-            timers[1].start();
+            timers[1].init();
         break;
-    }
 
     case REG_TM2CNT_H:
-    {
-        int enabled = timers[2].control.enabled;
+        enabled = timers[2].control.enabled;
         timers[2].control.write(0, byte);
         if (!enabled && timers[2].control.enabled)
-            timers[2].start();
+            timers[2].init();
         break;
-    }
 
     case REG_TM3CNT_H:
-    {
-        int enabled = timers[3].control.enabled;
+        enabled = timers[3].control.enabled;
         timers[3].control.write(0, byte);
         if (!enabled && timers[3].control.enabled)
-            timers[3].start();
+            timers[3].init();
         break;
     }
-    }
-    rebuild();
+    schedule();
 }
 
-void TimerController::update()
+void TimerController::runTimers()
 {
     for (auto& timer : active)
     {
-        timer->run(counter - last);
+        timer->run(counter);
     }
-    last = counter;
+    overflow -= counter;
+    counter = 0;
 }
 
-void TimerController::rebuild()
+void TimerController::schedule()
 {
-    last      = 0;
-    counter   = 0;
-    threshold = 0xFFFFFFFFull;
-
     active.clear();
+
+    overflow = 0x3FFF'FFFF;
 
     for (auto& timer : timers)
     {
         if (timer.control.enabled && !timer.control.cascade)
         {
             active.push_back(&timer);
-        }
-        if (timer.canCauseInterrupt())
-        {
-            threshold = std::min(threshold, timer.interruptsAfter());
+
+            overflow = std::min(overflow, timer.nextOverflow());
         }
     }
 }

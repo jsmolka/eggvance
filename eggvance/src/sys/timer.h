@@ -9,31 +9,21 @@ public:
     Timer(int id);
 
     void reset();
+    void init();
+    void run(int cycles);
 
-    void run(u64 accumulated);
-    
-    void start();
-    void update();
-
-    bool canChange() const;
-    bool canCauseInterrupt() const;
-
-    u64 interruptsAfter() const;
+    int nextOverflow() const;
 
     int id;
-    Timer* prev;
     Timer* next;
 
     TimerData data;
     TimerControl control;
 
 private:
-    bool inActiveCascadeChain() const;
+    void updateReload();
 
-    u64 cyclesRemaining() const;
-
-    u64 cycles;
-    u64 cycles_max;
-    u64 cycles_inital;
-    u64 cycles_overflow;
+    int reload;
+    int counter;
+    int overflow;
 };

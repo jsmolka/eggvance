@@ -11,5 +11,5 @@ public:
     void write(int index, u8 byte);
 
     u16 data;
-    u16 initial;
+    u16 reload;
 };

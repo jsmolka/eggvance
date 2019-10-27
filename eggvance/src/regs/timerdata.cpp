@@ -18,5 +18,5 @@ void TimerData::write(int index, u8 byte)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 
-    bcast(initial)[index] = byte;
+    bcast(reload)[index] = byte;
 }

@@ -11,19 +11,18 @@ public:
 
     void reset();
 
-    void run(u64 cycles);
+    void run(int cycles);
     void runUntil(int& cycles);
 
     u8 readByte(u32 addr);
     void writeByte(u32 addr, u8 byte);
 
 private:
-    void update();
-    void rebuild();
+    void runTimers();
+    void schedule();
 
-    u64 threshold;
-    u64 counter;
-    u64 last;
+    int overflow;
+    int counter;
 
     Timer timers[4] = { 0, 1, 2, 3 };
 

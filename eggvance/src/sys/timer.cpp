@@ -9,24 +9,30 @@ Timer::Timer(int id)
 
 void Timer::reset()
 {
-    cycles          = 0;
-    cycles_max      = 0;
-    cycles_inital   = 0;
-    cycles_overflow = 0;
-
-    control.reset();
     data.reset();
+    control.reset();
+
+    reload   = 0;
+    counter  = 0;
+    overflow = 0;
 }
 
-void Timer::run(u64 accumulated)
+void Timer::init()
 {
-    cycles += accumulated;
+    counter = 0;
 
-    if (cycles >= cycles_overflow)
+    updateReload();
+}
+
+void Timer::run(int cycles)
+{
+    counter += cycles;
+
+    if (counter >= overflow)
     {
         if (next && next->control.cascade)
         {
-            next->run(cycles / cycles_overflow);
+            next->run(counter / overflow);
         }
 
         if (control.irq)
@@ -39,80 +45,20 @@ void Timer::run(u64 accumulated)
             };
             arm.request(flags[id]);
         }
+        counter %= overflow;
 
-        cycles %= cycles_overflow;
+        updateReload();
     }
+    data.data = counter / control.prescaler + reload;
 }
 
-void Timer::start()
+int Timer::nextOverflow() const
 {
-    cycles = 0;
-    cycles_max = u64(control.prescaler) * 0x1'0000;
-    cycles_inital = u64(control.prescaler) * data.initial;
-    cycles_overflow = cycles_max - cycles_inital;
+    return overflow - counter;
 }
 
-void Timer::update()
+void Timer::updateReload()
 {
-    data.data = static_cast<u16>(cycles / control.prescaler);
-}
-
-bool Timer::canChange() const
-{
-    return control.enabled || (control.cascade && inActiveCascadeChain());
-}
-
-bool Timer::canCauseInterrupt() const
-{
-    if (!control.irq)
-        return false;
-
-    if (control.cascade)
-        return inActiveCascadeChain();
-    else
-        return control.enabled;
-}
-
-u64 Timer::interruptsAfter() const
-{
-    if (control.cascade)
-    {
-        if (!prev) 
-            return 0xFFFFFFFFull;
-
-        u64 remaining = 1;
-
-        const auto* p = this;
-        while (p)
-        {
-            remaining *= p->cycles_overflow;
-            remaining -= p->cycles;
-
-            if (!p->control.cascade)
-                break;
-            p = p->prev;
-        }
-        return remaining;
-    }
-    else
-    {
-        return cyclesRemaining();
-    }
-}
-
-bool Timer::inActiveCascadeChain() const
-{
-    if (!control.cascade)
-        return false;
-
-    Timer* p = prev;
-    while (p && p->control.cascade)
-        p = p->prev;
-
-    return p && p->control.enabled;
-}
-
-u64 Timer::cyclesRemaining() const
-{
-    return cycles_overflow - cycles;
+    reload   = data.reload;
+    overflow = control.prescaler * (0x10000 - reload);
 }
