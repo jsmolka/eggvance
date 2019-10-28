@@ -110,14 +110,38 @@ private:
     void disasm();
 
     void Arm_BranchExchange(u32 instr);
+    template<int link>
     void Arm_BranchLink(u32 instr);
+    template<int flags_, int opcode, int imm_op>
     void Arm_DataProcessing(u32 instr);
+    template<int write, int use_spsr, int imm_op>
     void Arm_StatusTransfer(u32 instr);
+    template<int flags, int accumulate>
     void Arm_Multiply(u32 instr);
+    template<int flags, int accumulate, int sign>
     void Arm_MultiplyLong(u32 instr);
+    template<int load, 
+        int writeback_, 
+        int byte, 
+        int increment, 
+        int pre_index, 
+        int imm_offset>
     void Arm_SingleDataTransfer(u32 instr);
+    template<
+        int opcode, 
+        int load, 
+        int writeback_, 
+        int imm_offset, 
+        int increment, 
+        int pre_index>
     void Arm_HalfSignedDataTransfer(u32 instr);
+    template<int load, 
+        int writeback_, 
+        int user_mode, 
+        int increment, 
+        int pre_index_>
     void Arm_BlockDataTransfer(u32 instr);
+    template<int byte>
     void Arm_SingleDataSwap(u32 instr);
     void Arm_SoftwareInterrupt(u32 instr);
     void Arm_CoprocessorDataOperations(u32 instr);
@@ -125,29 +149,49 @@ private:
     void Arm_CoprocessorRegisterTransfers(u32 instr);
     void Arm_Undefined(u32 instr);
 
+    template<int offset, int opcode>
     void Thumb_MoveShiftedRegister(u16 instr);
+    template<int rn, int opcode>
     void Thumb_AddSubtract(u16 instr);
+    template<int rd, int opcode>
     void Thumb_ImmediateOperations(u16 instr);
+    template<int opcode>
     void Thumb_ALUOperations(u16 instr);
+    template<int hs, int hd, int opcode>
     void Thumb_HighRegisterOperations(u16 instr);
+    template<int rd>
     void Thumb_LoadPCRelative(u16 instr);
+    template<int ro, int opcode>
     void Thumb_LoadStoreRegisterOffset(u16 instr);
+    template<int ro, int opcode>
     void Thumb_LoadStoreByteHalf(u16 instr);
+    template<int offset, int opcode>
     void Thumb_LoadStoreImmediateOffset(u16 instr);
+    template<int offset, int load>
     void Thumb_LoadStoreHalf(u16 instr);
+    template<int rd, int load>
     void Thumb_LoadStoreSPRelative(u16 instr);
+    template<int rd, int use_sp>
     void Thumb_LoadRelativeAddress(u16 instr);
+    template<int sign>
     void Thumb_AddOffsetSP(u16 instr);
+    template<int special, int pop>
     void Thumb_PushPopRegisters(u16 instr);
+    template<int rb, int load>
     void Thumb_LoadStoreMultiple(u16 instr);
+    template<int condition>
     void Thumb_ConditionalBranch(u16 instr);
     void Thumb_SoftwareInterrupt(u16 instr);
     void Thumb_UnconditionalBranch(u16 instr);
+    template<int second>
     void Thumb_LongBranchLink(u16 instr);
     void Thumb_Undefined(u16 instr);
 
     int cycles;
     u32 last_addr;
+
+    static std::array<void(ARM::*)(u32), 4096> instr_arm;
+    static std::array<void(ARM::*)(u16), 1024> instr_thumb;
 };
 
 extern ARM arm;

@@ -280,6 +280,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="src\arm\arm.inl" />
+    <None Include="src\arm\lut_arm.py" />
+    <None Include="src\arm\lut_thumb.py" />
     <None Include="src\ppu\collapse.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

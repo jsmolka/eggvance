@@ -429,5 +429,7 @@
     <None Include="src\ppu\collapse.inl">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="src\arm\lut_arm.py" />
+    <None Include="src\arm\lut_thumb.py" />
   </ItemGroup>
 </Project>
