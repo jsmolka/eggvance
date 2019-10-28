@@ -207,6 +207,9 @@
     <ClCompile Include="src\sys\timercontroller.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\arm\arithmetic.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="icon\icon.h">
@@ -423,9 +426,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\arm\arm.inl">
-      <Filter>Header Files</Filter>
-    </None>
     <None Include="src\ppu\collapse.inl">
       <Filter>Header Files</Filter>
     </None>

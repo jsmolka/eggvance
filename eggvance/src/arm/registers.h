@@ -11,16 +11,16 @@ public:
     {
         struct
         {
-            u32 gprs[13];  // General Purpose Registers
-            u32 sp;        // Stack Pointer
-            u32 lr;        // Link Register
-            u32 pc;        // Program Counter
+            u32 gprs[13];
+            u32 sp;
+            u32 lr;
+            u32 pc;
         };
         u32 regs[16];
     };
 
-    PSR cpsr;  // Current Program Status Register
-    PSR spsr;  // Saved Program Status Register
+    PSR cpsr;
+    PSR spsr;
 
 protected:
     void switchMode(PSR::Mode mode);

@@ -33,7 +33,7 @@ void Registers::reset()
 
 void Registers::switchMode(PSR::Mode mode)
 {
-    Bank bank_old = modeToBank(static_cast<PSR::Mode>(cpsr.mode));
+    Bank bank_old = modeToBank(cpsr.mode);
     Bank bank_new = modeToBank(mode);
 
     if (bank_old != bank_new)

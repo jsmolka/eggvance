@@ -72,7 +72,7 @@ void ARM::execute()
     //disasm();
     //#endif
 
-    if (io.irq_master && (io.irq_enabled & io.irq_request) && !cpsr.irqd)
+    if (io.irq_master && !cpsr.irqd && (io.irq_enabled & io.irq_request))
     {
         interruptHW();
     }

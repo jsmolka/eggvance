@@ -167,7 +167,7 @@ void ARM::Arm_StatusTransfer(u32 instr)
             u32 value  = bits<0, 8>(instr);
             int amount = bits<8, 4>(instr);
 
-            op = ror(value, amount << 1, false);
+            op = rotateRight(value, amount << 1);
         }
         else
         {
@@ -315,7 +315,8 @@ void ARM::Arm_SingleDataTransfer(u32 instr)
         {
             amount = bits<7, 5>(instr);
         }
-        offset = shift(Shift(type), regs[rm], amount, true);
+        bool carry = false;
+        offset = shift(Shift(type), regs[rm], amount, carry, true);
     }
     else
     {

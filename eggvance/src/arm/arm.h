@@ -31,9 +31,6 @@ enum class Interrupt
 
 class ARM : public Registers
 {
-    friend class MMU;
-    friend class PPU;
-
 public:
     void reset();
 
@@ -63,6 +60,8 @@ private:
         ROR = 0b11
     };
 
+    bool isSequential(u32 addr) const;
+
     u8  readByte(u32 addr);
     u16 readHalf(u32 addr);
     u32 readWord(u32 addr);
@@ -81,19 +80,13 @@ private:
     u32 ror(u32 value, int amount, bool& carry, bool immediate) const;
     u32 shift(Shift type, u32 value, int amount, bool& carry, bool immediate) const;
 
-    u32 lsl(u32 value, int amount) const;
-    u32 lsr(u32 value, int amount, bool immediate) const;
-    u32 asr(u32 value, int amount, bool immediate) const;
-    u32 ror(u32 value, int amount, bool immediate) const;
-    u32 shift(Shift type, u32 value, int amount, bool immediate) const;
+    u32 logical(u32 result, bool flags);
+    u32 logical(u32 result, bool carry, bool flags);
 
-    inline u32 logical(u32 result, bool flags);
-    inline u32 logical(u32 result, bool carry, bool flags);
-
-    inline u32 add(u32 op1, u32 op2, bool flags);
-    inline u32 sub(u32 op1, u32 op2, bool flags);
-    inline u32 adc(u64 op1, u64 op2, bool flags);
-    inline u32 sbc(u64 op1, u64 op2, bool flags);
+    u32 add(u32 op1, u32 op2, bool flags);
+    u32 sub(u32 op1, u32 op2, bool flags);
+    u32 adc(u64 op1, u64 op2, bool flags);
+    u32 sbc(u64 op1, u64 op2, bool flags);
 
     void execute();
 
@@ -120,7 +113,7 @@ private:
     void Arm_Multiply(u32 instr);
     template<int flags, int accumulate, int sign>
     void Arm_MultiplyLong(u32 instr);
-    template<int load, 
+    template<int load,
         int writeback_, 
         int byte, 
         int increment, 
@@ -195,5 +188,3 @@ private:
 };
 
 extern ARM arm;
-
-#include "arm.inl"
