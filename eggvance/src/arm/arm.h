@@ -100,8 +100,6 @@ private:
     void interruptHW();
     void interruptSW();
 
-    void disasm();
-
     void Arm_BranchExchange(u32 instr);
     template<int link>
     void Arm_BranchLink(u32 instr);

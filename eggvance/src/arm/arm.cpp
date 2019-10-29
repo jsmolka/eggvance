@@ -4,8 +4,7 @@
 
 #include "common/macros.h"
 #include "mmu/mmu.h"
-#include "decode.h"
-#include "diasm.h"
+#include "disassemble.h"
 
 ARM arm;
 
@@ -68,9 +67,22 @@ void ARM::request(Interrupt flag)
 
 void ARM::execute()
 {
-    //#ifdef EGG_DEBUG
-    //disasm();
-    //#endif
+    //static u32 operation = 0;
+    //operation++;
+
+    //DisasmData data;
+
+    //data.thumb = cpsr.thumb;
+    //data.instr = pipe[0];
+    //data.pc    = pc;
+    //data.lr    = lr;
+
+    //fmt::printf("%08X  %08X  %08X  %s\n", 
+    //    operation,
+    //    pc - 2 * (cpsr.thumb ? 2 : 4),
+    //    data.instr, 
+    //    disassemble(data)
+    //);
 
     if (io.irq_master && !cpsr.irqd && (io.irq_enabled & io.irq_request))
     {
@@ -172,18 +184,4 @@ void ARM::interruptSW()
     u32 lr = pc - (cpsr.thumb ? 2 : 4);
 
     interrupt(0x08, lr, PSR::Mode::SVC);
-}
-
-void ARM::disasm()
-{
-    u32 instr = cpsr.thumb
-        ? mmu.readHalf(pc - 4)
-        : mmu.readWord(pc - 8);
-
-    fmt::printf("%08X  %08X  %08X  %s\n", 
-        cycles, 
-        pc - 2 * (cpsr.thumb ? 2 : 4), 
-        instr, 
-        Disassembler::disassemble(instr, *this)
-    );
 }

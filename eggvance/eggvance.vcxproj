@@ -144,7 +144,7 @@
     <ClCompile Include="src\arm\arm.cpp" />
     <ClCompile Include="src\arm\bus.cpp" />
     <ClCompile Include="src\arm\decode.cpp" />
-    <ClCompile Include="src\arm\diasm.cpp" />
+    <ClCompile Include="src\arm\disassemble.cpp" />
     <ClCompile Include="src\arm\isa_arm.cpp" />
     <ClCompile Include="src\arm\isa_thumb.cpp" />
     <ClCompile Include="src\arm\psr.cpp" />
@@ -209,7 +209,7 @@
     <ClInclude Include="src\args.h" />
     <ClInclude Include="src\arm\arm.h" />
     <ClInclude Include="src\arm\decode.h" />
-    <ClInclude Include="src\arm\diasm.h" />
+    <ClInclude Include="src\arm\disassemble.h" />
     <ClInclude Include="src\arm\psr.h" />
     <ClInclude Include="src\arm\registers.h" />
     <ClInclude Include="src\common\config.h" />

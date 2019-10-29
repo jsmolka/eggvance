@@ -23,23 +23,17 @@ InstructionArm decodeHashArm(int hash)
     return InstructionArm::Undefined;
 }
 
-using LutArm = std::array<InstructionArm, 4096>;
-
-const LutArm makeLutArm()
-{
-    LutArm lut;
+static const auto lut_arm = [](){
+    std::array<InstructionArm, 4096> lut;
     for (int hash = 0; hash < lut.size(); ++hash)
         lut[hash] = decodeHashArm(hash);
-
     return lut;
-}
+}();
 
 inline int hashArm(u32 instr)
 {
     return ((instr >> 16) & 0xFF0) | ((instr >> 4) & 0xF);
 }
-
-static const LutArm lut_arm = makeLutArm();
 
 InstructionArm decodeArm(u32 instr)
 {
@@ -71,23 +65,17 @@ InstructionThumb decodeHashThumb(int hash)
     return InstructionThumb::Undefined;
 }
 
-using LutThumb = std::array<InstructionThumb, 256>;
-
-const LutThumb makeLutThumb()
-{
-    LutThumb lut;
+static const auto lut_thumb = [](){
+    std::array<InstructionThumb, 256> lut;
     for (int hash = 0; hash < lut.size(); ++hash)
         lut[hash] = decodeHashThumb(hash);
-
     return lut;
-}
+}();
 
 inline int hashThumb(u16 instr)
 {
     return instr >> 8;
 }
-
-static const LutThumb lut_thumb = makeLutThumb();
 
 InstructionThumb decodeThumb(u16 instr)
 {
