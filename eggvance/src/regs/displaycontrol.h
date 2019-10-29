@@ -10,7 +10,7 @@ public:
     u8 read(int index);
     void write(int index, u8 byte);
 
-    bool hasContent() const;
+    bool active() const;
 
     int mode;
     int frame;

@@ -2,34 +2,36 @@
 
 #include <array>
 
+#include "common/constants.h"
+
 template<typename T>
-using Buffer = std::array<T, 240>;
+using Buffer = std::array<T, WIDTH>;
 
 template<typename T>
 class DoubleBuffer
 {
 public:
-    void flip()
+    inline void flip()
     {
         page ^= 1;
     }
 
-    T* data()
+    inline T* data()
     {
         return buffer[page].data();
     }
 
-    void fill(const T& value)
+    inline void fill(const T& value)
     {
         buffer[page].fill(value);
     }
 
-    T operator[](std::size_t index) const
+    inline T operator[](std::size_t index) const
     {
         return buffer[page][index];
     }
 
-    T& operator[](std::size_t index)
+    inline T& operator[](std::size_t index)
     {
         return buffer[page][index];
     }

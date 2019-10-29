@@ -13,4 +13,5 @@ public:
 
     u16 colorFG(int index, int bank = 0);
     u16 colorBG(int index, int bank = 0);
+    u16 backdrop();
 };

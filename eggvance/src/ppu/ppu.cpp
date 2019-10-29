@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include "common/constants.h"
+#include "common/macros.h"
 #include "common/utility.h"
 #include "arm/arm.h"
 #include "mmu/mmu.h"
@@ -15,11 +16,11 @@ void PPU::reset()
 
     for (auto& background : backgrounds)
     {
-        background.fill(TRANS);
+        background.fill(TRANSPARENT);
         background.flip();
-        background.fill(TRANS);
+        background.fill(TRANSPARENT);
     }
-    objects.fill(ObjectLayer());
+    objects.fill({});
     objects_exist = false;
     objects_alpha = false;
 }
@@ -31,8 +32,8 @@ void PPU::scanline()
 
     if (io.dispcnt.force_blank)
     {
-        u32* scanline = &backend.buffer[240 * io.vcount];
-        std::fill_n(scanline, 240, 0xFFFFFFFF);
+        u32* scanline = &backend.buffer[WIDTH * io.vcount];
+        std::fill_n(scanline, WIDTH, 0xFFFFFFFF);
         return;
     }
 
@@ -43,7 +44,7 @@ void PPU::scanline()
 
     if (objects_exist)
     {
-        objects.fill(ObjectLayer());
+        objects.fill({});
         objects_exist = false;
         objects_alpha = false;
     }
@@ -142,7 +143,7 @@ void PPU::next()
 
 void PPU::present()
 {
-    if (io.dispcnt.hasContent())
+    if (io.dispcnt.active())
         backend.present();
 }
 
@@ -176,7 +177,7 @@ void PPU::mosaic(int bg)
         return;
 
     u16 color;
-    for (int x = 0; x < 240; ++x)
+    for (int x = 0; x < WIDTH; ++x)
     {
         if (x % mosaic_x == 0)
         {
@@ -194,37 +195,6 @@ bool PPU::mosaicAffected(int bg) const
 bool PPU::mosaicDominant() const
 {
     return io.vcount % io.mosaic.bgs.y == 0;
-}
-
-void PPU::collapse(int begin, int end)
-{
-    std::vector<BackgroundLayer> layers;
-    layers.reserve(end - begin);
-
-    for (int bg = begin; bg < end; ++bg) 
-    {
-        if (io.dispcnt.layers & (1 << bg))
-        {
-            layers.emplace_back(
-                bg, 
-                backgrounds[bg].data(),
-                io.bgcnt[bg].priority
-            );
-        }
-    }
-
-    std::sort(layers.begin(), layers.end(),
-        [](const BackgroundLayer& lhs, const BackgroundLayer& rhs) {
-            return lhs.priority != rhs.priority
-                ? lhs.priority < rhs.priority
-                : lhs.id < rhs.id;
-        }
-    );
-
-    if (objects_exist)
-        collapse<1>(layers);
-    else
-        collapse<0>(layers);
 }
 
 u16 PPU::blendAlpha(u16 a, u16 b) const

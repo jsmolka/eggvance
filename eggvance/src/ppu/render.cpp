@@ -1,6 +1,7 @@
 #include "ppu.h"
 
 #include "common/utility.h"
+#include "common/macros.h"
 #include "mmu/mmu.h"
 
 void PPU::renderBgMode0(int bg)
@@ -86,7 +87,7 @@ void PPU::renderBgMode0(int bg)
             {
                 for (; pixel_x < 8; ++pixel_x)
                 {
-                    backgrounds[bg][screen_x] = TRANS;
+                    backgrounds[bg][screen_x] = TRANSPARENT;
                     if (++screen_x == 240)
                         return;
                 }
@@ -135,7 +136,7 @@ void PPU::renderBgMode2(int bg)
             }
             else
             {
-                backgrounds[bg][screen_x] = TRANS;
+                backgrounds[bg][screen_x] = TRANSPARENT;
                 continue;
             }
         }
@@ -179,11 +180,11 @@ void PPU::renderBgMode5(int bg)
         u32 addr = (0xA000 * io.dispcnt.frame) + (2 * 160 * io.vcount);
         u16* pixel = mmu.vram.data<u16>(addr);
         pixel = std::copy_n(pixel, 160, &backgrounds[bg][0]);
-        std::fill_n(pixel, 80, TRANS);
+        pixel = std::fill_n(pixel,  80, TRANSPARENT);
     }
     else
     {
-        backgrounds[bg].fill(TRANS);
+        backgrounds[bg].fill(TRANSPARENT);
     }
 }
 
@@ -318,11 +319,11 @@ void PPU::renderObjects()
                     {
                     case GFX_NORMAL:
                     case GFX_ALPHA:
-                        if (entry.priority <= object.priority)
+                        if (entry.priority <= object.prio)
                         {
                             object.color    = mmu.palette.colorFG(index, bank);
                             object.opaque   = true;
-                            object.priority = entry.priority;
+                            object.prio = entry.priority;
                             object.alpha    = entry.gfx_mode == GFX_ALPHA;
                         }
                         break;

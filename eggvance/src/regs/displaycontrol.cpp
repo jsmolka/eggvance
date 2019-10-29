@@ -37,7 +37,7 @@ void DisplayControl::write(int index, u8 byte)
     data[index] = byte;
 }
 
-bool DisplayControl::hasContent() const
+bool DisplayControl::active() const
 {
     static constexpr int masks[8] = {
         0b11111, 

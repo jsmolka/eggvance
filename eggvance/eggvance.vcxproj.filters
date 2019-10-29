@@ -210,6 +210,9 @@
     <ClCompile Include="src\regs\intrequest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\ppu\collapse.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="icon\icon.h">
@@ -426,9 +429,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\ppu\collapse.inl">
-      <Filter>Header Files</Filter>
-    </None>
     <None Include="src\arm\lut_arm.py" />
     <None Include="src\arm\lut_thumb.py" />
   </ItemGroup>

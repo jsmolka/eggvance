@@ -15,65 +15,56 @@ enum LayerFlag
 
 struct Layer
 {
-    Layer(int priority) 
-        : priority(priority)
-    { 
-    
-    }
+    Layer(int prio) : prio(prio) { }
 
-    bool operator<(const Layer& other) const
+    inline bool operator<(const Layer& other) const
     {
-        return priority < other.priority;
+        return prio < other.prio;
     }
 
-    bool operator<=(const Layer& other) const
+    inline bool operator<=(const Layer& other) const
     {
-        return priority <= other.priority;
+        return prio <= other.prio;
     }
 
-    int priority;
+    int prio;
 };
 
 struct BackgroundLayer : public Layer
 {
-    BackgroundLayer(int id, u16* data, int priority)
-        : Layer(priority)
-        , id(id)
+    BackgroundLayer(int prio, u16* data, int flag)
+        : Layer(prio)
         , data(data)
-        , flag(1 << id)
-    {
+        , flag(flag) { }
 
+    inline bool operator<(const BackgroundLayer& other) const
+    {
+        if (prio == other.prio)
+            return flag < other.flag;
+        else    
+            return prio < other.prio;
     }
 
-    u16 color(int x) const
+    inline u16 color(int x) const
     {
         return data[x];
     }
 
-    bool opaque(int x) const
+    inline bool opaque(int x) const
     {
-        return color(x) != TRANS;
+        return data[x] != TRANSPARENT;
     }
 
-    int  id;
     u16* data;
     int  flag;
 };
 
 struct ObjectLayer : public Layer
 {
-    ObjectLayer()
-        : Layer(4)
-        , color(TRANS)
-        , opaque(false)
-        , window(false)
-        , alpha(false)
-    {
+    ObjectLayer() : Layer(4) { }
 
-    }
-
-    u16  color;
-    bool opaque;
-    bool window;
-    bool alpha;
+    u16  color  = TRANSPARENT;
+    bool opaque = false;
+    bool window = false;
+    bool alpha  = false;
 };

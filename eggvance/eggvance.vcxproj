@@ -80,7 +80,7 @@
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <DisableSpecificWarnings>26451;26495;26812;6385;6386</DisableSpecificWarnings>
+      <DisableSpecificWarnings>26451;26495;26812;6385;6386;6262</DisableSpecificWarnings>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PreprocessorDefinitions>_MBCS;FMT_HEADER_ONLY;EGG_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -99,7 +99,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)icon\;$(ProjectDir)external\fmt\include</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
-      <DisableSpecificWarnings>26451;26495;26812;6385;6386</DisableSpecificWarnings>
+      <DisableSpecificWarnings>26451;26495;26812;6385;6386;6262</DisableSpecificWarnings>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <DebugInformationFormat>None</DebugInformationFormat>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -124,7 +124,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)icon\;$(ProjectDir)external\fmt\include</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
-      <DisableSpecificWarnings>26451;26495;26812;6385;6386</DisableSpecificWarnings>
+      <DisableSpecificWarnings>26451;26495;26812;6385;6386;6262</DisableSpecificWarnings>
       <DebugInformationFormat>OldStyle</DebugInformationFormat>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -153,6 +153,7 @@
     <ClCompile Include="src\common\config.cpp" />
     <ClCompile Include="src\common\message.cpp" />
     <ClCompile Include="src\mmu\io.cpp" />
+    <ClCompile Include="src\ppu\collapse.cpp" />
     <ClCompile Include="src\regs\bgparameter.cpp" />
     <ClCompile Include="src\regs\bgreference.cpp" />
     <ClCompile Include="src\regs\blendalpha.cpp" />
@@ -282,7 +283,6 @@
   <ItemGroup>
     <None Include="src\arm\lut_arm.py" />
     <None Include="src\arm\lut_thumb.py" />
-    <None Include="src\ppu\collapse.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

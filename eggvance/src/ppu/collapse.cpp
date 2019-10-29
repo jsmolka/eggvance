@@ -1,7 +1,35 @@
+#include "ppu.h"
+
+#include "common/constants.h"
 #include "common/macros.h"
 #include "mmu/mmu.h"
 
 #define MISSING_PIXEL 0x6C3F
+
+void PPU::collapse(int begin, int end)
+{
+    std::vector<BackgroundLayer> layers;
+    layers.reserve(end - begin);
+
+    for (int bg = begin; bg < end; ++bg)
+    {
+        if (io.dispcnt.layers & (1 << bg))
+        {
+            layers.emplace_back(
+                io.bgcnt[bg].priority,
+                backgrounds[bg].data(),
+                1 << bg
+            );
+        }
+    }
+
+    std::sort(layers.begin(), layers.end(), std::less<BackgroundLayer>());
+
+    if (objects_exist)
+        collapse<1>(layers);
+    else
+        collapse<0>(layers);
+}
 
 template<int obj_master>
 void PPU::collapse(const std::vector<BackgroundLayer>& layers)
@@ -25,9 +53,9 @@ void PPU::collapse(const std::vector<BackgroundLayer>& layers)
 template<int obj_master>
 void PPU::collapseNN(const std::vector<BackgroundLayer>& layers)
 {
-    u32* scanline = &backend.buffer[240 * io.vcount];
+    u32* scanline = &backend.buffer[WIDTH * io.vcount];
 
-    for (int x = 0; x < 240; ++x)
+    for (int x = 0; x < WIDTH; ++x)
     {
         scanline[x] = argb(upperLayer<obj_master>(layers, x));
     }
@@ -56,9 +84,9 @@ void PPU::collapseNW(const std::vector<BackgroundLayer>& layers)
 template<int obj_master, int win_master>
 void PPU::collapseNW(const std::vector<BackgroundLayer>& layers)
 {
-    u32* scanline = &backend.buffer[240 * io.vcount];
+    u32* scanline = &backend.buffer[WIDTH * io.vcount];
 
-    for (int x = 0; x < 240; ++x)
+    for (int x = 0; x < WIDTH; ++x)
     {
         const auto& window = activeWindow<win_master>(x);
 
@@ -87,9 +115,9 @@ void PPU::collapseBN(const std::vector<BackgroundLayer>& layers)
 {
     constexpr int flags = 0xFFFF;
 
-    u32* scanline = &backend.buffer[240 * io.vcount];
+    u32* scanline = &backend.buffer[WIDTH * io.vcount];
 
-    for (int x = 0; x < 240; ++x)
+    for (int x = 0; x < WIDTH; ++x)
     {
         u16 upper = MISSING_PIXEL;
         u16 lower = MISSING_PIXEL;
@@ -171,9 +199,9 @@ void PPU::collapseBW(const std::vector<BackgroundLayer>& layers)
 template<int obj_master, int blend_mode, int win_master>
 void PPU::collapseBW(const std::vector<BackgroundLayer>& layers)
 {
-    u32* scanline = &backend.buffer[240 * io.vcount];
+    u32* scanline = &backend.buffer[WIDTH * io.vcount];
 
-    for (int x = 0; x < 240; ++x)
+    for (int x = 0; x < WIDTH; ++x)
     {
         u16 upper = MISSING_PIXEL;
         u16 lower = MISSING_PIXEL;
@@ -260,14 +288,14 @@ u16 PPU::upperLayer(const std::vector<BackgroundLayer>& layers, int x)
     {
         if (obj_master && object.opaque && object <= layer)
             return object.color;
-        
+
         if (layer.opaque(x))
             return layer.color(x);
     }
     if (obj_master && object.opaque)
         return object.color;
-    
-    return mmu.palette.readHalf(0);
+
+    return mmu.palette.backdrop();
 }
 
 template<int obj_master>
@@ -279,23 +307,23 @@ u16 PPU::upperLayer(const std::vector<BackgroundLayer>& layers, int x, int flags
     {
         if (obj_master && flags & LF_OBJ && object.opaque && object <= layer)
             return object.color;
-        
+
         if (flags & layer.flag && layer.opaque(x))
             return layer.color(x);
     }
     if (obj_master && flags & LF_OBJ && object.opaque)
         return object.color;
-    
-    return mmu.palette.readHalf(0);
+
+    return mmu.palette.backdrop();
 }
 
 template<int obj_master>
 bool PPU::findBlendLayers(const std::vector<BackgroundLayer>& layers, int x, int flags, u16& upper)
 {
     const auto& object = objects[x];
-    
+
     int flags_upper = object.alpha ? LF_OBJ : io.bldcnt.upper;
-    
+
     for (const auto& layer : layers)
     {
         if (obj_master && flags & LF_OBJ && object.opaque && object <= layer)
@@ -314,7 +342,7 @@ bool PPU::findBlendLayers(const std::vector<BackgroundLayer>& layers, int x, int
         upper = object.color;
         return flags_upper & LF_OBJ;
     }
-    upper = mmu.palette.readHalf(0);
+    upper = mmu.palette.backdrop();
     return flags_upper & LF_BDP;
 }
 
@@ -336,10 +364,10 @@ template<int obj_master>
 bool PPU::findBlendLayers(const std::vector<BackgroundLayer>& layers, int x, int flags, u16& upper, u16& lower)
 {
     const auto& object = objects[x];
-    
+
     int flags_upper = object.alpha ? LF_OBJ : io.bldcnt.upper;
     int flags_lower = io.bldcnt.lower;
-    
+
     bool upper_found = false;
     bool object_used = false;
 
@@ -361,16 +389,12 @@ bool PPU::findBlendLayers(const std::vector<BackgroundLayer>& layers, int x, int
     }
     if (upper_found)
     {
-        lower = mmu.palette.readHalf(0);
+        lower = mmu.palette.backdrop();
         return flags_lower & LF_BDP;
     }
     else
     {
-        upper = mmu.palette.readHalf(0);
+        upper = mmu.palette.backdrop();
         return false;
     }
 }
-
-#undef PROCESS_BLEND_LAYER
-
-#undef MISSING_PIXEL

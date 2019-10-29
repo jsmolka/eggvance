@@ -1,5 +1,9 @@
 #pragma once
 
-constexpr int LCD_W = 240;
-constexpr int LCD_H = 160;
-constexpr int TRANS = 0x8000;
+#ifdef _MSC_VER
+#  undef TRANSPARENT
+#endif
+
+constexpr int WIDTH  = 240;
+constexpr int HEIGHT = 160;
+constexpr int TRANSPARENT = 0x8000;

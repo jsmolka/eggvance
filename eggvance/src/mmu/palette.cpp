@@ -15,7 +15,7 @@ void Palette::writeByte(u32 addr, u8 byte)
 u16 Palette::colorFG(int index, int bank)
 {
     if (index == 0)
-        return TRANS;
+        return TRANSPARENT;
     else
         return readHalfFast(0x200 + 0x20 * bank + 2 * index);
 }
@@ -23,7 +23,12 @@ u16 Palette::colorFG(int index, int bank)
 u16 Palette::colorBG(int index, int bank)
 {
     if (index == 0)
-        return TRANS;
+        return TRANSPARENT;
     else
         return readHalfFast(0x20 * bank + 2 * index);
+}
+
+u16 Palette::backdrop()
+{
+    return readHalfFast(0);
 }

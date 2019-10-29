@@ -9,10 +9,6 @@
 
 class PPU
 {
-    friend class ARM;
-    friend class MMU;
-    friend class VRAM;
-
 public:
     void reset();
 
@@ -52,7 +48,6 @@ private:
     void collapse(int begin, int end);
     template<int obj_master>
     void collapse(const std::vector<BackgroundLayer>& layers);
-
     template<int obj_master>
     void collapseNN(const std::vector<BackgroundLayer>& layers);
     template<int obj_master>
@@ -96,7 +91,5 @@ private:
     bool objects_exist;
     bool objects_alpha;
 };
-
-#include "collapse.inl"
 
 extern PPU ppu;
