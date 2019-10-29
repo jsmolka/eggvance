@@ -218,8 +218,8 @@ void Emulator::updateWindowTitle()
     switch (mmu.gamepak.backup->type)
     {
     case Backup::Type::SRAM:     sstream << " - SRAM";     break;
-    case Backup::Type::FLASH64:  sstream << " - FLASH64";  break;
-    case Backup::Type::FLASH128: sstream << " - FLASH128"; break;
+    case Backup::Type::Flash64:  sstream << " - FLASH64";  break;
+    case Backup::Type::Flash128: sstream << " - FLASH128"; break;
     case Backup::Type::EEPROM:   sstream << " - EEPROM";   break;
     }
     title = sstream.str();

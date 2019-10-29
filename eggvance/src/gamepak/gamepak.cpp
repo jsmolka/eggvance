@@ -2,7 +2,9 @@
 
 #include <cstring>
 #include <filesystem>
+#include <fmt/format.h>
 
+#include "common/message.h"
 #include "eeprom.h"
 #include "flash.h"
 #include "fileutil.h"
@@ -39,7 +41,10 @@ bool GamePak::load(const std::string& file)
     if (this->file != file)
     {
         if (!fileutil::read(file, data))
+        {
+            showMessage(fmt::format("Cannot read file \"{}\"", file).c_str());
             return false;
+        }
 
         header = parseHeader();
 
@@ -51,12 +56,13 @@ bool GamePak::load(const std::string& file)
         case Backup::Type::SRAM:
             backup = std::make_unique<SRAM>(backup_file);
             break;
+
         case Backup::Type::EEPROM:
             backup = std::make_unique<EEPROM>(backup_file);
             break;
 
-        case Backup::Type::FLASH64:
-        case Backup::Type::FLASH128:
+        case Backup::Type::Flash64:
+        case Backup::Type::Flash128:
             backup = std::make_unique<Flash>(backup_file, backup_type);
             break;
 
@@ -107,9 +113,9 @@ Backup::Type GamePak::parseBackupType()
     static const std::pair<std::string, Backup::Type> backup_types[5] = {
         { "SRAM",      Backup::Type::SRAM     },
         { "EEPROM",    Backup::Type::EEPROM   },
-        { "FLASH_",    Backup::Type::FLASH64  },
-        { "FLASH512_", Backup::Type::FLASH64  },
-        { "FLASH1M_",  Backup::Type::FLASH128 }
+        { "FLASH_",    Backup::Type::Flash64  },
+        { "FLASH512_", Backup::Type::Flash64  },
+        { "FLASH1M_",  Backup::Type::Flash128 }
     };
 
     std::string id;
@@ -124,5 +130,5 @@ Backup::Type GamePak::parseBackupType()
                 return type;
         }
     }
-    return Backup::Type::NONE;
+    return Backup::Type::None;
 }

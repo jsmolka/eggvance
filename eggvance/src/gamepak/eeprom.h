@@ -7,25 +7,25 @@ class EEPROM : public Backup
 public:
     EEPROM(const std::string& file);
 
-    virtual u8 readByte(u32) override final;
+    virtual u8 readByte(u32 addr) override final;
     virtual void writeByte(u32, u8 byte) override final;
 
 private:
-    enum State
+    enum class State
     {
-        STATE_RECEIVE,
-        STATE_READ,
-        STATE_READ_NIBBLE,
-        STATE_READ_ADDRESS,
-        STATE_WRITE,   
-        STATE_WRITE_ADDRESS
-    };
+        Receive,
+        Read,
+        ReadNibble,
+        ReadAddress,
+        Write,   
+        WriteAddress
+    } state;
 
     void resetBuffer();
+
     int bus() const;
 
-    State state;
-    int addr;
     int buffer;
+    int address;
     int transmitted;
 };

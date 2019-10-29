@@ -4,7 +4,7 @@
 
 Backup::Backup()
     : file("")
-    , type(Type::NONE)
+    , type(Type::None)
 {
 
 }

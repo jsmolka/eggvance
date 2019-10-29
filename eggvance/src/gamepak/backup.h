@@ -10,11 +10,11 @@ class Backup
 public:
     enum class Type
     {
-        NONE,
+        None,
         SRAM,
         EEPROM,
-        FLASH64,
-        FLASH128
+        Flash64,
+        Flash128
     };
 
     Backup();

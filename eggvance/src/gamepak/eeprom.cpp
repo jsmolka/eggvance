@@ -1,131 +1,119 @@
 #include "eeprom.h"
 
-#include <fmt/printf.h>
-
 EEPROM::EEPROM(const std::string& file)
     : Backup(file, Backup::Type::EEPROM)
 {
     resetBuffer();
-    state = STATE_RECEIVE;
+    state = State::Receive;
 }
 
-u8 EEPROM::readByte(u32)
+u8 EEPROM::readByte(u32 addr)
 {
     switch (state)
     {
-    case STATE_READ_NIBBLE:
+    case State::ReadNibble:
         if (++transmitted == 4)
         {
-            state = STATE_READ;
+            state = State::Read;
             resetBuffer();
         }
         break;
 
-    case STATE_READ:
-    {
-        int off = transmitted / 8;
-        int bit = transmitted % 8;
-
-        if (++transmitted == 64)
+    case State::Read:
         {
-            state = STATE_RECEIVE;
-            resetBuffer();
-        }
-        return (data[addr + off] >> (7 - bit)) & 0x1;
-    }
+            int off = transmitted / 8;
+            int bit = transmitted % 8;
 
-    default:
-        //fmt::printf("EEPROM: Reading in invalid state %d\n", static_cast<int>(state));
-        break;
+            if (++transmitted == 64)
+            {
+                state = State::Receive;
+                resetBuffer();
+            }
+            return (data[address + off] >> (7 - bit)) & 0x1;
+        }
     }
     return 1;
 }
 
 void EEPROM::writeByte(u32, u8 byte)
 {
-    if (state == STATE_READ || state == STATE_READ_NIBBLE)
-    {
-        //fmt::printf("EEPROM: Writing in read state %d\n", static_cast<int>(state));
+    if (state == State::Read || state == State::ReadNibble)
         return;
-    }
 
     byte &= 0x1;
-
     transmitted++;
-    buffer = (buffer << 1) | byte;
+
+    buffer <<= 1;
+    buffer |= byte;
 
     switch (state)
     {
-    case STATE_RECEIVE:
+    case State::Receive:
         if (transmitted == 2)
         {
             switch (buffer)
             {
             case 0b10:
-                state = STATE_WRITE_ADDRESS;
+                state = State::WriteAddress;
                 break;
 
             case 0b11:
-                state = STATE_READ_ADDRESS;
-                break;
-
-            default:
-                //fmt::printf("EEPROM: Received invalid state %d\n", static_cast<int>(state));
+                state = State::ReadAddress;
                 break;
             }
-            addr = 0;
+            address = 0;
             resetBuffer();
         }
         break;
 
-    case STATE_READ_ADDRESS:
+    case State::ReadAddress:
         if (transmitted == bus())
         {
-            addr = buffer << 3;
+            address = buffer << 3;
         }
         else if (transmitted > bus())
         {
-            state = STATE_READ_NIBBLE;
+            state = State::ReadNibble;
             resetBuffer();
         }
         break;
 
-    case STATE_WRITE_ADDRESS:
+    case State::WriteAddress:
         if (transmitted == bus())
         {
-            addr = buffer << 3;
-            state = STATE_WRITE;
+            address = buffer << 3;
+            state = State::Write;
             resetBuffer();
         }
         break;
 
-    case STATE_WRITE:
-    {
-        if (transmitted <= 64)
+    case State::Write:
         {
-            int off = (transmitted - 1) / 8;
-            int bit = (transmitted - 1) % 8;
+            if (transmitted <= 64)
+            {
+                int off = (transmitted - 1) / 8;
+                int bit = (transmitted - 1) % 8;
 
-            data[addr + off] &= ~(1 << (7 - bit));
-            data[addr + off] |= byte << (7 - bit);
+                data[address + off] &= ~(1 << (7 - bit));
+                data[address + off] |= byte << (7 - bit);
+            }
+            else if (transmitted > 64)
+            {
+                state = State::Receive;
+                resetBuffer();
+            }
+            break;
         }
-        else if (transmitted > 64)
-        {
-            state = STATE_RECEIVE;
-            resetBuffer();
-        }
-        break;
     }
-    }
-}
-
-int EEPROM::bus() const
-{
-    return data.size() == 0x2000 ? 14 : 6;
 }
 
 void EEPROM::resetBuffer()
 {
     buffer = 0;
     transmitted = 0;
+}
+
+int EEPROM::bus() const
+{
+    return data.size() == 0x2000 ? 14 : 6;
 }

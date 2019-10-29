@@ -12,4 +12,4 @@ struct DisasmData
     bool thumb;
 };
 
-extern const std::string disassemble(const DisasmData& data);
+const std::string disassemble(const DisasmData& data);

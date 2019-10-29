@@ -45,5 +45,5 @@ enum class InstructionThumb
     LongBranchLink
 };
 
-extern InstructionArm decodeArm(u32 instr);
-extern InstructionThumb decodeThumb(u16 instr);
+InstructionArm decodeArm(u32 instr);
+InstructionThumb decodeThumb(u16 instr);

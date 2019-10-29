@@ -70,8 +70,8 @@ u8 MMU::readByte(u32 addr)
             addr &= 0x7FFF;
             return gamepak.backup->readByte(addr);
 
-        case Backup::Type::FLASH64:
-        case Backup::Type::FLASH128:
+        case Backup::Type::Flash64:
+        case Backup::Type::Flash128:
             addr &= 0xFFFF;
             return gamepak.backup->readByte(addr);
         }
@@ -248,8 +248,8 @@ void MMU::writeByte(u32 addr, u8 byte)
             gamepak.backup->writeByte(addr, byte);
             break;
 
-        case Backup::Type::FLASH64:
-        case Backup::Type::FLASH128:
+        case Backup::Type::Flash64:
+        case Backup::Type::Flash128:
             addr &= 0xFFFF;
             gamepak.backup->writeByte(addr, byte);
             break;

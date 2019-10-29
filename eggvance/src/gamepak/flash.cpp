@@ -9,11 +9,11 @@ Flash::Flash(const std::string& file, Backup::Type type)
 {
     switch (type)
     {
-    case Backup::Type::FLASH64:
+    case Backup::Type::Flash64:
         data.resize(0x10000, 0xFF);
         break;
 
-    case Backup::Type::FLASH128:
+    case Backup::Type::Flash128:
         data.resize(0x20000, 0xFF);
         break;
 

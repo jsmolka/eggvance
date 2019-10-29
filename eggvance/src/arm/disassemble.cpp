@@ -7,6 +7,52 @@
 
 #define MNEMONIC "{:<8}"
 
+static constexpr const char* bios_funcs[43] = {
+    "SoftReset",
+    "RegisterRamReset",
+    "Halt",
+    "Stop/Sleep",
+    "IntrWait",
+    "VBlankIntrWait",
+    "Div",
+    "DivArm",
+    "Sqrt",
+    "ArcTan",
+    "ArcTan2",
+    "CpuSet",
+    "CpuFastSet",
+    "GetBiosChecksum",
+    "BgAffineSet",
+    "ObjAffineSet",
+    "BitUnPack",
+    "LZ77UnCompReadNormalWrite8bit",
+    "LZ77UnCompReadNormalWrite16bit",
+    "HuffUnCompReadNormal",
+    "RLUnCompReadNormalWrite8bit",
+    "RLUnCompReadNormalWrite16bit",
+    "Diff8bitUnFilterWrite8bit",
+    "Diff8bitUnFilterWrite16bit",
+    "Diff16bitUnFilter",
+    "SoundBias",
+    "SoundDriverInit",
+    "SoundDriverMode",
+    "SoundDriverMain",
+    "SoundDriverVSync",
+    "SoundChannelClear",
+    "MidiKey2Freq",
+    "SoundWhatever0",
+    "SoundWhatever1",
+    "SoundWhatever2",
+    "SoundWhatever3",
+    "SoundWhatever4",
+    "MultiBoot",
+    "HardReset",
+    "CustomHalt",
+    "SoundDriverVSyncOff",
+    "SoundDriverVSyncOn",
+    "SoundGetJumpList"
+};
+
 const char* reg(int id)
 {
     static constexpr const char* regs[16] = {
@@ -482,7 +528,13 @@ const std::string Arm_SingleDataSwap(u32 instr)
 
 const std::string Arm_SoftwareInterrupt(u32 instr)
 {
-    return "swi";
+    int comment = bits<16, 8>(instr);
+
+    const char* func = comment < 43
+        ? bios_funcs[comment]
+        : "unknown";
+
+    return fmt::format(MNEMONIC"{:X}, {}", "swi", comment, func);
 }
 
 const std::string Thumb_MoveShiftedRegister(u16 instr)
@@ -801,7 +853,14 @@ const std::string Thumb_ConditionalBranch(u16 instr, u32 pc)
 
 const std::string Thumb_SoftwareInterrupt(u16 instr)
 {
-    return "swi";
+    int comment = bits<0, 8>(instr);
+
+    const char* func = comment < 43
+        ? bios_funcs[comment]
+        : "unknown";
+
+    return fmt::format(MNEMONIC"{:X} {}", "swi", comment, func);
+
 }
 
 const std::string Thumb_UnconditionalBranch(u16 instr, u32 pc)
