@@ -1,26 +1,26 @@
-#include "irqmaster.h"
+#include "intmaster.h"
 
 #include "common/macros.h"
 #include "common/utility.h"
 
-IRQMaster::operator bool() const
+IntMaster::operator bool() const
 {
     return master;
 }
 
-void IRQMaster::reset()
+void IntMaster::reset()
 {
     *this = {};
 }
 
-u8 IRQMaster::read(int index)
+u8 IntMaster::read(int index)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 
     return bcast(master)[index];
 }
 
-void IRQMaster::write(int index, u8 byte)
+void IntMaster::write(int index, u8 byte)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 

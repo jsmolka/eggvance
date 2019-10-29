@@ -2,7 +2,7 @@
 
 #include "register.h"
 
-class IRQMaster : public Register<4>
+class IntMaster : public Register<4>
 {
 public:
     operator bool() const;

@@ -164,8 +164,8 @@
     <ClCompile Include="src\regs\dmacontrol.cpp" />
     <ClCompile Include="src\regs\dmacount.cpp" />
     <ClCompile Include="src\regs\haltcontrol.cpp" />
-    <ClCompile Include="src\regs\irqmaster.cpp" />
-    <ClCompile Include="src\regs\irqrequest.cpp" />
+    <ClCompile Include="src\regs\intmaster.cpp" />
+    <ClCompile Include="src\regs\intrequest.cpp" />
     <ClCompile Include="src\regs\keycontrol.cpp" />
     <ClCompile Include="src\regs\timercontrol.cpp" />
     <ClCompile Include="src\regs\timerdata.cpp" />
@@ -188,7 +188,7 @@
     <ClCompile Include="src\mmu\mmu.cpp" />
     <ClCompile Include="src\regs\bgcontrol.cpp" />
     <ClCompile Include="src\regs\bgoffset.cpp" />
-    <ClCompile Include="src\regs\irqenabled.cpp" />
+    <ClCompile Include="src\regs\intenabled.cpp" />
     <ClCompile Include="src\regs\keyinput.cpp" />
     <ClCompile Include="src\regs\mosaic.cpp" />
     <ClCompile Include="src\regs\vcount.cpp" />
@@ -229,8 +229,8 @@
     <ClInclude Include="src\regs\dmacontrol.h" />
     <ClInclude Include="src\regs\dmacount.h" />
     <ClInclude Include="src\regs\haltcontrol.h" />
-    <ClInclude Include="src\regs\irqmaster.h" />
-    <ClInclude Include="src\regs\irqrequest.h" />
+    <ClInclude Include="src\regs\intmaster.h" />
+    <ClInclude Include="src\regs\intrequest.h" />
     <ClInclude Include="src\regs\keycontrol.h" />
     <ClInclude Include="src\regs\macros.h" />
     <ClInclude Include="src\regs\register.h" />
@@ -259,7 +259,7 @@
     <ClInclude Include="src\mmu\mmu.h" />
     <ClInclude Include="src\regs\bgcontrol.h" />
     <ClInclude Include="src\regs\bgoffset.h" />
-    <ClInclude Include="src\regs\irqenabled.h" />
+    <ClInclude Include="src\regs\intenabled.h" />
     <ClInclude Include="src\regs\keyinput.h" />
     <ClInclude Include="src\regs\mosaic.h" />
     <ClInclude Include="src\regs\vcount.h" />

@@ -3,9 +3,9 @@
 #include <array>
 
 #include "regs/haltcontrol.h"
-#include "regs/irqenabled.h"
-#include "regs/irqmaster.h"
-#include "regs/irqrequest.h"
+#include "regs/intenabled.h"
+#include "regs/intmaster.h"
+#include "regs/intrequest.h"
 #include "regs/waitcontrol.h"
 #include "sys/dmacontroller.h"
 #include "sys/timercontroller.h"
@@ -37,14 +37,14 @@ public:
     void run(int cycles);
     void request(Interrupt flag);
 
+    DMAController   dma;
     TimerController timer;
-    DMAController dma;
 
     struct IO
     {
-        IRQMaster irq_master;
-        IRQEnabled irq_enabled;
-        IRQRequest irq_request;
+        IntMaster   int_master;
+        IntEnabled  int_enabled;
+        IntRequest  int_request;
         WaitControl waitcnt;
         HaltControl haltcnt;
     } io;
@@ -89,6 +89,7 @@ private:
     u32 sbc(u64 op1, u64 op2, bool flags);
 
     void execute();
+    void disasm();
 
     void flushPipeHalf();
     void flushPipeWord();
@@ -99,6 +100,7 @@ private:
     void interrupt(u32 pc, u32 lr, PSR::Mode mode);
     void interruptHW();
     void interruptSW();
+    bool interrupted() const;
 
     void Arm_BranchExchange(u32 instr);
     template<int link>
@@ -111,7 +113,7 @@ private:
     void Arm_Multiply(u32 instr);
     template<int flags, int accumulate, int sign>
     void Arm_MultiplyLong(u32 instr);
-    template<int load, int writeback, int byte, int increment, int pre_index, int imm_offset>
+    template<int load, int writeback, int byte, int increment, int pre_index, int reg_offset>
     void Arm_SingleDataTransfer(u32 instr);
     template<int opcode, int load, int writeback, int imm_offset, int increment, int pre_index>
     void Arm_HalfSignedDataTransfer(u32 instr);
@@ -163,7 +165,8 @@ private:
     void Thumb_LongBranchLink(u16 instr);
     void Thumb_Undefined(u16 instr);
 
-    int cycles;
+    int remaining;
+    int instr_size;
     u32 last_addr;
 
     static std::array<void(ARM::*)(u32), 4096> instr_arm;

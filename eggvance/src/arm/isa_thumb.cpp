@@ -251,11 +251,13 @@ void ARM::Thumb_HighRegisterOperations(u16 instr)
         {
             pc = alignHalf(src);
             flushPipeHalf();
+            instr_size = 2;
         }
         else
         {
             pc = alignWord(src);
             flushPipeWord();
+            instr_size = 4;
         }
         break;
 

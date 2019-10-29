@@ -13,11 +13,13 @@ void ARM::Arm_BranchExchange(u32 instr)
     {
         pc = alignHalf(addr);
         flushPipeHalf();
+        instr_size = 2;
     }
     else
     {
         pc = alignWord(addr);
         flushPipeWord();
+        instr_size = 4;
     }
 }
 
@@ -139,11 +141,13 @@ void ARM::Arm_DataProcessing(u32 instr)
         {
             pc = alignHalf(pc);
             flushPipeHalf();
+            instr_size = 2;
         }
         else
         {
             pc = alignWord(pc);
             flushPipeWord();
+            instr_size = 4;
         }
     }
 }
@@ -273,7 +277,7 @@ void ARM::Arm_MultiplyLong(u32 instr)
     if (!pre_index)      \
         INDEX
 
-template<int load, int writeback_, int byte, int increment, int pre_index, int imm_offset>
+template<int load, int writeback_, int byte, int increment, int pre_index, int reg_offset>
 void ARM::Arm_SingleDataTransfer(u32 instr)
 {
     int rd        = bits<12, 4>(instr);
@@ -284,7 +288,7 @@ void ARM::Arm_SingleDataTransfer(u32 instr)
     u32 addr = regs[rn];
 
     u32 offset = 0;
-    if (imm_offset)
+    if (reg_offset)
     {
         int rm      = bits<0, 4>(instr);
         int use_reg = bits<4, 1>(instr);

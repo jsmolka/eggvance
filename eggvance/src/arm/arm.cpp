@@ -12,46 +12,44 @@ void ARM::reset()
 {
     Registers::reset();
 
-    io.irq_master.reset();
-    io.irq_enabled.reset();
-    io.irq_request.reset();
+    io.int_master.reset();
+    io.int_enabled.reset();
+    io.int_request.reset();
     io.waitcnt.reset();
     io.haltcnt.reset();
 
     dma.reset();
     timer.reset();
 
-    cycles = 0;
+    remaining = 0;
 
     flushPipeWord();
-    pc += 4;
+    instr_size = 4;
+    pc += instr_size;
 }
 
-void ARM::run(int cycles_)
+void ARM::run(int cycles)
 {
-    cycles += cycles_;
+    remaining += cycles;
 
-    while (cycles > 0)
+    while (remaining > 0)
     {
-        int last = cycles;
+        int last = remaining;
 
         if (dma.active)
         {
-            dma.run(cycles);
-            timer.run(last - cycles);
+            dma.run(remaining);
         }
         else
         {
             if (io.haltcnt)
             {
-                timer.runUntil(cycles);
+                timer.runUntil(remaining);
+                continue;
             }
-            else
-            {
-                execute();
-                timer.run(last - cycles);
-            }
+            execute();
         }
+        timer.run(last - remaining);
     }
 }
 
@@ -59,32 +57,17 @@ void ARM::request(Interrupt flag)
 {
     int mask = static_cast<int>(flag);
 
-    if (io.irq_enabled & mask)
+    if (io.int_enabled & mask)
         io.haltcnt = false;
 
-    io.irq_request |= mask;
+    io.int_request |= mask;
 }
 
 void ARM::execute()
 {
-    //static u32 operation = 0;
-    //operation++;
+    //disasm();
 
-    //DisasmData data;
-
-    //data.thumb = cpsr.thumb;
-    //data.instr = pipe[0];
-    //data.pc    = pc;
-    //data.lr    = lr;
-
-    //fmt::printf("%08X  %08X  %08X  %s\n", 
-    //    operation,
-    //    pc - 2 * (cpsr.thumb ? 2 : 4),
-    //    data.instr, 
-    //    disassemble(data)
-    //);
-
-    if (io.irq_master && !cpsr.irqd && (io.irq_enabled & io.irq_request))
+    if (interrupted())
     {
         interruptHW();
     }
@@ -112,7 +95,27 @@ void ARM::execute()
             }
         }
     }
-    pc += cpsr.thumb ? 2 : 4;
+    pc += instr_size;
+}
+
+void ARM::disasm()
+{
+    static u32 operation = 0;
+    operation++;
+
+    DisasmData data;
+
+    data.thumb = cpsr.thumb;
+    data.instr = pipe[0];
+    data.pc    = pc;
+    data.lr    = lr;
+
+    fmt::printf("%08X  %08X  %08X  %s\n", 
+        operation,
+        pc - 2 * instr_size,
+        data.instr, 
+        disassemble(data)
+    );
 }
 
 void ARM::flushPipeHalf()
@@ -131,7 +134,7 @@ void ARM::flushPipeWord()
 
 void ARM::idle()
 {
-    cycles--;
+    remaining--;
 }
 
 void ARM::booth(u32 multiplier, bool ones)
@@ -152,7 +155,7 @@ void ARM::booth(u32 multiplier, bool ones)
         else
             break;
     }
-    cycles -= internal;
+    remaining -= internal;
 }
 
 void ARM::interrupt(u32 pc, u32 lr, PSR::Mode mode)
@@ -168,20 +171,24 @@ void ARM::interrupt(u32 pc, u32 lr, PSR::Mode mode)
     this->cpsr.irqd  = true;
 
     flushPipeWord();
+    instr_size = 4;
 }
 
 void ARM::interruptHW()
 {
-    // Returns with subs pc, lr, 4
-    u32 lr = pc - 2 * (cpsr.thumb ? 2 : 4) + 4;
+    u32 lr = pc - 2 * instr_size + 4;
 
     interrupt(0x18, lr, PSR::Mode::IRQ);
 }
 
 void ARM::interruptSW()
 {
-    // Returns with movs pc, lr
-    u32 lr = pc - (cpsr.thumb ? 2 : 4);
+    u32 lr = pc - instr_size;
 
     interrupt(0x08, lr, PSR::Mode::SVC);
+}
+
+bool ARM::interrupted() const
+{
+    return io.int_master && !cpsr.irqd && (io.int_enabled & io.int_request);
 }

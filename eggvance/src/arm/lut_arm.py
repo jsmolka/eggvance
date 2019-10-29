@@ -54,14 +54,14 @@ def decode(x):
         byte       = bits(6, 1, x)
         increment  = bits(7, 1, x)
         pre_index  = bits(8, 1, x)
-        imm_offset = bits(9, 1, x)
-        return "SingleDataTransfer<{load}, {writeback}, {byte}, {increment}, {pre_index}, {imm_offset}>".format(
+        reg_offset = bits(9, 1, x)
+        return "SingleDataTransfer<{load}, {writeback}, {byte}, {increment}, {pre_index}, {reg_offset}>".format(
             load=load,
             writeback=writeback,
             byte=byte,
             increment=increment,
             pre_index=pre_index,
-            imm_offset=imm_offset
+            reg_offset=reg_offset
         )
 
     if matches("000100100001", x):

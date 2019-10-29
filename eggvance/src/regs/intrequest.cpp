@@ -1,33 +1,33 @@
-#include "irqrequest.h"
+#include "intrequest.h"
 
 #include "common/macros.h"
 #include "common/utility.h"
 
-IRQRequest::operator int() const
+IntRequest::operator int() const
 {
     return request;
 }
 
-IRQRequest& IRQRequest::operator|=(int value)
+IntRequest& IntRequest::operator|=(int value)
 {
     this->request |= value;
 
     return *this;
 }
 
-void IRQRequest::reset()
+void IntRequest::reset()
 {
     *this = {};
 }
 
-u8 IRQRequest::read(int index)
+u8 IntRequest::read(int index)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 
     return bcast(request)[index];
 }
 
-void IRQRequest::write(int index, u8 byte)
+void IntRequest::write(int index, u8 byte)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
     

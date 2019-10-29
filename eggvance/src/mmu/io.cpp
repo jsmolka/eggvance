@@ -127,9 +127,9 @@ u8 IO::readByte(u32 addr)
     READ2(REG_WINOUT,   ppu.io.winout);
     READ2(REG_BLDCNT,   ppu.io.bldcnt);
     READ2(REG_BLDALPHA, ppu.io.bldalpha);
-    READ2(REG_IE,       arm.io.irq_enabled);
-    READ2(REG_IF,       arm.io.irq_request);
-    READ2(REG_IME,      arm.io.irq_master);
+    READ2(REG_IE,       arm.io.int_enabled);
+    READ2(REG_IF,       arm.io.int_request);
+    READ2(REG_IME,      arm.io.int_master);
     READ2(REG_WAITCNT,  arm.io.waitcnt);
     READ2(REG_KEYINPUT, keypad.io.keyinput);
     READ2(REG_KEYCNT,   keypad.io.keycnt);
@@ -271,9 +271,9 @@ void IO::writeByte(u32 addr, u8 byte)
     WRITE2(REG_BLDCNT,   ppu.io.bldcnt);
     WRITE2(REG_BLDALPHA, ppu.io.bldalpha);
     WRITE2(REG_BLDY,     ppu.io.bldy);
-    WRITE2(REG_IE,       arm.io.irq_enabled);
-    WRITE2(REG_IF,       arm.io.irq_request);
-    WRITE2(REG_IME,      arm.io.irq_master);
+    WRITE2(REG_IE,       arm.io.int_enabled);
+    WRITE2(REG_IF,       arm.io.int_request);
+    WRITE2(REG_IME,      arm.io.int_master);
     WRITE1(REG_HALTCNT,  arm.io.haltcnt);
     WRITE2(REG_WAITCNT,  arm.io.waitcnt);
     WRITE2(REG_KEYCNT,   keypad.io.keycnt);

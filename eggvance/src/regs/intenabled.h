@@ -2,7 +2,7 @@
 
 #include "register.h"
 
-class IRQEnabled : public Register<2>
+class IntEnabled : public Register<2>
 {
 public:
     operator int() const;

@@ -165,15 +165,6 @@
     <ClCompile Include="src\regs\dmacontrol.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\regs\irqenabled.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\regs\irqrequest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\regs\irqmaster.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\regs\keycontrol.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -208,6 +199,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\arm\bus.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\regs\intenabled.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\regs\intmaster.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\regs\intrequest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -377,15 +377,6 @@
     <ClInclude Include="src\regs\dmacontrol.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\regs\irqenabled.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\regs\irqrequest.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\regs\irqmaster.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\regs\keycontrol.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -417,6 +408,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\arm\disassemble.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\regs\intenabled.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\regs\intmaster.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\regs\intrequest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,25 +1,25 @@
-#include "irqenabled.h"
+#include "intenabled.h"
 
 #include "common/macros.h"
 
-IRQEnabled::operator int() const
+IntEnabled::operator int() const
 {
     return enabled;
 }
 
-void IRQEnabled::reset()
+void IntEnabled::reset()
 {
     *this = {};
 }
 
-u8 IRQEnabled::read(int index)
+u8 IntEnabled::read(int index)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 
     return bcast(enabled)[index];
 }
 
-void IRQEnabled::write(int index, u8 byte)
+void IntEnabled::write(int index, u8 byte)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 
