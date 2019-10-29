@@ -2,14 +2,16 @@
 
 #include <array>
 
+#include "common/utility.h"
+
 InstructionArm decodeHashArm(int hash)
 {
-    if ((hash & 0b1110'0000'0000) == 0b1010'0000'0000) return InstructionArm::BranchLink;
-    if ((hash & 0b1110'0000'0000) == 0b1000'0000'0000) return InstructionArm::BlockDataTransfer;
+    if ((hash & 0b1111'0000'0000) == 0b1111'0000'0000) return InstructionArm::SoftwareInterrupt;
     if ((hash & 0b1110'0000'0000) == 0b1100'0000'0000) return InstructionArm::CoprocessorDataTransfers;
     if ((hash & 0b1111'0000'0001) == 0b1110'0000'0000) return InstructionArm::CoprocessorDataOperations;
     if ((hash & 0b1111'0000'0001) == 0b1110'0000'0001) return InstructionArm::CoprocessorRegisterTransfers;
-    if ((hash & 0b1111'0000'0000) == 0b1111'0000'0000) return InstructionArm::SoftwareInterrupt;
+    if ((hash & 0b1110'0000'0000) == 0b1010'0000'0000) return InstructionArm::BranchLink;
+    if ((hash & 0b1110'0000'0000) == 0b1000'0000'0000) return InstructionArm::BlockDataTransfer;
     if ((hash & 0b1110'0000'0001) == 0b0110'0000'0001) return InstructionArm::Undefined;
     if ((hash & 0b1100'0000'0000) == 0b0100'0000'0000) return InstructionArm::SingleDataTransfer;
     if ((hash & 0b1111'1111'1111) == 0b0001'0010'0001) return InstructionArm::BranchExchange;
@@ -18,7 +20,16 @@ InstructionArm decodeHashArm(int hash)
     if ((hash & 0b1111'1011'1111) == 0b0001'0000'1001) return InstructionArm::SingleDataSwap;
     if ((hash & 0b1110'0000'1001) == 0b0000'0000'1001) return InstructionArm::HalfSignedDataTransfer;
     if ((hash & 0b1101'1001'0000) == 0b0001'0000'0000) return InstructionArm::StatusTransfer;
-    if ((hash & 0b1100'0000'0000) == 0b0000'0000'0000) return InstructionArm::DataProcessing;
+    if ((hash & 0b1100'0000'0000) == 0b0000'0000'0000)
+    {
+        int flags  = bits<4, 1>(hash);
+        int opcode = bits<5, 4>(hash);
+
+        if ((opcode >> 2) == 0b10 && !flags)
+            return InstructionArm::Undefined;
+
+        return InstructionArm::DataProcessing;
+    }
 
     return InstructionArm::Undefined;
 }
@@ -46,7 +57,19 @@ InstructionThumb decodeHashThumb(int hash)
     if ((hash & 0b1110'0000) == 0b0000'0000) return InstructionThumb::MoveShiftedRegister;
     if ((hash & 0b1110'0000) == 0b0010'0000) return InstructionThumb::ImmediateOperations;
     if ((hash & 0b1111'1100) == 0b0100'0000) return InstructionThumb::ALUOperations;
-    if ((hash & 0b1111'1100) == 0b0100'0100) return InstructionThumb::HighRegisterOperations;
+    if ((hash & 0b1111'1100) == 0b0100'0100)
+    {
+        int hs     = bits<0, 1>(hash);
+        int hd     = bits<1, 1>(hash);
+        int opcode = bits<2, 2>(hash);
+
+        if (opcode == 0b11 && hs == 0 && hd == 0)
+            return InstructionThumb::Undefined;
+        if (opcode != 0b11 && hd == 1)
+            return InstructionThumb::Undefined;
+
+        return InstructionThumb::HighRegisterOperations;
+    }
     if ((hash & 0b1111'1000) == 0b0100'1000) return InstructionThumb::LoadPCRelative;
     if ((hash & 0b1111'0010) == 0b0101'0000) return InstructionThumb::LoadStoreRegisterOffset;
     if ((hash & 0b1111'0010) == 0b0101'0010) return InstructionThumb::LoadStoreByteHalf;
@@ -58,7 +81,17 @@ InstructionThumb decodeHashThumb(int hash)
     if ((hash & 0b1111'0110) == 0b1011'0100) return InstructionThumb::PushPopRegisters;
     if ((hash & 0b1111'0000) == 0b1100'0000) return InstructionThumb::LoadStoreMultiple;
     if ((hash & 0b1111'1111) == 0b1101'1111) return InstructionThumb::SoftwareInterrupt;
-    if ((hash & 0b1111'0000) == 0b1101'0000) return InstructionThumb::ConditionalBranch;
+    if ((hash & 0b1111'0000) == 0b1101'0000)
+    {
+        int condition = bits<2, 4>(hash);
+
+        if (condition == 0b1110)
+            return InstructionThumb::Undefined;
+        if (condition == 0b1111)
+            return InstructionThumb::Undefined;
+
+        return InstructionThumb::ConditionalBranch;
+    }
     if ((hash & 0b1111'1000) == 0b1110'0000) return InstructionThumb::UnconditionalBranch;
     if ((hash & 0b1111'0000) == 0b1111'0000) return InstructionThumb::LongBranchLink;
 

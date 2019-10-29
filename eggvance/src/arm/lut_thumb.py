@@ -13,7 +13,7 @@ def matches(pattern, value):
 
 def decode(x):
     """Decodes instruction hash"""
-    if matches("00011xxxxx", x): 
+    if matches("00011xxxxx", x):
         rn     = bits(0, 3, x)
         opcode = bits(3, 2, x)
         return "AddSubtract<{rn}, {opcode}>".format(
@@ -21,12 +21,10 @@ def decode(x):
             opcode=opcode
         )
 
-    if matches("000xxxxxxx", x): 
+    if matches("000xxxxxxx", x):
         offset = bits(0, 5, x)
         opcode = bits(5, 2, x)
-        if opcode == 0b11:
-            return "Undefined"
-        return "MoveShiftedRegister<{offset: >2}, {opcode}>".format(
+        return "MoveShiftedRegister<{offset}, {opcode}>".format(
             offset=offset,
             opcode=opcode
         )
@@ -41,7 +39,7 @@ def decode(x):
 
     if matches("010000xxxx", x):
         opcode = bits(0, 4, x)
-        return "ALUOperations<{opcode: >2}>".format(
+        return "ALUOperations<{opcode}>".format(
             opcode=opcode
         )
 
@@ -84,7 +82,7 @@ def decode(x):
     if matches("011xxxxxxx", x): 
         offset = bits(0, 5, x)
         opcode = bits(5, 2, x)
-        return "LoadStoreImmediateOffset<{offset: >2}, {opcode}>".format(
+        return "LoadStoreImmediateOffset<{offset}, {opcode}>".format(
             offset=offset,
             opcode=opcode
         )
@@ -92,7 +90,7 @@ def decode(x):
     if matches("1000xxxxxx", x):
         offset = bits(0, 5, x)
         load   = bits(5, 1, x)
-        return "LoadStoreHalf<{offset: >2}, {load}>".format(
+        return "LoadStoreHalf<{offset}, {load}>".format(
             offset=offset,
             load=load
         )
@@ -142,7 +140,7 @@ def decode(x):
         condition = bits(2, 4, x)
         if condition in (0b1110, 0b1111):
             return "Undefined"
-        return "ConditionalBranch<{condition: >2}>".format(
+        return "ConditionalBranch<{condition}>".format(
             condition=condition
         )
 

@@ -656,7 +656,7 @@ const std::string Thumb_LoadStoreImmediateOffset(u16 instr)
     int offset = bits< 6, 5>(instr);
     int opcode = bits<11, 2>(instr);
 
-    offset <<= opcode & 0x2;
+    offset <<= ~opcode & 0x2;
 
     static constexpr const char* mnemonics[4] = {
         "str", "strb", "ldr", "ldrb"

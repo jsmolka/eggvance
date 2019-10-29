@@ -5,7 +5,7 @@
 
 #include "common/integer.h"
 
-template<std::size_t tsize, std::size_t talign = tsize>
+template<std::size_t size_, std::size_t align_ = size_>
 class RAM
 {
 public:
@@ -19,7 +19,7 @@ public:
 
     inline std::size_t size() const
     {
-        return tsize;
+        return size_;
     }
 
     inline void fill(u8 value)
@@ -43,14 +43,14 @@ private:
     template<typename T>
     inline T read(u32 addr)
     {
-        addr &= talign - sizeof(T);
+        addr &= align_ - sizeof(T);
         return *data<T>(mirror(addr));
     }
 
     template<typename T>
     inline void write(u32 addr, T value)
     {
-        addr &= talign - sizeof(T);
+        addr &= align_ - sizeof(T);
         *data<T>(mirror(addr)) = value;
     }
 
@@ -59,5 +59,5 @@ private:
         return addr;
     }
 
-    u8 ram[tsize];
+    u8 ram[size_];
 };

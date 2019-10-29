@@ -103,7 +103,7 @@ private:
     void Arm_BranchExchange(u32 instr);
     template<int link>
     void Arm_BranchLink(u32 instr);
-    template<int flags_, int opcode, int imm_op>
+    template<int flags, int opcode, int imm_op>
     void Arm_DataProcessing(u32 instr);
     template<int write, int use_spsr, int imm_op>
     void Arm_StatusTransfer(u32 instr);
@@ -111,26 +111,11 @@ private:
     void Arm_Multiply(u32 instr);
     template<int flags, int accumulate, int sign>
     void Arm_MultiplyLong(u32 instr);
-    template<int load,
-        int writeback_, 
-        int byte, 
-        int increment, 
-        int pre_index, 
-        int imm_offset>
+    template<int load, int writeback, int byte, int increment, int pre_index, int imm_offset>
     void Arm_SingleDataTransfer(u32 instr);
-    template<
-        int opcode, 
-        int load, 
-        int writeback_, 
-        int imm_offset, 
-        int increment, 
-        int pre_index>
+    template<int opcode, int load, int writeback, int imm_offset, int increment, int pre_index>
     void Arm_HalfSignedDataTransfer(u32 instr);
-    template<int load, 
-        int writeback_, 
-        int user_mode, 
-        int increment, 
-        int pre_index_>
+    template<int load, int writeback, int user_mode, int increment, int pre_index>
     void Arm_BlockDataTransfer(u32 instr);
     template<int byte>
     void Arm_SingleDataSwap(u32 instr);

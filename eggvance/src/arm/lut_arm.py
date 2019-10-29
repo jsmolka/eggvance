@@ -121,7 +121,9 @@ def decode(x):
         flags  = bits(4, 1, x)
         opcode = bits(5, 4, x)
         imm_op = bits(9, 1, x)
-        return "DataProcessing<{flags}, {opcode: >2}, {imm_op}>".format(
+        if ((opcode >> 2) == 0b10 and not flags):
+            return "Undefined"
+        return "DataProcessing<{flags}, {opcode}, {imm_op}>".format(
             flags=flags,
             opcode=opcode,
             imm_op=imm_op
