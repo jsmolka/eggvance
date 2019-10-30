@@ -7,6 +7,11 @@ class Mosaic : public Register<4>
 public:
     struct Stretch
     {
+        void reset();
+
+        int sourceX(int x) const;
+        int sourceY(int y) const;
+
         int x;
         int y;
     };

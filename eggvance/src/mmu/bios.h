@@ -9,7 +9,7 @@ class BIOS
 public:
     void reset();
 
-    bool init(const std::string& file);
+    bool init();
 
     u8  readByte(u32 addr);
     u16 readHalf(u32 addr);

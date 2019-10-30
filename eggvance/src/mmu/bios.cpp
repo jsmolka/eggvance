@@ -14,11 +14,11 @@ void BIOS::reset()
         last_fetched = 0;
 }
 
-bool BIOS::init(const std::string& file)
+bool BIOS::init()
 {
     static constexpr u64 expected_hash = 0xECCF5E4CEA50816E;
 
-    if (!read(file))
+    if (!read(config.bios_file))
     {
         showMessage("Cannot read BIOS file.");
         return false;

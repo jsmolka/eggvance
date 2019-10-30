@@ -1,3 +1,6 @@
 [submodule "eggvance/external/fmt"]
     path = eggvance/external/fmt
     url = https://github.com/fmtlib/fmt
+[submodule "eggvance/external/toml11"]
+    path = eggvance/external/toml11
+    url = https://github.com/ToruNiina/toml11

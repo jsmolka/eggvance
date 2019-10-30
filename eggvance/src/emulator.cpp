@@ -5,7 +5,7 @@
 #include <fmt/format.h>
 #include <SDL2/SDL.h>
 
-#include "common/config.h"
+#include "common/macros.h"
 #include "arm/arm.h"
 #include "mmu/mmu.h"
 #include "ppu/ppu.h"
@@ -30,11 +30,11 @@ void Emulator::reset()
     keypad.reset();
 }
 
-bool Emulator::init(const Args& args)
+bool Emulator::init(const std::string& rom)
 {
-    config.init(args.dir);
+    config.init();
 
-    if (!mmu.bios.init(config.bios_file))
+    if (!mmu.bios.init())
         return false;
 
     if (!keypad.init())
@@ -43,8 +43,8 @@ bool Emulator::init(const Args& args)
     if (!ppu.backend.init())
         return false;
 
-    if (!args.rom.empty())
-        mmu.gamepak.load(args.rom);
+    if (!rom.empty())
+        mmu.gamepak.load(rom);
 
     return true;
 }
@@ -83,8 +83,9 @@ void Emulator::run()
                 keypad.keyboardEvent(event.key);
                 break;
 
-            case SDL_CONTROLLERBUTTONUP:
             case SDL_CONTROLLERBUTTONDOWN:
+                controllerButtonEvent(event.cbutton);
+            case SDL_CONTROLLERBUTTONUP:
                 keypad.controllerButtonEvent(event.cbutton);
                 break;
 
@@ -172,18 +173,66 @@ bool Emulator::dropAwait()
 
 void Emulator::keyboardEvent(const SDL_KeyboardEvent& event)
 {
-    auto key = event.keysym.sym;
+    auto pair = config.shortcuts.keyboard.find(event.keysym.sym);
+    if (pair == config.shortcuts.keyboard.end())
+        return;
 
-    if (key == config.fullscreen)
-        ppu.backend.fullscreen();
+    handleShortcut(pair->second);
+}
 
-    if (key == config.reset)
-        reset();
+void Emulator::controllerButtonEvent(const SDL_ControllerButtonEvent& event)
+{
+    auto pair = config.shortcuts.controller.find(static_cast<SDL_GameControllerButton>(event.button));
+    if (pair == config.shortcuts.controller.end())
+        return;
 
-    auto pair = config.fps_map.find(key);
-    if (pair != config.fps_map.end())
+    handleShortcut(pair->second);
+}
+
+void Emulator::handleShortcut(Config::Shortcut shortcut)
+{
+    constexpr double hz = 59.737;
+
+    switch (shortcut)
     {
-        limiter.setFPS(pair->second);
+    case Config::Shortcut::Reset:
+        reset();
+        break;
+
+    case Config::Shortcut::Fullscreen:
+        ppu.backend.fullscreen();
+        break;
+
+    case Config::Shortcut::SpeedDefault:
+        limiter.setFPS(hz);
+        break;
+
+    case Config::Shortcut::SpeedOption1:
+    {
+        auto val = config.fps_multipliers[0];
+        limiter.setFPS(hz * config.fps_multipliers[0]);
+        break;
+    }
+
+    case Config::Shortcut::SpeedOption2:
+        limiter.setFPS(hz * config.fps_multipliers[1]);
+        break;
+
+    case Config::Shortcut::SpeedOption3:
+        limiter.setFPS(hz * config.fps_multipliers[2]);
+        break;
+
+    case Config::Shortcut::SpeedOption4:
+        limiter.setFPS(hz * config.fps_multipliers[3]);
+        break;
+
+    case Config::Shortcut::SpeedUnlimited:
+        limiter.setFPS(hz * 100);
+        break;
+
+    default:
+        EGG_UNREACHABLE;
+        break;
     }
 }
 

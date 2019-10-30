@@ -3,12 +3,26 @@
 #include "common/macros.h"
 #include "common/utility.h"
 
+void Mosaic::Stretch::reset()
+{
+    x = 1;
+    y = 1;
+}
+
+int Mosaic::Stretch::sourceX(int x) const
+{
+    return this->x * (x / this->x);
+}
+
+int Mosaic::Stretch::sourceY(int y) const
+{
+    return this->y * (y / this->y);
+}
+
 void Mosaic::reset()
 {
-    bgs.x = 1;
-    bgs.y = 1;
-    obj.x = 1;
-    obj.y = 1;
+    bgs.reset();
+    obj.reset();
 }
 
 void Mosaic::write(int index, u8 byte)

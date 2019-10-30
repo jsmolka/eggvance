@@ -33,7 +33,7 @@ int VRAM::readPixel(u32 addr, int x, int y, Palette::Format format)
 
 u32 VRAM::mirror(u32 addr) const
 {
-    if (addr >= 0x1'8000)
-        addr -= 0x8000;
+    if (addr >= 0x18000)
+        addr -= 0x08000;
     return addr;
 }

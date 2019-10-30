@@ -4,10 +4,11 @@
 #include <filesystem>
 #include <fmt/format.h>
 
+#include "common/config.h"
 #include "common/message.h"
+#include "common/fileutil.h"
 #include "eeprom.h"
 #include "flash.h"
-#include "fileutil.h"
 #include "sram.h"
 
 namespace fs = std::filesystem;
@@ -81,9 +82,12 @@ std::size_t GamePak::size() const
 
 std::string GamePak::toBackupFile(const std::string& file)
 {
-    fs::path path = file;
-    path.replace_extension(".sav");
-    return path.string();
+    fs::path path(file);
+
+    if (config.save_dir.empty())
+        return path.replace_extension(".sav").string();
+    else
+        return fileutil::concat(config.save_dir, path.filename().replace_extension(".sav").string());
 }
 
 std::string GamePak::makeString(u8* data, int size)

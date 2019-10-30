@@ -44,8 +44,8 @@ bool Keypad::init()
 
 void Keypad::keyboardEvent(const SDL_KeyboardEvent& event)
 {
-    auto pair = config.keyboard_map.find(event.keysym.sym);
-    if (pair == config.keyboard_map.end())
+    auto pair = config.controls.keyboard.find(event.keysym.sym);
+    if (pair == config.controls.keyboard.end())
         return;
 
     handleInput(pair->second, event.state == SDL_PRESSED);
@@ -91,8 +91,8 @@ void Keypad::controllerAxisEvent(const SDL_ControllerAxisEvent& event)
 
 void Keypad::controllerButtonEvent(const SDL_ControllerButtonEvent& event)
 {
-    auto pair = config.controller_map.find(static_cast<SDL_GameControllerButton>(event.button));
-    if (pair == config.controller_map.end())
+    auto pair = config.controls.controller.find(static_cast<SDL_GameControllerButton>(event.button));
+    if (pair == config.controls.controller.end())
         return;
 
     handleInput(pair->second, event.state == SDL_PRESSED);

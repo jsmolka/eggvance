@@ -4,8 +4,6 @@
 #include "common/macros.h"
 #include "mmu/mmu.h"
 
-#include <fmt/printf.h>
-
 void PPU::renderBgMode0(int bg)
 {
     static constexpr int flip[2][8] = {
@@ -79,7 +77,7 @@ void PPU::renderBgMode0(int bg)
                         pformat
                     );
                     backgrounds[bg][screen_x] = mmu.palette.colorBG(index, bank);
-                    if (++screen_x == 240)
+                    if (++screen_x == WIDTH)
                         return;
                 }
             }
@@ -88,7 +86,7 @@ void PPU::renderBgMode0(int bg)
                 for (; pixel_x < 8; ++pixel_x)
                 {
                     backgrounds[bg][screen_x] = TRANSPARENT;
-                    if (++screen_x == 240)
+                    if (++screen_x == WIDTH)
                         return;
                 }
             }
@@ -119,7 +117,7 @@ void PPU::renderBgMode2(int bg)
     u32 base_map = 0x800 * bgcnt.map_block;
     u32 base_addr = 0x4000 * bgcnt.tile_block;
 
-    for (int screen_x = 0; screen_x < 240; ++screen_x)
+    for (int screen_x = 0; screen_x < WIDTH; ++screen_x)
     {
         int tex_x = (ref_x + screen_x * pa) >> 8;
         int tex_y = (ref_y + screen_x * pc) >> 8;
@@ -158,16 +156,16 @@ void PPU::renderBgMode2(int bg)
 
 void PPU::renderBgMode3(int bg)
 {
-    u32 addr = 2 * 240 * io.vcount;
+    u32 addr = 2 * WIDTH * io.vcount;
     u16* pixel = mmu.vram.data<u16>(addr);
-    std::copy_n(pixel, 240, &backgrounds[bg][0]);
+    std::copy_n(pixel, WIDTH, &backgrounds[bg][0]);
 }
 
 void PPU::renderBgMode4(int bg)
 {
-    u32 addr = (0xA000 * io.dispcnt.frame) + (240 * io.vcount);
+    u32 addr = (0xA000 * io.dispcnt.frame) + (WIDTH * io.vcount);
     u8* index = mmu.vram.data<u8>(addr);
-    for (int x = 0; x < 240; ++x, ++index)
+    for (int x = 0; x < WIDTH; ++x, ++index)
     {
         backgrounds[bg][x] = mmu.palette.colorBG(*index);
     }
@@ -188,13 +186,9 @@ void PPU::renderBgMode5(int bg)
     }
 }
 
-#include <fmt/printf.h>
 void PPU::renderObjects()
 {
     int line = io.vcount;
-
-    int mosaic_x = io.mosaic.obj.x;
-    int mosaic_y = io.mosaic.obj.y;
 
     for (int e = 127; e >= 0; --e)
     {
@@ -253,8 +247,6 @@ void PPU::renderObjects()
 
         }
 
-        fmt::printf("%d\n", entry.tile);
-
         // Rotation center
         int center_x = x + rect_width / 2;
         int center_y = y + rect_height / 2;
@@ -284,7 +276,7 @@ void PPU::renderObjects()
 
         for (; offset_x < rect_width / 2; ++offset_x, ++screen_x)
         {
-            if (screen_x >= 240)
+            if (screen_x >= WIDTH)
                 break;
 
             // Texture coordinates inside the sprite
@@ -299,8 +291,8 @@ void PPU::renderObjects()
                 if (entry.mosaic)
                 {
                     // Todo: Slighty different compared to real GBA
-                    tex_x = mosaic_x * (tex_x / mosaic_x);
-                    tex_y = mosaic_y * (tex_y / mosaic_y);
+                    tex_x = io.mosaic.obj.sourceX(tex_x);
+                    tex_y = io.mosaic.obj.sourceY(tex_y);
                 }
 
                 int tile_x = tex_x / 8;
