@@ -38,11 +38,6 @@ bool fileutil::exists(const std::string& file)
     return fs::exists(file) && fs::is_regular_file(file);
 }
 
-bool fileutil::isRelative(const std::string& file)
-{
-    return fs::path(file).is_relative();
-}
-
 std::string fileutil::concat(const std::string& left, const std::string& right)
 {
     return fs::path(left).append(right).string();

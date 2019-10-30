@@ -10,7 +10,7 @@ save_dir = ""
 deadzone = 16000
 
 # Custom multipliers can be used to alter the refresh rate of 
-# 59.737Hz. This also affects event processing frequency.
+# 59.737Hz. This also affects the event processing frequency.
 [multipliers]
 fps_multiplier_1 = 2.0
 fps_multiplier_2 = 4.0

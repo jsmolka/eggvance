@@ -425,5 +425,6 @@
   <ItemGroup>
     <None Include="src\arm\lut_arm.py" />
     <None Include="src\arm\lut_thumb.py" />
+    <None Include="eggvance.toml" />
   </ItemGroup>
 </Project>

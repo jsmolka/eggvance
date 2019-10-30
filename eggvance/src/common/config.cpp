@@ -1,7 +1,7 @@
 #include "config.h"
 
 #include <filesystem>
-#include <toml11/toml.hpp>
+#include <toml/toml.h>
 
 #include "common/fileutil.h"
 
@@ -23,43 +23,45 @@ void Config::init()
 
 void Config::initFile()
 {
-    const auto  data      = toml::parse(fileutil::toAbsolute("eggvance.toml"));
-    const auto& general   = toml::find(data, "general"    );
-    const auto& emulation = toml::find(data, "multipliers");
-    const auto& controls  = toml::find(data, "controls"   );
-    const auto& shortcuts = toml::find(data, "shortcuts"  );
+    auto stream = std::ifstream(fileutil::toAbsolute("eggvance.toml"));
+    auto result = toml::parse(stream);
+    if (!result.valid())
+        throw std::exception();
 
-    bios_file = toml::find<std::string>(general, "bios_file");
-    save_dir  = toml::find<std::string>(general, "save_dir");
-    bios_skip = toml::find<bool>(general, "bios_skip");
-    deadzone  = toml::find<int>(general, "deadzone");
+    auto& value = result.value;
 
-    if (fileutil::isRelative(bios_file))
+    bios_file = value.get<std::string>("general.bios_file");
+    save_dir  = value.get<std::string>("general.save_dir");
+    bios_skip = value.get<bool>("general.bios_skip");
+    deadzone  = value.get<int>("general.deadzone");
+
+    if (fs::path(bios_file).is_relative())
     {
         bios_file = fileutil::toAbsolute(bios_file);
     }
-    if (fileutil::isRelative(save_dir) && !save_dir.empty())
+    if (!save_dir.empty())
     {
-        save_dir = fileutil::toAbsolute(save_dir);
-        if (!fs::exists(save_dir))
+        if (fs::path(save_dir).is_relative())
+            save_dir = fileutil::toAbsolute(save_dir);
+        if (!fs::is_directory(save_dir) || !fs::exists(save_dir))
             fs::create_directories(save_dir);
     }
 
-    fps_multipliers[0] = toml::find<double>(emulation, "fps_multiplier_1");
-    fps_multipliers[1] = toml::find<double>(emulation, "fps_multiplier_2");
-    fps_multipliers[2] = toml::find<double>(emulation, "fps_multiplier_3");
-    fps_multipliers[3] = toml::find<double>(emulation, "fps_multiplier_4");
+    fps_multipliers[0] = value.get<double>("multipliers.fps_multiplier_1");
+    fps_multipliers[1] = value.get<double>("multipliers.fps_multiplier_2");
+    fps_multipliers[2] = value.get<double>("multipliers.fps_multiplier_3");
+    fps_multipliers[3] = value.get<double>("multipliers.fps_multiplier_4");
 
-    const auto a      = toml::find<std::vector<std::string>>(controls, "a"     );
-    const auto b      = toml::find<std::vector<std::string>>(controls, "b"     );
-    const auto up     = toml::find<std::vector<std::string>>(controls, "up"    );
-    const auto down   = toml::find<std::vector<std::string>>(controls, "down"  );
-    const auto left   = toml::find<std::vector<std::string>>(controls, "left"  );
-    const auto right  = toml::find<std::vector<std::string>>(controls, "right" );
-    const auto start  = toml::find<std::vector<std::string>>(controls, "start" );
-    const auto select = toml::find<std::vector<std::string>>(controls, "select");
-    const auto l      = toml::find<std::vector<std::string>>(controls, "l"     );
-    const auto r      = toml::find<std::vector<std::string>>(controls, "r"     );
+    const auto a      = value.get<std::vector<std::string>>("controls.a"     );
+    const auto b      = value.get<std::vector<std::string>>("controls.b"     );
+    const auto up     = value.get<std::vector<std::string>>("controls.up"    );
+    const auto down   = value.get<std::vector<std::string>>("controls.down"  );
+    const auto left   = value.get<std::vector<std::string>>("controls.left"  );
+    const auto right  = value.get<std::vector<std::string>>("controls.right" );
+    const auto start  = value.get<std::vector<std::string>>("controls.start" );
+    const auto select = value.get<std::vector<std::string>>("controls.select");
+    const auto l      = value.get<std::vector<std::string>>("controls.l"     );
+    const auto r      = value.get<std::vector<std::string>>("controls.r"     );
 
     this->controls.keyboard.insert({
         { SDL_GetKeyFromName(a[0].c_str())     , Keypad::Button::A     },
@@ -87,14 +89,14 @@ void Config::initFile()
         { SDL_GameControllerGetButtonFromString(r[1].c_str())     , Keypad::Button::L     } 
     });
 
-    const auto reset         = toml::find<std::vector<std::string>>(shortcuts, "reset"        );
-    const auto fullscreen    = toml::find<std::vector<std::string>>(shortcuts, "fullscreen"   );
-    const auto fps_default   = toml::find<std::vector<std::string>>(shortcuts, "fps_default"  );
-    const auto fps_option_1  = toml::find<std::vector<std::string>>(shortcuts, "fps_option_1" );
-    const auto fps_option_2  = toml::find<std::vector<std::string>>(shortcuts, "fps_option_2" );
-    const auto fps_option_3  = toml::find<std::vector<std::string>>(shortcuts, "fps_option_3" );
-    const auto fps_option_4  = toml::find<std::vector<std::string>>(shortcuts, "fps_option_4" );
-    const auto fps_unlimited = toml::find<std::vector<std::string>>(shortcuts, "fps_unlimited");
+    const auto reset         = value.get<std::vector<std::string>>("shortcuts.reset"        );
+    const auto fullscreen    = value.get<std::vector<std::string>>("shortcuts.fullscreen"   );
+    const auto fps_default   = value.get<std::vector<std::string>>("shortcuts.fps_default"  );
+    const auto fps_option_1  = value.get<std::vector<std::string>>("shortcuts.fps_option_1" );
+    const auto fps_option_2  = value.get<std::vector<std::string>>("shortcuts.fps_option_2" );
+    const auto fps_option_3  = value.get<std::vector<std::string>>("shortcuts.fps_option_3" );
+    const auto fps_option_4  = value.get<std::vector<std::string>>("shortcuts.fps_option_4" );
+    const auto fps_unlimited = value.get<std::vector<std::string>>("shortcuts.fps_unlimited");
 
     this->shortcuts.keyboard.insert({
         { SDL_GetKeyFromName(reset[0].c_str())        , Shortcut::Reset         },
@@ -126,9 +128,9 @@ void Config::initDefault()
     save_dir  = "";
     deadzone  = 16000;
 
-    fps_multipliers[0] = 0.5;
-    fps_multipliers[1] = 2.0;
-    fps_multipliers[2] = 4.0;
+    fps_multipliers[0] = 2.0;
+    fps_multipliers[1] = 4.0;
+    fps_multipliers[2] = 6.0;
     fps_multipliers[3] = 8.0;
 
     controls.keyboard.clear();

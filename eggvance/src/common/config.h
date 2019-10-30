@@ -23,10 +23,10 @@ public:
 
     void init();
 
-    int deadzone;
-    bool bios_skip;
     std::string bios_file;
     std::string save_dir;
+    bool bios_skip;
+    int deadzone;
 
     struct Controls
     {
