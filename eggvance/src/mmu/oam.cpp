@@ -30,3 +30,23 @@ void OAM::writeWord(u32 addr, u32 word)
     writeHalf(addr + 0, (word >>  0) & 0xFFFF);
     writeHalf(addr + 2, (word >> 16) & 0xFFFF);
 }
+
+s16 OAM::pa(int parameter)
+{
+    return readHalfFast(0x20 * parameter + 0x06);
+}
+
+s16 OAM::pb(int parameter)
+{
+    return readHalfFast(0x20 * parameter + 0x0E);
+}
+
+s16 OAM::pc(int parameter)
+{
+    return readHalfFast(0x20 * parameter + 0x16);
+}
+
+s16 OAM::pd(int parameter)
+{
+    return readHalfFast(0x20 * parameter + 0x1E);
+}

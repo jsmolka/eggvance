@@ -4,10 +4,11 @@
 #include "common/macros.h"
 #include "mmu/mmu.h"
 
+#include <fmt/printf.h>
+
 void PPU::renderBgMode0(int bg)
 {
-    // Removes branch prediction from flipping
-    static constexpr int flip_lut[2][8] = {
+    static constexpr int flip[2][8] = {
         { 0, 1, 2, 3, 4, 5, 6, 7 },
         { 7, 6, 5, 4, 3, 2, 1, 0 }
     };
@@ -20,7 +21,6 @@ void PPU::renderBgMode0(int bg)
     int tile_size = bgcnt.pformat ? 0x40 : 0x20;
     auto pformat = Palette::Format(bgcnt.pformat);
 
-    // Amount of blocks along axis
     int blocks_x = (bgcnt.screen_size & 0x1) ? 2 : 1;
     int blocks_y = (bgcnt.screen_size & 0x2) ? 2 : 1;
 
@@ -74,8 +74,8 @@ void PPU::renderBgMode0(int bg)
                 {
                     int index = mmu.vram.readPixel(
                         addr,
-                        flip_lut[flip_x][pixel_x],
-                        flip_lut[flip_y][pixel_y],
+                        flip[flip_x][pixel_x],
+                        flip[flip_y][pixel_y],
                         pformat
                     );
                     backgrounds[bg][screen_x] = mmu.palette.colorBG(index, bank);
@@ -188,6 +188,7 @@ void PPU::renderBgMode5(int bg)
     }
 }
 
+#include <fmt/printf.h>
 void PPU::renderObjects()
 {
     int line = io.vcount;
@@ -205,8 +206,8 @@ void PPU::renderObjects()
         int y = entry.y;
 
         // Wraparound
-        if (x >= 240) x -= 512;
-        if (y >= 160) y -= 256;
+        if (x >= WIDTH ) x -= 512;
+        if (y >= HEIGHT) y -= 256;
 
         int width  = entry.width();
         int height = entry.height();
@@ -245,11 +246,14 @@ void PPU::renderObjects()
 
         if (entry.affine)
         {
-            pa = mmu.oam.readHalf(0x20 * entry.paramter + 0x06);
-            pb = mmu.oam.readHalf(0x20 * entry.paramter + 0x0E);
-            pc = mmu.oam.readHalf(0x20 * entry.paramter + 0x16);
-            pd = mmu.oam.readHalf(0x20 * entry.paramter + 0x1E);
+            pa = mmu.oam.pa(entry.parameter);
+            pb = mmu.oam.pb(entry.parameter);
+            pc = mmu.oam.pc(entry.parameter);
+            pd = mmu.oam.pd(entry.parameter);
+
         }
+
+        fmt::printf("%d\n", entry.tile);
 
         // Rotation center
         int center_x = x + rect_width / 2;
@@ -304,8 +308,8 @@ void PPU::renderObjects()
 
                 // Get tile address and account for memory mirror
                 u32 addr = base_addr + tile_size * (tiles_per_row * tile_y + tile_x);
-                if (addr > 0x18000)
-                    addr -= 0x8000;
+                if (addr >= 0x18000)
+                    addr -= 0x08000;
 
                 int pixel_x = tex_x % 8;
                 int pixel_y = tex_y % 8;
@@ -321,15 +325,19 @@ void PPU::renderObjects()
                     case GFX_ALPHA:
                         if (entry.priority <= object.prio)
                         {
-                            object.color    = mmu.palette.colorFG(index, bank);
-                            object.opaque   = true;
-                            object.prio = entry.priority;
-                            object.alpha    = entry.gfx_mode == GFX_ALPHA;
+                            object.color  = mmu.palette.colorFGOpaque(index, bank);
+                            object.opaque = true;
+                            object.prio   = entry.priority;
+                            object.alpha  = entry.gfx_mode == GFX_ALPHA;
                         }
                         break;
 
                     case GFX_WINDOW:
                         object.window = true;
+                        break;
+
+                    default:
+                        EGG_UNREACHABLE;
                         break;
                     }
                     objects_exist = true;

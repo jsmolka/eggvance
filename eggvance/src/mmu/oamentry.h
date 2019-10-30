@@ -27,11 +27,11 @@ struct OAMEntry
     int color_mode;   // Color mode (1 = 256/1, 0 = 16/16)
     int shape;        // Object shape (0 = square, 1 = horizontal, 2 = vertical, 3 = prohibited)
 
-    int x;         // X coordinate
-    int paramter;  // Affine paramter (if affine)
-    int flip_x;    // Horizontal flip (if not affine)
-    int flip_y;    // Vertical flip (if not affine)
-    int size;      // Object size
+    int x;          // X coordinate
+    int parameter;  // Affine paramter (if affine)
+    int flip_x;     // Horizontal flip (if not affine)
+    int flip_y;     // Vertical flip (if not affine)
+    int size;       // Object size
 
     int tile;          // Base tile number
     int priority;      // Priority

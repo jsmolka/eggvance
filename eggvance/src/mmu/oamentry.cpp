@@ -54,11 +54,11 @@ void OAMEntry::writeHalf(int attr, u16 half)
         break;
 
     case 2:
-        x        = bits< 0, 9>(half);
-        paramter = bits< 9, 5>(half);
-        flip_x   = bits<12, 1>(half);
-        flip_y   = bits<13, 1>(half);
-        size     = bits<14, 2>(half);
+        x         = bits< 0, 9>(half);
+        parameter = bits< 9, 5>(half);
+        flip_x    = bits<12, 1>(half);
+        flip_y    = bits<13, 1>(half);
+        size      = bits<14, 2>(half);
         break;
 
     case 4:
