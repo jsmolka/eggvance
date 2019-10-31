@@ -1,11 +1,15 @@
 #include "displaycontrol.h"
 
+#include "common/config.h"
 #include "common/macros.h"
 #include "common/utility.h"
 
 void DisplayControl::reset()
 {
     *this = {};
+
+    if (config.bios_skip)
+        force_blank = true;
 }
 
 u8 DisplayControl::read(int index)

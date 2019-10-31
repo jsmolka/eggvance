@@ -1,6 +1,7 @@
 #include "io.h"
 
 #include "arm/arm.h"
+#include "common/config.h"
 #include "ppu/ppu.h"
 #include "regs/macros.h"
 #include "sys/keypad.h"
@@ -95,10 +96,28 @@ void IO::reset()
 {
     data.fill(0);
 
-    memcontrol[0] = 0;
-    memcontrol[1] = 0;
-    memcontrol[2] = 0;
-    memcontrol[3] = 0;
+    if (config.bios_skip)
+    {
+        memcontrol[0] = 0x20;
+        memcontrol[1] = 0x00;
+        memcontrol[2] = 0x00;
+        memcontrol[3] = 0xD0;
+
+        data.writeByte(REG_RCNT + 1, 0x80);
+        data.writeByte(REG_POSTFLG,  0x01);
+        
+        writeHalf(REG_BG2PA, 0x100);
+        writeHalf(REG_BG2PD, 0x100);
+        writeHalf(REG_BG3PA, 0x100);
+        writeHalf(REG_BG3PD, 0x100);
+    }
+    else
+    {
+        memcontrol[0] = 0x00;
+        memcontrol[1] = 0x00;
+        memcontrol[2] = 0x00;
+        memcontrol[3] = 0x00;
+    }
 }
 
 u8 IO::readByte(u32 addr)
