@@ -711,7 +711,7 @@ const std::string Thumb_LoadStoreImmediateOffset(u16 instr)
     offset <<= ~opcode & 0x2;
 
     static constexpr const char* mnemonics[4] = {
-        "str", "strb", "ldr", "ldrb"
+        "str", "ldr", "strb", "ldrb"
     };
 
     return fmt::format(
@@ -859,7 +859,7 @@ const std::string Thumb_SoftwareInterrupt(u16 instr)
         ? bios_funcs[comment]
         : "unknown";
 
-    return fmt::format(MNEMONIC"{:X} {}", "swi", comment, func);
+    return fmt::format(MNEMONIC"{}", "swi", func);
 
 }
 
