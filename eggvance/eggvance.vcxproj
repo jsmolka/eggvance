@@ -246,7 +246,7 @@
     <ClInclude Include="src\gamepak\flash.h" />
     <ClInclude Include="src\gamepak\sram.h" />
     <ClInclude Include="src\mmu\memmap.h" />
-    <ClInclude Include="src\common\ram.h" />
+    <ClInclude Include="src\mmu\ram.h" />
     <ClInclude Include="src\common\utility.h" />
     <ClInclude Include="src\sys\keypad.h" />
     <ClInclude Include="src\gamepak\gamepak.h" />

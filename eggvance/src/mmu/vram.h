@@ -1,7 +1,7 @@
 #pragma once
 
-#include "common/ram.h"
 #include "palette.h"
+#include "ram.h"
 
 class VRAM : public RAM<0x1'8000, 0x2'0000>
 {

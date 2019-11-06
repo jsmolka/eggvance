@@ -1,7 +1,7 @@
 #pragma once
 
-#include "common/ram.h"
 #include "oamentry.h"
+#include "ram.h"
 
 class OAM : public RAM<0x400>
 {

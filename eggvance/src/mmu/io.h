@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/ram.h"
+#include "ram.h"
 
 class IO
 {
