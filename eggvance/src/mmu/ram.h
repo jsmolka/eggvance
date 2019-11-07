@@ -31,27 +31,36 @@ public:
     inline u16 readHalf(u32 addr) { return read<u16>(addr); }
     inline u32 readWord(u32 addr) { return read<u32>(addr); }
 
-    inline void writeByte(u32 addr, u8  byte) { return write<u8 >(addr, byte); }
-    inline void writeHalf(u32 addr, u16 half) { return write<u16>(addr, half); }
-    inline void writeWord(u32 addr, u32 word) { return write<u32>(addr, word); }
-
     inline u8  readByteFast(u32 addr) { return *data<u8 >(addr); }
     inline u16 readHalfFast(u32 addr) { return *data<u16>(addr); }
     inline u32 readWordFast(u32 addr) { return *data<u32>(addr); }
+
+    inline void writeByte(u32 addr, u8  byte) { write<u8 >(addr, byte); }
+    inline void writeHalf(u32 addr, u16 half) { write<u16>(addr, half); }
+    inline void writeWord(u32 addr, u32 word) { write<u32>(addr, word); }
+
+    inline void writeByteFast(u32 addr, u8  byte) { *data<u8 >(addr) = byte; }
+    inline void writeHalfFast(u32 addr, u16 half) { *data<u16>(addr) = half; }
+    inline void writeWordFast(u32 addr, u32 word) { *data<u32>(addr) = word; }
+
+protected:
+    template<typename T>
+    static inline u32 align(u32 addr)
+    {
+        return addr & (align_ - sizeof(T));
+    }
 
 private:
     template<typename T>
     inline T read(u32 addr)
     {
-        addr &= align_ - sizeof(T);
-        return *data<T>(mirror(addr));
+        return *data<T>(mirror(align<T>(addr)));
     }
 
     template<typename T>
     inline void write(u32 addr, T value)
     {
-        addr &= align_ - sizeof(T);
-        *data<T>(mirror(addr)) = value;
+        *data<T>(mirror(align<T>(addr))) = value;
     }
 
     inline virtual u32 mirror(u32 addr) const
