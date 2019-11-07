@@ -8,6 +8,14 @@
 #include "memmap.h"
 #include "mmu.h"
 
+#define READ1_UNIMP(label) CASE1(label): return data.readByte(addr)
+#define READ2_UNIMP(label) CASE2(label): return data.readByte(addr)
+#define READ4_UNIMP(label) CASE4(label): return data.readByte(addr)
+
+#define WRITE1_UNIMP(label) CASE1(label): data.writeByte(addr, byte); break
+#define WRITE2_UNIMP(label) CASE2(label): data.writeByte(addr, byte); break
+#define WRITE4_UNIMP(label) CASE4(label): data.writeByte(addr, byte); break
+
 IO::IO()
 {
     std::memset(masks, 0xFF, sizeof(masks));
