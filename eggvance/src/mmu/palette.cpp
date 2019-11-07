@@ -30,15 +30,15 @@ u16 Palette::colorBG(int index, int bank)
 
 u16 Palette::colorFGOpaque(int index, int bank)
 {
-    return readHalfFast(0x200 + 0x20 * bank + 2 * index);
+    return readHalfFast(0x200 + 0x20 * bank + 2 * index) & 0x7FFF;
 }
 
 u16 Palette::colorBGOpaque(int index, int bank)
 {
-    return readHalfFast(0x20 * bank + 2 * index);
+    return readHalfFast(0x20 * bank + 2 * index) & 0x7FFF;
 }
 
 u16 Palette::backdrop()
 {
-    return readHalfFast(0);
+    return readHalfFast(0) & 0x7FFF;
 }
