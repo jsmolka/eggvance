@@ -10,6 +10,8 @@ public:
     u8 read(int index);
     void write(int index, u8 byte);
 
+    u32 frameBase() const;
+
     bool active() const;
 
     int mode;

@@ -41,6 +41,11 @@ void DisplayControl::write(int index, u8 byte)
     data[index] = byte;
 }
 
+u32 DisplayControl::frameBase() const
+{
+    return 0xA000 * frame;
+}
+
 bool DisplayControl::active() const
 {
     static constexpr int masks[8] = {

@@ -156,15 +156,18 @@ void PPU::renderBgMode2(int bg)
 
 void PPU::renderBgMode3(int bg)
 {
-    u32 addr = 2 * WIDTH * io.vcount;
-    u16* pixel = mmu.vram.data<u16>(addr);
-    std::copy_n(pixel, WIDTH, &backgrounds[bg][0]);
+    u16* color = mmu.vram.data<u16>(2 * WIDTH * io.vcount);
+
+    for (int x = 0; x < WIDTH; ++x, ++color)
+    {
+        backgrounds[bg][x] = *color & 0x7FFF;
+    }
 }
 
 void PPU::renderBgMode4(int bg)
 {
-    u32 addr = (0xA000 * io.dispcnt.frame) + (WIDTH * io.vcount);
-    u8* index = mmu.vram.data<u8>(addr);
+    u8* index = mmu.vram.data<u8>(WIDTH * io.vcount + io.dispcnt.frameBase());
+
     for (int x = 0; x < WIDTH; ++x, ++index)
     {
         backgrounds[bg][x] = mmu.palette.colorBG(*index);
@@ -173,12 +176,20 @@ void PPU::renderBgMode4(int bg)
 
 void PPU::renderBgMode5(int bg)
 {
-    if (io.vcount < 128)
+    constexpr int opaque_x = 160;
+    constexpr int opaque_y = 128;
+
+    if (io.vcount < opaque_y)
     {
-        u32 addr = (0xA000 * io.dispcnt.frame) + (2 * 160 * io.vcount);
-        u16* pixel = mmu.vram.data<u16>(addr);
-        pixel = std::copy_n(pixel, 160, &backgrounds[bg][0]);
-        pixel = std::fill_n(pixel,  80, TRANSPARENT);
+        u16* color = mmu.vram.data<u16>(2 * 160 * io.vcount + io.dispcnt.frameBase());
+
+        for (int x = 0; x < WIDTH; ++x, ++color)
+        {
+            if (x < opaque_x)
+                backgrounds[bg][x] = *color & 0x7FFF;
+            else
+                backgrounds[bg][x] = TRANSPARENT;
+        }
     }
     else
     {

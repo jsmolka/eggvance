@@ -144,7 +144,9 @@ void PPU::next()
 void PPU::present()
 {
     if (io.dispcnt.active())
+    {
         backend.present();
+    }
 }
 
 void PPU::renderBg(RenderFunc func, int bg)
