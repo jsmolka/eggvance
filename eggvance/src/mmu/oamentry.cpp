@@ -43,6 +43,7 @@ void OAMEntry::writeHalf(int attr, u16 half)
     switch (attr)
     {
     case 0:
+        attr0       = half;
         y           = bits< 0, 8>(half);
         affine      = bits< 8, 1>(half);
         double_size = bits< 9, 1>(half);
@@ -54,6 +55,7 @@ void OAMEntry::writeHalf(int attr, u16 half)
         break;
 
     case 2:
+        attr1     = half;
         x         = bits< 0, 9>(half);
         parameter = bits< 9, 5>(half);
         flip_x    = bits<12, 1>(half);
@@ -62,6 +64,7 @@ void OAMEntry::writeHalf(int attr, u16 half)
         break;
 
     case 4:
+        attr2        = half;
         tile         = bits< 0, 10>(half);
         priority     = bits<10,  2>(half);
         palette_bank = bits<12,  4>(half);
@@ -81,4 +84,9 @@ int OAMEntry::width() const
 int OAMEntry::height() const
 {
     return sizes[shape][size][1];
+}
+
+bool OAMEntry::isUninitialized() const
+{
+    return attr0 == 0 && attr1 == 0 && attr2 == 0;
 }

@@ -204,7 +204,7 @@ void PPU::renderObjects()
     for (int e = 127; e >= 0; --e)
     {
         const auto& entry = mmu.oam.entry(e);
-        if (!entry.affine && entry.disabled)
+        if ((!entry.affine && entry.disabled) || entry.isUninitialized())
             continue;
 
         int x = entry.x;

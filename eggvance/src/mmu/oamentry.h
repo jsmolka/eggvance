@@ -39,4 +39,11 @@ struct OAMEntry
 
     int width() const;
     int height() const;
+
+    bool isUninitialized() const;
+
+private:
+    u16 attr0;
+    u16 attr1;
+    u16 attr2;
 };
