@@ -16,6 +16,8 @@ public:
     u32 readWord(u32 addr);
 
 private:
+    u32 readProtected(u32 addr) const;
+
     bool read(const std::string& file);
     static u64 hash(u32* data, int size);
 

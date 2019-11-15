@@ -36,7 +36,7 @@ u8 BIOS::readByte(u32 addr)
     if (arm.pc < data.size())
         return data.readByte(addr);
     else
-        return last_fetched;
+        return readProtected(addr);
 }
 
 u16 BIOS::readHalf(u32 addr)
@@ -44,7 +44,7 @@ u16 BIOS::readHalf(u32 addr)
     if (arm.pc < data.size())
         return data.readHalf(addr);
     else
-        return last_fetched;
+        return readProtected(addr);
 }
 
 u32 BIOS::readWord(u32 addr)
@@ -52,7 +52,12 @@ u32 BIOS::readWord(u32 addr)
     if (arm.pc < data.size())
         return last_fetched = data.readWord(addr);
     else
-        return last_fetched;
+        return readProtected(addr);
+}
+
+u32 BIOS::readProtected(u32 addr) const
+{
+    return last_fetched >> (addr & 0x3);
 }
 
 bool BIOS::read(const std::string& file)
