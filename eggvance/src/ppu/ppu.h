@@ -4,8 +4,8 @@
 
 #include "buffer.h"
 #include "layers.h"
+#include "point.h"
 #include "ppuio.h"
-#include "texture.h"
 #include "videobackend.h"
 
 class PPU
@@ -34,7 +34,7 @@ private:
 
     using RenderFunc = void(PPU::*)(int);
 
-    Texture transform(int bg, int x) const;
+    Point transform(int bg, int x) const;
 
     void renderBg(RenderFunc func, int bg);
     void renderBgMode0(int bg);

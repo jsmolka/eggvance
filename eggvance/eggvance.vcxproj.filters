@@ -210,9 +210,6 @@
     <ClCompile Include="src\common\fileutil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ppu\texture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="icon\icon.h">
@@ -419,7 +416,10 @@
     <ClInclude Include="src\mmu\ram.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\ppu\texture.h">
+    <ClInclude Include="src\ppu\point.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ppu\dimensions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

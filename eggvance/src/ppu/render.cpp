@@ -4,14 +4,16 @@
 #include "common/macros.h"
 #include "mmu/mmu.h"
 
-Texture PPU::transform(int bg, int x) const
+static constexpr Dimensions screen(SCREEN_W, SCREEN_H);
+
+Point PPU::transform(int bg, int x) const
 {
     bg -= 2;
 
-    return {
-        .x = (io.bgx[bg].internal + io.bgpa[bg].parameter * x) >> 8,
-        .y = (io.bgy[bg].internal + io.bgpc[bg].parameter * x) >> 8
-    };
+    return Point(
+        (io.bgx[bg].internal + io.bgpa[bg].parameter * x) >> 8,
+        (io.bgy[bg].internal + io.bgpc[bg].parameter * x) >> 8
+    );
 }
 
 void PPU::renderBg(RenderFunc func, int bg)
@@ -193,7 +195,7 @@ void PPU::renderBgMode3(int bg)
     {
         const auto tex = transform(bg, x);
 
-        if (!tex.inBounds(SCREEN_W, SCREEN_H))
+        if (!tex.inBounds(screen))
         {
             backgrounds[bg][x] = TRANSPARENT;
             continue;
@@ -202,7 +204,7 @@ void PPU::renderBgMode3(int bg)
         int offset_x = sizeof(u16) * tex.x;
         int offset_y = sizeof(u16) * SCREEN_W * tex.y;
 
-        backgrounds[bg][x] = mmu.vram.readHalfFast(offset_y + offset_x) & 0x7FFF;
+        backgrounds[bg][x] = mmu.vram.readHalfFast(offset_y + offset_x) & COLOR_MASK;
     }
 }
 
@@ -214,7 +216,7 @@ void PPU::renderBgMode4(int bg)
     {
         const auto tex = transform(bg, x);
 
-        if (!tex.inBounds(SCREEN_W, SCREEN_H))
+        if (!tex.inBounds(screen))
         {
             backgrounds[bg][x] = TRANSPARENT;
             continue;
@@ -231,8 +233,7 @@ void PPU::renderBgMode4(int bg)
 
 void PPU::renderBgMode5(int bg)
 {
-    constexpr int bitmap_w = 160;
-    constexpr int bitmap_h = 128;
+    constexpr Dimensions bitmap = { 160, 128 };
 
     u32 frame = io.dispcnt.frameBase();
 
@@ -240,16 +241,16 @@ void PPU::renderBgMode5(int bg)
     {
         const auto tex = transform(bg, x);
 
-        if (!tex.inBounds(bitmap_w, bitmap_h))
+        if (!tex.inBounds(bitmap))
         {
             backgrounds[bg][x] = TRANSPARENT;
             continue;
         }
 
         int offset_x = sizeof(u16) * tex.x;
-        int offset_y = sizeof(u16) * bitmap_w * tex.y;
+        int offset_y = sizeof(u16) * bitmap.w * tex.y;
 
-        backgrounds[bg][x] = mmu.vram.readHalfFast(frame + offset_y + offset_x);
+        backgrounds[bg][x] = mmu.vram.readHalfFast(frame + offset_y + offset_x) & COLOR_MASK;
     }
 }
 
@@ -267,7 +268,7 @@ void PPU::renderObjects()
         int y = entry.y;
 
         // Wraparound
-        if (x >= SCREEN_W ) x -= 512;
+        if (x >= SCREEN_W) x -= 512;
         if (y >= SCREEN_H) y -= 256;
 
         int width  = entry.width();
