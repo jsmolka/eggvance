@@ -153,6 +153,7 @@
     <ClCompile Include="src\common\message.cpp" />
     <ClCompile Include="src\mmu\io.cpp" />
     <ClCompile Include="src\ppu\collapse.cpp" />
+    <ClCompile Include="src\ppu\texture.cpp" />
     <ClCompile Include="src\regs\bgparameter.cpp" />
     <ClCompile Include="src\regs\bgreference.cpp" />
     <ClCompile Include="src\regs\blendalpha.cpp" />
@@ -217,6 +218,7 @@
     <ClInclude Include="src\common\macros.h" />
     <ClInclude Include="src\common\message.h" />
     <ClInclude Include="src\mmu\io.h" />
+    <ClInclude Include="src\ppu\texture.h" />
     <ClInclude Include="src\regs\bgparameter.h" />
     <ClInclude Include="src\regs\bgreference.h" />
     <ClInclude Include="src\regs\blendalpha.h" />

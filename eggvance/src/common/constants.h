@@ -4,6 +4,6 @@
 #  undef TRANSPARENT
 #endif
 
-constexpr int WIDTH  = 240;
-constexpr int HEIGHT = 160;
+constexpr int SCREEN_W  = 240;
+constexpr int SCREEN_H = 160;
 constexpr int TRANSPARENT = 0x8000;

@@ -25,8 +25,8 @@ Emulator::Emulator()
 void Emulator::reset()
 {
     arm.reset();
-    mmu.reset();
     ppu.reset();
+    mmu.reset();
     keypad.reset();
 }
 

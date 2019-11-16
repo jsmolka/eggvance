@@ -1,5 +1,7 @@
 #include "ppuio.h"
 
+#include "common/config.h"
+
 void PPUIO::reset()
 {
     dispcnt.reset();
@@ -32,4 +34,12 @@ void PPUIO::reset()
     bldcnt.reset();
     bldalpha.reset();
     bldy.reset();
+
+    if (config.bios_skip)
+    {
+        bgpa[0].parameter = 0x100;
+        bgpa[1].parameter = 0x100;
+        bgpd[0].parameter = 0x100;
+        bgpd[1].parameter = 0x100;
+    }
 }

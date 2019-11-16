@@ -32,8 +32,8 @@ void PPU::scanline()
 
     if (io.dispcnt.force_blank)
     {
-        u32* scanline = &backend.buffer[WIDTH * io.vcount];
-        std::fill_n(scanline, WIDTH, 0xFFFFFFFF);
+        u32* scanline = &backend.buffer[SCREEN_W * io.vcount];
+        std::fill_n(scanline, SCREEN_W, 0xFFFFFFFF);
         return;
     }
 
@@ -149,29 +149,6 @@ void PPU::present()
     }
 }
 
-void PPU::renderBg(RenderFunc func, int bg)
-{
-    if (~io.dispcnt.layers & (1 << bg))
-        return;
-
-    if (mosaicAffected(bg))
-    {
-        if (mosaicDominant())
-        {
-            (this->*func)(bg);
-            mosaic(bg);
-        }
-        else
-        {
-            backgrounds[bg].flip();
-        }
-    }
-    else
-    {
-        (this->*func)(bg);
-    }
-}
-
 void PPU::mosaic(int bg)
 {
     int mosaic_x = io.mosaic.bgs.x;
@@ -179,7 +156,7 @@ void PPU::mosaic(int bg)
         return;
 
     u16 color;
-    for (int x = 0; x < WIDTH; ++x)
+    for (int x = 0; x < SCREEN_W; ++x)
     {
         if (x % mosaic_x == 0)
         {

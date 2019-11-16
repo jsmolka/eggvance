@@ -113,11 +113,6 @@ void IO::reset()
 
         data.writeByte(REG_RCNT + 1, 0x80);
         data.writeByte(REG_POSTFLG,  0x01);
-        
-        writeHalf(REG_BG2PA, 0x100);
-        writeHalf(REG_BG2PD, 0x100);
-        writeHalf(REG_BG3PA, 0x100);
-        writeHalf(REG_BG3PD, 0x100);
     }
     else
     {
