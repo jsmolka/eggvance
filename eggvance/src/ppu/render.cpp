@@ -193,16 +193,16 @@ void PPU::renderBgMode3(int bg)
 {
     for (int x = 0; x < SCREEN_W; ++x)
     {
-        const auto tex = transform(bg, x);
+        const auto texture = transform(bg, x);
 
-        if (!tex.inBounds(screen))
+        if (!screen.contains(texture))
         {
             backgrounds[bg][x] = TRANSPARENT;
             continue;
         }
 
-        int offset_x = sizeof(u16) * tex.x;
-        int offset_y = sizeof(u16) * SCREEN_W * tex.y;
+        int offset_x = sizeof(u16) * texture.x;
+        int offset_y = sizeof(u16) * SCREEN_W * texture.y;
 
         backgrounds[bg][x] = mmu.vram.readHalfFast(offset_y + offset_x) & COLOR_MASK;
     }
@@ -214,16 +214,16 @@ void PPU::renderBgMode4(int bg)
 
     for (int x = 0; x < SCREEN_W; ++x)
     {
-        const auto tex = transform(bg, x);
+        const auto texture = transform(bg, x);
 
-        if (!tex.inBounds(screen))
+        if (!screen.contains(texture))
         {
             backgrounds[bg][x] = TRANSPARENT;
             continue;
         }
 
-        int offset_x = tex.x;
-        int offset_y = SCREEN_W * tex.y;
+        int offset_x = texture.x;
+        int offset_y = SCREEN_W * texture.y;
 
         int index = mmu.vram.readByteFast(frame + offset_y + offset_x);
 
@@ -233,22 +233,22 @@ void PPU::renderBgMode4(int bg)
 
 void PPU::renderBgMode5(int bg)
 {
-    constexpr Dimensions bitmap = { 160, 128 };
+    constexpr Dimensions bitmap(160, 128);
 
     u32 frame = io.dispcnt.frameBase();
 
     for (int x = 0; x < SCREEN_W; ++x)
     {
-        const auto tex = transform(bg, x);
+        const auto texture = transform(bg, x);
 
-        if (!tex.inBounds(bitmap))
+        if (!bitmap.contains(texture))
         {
             backgrounds[bg][x] = TRANSPARENT;
             continue;
         }
 
-        int offset_x = sizeof(u16) * tex.x;
-        int offset_y = sizeof(u16) * bitmap.w * tex.y;
+        int offset_x = sizeof(u16) * texture.x;
+        int offset_y = sizeof(u16) * bitmap.w * texture.y;
 
         backgrounds[bg][x] = mmu.vram.readHalfFast(frame + offset_y + offset_x) & COLOR_MASK;
     }
@@ -314,6 +314,9 @@ void PPU::renderObjects()
             pd = mmu.oam.pd(entry.parameter);
 
         }
+
+        Point xp(x, y);
+
 
         // Rotation center
         int center_x = x + rect_width / 2;

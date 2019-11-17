@@ -3,8 +3,8 @@
 #include <vector>
 
 #include "buffer.h"
+#include "dimensions.h"
 #include "layers.h"
-#include "point.h"
 #include "ppuio.h"
 #include "videobackend.h"
 
