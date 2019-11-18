@@ -4,16 +4,18 @@
 #include "common/macros.h"
 #include "mmu/mmu.h"
 
-static constexpr Dimensions screen(SCREEN_W, SCREEN_H);
+constexpr int TILE_SIZE = 8;
+
+constexpr Dimensions screen(SCREEN_W, SCREEN_H);
 
 Point PPU::transform(int bg, int x) const
 {
     bg -= 2;
 
-    return Point(
+    return {
         (io.bgx[bg].internal + io.bgpa[bg].parameter * x) >> 8,
         (io.bgy[bg].internal + io.bgpc[bg].parameter * x) >> 8
-    );
+    };
 }
 
 void PPU::renderBg(RenderFunc func, int bg)
@@ -139,52 +141,41 @@ void PPU::renderBgMode2(int bg)
 {
     const auto& bgcnt = io.bgcnt[bg];
 
-    s16 pa = io.bgpa[bg - 2].parameter;
-    s16 pc = io.bgpc[bg - 2].parameter;
-
-    int ref_x = io.bgx[bg - 2].internal;
-    int ref_y = io.bgy[bg - 2].internal;
-
     int size = bgcnt.size();
 
-    int tiles_per_row = size / 8;
+    u32 base_map  = bgcnt.mapBase();
+    u32 base_addr = bgcnt.tileBase();
 
-    u32 base_map = 0x800 * bgcnt.map_block;
-    u32 base_addr = 0x4000 * bgcnt.tile_block;
-
-    for (int screen_x = 0; screen_x < SCREEN_W; ++screen_x)
+    for (int x = 0; x < SCREEN_W; ++x)
     {
-        int tex_x = (ref_x + screen_x * pa) >> 8;
-        int tex_y = (ref_y + screen_x * pc) >> 8;
+        auto texture = transform(bg, x);
 
-        if (tex_x < 0 || tex_x >= size || tex_y < 0 || tex_y >= size)
+        if (screen.contains(texture))
         {
             if (bgcnt.wraparound)
             {
-                tex_x %= size;
-                tex_y %= size;
+                texture %= size;
 
-                if (tex_x < 0) tex_x += size;
-                if (tex_y < 0) tex_y += size;
+                if (texture.x < 0) texture.x += size;
+                if (texture.y < 0) texture.y += size;
             }
             else
             {
-                backgrounds[bg][screen_x] = TRANSPARENT;
+                backgrounds[bg][x] = TRANSPARENT;
                 continue;
             }
         }
 
-        int tile_x = tex_x / 8;
-        int tile_y = tex_y / 8;
+        const auto tile  = texture / TILE_SIZE;
+        const auto pixel = texture % TILE_SIZE;
 
-        u32 addr_map = base_map + tile_y * tiles_per_row + tile_x;
-        u32 addr = base_addr + 0x40 * mmu.vram.readByteFast(addr_map);
+        int offset_x = tile.x;
+        int offset_y = tile.y * (size / TILE_SIZE);
 
-        int pixel_x = tex_x % 8;
-        int pixel_y = tex_y % 8;
+        u32 addr = base_addr + 0x40 * mmu.vram.readByteFast(base_map + offset_y + offset_y);
 
-        backgrounds[bg][screen_x] = mmu.palette.colorBG(
-            mmu.vram.readPixel(addr, pixel_x, pixel_y, Palette::Format::F256)
+        backgrounds[bg][x] = mmu.palette.colorBG(
+            mmu.vram.readPixel(addr, pixel.x, pixel.y, Palette::Format::F256)
         );
     }
 }
@@ -202,7 +193,7 @@ void PPU::renderBgMode3(int bg)
         }
 
         int offset_x = sizeof(u16) * texture.x;
-        int offset_y = sizeof(u16) * SCREEN_W * texture.y;
+        int offset_y = sizeof(u16) * texture.y * SCREEN_W;
 
         backgrounds[bg][x] = mmu.vram.readHalfFast(offset_y + offset_x) & COLOR_MASK;
     }
@@ -223,7 +214,7 @@ void PPU::renderBgMode4(int bg)
         }
 
         int offset_x = texture.x;
-        int offset_y = SCREEN_W * texture.y;
+        int offset_y = texture.y * SCREEN_W;
 
         int index = mmu.vram.readByteFast(frame + offset_y + offset_x);
 
@@ -248,7 +239,7 @@ void PPU::renderBgMode5(int bg)
         }
 
         int offset_x = sizeof(u16) * texture.x;
-        int offset_y = sizeof(u16) * bitmap.w * texture.y;
+        int offset_y = sizeof(u16) * texture.y * bitmap.w;
 
         backgrounds[bg][x] = mmu.vram.readHalfFast(frame + offset_y + offset_x) & COLOR_MASK;
     }

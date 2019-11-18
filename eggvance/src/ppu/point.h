@@ -25,6 +25,11 @@ struct Point
         return { x / scalar, y / scalar };
     }
 
+    constexpr Point operator%(int scalar) const
+    {
+        return { x % scalar, y % scalar };
+    }
+
     constexpr Point operator+(const Point& other) const
     {
         return { x + other.x, y + other.y };
@@ -43,6 +48,11 @@ struct Point
     constexpr Point operator/(const Point& other) const
     {
         return { x / other.x, y / other.y };
+    }
+
+    constexpr Point operator%(const Point& other) const
+    {
+        return { x % other.x, y % other.y };
     }
 
     constexpr Point& operator+=(int scalar)
@@ -77,6 +87,14 @@ struct Point
         return *this;
     }
 
+    constexpr Point& operator%=(int scalar)
+    {
+        x %= scalar;
+        y %= scalar;
+
+        return *this;
+    }
+
     constexpr Point& operator+=(const Point& other)
     {
         x += other.x;
@@ -105,6 +123,14 @@ struct Point
     {
         x /= other.x;
         y /= other.y;
+
+        return *this;
+    }
+
+    constexpr Point& operator%=(const Point& other)
+    {
+        x %= other.x;
+        y %= other.y;
 
         return *this;
     }

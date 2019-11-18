@@ -14,6 +14,9 @@ public:
     int width() const;
     int height() const;
 
+    u32 mapBase() const;
+    u32 tileBase() const;
+
     int priority;
     int tile_block;
     int mosaic;

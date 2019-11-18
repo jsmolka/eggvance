@@ -57,3 +57,13 @@ int BGControl::height() const
 {
     return sizes[screen_size][1];
 }
+
+u32 BGControl::mapBase() const
+{
+    return 0x800 * map_block;
+}
+
+u32 BGControl::tileBase() const
+{
+    return 0x4000 * tile_block;
+}

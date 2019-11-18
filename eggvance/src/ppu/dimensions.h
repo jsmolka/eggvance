@@ -35,6 +35,11 @@ struct Dimensions
         return { w / scalar, h / scalar };
     }
 
+    constexpr Dimensions operator%(int scalar) const
+    {
+        return { w % scalar, h % scalar };
+    }
+
     constexpr Dimensions operator+(const Dimensions& other) const
     {
         return { w + other.w, h + other.h };
@@ -53,6 +58,11 @@ struct Dimensions
     constexpr Dimensions operator/(const Dimensions& other) const
     {
         return { w / other.w, h / other.h };
+    }
+
+    constexpr Dimensions operator%(const Dimensions& other) const
+    {
+        return { w % other.w, h % other.h };
     }
 
     constexpr Dimensions& operator+=(int scalar)
@@ -87,6 +97,14 @@ struct Dimensions
         return *this;
     }
 
+    constexpr Dimensions& operator%=(int scalar)
+    {
+        w %= scalar;
+        h %= scalar;
+
+        return *this;
+    }
+
     constexpr Dimensions& operator+=(const Dimensions& other)
     {
         w += other.w;
@@ -115,6 +133,14 @@ struct Dimensions
     {
         w /= other.w;
         h /= other.h;
+
+        return *this;
+    }
+
+    constexpr Dimensions& operator%=(const Dimensions& other)
+    {
+        w %= other.w;
+        h %= other.h;
 
         return *this;
     }
