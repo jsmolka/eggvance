@@ -10,8 +10,8 @@ void VRAM::reset()
 void VRAM::writeByte(u32 addr, u8 byte)
 {
     if (ppu.io.dispcnt.mode < 3
-            ? addr < 0x1'0000  
-            : addr < 0x1'4000)
+            ? (addr - 0x600'0000) < 0x1'0000  
+            : (addr - 0x600'0000) < 0x1'4000)
         writeHalf(addr, byte * 0x0101);
 }
 
