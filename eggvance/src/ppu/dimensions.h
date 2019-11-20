@@ -4,6 +4,8 @@
 
 struct Dimensions
 {
+    constexpr Dimensions() {};
+
     constexpr Dimensions(int w, int h)
         : w(w), h(h) { }
 
@@ -145,6 +147,6 @@ struct Dimensions
         return *this;
     }
 
-    int w;
-    int h;
+    int w = 0;
+    int h = 0;
 };

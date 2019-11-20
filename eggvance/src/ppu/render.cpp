@@ -140,8 +140,7 @@ void PPU::renderBgMode0(int bg)
 void PPU::renderBgMode2(int bg)
 {
     const auto& bgcnt = io.bgcnt[bg];
-
-    int size = bgcnt.size();
+    const auto& dims  = bgcnt.dims_aff;
 
     u32 base_map  = bgcnt.mapBase();
     u32 base_addr = bgcnt.tileBase();
@@ -150,14 +149,15 @@ void PPU::renderBgMode2(int bg)
     {
         auto texture = transform(bg, x);
 
-        if (screen.contains(texture))
+        if (!dims.contains(texture))
         {
             if (bgcnt.wraparound)
             {
-                texture %= size;
+                texture.x %= dims.w;
+                texture.y %= dims.h;
 
-                if (texture.x < 0) texture.x += size;
-                if (texture.y < 0) texture.y += size;
+                if (texture.x < 0) texture.x += dims.w;
+                if (texture.y < 0) texture.y += dims.h;
             }
             else
             {
@@ -170,9 +170,9 @@ void PPU::renderBgMode2(int bg)
         const auto pixel = texture % TILE_SIZE;
 
         int offset_x = tile.x;
-        int offset_y = tile.y * (size / TILE_SIZE);
+        int offset_y = tile.y * (dims.w / TILE_SIZE);
 
-        u32 addr = base_addr + 0x40 * mmu.vram.readByteFast(base_map + offset_y + offset_y);
+        u32 addr = base_addr + 0x40 * mmu.vram.readByteFast(base_map + offset_y + offset_x);
 
         backgrounds[bg][x] = mmu.palette.colorBG(
             mmu.vram.readPixel(addr, pixel.x, pixel.y, Palette::Format::F256)

@@ -3,14 +3,6 @@
 #include "common/macros.h"
 #include "common/utility.h"
 
-int BGControl::sizes[4][2] =
-{
-    { 256, 256 },
-    { 512, 256 },
-    { 256, 512 },
-    { 512, 512 }
-};
-
 void BGControl::reset()
 {
     *this = {};
@@ -39,23 +31,10 @@ void BGControl::write(int index, u8 byte)
         map_block   = bits<0, 5>(byte);
         wraparound  = bits<5, 1>(byte);
         screen_size = bits<6, 2>(byte);
+
+        updateDims();
     }
     data[index] = byte;
-}
-
-int BGControl::size() const
-{
-    return 128 << screen_size;
-}
-
-int BGControl::width() const
-{
-    return sizes[screen_size][0];
-}
-
-int BGControl::height() const
-{
-    return sizes[screen_size][1];
 }
 
 u32 BGControl::mapBase() const
@@ -66,4 +45,20 @@ u32 BGControl::mapBase() const
 u32 BGControl::tileBase() const
 {
     return 0x4000 * tile_block;
+}
+
+void BGControl::updateDims()
+{
+    static constexpr int sizes[4][2] =
+    {
+        { 256, 256 },
+        { 512, 256 },
+        { 256, 512 },
+        { 512, 512 }
+    };
+
+    dims_reg.w = sizes[screen_size][0];
+    dims_reg.h = sizes[screen_size][1];
+    dims_aff.w = 128 << screen_size;
+    dims_aff.h = 128 << screen_size;
 }

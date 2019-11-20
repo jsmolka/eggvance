@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ppu/dimensions.h"
 #include "register.h"
 
 class BGControl : public Register<2>
@@ -9,10 +10,6 @@ public:
 
     u8 read(int index);
     void write(int index, u8 byte);
-
-    int size() const;
-    int width() const;
-    int height() const;
 
     u32 mapBase() const;
     u32 tileBase() const;
@@ -25,6 +22,9 @@ public:
     int wraparound;
     int screen_size;
 
+    Dimensions dims_aff;
+    Dimensions dims_reg;
+
 private:
-    static int sizes[4][2];
+    void updateDims();
 };
