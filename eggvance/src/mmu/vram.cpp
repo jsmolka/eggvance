@@ -1,5 +1,6 @@
 #include "vram.h"
 
+#include "common/utility.h"
 #include "ppu/ppu.h"
 
 void VRAM::reset()
@@ -10,9 +11,30 @@ void VRAM::reset()
 void VRAM::writeByte(u32 addr, u8 byte)
 {
     if (ppu.io.dispcnt.mode < 3
-            ? (addr - 0x600'0000) < 0x1'0000  
-            : (addr - 0x600'0000) < 0x1'4000)
+            ? (addr & 0x1'FFFF) < 0x1'0000  
+            : (addr & 0x1'FFFF) < 0x1'4000)
         writeHalf(addr, byte * 0x0101);
+}
+
+int VRAM::readIndex(u32 addr, const Point& pixel, Palette::Format format)
+{
+    return (format == Palette::Format::F256)
+        ? readIndexByte(addr, pixel)
+        : readIndexNibble(addr, pixel);
+}
+
+int VRAM::readIndexByte(u32 addr, const Point& pixel)
+{
+    return readByteFast(addr + pixel.offset(TILE_SIZE));
+}
+
+int VRAM::readIndexNibble(u32 addr, const Point& pixel)
+{
+    int data = readByteFast(addr + pixel.offset(TILE_SIZE) / 2);
+
+    return (pixel.x & 0x1)
+        ? bits<4, 4>(data)
+        : bits<0, 4>(data);
 }
 
 int VRAM::readPixel(u32 addr, int x, int y, Palette::Format format)

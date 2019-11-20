@@ -31,23 +31,13 @@ void BGControl::write(int index, u8 byte)
         map_block   = bits<0, 5>(byte);
         wraparound  = bits<5, 1>(byte);
         screen_size = bits<6, 2>(byte);
-
-        updateDims();
     }
     data[index] = byte;
+
+    update();
 }
 
-u32 BGControl::mapBase() const
-{
-    return 0x800 * map_block;
-}
-
-u32 BGControl::tileBase() const
-{
-    return 0x4000 * tile_block;
-}
-
-void BGControl::updateDims()
+void BGControl::update()
 {
     static constexpr int sizes[4][2] =
     {
@@ -61,4 +51,7 @@ void BGControl::updateDims()
     dims_reg.h = sizes[screen_size][1];
     dims_aff.w = 128 << screen_size;
     dims_aff.h = 128 << screen_size;
+
+    base_map  = 0x0800 * map_block;
+    base_tile = 0x4000 * tile_block;;
 }

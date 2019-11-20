@@ -8,8 +8,7 @@ void DisplayControl::reset()
 {
     *this = {};
 
-    if (config.bios_skip)
-        force_blank = true;
+    force_blank = config.bios_skip;
 }
 
 u8 DisplayControl::read(int index)
@@ -39,11 +38,8 @@ void DisplayControl::write(int index, u8 byte)
         winobj = bits<7, 1>(byte);
     }
     data[index] = byte;
-}
 
-u32 DisplayControl::frameBase() const
-{
-    return 0xA000 * frame;
+    update();
 }
 
 bool DisplayControl::active() const
@@ -59,4 +55,9 @@ bool DisplayControl::active() const
         0b00000
     };
     return layers & masks[mode];
+}
+
+void DisplayControl::update()
+{
+    base_frame = 0xA000 * frame;
 }

@@ -4,7 +4,7 @@
 
 struct Dimensions
 {
-    constexpr Dimensions() {};
+    constexpr Dimensions() { };
 
     constexpr Dimensions(int w, int h)
         : w(w), h(h) { }

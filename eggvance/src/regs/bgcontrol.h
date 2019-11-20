@@ -11,9 +11,6 @@ public:
     u8 read(int index);
     void write(int index, u8 byte);
 
-    u32 mapBase() const;
-    u32 tileBase() const;
-
     int priority;
     int tile_block;
     int mosaic;
@@ -25,6 +22,9 @@ public:
     Dimensions dims_aff;
     Dimensions dims_reg;
 
+    u32 base_map;
+    u32 base_tile;
+
 private:
-    void updateDims();
+    void update();
 };

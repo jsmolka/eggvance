@@ -5,6 +5,11 @@ struct Point
     constexpr Point(int x, int y)
         : x(x), y(y) { }
 
+    constexpr int offset(int width) const
+    {
+        return width * y + x;
+    }
+
     constexpr Point operator+(int scalar) const
     {
         return { x + scalar, y + scalar };

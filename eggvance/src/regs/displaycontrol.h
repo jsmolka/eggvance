@@ -10,8 +10,6 @@ public:
     u8 read(int index);
     void write(int index, u8 byte);
 
-    u32 frameBase() const;
-
     bool active() const;
 
     int mode;
@@ -23,4 +21,9 @@ public:
     int win0;
     int win1;
     int winobj;
+
+    u32 base_frame;
+
+private:
+    void update();
 };
