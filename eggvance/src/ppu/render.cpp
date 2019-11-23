@@ -39,97 +39,71 @@ void PPU::renderBg(RenderFunc func, int bg)
 
 void PPU::renderBgMode0(int bg)
 {
-    static constexpr int flip[2][8] = {
-        { 0, 1, 2, 3, 4, 5, 6, 7 },
-        { 7, 6, 5, 4, 3, 2, 1, 0 }
-    };
-
     const auto& bgcnt = io.bgcnt[bg];
+    const auto& dims  = io.bgcnt[bg].dims_reg;
 
-    int ref_x = io.bghofs[bg].offset;
-    int ref_y = io.bgvofs[bg].offset + io.vcount;
+    Point origin(
+        io.bghofs[bg].offset,
+        io.bgvofs[bg].offset + io.vcount
+    );
+
+    origin.x %= dims.w;
+    origin.y %= dims.h;
+
+    int block = (origin / 256).offset(dims.w / 256);
 
     int tile_size = bgcnt.pformat ? 0x40 : 0x20;
     auto pformat = Palette::Format(bgcnt.pformat);
 
-    int blocks_x = (bgcnt.screen_size & 0x1) ? 2 : 1;
-    int blocks_y = (bgcnt.screen_size & 0x2) ? 2 : 1;
+    auto tile  = origin / 8 % 32;
+    auto pixel = origin % 8;
 
-    // Wraparound
-    ref_x %= (blocks_x * 256);
-    ref_y %= (blocks_y * 256);
-
-    // Current block
-    int block = 0;
-    switch (bgcnt.screen_size)
-    {
-    case 0b00: block = 0; break;
-    case 0b01: block = ref_x / 256; break;
-    case 0b10: block = ref_y / 256; break;
-    case 0b11: block = 2 * (ref_y / 256) + ref_x / 256; break;
-
-    default:
-        EGG_UNREACHABLE;
-        break;
-    }
-
-    // Tiles inside current block
-    int tile_x = (ref_x / 8) % 32;
-    int tile_y = (ref_y / 8) % 32;
-
-    int pixel_x = ref_x % 8;
-    int pixel_y = ref_y % 8;
-
-    u32 base_map = 0x800 * bgcnt.map_block;
-    u32 base_addr = 0x4000 * bgcnt.tile_block;
-
-    int screen_x = 0;
+    int x = 0;
     while (true)
     {
-        u32 addr_map = base_map + 0x800 * block + 2 * (0x20 * tile_y + tile_x);
+        u32 addr_map = bgcnt.base_map + 0x800 * block + sizeof(u16) * tile.offset(0x20);
 
-        // Loop over all horizontal tiles in the block
-        while (tile_x++ < 32)
+        while (tile.x++ < 32)
         {
             int entry = mmu.vram.readHalfFast(addr_map);
-            int tile  = bits<0, 10>(entry);
+            int tile_  = bits<0, 10>(entry);
 
-            u32 addr = base_addr + tile_size * tile;
+            u32 addr = bgcnt.base_tile + tile_size * tile_;
             if (addr < 0x10000)
             {
                 int flip_x = bits<10, 1>(entry);
                 int flip_y = bits<11, 1>(entry);
                 int bank   = pformat == Palette::Format::F256 ? 0 : bits<12, 4>(entry);
 
-                for (; pixel_x < 8; ++pixel_x)
+                for (; pixel.x < 8; ++pixel.x)
                 {
                     int index = mmu.vram.readPixel(
                         addr,
-                        flip[flip_x][pixel_x],
-                        flip[flip_y][pixel_y],
+                        flip_x ? (7 - pixel.x) : pixel.x,
+                        flip_y ? (7 - pixel.y) : pixel.y,
                         pformat
                     );
-                    backgrounds[bg][screen_x] = mmu.palette.colorBG(index, bank);
-                    if (++screen_x == SCREEN_W)
+                    backgrounds[bg][x] = mmu.palette.colorBG(index, bank);
+                    if (++x == SCREEN_W)
                         return;
                 }
             }
             else  // Prevent reading from object memory
             {
-                for (; pixel_x < 8; ++pixel_x)
+                for (; pixel.x < 8; ++pixel.x)
                 {
-                    backgrounds[bg][screen_x] = TRANSPARENT;
-                    if (++screen_x == SCREEN_W)
+                    backgrounds[bg][x] = TRANSPARENT;
+                    if (++x == SCREEN_W)
                         return;
                 }
             }
-            pixel_x = 0;
+            pixel.x = 0;
             // Advance inside map
             addr_map += 2;
         }
-        tile_x = 0;
+        tile.x = 0;
         // Advance to next horizontal block
-        block ^= static_cast<int>(blocks_x == 2);
+        block ^= static_cast<int>((dims.w / 256) == 2);
     }
 }
 
