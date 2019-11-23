@@ -9,6 +9,6 @@ public:
 
     void write(int index, u8 byte);
 
-    int reference;
-    int internal;
+    int value;
+    int current;
 };

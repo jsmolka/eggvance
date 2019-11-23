@@ -11,5 +11,5 @@ void BGOffset::write(int index, u8 byte)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 
-    bcast(offset)[index] = byte;
+    bcast(value)[index] = byte;
 }

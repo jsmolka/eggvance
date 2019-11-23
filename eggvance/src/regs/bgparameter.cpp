@@ -11,5 +11,5 @@ void BGParameter::write(int index, u8 byte)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 
-    bcast(parameter)[index] = byte;
+    bcast(value)[index] = byte;
 }

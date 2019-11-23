@@ -9,5 +9,5 @@ public:
 
     void write(int index, u8 byte);
 
-    int offset;
+    int value;
 };

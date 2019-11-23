@@ -15,6 +15,6 @@ void BGReference::write(int index, u8 byte)
     if (index == 3)
         byte = signExtend<4>(byte);
 
-    bcast(reference)[index] = byte;
-    internal = reference;
+    bcast(value)[index] = byte;
+    current = value;
 }

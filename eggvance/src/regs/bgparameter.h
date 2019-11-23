@@ -9,5 +9,5 @@ public:
 
     void write(int index, u8 byte);
 
-    s16 parameter;
+    s16 value;
 };

@@ -4,13 +4,13 @@
 #include "common/macros.h"
 #include "mmu/mmu.h"
 
-Point PPU::transform(int bg, int x) const
+Point PPU::transformBG(int x, int bg) const
 {
     bg -= 2;
 
     return {
-        (io.bgx[bg].internal + io.bgpa[bg].parameter * x) >> 8,
-        (io.bgy[bg].internal + io.bgpc[bg].parameter * x) >> 8
+        (io.bgx[bg].current + io.bgpa[bg].value * x) >> 8,
+        (io.bgy[bg].current + io.bgpc[bg].value * x) >> 8
     };
 }
 
@@ -43,44 +43,42 @@ void PPU::renderBgMode0(int bg)
     const auto& dims  = io.bgcnt[bg].dims_reg;
 
     Point origin(
-        io.bghofs[bg].offset,
-        io.bgvofs[bg].offset + io.vcount
+        io.bghofs[bg].value,
+        io.bgvofs[bg].value + io.vcount
     );
 
     origin.x %= dims.w;
     origin.y %= dims.h;
 
-    int block = (origin / 256).offset(dims.w / 256);
-
     int tile_size = bgcnt.pformat ? 0x40 : 0x20;
     auto pformat = Palette::Format(bgcnt.pformat);
 
-    auto tile  = origin / 8 % 32;
+    auto block = origin / 256;
+    auto tiles = origin / 8 % 32;
     auto pixel = origin % 8;
 
-    int x = 0;
-    while (true)
+    for (int x = 0; true; block.x ^= (dims.w / 256) == 2)
     {
-        u32 addr_map = bgcnt.base_map + 0x800 * block + sizeof(u16) * tile.offset(0x20);
+        int offset = 0x800 * block.offset(dims.w / 256) + 2 * tiles.offset(0x20);
+        u16* entry = mmu.vram.data<u16>(bgcnt.base_map + offset);
 
-        while (tile.x++ < 32)
+        for (; tiles.x < 32; ++tiles.x, ++entry)
         {
-            int entry = mmu.vram.readHalfFast(addr_map);
-            int tile_  = bits<0, 10>(entry);
+            int tile = bits<0, 10>(*entry);
 
-            u32 addr = bgcnt.base_tile + tile_size * tile_;
-            if (addr < 0x10000)
+            u32 addr = bgcnt.base_tile + tile_size * tile;
+            if (addr < 0x1'0000)
             {
-                int flip_x = bits<10, 1>(entry);
-                int flip_y = bits<11, 1>(entry);
-                int bank   = pformat == Palette::Format::F256 ? 0 : bits<12, 4>(entry);
+                int flip_x = 7 * bits<10, 1>(*entry);
+                int flip_y = 7 * bits<11, 1>(*entry);
+                int bank   = pformat == Palette::Format::F256 ? 0 : bits<12, 4>(*entry);
 
                 for (; pixel.x < 8; ++pixel.x)
                 {
                     int index = mmu.vram.readPixel(
                         addr,
-                        flip_x ? (7 - pixel.x) : pixel.x,
-                        flip_y ? (7 - pixel.y) : pixel.y,
+                        pixel.x ^ flip_x,
+                        pixel.y ^ flip_y,
                         pformat
                     );
                     backgrounds[bg][x] = mmu.palette.colorBG(index, bank);
@@ -88,7 +86,7 @@ void PPU::renderBgMode0(int bg)
                         return;
                 }
             }
-            else  // Prevent reading from object memory
+            else
             {
                 for (; pixel.x < 8; ++pixel.x)
                 {
@@ -98,12 +96,8 @@ void PPU::renderBgMode0(int bg)
                 }
             }
             pixel.x = 0;
-            // Advance inside map
-            addr_map += 2;
         }
-        tile.x = 0;
-        // Advance to next horizontal block
-        block ^= static_cast<int>((dims.w / 256) == 2);
+        tiles.x = 0;
     }
 }
 
@@ -114,7 +108,7 @@ void PPU::renderBgMode2(int bg)
 
     for (int x = 0; x < SCREEN_W; ++x)
     {
-        auto texture = transform(bg, x);
+        auto texture = transformBG(x, bg);
 
         if (!dims.contains(texture))
         {
@@ -150,7 +144,7 @@ void PPU::renderBgMode3(int bg)
 
     for (int x = 0; x < SCREEN_W; ++x)
     {
-        const auto texture = transform(bg, x);
+        const auto texture = transformBG(x, bg);
 
         if (!dims.contains(texture))
         {
@@ -170,7 +164,7 @@ void PPU::renderBgMode4(int bg)
 
     for (int x = 0; x < SCREEN_W; ++x)
     {
-        const auto texture = transform(bg, x);
+        const auto texture = transformBG(x, bg);
 
         if (!dims.contains(texture))
         {
@@ -191,7 +185,7 @@ void PPU::renderBgMode5(int bg)
 
     for (int x = 0; x < SCREEN_W; ++x)
     {
-        const auto texture = transform(bg, x);
+        const auto texture = transformBG(x, bg);
 
         if (!dims.contains(texture))
         {

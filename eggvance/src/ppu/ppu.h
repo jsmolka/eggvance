@@ -34,7 +34,7 @@ private:
 
     using RenderFunc = void(PPU::*)(int);
 
-    Point transform(int bg, int x) const;
+    Point transformBG(int x, int bg) const;
 
     void renderBg(RenderFunc func, int bg);
     void renderBgMode0(int bg);
