@@ -39,7 +39,7 @@ void BGControl::write(int index, u8 byte)
 
 void BGControl::update()
 {
-    static constexpr int sizes[4][2] =
+    static constexpr Dimensions dims[4] =
     {
         { 256, 256 },
         { 512, 256 },
@@ -47,8 +47,7 @@ void BGControl::update()
         { 512, 512 }
     };
 
-    dims_reg.w = sizes[screen_size][0];
-    dims_reg.h = sizes[screen_size][1];
+    dims_reg   = dims[screen_size];
     dims_aff.w = 128 << screen_size;
     dims_aff.h = 128 << screen_size;
 

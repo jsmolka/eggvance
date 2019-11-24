@@ -3,6 +3,7 @@
 #include "common/utility.h"
 #include "common/macros.h"
 #include "mmu/mmu.h"
+#include "mapentry.h"
 
 Point PPU::transformBG(int x, int bg) const
 {
@@ -53,35 +54,36 @@ void PPU::renderBgMode0(int bg)
     int tile_size = bgcnt.pformat ? 0x40 : 0x20;
     auto pformat = Palette::Format(bgcnt.pformat);
 
-    auto block = origin / 256;
-    auto tiles = origin / 8 % 32;
     auto pixel = origin % 8;
+    auto block = origin / 256;
+    auto tile  = origin / 8 % 32;
 
     for (int x = 0; true; block.x ^= (dims.w / 256) == 2)
     {
-        int offset = 0x800 * block.offset(dims.w / 256) + 2 * tiles.offset(0x20);
-        u16* entry = mmu.vram.data<u16>(bgcnt.base_map + offset);
+        int offset = 0x800 * block.offset(dims.w / 256) + 2 * tile.offset(0x20);
+        u16* map = mmu.vram.data<u16>(bgcnt.base_map + offset);
 
-        for (; tiles.x < 32; ++tiles.x, ++entry)
+        for (; tile.x < 32; ++tile.x, ++map)
         {
-            int tile = bits<0, 10>(*entry);
+            MapEntry entry(*map);
 
-            u32 addr = bgcnt.base_tile + tile_size * tile;
+            if (pformat == Palette::Format::F256)
+            {
+                entry.bank = 0;
+            }
+
+            u32 addr = bgcnt.base_tile + tile_size * entry.tile;
             if (addr < 0x1'0000)
             {
-                int flip_x = 7 * bits<10, 1>(*entry);
-                int flip_y = 7 * bits<11, 1>(*entry);
-                int bank   = pformat == Palette::Format::F256 ? 0 : bits<12, 4>(*entry);
-
                 for (; pixel.x < 8; ++pixel.x)
                 {
                     int index = mmu.vram.readPixel(
                         addr,
-                        pixel.x ^ flip_x,
-                        pixel.y ^ flip_y,
+                        pixel.x ^ (7 * entry.flip_x),
+                        pixel.y ^ (7 * entry.flip_y),
                         pformat
                     );
-                    backgrounds[bg][x] = mmu.palette.colorBG(index, bank);
+                    backgrounds[bg][x] = mmu.palette.colorBG(index, entry.bank);
                     if (++x == SCREEN_W)
                         return;
                 }
@@ -97,7 +99,7 @@ void PPU::renderBgMode0(int bg)
             }
             pixel.x = 0;
         }
-        tiles.x = 0;
+        tile.x = 0;
     }
 }
 
