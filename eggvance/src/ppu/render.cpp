@@ -51,50 +51,44 @@ void PPU::renderBgMode0(int bg)
     origin.x %= dims.w;
     origin.y %= dims.h;
 
-    int tile_size = bgcnt.pformat ? 0x40 : 0x20;
-    auto pformat = Palette::Format(bgcnt.pformat);
-
     auto pixel = origin % 8;
     auto block = origin / 256;
     auto tile  = origin / 8 % 32;
 
-    for (int x = 0; true; block.x ^= (dims.w / 256) == 2)
+    for (int x = 0; x < SCREEN_W; block.x ^= (dims.w / 256) == 2)
     {
         int offset = 0x800 * block.offset(dims.w / 256) + 2 * tile.offset(0x20);
+
         u16* map = mmu.vram.data<u16>(bgcnt.base_map + offset);
 
-        for (; tile.x < 32; ++tile.x, ++map)
+        for (; tile.x < 32 && x < SCREEN_W; ++tile.x, ++map)
         {
             MapEntry entry(*map);
 
-            if (pformat == Palette::Format::F256)
+            if (bgcnt.pal_format == Palette::Format::F256)
             {
                 entry.bank = 0;
             }
 
-            u32 addr = bgcnt.base_tile + tile_size * entry.tile;
+            u32 addr = bgcnt.base_tile + (0x20 << bgcnt.pal_format) * entry.tile;
             if (addr < 0x1'0000)
             {
-                for (; pixel.x < 8; ++pixel.x)
+                for (; pixel.x < 8 && x < SCREEN_W; ++pixel.x, ++x)
                 {
                     int index = mmu.vram.readPixel(
                         addr,
-                        pixel.x ^ (7 * entry.flip_x),
-                        pixel.y ^ (7 * entry.flip_y),
-                        pformat
+                        pixel.x ^ (0x7 * entry.flip_x),
+                        pixel.y ^ (0x7 * entry.flip_y),
+                        Palette::Format(bgcnt.pal_format)
                     );
                     backgrounds[bg][x] = mmu.palette.colorBG(index, entry.bank);
-                    if (++x == SCREEN_W)
-                        return;
                 }
             }
             else
             {
-                for (; pixel.x < 8; ++pixel.x)
+                for (; pixel.x < 8 && x < SCREEN_W; ++pixel.x, ++x)
                 {
                     backgrounds[bg][x] = TRANSPARENT;
-                    if (++x == SCREEN_W)
-                        return;
                 }
             }
             pixel.x = 0;
@@ -129,10 +123,10 @@ void PPU::renderBgMode2(int bg)
             }
         }
 
-        const auto tile  = texture / TILE_SIZE;
-        const auto pixel = texture % TILE_SIZE;
+        const auto tile  = texture / 8;
+        const auto pixel = texture % 8;
 
-        int offset = tile.offset(dims.w / TILE_SIZE);
+        int offset = tile.offset(dims.w / 8);
         int entry  = mmu.vram.readByteFast(bgcnt.base_map + offset);
         int index  = mmu.vram.readIndexByte(bgcnt.base_tile + 0x40 * entry, pixel);
 

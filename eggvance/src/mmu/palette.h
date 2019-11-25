@@ -5,7 +5,7 @@
 class Palette : public RAM<0x400>
 {
 public:
-    enum class Format { F16, F256 };
+    enum Format { F16, F256 };
 
     void reset();
 
