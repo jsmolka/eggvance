@@ -2,6 +2,9 @@
 
 struct Point
 {
+    constexpr Point()
+        : Point(0, 0) { }
+
     constexpr Point(int x, int y)
         : x(x), y(y) { }
 

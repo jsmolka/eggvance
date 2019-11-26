@@ -220,6 +220,7 @@
     <ClInclude Include="src\mmu\io.h" />
     <ClInclude Include="src\ppu\dimensions.h" />
     <ClInclude Include="src\ppu\mapentry.h" />
+    <ClInclude Include="src\ppu\matrix.h" />
     <ClInclude Include="src\ppu\point.h" />
     <ClInclude Include="src\regs\bgparameter.h" />
     <ClInclude Include="src\regs\bgreference.h" />

@@ -9,12 +9,12 @@ void Mosaic::Stretch::reset()
     y = 1;
 }
 
-int Mosaic::Stretch::sourceX(int x) const
+int Mosaic::Stretch::mosaicX(int x) const
 {
     return this->x * (x / this->x);
 }
 
-int Mosaic::Stretch::sourceY(int y) const
+int Mosaic::Stretch::mosaicY(int y) const
 {
     return this->y * (y / this->y);
 }

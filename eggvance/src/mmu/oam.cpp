@@ -9,11 +9,6 @@ void OAM::reset()
     fill(0);
 }
 
-const OAMEntry& OAM::entry(int index) const
-{
-    return entries[index];
-}
-
 void OAM::writeHalf(u32 addr, u16 half)
 {
     addr &= 0x3FE;

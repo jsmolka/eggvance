@@ -72,8 +72,8 @@ void Config::initFile()
         { SDL_GetKeyFromName(right[0].c_str()) , Keypad::Button::Right },
         { SDL_GetKeyFromName(start[0].c_str()) , Keypad::Button::Start },
         { SDL_GetKeyFromName(select[0].c_str()), Keypad::Button::Select},
-        { SDL_GetKeyFromName(l[0].c_str())     , Keypad::Button::R     },
-        { SDL_GetKeyFromName(r[0].c_str())     , Keypad::Button::L     } 
+        { SDL_GetKeyFromName(l[0].c_str())     , Keypad::Button::L     },
+        { SDL_GetKeyFromName(r[0].c_str())     , Keypad::Button::R     } 
     });
     
     this->controls.controller.insert({

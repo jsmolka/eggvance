@@ -3,6 +3,7 @@
 #include "common/utility.h"
 #include "common/macros.h"
 #include "mmu/mmu.h"
+#include "matrix.h"
 #include "mapentry.h"
 
 Point PPU::transformBG(int x, int bg) const
@@ -197,154 +198,120 @@ void PPU::renderBgMode5(int bg)
 
 void PPU::renderObjects()
 {
-    int line = io.vcount;
+    const auto& entries = mmu.oam.entries;
 
-    for (int e = 127; e >= 0; --e)
+    for (auto entry = entries.crbegin(); entry != entries.crend(); ++entry)
     {
-        const auto& entry = mmu.oam.entry(e);
-        if ((!entry.affine && entry.disabled) || entry.isUninitialized())
+        if (entry->isDisabled() || entry->isUninitialized())
             continue;
 
-        int x = entry.x;
-        int y = entry.y;
+        const auto& origin = entry->origin;
+        const auto& dims   = entry->dims;
+        const auto& bounds = [&]() {
+            return entry->double_size
+                ? dims * 2
+                : dims;
+        }();
 
-        // Wraparound
-        if (x >= SCREEN_W) x -= 512;
-        if (y >= SCREEN_H) y -= 256;
-
-        int width  = entry.width();
-        int height = entry.height();
-
-        // Bounding rectangle dimensions
-        int rect_width  = width;
-        int rect_height = height;
-
-        if (entry.double_size)
-        {
-            rect_width  <<= 1;
-            rect_height <<= 1;
-        }
-
-        int sprite_line = line - y;
-        if (sprite_line < 0 || sprite_line >= rect_height)
+        if ((origin.x + bounds.w) < 0 || origin.x >= SCREEN_W)
             continue;
 
-        int bank = entry.color_mode ? 0 : entry.palette_bank;
-        int tile_size = entry.color_mode ? 0x40 : 0x20;
-        Palette::Format pformat = entry.color_mode ? Palette::Format::F256 : Palette::Format::F16;
+        int line = io.vcount - origin.y;
+        if (line < 0 || line >= bounds.h)
+            continue;
+
+        int size = entry->tileSize();
+        int bank = entry->paletteBank();
 
         // 1D mapping arranges tiles continuously in memory. 2D mapping arranges 
         // tiles in a 32x32 matrix. The width is halfed to 16 tiles when using 
         // 256 color mode. 
-        int tiles_per_row = io.dispcnt.mapping_1d ? (width / 8) : (entry.color_mode ? 16 : 32);
-
-        bool flip_x = !entry.affine && entry.flip_x;
-        bool flip_y = !entry.affine && entry.flip_y;
-
-        // Initalize with identity
-        s16 pa = 0x100;
-        s16 pb = 0x000;
-        s16 pc = 0x000;
-        s16 pd = 0x100;
-
-        if (entry.affine)
-        {
-            pa = mmu.oam.pa(entry.parameter);
-            pb = mmu.oam.pb(entry.parameter);
-            pc = mmu.oam.pc(entry.parameter);
-            pd = mmu.oam.pd(entry.parameter);
-
-        }
-
-        // Rotation center
-        int center_x = x + rect_width / 2;
-        int center_y = y + rect_height / 2;
-
-        // Rotation center offset
-        int offset_x = -rect_width / 2;
-        int offset_y = line - center_y;
+        int tiles_per_row = io.dispcnt.mapping_1d 
+            ? (entry->dims.w / 8) 
+            : (entry->color_mode ? 16 : 32);
 
         // The base tile defines the start of the object independent of the
         // color mode (and therefore tile_size). In 256/1 color mode only each 
         // second tile may be used.
-        u32 base_addr = 0x10000 + 0x20 * entry.tile;
+        u32 base_addr = 0x10000 + 0x20 * entry->tile;
 
-        int half_width  = width / 2;
-        int half_height = height / 2;
+        const Matrix matrix(
+            entry->affine ? mmu.oam.pa(entry->parameter) : 0x100,
+            entry->affine ? mmu.oam.pb(entry->parameter) : 0x000,
+            entry->affine ? mmu.oam.pc(entry->parameter) : 0x000,
+            entry->affine ? mmu.oam.pd(entry->parameter) : 0x100
+        );
 
-        int pb_y = pb * offset_y;
-        int pd_y = pd * offset_y;
+        const Point center(
+            origin.x + bounds.w / 2,
+            origin.y + bounds.h / 2
+        );
 
-        // Do not calculate data outside of the screen
-        int screen_x = center_x + offset_x;
-        if (screen_x < 0)
+        Point offset(
+            -bounds.w / 2,
+            io.vcount - center.y
+        );
+
+        int beg = std::max(center.x + offset.x, 0);
+        int end = std::min(center.x - offset.x, SCREEN_W);
+
+        offset.x -= (center.x + offset.x) - beg;
+         
+        for (int x = beg; x < end; ++offset.x, ++x)
         {
-            offset_x -= screen_x;
-            screen_x = 0;
-        }
+            auto texture = matrix.multiply(offset);
 
-        for (; offset_x < rect_width / 2; ++offset_x, ++screen_x)
-        {
-            if (screen_x >= SCREEN_W)
+            texture.x += dims.w / 2;
+            texture.y += dims.h / 2;
+
+            if (!dims.contains(texture))
+                continue;
+
+            if (entry->flipX()) texture.x ^= entry->dims.w - 1;
+            if (entry->flipY()) texture.y ^= entry->dims.h - 1;
+            if (entry->mosaic)
+            {
+                texture.x = io.mosaic.obj.mosaicX(texture.x);
+                texture.y = io.mosaic.obj.mosaicY(texture.y);
+            }
+
+            const auto tile  = texture / 8;
+            const auto pixel = texture % 8;
+
+            // Get tile address and account for memory mirror
+            u32 addr = base_addr + size * tile.offset(tiles_per_row);
+            if (addr >= 0x18000)
+                addr -= 0x08000;
+
+            int index = mmu.vram.readIndex(addr, pixel, Palette::Format(entry->color_mode));
+            if (index == 0)
+                continue;
+
+            auto& object = objects[x];
+
+            switch (entry->mode)
+            {
+            case OAMEntry::Mode::ALPHA:
+            case OAMEntry::Mode::NORMAL:
+                if (entry->prio <= object.prio)
+                {
+                    object.color  = mmu.palette.colorFGOpaque(index, bank);
+                    object.opaque = true;
+                    object.prio   = entry->prio;
+                    object.alpha  = entry->mode == OAMEntry::Mode::ALPHA;
+                }
                 break;
 
-            // Texture coordinates inside the sprite
-            int tex_x = ((pa * offset_x + pb_y) >> 8) + half_width;
-            int tex_y = ((pc * offset_x + pd_y) >> 8) + half_height;
+            case OAMEntry::Mode::WINDOW:
+                object.window = true;
+                break;
 
-            if (tex_x >= 0 && tex_x < width && tex_y >= 0 && tex_y < height)
-            {
-                if (flip_x) tex_x = width  - tex_x - 1;
-                if (flip_y) tex_y = height - tex_y - 1;
-
-                if (entry.mosaic)
-                {
-                    // Todo: Slighty different compared to real GBA
-                    tex_x = io.mosaic.obj.sourceX(tex_x);
-                    tex_y = io.mosaic.obj.sourceY(tex_y);
-                }
-
-                int tile_x = tex_x / 8;
-                int tile_y = tex_y / 8;
-
-                // Get tile address and account for memory mirror
-                u32 addr = base_addr + tile_size * (tiles_per_row * tile_y + tile_x);
-                if (addr >= 0x18000)
-                    addr -= 0x08000;
-
-                int pixel_x = tex_x % 8;
-                int pixel_y = tex_y % 8;
-
-                int index = mmu.vram.readPixel(addr, pixel_x, pixel_y, pformat);
-                if (index != 0)
-                {
-                    auto& object = objects[screen_x];
-
-                    switch (entry.gfx_mode)
-                    {
-                    case GFX_NORMAL:
-                    case GFX_ALPHA:
-                        if (entry.priority <= object.prio)
-                        {
-                            object.color  = mmu.palette.colorFGOpaque(index, bank);
-                            object.opaque = true;
-                            object.prio   = entry.priority;
-                            object.alpha  = entry.gfx_mode == GFX_ALPHA;
-                        }
-                        break;
-
-                    case GFX_WINDOW:
-                        object.window = true;
-                        break;
-
-                    default:
-                        EGG_UNREACHABLE;
-                        break;
-                    }
-                    objects_exist = true;
-                    objects_alpha |= object.alpha;
-                }
+            default:
+                EGG_UNREACHABLE;
+                break;
             }
+            objects_exist = true;
+            objects_alpha |= object.alpha;
         }
     }
 }

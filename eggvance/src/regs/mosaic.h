@@ -9,8 +9,8 @@ public:
     {
         void reset();
 
-        int sourceX(int x) const;
-        int sourceY(int y) const;
+        int mosaicX(int x) const;
+        int mosaicY(int y) const;
 
         int x;
         int y;
