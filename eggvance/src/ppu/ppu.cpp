@@ -143,7 +143,7 @@ void PPU::next()
 
 void PPU::present()
 {
-    if (io.dispcnt.active())
+    if (io.dispcnt.isActive())
     {
         backend.present();
     }

@@ -36,6 +36,8 @@ static constexpr Dimensions sizes[4][4] =
 void OAMEntry::reset()
 {
     *this = {};
+
+    update();
 }
 
 void OAMEntry::writeHalf(int attr, u16 half)
@@ -45,7 +47,6 @@ void OAMEntry::writeHalf(int attr, u16 half)
     switch (attr)
     {
     case 0:
-        attr0         = half;
         origin.y      = bits< 0, 8>(half);
         affine        = bits< 8, 1>(half);
         double_size   = bits< 9, 1>(half);
@@ -57,7 +58,6 @@ void OAMEntry::writeHalf(int attr, u16 half)
         break;
 
     case 2:
-        attr1     = half;
         origin.x  = bits< 0, 9>(half);
         parameter = bits< 9, 5>(half);
         flip_x    = bits<12, 1>(half);
@@ -66,7 +66,6 @@ void OAMEntry::writeHalf(int attr, u16 half)
         break;
 
     case 4:
-        attr2 = half;
         tile  = bits< 0, 10>(half);
         prio  = bits<10,  2>(half);
         bank  = bits<12,  4>(half);
@@ -108,11 +107,6 @@ bool OAMEntry::flipY() const
 bool OAMEntry::isDisabled() const
 {
     return !affine && disabled;
-}
-
-bool OAMEntry::isUninitialized() const
-{
-    return attr0 == 0 && attr1 == 0 && attr2 == 0;
 }
 
 void OAMEntry::update()

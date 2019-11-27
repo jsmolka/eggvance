@@ -26,7 +26,6 @@ struct OAMEntry
     bool flipY() const;
 
     bool isDisabled() const;
-    bool isUninitialized() const;
 
     Point origin;
     Dimensions dims;

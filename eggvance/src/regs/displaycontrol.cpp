@@ -9,6 +9,8 @@ void DisplayControl::reset()
     *this = {};
 
     force_blank = config.bios_skip;
+
+    update();
 }
 
 u8 DisplayControl::read(int index)
@@ -42,7 +44,7 @@ void DisplayControl::write(int index, u8 byte)
     update();
 }
 
-bool DisplayControl::active() const
+bool DisplayControl::isActive() const
 {
     static constexpr int masks[8] = {
         0b11111, 
@@ -55,6 +57,11 @@ bool DisplayControl::active() const
         0b00000
     };
     return layers & masks[mode];
+}
+
+bool DisplayControl::isBitmap() const
+{
+    return mode > 2;
 }
 
 void DisplayControl::update()

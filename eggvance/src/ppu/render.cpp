@@ -202,7 +202,7 @@ void PPU::renderObjects()
 
     for (auto entry = entries.crbegin(); entry != entries.crend(); ++entry)
     {
-        if (entry->isDisabled() || entry->isUninitialized())
+        if (entry->isDisabled())
             continue;
 
         const auto& origin = entry->origin;
@@ -261,8 +261,11 @@ void PPU::renderObjects()
             const auto pixel = texture % 8;
 
             u32 addr = entry->base_tile + size * tile.offset(tiles);
-            if (addr >= 0x18000)
-                addr -= 0x08000;
+            if (addr >= 0x1'8000)
+                addr -= 0x0'8000;
+
+            if (addr <= 0x1'3FFF && io.dispcnt.isBitmap())
+                continue;
 
             int index = mmu.vram.readIndex(addr, pixel, Palette::Format(entry->color_mode));
             if (index == 0)

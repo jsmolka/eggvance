@@ -16,7 +16,9 @@ public:
     u8 read(int index);
     void write(int index, u8 byte);
 
-    bool active() const;
+    bool isActive() const;
+    bool isBitmap() const;
+
 
     int mode;
     int frame;

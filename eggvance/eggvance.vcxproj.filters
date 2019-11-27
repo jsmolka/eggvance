@@ -90,9 +90,6 @@
     <ClCompile Include="src\mmu\vram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\mmu\oamentry.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\gamepak\backup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -213,6 +210,9 @@
     <ClCompile Include="src\ppu\mapentry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\ppu\oamentry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="icon\icon.h">
@@ -294,9 +294,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\mmu\vram.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\oamentry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\gamepak\backup.h">
@@ -432,6 +429,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\common\enums.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ppu\oamentry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

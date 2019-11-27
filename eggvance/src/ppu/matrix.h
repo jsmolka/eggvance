@@ -5,7 +5,7 @@
 
 struct Matrix
 {
-    constexpr Matrix(int pa, int pb, int pc, int pd)
+    constexpr Matrix(s16 pa, s16 pb, s16 pc, s16 pd)
         : pa(pa)
         , pb(pb)
         , pc(pc)
@@ -19,8 +19,10 @@ struct Matrix
         };
     }
 
-    int pa;
-    int pb;
-    int pc;
-    int pd;
+    s16 pa;
+    s16 pb;
+    s16 pc;
+    s16 pd;
 };
+
+static constexpr Matrix identity_matrix = { 0x100, 0x000, 0x000, 0x100 };

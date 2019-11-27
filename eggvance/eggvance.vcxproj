@@ -198,7 +198,7 @@
     <ClCompile Include="src\ppu\videobackend.cpp" />
     <ClCompile Include="src\ppu\ppuio.cpp" />
     <ClCompile Include="src\mmu\oam.cpp" />
-    <ClCompile Include="src\mmu\oamentry.cpp" />
+    <ClCompile Include="src\ppu\oamentry.cpp" />
     <ClCompile Include="src\mmu\palette.cpp" />
     <ClCompile Include="src\ppu\ppu.cpp" />
     <ClCompile Include="src\ppu\render.cpp" />
@@ -274,7 +274,7 @@
     <ClInclude Include="src\ppu\ppuio.h" />
     <ClInclude Include="src\ppu\layers.h" />
     <ClInclude Include="src\mmu\oam.h" />
-    <ClInclude Include="src\mmu\oamentry.h" />
+    <ClInclude Include="src\ppu\oamentry.h" />
     <ClInclude Include="src\mmu\palette.h" />
     <ClInclude Include="src\ppu\ppu.h" />
     <ClInclude Include="src\mmu\vram.h" />

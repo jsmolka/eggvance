@@ -2,7 +2,7 @@
 
 #include <array>
 
-#include "oamentry.h"
+#include "ppu/oamentry.h"
 #include "ram.h"
 
 class OAM : public RAM<0x400>
