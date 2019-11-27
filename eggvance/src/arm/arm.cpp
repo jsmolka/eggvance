@@ -53,46 +53,46 @@ void ARM::run(int cycles)
     }
 }
 
-void ARM::request(Interrupt flag)
+void ARM::interrupt(Interrupt flag)
 {
     int mask = static_cast<int>(flag);
 
+    io.int_request |= mask;
+
     if (io.int_enabled & mask)
+    {
         io.haltcnt = false;
 
-    io.int_request |= mask;
+        if (!cpsr.irqd)
+        {
+            interruptHW();
+        }
+    }
 }
 
 void ARM::execute()
 {
     //disasm();
 
-    if (interrupted())
+    if (cpsr.thumb)
     {
-        interruptHW();
+        u16 instr = pipe[0];
+
+        pipe[0] = pipe[1];
+        pipe[1] = readHalf(pc);
+
+        (this->*instr_thumb[instr >> 6])(instr);
     }
     else
-    {            
-        if (cpsr.thumb)
+    {
+        u32 instr = pipe[0];
+
+        pipe[0] = pipe[1];
+        pipe[1] = readWord(pc);
+
+        if (cpsr.check(PSR::Condition(instr >> 28)))
         {
-            u16 instr = pipe[0];
-
-            pipe[0] = pipe[1];
-            pipe[1] = readHalf(pc);
-
-            (this->*instr_thumb[instr >> 6])(instr);
-        }
-        else
-        {
-            u32 instr = pipe[0];
-
-            pipe[0] = pipe[1];
-            pipe[1] = readWord(pc);
-
-            if (cpsr.check(PSR::Condition(instr >> 28)))
-            {
-                (this->*instr_arm[((instr >> 16) & 0xFF0) | ((instr >> 4) & 0xF)])(instr);
-            }
+            (this->*instr_arm[((instr >> 16) & 0xFF0) | ((instr >> 4) & 0xF)])(instr);
         }
     }
     pc += instr_size;
@@ -158,7 +158,7 @@ void ARM::booth(u32 multiplier, bool ones)
     remaining -= internal;
 }
 
-void ARM::interrupt(u32 pc, u32 lr, PSR::Mode mode)
+void ARM::doInterrupt(u32 pc, u32 lr, PSR::Mode mode)
 {
     u32 cpsr = this->cpsr;
     switchMode(mode);
@@ -178,17 +178,12 @@ void ARM::interruptHW()
 {
     u32 lr = pc - 2 * instr_size + 4;
 
-    interrupt(0x18, lr, PSR::Mode::IRQ);
+    doInterrupt(0x18, lr, PSR::Mode::IRQ);
 }
 
 void ARM::interruptSW()
 {
     u32 lr = pc - instr_size;
 
-    interrupt(0x08, lr, PSR::Mode::SVC);
-}
-
-bool ARM::interrupted() const
-{
-    return io.int_master && !cpsr.irqd && (io.int_enabled & io.int_request);
+    doInterrupt(0x08, lr, PSR::Mode::SVC);
 }

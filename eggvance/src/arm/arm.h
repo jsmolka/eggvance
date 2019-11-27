@@ -35,7 +35,7 @@ public:
     void reset();
 
     void run(int cycles);
-    void request(Interrupt flag);
+    void interrupt(Interrupt flag);
 
     DMAController   dma;
     TimerController timer;
@@ -97,10 +97,9 @@ private:
     void idle();
     void booth(u32 multiplier, bool ones);
 
-    void interrupt(u32 pc, u32 lr, PSR::Mode mode);
+    void doInterrupt(u32 pc, u32 lr, PSR::Mode mode);
     void interruptHW();
     void interruptSW();
-    bool interrupted() const;
 
     void Arm_BranchExchange(u32 instr);
     template<int link>

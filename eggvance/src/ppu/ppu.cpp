@@ -109,7 +109,7 @@ void PPU::hblank()
 
     if (io.dispstat.hblank_irq)
     {
-        arm.request(Interrupt::HBlank);
+        arm.interrupt(Interrupt::HBlank);
     }
     arm.dma.signal(DMA::Timing::HBlank);
 }
@@ -126,7 +126,7 @@ void PPU::vblank()
 
     if (io.dispstat.vblank_irq)
     {
-        arm.request(Interrupt::VBlank);
+        arm.interrupt(Interrupt::VBlank);
     }
     arm.dma.signal(DMA::Timing::VBlank);
 }
@@ -136,7 +136,7 @@ void PPU::next()
     io.dispstat.vmatch = io.vcount == io.dispstat.vcompare;
     if (io.dispstat.vmatch && io.dispstat.vmatch_irq)
     {
-        arm.request(Interrupt::VMatch);
+        arm.interrupt(Interrupt::VMatch);
     }
     io.vcount.next();
 }

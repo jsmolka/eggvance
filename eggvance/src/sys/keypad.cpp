@@ -132,7 +132,7 @@ void Keypad::handleInput(Button button, bool pressed)
 
         if (interrupt)
         {
-            arm.request(Interrupt::Keypad);
+            arm.interrupt(Interrupt::Keypad);
         }
     }
 }
