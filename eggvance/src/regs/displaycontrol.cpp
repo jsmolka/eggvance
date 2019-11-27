@@ -27,7 +27,7 @@ void DisplayControl::write(int index, u8 byte)
         mode        = bits<0, 3>(byte);
         frame       = bits<4, 1>(byte);
         oam_hblank  = bits<5, 1>(byte);
-        mapping_1d  = bits<6, 1>(byte);
+        obj_mapping = bits<6, 1>(byte);
         force_blank = bits<7, 1>(byte);
     }
     else

@@ -207,11 +207,7 @@ void PPU::renderObjects()
 
         const auto& origin = entry->origin;
         const auto& dims   = entry->dims;
-        const auto& bounds = [&]() {
-            return entry->double_size
-                ? dims * 2
-                : dims;
-        }();
+        const auto  bounds = entry->dims * (1 << entry->double_size);
 
         if ((origin.x + bounds.w) < 0 || origin.x >= SCREEN_W)
             continue;
@@ -220,20 +216,9 @@ void PPU::renderObjects()
         if (line < 0 || line >= bounds.h)
             continue;
 
-        int size = entry->tileSize();
-        int bank = entry->paletteBank();
-
-        // 1D mapping arranges tiles continuously in memory. 2D mapping arranges 
-        // tiles in a 32x32 matrix. The width is halfed to 16 tiles when using 
-        // 256 color mode. 
-        int tiles_per_row = io.dispcnt.mapping_1d 
-            ? (entry->dims.w / 8) 
-            : (entry->color_mode ? 16 : 32);
-
-        // The base tile defines the start of the object independent of the
-        // color mode (and therefore tile_size). In 256/1 color mode only each 
-        // second tile may be used.
-        u32 base_addr = 0x10000 + 0x20 * entry->tile;
+        int size  = entry->tileSize();
+        int bank  = entry->paletteBank();
+        int tiles = entry->tilesPerRow(io.dispcnt.obj_mapping);
 
         const Matrix matrix(
             entry->affine ? mmu.oam.pa(entry->parameter) : 0x100,
@@ -248,16 +233,13 @@ void PPU::renderObjects()
         );
 
         Point offset(
-            -bounds.w / 2,
+            origin.x - center.x - std::min(origin.x, 0),
             io.vcount - center.y
         );
 
-        int beg = std::max(center.x + offset.x, 0);
-        int end = std::min(center.x - offset.x, SCREEN_W);
+        int end = std::min(origin.x + bounds.w, SCREEN_W);
 
-        offset.x -= (center.x + offset.x) - beg;
-         
-        for (int x = beg; x < end; ++offset.x, ++x)
+        for (int x = center.x + offset.x; x < end; ++offset.x, ++x)
         {
             auto texture = matrix.multiply(offset);
 
@@ -278,8 +260,7 @@ void PPU::renderObjects()
             const auto tile  = texture / 8;
             const auto pixel = texture % 8;
 
-            // Get tile address and account for memory mirror
-            u32 addr = base_addr + size * tile.offset(tiles_per_row);
+            u32 addr = entry->base_tile + size * tile.offset(tiles);
             if (addr >= 0x18000)
                 addr -= 0x08000;
 
@@ -289,21 +270,24 @@ void PPU::renderObjects()
 
             auto& object = objects[x];
 
-            switch (entry->mode)
+            switch (GraphicsMode(entry->graphics_mode))
             {
-            case OAMEntry::Mode::ALPHA:
-            case OAMEntry::Mode::NORMAL:
+            case GraphicsMode::Alpha:
+            case GraphicsMode::Normal:
                 if (entry->prio <= object.prio)
                 {
                     object.color  = mmu.palette.colorFGOpaque(index, bank);
                     object.opaque = true;
                     object.prio   = entry->prio;
-                    object.alpha  = entry->mode == OAMEntry::Mode::ALPHA;
+                    object.alpha  = entry->graphics_mode == int(GraphicsMode::Alpha);
                 }
                 break;
 
-            case OAMEntry::Mode::WINDOW:
+            case GraphicsMode::Window:
                 object.window = true;
+                break;
+
+            case GraphicsMode::Invalid:
                 break;
 
             default:

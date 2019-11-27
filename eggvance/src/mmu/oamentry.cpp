@@ -1,6 +1,7 @@
 #include "oamentry.h"
 
 #include "common/constants.h"
+#include "common/enums.h"
 #include "common/utility.h"
 #include "common/macros.h"
 
@@ -44,15 +45,15 @@ void OAMEntry::writeHalf(int attr, u16 half)
     switch (attr)
     {
     case 0:
-        attr0       = half;
-        origin.y    = bits< 0, 8>(half);
-        affine      = bits< 8, 1>(half);
-        double_size = bits< 9, 1>(half);
-        disabled    = bits< 9, 1>(half);
-        mode    = bits<10, 2>(half);
-        mosaic      = bits<12, 1>(half);
-        color_mode  = bits<13, 1>(half);
-        shape       = bits<14, 2>(half);
+        attr0         = half;
+        origin.y      = bits< 0, 8>(half);
+        affine        = bits< 8, 1>(half);
+        double_size   = bits< 9, 1>(half);
+        disabled      = bits< 9, 1>(half);
+        graphics_mode = bits<10, 2>(half);
+        mosaic        = bits<12, 1>(half);
+        color_mode    = bits<13, 1>(half);
+        shape         = bits<14, 2>(half);
         break;
 
     case 2:
@@ -65,10 +66,10 @@ void OAMEntry::writeHalf(int attr, u16 half)
         break;
 
     case 4:
-        attr2        = half;
-        tile         = bits< 0, 10>(half);
-        prio     = bits<10,  2>(half);
-        palette_bank = bits<12,  4>(half);
+        attr2 = half;
+        tile  = bits< 0, 10>(half);
+        prio  = bits<10,  2>(half);
+        bank  = bits<12,  4>(half);
         break;
 
     default:
@@ -86,7 +87,12 @@ int OAMEntry::tileSize() const
 
 int OAMEntry::paletteBank() const
 {
-    return color_mode ? 0 : palette_bank;
+    return color_mode == int(ColorMode::C256_B1) ? 0 : bank;
+}
+
+int OAMEntry::tilesPerRow(int mapping) const
+{
+    return mapping ? (dims.w / 8) : (32 >> color_mode);
 }
 
 bool OAMEntry::flipX() const
@@ -115,4 +121,6 @@ void OAMEntry::update()
     if (origin.y >= SCREEN_H) origin.y -= 256;
 
     dims = sizes[shape][size];
+
+    base_tile = 0x10000 + 0x20 * tile;
 }
