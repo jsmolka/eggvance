@@ -1,5 +1,7 @@
 #include "oam.h"
 
+#include "common/utility.h"
+
 void OAM::reset()
 {
     for (auto& entry : entries)
@@ -11,19 +13,22 @@ void OAM::reset()
 
 void OAM::writeHalf(u32 addr, u16 half)
 {
-    addr &= 0x3FE;
+    addr = mirror(addr);
+    addr = align<u16>(addr);
+
     int attr = addr & 0x7;
     if (attr != 0x6)
         entries[addr >> 3].writeHalf(attr, half);
 
-    RAM::writeHalf(addr, half);
+    writeHalfFast(addr, half);
 }
 
 void OAM::writeWord(u32 addr, u32 word)
 {
-    addr &= 0x3FC;
-    writeHalf(addr + 0, (word >>  0) & 0xFFFF);
-    writeHalf(addr + 2, (word >> 16) & 0xFFFF);
+    addr = align<u32>(addr);
+
+    writeHalf(addr + 0, bits< 0, 16>(word));
+    writeHalf(addr + 2, bits<16, 16>(word));
 }
 
 s16 OAM::pa(int parameter)

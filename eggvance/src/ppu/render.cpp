@@ -66,21 +66,20 @@ void PPU::renderBgMode0(int bg)
         {
             MapEntry entry(*map);
 
-            if (bgcnt.pal_format == Palette::Format::F256)
+            if (bgcnt.color_mode == int(ColorMode::C256x1))
             {
                 entry.bank = 0;
             }
 
-            u32 addr = bgcnt.base_tile + (0x20 << bgcnt.pal_format) * entry.tile;
+            u32 addr = bgcnt.base_tile + (0x20 << bgcnt.color_mode) * entry.tile;
             if (addr < 0x1'0000)
             {
                 for (; pixel.x < 8 && x < SCREEN_W; ++pixel.x, ++x)
                 {
-                    int index = mmu.vram.readPixel(
+                    int index = mmu.vram.index(
                         addr,
-                        pixel.x ^ (0x7 * entry.flip_x),
-                        pixel.y ^ (0x7 * entry.flip_y),
-                        Palette::Format(bgcnt.pal_format)
+                        { pixel.x ^ (0x7 * entry.flip_x), pixel.y ^ (0x7 * entry.flip_y), },
+                        ColorMode(bgcnt.color_mode)
                     );
                     backgrounds[bg][x] = mmu.palette.colorBG(index, entry.bank);
                 }
@@ -129,7 +128,7 @@ void PPU::renderBgMode2(int bg)
 
         int offset = tile.offset(dims.w / 8);
         int entry  = mmu.vram.readByteFast(bgcnt.base_map + offset);
-        int index  = mmu.vram.readIndexByte(bgcnt.base_tile + 0x40 * entry, pixel);
+        int index  = mmu.vram.index256x1(bgcnt.base_tile + 0x40 * entry, pixel);
 
         backgrounds[bg][x] = mmu.palette.colorBG(index);
     }
@@ -260,14 +259,11 @@ void PPU::renderObjects()
             const auto tile  = texture / 8;
             const auto pixel = texture % 8;
 
-            u32 addr = entry->base_tile + size * tile.offset(tiles);
-            if (addr >= 0x1'8000)
-                addr -= 0x0'8000;
-
-            if (addr <= 0x1'3FFF && io.dispcnt.isBitmap())
+            u32 addr = mmu.vram.mirror(entry->base_tile + size * tile.offset(tiles));
+            if (addr < 0x1'4000 && io.dispcnt.isBitmap())
                 continue;
 
-            int index = mmu.vram.readIndex(addr, pixel, Palette::Format(entry->color_mode));
+            int index = mmu.vram.index(addr, pixel, ColorMode(entry->color_mode));
             if (index == 0)
                 continue;
 

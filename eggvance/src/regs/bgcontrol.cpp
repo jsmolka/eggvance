@@ -24,7 +24,7 @@ void BGControl::write(int index, u8 byte)
         priority   = bits<0, 2>(byte);
         tile_block = bits<2, 2>(byte);
         mosaic     = bits<6, 1>(byte);
-        pal_format = bits<7, 1>(byte);
+        color_mode = bits<7, 1>(byte);
     }
     else
     {

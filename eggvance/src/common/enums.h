@@ -2,6 +2,6 @@
 
 enum class ColorMode
 {
-    C16_B16 = 0,
-    C256_B1 = 1
+    C16x16 = 0,
+    C256x1 = 1
 };

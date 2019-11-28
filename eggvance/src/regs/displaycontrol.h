@@ -19,7 +19,6 @@ public:
     bool isActive() const;
     bool isBitmap() const;
 
-
     int mode;
     int frame;
     int oam_hblank;

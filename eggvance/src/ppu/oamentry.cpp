@@ -86,7 +86,7 @@ int OAMEntry::tileSize() const
 
 int OAMEntry::paletteBank() const
 {
-    return color_mode == int(ColorMode::C256_B1) ? 0 : bank;
+    return color_mode == int(ColorMode::C256x1) ? 0 : bank;
 }
 
 int OAMEntry::tilesPerRow(int mapping) const

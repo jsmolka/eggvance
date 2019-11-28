@@ -14,7 +14,7 @@ public:
     int priority;
     int tile_block;
     int mosaic;
-    int pal_format;
+    int color_mode;
     int map_block;
     int wraparound;
     int screen_size;

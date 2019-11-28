@@ -5,11 +5,22 @@
 
 #include "common/integer.h"
 
-template<std::size_t size_, std::size_t align_ = size_>
+template<std::size_t ram_size>
 class RAM
 {
 public:
     virtual ~RAM() = default;
+
+    template<typename T>
+    static inline u32 align(u32 addr)
+    {
+        return addr & ~(sizeof(T) - 1);
+    }
+
+    inline virtual u32 mirror(u32 addr) const
+    {
+        return addr & (ram_size - 1);
+    }
 
     template<typename T>
     inline T* data(std::size_t addr)
@@ -19,7 +30,7 @@ public:
 
     inline std::size_t size() const
     {
-        return size_;
+        return ram_size;
     }
 
     inline void fill(u8 value)
@@ -43,13 +54,6 @@ public:
     inline void writeHalfFast(u32 addr, u16 half) { *data<u16>(addr) = half; }
     inline void writeWordFast(u32 addr, u32 word) { *data<u32>(addr) = word; }
 
-protected:
-    template<typename T>
-    static inline u32 align(u32 addr)
-    {
-        return addr & (align_ - sizeof(T));
-    }
-
 private:
     template<typename T>
     inline T read(u32 addr)
@@ -63,10 +67,5 @@ private:
         *data<T>(mirror(align<T>(addr))) = value;
     }
 
-    inline virtual u32 mirror(u32 addr) const
-    {
-        return addr;
-    }
-
-    u8 ram[size_];
+    u8 ram[ram_size];
 };
