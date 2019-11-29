@@ -1,19 +1,19 @@
 #pragma once
 
 #include "common/constants.h"
-#include "regs/bgcontrol.h"
-#include "regs/bgoffset.h"
-#include "regs/bgparameter.h"
-#include "regs/bgreference.h"
-#include "regs/blendalpha.h"
-#include "regs/blendcontrol.h"
-#include "regs/blendfade.h"
-#include "regs/displaycontrol.h"
-#include "regs/displaystatus.h"
-#include "regs/mosaic.h"
-#include "regs/vcount.h"
-#include "regs/window.h"
-#include "regs/windowdimension.h"
+#include "registers/bgcontrol.h"
+#include "registers/bgoffset.h"
+#include "registers/bgparameter.h"
+#include "registers/bgreference.h"
+#include "registers/blendalpha.h"
+#include "registers/blendcontrol.h"
+#include "registers/blendfade.h"
+#include "registers/displaycontrol.h"
+#include "registers/displaystatus.h"
+#include "registers/mosaic.h"
+#include "registers/vcount.h"
+#include "registers/window.h"
+#include "registers/windowdimension.h"
 
 class PPUIO
 {

@@ -3,8 +3,8 @@
 #include "arm/arm.h"
 #include "common/config.h"
 #include "ppu/ppu.h"
-#include "regs/macros.h"
-#include "sys/keypad.h"
+#include "registers/macros.h"
+#include "system/keypad.h"
 #include "memmap.h"
 #include "mmu.h"
 

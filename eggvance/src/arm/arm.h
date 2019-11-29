@@ -2,13 +2,13 @@
 
 #include <array>
 
-#include "regs/haltcontrol.h"
-#include "regs/intenabled.h"
-#include "regs/intmaster.h"
-#include "regs/intrequest.h"
-#include "regs/waitcontrol.h"
-#include "sys/dmacontroller.h"
-#include "sys/timercontroller.h"
+#include "registers/haltcontrol.h"
+#include "registers/intenabled.h"
+#include "registers/intmaster.h"
+#include "registers/intrequest.h"
+#include "registers/waitcontrol.h"
+#include "system/dmacontroller.h"
+#include "system/timercontroller.h"
 #include "registers.h"
 
 enum class Interrupt

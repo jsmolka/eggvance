@@ -2,7 +2,7 @@
 
 #include "common/macros.h"
 #include "mmu/memmap.h"
-#include "regs/macros.h"
+#include "registers/macros.h"
 
 void DMAController::reset()
 {

@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <SDL2/SDL_keyboard.h>
 
-#include "sys/keypad.h"
+#include "system/keypad.h"
 
 class Config
 {

@@ -5,11 +5,11 @@
 #include <fmt/format.h>
 #include <SDL2/SDL.h>
 
-#include "common/macros.h"
 #include "arm/arm.h"
+#include "common/macros.h"
 #include "mmu/mmu.h"
 #include "ppu/ppu.h"
-#include "sys/keypad.h"
+#include "system/keypad.h"
 #include "framelimiter.h"
 #include "icon.h"
 

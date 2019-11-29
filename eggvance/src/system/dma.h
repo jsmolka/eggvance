@@ -1,8 +1,8 @@
 #pragma once
 
-#include "regs/dmaaddress.h"
-#include "regs/dmacontrol.h"
-#include "regs/dmacount.h"
+#include "registers/dmaaddress.h"
+#include "registers/dmacontrol.h"
+#include "registers/dmacount.h"
 
 class DMA
 {

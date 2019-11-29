@@ -2,8 +2,8 @@
 
 #include <SDL2/SDL_events.h>
 
-#include "regs/keycontrol.h"
-#include "regs/keyinput.h"
+#include "registers/keycontrol.h"
+#include "registers/keyinput.h"
 
 class Keypad
 {
