@@ -10,10 +10,10 @@ Point PPU::transformBG(int x, int bg) const
 {
     bg -= 2;
 
-    return {
-        (io.bgx[bg].current + io.bgpa[bg].value * x) >> 8,
-        (io.bgy[bg].current + io.bgpc[bg].value * x) >> 8
-    };
+    return Point(
+        io.bgx[bg].current + io.bgpa[bg].value * x,
+        io.bgy[bg].current + io.bgpc[bg].value * x
+    );
 }
 
 void PPU::renderBg(RenderFunc func, int bg)
@@ -104,7 +104,7 @@ void PPU::renderBgMode2(int bg)
 
     for (int x = 0; x < SCREEN_W; ++x)
     {
-        auto texture = transformBG(x, bg);
+        auto texture = transformBG(x, bg) >> 8;
 
         if (!dims.contains(texture))
         {
@@ -140,7 +140,7 @@ void PPU::renderBgMode3(int bg)
 
     for (int x = 0; x < SCREEN_W; ++x)
     {
-        const auto texture = transformBG(x, bg);
+        const auto texture = transformBG(x, bg) >> 8;
 
         if (!dims.contains(texture))
         {
@@ -160,7 +160,7 @@ void PPU::renderBgMode4(int bg)
 
     for (int x = 0; x < SCREEN_W; ++x)
     {
-        const auto texture = transformBG(x, bg);
+        const auto texture = transformBG(x, bg) >> 8;
 
         if (!dims.contains(texture))
         {
@@ -181,7 +181,7 @@ void PPU::renderBgMode5(int bg)
 
     for (int x = 0; x < SCREEN_W; ++x)
     {
-        const auto texture = transformBG(x, bg);
+        const auto texture = transformBG(x, bg) >> 8;
 
         if (!dims.contains(texture))
         {
@@ -240,7 +240,7 @@ void PPU::renderObjects()
 
         for (int x = center.x + offset.x; x < end; ++offset.x, ++x)
         {
-            auto texture = matrix.multiply(offset);
+            auto texture = matrix.multiply(offset) >> 8;
 
             texture.x += dims.w / 2;
             texture.y += dims.h / 2;

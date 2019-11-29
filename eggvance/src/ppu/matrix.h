@@ -9,14 +9,17 @@ struct Matrix
         : pa(pa)
         , pb(pb)
         , pc(pc)
-        , pd(pd) {};
+        , pd(pd)
+    {
+    
+    }
 
     constexpr Point multiply(const Point& point) const
     {
-        return {
-            (pa * point.x + pb * point.y) >> 8,
-            (pc * point.x + pd * point.y) >> 8
-        };
+        return Point(
+            pa * point.x + pb * point.y,
+            pc * point.x + pd * point.y
+        );
     }
 
     s16 pa;
@@ -25,4 +28,4 @@ struct Matrix
     s16 pd;
 };
 
-static constexpr Matrix identity_matrix = { 0x100, 0x000, 0x000, 0x100 };
+static constexpr Matrix identity_matrix(0x100, 0x000, 0x000, 0x100);
