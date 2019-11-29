@@ -34,7 +34,7 @@ void Timer::run(int cycles)
                 Interrupt::Timer2,
                 Interrupt::Timer3
             };
-            arm.interrupt(flags[id]);
+            arm.request(flags[id]);
         }
 
         counter %= overflow;

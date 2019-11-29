@@ -38,7 +38,7 @@ struct OAMEntry
     int color_mode;
     int shape;
 
-    int parameter;
+    int matrix_index;
     int flip_x;
     int flip_y;
     int size;
@@ -51,8 +51,4 @@ struct OAMEntry
 
 private:
     void update();
-
-    u16 attr0;
-    u16 attr1;
-    u16 attr2;
 };

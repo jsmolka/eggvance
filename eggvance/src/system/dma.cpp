@@ -92,7 +92,7 @@ void DMA::run(int& cycles)
             Interrupt::DMA2,
             Interrupt::DMA3
         };
-        arm.interrupt(flags[id]);
+        arm.request(flags[id]);
     }
     running = false;
 }

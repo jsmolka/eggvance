@@ -219,12 +219,9 @@ void PPU::renderObjects()
         int bank  = entry->paletteBank();
         int tiles = entry->tilesPerRow(io.dispcnt.obj_mapping);
 
-        const Matrix matrix(
-            entry->affine ? mmu.oam.pa(entry->parameter) : 0x100,
-            entry->affine ? mmu.oam.pb(entry->parameter) : 0x000,
-            entry->affine ? mmu.oam.pc(entry->parameter) : 0x000,
-            entry->affine ? mmu.oam.pd(entry->parameter) : 0x100
-        );
+        const Matrix matrix = entry->affine
+            ? mmu.oam.matrix(entry->matrix_index)
+            : identity_matrix;
 
         const Point center(
             origin.x + bounds.w / 2,
