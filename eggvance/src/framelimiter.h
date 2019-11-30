@@ -5,7 +5,7 @@
 class FrameLimiter
 {
 public:
-    FrameLimiter();
+    FrameLimiter(double fps);
 
     void setFPS(double fps);
 

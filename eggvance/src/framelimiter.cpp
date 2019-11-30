@@ -4,9 +4,9 @@
 
 namespace micro = micro_clock;
 
-FrameLimiter::FrameLimiter()
+FrameLimiter::FrameLimiter(double fps)
 {
-    reset();
+    setFPS(fps);
 }
 
 void FrameLimiter::setFPS(double fps)

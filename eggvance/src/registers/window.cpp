@@ -4,17 +4,17 @@
 #include "common/utility.h"
 #include "ppu/layer.h"
 
-void Window::reset()
+void Window_::reset()
 {
     *this = {};
 }
 
-u8 Window::read()
+u8 Window_::read()
 {
     return data[0];
 }
 
-void Window::write(u8 byte)
+void Window_::write(u8 byte)
 {
     flags   = bits<0, 5>(byte) | LF_BDP;
     effects = bits<5, 1>(byte);

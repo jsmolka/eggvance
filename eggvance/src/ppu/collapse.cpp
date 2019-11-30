@@ -265,7 +265,7 @@ int PPU::possibleWindows() const
 }
 
 template<int win_master>
-const Window& PPU::activeWindow(int x) const
+const Window_& PPU::activeWindow(int x) const
 {
     if (win_master & WF_WIN0 && io.winh[0].contains(x))
         return io.winin.win0;

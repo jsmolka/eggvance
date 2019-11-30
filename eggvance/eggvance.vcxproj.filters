@@ -51,9 +51,6 @@
     <ClCompile Include="src\ppu\render.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\emulator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\microclock.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -216,9 +213,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="icon\icon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\emulator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\common\integer.h">

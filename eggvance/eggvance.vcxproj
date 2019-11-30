@@ -173,7 +173,6 @@
     <ClCompile Include="src\registers\waitcontrol.cpp" />
     <ClCompile Include="src\registers\windowdimension.cpp" />
     <ClCompile Include="src\system\dmacontroller.cpp" />
-    <ClCompile Include="src\emulator.cpp" />
     <ClCompile Include="src\framelimiter.cpp" />
     <ClCompile Include="src\system\keypad.cpp" />
     <ClCompile Include="src\microclock.cpp" />
@@ -258,7 +257,6 @@
     <ClInclude Include="src\mmu\gamepak\gamepak.h" />
     <ClInclude Include="src\mmu\gamepak\backup.h" />
     <ClInclude Include="src\common\integer.h" />
-    <ClInclude Include="src\emulator.h" />
     <ClInclude Include="icon\icon.h" />
     <ClInclude Include="src\common\fileutil.h" />
     <ClInclude Include="src\mmu\mmu.h" />
