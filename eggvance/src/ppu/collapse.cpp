@@ -8,7 +8,7 @@
 
 void PPU::collapse(int begin, int end)
 {
-    std::vector<BackgroundLayer> layers;
+    std::vector<BGLayer> layers;
     layers.reserve(end - begin);
 
     for (int bg = begin; bg < end; ++bg)
@@ -23,7 +23,7 @@ void PPU::collapse(int begin, int end)
         }
     }
 
-    std::sort(layers.begin(), layers.end(), std::less<BackgroundLayer>());
+    std::sort(layers.begin(), layers.end(), std::less<BGLayer>());
 
     if (objects_exist)
         collapse<1>(layers);
@@ -32,7 +32,7 @@ void PPU::collapse(int begin, int end)
 }
 
 template<int obj_master>
-void PPU::collapse(const std::vector<BackgroundLayer>& layers)
+void PPU::collapse(const std::vector<BGLayer>& layers)
 {
     int windows = io.dispcnt.win0 || io.dispcnt.win1 || io.dispcnt.winobj;
     int effects = io.bldcnt.mode != BlendControl::Mode::DISABLED || objects_alpha;
@@ -51,9 +51,9 @@ void PPU::collapse(const std::vector<BackgroundLayer>& layers)
 }
 
 template<int obj_master>
-void PPU::collapseNN(const std::vector<BackgroundLayer>& layers)
+void PPU::collapseNN(const std::vector<BGLayer>& layers)
 {
-    u32* scanline = &backend.buffer[SCREEN_W * io.vcount];
+    u32* scanline = &window.buffer[SCREEN_W * io.vcount];
 
     for (int x = 0; x < SCREEN_W; ++x)
     {
@@ -62,7 +62,7 @@ void PPU::collapseNN(const std::vector<BackgroundLayer>& layers)
 }
 
 template<int obj_master>
-void PPU::collapseNW(const std::vector<BackgroundLayer>& layers)
+void PPU::collapseNW(const std::vector<BGLayer>& layers)
 {
     switch (possibleWindows<obj_master>())
     {
@@ -82,9 +82,9 @@ void PPU::collapseNW(const std::vector<BackgroundLayer>& layers)
 }
 
 template<int obj_master, int win_master>
-void PPU::collapseNW(const std::vector<BackgroundLayer>& layers)
+void PPU::collapseNW(const std::vector<BGLayer>& layers)
 {
-    u32* scanline = &backend.buffer[SCREEN_W * io.vcount];
+    u32* scanline = &window.buffer[SCREEN_W * io.vcount];
 
     for (int x = 0; x < SCREEN_W; ++x)
     {
@@ -95,7 +95,7 @@ void PPU::collapseNW(const std::vector<BackgroundLayer>& layers)
 }
 
 template<int obj_master>
-void PPU::collapseBN(const std::vector<BackgroundLayer>& layers)
+void PPU::collapseBN(const std::vector<BGLayer>& layers)
 {
     switch (io.bldcnt.mode)
     {
@@ -111,11 +111,11 @@ void PPU::collapseBN(const std::vector<BackgroundLayer>& layers)
 }
 
 template<int obj_master, int blend_mode>
-void PPU::collapseBN(const std::vector<BackgroundLayer>& layers)
+void PPU::collapseBN(const std::vector<BGLayer>& layers)
 {
     constexpr int flags = 0xFFFF;
 
-    u32* scanline = &backend.buffer[SCREEN_W * io.vcount];
+    u32* scanline = &window.buffer[SCREEN_W * io.vcount];
 
     for (int x = 0; x < SCREEN_W; ++x)
     {
@@ -161,7 +161,7 @@ void PPU::collapseBN(const std::vector<BackgroundLayer>& layers)
 }
 
 template<int obj_master>
-void PPU::collapseBW(const std::vector<BackgroundLayer>& layers)
+void PPU::collapseBW(const std::vector<BGLayer>& layers)
 {
     switch (io.bldcnt.mode)
     {
@@ -177,7 +177,7 @@ void PPU::collapseBW(const std::vector<BackgroundLayer>& layers)
 }
 
 template<int obj_master, int blend_mode>
-void PPU::collapseBW(const std::vector<BackgroundLayer>& layers)
+void PPU::collapseBW(const std::vector<BGLayer>& layers)
 {
     switch (possibleWindows<obj_master>())
     {
@@ -197,9 +197,9 @@ void PPU::collapseBW(const std::vector<BackgroundLayer>& layers)
 }
 
 template<int obj_master, int blend_mode, int win_master>
-void PPU::collapseBW(const std::vector<BackgroundLayer>& layers)
+void PPU::collapseBW(const std::vector<BGLayer>& layers)
 {
-    u32* scanline = &backend.buffer[SCREEN_W * io.vcount];
+    u32* scanline = &window.buffer[SCREEN_W * io.vcount];
 
     for (int x = 0; x < SCREEN_W; ++x)
     {
@@ -280,45 +280,45 @@ const Window& PPU::activeWindow(int x) const
 }
 
 template<int obj_master>
-u16 PPU::upperLayer(const std::vector<BackgroundLayer>& layers, int x)
+u16 PPU::upperLayer(const std::vector<BGLayer>& layers, int x)
 {
     const auto& object = objects[x];
 
     for (const auto& layer : layers)
     {
-        if (obj_master && object.opaque && object <= layer)
+        if (obj_master && object.opaque() && object <= layer)
             return object.color;
 
         if (layer.opaque(x))
             return layer.color(x);
     }
-    if (obj_master && object.opaque)
+    if (obj_master && object.opaque())
         return object.color;
 
     return mmu.palette.backdrop();
 }
 
 template<int obj_master>
-u16 PPU::upperLayer(const std::vector<BackgroundLayer>& layers, int x, int flags)
+u16 PPU::upperLayer(const std::vector<BGLayer>& layers, int x, int flags)
 {    
     const auto& object = objects[x];
 
     for (const auto& layer : layers)
     {
-        if (obj_master && flags & LF_OBJ && object.opaque && object <= layer)
+        if (obj_master && flags & LF_OBJ && object.opaque() && object <= layer)
             return object.color;
 
         if (flags & layer.flag && layer.opaque(x))
             return layer.color(x);
     }
-    if (obj_master && flags & LF_OBJ && object.opaque)
+    if (obj_master && flags & LF_OBJ && object.opaque())
         return object.color;
 
     return mmu.palette.backdrop();
 }
 
 template<int obj_master>
-bool PPU::findBlendLayers(const std::vector<BackgroundLayer>& layers, int x, int flags, u16& upper)
+bool PPU::findBlendLayers(const std::vector<BGLayer>& layers, int x, int flags, u16& upper)
 {
     const auto& object = objects[x];
 
@@ -326,7 +326,7 @@ bool PPU::findBlendLayers(const std::vector<BackgroundLayer>& layers, int x, int
 
     for (const auto& layer : layers)
     {
-        if (obj_master && flags & LF_OBJ && object.opaque && object <= layer)
+        if (obj_master && flags & LF_OBJ && object.opaque() && object <= layer)
         {
             upper = object.color;
             return flags_upper & LF_OBJ;
@@ -337,7 +337,7 @@ bool PPU::findBlendLayers(const std::vector<BackgroundLayer>& layers, int x, int
             return flags_upper & layer.flag;
         }
     }
-    if (obj_master && flags & LF_OBJ && object.opaque)
+    if (obj_master && flags & LF_OBJ && object.opaque())
     {
         upper = object.color;
         return flags_upper & LF_OBJ;
@@ -361,7 +361,7 @@ bool PPU::findBlendLayers(const std::vector<BackgroundLayer>& layers, int x, int
     }
 
 template<int obj_master>
-bool PPU::findBlendLayers(const std::vector<BackgroundLayer>& layers, int x, int flags, u16& upper, u16& lower)
+bool PPU::findBlendLayers(const std::vector<BGLayer>& layers, int x, int flags, u16& upper, u16& lower)
 {
     const auto& object = objects[x];
 
@@ -373,7 +373,7 @@ bool PPU::findBlendLayers(const std::vector<BackgroundLayer>& layers, int x, int
 
     for (const auto& layer : layers)
     {
-        if (obj_master && flags & LF_OBJ && !object_used && object.opaque && object <= layer)
+        if (obj_master && flags & LF_OBJ && !object_used && object.opaque() && object <= layer)
         {
             PROCESS_BLEND_LAYER(object.color, LF_OBJ);
             object_used = true;
@@ -383,7 +383,7 @@ bool PPU::findBlendLayers(const std::vector<BackgroundLayer>& layers, int x, int
             PROCESS_BLEND_LAYER(layer.color(x), layer.flag);
         }
     }
-    if (obj_master && flags & LF_OBJ && !object_used && object.opaque)
+    if (obj_master && flags & LF_OBJ && !object_used && object.opaque())
     {
         PROCESS_BLEND_LAYER(object.color, LF_OBJ);
     }

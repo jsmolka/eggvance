@@ -4,11 +4,12 @@
 #include <SDL2/SDL.h>
 
 #include "common/integer.h"
+#include "common/constants.h"
 
-class VideoBackend
+class Window
 {
 public:
-    ~VideoBackend();
+    ~Window();
 
     bool init();
     void present();
@@ -18,7 +19,7 @@ public:
     SDL_Renderer* renderer;
     SDL_Texture* texture;
 
-    std::array<u32, 240 * 160> buffer;
+    std::array<u32, SCREEN_W * SCREEN_H> buffer;
 
 private:
     bool createWindow();

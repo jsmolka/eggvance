@@ -3,8 +3,9 @@
 #include "common/integer.h"
 #include "point.h"
 
-struct Matrix
+class Matrix
 {
+public:
     constexpr Matrix(s16 pa, s16 pb, s16 pc, s16 pd)
         : pa(pa)
         , pb(pb)
@@ -22,10 +23,11 @@ struct Matrix
         );
     }
 
-    s16 pa;
-    s16 pb;
-    s16 pc;
-    s16 pd;
+private:
+    int pa;
+    int pb;
+    int pc;
+    int pd;
 };
 
-static constexpr Matrix identity_matrix(0x100, 0x000, 0x000, 0x100);
+static constexpr Matrix identity_matrix(0x100, 0, 0, 0x100);

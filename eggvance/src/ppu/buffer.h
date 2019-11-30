@@ -11,42 +11,38 @@ template<typename T>
 class DoubleBuffer
 {
 public:
-    inline void flip()
+    constexpr DoubleBuffer()
+        : page(0)
     {
-        page ^= 1;
+
     }
 
-    inline auto begin()
-    {
-        return buffer[page].begin();
-    }
-
-    inline auto end()
-    {
-        return buffer[page].end();
-    }
-
-    inline T* data()
+    constexpr T* data()
     {
         return buffer[page].data();
     }
 
-    inline void fill(const T& value)
+    constexpr void flip()
+    {
+        page ^= 1;
+    }
+
+    constexpr void fill(const T& value)
     {
         buffer[page].fill(value);
     }
 
-    inline T operator[](std::size_t index) const
+    constexpr T operator[](std::size_t index) const
     {
         return buffer[page][index];
     }
 
-    inline T& operator[](std::size_t index)
+    constexpr T& operator[](std::size_t index)
     {
         return buffer[page][index];
     }
 
 private:
-    int page = 0;
+    int page;
     Buffer<T> buffer[2];
 };

@@ -40,7 +40,7 @@ bool Emulator::init(const std::string& rom)
     if (!keypad.init())
         return false;
 
-    if (!ppu.backend.init())
+    if (!ppu.window.init())
         return false;
 
     if (!rom.empty())
@@ -113,7 +113,7 @@ void Emulator::run()
         {
 
             std::string fps = fmt::format(" - {:.1f} fps", (1000.f / static_cast<double>(delta) * static_cast<double>(fps_frame)));
-            SDL_SetWindowTitle(ppu.backend.window, (title + fps).c_str());
+            SDL_SetWindowTitle(ppu.window.window, (title + fps).c_str());
 
             fps_begin = SDL_GetTicks();
             fps_frame = 0;
@@ -124,7 +124,7 @@ void Emulator::run()
 void Emulator::drawIcon()
 {
     SDL_Rect rect = { 0, 0, 240, 160 };
-    SDL_Renderer* renderer = ppu.backend.renderer;
+    SDL_Renderer* renderer = ppu.window.renderer;
     SDL_SetRenderDrawColor(renderer, 38, 40, 43, 1);
     SDL_RenderFillRect(renderer, &rect);
 
@@ -147,7 +147,7 @@ bool Emulator::dropAwait()
     while (true)
     {
         SDL_Delay(16);
-        SDL_RenderPresent(ppu.backend.renderer);
+        SDL_RenderPresent(ppu.window.renderer);
 
         SDL_Event event;
         while (SDL_PollEvent(&event))
@@ -200,7 +200,7 @@ void Emulator::handleShortcut(Config::Shortcut shortcut)
         break;
 
     case Config::Shortcut::Fullscreen:
-        ppu.backend.fullscreen();
+        ppu.window.fullscreen();
         break;
 
     case Config::Shortcut::SpeedDefault:
@@ -250,7 +250,7 @@ bool Emulator::dropEvent(const SDL_DropEvent& event)
     reset();
 
     updateWindowTitle();
-    SDL_RaiseWindow(ppu.backend.window);
+    SDL_RaiseWindow(ppu.window.window);
 
     return true;
 }
@@ -272,7 +272,7 @@ void Emulator::updateWindowTitle()
     case Backup::Type::EEPROM:   sstream << " - EEPROM";   break;
     }
     title = sstream.str();
-    SDL_SetWindowTitle(ppu.backend.window, title.c_str());
+    SDL_SetWindowTitle(ppu.window.window, title.c_str());
 }
 
 void Emulator::frame()

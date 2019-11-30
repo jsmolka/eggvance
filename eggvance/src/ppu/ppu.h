@@ -4,9 +4,9 @@
 
 #include "buffer.h"
 #include "dimensions.h"
-#include "layers.h"
+#include "layer.h"
 #include "ppuio.h"
-#include "videobackend.h"
+#include "window.h"
 
 class PPU
 {
@@ -20,7 +20,7 @@ public:
 
     void present();
 
-    VideoBackend backend;
+    Window window;
 
     PPUIO io;
 
@@ -34,7 +34,7 @@ private:
 
     using RenderFunc = void(PPU::*)(int);
 
-    Point transformBG(int x, int bg) const;
+    Point transform(int x, int bg) const;
 
     void renderBg(RenderFunc func, int bg);
     void renderBgMode0(int bg);
@@ -50,38 +50,38 @@ private:
 
     void collapse(int begin, int end);
     template<int obj_master>
-    void collapse(const std::vector<BackgroundLayer>& layers);
+    void collapse(const std::vector<BGLayer>& layers);
     template<int obj_master>
-    void collapseNN(const std::vector<BackgroundLayer>& layers);
+    void collapseNN(const std::vector<BGLayer>& layers);
     template<int obj_master>
-    void collapseNW(const std::vector<BackgroundLayer>& layers);
+    void collapseNW(const std::vector<BGLayer>& layers);
     template<int obj_master, int win_master>
-    void collapseNW(const std::vector<BackgroundLayer>& layers);
+    void collapseNW(const std::vector<BGLayer>& layers);
     template<int obj_master>
-    void collapseBN(const std::vector<BackgroundLayer>& layers);
+    void collapseBN(const std::vector<BGLayer>& layers);
     template<int obj_master, int blend_mode>
-    void collapseBN(const std::vector<BackgroundLayer>& layers);
+    void collapseBN(const std::vector<BGLayer>& layers);
     template<int obj_master>
-    void collapseBW(const std::vector<BackgroundLayer>& layers);
+    void collapseBW(const std::vector<BGLayer>& layers);
     template<int obj_master, int blend_mode>
-    void collapseBW(const std::vector<BackgroundLayer>& layers);
+    void collapseBW(const std::vector<BGLayer>& layers);
     template<int obj_master, int blend_mode, int win_master>
-    void collapseBW(const std::vector<BackgroundLayer>& layers);
+    void collapseBW(const std::vector<BGLayer>& layers);
 
     template<int obj_master>
     int possibleWindows() const;
     template<int win_master>
-    const Window& activeWindow(int x) const;
+    const Window_& activeWindow(int x) const;
 
     template<int obj_master>
-    u16 upperLayer(const std::vector<BackgroundLayer>& layers, int x);
+    u16 upperLayer(const std::vector<BGLayer>& layers, int x);
     template<int obj_master>
-    u16 upperLayer(const std::vector<BackgroundLayer>& layers, int x, int flags);
+    u16 upperLayer(const std::vector<BGLayer>& layers, int x, int flags);
 
     template<int obj_master>
-    bool findBlendLayers(const std::vector<BackgroundLayer>& layers, int x, int flags, u16& upper);
+    bool findBlendLayers(const std::vector<BGLayer>& layers, int x, int flags, u16& upper);
     template<int obj_master>
-    bool findBlendLayers(const std::vector<BackgroundLayer>& layers, int x, int flags, u16& upper, u16& lower);
+    bool findBlendLayers(const std::vector<BGLayer>& layers, int x, int flags, u16& upper, u16& lower);
 
     u16 blendAlpha(u16 a, u16 b) const;
     u16 blendWhite(u16 a) const;

@@ -2,7 +2,7 @@
 
 #include "common/macros.h"
 #include "common/utility.h"
-#include "ppu/layers.h"
+#include "ppu/layer.h"
 
 void Window::reset()
 {

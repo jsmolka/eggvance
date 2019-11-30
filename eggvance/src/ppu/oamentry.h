@@ -2,7 +2,7 @@
 
 #include "common/enums.h"
 #include "common/integer.h"
-#include "ppu/dimensions.h"
+#include "dimensions.h"
 
 enum class ObjectMode
 {
@@ -28,11 +28,6 @@ struct OAMEntry
     bool isDisabled() const;
     bool isVisible(int vcount) const;
 
-    Point origin;
-    Point center;
-    Dimensions dims;
-    Dimensions bounds;
-
     int affine;
     int double_size;
     int disabled;
@@ -50,6 +45,10 @@ struct OAMEntry
     int prio;
     int bank;
 
+    Point origin;
+    Point center;
+    Dimensions dims;
+    Dimensions bounds;
     u32 base_tile;
 
 private:

@@ -195,7 +195,7 @@
     <ClCompile Include="src\registers\vcount.cpp" />
     <ClCompile Include="src\registers\window.cpp" />
     <ClCompile Include="src\system\dma.cpp" />
-    <ClCompile Include="src\ppu\videobackend.cpp" />
+    <ClCompile Include="src\ppu\window.cpp" />
     <ClCompile Include="src\ppu\ppuio.cpp" />
     <ClCompile Include="src\mmu\oam.cpp" />
     <ClCompile Include="src\ppu\oamentry.cpp" />
@@ -269,10 +269,10 @@
     <ClInclude Include="src\registers\mosaic.h" />
     <ClInclude Include="src\registers\vcount.h" />
     <ClInclude Include="src\registers\window.h" />
-    <ClInclude Include="src\ppu\videobackend.h" />
+    <ClInclude Include="src\ppu\window.h" />
     <ClInclude Include="src\ppu\buffer.h" />
     <ClInclude Include="src\ppu\ppuio.h" />
-    <ClInclude Include="src\ppu\layers.h" />
+    <ClInclude Include="src\ppu\layer.h" />
     <ClInclude Include="src\mmu\oam.h" />
     <ClInclude Include="src\ppu\oamentry.h" />
     <ClInclude Include="src\mmu\palette.h" />

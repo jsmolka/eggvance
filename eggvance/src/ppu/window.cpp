@@ -1,8 +1,8 @@
-#include "videobackend.h"
+#include "window.h"
 
 #include "common/message.h"
 
-VideoBackend::~VideoBackend()
+Window::~Window()
 {
     if (SDL_WasInit(SDL_INIT_VIDEO) == 0)
         return;
@@ -14,7 +14,7 @@ VideoBackend::~VideoBackend()
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
 
-bool VideoBackend::init()
+bool Window::init()
 {
     if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0)
     {
@@ -39,7 +39,7 @@ bool VideoBackend::init()
     return true;
 }
 
-void VideoBackend::present()
+void Window::present()
 {
     SDL_UpdateTexture(
         texture, nullptr,
@@ -50,14 +50,14 @@ void VideoBackend::present()
     SDL_RenderPresent(renderer);
 }
 
-void VideoBackend::fullscreen()
+void Window::fullscreen()
 {
     u32 flag = SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN_DESKTOP;
     SDL_SetWindowFullscreen(window, flag ^ SDL_WINDOW_FULLSCREEN_DESKTOP);
     SDL_ShowCursor(1 ^ SDL_ShowCursor(SDL_QUERY));
 }
 
-bool VideoBackend::createWindow()
+bool Window::createWindow()
 {
     return window = SDL_CreateWindow(
         "eggvance",
@@ -65,10 +65,10 @@ bool VideoBackend::createWindow()
         SDL_WINDOWPOS_UNDEFINED,
         2 * 240, 2 * 160,
         SDL_WINDOW_RESIZABLE
-    );;
+    );
 }
 
-bool VideoBackend::createRenderer()
+bool Window::createRenderer()
 {
     renderer = SDL_CreateRenderer(
         window, -1, 
@@ -79,7 +79,7 @@ bool VideoBackend::createRenderer()
     return renderer;
 }
 
-bool VideoBackend::createTexture()
+bool Window::createTexture()
 {
     return texture = SDL_CreateTexture(
         renderer,

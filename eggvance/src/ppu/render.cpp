@@ -6,7 +6,7 @@
 #include "matrix.h"
 #include "mapentry.h"
 
-Point PPU::transformBG(int x, int bg) const
+Point PPU::transform(int x, int bg) const
 {
     bg -= 2;
 
@@ -104,7 +104,7 @@ void PPU::renderBgMode2(int bg)
 
     for (int x = 0; x < SCREEN_W; ++x)
     {
-        auto texture = transformBG(x, bg) >> 8;
+        auto texture = transform(x, bg) >> 8;
 
         if (!dims.contains(texture))
         {
@@ -140,7 +140,7 @@ void PPU::renderBgMode3(int bg)
 
     for (int x = 0; x < SCREEN_W; ++x)
     {
-        const auto texture = transformBG(x, bg) >> 8;
+        const auto texture = transform(x, bg) >> 8;
 
         if (!dims.contains(texture))
         {
@@ -160,7 +160,7 @@ void PPU::renderBgMode4(int bg)
 
     for (int x = 0; x < SCREEN_W; ++x)
     {
-        const auto texture = transformBG(x, bg) >> 8;
+        const auto texture = transform(x, bg) >> 8;
 
         if (!dims.contains(texture))
         {
@@ -181,7 +181,7 @@ void PPU::renderBgMode5(int bg)
 
     for (int x = 0; x < SCREEN_W; ++x)
     {
-        const auto texture = transformBG(x, bg) >> 8;
+        const auto texture = transform(x, bg) >> 8;
 
         if (!dims.contains(texture))
         {
@@ -255,10 +255,9 @@ void PPU::renderObjects()
             case ObjectMode::Normal:
                 if (entry.prio < object.prio)
                 {
-                    object.color  = mmu.palette.colorFGOpaque(index, bank);
-                    object.opaque = true;
-                    object.prio   = entry.prio;
-                    object.alpha  = entry.mode == int(ObjectMode::Alpha);
+                    object.color = mmu.palette.colorFGOpaque(index, bank);
+                    object.prio  = entry.prio;
+                    object.alpha = entry.mode == int(ObjectMode::Alpha);
                 }
                 break;
 

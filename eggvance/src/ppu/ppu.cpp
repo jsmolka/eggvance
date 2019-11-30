@@ -32,7 +32,7 @@ void PPU::scanline()
 
     if (io.dispcnt.force_blank)
     {
-        u32* scanline = &backend.buffer[SCREEN_W * io.vcount];
+        u32* scanline = &window.buffer[SCREEN_W * io.vcount];
         std::fill_n(scanline, SCREEN_W, 0xFFFFFFFF);
         return;
     }
@@ -145,7 +145,7 @@ void PPU::present()
 {
     if (io.dispcnt.isActive())
     {
-        backend.present();
+        window.present();
     }
 }
 
