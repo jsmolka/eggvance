@@ -1,6 +1,6 @@
 #include "sdlvideodevice.h"
 
-#include <exception>
+#include <stdexcept>
 
 SDLVideoDevice::~SDLVideoDevice()
 {
@@ -38,7 +38,7 @@ void SDLVideoDevice::present()
 {
     SDL_UpdateTexture(
         texture, nullptr, buffer,
-        sizeof(u32) * 240
+        sizeof(u32) * SCREEN_W
     );
     SDL_RenderCopy(renderer, texture, nullptr, nullptr);
     SDL_RenderPresent(renderer);
@@ -67,7 +67,7 @@ bool SDLVideoDevice::createRenderer()
     renderer = SDL_CreateRenderer(
         window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE
     );
-    SDL_RenderSetLogicalSize(renderer, 240, 160);;
+    SDL_RenderSetLogicalSize(renderer, SCREEN_W, SCREEN_H);;
 
     return renderer;
 }

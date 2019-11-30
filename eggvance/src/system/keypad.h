@@ -26,6 +26,8 @@ public:
 
     void reset();
 
+    void update();
+
     bool init();
 
     void keyboardEvent(const SDL_KeyboardEvent& event);

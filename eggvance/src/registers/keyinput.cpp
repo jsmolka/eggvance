@@ -4,31 +4,31 @@
 
 KeyInput::operator int() const
 {
-    return input;
+    return value;
 }
 
 KeyInput& KeyInput::operator|=(int value)
 {
-    input |= value;
+    value |= value;
 
     return *this;
 }
 
 KeyInput& KeyInput::operator&=(int value)
 {
-    input &= value;
+    value &= value;
 
     return *this;
 }
 
 void KeyInput::reset()
 {
-    input = 0x3FF;
+    value = 0x3FF;
 }
 
 u8 KeyInput::read(int index)
 {
     EGG_ASSERT(index <= 1, "Invalid index");
 
-    return bcast(input)[index];
+    return bcast(value)[index];
 }

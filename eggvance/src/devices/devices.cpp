@@ -3,53 +3,25 @@
 class NoAudioDevice : public AudioDevice
 {
 public:
-    void init() override
-    {
-
-    }
-
-    void deinit() override
-    {
-
-    }
+    void init() override {}
+    void deinit() override {}
 };
 
 class NoInputDevice : public InputDevice
 {
 public:
-    void init() override
-    {
-
-    }
-
-    void deinit() override
-    {
-
-    }
+    void init() override {}
+    void deinit() override {}
+    void poll(u16& state) override {}
 };
 
 class NoVideoDevice : public VideoDevice
 {
 public:
-    void init() override 
-    {
-
-    }
-
-    void deinit() override
-    {
-
-    }
-
-    void present() override
-    {
-
-    }
-
-    void fullscreen() override
-    {
-
-    }
+    void init() override {}
+    void deinit() override {}
+    void present() override {}
+    void fullscreen() override {}
 };
 
 std::shared_ptr<AudioDevice> audio_device = std::make_shared<NoAudioDevice>();

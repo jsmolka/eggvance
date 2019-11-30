@@ -214,6 +214,8 @@ void run()
     {
         limiter.frameBegin();
 
+        keypad.update();
+
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
@@ -225,22 +227,22 @@ void run()
             case SDL_KEYDOWN:
                 keyboardEvent(event.key);
             case SDL_KEYUP:
-                keypad.keyboardEvent(event.key);
+                //keypad.keyboardEvent(event.key);
                 break;
 
             case SDL_CONTROLLERBUTTONDOWN:
                 controllerButtonEvent(event.cbutton);
             case SDL_CONTROLLERBUTTONUP:
-                keypad.controllerButtonEvent(event.cbutton);
+                //keypad.controllerButtonEvent(event.cbutton);
                 break;
 
             case SDL_CONTROLLERAXISMOTION:
-                keypad.controllerAxisEvent(event.caxis);
+                //keypad.controllerAxisEvent(event.caxis);
                 break;
 
             case SDL_CONTROLLERDEVICEADDED:
             case SDL_CONTROLLERDEVICEREMOVED:
-                keypad.controllerDeviceEvent(event.cdevice);
+                //keypad.controllerDeviceEvent(event.cdevice);
                 break;
 
             case SDL_DROPFILE:

@@ -13,5 +13,5 @@ public:
 
     u8 read(int index);
 
-    int input;
+    u16 value;
 };

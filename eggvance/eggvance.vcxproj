@@ -150,6 +150,7 @@
     <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\arm\shifts.cpp" />
     <ClCompile Include="src\common\config.cpp" />
+    <ClCompile Include="src\common\input.cpp" />
     <ClCompile Include="src\common\message.cpp" />
     <ClCompile Include="src\devices\devices.cpp" />
     <ClCompile Include="src\mmu\io.cpp" />
@@ -225,6 +226,7 @@
     <ClInclude Include="src\devices\inputdevice.h" />
     <ClInclude Include="src\devices\videodevice.h" />
     <ClInclude Include="src\mmu\io.h" />
+    <ClInclude Include="src\common\input.h" />
     <ClInclude Include="src\platform\sdl\sdlaudiodevice.h" />
     <ClInclude Include="src\platform\sdl\sdlinputdevice.h" />
     <ClInclude Include="src\platform\sdl\sdlvideodevice.h" />

@@ -26,6 +26,30 @@ void Keypad::reset()
     io.keyinput_raw.reset();
 }
 
+#include "devices/devices.h"
+
+void Keypad::update()
+{
+    u16 previous = io.keyinput;
+
+    input_device->poll(io.keyinput.value);
+
+    if (previous != io.keyinput)
+    {
+        if (io.keycnt.irq)
+        {
+            bool interrupt = io.keycnt.logic
+                ? (~io.keyinput == io.keycnt.mask)
+                : (~io.keyinput &  io.keycnt.mask);
+
+            if (interrupt)
+            {
+                arm.request(Interrupt::Keypad);
+            }
+        }
+    }
+}
+
 bool Keypad::init()
 {
     if (SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER) != 0)

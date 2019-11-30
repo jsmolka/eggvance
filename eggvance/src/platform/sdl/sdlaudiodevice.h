@@ -1,5 +1,7 @@
 #pragma once
 
+#include <SDL2/SDL.h>
+
 #include "devices/audiodevice.h"
 
 class SDLAudioDevice : public AudioDevice

@@ -30,6 +30,20 @@ public:
 
     struct Controls
     {
+        struct
+        {
+            Key a;
+            Key b;
+            Key up;
+            Key down;
+            Key left;
+            Key right;
+            Key start;
+            Key select;
+            Key l;
+            Key r;
+        } keyboard2;
+
         std::unordered_map<SDL_Keycode, Keypad::Button> keyboard;
         std::unordered_map<SDL_GameControllerButton, Keypad::Button> controller;
     } controls;
