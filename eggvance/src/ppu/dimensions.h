@@ -11,7 +11,8 @@ struct Dimensions
     }
 
     constexpr Dimensions(int w, int h)
-        : w(w), h(h) 
+        : w(w)
+        , h(h) 
     {
     
     }
@@ -251,3 +252,11 @@ struct Dimensions
     int w;
     int h;
 };
+
+constexpr Point operator+(const Point& point, const Dimensions& dims)
+{
+    return Point(
+        point.x + dims.w,
+        point.y + dims.h
+    );
+}

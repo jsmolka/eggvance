@@ -16,6 +16,16 @@ public:
         page ^= 1;
     }
 
+    inline auto begin()
+    {
+        return buffer[page].begin();
+    }
+
+    inline auto end()
+    {
+        return buffer[page].end();
+    }
+
     inline T* data()
     {
         return buffer[page].data();

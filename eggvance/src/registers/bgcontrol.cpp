@@ -6,6 +6,8 @@
 void BGControl::reset()
 {
     *this = {};
+
+    update();
 }
 
 u8 BGControl::read(int index)

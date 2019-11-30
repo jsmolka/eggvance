@@ -2,12 +2,6 @@
 
 #include "register.h"
 
-enum ObjectMapping
-{
-    MAP_2D = 0,
-    MAP_1D = 1
-};
-
 class DisplayControl : public Register<2>
 {
 public:

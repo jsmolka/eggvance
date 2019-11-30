@@ -9,7 +9,8 @@ struct Point
     }
 
     constexpr Point(int x, int y)
-        : x(x), y(y)
+        : x(x)
+        , y(y)
     {
     
     }

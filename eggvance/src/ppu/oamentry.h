@@ -1,10 +1,10 @@
 #pragma once
 
+#include "common/enums.h"
 #include "common/integer.h"
 #include "ppu/dimensions.h"
-#include "ppu/point.h"
 
-enum class GraphicsMode
+enum class ObjectMode
 {
     Normal  = 0b00,
     Alpha   = 0b01,
@@ -20,25 +20,28 @@ struct OAMEntry
 
     int tileSize() const;
     int paletteBank() const;
-    int tilesPerRow(int mapping) const;
+    int tilesPerRow(ObjectMapping mapping) const;
 
     bool flipX() const;
     bool flipY() const;
 
     bool isDisabled() const;
+    bool isVisible(int vcount) const;
 
     Point origin;
+    Point center;
     Dimensions dims;
+    Dimensions bounds;
 
     int affine;
     int double_size;
     int disabled;
-    int graphics_mode;
+    int mode;
     int mosaic;
     int color_mode;
     int shape;
 
-    int matrix_index;
+    int matrix;
     int flip_x;
     int flip_y;
     int size;
@@ -50,5 +53,8 @@ struct OAMEntry
     u32 base_tile;
 
 private:
+    bool isVisibleX() const;
+    bool isVisibleY(int vcount) const;
+
     void update();
 };

@@ -136,7 +136,7 @@ void PPU::renderBgMode2(int bg)
 
 void PPU::renderBgMode3(int bg)
 {
-    constexpr Dimensions dims(SCREEN_W, SCREEN_H);
+    static constexpr Dimensions dims(SCREEN_W, SCREEN_H);
 
     for (int x = 0; x < SCREEN_W; ++x)
     {
@@ -156,7 +156,7 @@ void PPU::renderBgMode3(int bg)
 
 void PPU::renderBgMode4(int bg)
 {
-    constexpr Dimensions dims(SCREEN_W, SCREEN_H);
+    static constexpr Dimensions dims(SCREEN_W, SCREEN_H);
 
     for (int x = 0; x < SCREEN_W; ++x)
     {
@@ -177,7 +177,7 @@ void PPU::renderBgMode4(int bg)
 
 void PPU::renderBgMode5(int bg)
 {
-    constexpr Dimensions dims(160, 128);
+    static constexpr Dimensions dims(160, 128);
 
     for (int x = 0; x < SCREEN_W; ++x)
     {
@@ -197,57 +197,40 @@ void PPU::renderBgMode5(int bg)
 
 void PPU::renderObjects()
 {
-    const auto& entries = mmu.oam.entries;
-
-    for (auto entry = entries.crbegin(); entry != entries.crend(); ++entry)
+    for (const auto& entry : mmu.oam.entries)
     {
-        if (entry->isDisabled())
+        if (entry.isDisabled() || !entry.isVisible(io.vcount))
             continue;
 
-        const auto& origin = entry->origin;
-        const auto& dims   = entry->dims;
-        const auto  bounds = entry->dims * (1 << entry->double_size);
-
-        if ((origin.x + bounds.w) < 0 || origin.x >= SCREEN_W)
-            continue;
-
-        int line = io.vcount - origin.y;
-        if (line < 0 || line >= bounds.h)
-            continue;
-
-        int size  = entry->tileSize();
-        int bank  = entry->paletteBank();
-        int tiles = entry->tilesPerRow(io.dispcnt.obj_mapping);
-
-        const Matrix matrix = entry->affine
-            ? mmu.oam.matrix(entry->matrix_index)
+        const auto& origin = entry.origin;
+        const auto& center = entry.center;
+        const auto& dims   = entry.dims;
+        const auto& bounds = entry.bounds;
+        const auto& matrix = entry.affine 
+            ? mmu.oam.matrix(entry.matrix)
             : identity_matrix;
 
-        const Point center(
-            origin.x + bounds.w / 2,
-            origin.y + bounds.h / 2
-        );
+        int size  = entry.tileSize();
+        int bank  = entry.paletteBank();
+        int tiles = entry.tilesPerRow(ObjectMapping(io.dispcnt.obj_mapping));
 
         Point offset(
-            origin.x - center.x - std::min(origin.x, 0),
-            io.vcount - center.y
+            -center.x + origin.x - std::min(origin.x, 0),
+            -center.y + io.vcount
         );
 
         int end = std::min(origin.x + bounds.w, SCREEN_W);
 
-        for (int x = center.x + offset.x; x < end; ++offset.x, ++x)
+        for (int x = center.x + offset.x; x < end; ++x, ++offset.x)
         {
-            auto texture = matrix.multiply(offset) >> 8;
-
-            texture.x += dims.w / 2;
-            texture.y += dims.h / 2;
+            auto texture = (matrix.multiply(offset) >> 8) + (dims / 2);
 
             if (!dims.contains(texture))
                 continue;
 
-            if (entry->flipX()) texture.x ^= entry->dims.w - 1;
-            if (entry->flipY()) texture.y ^= entry->dims.h - 1;
-            if (entry->mosaic)
+            if (entry.flipX()) texture.x ^= entry.dims.w - 1;
+            if (entry.flipY()) texture.y ^= entry.dims.h - 1;
+            if (entry.mosaic)
             {
                 texture.x = io.mosaic.obj.mosaicX(texture.x);
                 texture.y = io.mosaic.obj.mosaicY(texture.y);
@@ -256,34 +239,34 @@ void PPU::renderObjects()
             const auto tile  = texture / 8;
             const auto pixel = texture % 8;
 
-            u32 addr = mmu.vram.mirror(entry->base_tile + size * tile.offset(tiles));
+            u32 addr = mmu.vram.mirror(entry.base_tile + size * tile.offset(tiles));
             if (addr < 0x1'4000 && io.dispcnt.isBitmap())
                 continue;
 
-            int index = mmu.vram.index(addr, pixel, ColorMode(entry->color_mode));
+            int index = mmu.vram.index(addr, pixel, ColorMode(entry.color_mode));
             if (index == 0)
                 continue;
 
             auto& object = objects[x];
 
-            switch (GraphicsMode(entry->graphics_mode))
+            switch (ObjectMode(entry.mode))
             {
-            case GraphicsMode::Alpha:
-            case GraphicsMode::Normal:
-                if (entry->prio <= object.prio)
+            case ObjectMode::Alpha:
+            case ObjectMode::Normal:
+                if (entry.prio < object.prio)
                 {
                     object.color  = mmu.palette.colorFGOpaque(index, bank);
                     object.opaque = true;
-                    object.prio   = entry->prio;
-                    object.alpha  = entry->graphics_mode == int(GraphicsMode::Alpha);
+                    object.prio   = entry.prio;
+                    object.alpha  = entry.mode == int(ObjectMode::Alpha);
                 }
                 break;
 
-            case GraphicsMode::Window:
+            case ObjectMode::Window:
                 object.window = true;
                 break;
 
-            case GraphicsMode::Invalid:
+            case ObjectMode::Invalid:
                 break;
 
             default:
