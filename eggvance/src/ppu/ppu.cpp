@@ -2,10 +2,11 @@
 
 #include <algorithm>
 
+#include "arm/arm.h"
 #include "common/constants.h"
 #include "common/macros.h"
 #include "common/utility.h"
-#include "arm/arm.h"
+#include "devices/devices.h"
 #include "mmu/mmu.h"
 
 PPU ppu;
@@ -32,7 +33,7 @@ void PPU::scanline()
 
     if (io.dispcnt.force_blank)
     {
-        u32* scanline = &window.buffer[SCREEN_W * io.vcount];
+        u32* scanline = &video_device->buffer[SCREEN_W * io.vcount];
         std::fill_n(scanline, SCREEN_W, 0xFFFFFFFF);
         return;
     }
@@ -145,7 +146,7 @@ void PPU::present()
 {
     if (io.dispcnt.isActive())
     {
-        window.present();
+        video_device->present();
     }
 }
 

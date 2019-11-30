@@ -151,7 +151,11 @@
     <ClCompile Include="src\arm\shifts.cpp" />
     <ClCompile Include="src\common\config.cpp" />
     <ClCompile Include="src\common\message.cpp" />
+    <ClCompile Include="src\devices\devices.cpp" />
     <ClCompile Include="src\mmu\io.cpp" />
+    <ClCompile Include="src\platform\sdl\sdlaudiodevice.cpp" />
+    <ClCompile Include="src\platform\sdl\sdlinputdevice.cpp" />
+    <ClCompile Include="src\platform\sdl\sdlvideodevice.cpp" />
     <ClCompile Include="src\ppu\collapse.cpp" />
     <ClCompile Include="src\ppu\mapentry.cpp" />
     <ClCompile Include="src\registers\bgparameter.cpp" />
@@ -182,7 +186,7 @@
     <ClCompile Include="src\mmu\gamepak\flash.cpp" />
     <ClCompile Include="src\mmu\gamepak\gamepak.cpp" />
     <ClCompile Include="icon\icon.cpp" />
-    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\platform\sdl\main.cpp" />
     <ClCompile Include="src\common\fileutil.cpp" />
     <ClCompile Include="src\mmu\gamepak\sram.cpp" />
     <ClCompile Include="src\mmu\mmu.cpp" />
@@ -194,7 +198,6 @@
     <ClCompile Include="src\registers\vcount.cpp" />
     <ClCompile Include="src\registers\window.cpp" />
     <ClCompile Include="src\system\dma.cpp" />
-    <ClCompile Include="src\ppu\window.cpp" />
     <ClCompile Include="src\ppu\ppuio.cpp" />
     <ClCompile Include="src\mmu\oam.cpp" />
     <ClCompile Include="src\ppu\oamentry.cpp" />
@@ -217,7 +220,14 @@
     <ClInclude Include="src\common\critical.h" />
     <ClInclude Include="src\common\macros.h" />
     <ClInclude Include="src\common\message.h" />
+    <ClInclude Include="src\devices\audiodevice.h" />
+    <ClInclude Include="src\devices\devices.h" />
+    <ClInclude Include="src\devices\inputdevice.h" />
+    <ClInclude Include="src\devices\videodevice.h" />
     <ClInclude Include="src\mmu\io.h" />
+    <ClInclude Include="src\platform\sdl\sdlaudiodevice.h" />
+    <ClInclude Include="src\platform\sdl\sdlinputdevice.h" />
+    <ClInclude Include="src\platform\sdl\sdlvideodevice.h" />
     <ClInclude Include="src\ppu\dimensions.h" />
     <ClInclude Include="src\ppu\mapentry.h" />
     <ClInclude Include="src\ppu\matrix.h" />
@@ -267,7 +277,6 @@
     <ClInclude Include="src\registers\mosaic.h" />
     <ClInclude Include="src\registers\vcount.h" />
     <ClInclude Include="src\registers\window.h" />
-    <ClInclude Include="src\ppu\window.h" />
     <ClInclude Include="src\ppu\buffer.h" />
     <ClInclude Include="src\ppu\ppuio.h" />
     <ClInclude Include="src\ppu\layer.h" />

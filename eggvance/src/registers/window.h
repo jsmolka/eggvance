@@ -2,7 +2,7 @@
 
 #include "register.h"
 
-class Window_ : Register<1>
+class Window : Register<1>
 {
 public:
     void reset();
@@ -22,8 +22,8 @@ public:
     u8 read(int index);
     void write(int index, u8 byte);
 
-    Window_ win0;
-    Window_ win1;
+    Window win0;
+    Window win1;
 };
 
 class WindowOut : public Register<2>
@@ -34,6 +34,6 @@ public:
     u8 read(int index);
     void write(int index, u8 byte);
 
-    Window_ winout;
-    Window_ winobj;
+    Window winout;
+    Window winobj;
 };

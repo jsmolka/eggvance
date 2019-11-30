@@ -9,13 +9,21 @@
 
 #include "arm/arm.h"
 #include "common/config.h"
+#include "devices/devices.h"
 #include "mmu/mmu.h"
 #include "ppu/ppu.h"
 #include "system/keypad.h"
 #include "framelimiter.h"
 #include "icon.h"
+#include "sdlaudiodevice.h"
+#include "sdlinputdevice.h"
+#include "sdlvideodevice.h"
 
 namespace fs = std::filesystem;
+
+std::shared_ptr<SDLAudioDevice> sdl_audio_device;
+std::shared_ptr<SDLInputDevice> sdl_input_device;
+std::shared_ptr<SDLVideoDevice> sdl_video_device;
 
 // Todo: Move to window
 std::string title;
@@ -41,7 +49,7 @@ void processShortcut(Config::Shortcut shortcut)
         break;
 
     case Config::Shortcut::Fullscreen:
-        ppu.window.fullscreen();
+        sdl_video_device->fullscreen();
         break;
 
     case Config::Shortcut::SpeedDefault:
@@ -94,7 +102,7 @@ void updateWindowTitle()
     case Backup::Type::EEPROM:   sstream << " - EEPROM";   break;
     }
     title = sstream.str();
-    SDL_SetWindowTitle(ppu.window.window, title.c_str());
+    SDL_SetWindowTitle(sdl_video_device->window, title.c_str());
 }
 
 void frame()
@@ -120,7 +128,7 @@ void frame()
 void drawIcon()
 {
     SDL_Rect rect = { 0, 0, 240, 160 };
-    SDL_Renderer* renderer = ppu.window.renderer;
+    SDL_Renderer* renderer = sdl_video_device->renderer;
     SDL_SetRenderDrawColor(renderer, 38, 40, 43, 1);
     SDL_RenderFillRect(renderer, &rect);
 
@@ -150,7 +158,7 @@ bool dropEvent(const SDL_DropEvent& event)
     reset();
 
     updateWindowTitle();
-    SDL_RaiseWindow(ppu.window.window);
+    SDL_RaiseWindow(sdl_video_device->window);
 
     return true;
 }
@@ -162,7 +170,7 @@ bool dropAwait()
     while (true)
     {
         SDL_Delay(16);
-        SDL_RenderPresent(ppu.window.renderer);
+        SDL_RenderPresent(sdl_video_device->renderer);
 
         SDL_Event event;
         while (SDL_PollEvent(&event))
@@ -250,7 +258,7 @@ void run()
         {
 
             std::string fps = fmt::format(" - {:.1f} fps", (1000.f / static_cast<double>(delta) * static_cast<double>(fps_frame)));
-            SDL_SetWindowTitle(ppu.window.window, (title + fps).c_str());
+            SDL_SetWindowTitle(sdl_video_device->window, (title + fps).c_str());
 
             fps_begin = SDL_GetTicks();
             fps_frame = 0;
@@ -262,12 +270,23 @@ int main(int argc, char* argv[])
 {
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 
+    sdl_audio_device = std::make_shared<SDLAudioDevice>();
+    sdl_input_device = std::make_shared<SDLInputDevice>();
+    sdl_video_device = std::make_shared<SDLVideoDevice>();
+
+    audio_device = sdl_audio_device;
+    input_device = sdl_input_device;
+    video_device = sdl_video_device;
+
     try
     {
         config.init();
         mmu.bios.init();
         keypad.init();
-        ppu.window.init();
+
+        sdl_audio_device->init();
+        sdl_input_device->init();
+        sdl_video_device->init();
 
         if (argc > 1)
             mmu.gamepak.load(argv[1]);

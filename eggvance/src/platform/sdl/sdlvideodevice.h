@@ -1,25 +1,22 @@
 #pragma once
 
-#include <array>
 #include <SDL2/SDL.h>
 
-#include "common/integer.h"
-#include "common/constants.h"
+#include "devices/videodevice.h"
 
-class Window
+class SDLVideoDevice : public VideoDevice
 {
 public:
-    ~Window();
+    ~SDLVideoDevice();
 
-    bool init();
-    void present();
-    void fullscreen();
+    void init() override;
+    void deinit() override;
+    void present() override;
+    void fullscreen() override;
 
     SDL_Window* window;
     SDL_Renderer* renderer;
     SDL_Texture* texture;
-
-    std::array<u32, SCREEN_W * SCREEN_H> buffer;
 
 private:
     bool createWindow();

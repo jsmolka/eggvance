@@ -2,6 +2,7 @@
 
 #include "common/constants.h"
 #include "common/macros.h"
+#include "devices/devices.h"
 #include "mmu/mmu.h"
 
 #define MISSING_PIXEL 0x6C3F
@@ -53,7 +54,7 @@ void PPU::collapse(const std::vector<BGLayer>& layers)
 template<int obj_master>
 void PPU::collapseNN(const std::vector<BGLayer>& layers)
 {
-    u32* scanline = &window.buffer[SCREEN_W * io.vcount];
+    u32* scanline = &video_device->buffer[SCREEN_W * io.vcount];
 
     for (int x = 0; x < SCREEN_W; ++x)
     {
@@ -84,7 +85,7 @@ void PPU::collapseNW(const std::vector<BGLayer>& layers)
 template<int obj_master, int win_master>
 void PPU::collapseNW(const std::vector<BGLayer>& layers)
 {
-    u32* scanline = &window.buffer[SCREEN_W * io.vcount];
+    u32* scanline = &video_device->buffer[SCREEN_W * io.vcount];
 
     for (int x = 0; x < SCREEN_W; ++x)
     {
@@ -115,7 +116,7 @@ void PPU::collapseBN(const std::vector<BGLayer>& layers)
 {
     constexpr int flags = 0xFFFF;
 
-    u32* scanline = &window.buffer[SCREEN_W * io.vcount];
+    u32* scanline = &video_device->buffer[SCREEN_W * io.vcount];
 
     for (int x = 0; x < SCREEN_W; ++x)
     {
@@ -199,7 +200,7 @@ void PPU::collapseBW(const std::vector<BGLayer>& layers)
 template<int obj_master, int blend_mode, int win_master>
 void PPU::collapseBW(const std::vector<BGLayer>& layers)
 {
-    u32* scanline = &window.buffer[SCREEN_W * io.vcount];
+    u32* scanline = &video_device->buffer[SCREEN_W * io.vcount];
 
     for (int x = 0; x < SCREEN_W; ++x)
     {
@@ -265,7 +266,7 @@ int PPU::possibleWindows() const
 }
 
 template<int win_master>
-const Window_& PPU::activeWindow(int x) const
+const Window& PPU::activeWindow(int x) const
 {
     if (win_master & WF_WIN0 && io.winh[0].contains(x))
         return io.winin.win0;

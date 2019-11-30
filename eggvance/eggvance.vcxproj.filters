@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="icon\icon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -207,7 +204,19 @@
     <ClCompile Include="src\system\timercontroller.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ppu\window.cpp">
+    <ClCompile Include="src\devices\devices.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\platform\sdl\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\platform\sdl\sdlaudiodevice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\platform\sdl\sdlinputdevice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\platform\sdl\sdlvideodevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -425,7 +434,25 @@
     <ClInclude Include="src\ppu\layer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\ppu\window.h">
+    <ClInclude Include="src\devices\audiodevice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\devices\inputdevice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\devices\videodevice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\devices\devices.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\platform\sdl\sdlaudiodevice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\platform\sdl\sdlvideodevice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\platform\sdl\sdlinputdevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

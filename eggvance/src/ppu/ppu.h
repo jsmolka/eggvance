@@ -6,7 +6,6 @@
 #include "dimensions.h"
 #include "layer.h"
 #include "ppuio.h"
-#include "window.h"
 
 class PPU
 {
@@ -19,8 +18,6 @@ public:
     void next();
 
     void present();
-
-    Window window;
 
     PPUIO io;
 
@@ -71,7 +68,7 @@ private:
     template<int obj_master>
     int possibleWindows() const;
     template<int win_master>
-    const Window_& activeWindow(int x) const;
+    const Window& activeWindow(int x) const;
 
     template<int obj_master>
     u16 upperLayer(const std::vector<BGLayer>& layers, int x);
