@@ -58,16 +58,16 @@ void processInput(const ShortcutConfig<T>& config, T input)
     if (input == config.fps_default)
         limiter.setFPS(REFRESH_RATE);
 
-    if (input == config.fps_option_1)
+    if (input == config.fps_custom_1)
         limiter.setFPS(REFRESH_RATE * ::config.fps_multipliers[0]);
 
-    if (input == config.fps_option_2)
+    if (input == config.fps_custom_2)
         limiter.setFPS(REFRESH_RATE * ::config.fps_multipliers[1]);
 
-    if (input == config.fps_option_3)
+    if (input == config.fps_custom_3)
         limiter.setFPS(REFRESH_RATE * ::config.fps_multipliers[2]);
 
-    if (input == config.fps_option_4)
+    if (input == config.fps_custom_4)
         limiter.setFPS(REFRESH_RATE * ::config.fps_multipliers[3]);
 
     if (input == config.fps_unlimited)

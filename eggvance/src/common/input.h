@@ -126,10 +126,10 @@ struct ShortcutConfig
     T reset;
     T fullscreen;
     T fps_default;
-    T fps_option_1;
-    T fps_option_2;
-    T fps_option_3;
-    T fps_option_4;
+    T fps_custom_1;
+    T fps_custom_2;
+    T fps_custom_3;
+    T fps_custom_4;
     T fps_unlimited;
 
     template<typename U>
@@ -140,10 +140,10 @@ struct ShortcutConfig
         config.reset         = map_func(reset);
         config.fullscreen    = map_func(fullscreen);
         config.fps_default   = map_func(fps_default);
-        config.fps_option_1  = map_func(fps_option_1);
-        config.fps_option_2  = map_func(fps_option_2);
-        config.fps_option_3  = map_func(fps_option_3);
-        config.fps_option_4  = map_func(fps_option_4);
+        config.fps_custom_1  = map_func(fps_custom_1);
+        config.fps_custom_2  = map_func(fps_custom_2);
+        config.fps_custom_3  = map_func(fps_custom_3);
+        config.fps_custom_4  = map_func(fps_custom_4);
         config.fps_unlimited = map_func(fps_unlimited);
 
         return config;

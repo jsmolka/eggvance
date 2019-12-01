@@ -88,28 +88,28 @@ void Config::initFile()
     const auto reset         = value.get<std::vector<std::string>>("shortcuts.reset"        );
     const auto fullscreen    = value.get<std::vector<std::string>>("shortcuts.fullscreen"   );
     const auto fps_default   = value.get<std::vector<std::string>>("shortcuts.fps_default"  );
-    const auto fps_option_1  = value.get<std::vector<std::string>>("shortcuts.fps_option_1" );
-    const auto fps_option_2  = value.get<std::vector<std::string>>("shortcuts.fps_option_2" );
-    const auto fps_option_3  = value.get<std::vector<std::string>>("shortcuts.fps_option_3" );
-    const auto fps_option_4  = value.get<std::vector<std::string>>("shortcuts.fps_option_4" );
+    const auto fps_custom_1  = value.get<std::vector<std::string>>("shortcuts.fps_custom_1" );
+    const auto fps_custom_2  = value.get<std::vector<std::string>>("shortcuts.fps_custom_2" );
+    const auto fps_custom_3  = value.get<std::vector<std::string>>("shortcuts.fps_custom_3" );
+    const auto fps_custom_4  = value.get<std::vector<std::string>>("shortcuts.fps_custom_4" );
     const auto fps_unlimited = value.get<std::vector<std::string>>("shortcuts.fps_unlimited");
 
     shortcuts.keyboard.reset         = keyByName(reset[0]);
     shortcuts.keyboard.fullscreen    = keyByName(fullscreen[0]);
     shortcuts.keyboard.fps_default   = keyByName(fps_default[0]);
-    shortcuts.keyboard.fps_option_1  = keyByName(fps_option_1[0]);
-    shortcuts.keyboard.fps_option_2  = keyByName(fps_option_2[0]);
-    shortcuts.keyboard.fps_option_3  = keyByName(fps_option_3[0]);
-    shortcuts.keyboard.fps_option_4  = keyByName(fps_option_4[0]);
+    shortcuts.keyboard.fps_custom_1  = keyByName(fps_custom_1[0]);
+    shortcuts.keyboard.fps_custom_2  = keyByName(fps_custom_2[0]);
+    shortcuts.keyboard.fps_custom_3  = keyByName(fps_custom_3[0]);
+    shortcuts.keyboard.fps_custom_4  = keyByName(fps_custom_4[0]);
     shortcuts.keyboard.fps_unlimited = keyByName(fps_unlimited[0]);
 
     shortcuts.controller.reset         = buttonByName(reset[1]);
     shortcuts.controller.fullscreen    = buttonByName(fullscreen[1]);
     shortcuts.controller.fps_default   = buttonByName(fps_default[1]);
-    shortcuts.controller.fps_option_1  = buttonByName(fps_option_1[1]);
-    shortcuts.controller.fps_option_2  = buttonByName(fps_option_2[1]);
-    shortcuts.controller.fps_option_3  = buttonByName(fps_option_3[1]);
-    shortcuts.controller.fps_option_4  = buttonByName(fps_option_4[1]);
+    shortcuts.controller.fps_custom_1  = buttonByName(fps_custom_1[1]);
+    shortcuts.controller.fps_custom_2  = buttonByName(fps_custom_2[1]);
+    shortcuts.controller.fps_custom_3  = buttonByName(fps_custom_3[1]);
+    shortcuts.controller.fps_custom_4  = buttonByName(fps_custom_4[1]);
     shortcuts.controller.fps_unlimited = buttonByName(fps_unlimited[1]);
 }
 
@@ -150,18 +150,18 @@ void Config::initDefault()
     shortcuts.keyboard.reset         = KEY_R;
     shortcuts.keyboard.fullscreen    = KEY_F11;
     shortcuts.keyboard.fps_default   = KEY_1;
-    shortcuts.keyboard.fps_option_1  = KEY_2;
-    shortcuts.keyboard.fps_option_2  = KEY_3;
-    shortcuts.keyboard.fps_option_3  = KEY_4;
-    shortcuts.keyboard.fps_option_4  = KEY_5;
+    shortcuts.keyboard.fps_custom_1  = KEY_2;
+    shortcuts.keyboard.fps_custom_2  = KEY_3;
+    shortcuts.keyboard.fps_custom_3  = KEY_4;
+    shortcuts.keyboard.fps_custom_4  = KEY_5;
     shortcuts.keyboard.fps_unlimited = KEY_6;
 
     shortcuts.controller.reset         = BTN_NONE;
     shortcuts.controller.fullscreen    = BTN_NONE;
     shortcuts.controller.fps_default   = BTN_NONE;
-    shortcuts.controller.fps_option_1  = BTN_NONE;
-    shortcuts.controller.fps_option_2  = BTN_NONE;
-    shortcuts.controller.fps_option_3  = BTN_NONE;
-    shortcuts.controller.fps_option_4  = BTN_NONE;
+    shortcuts.controller.fps_custom_1  = BTN_NONE;
+    shortcuts.controller.fps_custom_2  = BTN_NONE;
+    shortcuts.controller.fps_custom_3  = BTN_NONE;
+    shortcuts.controller.fps_custom_4  = BTN_NONE;
     shortcuts.controller.fps_unlimited = BTN_NONE;
 }
