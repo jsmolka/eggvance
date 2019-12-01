@@ -16,12 +16,12 @@ void FrameLimiter::setFPS(double fps)
     frame = static_cast<u64>(1.0e6 / fps);
 }
 
-void FrameLimiter::frameBegin()
+void FrameLimiter::beginFrame()
 {
     begin = micro::now();
 }
 
-void FrameLimiter::frameSleep()
+void FrameLimiter::endFrame()
 {
     if (begin == 0)
         return;

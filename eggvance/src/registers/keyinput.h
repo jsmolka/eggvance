@@ -5,13 +5,13 @@
 class KeyInput : public Register<2>
 {
 public:
-    operator int() const;
-    KeyInput& operator|=(int value);
-    KeyInput& operator&=(int value);
+    KeyInput& operator=(u16 value);
+    operator u16() const;
 
     void reset();
 
     u8 read(int index);
 
+private:
     u16 value;
 };

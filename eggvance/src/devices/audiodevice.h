@@ -2,13 +2,11 @@
 
 #include <memory>
 
-class AudioDevice
-{
-public:
-    virtual ~AudioDevice() = default;
+#include "device.h"
 
-    virtual void init() = 0;
-    virtual void deinit() = 0;
+class AudioDevice : public Device
+{
+
 };
 
 extern std::shared_ptr<AudioDevice> audio_device;

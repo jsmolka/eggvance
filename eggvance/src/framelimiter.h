@@ -9,8 +9,8 @@ public:
 
     void setFPS(double fps);
 
-    void frameBegin();
-    void frameSleep();
+    void beginFrame();
+    void endFrame();
 
 private:
     void reset();

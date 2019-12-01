@@ -2,16 +2,12 @@
 
 #include <memory>
 
-#include "common/integer.h"
+#include "device.h"
 
-class InputDevice
+class InputDevice : public Device
 {
 public:
-    virtual ~InputDevice() = default;
-
-    virtual void init() = 0;
-    virtual void deinit() = 0;
-    virtual void poll(u16& state) = 0;
+    virtual int state() = 0;
 
 protected:
     enum Shift

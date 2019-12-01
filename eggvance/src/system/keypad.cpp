@@ -15,7 +15,7 @@ void Keypad::update()
 {
     u16 previous = io.keyinput;
 
-    input_device->poll(io.keyinput.value);
+    io.keyinput = input_device->state();
 
     if (previous != io.keyinput && io.keycnt.irq)
     {

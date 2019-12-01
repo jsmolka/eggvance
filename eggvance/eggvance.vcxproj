@@ -222,6 +222,7 @@
     <ClInclude Include="src\common\critical.h" />
     <ClInclude Include="src\common\macros.h" />
     <ClInclude Include="src\devices\audiodevice.h" />
+    <ClInclude Include="src\devices\device.h" />
     <ClInclude Include="src\devices\inputdevice.h" />
     <ClInclude Include="src\devices\videodevice.h" />
     <ClInclude Include="src\mmu\io.h" />

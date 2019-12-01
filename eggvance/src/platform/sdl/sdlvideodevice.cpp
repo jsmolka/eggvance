@@ -53,7 +53,7 @@ void SDLVideoDevice::fullscreen()
     SDL_ShowCursor(1 ^ SDL_ShowCursor(SDL_QUERY));
 }
 
-void SDLVideoDevice::drawIcon()
+void SDLVideoDevice::renderIcon()
 {
     constexpr int scale = 9;
 

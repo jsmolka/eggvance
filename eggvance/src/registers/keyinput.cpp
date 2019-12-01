@@ -2,23 +2,16 @@
 
 #include "common/macros.h"
 
-KeyInput::operator int() const
+KeyInput& KeyInput::operator=(u16 value)
+{
+    this->value = value;
+
+    return *this;
+}
+
+KeyInput::operator u16() const
 {
     return value;
-}
-
-KeyInput& KeyInput::operator|=(int value)
-{
-    value |= value;
-
-    return *this;
-}
-
-KeyInput& KeyInput::operator&=(int value)
-{
-    value &= value;
-
-    return *this;
 }
 
 void KeyInput::reset()

@@ -12,22 +12,22 @@ public:
 
     void init() override;
     void deinit() override;
-    void poll(u16& state) override;
+    int state() override;
 
     void deviceEvent(const SDL_ControllerDeviceEvent& event);
 
-    static SDL_Scancode mapKey(Key key);
-    static SDL_GameControllerButton mapButton(Button button);
+    static SDL_Scancode convertKey(Key key);
+    static SDL_GameControllerButton convertButton(Button button);
 
 private:
-    struct
+    struct Controls
     {
         InputConfig<SDL_Scancode> keyboard;
         InputConfig<SDL_GameControllerButton> controller;
-    } map;
+    } controls;
 
-    void pollKeys(u16& state);
-    void pollButtons(u16& state);
+    int keyboardState() const;
+    int controllerState() const;
 
     SDL_GameController* controller;
 };

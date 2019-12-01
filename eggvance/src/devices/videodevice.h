@@ -1,18 +1,14 @@
 #pragma once
 
-#include <array>
 #include <memory>
 
 #include "common/constants.h"
 #include "common/integer.h"
+#include "device.h"
 
-class VideoDevice
+class VideoDevice : public Device
 {
 public:
-    virtual ~VideoDevice() = default;
-
-    virtual void init() = 0;
-    virtual void deinit() = 0;
     virtual void present() = 0;
     virtual void fullscreen() = 0;
 

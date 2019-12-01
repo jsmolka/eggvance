@@ -89,6 +89,25 @@ enum Button
 template<typename T>
 struct InputConfig
 {
+    template<typename U>
+    InputConfig<U> convert(const std::function<U(T)>& converter)
+    {
+        InputConfig<U> result;
+
+        result.a      = converter(a);
+        result.b      = converter(b);
+        result.up     = converter(up);
+        result.down   = converter(down);
+        result.left   = converter(left);
+        result.right  = converter(right);
+        result.start  = converter(start);
+        result.select = converter(select);
+        result.l      = converter(l);
+        result.r      = converter(r);
+
+        return result;
+    }
+
     T a;
     T b;
     T up;
@@ -99,30 +118,28 @@ struct InputConfig
     T select;
     T l;
     T r;
-
-    template<typename U>
-    InputConfig<U> map(const std::function<U(T)>& map_func)
-    {
-        InputConfig<U> config;
-
-        config.a      = map_func(a);
-        config.b      = map_func(b);
-        config.up     = map_func(up);
-        config.down   = map_func(down);
-        config.left   = map_func(left);
-        config.right  = map_func(right);
-        config.start  = map_func(start);
-        config.select = map_func(select);
-        config.l      = map_func(l);
-        config.r      = map_func(r);
-
-        return config;
-    }
 };
 
 template<typename T>
 struct ShortcutConfig
 {
+    template<typename U>
+    ShortcutConfig<U> convert(const std::function<U(T)>& converter)
+    {
+        ShortcutConfig<U> result;
+
+        result.reset         = converter(reset);
+        result.fullscreen    = converter(fullscreen);
+        result.fps_default   = converter(fps_default);
+        result.fps_custom_1  = converter(fps_custom_1);
+        result.fps_custom_2  = converter(fps_custom_2);
+        result.fps_custom_3  = converter(fps_custom_3);
+        result.fps_custom_4  = converter(fps_custom_4);
+        result.fps_unlimited = converter(fps_unlimited);
+
+        return result;
+    }
+
     T reset;
     T fullscreen;
     T fps_default;
@@ -131,23 +148,6 @@ struct ShortcutConfig
     T fps_custom_3;
     T fps_custom_4;
     T fps_unlimited;
-
-    template<typename U>
-    ShortcutConfig<U> map(const std::function<U(T)>& map_func)
-    {
-        ShortcutConfig<U> config;
-
-        config.reset         = map_func(reset);
-        config.fullscreen    = map_func(fullscreen);
-        config.fps_default   = map_func(fps_default);
-        config.fps_custom_1  = map_func(fps_custom_1);
-        config.fps_custom_2  = map_func(fps_custom_2);
-        config.fps_custom_3  = map_func(fps_custom_3);
-        config.fps_custom_4  = map_func(fps_custom_4);
-        config.fps_unlimited = map_func(fps_unlimited);
-
-        return config;
-    }
 };
 
 Key keyByName(const std::string& name);

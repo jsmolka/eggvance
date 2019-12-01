@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <SDL2/SDL.h>
 
 #include "devices/videodevice.h"
@@ -14,7 +15,7 @@ public:
     void present() override;
     void fullscreen() override;
 
-    void drawIcon();
+    void renderIcon();
     void raiseWindow();
     void setWindowTitle(const std::string& title);
 
