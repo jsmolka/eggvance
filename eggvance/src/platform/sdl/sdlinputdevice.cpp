@@ -41,6 +41,12 @@ void SDLInputDevice::poll(u16& state)
     pollKeys(state);
     pollButtons(state);
 
+    constexpr u16 ud_mask = (1 << SHIFT_UP) | (1 << SHIFT_DOWN);
+    constexpr u16 lr_mask = (1 << SHIFT_LEFT) | (1 << SHIFT_RIGHT);
+
+    if ((state & ud_mask) == ud_mask) state &= ~ud_mask;
+    if ((state & lr_mask) == lr_mask) state &= ~lr_mask;
+
     state = ~state;
 }
 

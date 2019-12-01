@@ -5,7 +5,6 @@
 #include <fmt/format.h>
 
 #include "common/config.h"
-#include "common/message.h"
 #include "common/fileutil.h"
 #include "eeprom.h"
 #include "flash.h"
@@ -42,10 +41,7 @@ bool GamePak::load(const std::string& file)
     if (this->file != file)
     {
         if (!fileutil::read(file, data))
-        {
-            showMessage(fmt::format("Cannot read file \"{}\"", file).c_str());
             return false;
-        }
 
         header = parseHeader();
 

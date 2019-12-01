@@ -2,7 +2,7 @@
 
 #include "common/constants.h"
 #include "common/macros.h"
-#include "devices/devices.h"
+#include "devices/videodevice.h"
 #include "mmu/mmu.h"
 
 #define MISSING_PIXEL 0x6C3F

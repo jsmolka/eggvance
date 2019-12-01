@@ -1,31 +1,42 @@
-#define SDL_MAIN_HANDLED
-
-#include <filesystem>
-#include <memory>
-#include <string>
-#include <sstream>
 #include <fmt/format.h>
-#include <SDL2/SDL.h>
 
 #include "arm/arm.h"
 #include "common/config.h"
-#include "devices/devices.h"
 #include "mmu/mmu.h"
 #include "ppu/ppu.h"
 #include "system/keypad.h"
 #include "framelimiter.h"
-#include "icon.h"
 #include "sdlaudiodevice.h"
 #include "sdlinputdevice.h"
 #include "sdlvideodevice.h"
-
-namespace fs = std::filesystem;
 
 std::shared_ptr<SDLAudioDevice> sdl_audio_device;
 std::shared_ptr<SDLInputDevice> sdl_input_device;
 std::shared_ptr<SDLVideoDevice> sdl_video_device;
 
-FrameLimiter limiter(59.737);
+FrameLimiter limiter(REFRESH_RATE);
+
+std::string window_title;
+
+struct Shortcuts
+{
+    ShortcutConfig<SDL_Scancode> keyboard;
+    ShortcutConfig<SDL_GameControllerButton> controller;
+} shortcuts;
+
+void init()
+{
+    config.init();
+
+    mmu.bios.init(config.bios_file);
+
+    sdl_audio_device->init();
+    sdl_input_device->init();
+    sdl_video_device->init();
+
+    shortcuts.keyboard = config.shortcuts.keyboard.map<SDL_Scancode>(SDLInputDevice::mapKey);
+    shortcuts.controller = config.shortcuts.controller.map<SDL_GameControllerButton>(SDLInputDevice::mapButton);
+}
 
 void reset()
 {
@@ -35,23 +46,9 @@ void reset()
     keypad.reset();
 }
 
-struct Shortcuts
-{
-    ShortcutConfig<SDL_Scancode> keyboard;
-    ShortcutConfig<SDL_GameControllerButton> controller;
-} shortcuts;
-
-void initShortcuts()
-{
-    shortcuts.keyboard = config.shortcuts.keyboard.map<SDL_Scancode>(SDLInputDevice::mapKey);
-    shortcuts.controller = config.shortcuts.controller.map<SDL_GameControllerButton>(SDLInputDevice::mapButton);
-}
-
 template<typename T>
-void processShortcut(const ShortcutConfig<T>& config, T input)
+void processInput(const ShortcutConfig<T>& config, T input)
 {
-    constexpr double hz = 59.737;
-
     if (input == config.reset)
         reset();
 
@@ -59,84 +56,34 @@ void processShortcut(const ShortcutConfig<T>& config, T input)
         video_device->fullscreen();
 
     if (input == config.fps_default)
-        limiter.setFPS(hz);
+        limiter.setFPS(REFRESH_RATE);
 
     if (input == config.fps_option_1)
-        limiter.setFPS(hz * ::config.fps_multipliers[0]);
+        limiter.setFPS(REFRESH_RATE * ::config.fps_multipliers[0]);
 
     if (input == config.fps_option_2)
-        limiter.setFPS(hz * ::config.fps_multipliers[1]);
+        limiter.setFPS(REFRESH_RATE * ::config.fps_multipliers[1]);
 
     if (input == config.fps_option_3)
-        limiter.setFPS(hz * ::config.fps_multipliers[2]);
+        limiter.setFPS(REFRESH_RATE * ::config.fps_multipliers[2]);
 
     if (input == config.fps_option_4)
-        limiter.setFPS(hz * ::config.fps_multipliers[3]);
+        limiter.setFPS(REFRESH_RATE * ::config.fps_multipliers[3]);
 
     if (input == config.fps_unlimited)
-        limiter.setFPS(hz * 1000);
+        limiter.setFPS(REFRESH_RATE * 1000);
 }
-
-// Todo: Move to window
-std::string title;
 
 void updateWindowTitle()
 {
-    std::stringstream sstream;
-    sstream << "eggvance";
+    window_title = "eggvance";
+
     if (!mmu.gamepak.header.title.empty())
     {
-        sstream << " - ";
-        sstream << mmu.gamepak.header.title;
-    }
-    switch (mmu.gamepak.backup->type)
-    {
-    case Backup::Type::SRAM:     sstream << " - SRAM";     break;
-    case Backup::Type::Flash64:  sstream << " - FLASH64";  break;
-    case Backup::Type::Flash128: sstream << " - FLASH128"; break;
-    case Backup::Type::EEPROM:   sstream << " - EEPROM";   break;
-    }
-    title = sstream.str();
-    SDL_SetWindowTitle(sdl_video_device->window, title.c_str());
-}
-
-void frame()
-{
-    for (int line = 0; line < 160; ++line)
-    {
-        arm.run(960);
-        ppu.scanline();
-        ppu.hblank();
-        arm.run(272);
-        ppu.next();
+        window_title += fmt::format(" - {}", mmu.gamepak.header.title);
     }
 
-    ppu.vblank();
-    for (int line = 0; line < 68; ++line)
-    {
-        arm.run(960 + 272);
-        ppu.next();
-    }
-    ppu.present();
-}
-
-void drawIcon()
-{
-    SDL_Rect rect = { 0, 0, 240, 160 };
-    SDL_Renderer* renderer = sdl_video_device->renderer;
-    SDL_SetRenderDrawColor(renderer, 38, 40, 43, 1);
-    SDL_RenderFillRect(renderer, &rect);
-
-    int scale = 9;
-    rect.w = scale;
-    rect.h = scale;
-    for (const auto& pixel : icon)
-    {
-        rect.x = scale * pixel.x + 48;
-        rect.y = scale * pixel.y + 8;
-        SDL_SetRenderDrawColor(renderer, pixel.r, pixel.g, pixel.b, 1);
-        SDL_RenderFillRect(renderer, &rect);
-    }
+    sdl_video_device->setWindowTitle(window_title);
 }
 
 bool dropEvent(const SDL_DropEvent& event)
@@ -144,23 +91,19 @@ bool dropEvent(const SDL_DropEvent& event)
     std::string file(event.file);
     SDL_free(event.file);
 
-    if (!fs::is_regular_file(file))
-        return false;
-
     if (!mmu.gamepak.load(file))
         return false;
 
     reset();
 
-    updateWindowTitle();
-    SDL_RaiseWindow(sdl_video_device->window);
+    sdl_video_device->raiseWindow();
 
     return true;
 }
 
-bool dropAwait()
+bool dropMain()
 {
-    drawIcon();
+    sdl_video_device->drawIcon();
 
     while (true)
     {
@@ -189,18 +132,36 @@ bool dropAwait()
     }
 }
 
-void run()
+void frame()
+{
+    for (int line = 0; line < SCREEN_H; ++line)
+    {
+        arm.run(960);
+        ppu.scanline();
+        ppu.hblank();
+        arm.run(272);
+        ppu.next();
+    }
+
+    ppu.vblank();
+    for (int line = 0; line < 68; ++line)
+    {
+        arm.run(1232);
+        ppu.next();
+    }
+
+    ppu.present();
+}
+
+void emulate()
 {
     if (mmu.gamepak.size() == 0)
     {
-        if (!dropAwait())
+        if (!dropMain())
             return;
     }
-    else
-    {
-        updateWindowTitle();
-        reset();
-    }
+
+    updateWindowTitle();
 
     u32 fps_frame = 0;
     u32 fps_begin = SDL_GetTicks();
@@ -218,11 +179,11 @@ void run()
                 return;
 
             case SDL_KEYDOWN:
-                processShortcut(shortcuts.keyboard, event.key.keysym.scancode);
+                processInput(shortcuts.keyboard, event.key.keysym.scancode);
                 break;
 
             case SDL_CONTROLLERBUTTONDOWN:
-                processShortcut(shortcuts.controller, SDL_GameControllerButton(event.cbutton.button));
+                processInput(shortcuts.controller, SDL_GameControllerButton(event.cbutton.button));
                 break;
 
             case SDL_CONTROLLERDEVICEADDED:
@@ -236,7 +197,7 @@ void run()
             }
         }
 
-        keypad.poll();
+        keypad.update();
 
         frame();
 
@@ -246,10 +207,9 @@ void run()
         u32 delta = SDL_GetTicks() - fps_begin;
         if (delta >= 1000)
         {
-
-            std::string fps = fmt::format(" - {:.1f} fps", (1000.f / static_cast<double>(delta) * static_cast<double>(fps_frame)));
-            SDL_SetWindowTitle(sdl_video_device->window, (title + fps).c_str());
-
+            sdl_video_device->setWindowTitle(
+                window_title + fmt::format(" - {:.1f} fps", (1000.f / double(delta) * double(fps_frame)))
+            );
             fps_begin = SDL_GetTicks();
             fps_frame = 0;
         }
@@ -270,23 +230,18 @@ int main(int argc, char* argv[])
 
     try
     {
-        config.init();
-        mmu.bios.init();
-
-        sdl_audio_device->init();
-        sdl_input_device->init();
-        sdl_video_device->init();
-
-        initShortcuts();
+        init();
 
         if (argc > 1)
             mmu.gamepak.load(argv[1]);
 
-        run();
+        reset();
+
+        emulate();
     }
     catch (std::exception ex)
     {
-        return 1;
+        SDL_ShowSimpleMessageBox(0, "Error", ex.what(), nullptr);
     }
     return 0;
 }

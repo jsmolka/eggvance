@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "common/integer.h"
 
 class InputDevice
@@ -26,3 +28,5 @@ protected:
         SHIFT_L      = 9
     };
 };
+
+extern std::shared_ptr<InputDevice> input_device;

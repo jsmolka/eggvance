@@ -6,7 +6,7 @@
 #include "common/constants.h"
 #include "common/macros.h"
 #include "common/utility.h"
-#include "devices/devices.h"
+#include "devices/videodevice.h"
 #include "mmu/mmu.h"
 
 PPU ppu;

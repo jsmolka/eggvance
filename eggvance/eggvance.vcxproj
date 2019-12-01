@@ -151,8 +151,9 @@
     <ClCompile Include="src\arm\shifts.cpp" />
     <ClCompile Include="src\common\config.cpp" />
     <ClCompile Include="src\common\input.cpp" />
-    <ClCompile Include="src\common\message.cpp" />
-    <ClCompile Include="src\devices\devices.cpp" />
+    <ClCompile Include="src\devices\audiodevice.cpp" />
+    <ClCompile Include="src\devices\inputdevice.cpp" />
+    <ClCompile Include="src\devices\videodevice.cpp" />
     <ClCompile Include="src\mmu\io.cpp" />
     <ClCompile Include="src\platform\sdl\sdlaudiodevice.cpp" />
     <ClCompile Include="src\platform\sdl\sdlinputdevice.cpp" />
@@ -220,9 +221,7 @@
     <ClInclude Include="src\common\constants.h" />
     <ClInclude Include="src\common\critical.h" />
     <ClInclude Include="src\common\macros.h" />
-    <ClInclude Include="src\common\message.h" />
     <ClInclude Include="src\devices\audiodevice.h" />
-    <ClInclude Include="src\devices\devices.h" />
     <ClInclude Include="src\devices\inputdevice.h" />
     <ClInclude Include="src\devices\videodevice.h" />
     <ClInclude Include="src\mmu\io.h" />

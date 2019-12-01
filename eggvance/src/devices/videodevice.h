@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <memory>
 
 #include "common/constants.h"
 #include "common/integer.h"
@@ -17,3 +18,5 @@ public:
 
     u32 buffer[SCREEN_H * SCREEN_W];
 };
+
+extern std::shared_ptr<VideoDevice> video_device;
