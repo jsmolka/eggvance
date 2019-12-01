@@ -8,41 +8,26 @@
 class SDLInputDevice : public InputDevice
 {
 public:
-    SDLInputDevice();
     ~SDLInputDevice();
 
     void init() override;
     void deinit() override;
     void poll(u16& state) override;
 
+    void deviceEvent(const SDL_ControllerDeviceEvent& event);
+
+    static SDL_Scancode mapKey(Key key);
+    static SDL_GameControllerButton mapButton(Button button);
+
 private:
     struct
     {
-        SDL_Scancode a;
-        SDL_Scancode b;
-        SDL_Scancode up;
-        SDL_Scancode down;
-        SDL_Scancode left;
-        SDL_Scancode right;
-        SDL_Scancode start;
-        SDL_Scancode select;
-        SDL_Scancode l;
-        SDL_Scancode r;
-    } keyboard;
+        InputConfig<SDL_Scancode> keyboard;
+        InputConfig<SDL_GameControllerButton> controller;
+    } map;
 
-    struct
-    {
-        SDL_GameControllerButton a;
-        SDL_GameControllerButton b;
-        SDL_GameControllerButton up;
-        SDL_GameControllerButton down;
-        SDL_GameControllerButton left;
-        SDL_GameControllerButton right;
-        SDL_GameControllerButton start;
-        SDL_GameControllerButton select;
-        SDL_GameControllerButton l;
-        SDL_GameControllerButton r;
-    } controller;
+    void pollKeys(u16& state);
+    void pollButtons(u16& state);
 
-    static SDL_Scancode mapKey(Key key);
+    SDL_GameController* controller;
 };

@@ -1,26 +1,12 @@
 #pragma once
 
 #include <string>
-#include <unordered_map>
-#include <SDL2/SDL_keyboard.h>
 
-#include "system/keypad.h"
+#include "common/input.h"
 
 class Config
 {
 public:
-    enum class Shortcut
-    {
-        Reset,
-        Fullscreen,
-        SpeedDefault,
-        SpeedOption1,
-        SpeedOption2,
-        SpeedOption3,
-        SpeedOption4,
-        SpeedUnlimited
-    };
-
     void init();
 
     std::string bios_file;
@@ -30,28 +16,14 @@ public:
 
     struct Controls
     {
-        struct
-        {
-            Key a;
-            Key b;
-            Key up;
-            Key down;
-            Key left;
-            Key right;
-            Key start;
-            Key select;
-            Key l;
-            Key r;
-        } keyboard2;
-
-        std::unordered_map<SDL_Keycode, Keypad::Button> keyboard;
-        std::unordered_map<SDL_GameControllerButton, Keypad::Button> controller;
+        InputConfig<Key> keyboard;
+        InputConfig<Button> controller;
     } controls;
 
     struct Shortcuts
     {
-        std::unordered_map<SDL_Keycode, Shortcut> keyboard;
-        std::unordered_map<SDL_GameControllerButton, Shortcut> controller;
+        ShortcutConfig<Key> keyboard;
+        ShortcutConfig<Button> controller;
     } shortcuts;
 
     double fps_multipliers[4];

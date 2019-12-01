@@ -25,9 +25,6 @@ std::shared_ptr<SDLAudioDevice> sdl_audio_device;
 std::shared_ptr<SDLInputDevice> sdl_input_device;
 std::shared_ptr<SDLVideoDevice> sdl_video_device;
 
-// Todo: Move to window
-std::string title;
-
 FrameLimiter limiter(59.737);
 
 void reset()
@@ -38,52 +35,50 @@ void reset()
     keypad.reset();
 }
 
-void processShortcut(Config::Shortcut shortcut)
+struct Shortcuts
+{
+    ShortcutConfig<SDL_Scancode> keyboard;
+    ShortcutConfig<SDL_GameControllerButton> controller;
+} shortcuts;
+
+void initShortcuts()
+{
+    shortcuts.keyboard = config.shortcuts.keyboard.map<SDL_Scancode>(SDLInputDevice::mapKey);
+    shortcuts.controller = config.shortcuts.controller.map<SDL_GameControllerButton>(SDLInputDevice::mapButton);
+}
+
+template<typename T>
+void processShortcut(const ShortcutConfig<T>& config, T input)
 {
     constexpr double hz = 59.737;
 
-    switch (shortcut)
-    {
-    case Config::Shortcut::Reset:
+    if (input == config.reset)
         reset();
-        break;
 
-    case Config::Shortcut::Fullscreen:
-        sdl_video_device->fullscreen();
-        break;
+    if (input == config.fullscreen)
+        video_device->fullscreen();
 
-    case Config::Shortcut::SpeedDefault:
+    if (input == config.fps_default)
         limiter.setFPS(hz);
-        break;
 
-    case Config::Shortcut::SpeedUnlimited:
-        limiter.setFPS(hz * 100);
-        break;
+    if (input == config.fps_option_1)
+        limiter.setFPS(hz * ::config.fps_multipliers[0]);
 
-    case Config::Shortcut::SpeedOption1: limiter.setFPS(hz * config.fps_multipliers[0]); break;
-    case Config::Shortcut::SpeedOption2: limiter.setFPS(hz * config.fps_multipliers[1]); break;
-    case Config::Shortcut::SpeedOption3: limiter.setFPS(hz * config.fps_multipliers[2]); break;
-    case Config::Shortcut::SpeedOption4: limiter.setFPS(hz * config.fps_multipliers[3]); break;
-    }
+    if (input == config.fps_option_2)
+        limiter.setFPS(hz * ::config.fps_multipliers[1]);
+
+    if (input == config.fps_option_3)
+        limiter.setFPS(hz * ::config.fps_multipliers[2]);
+
+    if (input == config.fps_option_4)
+        limiter.setFPS(hz * ::config.fps_multipliers[3]);
+
+    if (input == config.fps_unlimited)
+        limiter.setFPS(hz * 1000);
 }
 
-void keyboardEvent(const SDL_KeyboardEvent& event)
-{
-    auto pair = config.shortcuts.keyboard.find(event.keysym.sym);
-    if (pair == config.shortcuts.keyboard.end())
-        return;
-
-    processShortcut(pair->second);
-}
-
-void controllerButtonEvent(const SDL_ControllerButtonEvent& event)
-{
-    auto pair = config.shortcuts.controller.find(static_cast<SDL_GameControllerButton>(event.button));
-    if (pair == config.shortcuts.controller.end())
-        return;
-
-    processShortcut(pair->second);
-}
+// Todo: Move to window
+std::string title;
 
 void updateWindowTitle()
 {
@@ -182,7 +177,7 @@ bool dropAwait()
 
             case SDL_CONTROLLERDEVICEADDED:
             case SDL_CONTROLLERDEVICEREMOVED:
-                keypad.controllerDeviceEvent(event.cdevice);
+                sdl_input_device->deviceEvent(event.cdevice);
                 break;
 
             case SDL_DROPFILE:
@@ -214,8 +209,6 @@ void run()
     {
         limiter.frameBegin();
 
-        keypad.update();
-
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
@@ -225,24 +218,16 @@ void run()
                 return;
 
             case SDL_KEYDOWN:
-                keyboardEvent(event.key);
-            case SDL_KEYUP:
-                //keypad.keyboardEvent(event.key);
+                processShortcut(shortcuts.keyboard, event.key.keysym.scancode);
                 break;
 
             case SDL_CONTROLLERBUTTONDOWN:
-                controllerButtonEvent(event.cbutton);
-            case SDL_CONTROLLERBUTTONUP:
-                //keypad.controllerButtonEvent(event.cbutton);
-                break;
-
-            case SDL_CONTROLLERAXISMOTION:
-                //keypad.controllerAxisEvent(event.caxis);
+                processShortcut(shortcuts.controller, SDL_GameControllerButton(event.cbutton.button));
                 break;
 
             case SDL_CONTROLLERDEVICEADDED:
             case SDL_CONTROLLERDEVICEREMOVED:
-                //keypad.controllerDeviceEvent(event.cdevice);
+                sdl_input_device->deviceEvent(event.cdevice);
                 break;
 
             case SDL_DROPFILE:
@@ -250,6 +235,9 @@ void run()
                 break;
             }
         }
+
+        keypad.poll();
+
         frame();
 
         limiter.frameSleep();
@@ -284,11 +272,12 @@ int main(int argc, char* argv[])
     {
         config.init();
         mmu.bios.init();
-        keypad.init();
 
         sdl_audio_device->init();
         sdl_input_device->init();
         sdl_video_device->init();
+
+        initShortcuts();
 
         if (argc > 1)
             mmu.gamepak.load(argv[1]);

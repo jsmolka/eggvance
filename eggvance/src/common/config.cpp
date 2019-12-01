@@ -63,31 +63,27 @@ void Config::initFile()
     const auto l      = value.get<std::vector<std::string>>("controls.l"     );
     const auto r      = value.get<std::vector<std::string>>("controls.r"     );
 
-    this->controls.keyboard.insert({
-        { SDL_GetKeyFromName(a[0].c_str())     , Keypad::Button::A     },
-        { SDL_GetKeyFromName(b[0].c_str())     , Keypad::Button::B     },
-        { SDL_GetKeyFromName(up[0].c_str())    , Keypad::Button::Up    },
-        { SDL_GetKeyFromName(down[0].c_str())  , Keypad::Button::Down  },
-        { SDL_GetKeyFromName(left[0].c_str())  , Keypad::Button::Left  },
-        { SDL_GetKeyFromName(right[0].c_str()) , Keypad::Button::Right },
-        { SDL_GetKeyFromName(start[0].c_str()) , Keypad::Button::Start },
-        { SDL_GetKeyFromName(select[0].c_str()), Keypad::Button::Select},
-        { SDL_GetKeyFromName(l[0].c_str())     , Keypad::Button::L     },
-        { SDL_GetKeyFromName(r[0].c_str())     , Keypad::Button::R     } 
-    });
-    
-    this->controls.controller.insert({
-        { SDL_GameControllerGetButtonFromString(a[1].c_str())     , Keypad::Button::A     },
-        { SDL_GameControllerGetButtonFromString(b[1].c_str())     , Keypad::Button::B     },
-        { SDL_GameControllerGetButtonFromString(up[1].c_str())    , Keypad::Button::Up    },
-        { SDL_GameControllerGetButtonFromString(down[1].c_str())  , Keypad::Button::Down  },
-        { SDL_GameControllerGetButtonFromString(left[1].c_str())  , Keypad::Button::Left  },
-        { SDL_GameControllerGetButtonFromString(right[1].c_str()) , Keypad::Button::Right },
-        { SDL_GameControllerGetButtonFromString(start[1].c_str()) , Keypad::Button::Start },
-        { SDL_GameControllerGetButtonFromString(select[1].c_str()), Keypad::Button::Select},
-        { SDL_GameControllerGetButtonFromString(l[1].c_str())     , Keypad::Button::R     },
-        { SDL_GameControllerGetButtonFromString(r[1].c_str())     , Keypad::Button::L     } 
-    });
+    controls.keyboard.a      = keyByName(a[0]);
+    controls.keyboard.b      = keyByName(b[0]);
+    controls.keyboard.up     = keyByName(up[0]);
+    controls.keyboard.down   = keyByName(down[0]);
+    controls.keyboard.left   = keyByName(left[0]);
+    controls.keyboard.right  = keyByName(right[0]);
+    controls.keyboard.start  = keyByName(start[0]);
+    controls.keyboard.select = keyByName(select[0]);
+    controls.keyboard.l      = keyByName(l[0]);
+    controls.keyboard.r      = keyByName(r[0]);
+
+    controls.controller.a      = buttonByName(a[1]);
+    controls.controller.b      = buttonByName(b[1]);
+    controls.controller.up     = buttonByName(up[1]);
+    controls.controller.down   = buttonByName(down[1]);
+    controls.controller.left   = buttonByName(left[1]);
+    controls.controller.right  = buttonByName(right[1]);
+    controls.controller.start  = buttonByName(start[1]);
+    controls.controller.select = buttonByName(select[1]);
+    controls.controller.l      = buttonByName(l[1]);
+    controls.controller.r      = buttonByName(r[1]);
 
     const auto reset         = value.get<std::vector<std::string>>("shortcuts.reset"        );
     const auto fullscreen    = value.get<std::vector<std::string>>("shortcuts.fullscreen"   );
@@ -98,27 +94,23 @@ void Config::initFile()
     const auto fps_option_4  = value.get<std::vector<std::string>>("shortcuts.fps_option_4" );
     const auto fps_unlimited = value.get<std::vector<std::string>>("shortcuts.fps_unlimited");
 
-    this->shortcuts.keyboard.insert({
-        { SDL_GetKeyFromName(reset[0].c_str())        , Shortcut::Reset         },
-        { SDL_GetKeyFromName(fullscreen[0].c_str())   , Shortcut::Fullscreen    },
-        { SDL_GetKeyFromName(fps_default[0].c_str())  , Shortcut::SpeedDefault  },
-        { SDL_GetKeyFromName(fps_option_1[0].c_str()) , Shortcut::SpeedOption1  },
-        { SDL_GetKeyFromName(fps_option_2[0].c_str()) , Shortcut::SpeedOption2  },
-        { SDL_GetKeyFromName(fps_option_3[0].c_str()) , Shortcut::SpeedOption3  },
-        { SDL_GetKeyFromName(fps_option_4[0].c_str()) , Shortcut::SpeedOption4  },
-        { SDL_GetKeyFromName(fps_unlimited[0].c_str()), Shortcut::SpeedUnlimited}
-    });    
-    
-    this->shortcuts.controller.insert({
-        { SDL_GameControllerGetButtonFromString(reset[1].c_str())        , Shortcut::Reset         },
-        { SDL_GameControllerGetButtonFromString(fullscreen[1].c_str())   , Shortcut::Fullscreen    },
-        { SDL_GameControllerGetButtonFromString(fps_default[1].c_str())  , Shortcut::SpeedDefault  },
-        { SDL_GameControllerGetButtonFromString(fps_option_1[1].c_str()) , Shortcut::SpeedOption1  },
-        { SDL_GameControllerGetButtonFromString(fps_option_2[1].c_str()) , Shortcut::SpeedOption2  },
-        { SDL_GameControllerGetButtonFromString(fps_option_3[1].c_str()) , Shortcut::SpeedOption3  },
-        { SDL_GameControllerGetButtonFromString(fps_option_4[1].c_str()) , Shortcut::SpeedOption4  },
-        { SDL_GameControllerGetButtonFromString(fps_unlimited[1].c_str()), Shortcut::SpeedUnlimited}
-    });
+    shortcuts.keyboard.reset         = keyByName(reset[0]);
+    shortcuts.keyboard.fullscreen    = keyByName(fullscreen[0]);
+    shortcuts.keyboard.fps_default   = keyByName(fps_default[0]);
+    shortcuts.keyboard.fps_option_1  = keyByName(fps_option_1[0]);
+    shortcuts.keyboard.fps_option_2  = keyByName(fps_option_2[0]);
+    shortcuts.keyboard.fps_option_3  = keyByName(fps_option_3[0]);
+    shortcuts.keyboard.fps_option_4  = keyByName(fps_option_4[0]);
+    shortcuts.keyboard.fps_unlimited = keyByName(fps_unlimited[0]);
+
+    shortcuts.controller.reset         = buttonByName(reset[1]);
+    shortcuts.controller.fullscreen    = buttonByName(fullscreen[1]);
+    shortcuts.controller.fps_default   = buttonByName(fps_default[1]);
+    shortcuts.controller.fps_option_1  = buttonByName(fps_option_1[1]);
+    shortcuts.controller.fps_option_2  = buttonByName(fps_option_2[1]);
+    shortcuts.controller.fps_option_3  = buttonByName(fps_option_3[1]);
+    shortcuts.controller.fps_option_4  = buttonByName(fps_option_4[1]);
+    shortcuts.controller.fps_unlimited = buttonByName(fps_unlimited[1]);
 }
 
 void Config::initDefault()
@@ -133,45 +125,43 @@ void Config::initDefault()
     fps_multipliers[2] = 6.0;
     fps_multipliers[3] = 8.0;
 
-    controls.keyboard.clear();
-    controls.keyboard.insert({
-        { SDLK_u, Keypad::Button::A      },
-        { SDLK_h, Keypad::Button::B      },
-        { SDLK_f, Keypad::Button::Select },
-        { SDLK_g, Keypad::Button::Start  },
-        { SDLK_d, Keypad::Button::Right  },
-        { SDLK_a, Keypad::Button::Left   },
-        { SDLK_w, Keypad::Button::Up     },
-        { SDLK_s, Keypad::Button::Down   },
-        { SDLK_i, Keypad::Button::R      },
-        { SDLK_q, Keypad::Button::L      } 
-    });
+    controls.keyboard.a      = KEY_U;
+    controls.keyboard.b      = KEY_H;
+    controls.keyboard.up     = KEY_W;
+    controls.keyboard.down   = KEY_S;
+    controls.keyboard.left   = KEY_A;
+    controls.keyboard.right  = KEY_D;
+    controls.keyboard.start  = KEY_G;
+    controls.keyboard.select = KEY_F;
+    controls.keyboard.l      = KEY_Q;
+    controls.keyboard.r      = KEY_I;
 
-    controls.controller.clear();
-    controls.controller.insert({
-        { SDL_CONTROLLER_BUTTON_B,             Keypad::Button::A      },
-        { SDL_CONTROLLER_BUTTON_A,             Keypad::Button::B      },
-        { SDL_CONTROLLER_BUTTON_BACK,          Keypad::Button::Select },
-        { SDL_CONTROLLER_BUTTON_START,         Keypad::Button::Start  },
-        { SDL_CONTROLLER_BUTTON_DPAD_RIGHT,    Keypad::Button::Right  },
-        { SDL_CONTROLLER_BUTTON_DPAD_LEFT,     Keypad::Button::Left   },
-        { SDL_CONTROLLER_BUTTON_DPAD_UP,       Keypad::Button::Up     },
-        { SDL_CONTROLLER_BUTTON_DPAD_DOWN,     Keypad::Button::Down   },
-        { SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, Keypad::Button::R      },
-        { SDL_CONTROLLER_BUTTON_LEFTSHOULDER,  Keypad::Button::L      }
-    });
+    controls.controller.a      = BTN_B;
+    controls.controller.b      = BTN_A;
+    controls.controller.up     = BTN_DPAD_UP;
+    controls.controller.down   = BTN_DPAD_DOWN;
+    controls.controller.left   = BTN_DPAD_LEFT;
+    controls.controller.right  = BTN_DPAD_RIGHT;
+    controls.controller.start  = BTN_START;
+    controls.controller.select = BTN_BACK;
+    controls.controller.l      = BTN_LEFTSHOULDER;
+    controls.controller.r      = BTN_RIGHTSHOULDER;
 
-    shortcuts.keyboard.clear();
-    shortcuts.keyboard.insert({
-        { SDLK_r  , Shortcut::Reset          },
-        { SDLK_F11, Shortcut::Fullscreen     },
-        { SDLK_1  , Shortcut::SpeedDefault   },
-        { SDLK_2  , Shortcut::SpeedOption1   },
-        { SDLK_3  , Shortcut::SpeedOption2   },
-        { SDLK_4  , Shortcut::SpeedOption3   },
-        { SDLK_5  , Shortcut::SpeedOption4   },
-        { SDLK_6  , Shortcut::SpeedUnlimited },
-    });
+    shortcuts.keyboard.reset         = KEY_R;
+    shortcuts.keyboard.fullscreen    = KEY_F11;
+    shortcuts.keyboard.fps_default   = KEY_1;
+    shortcuts.keyboard.fps_option_1  = KEY_2;
+    shortcuts.keyboard.fps_option_2  = KEY_3;
+    shortcuts.keyboard.fps_option_3  = KEY_4;
+    shortcuts.keyboard.fps_option_4  = KEY_5;
+    shortcuts.keyboard.fps_unlimited = KEY_6;
 
-    shortcuts.controller.clear();
+    shortcuts.controller.reset         = BTN_NONE;
+    shortcuts.controller.fullscreen    = BTN_NONE;
+    shortcuts.controller.fps_default   = BTN_NONE;
+    shortcuts.controller.fps_option_1  = BTN_NONE;
+    shortcuts.controller.fps_option_2  = BTN_NONE;
+    shortcuts.controller.fps_option_3  = BTN_NONE;
+    shortcuts.controller.fps_option_4  = BTN_NONE;
+    shortcuts.controller.fps_unlimited = BTN_NONE;
 }
