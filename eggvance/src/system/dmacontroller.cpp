@@ -33,18 +33,11 @@ void DMAController::run(int& cycles)
     }
 }
 
-void DMAController::signal(DMA::Timing timing)
+void DMAController::broadcast(DMA::Timing timing)
 {
     for (auto& dma : dmas)
     {
-        const auto& control = dma.control;
-
-        if (!dma.running && control.enabled && DMA::Timing(control.timing) == timing)
-        {
-            dma.start();
-            if (!active || dma.id < active->id)
-                active = &dma;
-        }
+        emit(timing, dma);
     }
 }
 
@@ -63,11 +56,9 @@ u8 DMAController::readByte(u32 addr)
     }
 }
 
-#define WRITE_DMA_CONTROL(label, control)    \
-    CASE2(label):                            \
-        control.write(addr - label, byte);   \
-        if (control.reload)                  \
-            signal(DMA::Timing::Immediate);  \
+#define WRITE_DMA_CONTROL(label, dma)           \
+    CASE2(label):                               \
+        writeControl(dma, addr - label, byte);  \
         break
 
 void DMAController::writeByte(u32 addr, u8 byte)
@@ -87,13 +78,34 @@ void DMAController::writeByte(u32 addr, u8 byte)
     WRITE2(REG_DMA2CNT_L, dmas[2].count);
     WRITE2(REG_DMA3CNT_L, dmas[3].count);
 
-    WRITE_DMA_CONTROL(REG_DMA0CNT_H, dmas[0].control);
-    WRITE_DMA_CONTROL(REG_DMA1CNT_H, dmas[1].control);
-    WRITE_DMA_CONTROL(REG_DMA2CNT_H, dmas[2].control);
-    WRITE_DMA_CONTROL(REG_DMA3CNT_H, dmas[3].control);
+    WRITE_DMA_CONTROL(REG_DMA0CNT_H, dmas[0]);
+    WRITE_DMA_CONTROL(REG_DMA1CNT_H, dmas[1]);
+    WRITE_DMA_CONTROL(REG_DMA2CNT_H, dmas[2]);
+    WRITE_DMA_CONTROL(REG_DMA3CNT_H, dmas[3]);
 
     default:
         EGG_UNREACHABLE;
         break;
+    }
+}
+
+void DMAController::emit(DMA::Timing timing, DMA& dma)
+{
+    if (!dma.running && dma.control.enabled && dma.control.timing == int(timing))
+    {
+        dma.start();
+
+        if (!active || dma.id < active->id)
+            active = &dma;
+    }
+}
+
+void DMAController::writeControl(DMA& dma, int index, u8 byte)
+{
+    dma.control.write(index, byte);
+
+    if (dma.control.reload)
+    {
+        emit(DMA::Timing::Immediate, dma);
     }
 }
