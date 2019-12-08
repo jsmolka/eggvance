@@ -80,13 +80,13 @@ private:
     u32 ror(u32 value, int amount, bool& carry, bool immediate) const;
     u32 shift(Shift type, u32 value, int amount, bool& carry, bool immediate) const;
 
-    u32 logical(u32 result, bool flags);
-    u32 logical(u32 result, bool carry, bool flags);
+    u32 logical(u32 value, bool flags);
+    u32 logical(u32 value, bool carry, bool flags);
 
     u32 add(u32 op1, u32 op2, bool flags);
     u32 sub(u32 op1, u32 op2, bool flags);
-    u32 adc(u64 op1, u64 op2, bool flags);
-    u32 sbc(u64 op1, u64 op2, bool flags);
+    u32 adc(u32 op1, u32 op2, bool flags);
+    u32 sbc(u32 op1, u32 op2, bool flags);
 
     void execute();
     void disasm();
