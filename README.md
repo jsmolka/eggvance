@@ -2,7 +2,7 @@
 A Game Boy Advance emulator.
 
 ## State
-Bad news first: there is no audio. Apart from that the emulator can boot all tested games and the vast majority of them run without any issues. I'll do my best to maintain a [list](https://eggception.de/eggvance/compatibility/) of fully tested games and to write a [progress report](https://eggception.de/eggvance/progress/) every once in a while.
+Bad news first: there is no audio implementation. Beside that the emulator is able run all tested games without any issues. I will do my best to write a [progress report](https://eggception.de/eggvance/) every once in a while.
 
 ## Usage
 The emulator requires a BIOS file in order to work. Its location and many other things can be customized in the [config](https://github.com/jsmolka/eggvance/blob/master/eggvance/eggvance.toml). A game can be started by either passing it as a command line argument or dropping it in the opened emulator window (paths with non-ANSI characters aren't supported at the moment). Windows binaries for the latest release can be downloaded [here](https://github.com/jsmolka/eggvance/releases).
