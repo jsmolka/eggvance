@@ -1,5 +1,6 @@
 #include "arm.h"
 
+#include "common/bitutil.h"
 #include "common/macros.h"
 #include "common/utility.h"
 
@@ -486,8 +487,8 @@ void ARM::Thumb_PushPopRegisters(u16 instr)
      
     if (pop)
     {
-        int beg = bitScanForward(rlist);
-        int end = bitScanReverse(rlist);
+        int beg = bitutil::lowestSetBit(rlist);
+        int end = bitutil::highestSetBit(rlist);
 
         for (int x = beg; x <= end; ++x)
         {
@@ -511,8 +512,8 @@ void ARM::Thumb_PushPopRegisters(u16 instr)
     }
     else
     {
-        int beg = bitScanReverse(rlist);
-        int end = bitScanForward(rlist);
+        int beg = bitutil::highestSetBit(rlist);
+        int end = bitutil::lowestSetBit(rlist);
 
         if (special)
         {
@@ -544,8 +545,8 @@ void ARM::Thumb_LoadStoreMultiple(u16 instr)
 
     if (rlist != 0)
     {
-        int beg = bitScanForward(rlist);
-        int end = bitScanReverse(rlist);
+        int beg = bitutil::lowestSetBit(rlist);
+        int end = bitutil::highestSetBit(rlist);
 
         if (load)
         {

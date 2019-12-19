@@ -2,6 +2,7 @@
 
 #include <fmt/format.h>
 
+#include "common/bitutil.h"
 #include "common/utility.h"
 #include "decode.h"
 
@@ -71,12 +72,15 @@ const std::string hex(u32 value)
 
 const std::string list(u16 rlist)
 {
+    if (rlist == 0)
+        return "{}";
+
     std::string result;
 
     result.reserve(4 * bitCount(rlist) + 4);
 
-    int beg = bitScanForward(rlist);
-    int end = bitScanReverse(rlist);
+    int beg = bitutil::lowestSetBit(rlist);
+    int end = bitutil::highestSetBit(rlist);
 
     result.append("{");
     for (int x = beg; x <= end; ++x)

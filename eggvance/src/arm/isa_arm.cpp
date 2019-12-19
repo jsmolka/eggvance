@@ -1,5 +1,6 @@
 #include "arm.h"
 
+#include "common/bitutil.h"
 #include "common/macros.h"
 #include "common/utility.h"
 
@@ -462,8 +463,8 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
             pre_index ^= true;
         }
 
-        int beg = bitScanForward(rlist);
-        int end = bitScanReverse(rlist);
+        int beg = bitutil::lowestSetBit(rlist);
+        int end = bitutil::highestSetBit(rlist);
 
         if (load)
         {

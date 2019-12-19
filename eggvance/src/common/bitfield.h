@@ -1,20 +1,18 @@
 #pragma once
 
-#include <cstddef>
+#include "bitutil.h"
 
 template<typename T, std::size_t position, std::size_t size>
 struct BitField
 {
     constexpr operator T() const
     {
-        return (value >> position) & ((1ull << size) - 1);
+        return bitutil::get<position, size>(value);
     }
 
-    constexpr BitField& operator=(T v)
+    constexpr BitField& operator=(T data)
     {
-        constexpr T mask = ((1ull << size) - 1) << position;
-
-        value = (value & ~mask) | ((v << position) & mask);
+        value = bitutil::set<position, size>(value, data);
 
         return *this;
     }

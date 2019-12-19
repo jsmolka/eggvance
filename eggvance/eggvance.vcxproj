@@ -216,6 +216,8 @@
     <ClInclude Include="src\arm\disassemble.h" />
     <ClInclude Include="src\arm\psr.h" />
     <ClInclude Include="src\arm\registers.h" />
+    <ClInclude Include="src\common\bitfield.h" />
+    <ClInclude Include="src\common\bitutil.h" />
     <ClInclude Include="src\common\enums.h" />
     <ClInclude Include="src\common\config.h" />
     <ClInclude Include="src\common\constants.h" />
