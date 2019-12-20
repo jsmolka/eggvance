@@ -450,7 +450,7 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
 
     if (rlist != 0)
     {
-        int count = bitCount(rlist);
+        int count = bitutil::popcount(rlist);
 
         if (!increment)
         {
@@ -463,8 +463,8 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
             pre_index ^= true;
         }
 
-        int beg = bitutil::lowestSetBit(rlist);
-        int end = bitutil::highestSetBit(rlist);
+        int beg = bitutil::scanForward(rlist);
+        int end = bitutil::scanReverse(rlist);
 
         if (load)
         {

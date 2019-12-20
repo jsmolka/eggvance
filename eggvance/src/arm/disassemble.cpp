@@ -79,8 +79,8 @@ const std::string list(u16 rlist)
 
     result.reserve(4 * bitCount(rlist) + 4);
 
-    int beg = bitutil::lowestSetBit(rlist);
-    int end = bitutil::highestSetBit(rlist);
+    int beg = bitutil::scanForward(rlist);
+    int end = bitutil::scanReverse(rlist);
 
     result.append("{");
     for (int x = beg; x <= end; ++x)

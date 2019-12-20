@@ -2,17 +2,17 @@
 
 #include "bitutil.h"
 
-template<typename T, std::size_t position, std::size_t size>
+template<typename T, unsigned index, unsigned size>
 struct BitField
 {
     constexpr operator T() const
     {
-        return bitutil::get<position, size>(value);
+        return bitutil::get<index, size>(value);
     }
 
     constexpr BitField& operator=(T data)
     {
-        value = bitutil::set<position, size>(value, data);
+        value = bitutil::set<index, size>(value, data);
 
         return *this;
     }

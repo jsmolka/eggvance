@@ -487,8 +487,8 @@ void ARM::Thumb_PushPopRegisters(u16 instr)
      
     if (pop)
     {
-        int beg = bitutil::lowestSetBit(rlist);
-        int end = bitutil::highestSetBit(rlist);
+        int beg = bitutil::scanForward(rlist);
+        int end = bitutil::scanReverse(rlist);
 
         for (int x = beg; x <= end; ++x)
         {
@@ -512,14 +512,14 @@ void ARM::Thumb_PushPopRegisters(u16 instr)
     }
     else
     {
-        int beg = bitutil::highestSetBit(rlist);
-        int end = bitutil::lowestSetBit(rlist);
-
         if (special)
         {
             sp -= 4;
             writeWord(sp, lr);
         }
+
+        int beg = bitutil::scanReverse(rlist);
+        int end = bitutil::scanForward(rlist);
 
         for (int x = beg; x >= end; --x)
         {
@@ -545,8 +545,8 @@ void ARM::Thumb_LoadStoreMultiple(u16 instr)
 
     if (rlist != 0)
     {
-        int beg = bitutil::lowestSetBit(rlist);
-        int end = bitutil::highestSetBit(rlist);
+        int beg = bitutil::scanForward(rlist);
+        int end = bitutil::scanReverse(rlist);
 
         if (load)
         {
@@ -572,7 +572,7 @@ void ARM::Thumb_LoadStoreMultiple(u16 instr)
                     continue;
 
                 if (x == rb)
-                    writeWord(addr, base + 4 * bitCount(rlist));
+                    writeWord(addr, base + 4 * bitutil::popcount(rlist));
                 else
                     writeWord(addr, regs[x]);
 

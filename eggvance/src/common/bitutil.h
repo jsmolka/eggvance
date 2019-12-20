@@ -1,116 +1,92 @@
 #pragma once
 
-#include <bitset>
-#include <cstddef>
 #include <type_traits>
-
-#ifdef _MSC_VER
-#include <intrin.h>
-#endif
 
 namespace bitutil
 {
     template<typename T>
-    constexpr std::size_t bits()
+    constexpr unsigned bits()
     {
         return sizeof(T) * CHAR_BIT;
     }
 
-    template<std::size_t position, std::size_t size, typename T>
+    template<unsigned size>
+    constexpr unsigned ones()
+    {
+        return (1ull << size) - 1;
+    }
+
+    template<unsigned index, unsigned size, typename T>
     constexpr T get(T value)
     {
-        static_assert(position + size <= bits<T>(), "Invalid parameters");
-
-        return (value >> position) & ((1ull << size) - 1);
+        return (value >> index) & ones<size>();
     }
 
-    template<std::size_t position, std::size_t size, typename T>
+    template<unsigned index, unsigned size, typename T>
     constexpr T set(T value, T data)
     {
-        static_assert(position + size <= bits<T>(), "Invalid parameters");
+        constexpr T mask = ones<size>() << index;
 
-        constexpr T mask = ((1ull << size) - 1) << position;
-
-        return (value & ~mask) | ((data << position) & mask);
+        return (value & ~mask) | ((data << index) & mask);
     }
 
-    template<std::size_t size, typename T>
+    template<unsigned size, typename T>
     constexpr T signExtend(T value)
     {
-        static_assert(size <= bits<T>(), "Invalid parameters");
-
         constexpr T mask = 1ull << (size - 1);
 
         return (value ^ mask) - mask;
     }
 
     template<typename T>
-    constexpr std::size_t bitCount(T value)
+    constexpr T rotateRight(T value, unsigned amount)
     {
-        return std::bitset<bits<T>()>(value).count();
+        amount %= bits<T>();
+
+        if (amount == 0)
+            return value;
+
+        auto x = static_cast<std::make_unsigned_t<T>>(value);
+
+        return (x >> amount) | (x << (bits<T>() - amount));
     }
 
-    #pragma warning(push)
-    #pragma warning(disable : 4267)
+    constexpr unsigned popcount(unsigned value)
+    {
+        value = value - ((value >> 1) & 0x5555'5555);
+        value = (value & 0x3333'3333) + ((value >> 2) & 0x3333'3333);
+        return ((value + (value >> 4) & 0x0F0F'0F0F) * 0x0101'0101) >> 24;
+    }
 
     template<typename T>
-    constexpr int lowestSetBit(T value)
+    constexpr unsigned scanForward(T value)
     {
         if (value == 0)
-            return bits<T>();
+            return bits<T>() - 1;
 
-        #ifdef _MSC_VER
+        auto x = static_cast<std::make_unsigned_t<T>>(value);
 
-        unsigned long index = 0;
+        x = (x ^ (x - 1)) >> 1;
 
-        if (bits<T>() <= 32)
-            _BitScanForward(&index, value);
-        else
-            _BitScanForward64(&index, value);
-
+        unsigned index = 0;
+        while (x >>= 1)
+            index++;
+        
         return index;
-
-        #else
-
-        for (int x = 0; x < bits<T>(); ++x)
-        {
-            if (value & (1 << x))
-                return x;
-        }
-        return bits<T>();
-
-        #endif
     }
 
     template<typename T>
-    constexpr int highestSetBit(T value)
+    constexpr unsigned scanReverse(T value)
     {
         if (value == 0)
             return 0;
 
-        #ifdef _MSC_VER
+        auto v = static_cast<std::make_unsigned_t<T>>(value);
 
-        unsigned long index = 0;
-
-        if (bits<T>() <= 32)
-            _BitScanReverse(&index, value);
-        else
-            _BitScanReverse64(&index, value);
+        unsigned index = 0;
+        while (v >>= 1)
+            index++;
 
         return index;
-
-        #else
-
-        for (int x = bits<T>() - 1; x > -1; --x)
-        {
-            if (value & (1 << x))
-                return x;
-        }
-        return 0;
-
-        #endif
     }
-
-    #pragma warning(pop)
 }
-
