@@ -144,8 +144,8 @@
     <ClCompile Include="src\arm\bus.cpp" />
     <ClCompile Include="src\arm\decode.cpp" />
     <ClCompile Include="src\arm\disassemble.cpp" />
-    <ClCompile Include="src\arm\isa_arm.cpp" />
-    <ClCompile Include="src\arm\isa_thumb.cpp" />
+    <ClCompile Include="src\arm\instr_arm.cpp" />
+    <ClCompile Include="src\arm\instr_thumb.cpp" />
     <ClCompile Include="src\arm\psr.cpp" />
     <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\arm\shifts.cpp" />
@@ -297,8 +297,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="eggvance.toml" />
-    <None Include="src\arm\lut_arm.py" />
-    <None Include="src\arm\lut_thumb.py" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

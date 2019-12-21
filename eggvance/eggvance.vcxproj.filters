@@ -54,12 +54,6 @@
     <ClCompile Include="src\framelimiter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\arm\isa_arm.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\arm\isa_thumb.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\mmu\oam.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -223,6 +217,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\devices\videodevice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\arm\instr_arm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\arm\instr_thumb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -474,8 +474,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\arm\lut_arm.py" />
-    <None Include="src\arm\lut_thumb.py" />
     <None Include="eggvance.toml" />
   </ItemGroup>
 </Project>

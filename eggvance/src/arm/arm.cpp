@@ -1,12 +1,19 @@
 #include "arm.h"
 
 #include <fmt/printf.h>
+#include <common/macros.h>
+#include <mmu/mmu.h>
 
-#include "common/macros.h"
-#include "mmu/mmu.h"
 #include "disassemble.h"
+#include "decode.h"
 
 ARM arm;
+
+ARM::ARM()
+{
+    Arm_GenerateLut();
+    Thumb_GenerateLut();
+}
 
 void ARM::reset()
 {
@@ -80,7 +87,7 @@ void ARM::execute()
             pipe[0] = pipe[1];
             pipe[1] = readHalf(pc);
 
-            (this->*instr_thumb[instr >> 6])(instr);
+            (this->*instr_thumb[thumbHash(instr)])(instr);
         }
         else
         {
@@ -91,7 +98,7 @@ void ARM::execute()
 
             if (cpsr.check(PSR::Condition(instr >> 28)))
             {
-                (this->*instr_arm[((instr >> 16) & 0xFF0) | ((instr >> 4) & 0xF)])(instr);
+                (this->*instr_arm[armHash(instr)])(instr);
             }
         }
     }

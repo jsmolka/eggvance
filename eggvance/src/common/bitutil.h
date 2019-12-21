@@ -81,10 +81,10 @@ namespace bitutil
         if (value == 0)
             return 0;
 
-        auto v = static_cast<std::make_unsigned_t<T>>(value);
+        auto x = static_cast<std::make_unsigned_t<T>>(value);
 
         unsigned index = 0;
-        while (v >>= 1)
+        while (x >>= 1)
             index++;
 
         return index;
