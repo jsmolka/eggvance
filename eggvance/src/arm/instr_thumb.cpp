@@ -1,9 +1,8 @@
 #include "arm.h"
 
-#include <common/bitutil.h>
-#include <common/macros.h>
-#include <common/utility.h>
-
+#include "common/bitutil.h"
+#include "common/macros.h"
+#include "common/utility.h"
 #include "decode.h"
 
 void ARM::Thumb_MoveShiftedRegister(u16 instr)

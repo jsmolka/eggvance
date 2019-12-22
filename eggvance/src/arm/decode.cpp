@@ -1,6 +1,6 @@
 #include "decode.h"
 
-#include <common/bitutil.h>
+#include "common/bitutil.h"
 
 InstructionArm decodeArm(u32 instr)
 {

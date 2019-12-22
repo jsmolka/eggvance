@@ -1,9 +1,8 @@
 #include "arm.h"
 
-#include <common/bitutil.h>
-#include <common/macros.h>
-#include <common/utility.h>
-
+#include "common/bitutil.h"
+#include "common/macros.h"
+#include "common/utility.h"
 #include "decode.h"
 
 void ARM::Arm_BranchExchange(u32 instr)
