@@ -11,18 +11,8 @@ void ARM::Arm_BranchExchange(u32 instr)
 
     u32 addr = regs[rn];
 
-    if (cpsr.thumb = addr & 0x1)
-    {
-        pc = alignHalf(addr);
-        flushPipeHalf();
-        instr_size = 2;
-    }
-    else
-    {
-        pc = alignWord(addr);
-        flushPipeWord();
-        instr_size = 4;
-    }
+    cpsr.thumb = addr & 0x1;
+    pc = addr;
 }
 
 void ARM::Arm_BranchLink(u32 instr)
@@ -36,7 +26,6 @@ void ARM::Arm_BranchLink(u32 instr)
     offset <<= 2;
 
     pc += offset;
-    flushPipeWord();
 }
 
 void ARM::Arm_DataProcessing(u32 instr)
@@ -67,7 +56,7 @@ void ARM::Arm_DataProcessing(u32 instr)
     int opcode = bits<21, 4>(instr);
     int imm_op = bits<25, 1>(instr);
 
-    u32& dst = regs[rd];
+    GPR& dst = regs[rd];
     u32  op1 = regs[rn];
     u32  op2 = 0;
 
@@ -137,22 +126,6 @@ void ARM::Arm_DataProcessing(u32 instr)
         EGG_UNREACHABLE;
         break;
     }
-
-    if (rd == 15)
-    {
-        if (cpsr.thumb)
-        {
-            pc = alignHalf(pc);
-            flushPipeHalf();
-            instr_size = 2;
-        }
-        else
-        {
-            pc = alignWord(pc);
-            flushPipeWord();
-            instr_size = 4;
-        }
-    }
 }
 
 void ARM::Arm_StatusTransfer(u32 instr)
@@ -219,7 +192,7 @@ void ARM::Arm_Multiply(u32 instr)
     u32  op1 = regs[rm];
     u32  op2 = regs[rs];
     u32  op3 = regs[rn];
-    u32& dst = regs[rd];
+    GPR& dst = regs[rd];
 
     dst = op1 * op2;
     if (accumulate)
@@ -244,8 +217,8 @@ void ARM::Arm_MultiplyLong(u32 instr)
 
     u64  op1  = regs[rm];
     u64  op2  = regs[rs];
-    u32& dstl = regs[rdl];
-    u32& dsth = regs[rdh];
+    GPR& dstl = regs[rdl];
+    GPR& dsth = regs[rdh];
 
     if (sign)
     {
@@ -299,7 +272,7 @@ void ARM::Arm_SingleDataTransfer(u32 instr)
 
     writeback |= !pre_index;
 
-    u32& dst = regs[rd];
+    GPR& dst = regs[rd];
     u32 addr = regs[rn];
 
     u32 offset = 0;
@@ -336,11 +309,6 @@ void ARM::Arm_SingleDataTransfer(u32 instr)
             ? readByte(addr)
             : readWordRotated(addr);
 
-        if (rd == 15)
-        {
-            pc = alignWord(pc);
-            flushPipeWord();
-        }
         idle();
     }
     else
@@ -383,7 +351,7 @@ void ARM::Arm_HalfSignedDataTransfer(u32 instr)
 
     writeback |= !pre_index;
 
-    u32& dst = regs[rd];
+    GPR& dst = regs[rd];
     u32 addr = regs[rn];
 
     u32 offset = 0;
@@ -414,7 +382,7 @@ void ARM::Arm_HalfSignedDataTransfer(u32 instr)
 
         case Operation::LDRSB:
             dst = readByte(addr);
-            dst = signExtend<8>(dst);
+            dst = signExtend<8>(static_cast<u32>(dst));
             break;
 
         case Operation::LDRSH:
@@ -424,12 +392,6 @@ void ARM::Arm_HalfSignedDataTransfer(u32 instr)
         default:
             EGG_UNREACHABLE;
             break;
-        }
-
-        if (rd == 15)
-        {
-            pc = alignWord(pc);
-            flushPipeWord();
         }
         idle();
     }
@@ -508,12 +470,6 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
             }
 
             idle();
-
-            if (rlist & (1 << 15))
-            {
-                pc = alignWord(pc);
-                flushPipeWord();
-            }
         }
         else
         {
@@ -556,15 +512,9 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
     else
     {
         if (load)
-        {
             pc = readWord(addr);
-            pc = alignWord(pc);
-            flushPipeWord();
-        }
         else
-        {
             writeWord(addr, pc + 4);
-        }
 
         addr += increment
             ?  0x40
@@ -586,7 +536,7 @@ void ARM::Arm_SingleDataSwap(u32 instr)
     int byte = bits<22, 1>(instr);
 
     u32  src = regs[rm];
-    u32& dst = regs[rd];
+    GPR& dst = regs[rd];
     u32 addr = regs[rn];
 
     if (byte)

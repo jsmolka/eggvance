@@ -1,22 +1,26 @@
 #pragma once
 
+#include "gpr.h"
 #include "psr.h"
 
 class Registers
 {
 public:
+    Registers() : regs{} {};
+    ~Registers() {};
+
     void reset();
 
     union
     {
         struct
         {
-            u32 gprs[13];
-            u32 sp;
-            u32 lr;
-            u32 pc;
+            GPR gprs[13];
+            GPR sp;
+            GPR lr;
+            GPR pc;
         };
-        u32 regs[16];
+        GPR regs[16];
     };
 
     PSR cpsr;

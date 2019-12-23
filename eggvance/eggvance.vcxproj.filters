@@ -467,6 +467,9 @@
     <ClInclude Include="src\common\bitutil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\arm\gpr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="eggvance.rc">

@@ -7,7 +7,11 @@
 
 void Registers::reset()
 {
-    std::memset(regs,     0, sizeof(regs));
+    for (auto& reg : regs)
+    {
+        reg = 0;
+    }
+
     std::memset(bank,     0, sizeof(bank));
     std::memset(bank_fiq, 0, sizeof(bank_fiq));
 
@@ -51,8 +55,17 @@ void Registers::switchMode(PSR::Mode mode)
             int fiq_old = bank_old == Bank::FIQ;
             int fiq_new = bank_new == Bank::FIQ;
 
-            std::copy_n(&regs[8], 5, &bank_fiq[fiq_old][0]);
-            std::copy_n(&bank_fiq[fiq_new][0], 5, &regs[8]);
+            bank_fiq[fiq_old][0] = regs[ 8];
+            bank_fiq[fiq_old][1] = regs[ 9];
+            bank_fiq[fiq_old][2] = regs[10];
+            bank_fiq[fiq_old][3] = regs[11];
+            bank_fiq[fiq_old][4] = regs[12];
+
+            regs[ 8] = bank_fiq[fiq_new][0];
+            regs[ 9] = bank_fiq[fiq_new][1];
+            regs[10] = bank_fiq[fiq_new][2];
+            regs[11] = bank_fiq[fiq_new][3];
+            regs[12] = bank_fiq[fiq_new][4];
         }
     }
     cpsr.mode = mode;

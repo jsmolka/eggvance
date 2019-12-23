@@ -93,9 +93,6 @@ private:
     void execute();
     void disasm();
 
-    void flushPipeHalf();
-    void flushPipeWord();
-
     void idle();
     void booth(u32 multiplier, bool ones);
 

@@ -12,7 +12,7 @@ void ARM::Thumb_MoveShiftedRegister(u16 instr)
     int offset = bits< 6, 5>(instr);
     int opcode = bits<11, 2>(instr);
 
-    u32& dst = regs[rd];
+    GPR& dst = regs[rd];
     u32  src = regs[rs];
 
     bool carry = cpsr.c;
@@ -45,7 +45,7 @@ void ARM::Thumb_AddSubtract(u16 instr)
     int rn     = bits<6, 3>(instr);
     int opcode = bits<9, 2>(instr);
 
-    u32& dst = regs[rd];
+    GPR& dst = regs[rd];
     u32  src = regs[rs];
 
     switch (Operation(opcode))
@@ -75,7 +75,7 @@ void ARM::Thumb_ImmediateOperations(u16 instr)
     int rd     = bits< 8, 3>(instr);
     int opcode = bits<11, 2>(instr);
 
-    u32& dst = regs[rd];
+    GPR& dst = regs[rd];
 
     switch (Operation(opcode))
     {
@@ -116,7 +116,7 @@ void ARM::Thumb_ALUOperations(u16 instr)
     int rs     = bits<3, 3>(instr);
     int opcode = bits<6, 4>(instr);
 
-    u32& dst = regs[rd];
+    GPR& dst = regs[rd];
     u32  src = regs[rs];
 
     bool carry = cpsr.c;
@@ -220,33 +220,17 @@ void ARM::Thumb_HighRegisterOperations(u16 instr)
     rs |= hs << 3;
     rd |= hd << 3;
 
-    u32& dst = regs[rd];
+    GPR& dst = regs[rd];
     u32  src = regs[rs];
 
     switch (Operation(opcode))
     {
     case Operation::ADD:
-        if (rd == 15 && hd)
-        {
-            dst = alignHalf(dst + src);
-            flushPipeHalf();
-        }
-        else
-        {
-            dst += src;
-        }
+        dst += src;
         break;
 
     case Operation::MOV:
-        if (rd == 15 && hd)
-        {
-            dst = alignHalf(src);
-            flushPipeHalf();
-        }
-        else
-        {
-            dst = src;
-        }
+        dst = src;
         break;
 
     case Operation::CMP:
@@ -254,18 +238,8 @@ void ARM::Thumb_HighRegisterOperations(u16 instr)
         break;
 
     case Operation::BX:
-        if (cpsr.thumb = src & 0x1)
-        {
-            pc = alignHalf(src);
-            flushPipeHalf();
-            instr_size = 2;
-        }
-        else
-        {
-            pc = alignWord(src);
-            flushPipeWord();
-            instr_size = 4;
-        }
+        cpsr.thumb = src & 0x1;
+        pc = src;
         break;
 
     default:
@@ -303,7 +277,7 @@ void ARM::Thumb_LoadStoreRegisterOffset(u16 instr)
     int ro     = bits< 6, 3>(instr);
     int opcode = bits<10, 2>(instr);
 
-    u32& dst = regs[rd];
+    GPR& dst = regs[rd];
     u32 addr = regs[rb] + regs[ro];
 
     switch (Operation(opcode))
@@ -347,7 +321,7 @@ void ARM::Thumb_LoadStoreByteHalf(u16 instr)
     int ro     = bits< 6, 3>(instr);
     int opcode = bits<10, 2>(instr);
 
-    u32& dst = regs[rd];
+    GPR& dst = regs[rd];
     u32 addr = regs[rb] + regs[ro];
 
     switch (Operation(opcode))
@@ -358,7 +332,7 @@ void ARM::Thumb_LoadStoreByteHalf(u16 instr)
 
     case Operation::LDRSB:
         dst = readByte(addr);
-        dst = signExtend<8>(dst);
+        dst = signExtend<8>(static_cast<u32>(dst));
         idle();
         break;
 
@@ -393,7 +367,7 @@ void ARM::Thumb_LoadStoreImmediateOffset(u16 instr)
     int offset = bits< 6, 5>(instr);
     int opcode = bits<11, 2>(instr);
 
-    u32& dst = regs[rd];
+    GPR& dst = regs[rd];
     u32 addr = regs[rb] + (offset << (~opcode & 0x2));
 
     switch (Operation(opcode))
@@ -429,7 +403,7 @@ void ARM::Thumb_LoadStoreHalf(u16 instr)
     int offset = bits< 6, 5>(instr);
     int load   = bits<11, 1>(instr);
 
-    u32& dst = regs[rd];
+    GPR& dst = regs[rd];
     u32 addr = regs[rb] + (offset << 1);
 
     if (load)
@@ -449,7 +423,7 @@ void ARM::Thumb_LoadStoreSPRelative(u16 instr)
     int rd     = bits< 8, 3>(instr);
     int load   = bits<11, 1>(instr);
 
-    u32& dst = regs[rd];
+    GPR& dst = regs[rd];
     u32 addr = sp + (offset << 2);
 
     if (load)
@@ -471,7 +445,7 @@ void ARM::Thumb_LoadRelativeAddress(u16 instr)
 
     offset <<= 2;
 
-    u32& dst = regs[rd];
+    GPR& dst = regs[rd];
 
     if (use_sp)
         dst = sp + offset;
@@ -517,9 +491,6 @@ void ARM::Thumb_PushPopRegisters(u16 instr)
         if (special)
         {
             pc = readWord(sp);
-            pc = alignHalf(pc);
-            flushPipeHalf();
-
             sp += 4;
         }
     }
@@ -597,15 +568,10 @@ void ARM::Thumb_LoadStoreMultiple(u16 instr)
     else
     {
         if (load)
-        {
             pc = readWord(addr);
-            pc = alignHalf(pc);
-            flushPipeHalf();
-        }
         else
-        {
             writeWord(addr, pc + 2);
-        }
+
         addr += 0x40;
     }
 
@@ -625,7 +591,6 @@ void ARM::Thumb_ConditionalBranch(u16 instr)
         offset <<= 1;
 
         pc += offset;
-        flushPipeHalf();
     }
 }
 
@@ -642,7 +607,6 @@ void ARM::Thumb_UnconditionalBranch(u16 instr)
     offset <<= 1;
 
     pc += offset;
-    flushPipeHalf();
 }
 
 void ARM::Thumb_LongBranchLink(u16 instr)
@@ -657,8 +621,6 @@ void ARM::Thumb_LongBranchLink(u16 instr)
         u32 next = (pc - 2) | 1;
         pc = lr + offset;
         lr = next;
-
-        flushPipeHalf();
     }
     else
     {
