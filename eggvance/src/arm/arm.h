@@ -142,11 +142,10 @@ private:
     void Thumb_GenerateLut();
 
     int remaining;
-    int instr_size;
     u32 last_addr;
 
-    std::array<void(ARM::*)(u32), 4096> instr_arm;
-    std::array<void(ARM::*)(u16),  256> instr_thumb;
+    std::array<void(ARM::*)(u32), 0x1000> instr_arm;
+    std::array<void(ARM::*)(u16), 0x0100> instr_thumb;
 };
 
 extern ARM arm;

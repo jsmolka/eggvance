@@ -53,7 +53,7 @@ struct PSR
 
     inline operator u32() const
     {
-        return static_cast<int>(mode)
+        return static_cast<u32>(mode)
             | (t <<  5)
             | (f <<  6)
             | (i <<  7)
@@ -61,6 +61,11 @@ struct PSR
             | (c << 29)
             | (z << 30)
             | (n << 31);
+    }
+
+    inline u32 size() const
+    {
+        return 2 << (t ^ 0x1);
     }
 
     inline bool check(Condition condition) const
@@ -88,11 +93,6 @@ struct PSR
             EGG_UNREACHABLE;
             return false;
         }
-    }
-
-    inline int instrSize() const
-    {
-        return 2 * (t ^ 0x1) + 2;
     }
 
     Mode mode;

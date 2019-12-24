@@ -89,4 +89,16 @@ namespace bitutil
         value = (value & 0x3333'3333) + ((value >> 2) & 0x3333'3333);
         return ((value + (value >> 4) & 0x0F0F'0F0F) * 0x0101'0101) >> 24;
     }
+
+    template<unsigned size, typename T>
+    inline T align(T value)
+    {
+        return value & ~(size - 1);
+    }
+
+    template<typename T>
+    inline T align(T value, unsigned size)
+    {
+        return value & ~(size - 1);
+    }
 }

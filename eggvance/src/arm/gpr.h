@@ -43,5 +43,5 @@ struct GPR
 
     u32 value;
 
-    std::function<void(void)> on_write;
+    std::function<void()> on_write;
 };

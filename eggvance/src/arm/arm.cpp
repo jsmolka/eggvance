@@ -2,7 +2,6 @@
 
 #include <fmt/printf.h>
 
-#include "common/macros.h"
 #include "mmu/mmu.h"
 #include "decode.h"
 #include "disassemble.h"
@@ -19,7 +18,11 @@ ARM::ARM()
 
 void ARM::reset()
 {
+    remaining = 0;
+
     Registers::reset();
+
+    pc.value = pc + 4;
 
     io.int_master.reset();
     io.int_enabled.reset();
@@ -29,11 +32,6 @@ void ARM::reset()
 
     dma.reset();
     timer.reset();
-
-    remaining = 0;
-
-    instr_size = 4;
-    pc.value += instr_size;
 }
 
 void ARM::run(int cycles)
@@ -77,17 +75,13 @@ void ARM::flush()
     {
         pipe[0] = readHalf(pc + 0);
         pipe[1] = readHalf(pc + 2);
-        instr_size = 2;
-        pc.value += 2;
     }
     else
     {
         pipe[0] = readWord(pc + 0);
         pipe[1] = readWord(pc + 4);
-        instr_size = 4;
-        pc.value += 4;
     }
-    pc.value &= ~(instr_size - 1);
+    pc.value = bitutil::align(pc + cpsr.size(), cpsr.size());
 }
 
 void ARM::execute()
@@ -122,7 +116,7 @@ void ARM::execute()
             }
         }
     }
-    pc.value += instr_size;
+    pc.value += cpsr.size();
 }
 
 void ARM::disasm()
@@ -139,7 +133,7 @@ void ARM::disasm()
 
     fmt::printf("%08X  %08X  %08X  %s\n", 
         operation,
-        pc - 2 * instr_size,
+        pc - 2 * cpsr.size(),
         data.instr, 
         disassemble(data)
     );
@@ -186,21 +180,19 @@ void ARM::interrupt(u32 pc, u32 lr, PSR::Mode mode)
 
 void ARM::interruptHW()
 {
-    u32 lr = pc - 2 * instr_size + 4;
+    u32 lr = pc - 2 * cpsr.size() + 4;
 
     interrupt(0x18, lr, PSR::Mode::IRQ);
 }
 
 void ARM::interruptSW()
 {
-    u32 lr = pc - instr_size;
+    u32 lr = pc - cpsr.size();
 
     interrupt(0x08, lr, PSR::Mode::SVC);
 }
 
 bool ARM::interrupted() const
 {
-    return !cpsr.i
-        && io.int_master
-        && io.int_enabled & io.int_request;
+    return !cpsr.i && io.int_master && io.int_enabled & io.int_request;
 }
