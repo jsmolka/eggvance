@@ -238,7 +238,7 @@ void ARM::Thumb_HighRegisterOperations(u16 instr)
         break;
 
     case Operation::BX:
-        cpsr.thumb = src & 0x1;
+        cpsr.t = src & 0x1;
         pc = src;
         break;
 

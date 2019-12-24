@@ -1,10 +1,22 @@
 #pragma once
 
+#include "common/bitutil.h"
 #include "common/integer.h"
+#include "common/macros.h"
 
-class PSR
+struct PSR
 {
-public:
+    enum class Mode
+    {
+        USR = 0b10000,
+        FIQ = 0b10001,
+        IRQ = 0b10010,
+        SVC = 0b10011,
+        ABT = 0b10111,
+        SYS = 0b11111,
+        UND = 0b11011
+    };
+
     enum class Condition
     {
         EQ = 0x0,
@@ -22,40 +34,73 @@ public:
         GT = 0xC,
         LE = 0xD,
         AL = 0xE,
-        NV = 0xF,
+        NV = 0xF
     };
 
-    enum class Mode : u32
+    inline PSR& operator=(u32 value)
     {
-        USR = 0b10000,
-        FIQ = 0b10001,
-        IRQ = 0b10010,
-        SVC = 0b10011,
-        ABT = 0b10111,
-        SYS = 0b11111,
-        UND = 0b11011
-    };
+        mode = static_cast<Mode>(bitutil::get<0, 5>(value));
+        t    = bitutil::get< 5, 1>(value);
+        f    = bitutil::get< 6, 1>(value);
+        i    = bitutil::get< 7, 1>(value);
+        v    = bitutil::get<28, 1>(value);
+        c    = bitutil::get<29, 1>(value);
+        z    = bitutil::get<30, 1>(value);
+        n    = bitutil::get<31, 1>(value);
 
-    PSR& operator=(const PSR& other);
-    PSR& operator=(u32 value);
-    operator u32() const;
+        return *this;
+    }
 
-    bool check(Condition condition) const;
-
-    union
+    inline operator u32() const
     {
-        struct
+        return static_cast<int>(mode)
+            | (t <<  5)
+            | (f <<  6)
+            | (i <<  7)
+            | (v << 28)
+            | (c << 29)
+            | (z << 30)
+            | (n << 31);
+    }
+
+    inline bool check(Condition condition) const
+    {
+        switch (condition)
         {
-            Mode mode   :  5;
-            u32  thumb  :  1;
-            u32  fiqd   :  1;
-            u32  irqd   :  1;
-            u32  unused : 20;
-            u32  v      :  1;
-            u32  c      :  1;
-            u32  z      :  1;
-            u32  n      :  1;
-        };
-        u32 value;
-    };
+        case Condition::EQ: return z;
+        case Condition::NE: return !z;
+        case Condition::CS: return c;
+        case Condition::CC: return !c;
+        case Condition::MI: return n;
+        case Condition::PL: return !n;
+        case Condition::VS: return v;
+        case Condition::VC: return !v;
+        case Condition::HI: return c && !z;
+        case Condition::LS: return !c || z;
+        case Condition::GE: return n == v;
+        case Condition::LT: return n != v;
+        case Condition::GT: return !z && (n == v);
+        case Condition::LE: return z || (n != v);
+        case Condition::AL: return true;
+        case Condition::NV: return false;
+
+        default:
+            EGG_UNREACHABLE;
+            return false;
+        }
+    }
+
+    inline int instrSize() const
+    {
+        return 2 * (t ^ 0x1) + 2;
+    }
+
+    Mode mode;
+    int t;
+    int f;
+    int i;
+    int v;
+    int c;
+    int z;
+    int n;
 };

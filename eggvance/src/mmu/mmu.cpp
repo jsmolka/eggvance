@@ -371,7 +371,7 @@ void MMU::writeWord(u32 addr, u32 word)
 u32 MMU::readUnused(u32 addr)
 {
     u32 value = 0;
-    if (arm.cpsr.thumb)
+    if (arm.cpsr.t)
     {
         u32 lsw = arm.pipe[1];
         u32 msw = arm.pipe[1];

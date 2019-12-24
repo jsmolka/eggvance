@@ -90,6 +90,7 @@ private:
     u32 adc(u32 op1, u32 op2, bool flags);
     u32 sbc(u32 op1, u32 op2, bool flags);
 
+    void flush();
     void execute();
     void disasm();
 

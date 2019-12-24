@@ -1,18 +1,28 @@
 #include "registers.h"
 
-#include <algorithm>
+#include <cstring>
 
 #include "common/macros.h"
 #include "common/config.h"
+
+Registers::Registers()
+{
+
+}
+
+Registers::~Registers()
+{
+
+}
 
 void Registers::reset()
 {
     for (auto& reg : regs)
     {
-        reg = 0;
+        reg.reset();
     }
 
-    std::memset(bank,     0, sizeof(bank));
+    std::memset(bank_all, 0, sizeof(bank_all));
     std::memset(bank_fiq, 0, sizeof(bank_fiq));
 
     if (config.bios_skip)
@@ -22,11 +32,11 @@ void Registers::reset()
         pc   = 0x0800'0000;
         cpsr = 0x0000'005F;
 
-        bank[Bank::FIQ][0] = 0x0300'7F00;
-        bank[Bank::ABT][0] = 0x0300'7F00;
-        bank[Bank::UND][0] = 0x0300'7F00;
-        bank[Bank::SVC][0] = 0x0300'7FE0;
-        bank[Bank::IRQ][0] = 0x0300'7FA0;
+        bank_all[Bank::FIQ][0] = 0x0300'7F00;
+        bank_all[Bank::ABT][0] = 0x0300'7F00;
+        bank_all[Bank::UND][0] = 0x0300'7F00;
+        bank_all[Bank::SVC][0] = 0x0300'7FE0;
+        bank_all[Bank::IRQ][0] = 0x0300'7FA0;
     }
     else 
     {
@@ -42,13 +52,13 @@ void Registers::switchMode(PSR::Mode mode)
 
     if (bank_old != bank_new)
     {
-        bank[bank_old][0] = sp;
-        bank[bank_old][1] = lr;
-        bank[bank_old][2] = spsr;
+        bank_all[bank_old][0] = sp;
+        bank_all[bank_old][1] = lr;
+        bank_all[bank_old][2] = spsr;
 
-        sp   = bank[bank_new][0];
-        lr   = bank[bank_new][1];
-        spsr = bank[bank_new][2];
+        sp   = bank_all[bank_new][0];
+        lr   = bank_all[bank_new][1];
+        spsr = bank_all[bank_new][2];
 
         if (bank_old == Bank::FIQ || bank_new == Bank::FIQ)
         {

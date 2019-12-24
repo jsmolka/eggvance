@@ -146,7 +146,6 @@
     <ClCompile Include="src\arm\disassemble.cpp" />
     <ClCompile Include="src\arm\instr_arm.cpp" />
     <ClCompile Include="src\arm\instr_thumb.cpp" />
-    <ClCompile Include="src\arm\psr.cpp" />
     <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\arm\shifts.cpp" />
     <ClCompile Include="src\common\config.cpp" />

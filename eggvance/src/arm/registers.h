@@ -6,8 +6,8 @@
 class Registers
 {
 public:
-    Registers() : regs{} {};
-    ~Registers() {};
+    Registers();
+    ~Registers();
 
     void reset();
 
@@ -42,6 +42,6 @@ private:
 
     static Bank modeToBank(PSR::Mode mode);
 
-    u32 bank[6][3];
+    u32 bank_all[6][3];
     u32 bank_fiq[2][5];
 };

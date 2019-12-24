@@ -6,12 +6,17 @@
 
 struct GPR
 {
+    inline void reset()
+    {
+        value = 0;
+    }
+
     inline GPR& operator=(u32 value)
     {
         this->value = value;
 
-        if (callback)
-            callback();
+        if (on_write)
+            on_write();
 
         return *this;
     }
@@ -37,5 +42,6 @@ struct GPR
     }
 
     u32 value;
-    std::function<void(void)> callback;
+
+    std::function<void(void)> on_write;
 };

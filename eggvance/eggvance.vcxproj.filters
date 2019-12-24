@@ -18,9 +18,6 @@
     <ClCompile Include="icon\icon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\arm\psr.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\arm\registers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

@@ -4,8 +4,8 @@
 
 #include "common/macros.h"
 #include "mmu/mmu.h"
-#include "disassemble.h"
 #include "decode.h"
+#include "disassemble.h"
 
 ARM arm;
 
@@ -14,24 +14,7 @@ ARM::ARM()
     Arm_GenerateLut();
     Thumb_GenerateLut();
 
-    pc.callback = [&]()
-    {
-        if (cpsr.thumb)
-        {
-            pipe[0] = readHalf(pc + 0);
-            pipe[1] = readHalf(pc + 2);
-            instr_size = 2;
-            pc.value += 2;
-        }
-        else
-        {
-            pipe[0] = readWord(pc + 0);
-            pipe[1] = readWord(pc + 4);
-            instr_size = 4;
-            pc.value += 4;
-        }
-        pc.value &= ~(instr_size - 1);
-    };
+    pc.on_write = std::bind(&ARM::flush, this);
 }
 
 void ARM::reset()
@@ -88,6 +71,25 @@ void ARM::request(Interrupt flag)
         io.haltcnt = false;
 }
 
+void ARM::flush()
+{
+    if (cpsr.t)
+    {
+        pipe[0] = readHalf(pc + 0);
+        pipe[1] = readHalf(pc + 2);
+        instr_size = 2;
+        pc.value += 2;
+    }
+    else
+    {
+        pipe[0] = readWord(pc + 0);
+        pipe[1] = readWord(pc + 4);
+        instr_size = 4;
+        pc.value += 4;
+    }
+    pc.value &= ~(instr_size - 1);
+}
+
 void ARM::execute()
 {
     //disasm();
@@ -98,7 +100,7 @@ void ARM::execute()
     }
     else
     {
-        if (cpsr.thumb)
+        if (cpsr.t)
         {
             u16 instr = pipe[0];
 
@@ -130,7 +132,7 @@ void ARM::disasm()
 
     DisasmData data;
 
-    data.thumb = cpsr.thumb;
+    data.thumb = cpsr.t;
     data.instr = pipe[0];
     data.pc    = pc;
     data.lr    = lr;
@@ -171,12 +173,12 @@ void ARM::booth(u32 multiplier, bool ones)
 
 void ARM::interrupt(u32 pc, u32 lr, PSR::Mode mode)
 {
-    u32 cpsr = this->cpsr;
+    PSR cpsr = this->cpsr;
     switchMode(mode);
     spsr = cpsr;
 
-    this->cpsr.thumb = false;
-    this->cpsr.irqd  = true;
+    this->cpsr.t = 0;
+    this->cpsr.i = 1;
 
     this->lr = lr;
     this->pc = pc;
@@ -198,7 +200,7 @@ void ARM::interruptSW()
 
 bool ARM::interrupted() const
 {
-    return !cpsr.irqd
+    return !cpsr.i
         && io.int_master
         && io.int_enabled & io.int_request;
 }

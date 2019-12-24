@@ -11,7 +11,7 @@ void ARM::Arm_BranchExchange(u32 instr)
 
     u32 addr = regs[rn];
 
-    cpsr.thumb = addr & 0x1;
+    cpsr.t = addr & 0x1;
     pc = addr;
 }
 
