@@ -1,8 +1,8 @@
 #include "displaycontrol.h"
 
+#include "common/bits.h"
 #include "common/config.h"
 #include "common/macros.h"
-#include "common/utility.h"
 
 void DisplayControl::reset()
 {

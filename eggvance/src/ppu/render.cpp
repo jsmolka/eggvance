@@ -1,10 +1,9 @@
 #include "ppu.h"
 
-#include "common/utility.h"
-#include "common/macros.h"
-#include "mmu/mmu.h"
 #include "matrix.h"
 #include "mapentry.h"
+#include "common/macros.h"
+#include "mmu/mmu.h"
 
 Point PPU::transform(int x, int bg) const
 {

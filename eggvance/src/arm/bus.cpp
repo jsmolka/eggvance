@@ -1,6 +1,6 @@
 #include "arm.h"
 
-#include "common/utility.h"
+#include "common/bits.h"
 #include "mmu/mmu.h"
 
 bool ARM::isSequential(u32 addr) const
@@ -54,25 +54,19 @@ u32 ARM::readWordRotated(u32 addr)
 {
     u32 value = readWord(addr);
 
-    if (misalignedWord(addr))
-        return rotateRight(value, (addr & 0x3) << 3);
-    else
-        return value;
+    return rotateRight(value, (addr & 0x3) << 3);
 }
 
 u32 ARM::readHalfRotated(u32 addr)
 {
     u32 value = readHalf(addr);
 
-    if (misalignedHalf(addr))
-        return rotateRight(value, 8);
-    else
-        return value;
+    return rotateRight(value, (addr & 0x1) << 3);
 }
 
 u32 ARM::readHalfSigned(u32 addr)
 {
-    if (misalignedHalf(addr))
+    if (addr & 0x1)
     {
         u32 value = readByte(addr);
         return signExtend<8>(value);

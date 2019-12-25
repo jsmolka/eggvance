@@ -1,6 +1,6 @@
 #include "oam.h"
 
-#include "common/utility.h"
+#include "common/bits.h"
 
 void OAM::reset()
 {

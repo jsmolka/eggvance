@@ -2,9 +2,9 @@
 
 #include <array>
 
+#include "ram.h"
 #include "ppu/oamentry.h"
 #include "ppu/matrix.h"
-#include "ram.h"
 
 class OAM : public RAM<0x400>
 {

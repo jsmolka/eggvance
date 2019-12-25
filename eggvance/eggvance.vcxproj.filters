@@ -242,9 +242,6 @@
     <ClInclude Include="src\common\macros.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\common\utility.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\arm\arm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -458,13 +455,10 @@
     <ClInclude Include="src\devices\device.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\common\bitfield.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\common\bitutil.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\arm\gpr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common\bits.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

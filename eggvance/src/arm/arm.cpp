@@ -2,9 +2,9 @@
 
 #include <fmt/printf.h>
 
-#include "mmu/mmu.h"
 #include "decode.h"
 #include "disassemble.h"
+#include "mmu/mmu.h"
 
 ARM arm;
 
@@ -81,7 +81,7 @@ void ARM::flush()
         pipe[0] = readWord(pc + 0);
         pipe[1] = readWord(pc + 4);
     }
-    pc.value = bitutil::align(pc + cpsr.size(), cpsr.size());
+    pc.value = (pc.value & ~(cpsr.size() - 1)) + cpsr.size();
 }
 
 void ARM::execute()

@@ -1,6 +1,6 @@
 #include "decode.h"
 
-#include "common/bitutil.h"
+#include "common/bits.h"
 
 InstructionArm decodeArm(u32 instr)
 {
@@ -25,8 +25,8 @@ InstructionArm decodeArmHash(int hash)
     if ((hash & 0b1101'1001'0000) == 0b0001'0000'0000) return InstructionArm::StatusTransfer;
     if ((hash & 0b1100'0000'0000) == 0b0000'0000'0000)
     {
-        int flags  = bitutil::get<4, 1>(hash);
-        int opcode = bitutil::get<5, 4>(hash);
+        int flags  = bits<4, 1>(hash);
+        int opcode = bits<5, 4>(hash);
 
         if ((opcode >> 2) == 0b10 && !flags)
             return InstructionArm::Undefined;
@@ -61,7 +61,7 @@ InstructionThumb decodeThumbHash(int hash)
     if ((hash & 0b1111'1111) == 0b1101'1111) return InstructionThumb::SoftwareInterrupt;
     if ((hash & 0b1111'0000) == 0b1101'0000)
     {
-        int condition = bitutil::get<2, 4>(hash);
+        int condition = bits<2, 4>(hash);
 
         if (condition == 0b1110)
             return InstructionThumb::Undefined;

@@ -1,12 +1,12 @@
 #include "io.h"
 
+#include "memmap.h"
+#include "mmu.h"
 #include "arm/arm.h"
 #include "common/config.h"
 #include "ppu/ppu.h"
 #include "registers/macros.h"
 #include "system/keypad.h"
-#include "memmap.h"
-#include "mmu.h"
 
 #define READ1_UNIMP(label) CASE1(label): return data.readByte(addr)
 #define READ2_UNIMP(label) CASE2(label): return data.readByte(addr)

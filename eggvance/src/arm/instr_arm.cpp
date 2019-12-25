@@ -1,9 +1,8 @@
 #include "arm.h"
 
-#include "common/bitutil.h"
-#include "common/macros.h"
-#include "common/utility.h"
 #include "decode.h"
+#include "common/bits.h"
+#include "common/macros.h"
 
 void ARM::Arm_BranchExchange(u32 instr)
 {
@@ -434,7 +433,7 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
 
     if (rlist != 0)
     {
-        int count = bitutil::popcount(rlist);
+        int count = popcount(rlist);
 
         if (!increment)
         {
@@ -447,8 +446,8 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
             pre_index ^= true;
         }
 
-        int beg = bitutil::scanForward(rlist);
-        int end = bitutil::scanReverse(rlist);
+        int beg = bitScanForward(rlist);
+        int end = bitScanReverse(rlist);
 
         if (load)
         {

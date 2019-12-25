@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/bitutil.h"
+#include "common/bits.h"
 #include "common/integer.h"
 #include "common/macros.h"
 
@@ -39,14 +39,14 @@ struct PSR
 
     inline PSR& operator=(u32 value)
     {
-        mode = static_cast<Mode>(bitutil::get<0, 5>(value));
-        t    = bitutil::get< 5, 1>(value);
-        f    = bitutil::get< 6, 1>(value);
-        i    = bitutil::get< 7, 1>(value);
-        v    = bitutil::get<28, 1>(value);
-        c    = bitutil::get<29, 1>(value);
-        z    = bitutil::get<30, 1>(value);
-        n    = bitutil::get<31, 1>(value);
+        mode = static_cast<Mode>(bits<0, 5>(value));
+        t    = bits< 5, 1>(value);
+        f    = bits< 6, 1>(value);
+        i    = bits< 7, 1>(value);
+        v    = bits<28, 1>(value);
+        c    = bits<29, 1>(value);
+        z    = bits<30, 1>(value);
+        n    = bits<31, 1>(value);
 
         return *this;
     }

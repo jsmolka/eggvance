@@ -1,7 +1,7 @@
 #include "window.h"
 
+#include "common/bits.h"
 #include "common/macros.h"
-#include "common/utility.h"
 #include "ppu/layer.h"
 
 void Window::reset()

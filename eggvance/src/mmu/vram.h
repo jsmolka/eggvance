@@ -1,8 +1,8 @@
 #pragma once
 
+#include "ram.h"
 #include "common/enums.h"
 #include "ppu/point.h"
-#include "ram.h"
 
 class VRAM : public RAM<0x1'8000>
 {

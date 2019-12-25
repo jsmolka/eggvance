@@ -1,11 +1,11 @@
 #pragma once
 
-#include "gamepak/gamepak.h"
 #include "bios.h"
 #include "palette.h"
 #include "vram.h"
 #include "oam.h"
 #include "io.h"
+#include "gamepak/gamepak.h"
 
 class MMU
 {

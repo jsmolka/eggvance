@@ -1,7 +1,7 @@
 #include "intrequest.h"
 
+#include "common/bits.h"
 #include "common/macros.h"
-#include "common/utility.h"
 
 IntRequest::operator int() const
 {

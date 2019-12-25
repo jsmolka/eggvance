@@ -1,14 +1,14 @@
 #include <fmt/format.h>
 
+#include "framelimiter.h"
+#include "sdlaudiodevice.h"
+#include "sdlinputdevice.h"
+#include "sdlvideodevice.h"
 #include "arm/arm.h"
 #include "common/config.h"
 #include "mmu/mmu.h"
 #include "ppu/ppu.h"
 #include "system/keypad.h"
-#include "framelimiter.h"
-#include "sdlaudiodevice.h"
-#include "sdlinputdevice.h"
-#include "sdlvideodevice.h"
 
 std::shared_ptr<SDLAudioDevice> sdl_audio_device;
 std::shared_ptr<SDLInputDevice> sdl_input_device;

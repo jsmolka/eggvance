@@ -1,7 +1,7 @@
 #include "timercontrol.h"
 
+#include "common/bits.h"
 #include "common/macros.h"
-#include "common/utility.h"
 
 void TimerControl::reset()
 {

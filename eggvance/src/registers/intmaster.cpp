@@ -1,7 +1,7 @@
 #include "intmaster.h"
 
+#include "common/bits.h"
 #include "common/macros.h"
-#include "common/utility.h"
 
 IntMaster::operator bool() const
 {

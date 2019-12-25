@@ -1,8 +1,5 @@
 #include "arm.h"
 
-#include "common/macros.h"
-#include "common/utility.h"
-
 u32 ARM::lsl(u32 value, int amount, bool& carry) const
 {
     if (amount != 0)

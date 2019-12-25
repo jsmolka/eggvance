@@ -1,9 +1,8 @@
 #include "arm.h"
 
-#include "common/bitutil.h"
-#include "common/macros.h"
-#include "common/utility.h"
 #include "decode.h"
+#include "common/bits.h"
+#include "common/macros.h"
 
 void ARM::Thumb_MoveShiftedRegister(u16 instr)
 {
@@ -255,7 +254,7 @@ void ARM::Thumb_LoadPCRelative(u16 instr)
 
     offset <<= 2;
 
-    u32 addr = alignWord(pc + offset);
+    u32 addr = (pc & ~0x3) + offset;
 
     regs[rd] = readWord(addr);
 
@@ -450,7 +449,7 @@ void ARM::Thumb_LoadRelativeAddress(u16 instr)
     if (use_sp)
         dst = sp + offset;
     else
-        dst = alignWord(pc + offset);
+        dst = (pc & ~0x3) + offset;
 }
 
 void ARM::Thumb_AddOffsetSP(u16 instr)
@@ -474,8 +473,8 @@ void ARM::Thumb_PushPopRegisters(u16 instr)
      
     if (pop)
     {
-        int beg = bitutil::scanForward(rlist);
-        int end = bitutil::scanReverse(rlist);
+        int beg = bitScanForward(rlist);
+        int end = bitScanReverse(rlist);
 
         for (int x = beg; x <= end; ++x)
         {
@@ -502,8 +501,8 @@ void ARM::Thumb_PushPopRegisters(u16 instr)
             writeWord(sp, lr);
         }
 
-        int beg = bitutil::scanReverse(rlist);
-        int end = bitutil::scanForward(rlist);
+        int beg = bitScanReverse(rlist);
+        int end = bitScanForward(rlist);
 
         for (int x = beg; x >= end; --x)
         {
@@ -530,8 +529,8 @@ void ARM::Thumb_LoadStoreMultiple(u16 instr)
 
     if (rlist != 0)
     {
-        int beg = bitutil::scanForward(rlist);
-        int end = bitutil::scanReverse(rlist);
+        int beg = bitScanForward(rlist);
+        int end = bitScanReverse(rlist);
 
         if (load)
         {
@@ -557,7 +556,7 @@ void ARM::Thumb_LoadStoreMultiple(u16 instr)
                     continue;
 
                 if (x == rb)
-                    writeWord(addr, base + 4 * bitutil::popcount(rlist));
+                    writeWord(addr, base + 4 * popcount(rlist));
                 else
                     writeWord(addr, regs[x]);
 

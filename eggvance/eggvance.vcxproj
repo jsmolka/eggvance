@@ -216,8 +216,7 @@
     <ClInclude Include="src\arm\gpr.h" />
     <ClInclude Include="src\arm\psr.h" />
     <ClInclude Include="src\arm\registers.h" />
-    <ClInclude Include="src\common\bitfield.h" />
-    <ClInclude Include="src\common\bitutil.h" />
+    <ClInclude Include="src\common\bits.h" />
     <ClInclude Include="src\common\enums.h" />
     <ClInclude Include="src\common\config.h" />
     <ClInclude Include="src\common\constants.h" />
@@ -266,7 +265,6 @@
     <ClInclude Include="src\mmu\gamepak\sram.h" />
     <ClInclude Include="src\mmu\memmap.h" />
     <ClInclude Include="src\mmu\ram.h" />
-    <ClInclude Include="src\common\utility.h" />
     <ClInclude Include="src\system\keypad.h" />
     <ClInclude Include="src\mmu\gamepak\gamepak.h" />
     <ClInclude Include="src\mmu\gamepak\backup.h" />

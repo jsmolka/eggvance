@@ -2,9 +2,9 @@
 
 #include <memory>
 
+#include "device.h"
 #include "common/constants.h"
 #include "common/integer.h"
-#include "device.h"
 
 class VideoDevice : public Device
 {

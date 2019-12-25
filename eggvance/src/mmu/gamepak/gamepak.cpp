@@ -4,11 +4,11 @@
 #include <filesystem>
 #include <fmt/format.h>
 
-#include "common/config.h"
-#include "common/fileutil.h"
 #include "eeprom.h"
 #include "flash.h"
 #include "sram.h"
+#include "common/config.h"
+#include "common/fileutil.h"
 
 namespace fs = std::filesystem;
 

@@ -1,7 +1,7 @@
 #include "mosaic.h"
 
+#include "common/bits.h"
 #include "common/macros.h"
-#include "common/utility.h"
 
 void Mosaic::Stretch::reset()
 {

@@ -1,8 +1,8 @@
 #include "mmu.h"
 
-#include "arm/arm.h"
-#include "common/utility.h"
 #include "memmap.h"
+#include "arm/arm.h"
+#include "common/bits.h"
 
 MMU mmu;
 
@@ -384,7 +384,7 @@ u32 MMU::readUnused(u32 addr)
             break;
 
         case REGION_IWRAM:
-            if (misalignedWord(addr))
+            if (addr & 0x3)
                 lsw = arm.pipe[0];
             else
                 msw = arm.pipe[0];

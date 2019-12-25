@@ -1,6 +1,6 @@
 #include "vram.h"
 
-#include "common/utility.h"
+#include "common/bits.h"
 #include "ppu/ppu.h"
 
 void VRAM::reset()

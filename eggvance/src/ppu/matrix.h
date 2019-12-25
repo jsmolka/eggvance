@@ -1,7 +1,7 @@
 #pragma once
 
-#include "common/integer.h"
 #include "point.h"
+#include "common/integer.h"
 
 class Matrix
 {

@@ -2,8 +2,8 @@
 
 #include <algorithm>
 
+#include "common/bits.h"
 #include "common/macros.h"
-#include "common/utility.h"
 
 void BlendAlpha::reset()
 {
@@ -22,9 +22,9 @@ void BlendAlpha::write(int index, u8 byte)
     EGG_ASSERT(index <= 1, "Invalid index");
 
     if (index == 0)
-        eva = std::min(16, bits<0, 5>(byte));
+        eva = std::min(16, static_cast<int>(bits<0, 5>(byte)));
     else
-        evb = std::min(16, bits<0, 5>(byte));
+        evb = std::min(16, static_cast<int>(bits<0, 5>(byte)));
 
     data[index] = byte;
 }
