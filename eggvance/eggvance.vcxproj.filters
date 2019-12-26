@@ -66,9 +66,6 @@
     <ClCompile Include="src\arm\arithmetic.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\arm\decode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\arm\disassemble.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
