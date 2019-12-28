@@ -637,35 +637,33 @@ void ARM::Thumb_Undefined(u16 instr)
 
 void ARM::Thumb_GenerateLut()
 {
-    auto instr = [](int hash)
-    {
-        switch (decodeThumbHash(hash))
-        {
-        case InstructionThumb::MoveShiftedRegister: return &ARM::Thumb_MoveShiftedRegister;
-        case InstructionThumb::AddSubtract: return &ARM::Thumb_AddSubtract;
-        case InstructionThumb::ImmediateOperations: return &ARM::Thumb_ImmediateOperations;
-        case InstructionThumb::ALUOperations: return &ARM::Thumb_ALUOperations;
-        case InstructionThumb::HighRegisterOperations: return &ARM::Thumb_HighRegisterOperations;
-        case InstructionThumb::LoadPCRelative: return &ARM::Thumb_LoadPCRelative;
-        case InstructionThumb::LoadStoreRegisterOffset: return &ARM::Thumb_LoadStoreRegisterOffset;
-        case InstructionThumb::LoadStoreByteHalf: return &ARM::Thumb_LoadStoreByteHalf;
-        case InstructionThumb::LoadStoreImmediateOffset: return &ARM::Thumb_LoadStoreImmediateOffset;
-        case InstructionThumb::LoadStoreHalf: return &ARM::Thumb_LoadStoreHalf;
-        case InstructionThumb::LoadStoreSPRelative: return &ARM::Thumb_LoadStoreSPRelative;
-        case InstructionThumb::LoadRelativeAddress: return &ARM::Thumb_LoadRelativeAddress;
-        case InstructionThumb::AddOffsetSP: return &ARM::Thumb_AddOffsetSP;
-        case InstructionThumb::PushPopRegisters: return &ARM::Thumb_PushPopRegisters;
-        case InstructionThumb::LoadStoreMultiple: return &ARM::Thumb_LoadStoreMultiple;
-        case InstructionThumb::ConditionalBranch: return &ARM::Thumb_ConditionalBranch;
-        case InstructionThumb::SoftwareInterrupt: return &ARM::Thumb_SoftwareInterrupt;
-        case InstructionThumb::UnconditionalBranch: return &ARM::Thumb_UnconditionalBranch;
-        case InstructionThumb::LongBranchLink: return &ARM::Thumb_LongBranchLink;
-        }
-        return &ARM::Thumb_Undefined;
-    };
-
     for (int hash = 0; hash < instr_thumb.size(); ++hash)
     {
-        instr_thumb[hash] = instr(hash);
+        instr_thumb[hash] = [hash]()
+        {
+            switch (decodeThumbHash(hash))
+            {
+            case InstructionThumb::MoveShiftedRegister: return &ARM::Thumb_MoveShiftedRegister;
+            case InstructionThumb::AddSubtract: return &ARM::Thumb_AddSubtract;
+            case InstructionThumb::ImmediateOperations: return &ARM::Thumb_ImmediateOperations;
+            case InstructionThumb::ALUOperations: return &ARM::Thumb_ALUOperations;
+            case InstructionThumb::HighRegisterOperations: return &ARM::Thumb_HighRegisterOperations;
+            case InstructionThumb::LoadPCRelative: return &ARM::Thumb_LoadPCRelative;
+            case InstructionThumb::LoadStoreRegisterOffset: return &ARM::Thumb_LoadStoreRegisterOffset;
+            case InstructionThumb::LoadStoreByteHalf: return &ARM::Thumb_LoadStoreByteHalf;
+            case InstructionThumb::LoadStoreImmediateOffset: return &ARM::Thumb_LoadStoreImmediateOffset;
+            case InstructionThumb::LoadStoreHalf: return &ARM::Thumb_LoadStoreHalf;
+            case InstructionThumb::LoadStoreSPRelative: return &ARM::Thumb_LoadStoreSPRelative;
+            case InstructionThumb::LoadRelativeAddress: return &ARM::Thumb_LoadRelativeAddress;
+            case InstructionThumb::AddOffsetSP: return &ARM::Thumb_AddOffsetSP;
+            case InstructionThumb::PushPopRegisters: return &ARM::Thumb_PushPopRegisters;
+            case InstructionThumb::LoadStoreMultiple: return &ARM::Thumb_LoadStoreMultiple;
+            case InstructionThumb::ConditionalBranch: return &ARM::Thumb_ConditionalBranch;
+            case InstructionThumb::SoftwareInterrupt: return &ARM::Thumb_SoftwareInterrupt;
+            case InstructionThumb::UnconditionalBranch: return &ARM::Thumb_UnconditionalBranch;
+            case InstructionThumb::LongBranchLink: return &ARM::Thumb_LongBranchLink;
+            }
+            return &ARM::Thumb_Undefined;
+        }();
     }
 }

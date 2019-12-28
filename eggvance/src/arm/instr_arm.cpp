@@ -578,30 +578,28 @@ void ARM::Arm_Undefined(u32 instr)
 
 void ARM::Arm_GenerateLut()
 {
-    auto instr = [](int hash)
-    {
-        switch (decodeArmHash(hash))
-        {
-        case InstructionArm::BranchExchange: return &ARM::Arm_BranchExchange;
-        case InstructionArm::BranchLink: return &ARM::Arm_BranchLink;
-        case InstructionArm::DataProcessing: return &ARM::Arm_DataProcessing;
-        case InstructionArm::StatusTransfer: return &ARM::Arm_StatusTransfer;
-        case InstructionArm::Multiply: return &ARM::Arm_Multiply;
-        case InstructionArm::MultiplyLong: return &ARM::Arm_MultiplyLong;
-        case InstructionArm::SingleDataTransfer: return &ARM::Arm_SingleDataTransfer;
-        case InstructionArm::HalfSignedDataTransfer: return &ARM::Arm_HalfSignedDataTransfer;
-        case InstructionArm::BlockDataTransfer: return &ARM::Arm_BlockDataTransfer;
-        case InstructionArm::SingleDataSwap: return &ARM::Arm_SingleDataSwap;
-        case InstructionArm::SoftwareInterrupt: return &ARM::Arm_SoftwareInterrupt;
-        case InstructionArm::CoprocessorDataOperations: return &ARM::Arm_CoprocessorDataOperations;
-        case InstructionArm::CoprocessorDataTransfers: return &ARM::Arm_CoprocessorDataTransfers;
-        case InstructionArm::CoprocessorRegisterTransfers: return &ARM::Arm_CoprocessorRegisterTransfers;
-        }
-        return &ARM::Arm_Undefined;
-    };
-
     for (int hash = 0; hash < instr_arm.size(); ++hash)
     {
-        instr_arm[hash] = instr(hash);
+        instr_arm[hash] = [hash]()
+        {
+            switch (decodeArmHash(hash))
+            {
+            case InstructionArm::BranchExchange: return &ARM::Arm_BranchExchange;
+            case InstructionArm::BranchLink: return &ARM::Arm_BranchLink;
+            case InstructionArm::DataProcessing: return &ARM::Arm_DataProcessing;
+            case InstructionArm::StatusTransfer: return &ARM::Arm_StatusTransfer;
+            case InstructionArm::Multiply: return &ARM::Arm_Multiply;
+            case InstructionArm::MultiplyLong: return &ARM::Arm_MultiplyLong;
+            case InstructionArm::SingleDataTransfer: return &ARM::Arm_SingleDataTransfer;
+            case InstructionArm::HalfSignedDataTransfer: return &ARM::Arm_HalfSignedDataTransfer;
+            case InstructionArm::BlockDataTransfer: return &ARM::Arm_BlockDataTransfer;
+            case InstructionArm::SingleDataSwap: return &ARM::Arm_SingleDataSwap;
+            case InstructionArm::SoftwareInterrupt: return &ARM::Arm_SoftwareInterrupt;
+            case InstructionArm::CoprocessorDataOperations: return &ARM::Arm_CoprocessorDataOperations;
+            case InstructionArm::CoprocessorDataTransfers: return &ARM::Arm_CoprocessorDataTransfers;
+            case InstructionArm::CoprocessorRegisterTransfers: return &ARM::Arm_CoprocessorRegisterTransfers;
+            }
+            return &ARM::Arm_Undefined;
+        }();
     }
 }
