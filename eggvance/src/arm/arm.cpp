@@ -9,6 +9,9 @@
 ARM arm;
 
 ARM::ARM()
+    : sp(regs[13])
+    , lr(regs[14])
+    , pc(regs[15])
 {
     Arm_GenerateLut();
     Thumb_GenerateLut();

@@ -6,23 +6,9 @@
 class Registers
 {
 public:
-    Registers();
-    ~Registers();
-
     void reset();
 
-    union
-    {
-        struct
-        {
-            GPR gprs[13];
-            GPR sp;
-            GPR lr;
-            GPR pc;
-        };
-        GPR regs[16];
-    };
-
+    GPR regs[16];
     PSR cpsr;
     PSR spsr;
 

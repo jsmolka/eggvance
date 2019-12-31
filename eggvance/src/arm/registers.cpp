@@ -5,16 +5,6 @@
 #include "common/macros.h"
 #include "common/config.h"
 
-Registers::Registers()
-{
-
-}
-
-Registers::~Registers()
-{
-
-}
-
 void Registers::reset()
 {
     for (auto& reg : regs)
@@ -27,10 +17,10 @@ void Registers::reset()
 
     if (config.bios_skip)
     {
-        sp   = 0x0300'7F00;
-        lr   = 0x0800'0000;
-        pc   = 0x0800'0000;
-        cpsr = 0x0000'005F;
+        regs[13] = 0x0300'7F00;
+        regs[14] = 0x0800'0000;
+        regs[15] = 0x0800'0000;
+        cpsr     = 0x0000'005F;
 
         bank_all[Bank::FIQ][0] = 0x0300'7F00;
         bank_all[Bank::ABT][0] = 0x0300'7F00;
@@ -40,8 +30,8 @@ void Registers::reset()
     }
     else 
     {
-        pc   = 0x0000'0000;
-        cpsr = 0x0000'00D3;
+        regs[15] = 0x0000'0000;
+        cpsr     = 0x0000'00D3;
     }
 }
 
@@ -52,13 +42,13 @@ void Registers::switchMode(PSR::Mode mode)
 
     if (bank_old != bank_new)
     {
-        bank_all[bank_old][0] = sp;
-        bank_all[bank_old][1] = lr;
+        bank_all[bank_old][0] = regs[13];
+        bank_all[bank_old][1] = regs[14];
         bank_all[bank_old][2] = spsr;
 
-        sp   = bank_all[bank_new][0];
-        lr   = bank_all[bank_new][1];
-        spsr = bank_all[bank_new][2];
+        regs[13] = bank_all[bank_new][0];
+        regs[14] = bank_all[bank_new][1];
+        spsr     = bank_all[bank_new][2];
 
         if (bank_old == Bank::FIQ || bank_new == Bank::FIQ)
         {

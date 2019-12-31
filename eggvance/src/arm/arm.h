@@ -53,6 +53,10 @@ public:
 
     u32 pipe[2];
 
+    GPR& sp;
+    GPR& lr;
+    GPR& pc;
+
 private:
     enum class Shift
     {
