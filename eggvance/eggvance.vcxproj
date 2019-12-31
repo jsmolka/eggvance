@@ -227,6 +227,7 @@
     <ClInclude Include="src\devices\videodevice.h" />
     <ClInclude Include="src\mmu\io.h" />
     <ClInclude Include="src\common\input.h" />
+    <ClInclude Include="src\platform\sdl\platform.h" />
     <ClInclude Include="src\platform\sdl\sdlaudiodevice.h" />
     <ClInclude Include="src\platform\sdl\sdlinputdevice.h" />
     <ClInclude Include="src\platform\sdl\sdlvideodevice.h" />

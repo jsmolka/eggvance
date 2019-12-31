@@ -1,8 +1,8 @@
 #pragma once
 
 #include <string>
-#include <SDL2/SDL.h>
 
+#include "platform.h"
 #include "devices/videodevice.h"
 
 class SDLVideoDevice : public VideoDevice

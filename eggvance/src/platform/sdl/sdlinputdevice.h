@@ -1,7 +1,6 @@
 #pragma once
 
-#include <SDL2/SDL.h>
-
+#include "platform.h"
 #include "common/input.h"
 #include "devices/inputdevice.h"
 
