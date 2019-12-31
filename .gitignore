@@ -1,10 +1,6 @@
 # Visual Studio
-.vs/
-bin/
+.vs
+bin
+build
 *.aps
 *.user
-
-# GBA / FASMARM
-*.gba
-*.sav
-bios.bin

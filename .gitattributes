@@ -4,5 +4,3 @@
 # Help linguist
 *.h    text diff=cpp linguist-language=cpp
 *.cpp  text diff=cpp linguist-language=cpp
-*.inc  text diff=asm linguist-language=asm
-*.asm  text diff=asm linguist-language=asm
