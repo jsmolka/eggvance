@@ -101,10 +101,10 @@ u32 GamePak::readUnused(u32 addr)
 
 GamePak::Header GamePak::parseHeader()
 {
-    return Header {
-        .title = makeString(&data[0xA0], 12),
-        .maker = makeString(&data[0xB0], 2),
-        .code  = makeString(&data[0xAC], 4)
+    return {
+        makeString(&data[0xA0], 12),
+        makeString(&data[0xB0], 2),
+        makeString(&data[0xAC], 4)
     };
 }
 

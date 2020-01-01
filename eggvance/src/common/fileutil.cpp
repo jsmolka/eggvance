@@ -2,9 +2,15 @@
 
 #include <filesystem>
 #include <fstream>
-#include <windows.h>
 
 namespace fs = std::filesystem;
+
+static std::string initial;
+
+void fileutil::init(const std::string& executable)
+{
+    initial = fs::path(executable).parent_path().string();
+}
 
 bool fileutil::read(const std::string& file, std::vector<u8>& dst)
 {
@@ -45,10 +51,5 @@ std::string fileutil::concat(const std::string& left, const std::string& right)
 
 std::string fileutil::toAbsolute(const std::string& relative)
 {
-    static const std::string initial = [](){
-        char buffer[MAX_PATH];
-        GetModuleFileName(GetModuleHandle(NULL), buffer, sizeof(buffer));
-        return fs::path(buffer).parent_path().string();
-    }();
     return concat(initial, relative);
 }

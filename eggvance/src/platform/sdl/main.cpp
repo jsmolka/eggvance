@@ -5,6 +5,7 @@
 #include "sdlinputdevice.h"
 #include "sdlvideodevice.h"
 #include "arm/arm.h"
+#include "common/fileutil.h"
 #include "common/config.h"
 #include "mmu/mmu.h"
 #include "ppu/ppu.h"
@@ -229,6 +230,8 @@ int main(int argc, char* argv[])
 
     try
     {
+        fileutil::init(argv[0]);
+
         init();
 
         if (argc > 1)

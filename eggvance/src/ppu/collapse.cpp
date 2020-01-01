@@ -1,5 +1,7 @@
 #include "ppu.h"
 
+#include <algorithm>
+
 #include "common/constants.h"
 #include "common/macros.h"
 #include "devices/videodevice.h"
