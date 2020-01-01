@@ -115,7 +115,7 @@ void Config::initFile()
 
 void Config::initDefault()
 {
-    bios_file = fileutil::toAbsolute("bios.bin");
+    bios_file = "";
     bios_skip = false;
     save_dir  = "";
     deadzone  = 16000;

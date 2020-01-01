@@ -1,6 +1,7 @@
 [general]
-# Relative or absolute BIOS file.
-bios_file = "bios.bin"
+# Relative or absolute BIOS file. An empty value
+# uses the bundled replacement BIOS by Normmatt.
+bios_file = ""
 # Skips the BIOS intro.
 bios_skip = false
 # Relative or absolute save directory. An empty

@@ -16,13 +16,20 @@ void BIOS::reset()
 
 void BIOS::init(const std::string& file)
 {
-    static constexpr u64 expected_hash = 0xECCF5E4CEA50816E;
+    if (file.empty())
+    {
+        std::memcpy(data.data<u8>(0), replacement_bios.data(), 0x4000);
+    }
+    else
+    {
+        static constexpr u64 expected_hash = 0xECCF5E4CEA50816E;
 
-    if (!read(config.bios_file))
-        throw std::runtime_error("Cannot read BIOS");
+        if (!read(config.bios_file))
+            throw std::runtime_error("Cannot read BIOS");
 
-    if (hash(data.data<u32>(0), 0x1000) != expected_hash)
-        throw std::runtime_error("Invalid BIOS hash");
+        if (hash(data.data<u32>(0), 0x1000) != expected_hash)
+            throw std::runtime_error("Invalid BIOS hash");
+    }
 }
 
 u8 BIOS::readByte(u32 addr)

@@ -152,6 +152,7 @@
     <ClCompile Include="src\devices\audiodevice.cpp" />
     <ClCompile Include="src\devices\inputdevice.cpp" />
     <ClCompile Include="src\devices\videodevice.cpp" />
+    <ClCompile Include="src\mmu\bios_data.cpp" />
     <ClCompile Include="src\mmu\io.cpp" />
     <ClCompile Include="src\platform\sdl\sdlaudiodevice.cpp" />
     <ClCompile Include="src\platform\sdl\sdlinputdevice.cpp" />
@@ -295,6 +296,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="eggvance.toml" />
+    <None Include="icon\icon.ase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon\icon.ico" />
+    <Image Include="icon\icon.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

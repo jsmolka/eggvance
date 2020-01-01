@@ -219,6 +219,9 @@
     <ClCompile Include="src\arm\instr_thumb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\mmu\bios_data.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="icon\icon.h">
@@ -469,5 +472,17 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="eggvance.toml" />
+    <None Include="icon\icon.ase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon\icon.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icon\icon.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

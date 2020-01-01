@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <string>
 
 #include "ram.h"
@@ -23,4 +24,5 @@ private:
 
     u32 last_fetched;
     RAM<0x4000> data;
+    static std::array<u8, 0x4000> replacement_bios;
 };
