@@ -63,7 +63,7 @@ struct PSR
             | (n << 31);
     }
 
-    inline u32 size() const
+    inline int size() const
     {
         return 2 << (t ^ 0x1);
     }

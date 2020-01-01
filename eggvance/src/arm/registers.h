@@ -12,6 +12,10 @@ public:
     PSR cpsr;
     PSR spsr;
 
+    GPR& sp = regs[13];
+    GPR& lr = regs[14];
+    GPR& pc = regs[15];
+
 protected:
     void switchMode(PSR::Mode mode);
 

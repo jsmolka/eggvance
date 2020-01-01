@@ -8,7 +8,8 @@ struct GPR
 {
     inline void reset()
     {
-        value = 0;
+        value    = 0;
+        on_write = std::function<void()>();
     }
 
     inline GPR& operator=(u32 value)
@@ -26,11 +27,6 @@ struct GPR
         return *this = other.value;
     }
 
-    inline operator u32() const
-    {
-        return value;
-    }
-
     inline GPR& operator+=(u32 value)
     {
         return *this = this->value + value;
@@ -41,7 +37,11 @@ struct GPR
         return *this = this->value - value;
     }
 
-    u32 value;
+    inline operator u32() const
+    {
+        return value;
+    }
 
+    u32 value;
     std::function<void()> on_write;
 };

@@ -9,14 +9,9 @@
 ARM arm;
 
 ARM::ARM()
-    : sp(regs[13])
-    , lr(regs[14])
-    , pc(regs[15])
 {
     Arm_GenerateLut();
     Thumb_GenerateLut();
-
-    pc.on_write = std::bind(&ARM::flush, this);
 }
 
 void ARM::reset()
@@ -25,7 +20,10 @@ void ARM::reset()
 
     Registers::reset();
 
-    pc.value = pc + 4;
+    flush();
+
+    pc.value += 4;
+    pc.on_write = std::bind(&ARM::flush, this);
 
     io.int_master.reset();
     io.int_enabled.reset();
@@ -76,15 +74,17 @@ void ARM::flush()
 {
     if (cpsr.t)
     {
+        pc.value &= ~0x1;
         pipe[0] = readHalf(pc + 0);
         pipe[1] = readHalf(pc + 2);
     }
     else
     {
+        pc.value &= ~0x3;
         pipe[0] = readWord(pc + 0);
         pipe[1] = readWord(pc + 4);
     }
-    pc.value = (pc.value & ~(cpsr.size() - 1)) + cpsr.size();
+    pc.value += cpsr.size();
 }
 
 void ARM::execute()
