@@ -3,16 +3,19 @@
 #include <climits>
 #include <type_traits>
 
-template<typename T>
-constexpr unsigned bitSize()
+namespace detail
 {
-    return CHAR_BIT * sizeof(T);
+    template<typename T>
+    constexpr unsigned digits()
+    {
+        return CHAR_BIT * sizeof(T);
+    }
 }
 
 template<unsigned index, unsigned size, typename T>
 constexpr T bits(T value)
 {
-    static_assert((index + size) <= bitSize<T>());
+    static_assert(index + size <= detail::digits<T>());
 
     return (value >> index) & ((1ull << size) - 1);
 }
@@ -20,7 +23,7 @@ constexpr T bits(T value)
 template<unsigned size, typename T>
 constexpr T signExtend(T value)
 {
-    static_assert(size <= bitSize<T>());
+    static_assert(size <= detail::digits<T>());
 
     constexpr T mask = 1ull << (size - 1);
 
@@ -30,31 +33,26 @@ constexpr T signExtend(T value)
 template<typename T>
 constexpr T rotateRight(T value, unsigned amount)
 {
-    amount %= bitSize<T>();
+    amount %= detail::digits<T>();
 
     if (amount == 0)
         return value;
 
     auto x = static_cast<std::make_unsigned_t<T>>(value);
 
-    return (x >> amount) | (x << (bitSize<T>() - amount));
+    return (x >> amount) | (x << (detail::digits<T>() - amount));
 }
 
-template<typename T>
-constexpr unsigned bitScanForward(T value)
+constexpr unsigned popcount(unsigned value)
 {
-    if (value == 0)
-        return bitSize<T>() - 1;
+    value = value - ((value >> 1) & 0x5555'5555);
+    value = (value & 0x3333'3333) + ((value >> 2) & 0x3333'3333);
+    return ((value + (value >> 4) & 0x0F0F'0F0F) * 0x0101'0101) >> 24;
+}
 
-    auto x = static_cast<std::make_unsigned_t<T>>(value);
-
-    x = (x ^ (x - 1)) >> 1;
-
-    unsigned index = 0;
-    while (x >>= 1)
-        index++;
-        
-    return index;
+constexpr unsigned bitScanForward(unsigned value)
+{
+    return popcount((value ^ (value - 1)) >> 1);
 }
 
 template<typename T>
@@ -70,11 +68,4 @@ constexpr unsigned bitScanReverse(T value)
         index++;
 
     return index;
-}
-
-constexpr unsigned popcount(unsigned value)
-{
-    value = value - ((value >> 1) & 0x5555'5555);
-    value = (value & 0x3333'3333) + ((value >> 2) & 0x3333'3333);
-    return ((value + (value >> 4) & 0x0F0F'0F0F) * 0x0101'0101) >> 24;
 }
