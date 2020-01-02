@@ -470,19 +470,20 @@ void ARM::Thumb_PushPopRegisters(u16 instr)
     int rlist   = bits< 0, 8>(instr);
     int special = bits< 8, 1>(instr);
     int pop     = bits<11, 1>(instr);
-     
+
+    int count = popcount(rlist);
+    int begin = scanForward(rlist);
+
     if (pop)
     {
-        int beg = bitScanForward(rlist);
-        int end = bitScanReverse(rlist);
-
-        for (int x = beg; x <= end; ++x)
+        for (int x = begin; count > 0; ++x)
         {
             if (~rlist & (1 << x))
                 continue;
 
-            regs[x] = readWord(sp);
+            count--;
 
+            regs[x] = readWord(sp);
             sp += 4;
         }
         idle();
@@ -495,24 +496,23 @@ void ARM::Thumb_PushPopRegisters(u16 instr)
     }
     else
     {
-        if (special)
-        {
-            sp -= 4;
-            writeWord(sp, lr);
-        }
+        sp -= 4 * (count + special);
 
-        int beg = bitScanReverse(rlist);
-        int end = bitScanForward(rlist);
+        u32 addr = sp;
 
-        for (int x = beg; x >= end; --x)
+        for (int x = begin; count > 0; ++x)
         {
             if (~rlist & (1 << x))
                 continue;
 
-            sp -= 4;
+            count--;
 
-            writeWord(sp, regs[x]);
+            writeWord(addr, regs[x]);
+            addr += 4;
         }
+
+        if (special)
+            writeWord(addr, lr);
     }
 }
 
@@ -529,37 +529,45 @@ void ARM::Thumb_LoadStoreMultiple(u16 instr)
 
     if (rlist != 0)
     {
-        int beg = bitScanForward(rlist);
-        int end = bitScanReverse(rlist);
+        int count = popcount(rlist);
+        int begin = scanForward(rlist);
 
         if (load)
         {
             if (rlist & (1 << rb))
                 writeback = false;
 
-            for (int x = beg; x <= end; ++x)
+            for (int x = begin; count > 0; ++x)
             {
                 if (~rlist & (1 << x))
                     continue;
 
-                regs[x] = readWord(addr);
+                count--;
 
+                regs[x] = readWord(addr);
                 addr += 4;
             }
             idle();
         }
         else
         {
-            for (int x = beg; x <= end; ++x)
+            if (rb != begin)
+            {
+                base += 4 * count;
+            }
+
+            for (int x = begin; count > 0; ++x)
             {
                 if (~rlist & (1 << x))
                     continue;
 
-                if (x == rb)
-                    writeWord(addr, base + 4 * popcount(rlist));
-                else
-                    writeWord(addr, regs[x]);
+                count--;
 
+                u32 value = x != rb
+                    ? regs[x]
+                    : base;
+
+                writeWord(addr, value);
                 addr += 4;
             }
         }

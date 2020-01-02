@@ -434,6 +434,7 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
     if (rlist != 0)
     {
         int count = popcount(rlist);
+        int begin = scanForward(rlist);
 
         if (!increment)
         {
@@ -446,65 +447,49 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
             pre_index ^= true;
         }
 
-        int beg = bitScanForward(rlist);
-        int end = bitScanReverse(rlist);
-
         if (load)
         {
             if (rlist & (1 << rn))
                 writeback = false;
 
-            for (int x = beg; x <= end; ++x)
+            for (int x = begin; count > 0; ++x)
             {
                 if (~rlist & (1 << x))
                     continue;
 
-                if (pre_index) 
-                    addr += 4;
+                count--;
 
+                addr += 4 * pre_index;
                 regs[x] = readWord(addr);
-
-                if (!pre_index) 
-                    addr += 4;
+                addr += 4 * pre_index ^ 0x4;
             }
-
             idle();
         }
         else
         {
-            for (int x = beg; x <= end; ++x)
+            if (rn != begin)
+            {
+                base = increment
+                    ? base + 4 * count
+                    : base - 4 * count;
+            }
+
+            for (int x = begin; count > 0; ++x)
             {
                 if (~rlist & (1 << x))
                     continue;
 
-                if (pre_index)
-                    addr += 4;
+                count--;
 
-                u32 value = 0;
-                if (x == rn)
-                {
-                    if (x == beg)
-                    {
-                        value = base;
-                    }
-                    else
-                    {
-                        value = increment
-                            ? base + 4 * count
-                            : base - 4 * count;
-                    }
-                }
-                else
-                {
-                    value = (x == 15)
-                        ? regs[x] + 4
-                        : regs[x] + 0;
-                }
+                u32 value = x != rn
+                    ? x != 15
+                        ? regs[x] + 0
+                        : regs[x] + 4
+                    : base;
 
+                addr += 4 * pre_index;
                 writeWord(addr, value);
-
-                if (!pre_index)
-                    addr += 4;
+                addr += 4 * pre_index ^ 0x4;
             }
         }
     }
@@ -515,9 +500,9 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
         else
             writeWord(addr, pc + 4);
 
-        addr += increment
-            ?  0x40
-            : -0x40;
+        addr = increment
+            ? addr + 0x40
+            : addr - 0x40;
     }
 
     if (writeback)

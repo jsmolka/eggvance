@@ -3,19 +3,11 @@
 #include <climits>
 #include <type_traits>
 
-namespace detail
-{
-    template<typename T>
-    constexpr unsigned digits()
-    {
-        return CHAR_BIT * sizeof(T);
-    }
-}
-
 template<unsigned index, unsigned size, typename T>
 constexpr T bits(T value)
 {
-    static_assert(index + size <= detail::digits<T>());
+    static_assert(std::is_integral_v<T>);
+    static_assert(index + size <= CHAR_BIT * sizeof(T));
 
     return (value >> index) & ((1ull << size) - 1);
 }
@@ -23,24 +15,19 @@ constexpr T bits(T value)
 template<unsigned size, typename T>
 constexpr T signExtend(T value)
 {
-    static_assert(size <= detail::digits<T>());
+    static_assert(std::is_integral_v<T>);
+    static_assert(size <= CHAR_BIT * sizeof(T));
 
     constexpr T mask = 1ull << (size - 1);
 
     return (value ^ mask) - mask;
 }
 
-template<typename T>
-constexpr T rotateRight(T value, unsigned amount)
+constexpr unsigned rotateRight(unsigned value, unsigned amount)
 {
-    amount %= detail::digits<T>();
-
-    if (amount == 0)
-        return value;
-
-    auto x = static_cast<std::make_unsigned_t<T>>(value);
-
-    return (x >> amount) | (x << (detail::digits<T>() - amount));
+    amount %= 32;
+    if (amount == 0) return value;
+    return (value >> amount) | (value << (32 - amount));
 }
 
 constexpr unsigned popcount(unsigned value)
@@ -50,22 +37,7 @@ constexpr unsigned popcount(unsigned value)
     return ((value + (value >> 4) & 0x0F0F'0F0F) * 0x0101'0101) >> 24;
 }
 
-constexpr unsigned bitScanForward(unsigned value)
+constexpr unsigned scanForward(unsigned value)
 {
     return popcount((value ^ (value - 1)) >> 1);
-}
-
-template<typename T>
-constexpr unsigned bitScanReverse(T value)
-{
-    if (value == 0)
-        return 0;
-
-    auto x = static_cast<std::make_unsigned_t<T>>(value);
-
-    unsigned index = 0;
-    while (x >>= 1)
-        index++;
-
-    return index;
 }

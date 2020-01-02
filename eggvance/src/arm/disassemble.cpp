@@ -73,19 +73,21 @@ const std::string list(u16 rlist)
 {
     std::string result;
 
-    result.reserve(4 * popcount(rlist) + 4);
+    int count = popcount(rlist);
+    int begin = scanForward(rlist);
 
-    int beg = bitScanForward(rlist);
-    int end = bitScanReverse(rlist);
+    result.reserve(4 * count + 4);
 
     result.append("{");
-    for (int x = beg; x <= end; ++x)
+    for (int x = begin; count > 0; ++x)
     {
-        if (rlist & (1 << x))
-        {
-            result.append(reg(x));
-            result.append((x != end) ? "," : "");
-        }
+        if (~rlist & (1 << x))
+            continue;
+
+        count--;
+
+        result.append(reg(x));
+        result.append(count > 0 ? "," : "");
     }
     result.append("}");
 
