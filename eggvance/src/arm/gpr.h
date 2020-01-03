@@ -6,6 +6,10 @@
 
 struct GPR
 {
+    static constexpr int SP = 13;
+    static constexpr int LR = 14;
+    static constexpr int PC = 15;
+
     inline void reset()
     {
         value    = 0;

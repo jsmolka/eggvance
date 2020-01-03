@@ -1,6 +1,7 @@
 #include "arm.h"
 
 #include "decode.h"
+#include "rlist.h"
 #include "common/bits.h"
 #include "common/macros.h"
 
@@ -467,52 +468,32 @@ void ARM::Thumb_AddOffsetSP(u16 instr)
 
 void ARM::Thumb_PushPopRegisters(u16 instr)
 {
-    int rlist   = bits< 0, 8>(instr);
-    int special = bits< 8, 1>(instr);
-    int pop     = bits<11, 1>(instr);
+    int rlist = bits< 0, 8>(instr);
+    int rbit  = bits< 8, 1>(instr);
+    int pop   = bits<11, 1>(instr);
 
-    int count = popcount(rlist);
-    int begin = scanForward(rlist);
+    rlist |= rbit << (pop ? GPR::PC : GPR::LR);
 
     if (pop)
     {
-        for (int x = begin; count > 0; ++x)
+        for (auto x : RList(rlist))
         {
-            if (~rlist & (1 << x))
-                continue;
-
-            count--;
-
             regs[x] = readWord(sp);
             sp += 4;
         }
         idle();
-
-        if (special)
-        {
-            pc = readWord(sp);
-            sp += 4;
-        }
     }
     else
     {
-        sp -= 4 * (count + special);
+        sp -= 4 * popcount(rlist);
 
         u32 addr = sp;
 
-        for (int x = begin; count > 0; ++x)
+        for (auto x : RList(rlist))
         {
-            if (~rlist & (1 << x))
-                continue;
-
-            count--;
-
             writeWord(addr, regs[x]);
             addr += 4;
         }
-
-        if (special)
-            writeWord(addr, lr);
     }
 }
 
@@ -529,21 +510,13 @@ void ARM::Thumb_LoadStoreMultiple(u16 instr)
 
     if (rlist != 0)
     {
-        int count = popcount(rlist);
-        int begin = scanForward(rlist);
-
         if (load)
         {
             if (rlist & (1 << rb))
                 writeback = false;
 
-            for (int x = begin; count > 0; ++x)
+            for (auto x : RList(rlist))
             {
-                if (~rlist & (1 << x))
-                    continue;
-
-                count--;
-
                 regs[x] = readWord(addr);
                 addr += 4;
             }
@@ -551,24 +524,20 @@ void ARM::Thumb_LoadStoreMultiple(u16 instr)
         }
         else
         {
-            if (rb != begin)
+            bool begin = true;
+
+            for (auto x : RList(rlist))
             {
-                base += 4 * count;
-            }
-
-            for (int x = begin; count > 0; ++x)
-            {
-                if (~rlist & (1 << x))
-                    continue;
-
-                count--;
-
                 u32 value = x != rb
                     ? regs[x]
-                    : base;
+                    : begin
+                        ? base
+                        : base + 4 * popcount(rlist);
 
                 writeWord(addr, value);
                 addr += 4;
+
+                begin = false;
             }
         }
     }

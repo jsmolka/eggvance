@@ -12,9 +12,9 @@ public:
     PSR cpsr;
     PSR spsr;
 
-    GPR& sp = regs[13];
-    GPR& lr = regs[14];
-    GPR& pc = regs[15];
+    GPR& sp = regs[GPR::SP];
+    GPR& lr = regs[GPR::LR];
+    GPR& pc = regs[GPR::PC];
 
 protected:
     void switchMode(PSR::Mode mode);

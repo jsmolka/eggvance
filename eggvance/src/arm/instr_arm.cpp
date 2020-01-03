@@ -1,6 +1,7 @@
 #include "arm.h"
 
 #include "decode.h"
+#include "rlist.h"
 #include "common/bits.h"
 #include "common/macros.h"
 
@@ -433,18 +434,15 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
 
     if (rlist != 0)
     {
-        int count = popcount(rlist);
-        int begin = scanForward(rlist);
-
         if (!increment)
         {
-            addr -= 4 * count;
+            addr -= 4 * popcount(rlist);
             if (writeback)
             {
                 regs[rn] = addr;
                 writeback = false;
             }
-            pre_index ^= true;
+            pre_index ^= 0x1;
         }
 
         if (load)
@@ -452,13 +450,8 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
             if (rlist & (1 << rn))
                 writeback = false;
 
-            for (int x = begin; count > 0; ++x)
+            for (auto x : RList(rlist))
             {
-                if (~rlist & (1 << x))
-                    continue;
-
-                count--;
-
                 addr += 4 * pre_index;
                 regs[x] = readWord(addr);
                 addr += 4 * pre_index ^ 0x4;
@@ -467,29 +460,23 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
         }
         else
         {
-            if (rn != begin)
+            bool first = true;
+
+            for (auto x : RList(rlist))
             {
-                base = increment
-                    ? base + 4 * count
-                    : base - 4 * count;
-            }
-
-            for (int x = begin; count > 0; ++x)
-            {
-                if (~rlist & (1 << x))
-                    continue;
-
-                count--;
-
                 u32 value = x != rn
-                    ? x != 15
+                    ? x != GPR::PC
                         ? regs[x] + 0
                         : regs[x] + 4
-                    : base;
+                    : first
+                        ? base
+                        : base + (increment ? 4 : -4) * popcount(rlist);
 
                 addr += 4 * pre_index;
                 writeWord(addr, value);
                 addr += 4 * pre_index ^ 0x4;
+
+                first = false;
             }
         }
     }

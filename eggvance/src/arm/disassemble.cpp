@@ -74,7 +74,7 @@ const std::string list(u16 rlist)
     std::string result;
 
     int count = popcount(rlist);
-    int begin = scanForward(rlist);
+    int begin = bitScanForward(rlist);
 
     result.reserve(4 * count + 4);
 
