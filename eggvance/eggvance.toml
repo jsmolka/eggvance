@@ -3,7 +3,7 @@
 # uses the bundled replacement BIOS by Normmatt.
 bios_file = ""
 # Skips the BIOS intro.
-bios_skip = false
+bios_skip = true
 # Relative or absolute save directory. An empty
 # value stores save files next to the ROM.
 save_dir = ""
