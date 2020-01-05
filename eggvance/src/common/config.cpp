@@ -116,7 +116,7 @@ void Config::initFile()
 void Config::initDefault()
 {
     bios_file = "";
-    bios_skip = false;
+    bios_skip = true;
     save_dir  = "";
     deadzone  = 16000;
 
