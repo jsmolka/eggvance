@@ -1,4 +1,4 @@
-#include "clock.h"
+#include "microclock.h"
 
 #ifdef _MSC_VER
 #  include <windows.h>
@@ -30,7 +30,7 @@ struct WaitableTimer
 
 static WaitableTimer timer;
 
-u64 clock::now()
+u64 micro_clock::now()
 {
     static u64 freq = []() {
         LARGE_INTEGER freq;
@@ -44,7 +44,7 @@ u64 clock::now()
     return static_cast<u64>(static_cast<double>(perf_counter.QuadPart) * 1000000 / freq);
 }
 
-void clock::sleep(u32 us)
+void micro_clock::sleep(u32 us)
 {
     LARGE_INTEGER relative_time;
     relative_time.QuadPart = -static_cast<s64>(10 * us);
@@ -55,7 +55,7 @@ void clock::sleep(u32 us)
 
 #else
 
-u64 clock::now()
+u64 micro_clock::now()
 {
     #ifdef __APPLE__
     clock_serv_t cs;
@@ -73,7 +73,7 @@ u64 clock::now()
     return static_cast<u64>(now.tv_sec) * 1000000 + now.tv_nsec / 1000;
 }
 
-void clock::sleep(u32 us)
+void micro_clock::sleep(u32 us)
 {
     timespec ts;
     ts.tv_sec = us / 1000000;

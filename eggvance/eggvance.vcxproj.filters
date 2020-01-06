@@ -219,7 +219,7 @@
     <ClCompile Include="src\mmu\bios_data.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\clock.cpp">
+    <ClCompile Include="src\microclock.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -464,7 +464,7 @@
     <ClInclude Include="src\arm\rlist.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\clock.h">
+    <ClInclude Include="src\microclock.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

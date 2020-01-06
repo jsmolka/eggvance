@@ -183,7 +183,7 @@
     <ClCompile Include="src\system\dmacontroller.cpp" />
     <ClCompile Include="src\framelimiter.cpp" />
     <ClCompile Include="src\system\keypad.cpp" />
-    <ClCompile Include="src\clock.cpp" />
+    <ClCompile Include="src\microclock.cpp" />
     <ClCompile Include="src\mmu\bios.cpp" />
     <ClCompile Include="src\mmu\gamepak\backup.cpp" />
     <ClCompile Include="src\mmu\gamepak\eeprom.cpp" />
@@ -263,7 +263,7 @@
     <ClInclude Include="src\system\dma.h" />
     <ClInclude Include="src\system\dmacontroller.h" />
     <ClInclude Include="src\framelimiter.h" />
-    <ClInclude Include="src\clock.h" />
+    <ClInclude Include="src\microclock.h" />
     <ClInclude Include="src\mmu\bios.h" />
     <ClInclude Include="src\mmu\gamepak\eeprom.h" />
     <ClInclude Include="src\mmu\gamepak\flash.h" />

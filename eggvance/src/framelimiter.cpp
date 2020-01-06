@@ -1,6 +1,8 @@
 #include "framelimiter.h"
 
-#include "clock.h"
+#include "microclock.h"
+
+namespace micro = micro_clock;
 
 FrameLimiter::FrameLimiter(double fps)
 {
@@ -16,7 +18,7 @@ void FrameLimiter::setFPS(double fps)
 
 void FrameLimiter::beginFrame()
 {
-    begin = clock::now();
+    begin = micro::now();
 }
 
 void FrameLimiter::endFrame()
@@ -24,12 +26,12 @@ void FrameLimiter::endFrame()
     if (begin == 0)
         return;
 
-    delta += clock::now() - begin;
+    delta += micro::now() - begin;
     if (delta < static_cast<s64>(frame))
     {
-        u64 sleep_begin = clock::now();
-        clock::sleep(static_cast<u32>(frame - delta));
-        delta += clock::now() - sleep_begin;
+        u64 sleep_begin = micro::now();
+        micro::sleep(static_cast<u32>(frame - delta));
+        delta += micro::now() - sleep_begin;
     }
     delta -= frame;
 }
