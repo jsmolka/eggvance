@@ -1,17 +1,16 @@
 #pragma once
 
-#include <string>
-
-#include "common/input.h"
+#include "fs.h"
+#include "input.h"
 
 class Config
 {
 public:
     void init();
 
-    std::string bios_file;
-    std::string save_dir;
+    Path bios_file;
     bool bios_skip;
+    Path save_dir;
     int deadzone;
 
     struct Controls

@@ -5,6 +5,7 @@
 #include <vector>
  
 #include "backup.h"
+#include "common/fs.h"
 
 class GamePak
 {
@@ -20,20 +21,20 @@ public:
     u16 readHalf(u32 addr);
     u32 readWord(u32 addr);
 
-    bool load(const std::string& file);
+    bool load(const Path& file);
 
     std::size_t size() const;
 
     std::unique_ptr<Backup> backup;
 
 private:
-    static std::string toBackupFile(const std::string& file);
+    static Path toBackupFile(const Path& file);
     static std::string makeString(u8* data, int size);
     static u32 readUnused(u32 addr);
 
     Header parseHeader();
     Backup::Type parseBackupType();
 
-    std::string file;
+    Path file;
     std::vector<u8> data;
 };

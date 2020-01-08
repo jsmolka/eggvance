@@ -5,8 +5,8 @@
 #include "sdlinputdevice.h"
 #include "sdlvideodevice.h"
 #include "arm/arm.h"
-#include "common/fileutil.h"
 #include "common/config.h"
+#include "common/fs.h"
 #include "mmu/mmu.h"
 #include "ppu/ppu.h"
 #include "system/keypad.h"
@@ -86,7 +86,7 @@ void updateWindowTitle()
 
 bool dropEvent(const SDL_DropEvent& event)
 {
-    std::string file(event.file);
+    Path file(event.file);
     SDL_free(event.file);
 
     if (!mmu.gamepak.load(file))
@@ -230,12 +230,12 @@ int main(int argc, char* argv[])
 
     try
     {
-        fileutil::init(argv[0]);
+        fs::init(argv[0]);
 
         init();
 
         if (argc > 1)
-            mmu.gamepak.load(argv[1]);
+            mmu.gamepak.load(fs::relativeToCwd(argv[1]));
 
         run();
     }

@@ -5,7 +5,7 @@
 class EEPROM : public Backup
 {
 public:
-    EEPROM(const std::string& file);
+    EEPROM(const Path& file);
 
     virtual u8 readByte(u32 addr) override final;
     virtual void writeByte(u32, u8 byte) override final;

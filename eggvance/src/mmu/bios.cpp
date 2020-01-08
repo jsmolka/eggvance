@@ -14,7 +14,7 @@ void BIOS::reset()
         last_fetched = 0;
 }
 
-void BIOS::init(const std::string& file)
+void BIOS::init(const Path& file)
 {
     if (file.empty())
     {
@@ -61,7 +61,7 @@ u32 BIOS::readProtected(u32 addr) const
     return last_fetched >> (addr & 0x3);
 }
 
-bool BIOS::read(const std::string& file)
+bool BIOS::read(const Path& file)
 {
     std::ifstream stream(file, std::ios::binary);
     if (!stream.is_open())

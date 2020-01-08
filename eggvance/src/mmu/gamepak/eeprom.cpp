@@ -1,6 +1,6 @@
 #include "eeprom.h"
 
-EEPROM::EEPROM(const std::string& file)
+EEPROM::EEPROM(const Path& file)
     : Backup(file, Backup::Type::EEPROM)
 {
     resetBuffer();

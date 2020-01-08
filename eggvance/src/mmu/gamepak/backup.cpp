@@ -1,26 +1,26 @@
 #include "backup.h"
 
-#include "common/fileutil.h"
+#include "common/fs.h"
 
 Backup::Backup()
-    : file("")
+    : file()
     , type(Type::None)
 {
 
 }
 
-Backup::Backup(const std::string& file, Type type)
+Backup::Backup(const Path& file, Type type)
     : file(file)
     , type(type)
 {
-    if (fileutil::exists(file))
-        fileutil::read(file, data);
+    if (fs::isFile(file))
+        fs::read(file, data);
 }
 
 Backup::~Backup()
 {
     if (!data.empty())
-        fileutil::write(file, data);
+        fs::write(file, data);
 }
 
 u8 Backup::readByte(u32 addr)

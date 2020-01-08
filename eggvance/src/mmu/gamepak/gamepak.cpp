@@ -1,16 +1,11 @@
 #include "gamepak.h"
 
 #include <cstring>
-#include <filesystem>
-#include <fmt/format.h>
 
 #include "eeprom.h"
 #include "flash.h"
 #include "sram.h"
 #include "common/config.h"
-#include "common/fileutil.h"
-
-namespace fs = std::filesystem;
 
 u8 GamePak::readByte(u32 addr)
 {
@@ -36,11 +31,11 @@ u32 GamePak::readWord(u32 addr)
         return readUnused(addr);
 }
 
-bool GamePak::load(const std::string& file)
+bool GamePak::load(const Path& file)
 {
     if (this->file != file)
     {
-        if (!fileutil::read(file, data))
+        if (!fs::read(file, data))
             return false;
 
         header = parseHeader();
@@ -76,14 +71,14 @@ std::size_t GamePak::size() const
     return data.size();
 }
 
-std::string GamePak::toBackupFile(const std::string& file)
+Path GamePak::toBackupFile(const Path& file)
 {
-    fs::path path(file);
+    auto backup = static_cast<std::filesystem::path>(file).replace_extension("sav");
 
     if (config.save_dir.empty())
-        return path.replace_extension(".sav").string();
+        return fs::relativeToCwd(backup);
     else
-        return fileutil::concat(config.save_dir, path.filename().replace_extension(".sav").string());
+        return config.save_dir / backup.filename();
 }
 
 std::string GamePak::makeString(u8* data, int size)

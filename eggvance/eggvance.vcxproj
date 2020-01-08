@@ -151,6 +151,7 @@
     <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\arm\shifts.cpp" />
     <ClCompile Include="src\common\config.cpp" />
+    <ClCompile Include="src\common\fs.cpp" />
     <ClCompile Include="src\common\input.cpp" />
     <ClCompile Include="src\devices\audiodevice.cpp" />
     <ClCompile Include="src\devices\inputdevice.cpp" />
@@ -191,7 +192,6 @@
     <ClCompile Include="src\mmu\gamepak\gamepak.cpp" />
     <ClCompile Include="icon\icon.cpp" />
     <ClCompile Include="src\platform\sdl\main.cpp" />
-    <ClCompile Include="src\common\fileutil.cpp" />
     <ClCompile Include="src\mmu\gamepak\sram.cpp" />
     <ClCompile Include="src\mmu\mmu.cpp" />
     <ClCompile Include="src\registers\bgcontrol.cpp" />
@@ -224,6 +224,7 @@
     <ClInclude Include="src\common\config.h" />
     <ClInclude Include="src\common\constants.h" />
     <ClInclude Include="src\common\critical.h" />
+    <ClInclude Include="src\common\fs.h" />
     <ClInclude Include="src\common\macros.h" />
     <ClInclude Include="src\arm\rlist.h" />
     <ClInclude Include="src\devices\audiodevice.h" />
@@ -275,7 +276,6 @@
     <ClInclude Include="src\mmu\gamepak\backup.h" />
     <ClInclude Include="src\common\integer.h" />
     <ClInclude Include="icon\icon.h" />
-    <ClInclude Include="src\common\fileutil.h" />
     <ClInclude Include="src\mmu\mmu.h" />
     <ClInclude Include="src\registers\bgcontrol.h" />
     <ClInclude Include="src\registers\bgoffset.h" />

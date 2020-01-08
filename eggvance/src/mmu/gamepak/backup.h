@@ -1,8 +1,8 @@
 #pragma once
 
 #include <vector>
-#include <string>
 
+#include "common/fs.h"
 #include "common/integer.h"
 
 class Backup
@@ -18,7 +18,7 @@ public:
     };
 
     Backup();
-    Backup(const std::string& file, Type type);
+    Backup(const Path& file, Type type);
     virtual ~Backup();
 
     virtual u8 readByte(u32 addr);
@@ -28,5 +28,5 @@ public:
     std::vector<u8> data;
 
 private:
-    std::string file;
+    Path file;
 };

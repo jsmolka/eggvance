@@ -4,7 +4,7 @@
 
 #include "common/macros.h"
 
-Flash::Flash(const std::string& file, Backup::Type type)
+Flash::Flash(const Path& file, Backup::Type type)
     : Backup(file, type)
 {
     switch (type)

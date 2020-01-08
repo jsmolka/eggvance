@@ -44,7 +44,6 @@ make
 ```
 
 ## Issues
-- no support for UTF-8 paths on Windows
 - no audio emulation
 - no RTC emulation
 

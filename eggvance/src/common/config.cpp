@@ -1,11 +1,6 @@
 #include "config.h"
 
-#include <filesystem>
 #include <toml/toml.h>
-
-#include "common/fileutil.h"
-
-namespace fs = std::filesystem;
 
 Config config;
 
@@ -23,7 +18,7 @@ void Config::init()
 
 void Config::initFile()
 {
-    auto stream = std::ifstream(fileutil::toAbsolute("eggvance.toml"));
+    auto stream = std::ifstream(fs::relativeToExe("eggvance.toml"));
     auto result = toml::parse(stream);
     if (!result.valid())
         throw std::exception();
@@ -35,16 +30,16 @@ void Config::initFile()
     bios_skip = value.get<bool>("general.bios_skip");
     deadzone  = value.get<int>("general.deadzone");
 
-    if (fs::path(bios_file).is_relative())
-    {
-        bios_file = fileutil::toAbsolute(bios_file);
-    }
+    if (!bios_file.empty() && bios_file.is_relative())
+        bios_file = fs::relativeToExe(bios_file);
+
     if (!save_dir.empty())
     {
-        if (fs::path(save_dir).is_relative())
-            save_dir = fileutil::toAbsolute(save_dir);
-        if (!fs::is_directory(save_dir) || !fs::exists(save_dir))
-            fs::create_directories(save_dir);
+        if (save_dir.is_relative())
+            save_dir = fs::relativeToExe(save_dir);
+
+        if (!fs::isDir(save_dir))
+            std::filesystem::create_directories(save_dir);
     }
 
     fps_multipliers[0] = value.get<double>("multipliers.fps_multiplier_1");
