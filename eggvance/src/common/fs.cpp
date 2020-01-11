@@ -12,7 +12,7 @@ Path::Path(const char* path)
     : Path(std::string(path)) {}
 
 Path::Path(const std::string& path)
-    : std::filesystem::path(path)
+    : std_filesystem::path(path)
 {
     #ifdef _MSC_VER
     int size = MultiByteToWideChar(
@@ -35,10 +35,10 @@ Path::Path(const std::string& path)
 }
 
 Path::Path(const std::wstring& path)
-    : std::filesystem::path(path) {}
+    : std_filesystem::path(path) {}
 
-Path::Path(const std::filesystem::path& path)
-    : std::filesystem::path(path) {}
+Path::Path(const std_filesystem::path& path)
+    : std_filesystem::path(path) {}
 
 void fs::init(const Path& executable)
 {
@@ -75,17 +75,17 @@ bool fs::write(const Path& file, std::vector<u8>& src)
 
 bool fs::isFile(const Path& path)
 {
-    return std::filesystem::is_regular_file(path);
+    return std_filesystem::is_regular_file(path);
 }
 
 bool fs::isDirectory(const Path& path)
 {
-    return std::filesystem::is_directory(path);
+    return std_filesystem::is_directory(path);
 }
 
 bool fs::makeDirectory(const Path& path)
 {
-    return std::filesystem::create_directories(path);
+    return std_filesystem::create_directories(path);
 }
 
 Path fs::relativeToExe(const Path& path)

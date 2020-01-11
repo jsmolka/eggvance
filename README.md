@@ -43,9 +43,18 @@ cmake ..
 make
 ```
 
+### macOS
+Install SDL2 with [homebrew](https://brew.sh/).
+
+```
+brew install sdl2
+```
+
+Build like on Linux.
+
 ## Issues
 - no audio emulation
-- no RTC emulation
+- no real-time clock emulation
 
 ## Credits
 The following projects were invaluable resources while creating the emulator.

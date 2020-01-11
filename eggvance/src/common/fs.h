@@ -1,17 +1,23 @@
 #pragma once
 
+#if __has_include(<filesystem>)
 #include <filesystem>
+namespace std_filesystem = std::filesystem;
+#else
+#include <experimental/filesystem>
+namespace std_filesystem = std::experimental::filesystem;
+#endif
 #include <vector>
 
 #include "integer.h"
 
-struct Path : public std::filesystem::path
+struct Path : public std_filesystem::path
 {
     Path() = default;
     Path(const char* path);
     Path(const std::string& path);
     Path(const std::wstring& path);
-    Path(const std::filesystem::path& path);
+    Path(const std_filesystem::path& path);
 
     template<typename T>
     Path& operator=(const T& path)
