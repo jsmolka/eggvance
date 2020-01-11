@@ -99,12 +99,11 @@ bool dropEvent(const SDL_DropEvent& event)
 
 bool awaitDrop()
 {
-    sdl_video_device->renderIcon();
-
     while (true)
     {
-        SDL_Delay(16);
+        sdl_video_device->renderIcon();
         SDL_RenderPresent(sdl_video_device->renderer);
+        SDL_Delay(16);
 
         SDL_Event event;
         while (SDL_PollEvent(&event))

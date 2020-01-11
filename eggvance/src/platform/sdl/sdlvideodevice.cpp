@@ -57,12 +57,11 @@ void SDLVideoDevice::renderIcon()
 {
     constexpr int scale = 9;
 
-    SDL_Rect rect = { 0, 0, SCREEN_W, SCREEN_H };
-    SDL_SetRenderDrawColor(renderer, 38, 40, 43, 1);
-    SDL_RenderFillRect(renderer, &rect);
+    SDL_SetRenderDrawColor(renderer, 56, 56, 56, 1);
+    SDL_RenderClear(renderer);
 
-    rect.w = scale;
-    rect.h = scale;
+    SDL_Rect rect = { 0, 0, scale, scale };
+
     for (const auto& pixel : icon)
     {
         rect.x = scale * pixel.x + 48;
@@ -98,7 +97,7 @@ bool SDLVideoDevice::createRenderer()
     renderer = SDL_CreateRenderer(
         window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE
     );
-    SDL_RenderSetLogicalSize(renderer, SCREEN_W, SCREEN_H);;
+    SDL_RenderSetLogicalSize(renderer, SCREEN_W, SCREEN_H);
 
     return renderer;
 }
