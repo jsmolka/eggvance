@@ -234,8 +234,7 @@ int main(int argc, char* argv[])
 
         init();
 
-        if (argc > 1)
-            mmu.gamepak.load(fs::relativeToCwd(argv[1]));
+        if (argc > 1) mmu.gamepak.load(argv[1]);
 
         run();
     }

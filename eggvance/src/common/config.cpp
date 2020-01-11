@@ -30,7 +30,7 @@ void Config::initFile()
     bios_skip = value.get<bool>("general.bios_skip");
     deadzone  = value.get<int>("general.deadzone");
 
-    if (!bios_file.empty() && bios_file.is_relative())
+    if (bios_file.is_relative() && !bios_file.empty())
         bios_file = fs::relativeToExe(bios_file);
 
     if (!save_dir.empty())
@@ -38,8 +38,8 @@ void Config::initFile()
         if (save_dir.is_relative())
             save_dir = fs::relativeToExe(save_dir);
 
-        if (!fs::isDir(save_dir))
-            std::filesystem::create_directories(save_dir);
+        if (!fs::isDirectory(save_dir))
+            fs::makeDirectory(save_dir);
     }
 
     fps_multipliers[0] = value.get<double>("multipliers.fps_multiplier_1");
@@ -110,9 +110,9 @@ void Config::initFile()
 
 void Config::initDefault()
 {
-    bios_file = "";
+    bios_file = Path();
     bios_skip = true;
-    save_dir  = "";
+    save_dir  = Path();
     deadzone  = 16000;
 
     fps_multipliers[0] = 2.0;

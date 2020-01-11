@@ -13,10 +13,11 @@ struct Path : public std::filesystem::path
     Path(const std::wstring& path);
     Path(const std::filesystem::path& path);
 
-    Path& operator=(const char* path);
-    Path& operator=(const std::string& path);
-    Path& operator=(const std::wstring& path);
-    Path& operator=(const std::filesystem::path& path);
+    template<typename T>
+    Path& operator=(const T& path)
+    {
+        return *this = Path(path);
+    }
 };
 
 namespace fs
@@ -26,9 +27,9 @@ namespace fs
     bool read(const Path& file, std::vector<u8>& dst);
     bool write(const Path& file, std::vector<u8>& src);
 
-    bool isDir(const Path& path);
-    bool isFile(const Path& file);
+    bool isFile(const Path& path);
+    bool isDirectory(const Path& path);
 
-    Path relativeToCwd(const Path& path);
+    bool makeDirectory(const Path& path);
     Path relativeToExe(const Path& path);
 }

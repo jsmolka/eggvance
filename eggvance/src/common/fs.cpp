@@ -1,53 +1,36 @@
 #include "fs.h"
 
 #include <fstream>
-#include <stdexcept>
 
 #ifdef _MSC_VER
 #include <windows.h>
 #endif
 
-static Path executable_dir;
+static Path executable;
 
 Path::Path(const char* path)
-    : Path(std::string(path))
-{
-
-}
+    : Path(std::string(path)) {}
 
 Path::Path(const std::string& path)
     : std::filesystem::path(path)
 {
     #ifdef _MSC_VER
-    std::wstring wpath;
-
-    int wlength = MultiByteToWideChar(
-        CP_UTF8,
-        MB_ERR_INVALID_CHARS,
-        path.data(),
-        static_cast<int>(path.size()),
-        nullptr,
-        0
+    int size = MultiByteToWideChar(
+        CP_UTF8, MB_ERR_INVALID_CHARS,
+        path.data(), static_cast<int>(path.size()),
+        nullptr, 0
     );
 
-    if (wlength == 0)
-        throw std::runtime_error("Cannot convert path");
+    std::wstring data;
+    data.resize(size);
 
-    wpath.resize(wlength);
+    if (!MultiByteToWideChar(
+        CP_UTF8, MB_ERR_INVALID_CHARS,
+        path.data(), static_cast<int>(path.size()),
+        data.data(), static_cast<int>(data.size())
+    )) return;
 
-    int success = MultiByteToWideChar(
-        CP_UTF8,
-        MB_ERR_INVALID_CHARS,
-        path.data(),
-        static_cast<int>(path.size()),
-        wpath.data(),
-        static_cast<int>(wpath.size())
-    );
-
-    if (success == 0)
-        throw std::runtime_error("Cannot convert path");
-
-    *this = wpath;
+    *this = data;
     #endif
 }
 
@@ -57,29 +40,9 @@ Path::Path(const std::wstring& path)
 Path::Path(const std::filesystem::path& path)
     : std::filesystem::path(path) {}
 
-Path& Path::operator=(const char* path)
-{
-    return *this = Path(path);
-}
-
-Path& Path::operator=(const std::string& path)
-{
-    return *this = Path(path);
-}
-
-Path& Path::operator=(const std::wstring& path)
-{
-    return *this = Path(path);
-}
-
-Path& Path::operator=(const std::filesystem::path& path)
-{
-    return *this = Path(path);
-}
-
 void fs::init(const Path& executable)
 {
-    executable_dir = executable.parent_path();
+    ::executable = executable;
 }
 
 bool fs::read(const Path& file, std::vector<u8>& dst)
@@ -110,24 +73,22 @@ bool fs::write(const Path& file, std::vector<u8>& src)
     return true;
 }
 
-bool fs::isDir(const Path& path)
+bool fs::isFile(const Path& path)
 {
-    return std::filesystem::exists(path)
-        && std::filesystem::is_directory(path);
+    return std::filesystem::is_regular_file(path);
 }
 
-bool fs::isFile(const Path& file)
+bool fs::isDirectory(const Path& path)
 {
-    return std::filesystem::exists(file)
-        && std::filesystem::is_regular_file(file);
+    return std::filesystem::is_directory(path);
 }
 
-Path fs::relativeToCwd(const Path& path)
+bool fs::makeDirectory(const Path& path)
 {
-    return Path(std::filesystem::current_path()) / path;
+    return std::filesystem::create_directories(path);
 }
 
 Path fs::relativeToExe(const Path& path)
 {
-    return executable_dir / path;
+    return executable.parent_path() / path;
 }

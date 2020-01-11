@@ -73,10 +73,10 @@ std::size_t GamePak::size() const
 
 Path GamePak::toBackupFile(const Path& file)
 {
-    auto backup = static_cast<std::filesystem::path>(file).replace_extension("sav");
+    auto backup = Path(file).replace_extension("sav");
 
     if (config.save_dir.empty())
-        return fs::relativeToCwd(backup);
+        return backup;
     else
         return config.save_dir / backup.filename();
 }
