@@ -8,14 +8,17 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
-		Release (Debug)|x64 = Release (Debug)|x64
+		Release with console|x64 = Release with console|x64
+		Release with symbols|x64 = Release with symbols|x64
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{371B584C-D6D3-4974-ADF3-E66735450416}.Debug|x64.ActiveCfg = Debug|x64
 		{371B584C-D6D3-4974-ADF3-E66735450416}.Debug|x64.Build.0 = Debug|x64
-		{371B584C-D6D3-4974-ADF3-E66735450416}.Release (Debug)|x64.ActiveCfg = Release (Debug)|x64
-		{371B584C-D6D3-4974-ADF3-E66735450416}.Release (Debug)|x64.Build.0 = Release (Debug)|x64
+		{371B584C-D6D3-4974-ADF3-E66735450416}.Release with console|x64.ActiveCfg = Release with console|x64
+		{371B584C-D6D3-4974-ADF3-E66735450416}.Release with console|x64.Build.0 = Release with console|x64
+		{371B584C-D6D3-4974-ADF3-E66735450416}.Release with symbols|x64.ActiveCfg = Release with symbols|x64
+		{371B584C-D6D3-4974-ADF3-E66735450416}.Release with symbols|x64.Build.0 = Release with symbols|x64
 		{371B584C-D6D3-4974-ADF3-E66735450416}.Release|x64.ActiveCfg = Release|x64
 		{371B584C-D6D3-4974-ADF3-E66735450416}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
