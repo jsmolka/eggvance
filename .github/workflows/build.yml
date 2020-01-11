@@ -1,0 +1,42 @@
+name: Build
+
+on: push
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+      - uses: actions/checkout@master
+        
+      - name: Setup submodules
+        run: git submodule update --init
+        shell: cmd
+        
+      - name: Setup vcpkg
+        run: vcpkg integrate install
+        shell: cmd
+        
+      - name: Build SDL2
+        run: vcpkg install sdl2:x64-windows
+        shell: cmd
+        
+      - name: Build eggvance
+        run: | 
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          msbuild /property:Configuration=Release eggvance.sln
+        shell: cmd
+        
+      - name: Collect files
+        run: |
+          mkdir upload
+          move bin\Release\eggvance.exe upload
+          move bin\Release\SDL2.dll upload
+          move eggvance\eggvance.toml upload
+        shell: cmd
+        
+      - name: Upload files
+        uses: actions/upload-artifact@master
+        with:
+          name: eggvance
+          path: upload
