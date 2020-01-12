@@ -1,7 +1,7 @@
 #include "keypad.h"
 
 #include "arm/arm.h"
-#include "devices/inputdevice.h"
+#include "platform/inputdevice.h"
 
 Keypad keypad;
 
@@ -11,7 +11,7 @@ void Keypad::reset()
     io.keyinput.reset();
 }
 
-void Keypad::update()
+void Keypad::process()
 {
     u16 previous = io.keyinput;
 

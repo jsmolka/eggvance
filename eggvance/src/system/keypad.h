@@ -7,7 +7,7 @@ class Keypad
 {
 public:
     void reset();
-    void update();
+    void process();
 
     struct IO
     {

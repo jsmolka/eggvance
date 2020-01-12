@@ -4,11 +4,11 @@
 
 Config config;
 
-void Config::init()
+void Config::init(const Path& file)
 {
     try
     {
-        initFile();
+        initFile(file);
     }
     catch (std::exception ex)
     {
@@ -16,9 +16,9 @@ void Config::init()
     }
 }
 
-void Config::initFile()
+void Config::initFile(const Path& file)
 {
-    auto stream = std::ifstream(fs::relativeToExe("eggvance.toml"));
+    auto stream = std::ifstream(fs::relativeToExe(file));
     auto result = toml::parse(stream);
     if (!result.valid())
         throw std::exception();

@@ -4,8 +4,8 @@
 
 #include "common/constants.h"
 #include "common/macros.h"
-#include "devices/videodevice.h"
 #include "mmu/mmu.h"
+#include "platform/videodevice.h"
 
 #define MISSING_PIXEL 0x6C3F
 

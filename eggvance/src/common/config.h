@@ -6,7 +6,7 @@
 class Config
 {
 public:
-    void init();
+    void init(const Path& file);
 
     Path bios_file;
     bool bios_skip;
@@ -28,7 +28,7 @@ public:
     double fps_multipliers[4];
 
 private:
-    void initFile();
+    void initFile(const Path& file);
     void initDefault();
 };
 

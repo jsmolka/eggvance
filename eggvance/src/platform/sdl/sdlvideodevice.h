@@ -2,8 +2,13 @@
 
 #include <string>
 
-#include "platform.h"
-#include "devices/videodevice.h"
+#ifdef _MSC_VER
+#include <SDL2/SDL.h>
+#else
+#include "SDL.h"
+#endif
+
+#include "platform/videodevice.h"
 
 class SDLVideoDevice : public VideoDevice
 {
@@ -14,10 +19,9 @@ public:
     void deinit() override;
     void present() override;
     void fullscreen() override;
+    void title(const std::string& title) override;
 
     void renderIcon();
-    void raiseWindow();
-    void setWindowTitle(const std::string& title);
 
     SDL_Window* window;
     SDL_Renderer* renderer;

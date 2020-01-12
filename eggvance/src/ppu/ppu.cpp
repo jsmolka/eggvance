@@ -5,8 +5,8 @@
 #include "arm/arm.h"
 #include "common/constants.h"
 #include "common/macros.h"
-#include "devices/videodevice.h"
 #include "mmu/mmu.h"
+#include "platform/videodevice.h"
 
 PPU ppu;
 
