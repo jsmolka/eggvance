@@ -9,7 +9,7 @@ A Game Boy Advance emulator.
 A game can be started by either passing it as a command line argument or dropping it in the opened window. Even though the included [BIOS](https://github.com/Nebuleon/ReGBA/tree/master/bios) should be enough to run most games, it is recommended to download the original one. Its location and many other things can be customized in the [config](https://github.com/jsmolka/eggvance/blob/master/eggvance/eggvance.toml).
 
 ## Binaries
-Binaries for the latest commit can be found in the [actions](https://github.com/jsmolka/eggvance/actions) section. Click on the last build and download the artifacts in the top right corner. Please note that you will need to install SDL2 on Linux or macOS. Optimized Windows binaries for the latest release can be found [here](https://github.com/jsmolka/eggvance/releases).
+Automatic builds can be accessed by clicking on the green checkmark next to the latest commit. Please note that you will need to install SDL2 on Linux or macOS. Optimized Windows binaries for the latest release can be found [here](https://github.com/jsmolka/eggvance/releases).
 
 ## Building
 A C++17 compiler is required to build the emulator.
