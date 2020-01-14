@@ -6,7 +6,9 @@
 #include "common/config.h"
 #include "ppu/ppu.h"
 #include "registers/macros.h"
+#include "system/dmacontroller.h"
 #include "system/keypad.h"
+#include "system/timercontroller.h"
 
 #define READ1_UNIMP(label) CASE1(label): return data.readByte(addr)
 #define READ2_UNIMP(label) CASE2(label): return data.readByte(addr)
@@ -196,7 +198,7 @@ u8 IO::readByte(u32 addr)
     CASE2(REG_DMA1CNT_H):
     CASE2(REG_DMA2CNT_H):
     CASE2(REG_DMA3CNT_H):
-        return arm.dma.readByte(addr);
+        return dmac.readByte(addr);
 
     CASE2(REG_TM0CNT_L):
     CASE1(REG_TM0CNT_H):
@@ -206,7 +208,7 @@ u8 IO::readByte(u32 addr)
     CASE1(REG_TM2CNT_H):
     CASE2(REG_TM3CNT_L):
     CASE1(REG_TM3CNT_H):
-        return arm.timer.readByte(addr);
+        return timerc.readByte(addr);
 
     CASE1(REG_TM0CNT_H + 1):
     CASE1(REG_TM1CNT_H + 1):
@@ -354,7 +356,7 @@ void IO::writeByte(u32 addr, u8 byte)
     CASE2(REG_DMA2CNT_H):
     CASE2(REG_DMA3CNT_L):
     CASE2(REG_DMA3CNT_H):
-        arm.dma.writeByte(addr, byte);
+        dmac.writeByte(addr, byte);
         break;
 
     CASE2(REG_TM0CNT_L):
@@ -365,7 +367,7 @@ void IO::writeByte(u32 addr, u8 byte)
     CASE1(REG_TM2CNT_H):
     CASE2(REG_TM3CNT_L):
     CASE1(REG_TM3CNT_H):
-        arm.timer.writeByte(addr, byte);
+        timerc.writeByte(addr, byte);
         break;
     }
 }

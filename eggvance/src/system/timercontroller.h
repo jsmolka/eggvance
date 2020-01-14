@@ -29,3 +29,5 @@ private:
 
     std::vector<Timer*> active;
 };
+
+extern TimerController timerc;

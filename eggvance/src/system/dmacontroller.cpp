@@ -4,6 +4,8 @@
 #include "mmu/memmap.h"
 #include "registers/macros.h"
 
+DMAController dmac;
+
 void DMAController::reset()
 {
     active = nullptr;

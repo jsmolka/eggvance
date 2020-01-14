@@ -6,6 +6,8 @@
 #include "mmu/memmap.h"
 #include "registers/macros.h"
 
+TimerController timerc;
+
 TimerController::TimerController()
 {
     timers[0].next = &timers[1];

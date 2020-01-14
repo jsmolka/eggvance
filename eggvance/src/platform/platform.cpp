@@ -11,7 +11,9 @@
 #include "common/fs.h"
 #include "mmu/mmu.h"
 #include "ppu/ppu.h"
+#include "system/dmacontroller.h"
 #include "system/keypad.h"
+#include "system/timercontroller.h"
 
 void Platform::init(int argc, char* argv[])
 {
@@ -66,7 +68,9 @@ void Platform::reset()
     arm.reset();
     mmu.reset();
     ppu.reset();
+    dmac.reset();
     keypad.reset();
+    timerc.reset();
 }
 
 void Platform::updateTitle()

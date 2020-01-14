@@ -5,6 +5,8 @@
 #include "decode.h"
 #include "disassemble.h"
 #include "mmu/mmu.h"
+#include "system/dmacontroller.h"
+#include "system/timercontroller.h"
 
 ARM arm;
 
@@ -30,9 +32,6 @@ void ARM::reset()
     io.int_request.reset();
     io.waitcnt.reset();
     io.haltcnt.reset();
-
-    dma.reset();
-    timer.reset();
 }
 
 void ARM::run(int cycles)
@@ -43,20 +42,20 @@ void ARM::run(int cycles)
     {
         int last = remaining;
 
-        if (dma.active)
+        if (dmac.active)
         {
-            dma.run(remaining);
+            dmac.run(remaining);
         }
         else
         {
             if (io.haltcnt)
             {
-                timer.runUntil(remaining);
+                timerc.runUntil(remaining);
                 continue;
             }
             execute();
         }
-        timer.run(last - remaining);
+        timerc.run(last - remaining);
     }
 }
 

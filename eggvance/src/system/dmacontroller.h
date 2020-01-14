@@ -22,3 +22,5 @@ private:
 
     DMA dmas[4] = { 0, 1, 2, 3 };
 };
+
+extern DMAController dmac;

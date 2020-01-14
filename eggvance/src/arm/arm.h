@@ -7,8 +7,6 @@
 #include "registers/intmaster.h"
 #include "registers/intrequest.h"
 #include "registers/waitcontrol.h"
-#include "system/dmacontroller.h"
-#include "system/timercontroller.h"
 #include "registers.h"
 
 enum class Interrupt
@@ -38,9 +36,6 @@ public:
 
     void run(int cycles);
     void request(Interrupt flag);
-
-    DMAController   dma;
-    TimerController timer;
 
     struct IO
     {

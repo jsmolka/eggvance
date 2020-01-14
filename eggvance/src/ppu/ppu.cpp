@@ -7,6 +7,7 @@
 #include "common/macros.h"
 #include "mmu/mmu.h"
 #include "platform/videodevice.h"
+#include "system/dmacontroller.h"
 
 PPU ppu;
 
@@ -111,7 +112,7 @@ void PPU::hblank()
     {
         arm.request(Interrupt::HBlank);
     }
-    arm.dma.broadcast(DMA::Timing::HBlank);
+    dmac.broadcast(DMA::Timing::HBlank);
 }
 
 void PPU::vblank()
@@ -128,7 +129,7 @@ void PPU::vblank()
     {
         arm.request(Interrupt::VBlank);
     }
-    arm.dma.broadcast(DMA::Timing::VBlank);
+    dmac.broadcast(DMA::Timing::VBlank);
 }
 
 void PPU::next()
