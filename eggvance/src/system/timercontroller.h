@@ -22,10 +22,10 @@ private:
     void schedule();
     void reschedule();
 
-    int overflow;
-    int counter;
+    uint overflow;
+    uint counter;
 
-    Timer timers[4] = { 0, 1, 2, 3 };
+    Timer timers[4];
 
     std::vector<Timer*> active;
 };

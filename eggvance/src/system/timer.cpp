@@ -2,9 +2,12 @@
 
 #include "arm/arm.h"
 
-Timer::Timer(int id)
+constexpr uint limit = 0x1'0000;
+
+Timer::Timer(uint id)
+    : id(id)
 {
-    this->id = id;
+    reset();
 }
 
 void Timer::reset()
@@ -12,34 +15,27 @@ void Timer::reset()
     data.reset();
     control.reset();
 
-    reload   = 0;
     counter  = 0;
+    reload   = 0;
     overflow = 0;
 }
 
-void Timer::run(int cycles)
+void Timer::run(uint cycles)
 {
     counter += cycles;
-
+    
     if (counter >= overflow)
     {
         if (next && next->control.cascade)
             next->run(counter / overflow);
 
         if (control.irq)
-        {
-            static constexpr Interrupt flags[4] = {
-                Interrupt::Timer0,
-                Interrupt::Timer1,
-                Interrupt::Timer2,
-                Interrupt::Timer3
-            };
-            arm.request(flags[id]);
-        }
+            arm.request(static_cast<Interrupt>(
+                static_cast<uint>(Interrupt::Timer0) << id));
 
         counter %= overflow;
         reload   = data.reload;
-        overflow = control.prescaler * (0x10000 - reload);
+        overflow = prescale(limit - reload);
     }
     data.counter = counter / control.prescaler + reload;
 }
@@ -48,16 +44,21 @@ void Timer::start()
 {
     counter  = 0;
     reload   = data.reload;
-    overflow = control.prescaler * (0x10000 - reload);
+    overflow = prescale(limit - reload);
 }
 
 void Timer::update()
 {
-    counter  = control.prescaler * (data.counter - reload);
-    overflow = control.prescaler * (0x10000 - reload);
+    counter  = prescale(data.counter - reload);
+    overflow = prescale(limit - reload);
 }
 
-int Timer::nextOverflow() const
+uint Timer::nextOverflow() const
 {
     return overflow - counter;
+}
+
+uint Timer::prescale(uint value) const
+{
+    return control.prescaler * value;
 }

@@ -9,20 +9,24 @@
 TimerController timerc;
 
 TimerController::TimerController()
+    : timers { 1, 2, 3, 4}
 {
     timers[0].next = &timers[1];
     timers[1].next = &timers[2];
     timers[2].next = &timers[3];
+
+    reset();
 }
 
 void TimerController::reset()
 {
     active.clear();
 
-    for (auto& timer : timers)
-    {
-        timer.reset();
-    }
+    timers[0].reset();
+    timers[1].reset();
+    timers[2].reset();
+    timers[3].reset();
+
     counter  = 0;
     overflow = 0x7FFF'FFFF;
 }

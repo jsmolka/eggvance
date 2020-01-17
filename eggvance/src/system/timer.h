@@ -6,23 +6,25 @@
 class Timer
 {
 public:
-    Timer(int id);
+    Timer(uint id);
 
     void reset();
 
-    void run(int cycles);
+    void run(uint cycles);
     void start();
     void update();
 
-    int nextOverflow() const;
+    uint nextOverflow() const;
 
-    int id;
+    uint id;
     Timer* next;
     TimerData data;
     TimerControl control;
 
 private:
-    int reload;
-    int counter;
-    int overflow;
+    uint prescale(uint value) const;
+
+    uint counter;
+    uint reload;
+    uint overflow;
 };
