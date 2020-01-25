@@ -9,10 +9,6 @@
       <Configuration>Release with symbols</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug|x64">
-      <Configuration>Debug</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
@@ -21,60 +17,34 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{371b584c-d6d3-4974-adf3-e66735450416}</ProjectGuid>
-    <RootNamespace>eggvance</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>eggvance</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release with console|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release with symbols|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="ExtensionSettings">
-  </ImportGroup>
-  <ImportGroup Label="Shared">
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release with console|x64'" Label="PropertySheets">
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release with console|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release with symbols|x64'" Label="PropertySheets">
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release with symbols|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)bin\intermediate\$(Configuration)\</IntDir>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)bin\intermediate\$(Configuration)\</IntDir>
@@ -88,41 +58,16 @@
     <IntDir>$(SolutionDir)bin\intermediate\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
-      <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)icon\;$(ProjectDir)external\fmt\include;$(ProjectDir)external\tinytoml\include</AdditionalIncludeDirectories>
-      <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <DisableSpecificWarnings>26451;26495;26812;6385;6386;6262;26444</DisableSpecificWarnings>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;FMT_HEADER_ONLY;SDL_MAIN_HANDLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
-    </ClCompile>
-    <Link>
-      <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>SDL2maind.lib</AdditionalDependencies>
-    </Link>
-  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
-      <SDLCheck>true</SDLCheck>
-      <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)icon\;$(ProjectDir)external\fmt\include;$(ProjectDir)external\tinytoml\include</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
       <DisableSpecificWarnings>26451;26495;26812;6385;6386;6262;26444</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <DebugInformationFormat>None</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/Ob3 %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;FMT_HEADER_ONLY;SDL_MAIN_HANDLED;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <PreprocessorDefinitions>FMT_HEADER_ONLY;SDL_MAIN_HANDLED;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -131,25 +76,21 @@
       <AdditionalDependencies>SDL2main.lib</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>$(OutDir)$(TargetName).map</MapFileName>
+      <MapFileName>$(SolutionDir)bin\intermediate\$(Configuration)\$(TargetName).map</MapFileName>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <ProgramDatabaseFile>$(SolutionDir)bin\intermediate\$(Configuration)\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release with console|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
-      <SDLCheck>true</SDLCheck>
-      <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)icon\;$(ProjectDir)external\fmt\include;$(ProjectDir)external\tinytoml\include</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
       <DisableSpecificWarnings>26451;26495;26812;6385;6386;6262;26444</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <DebugInformationFormat>None</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/Ob3 %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;FMT_HEADER_ONLY;SDL_MAIN_HANDLED;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <PreprocessorDefinitions>FMT_HEADER_ONLY;SDL_MAIN_HANDLED;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -158,32 +99,27 @@
       <AdditionalDependencies>SDL2main.lib</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>$(OutDir)$(TargetName).map</MapFileName>
+      <MapFileName>$(SolutionDir)bin\intermediate\$(Configuration)\$(TargetName).map</MapFileName>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <ProgramDatabaseFile>$(SolutionDir)bin\intermediate\$(Configuration)\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release with symbols|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
-      <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)icon\;$(ProjectDir)external\fmt\include;$(ProjectDir)external\tinytoml\include</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
       <DisableSpecificWarnings>26451;26495;26812;6385;6386;6262;26444</DisableSpecificWarnings>
-      <DebugInformationFormat>OldStyle</DebugInformationFormat>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;FMT_HEADER_ONLY;SDL_MAIN_HANDLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>FMT_HEADER_ONLY;SDL_MAIN_HANDLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SupportJustMyCode>true</SupportJustMyCode>
-      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Console</SubSystem>
       <AdditionalDependencies>SDL2main.lib</AdditionalDependencies>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(SolutionDir)bin\intermediate\$(Configuration)\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
