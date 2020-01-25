@@ -483,9 +483,31 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
     else
     {
         if (load)
+        {
             pc = readWord(addr);
+        }
         else
-            writeWord(addr, pc + 4);
+        {
+            enum Suffix
+            {
+                kSuffixDA = 0b00,
+                kSuffixDB = 0b01,
+                kSuffixIA = 0b10,
+                kSuffixIB = 0b11
+            };
+
+            switch ((increment << 1) | pre_index)
+            {
+            case kSuffixDA: writeWord(addr - 0x3C, pc + 4); break;
+            case kSuffixDB: writeWord(addr - 0x40, pc + 4); break;
+            case kSuffixIA: writeWord(addr + 0x00, pc + 4); break;
+            case kSuffixIB: writeWord(addr + 0x04, pc + 4); break;
+
+            default:
+                EGG_UNREACHABLE;
+                break;
+            }
+        }
 
         addr = increment
             ? addr + 0x40
