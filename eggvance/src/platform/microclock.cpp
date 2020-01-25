@@ -1,13 +1,13 @@
 #include "microclock.h"
 
 #ifdef _MSC_VER
-#  include <windows.h>
+#include <windows.h>
 #else
-#  include <errno.h>
-#  include <time.h>
+#include <errno.h>
+#include <time.h>
 #  ifdef __APPLE__
-#    include <mach/clock.h>
-#    include <mach/mach.h>
+#  include <mach/clock.h>
+#  include <mach/mach.h>
 #  endif
 #endif
 

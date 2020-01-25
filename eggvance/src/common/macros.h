@@ -6,9 +6,9 @@
 
 #ifdef NDEBUG
 #  ifdef _MSC_VER
-#    define EGG_UNREACHABLE __assume(0)
+#  define EGG_UNREACHABLE __assume(0)
 #  else
-#    define EGG_UNREACHABLE static_cast<void>(0)
+#  define EGG_UNREACHABLE __builtin_unreachable()
 #  endif
 #else
 #  define EGG_UNREACHABLE EGG_ASSERT(false, "Unreachable")
