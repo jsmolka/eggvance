@@ -3,33 +3,25 @@
 #include <climits>
 #include <type_traits>
 
+#ifdef _MSC_VER
+#include <intrin.h>
+#else
+#include <x86intrin.h>
+#endif
+
 #include "integer.h"
 
-template<typename T>
-constexpr uint bitSize()
-{
-    return sizeof(T) * CHAR_BIT;
-}
-
 template<uint index, uint size, typename T>
-constexpr T bits(T value)
+inline T bits(T value)
 {
     static_assert(std::is_integral_v<T>);
-    static_assert(index + size <= bitSize<T>());
+    static_assert(index + size <= sizeof(T) * CHAR_BIT);
 
     return (value >> index) & ((1ull << size) - 1);
 }
 
 template<typename T>
-constexpr T shr(T value, uint amount)
-{
-    static_assert(std::is_integral_v<T>);
-
-    return static_cast<std::make_unsigned_t<T>>(value) >> amount;
-}
-
-template<typename T>
-constexpr T sar(T value, uint amount)
+inline T sar(T value, uint amount)
 {
     static_assert(std::is_integral_v<T>);
 
@@ -37,111 +29,90 @@ constexpr T sar(T value, uint amount)
 }
 
 template<uint size, typename T>
-constexpr T signExtend(T value)
+inline T signExtend(T value)
 {
     static_assert(std::is_integral_v<T>);
-    static_assert(size <= bitSize<T>());
+    static_assert(size <= sizeof(T) * CHAR_BIT);
 
     constexpr T mask = 1ull << (size - 1);
 
     return (value ^ mask) - mask;
 }
 
-template<typename T>
-constexpr T rotateLeft(T value, uint amount)
+inline uint rotateRight(uint value, uint amount)
 {
-    static_assert(std::is_integral_v<T>);
-
-    constexpr T mask = bitSize<T>() - 1;
-
-    amount &= mask;
-    return (value << amount) | shr(value, -amount & mask);
+    #ifdef _MSC_VER
+    return _rotr(value, amount);
+    #elif defined __clang__
+    return __builtin_rotateright32(value, amount);
+    #else
+    amount &= 31;
+    return (value >> amount) | (value << (-amount & 31));
+    #endif
 }
 
-template<typename T>
-constexpr T rotateRight(T value, uint amount)
+inline uint popcount(uint value)
 {
-    static_assert(std::is_integral_v<T>);
-
-    constexpr T mask = bitSize<T>() - 1;
-
-    amount &= mask;
-    return shr(value, amount) | (value << (-amount & mask));
+    #ifdef _MSC_VER
+    return __popcnt(value);
+    #else
+    return __builtin_popcount(value);
+    #endif
 }
 
-template<typename T>
-constexpr uint popcount(T value)
+inline uint bitScanForward(uint value)
 {
-    static_assert(std::is_integral_v<T>);
-
-    using U = std::make_unsigned_t<T>;
-
-    U x = static_cast<U>(value);
-
-    x = x - ((x >> 1) & (U) ~(U)0 / 3);
-    x = (x & (U) ~(U)0 / 15 * 3) + ((x >> 2) & (U) ~(U)0 / 15 * 3);
-    x = (x + (x >> 4)) & (U) ~(U)0 / 255 * 15;
-    return (U)(x * ((U) ~(U)0 / 255)) >> (sizeof(U) - 1) * 8;
+    #ifdef _MSC_VER
+    unsigned long index;
+    _BitScanForward(&index, value);
+    return static_cast<uint>(index);
+    #else
+    return __builtin_ctz(value);
+    #endif
 }
 
-template<typename T>
-constexpr uint bitScanForward(T value)
-{
-    static_assert(std::is_integral_v<T>);
-
-    return popcount((value ^ (value - 1)) >> 1);
-}
-
-template<typename T>
 class SetBits
 {
 public:
-    static_assert(std::is_integral_v<T>);
-
-    constexpr SetBits(T value)
+    explicit SetBits(uint value)
         : value(value) {}
 
     class Iterator
     {
     public:
-        constexpr Iterator(T value)
+        explicit Iterator(uint value)
             : value(value) {}
 
-        constexpr Iterator& operator++()
+        Iterator& operator++()
         {
             value &= value - 1;
             return *this;
         }
 
-        constexpr uint operator*() const
+        uint operator*() const
         {
             return bitScanForward(value);
         }
 
-        constexpr bool operator==(const Iterator& other) const
-        {
-            return value == other.value;
-        }
-
-        constexpr bool operator!=(const Iterator& other) const
+        bool operator!=(const Iterator& other) const
         {
             return value != other.value;
         }
 
     private:
-        T value;
+        uint value;
     };
 
-    constexpr Iterator begin() const
+    Iterator begin() const
     {
         return Iterator(value);
     }
 
-    constexpr Iterator end() const
+    Iterator end() const
     {
         return Iterator(0);
     }
 
 private:
-    T value;
+    uint value;
 };

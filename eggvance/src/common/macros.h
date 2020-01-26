@@ -4,6 +4,12 @@
 
 #define EGG_ASSERT(cond, msg) assert((cond) && msg)
 
+#ifdef _MSC_VER
+#define EGG_INLINE __forceinline
+#else
+#define EGGE_INLINE __attribute__((always_inline))
+#endif
+
 #ifdef NDEBUG
 #  ifdef _MSC_VER
 #  define EGG_UNREACHABLE __assume(0)
