@@ -1,7 +1,6 @@
 #include "arm.h"
 
 #include "decode.h"
-#include "rlist.h"
 #include "common/bits.h"
 #include "common/macros.h"
 
@@ -450,7 +449,7 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
             if (rlist & (1 << rn))
                 writeback = false;
 
-            for (auto x : RList(rlist))
+            for (uint x : SetBits(rlist))
             {
                 addr += 4 * pre_index;
                 regs[x] = readWord(addr);
@@ -462,7 +461,7 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
         {
             bool first = true;
 
-            for (auto x : RList(rlist))
+            for (uint x : SetBits(rlist))
             {
                 u32 value = x != rn
                     ? x != GPR::PC

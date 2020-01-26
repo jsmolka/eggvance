@@ -210,7 +210,6 @@
     <ClInclude Include="src\common\critical.h" />
     <ClInclude Include="src\common\fs.h" />
     <ClInclude Include="src\common\macros.h" />
-    <ClInclude Include="src\arm\rlist.h" />
     <ClInclude Include="src\platform\audiodevice.h" />
     <ClInclude Include="src\platform\device.h" />
     <ClInclude Include="src\platform\framecounter.h" />

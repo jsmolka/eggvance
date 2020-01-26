@@ -449,9 +449,6 @@
     <ClInclude Include="src\common\bits.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\arm\rlist.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\common\fs.h">
       <Filter>Header Files</Filter>
     </ClInclude>

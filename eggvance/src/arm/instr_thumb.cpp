@@ -1,7 +1,6 @@
 #include "arm.h"
 
 #include "decode.h"
-#include "rlist.h"
 #include "common/bits.h"
 #include "common/macros.h"
 
@@ -476,7 +475,7 @@ void ARM::Thumb_PushPopRegisters(u16 instr)
 
     if (pop)
     {
-        for (auto x : RList(rlist))
+        for (uint x : SetBits(rlist))
         {
             regs[x] = readWord(sp);
             sp += 4;
@@ -489,7 +488,7 @@ void ARM::Thumb_PushPopRegisters(u16 instr)
 
         u32 addr = sp;
 
-        for (auto x : RList(rlist))
+        for (uint x : SetBits(rlist))
         {
             writeWord(addr, regs[x]);
             addr += 4;
@@ -515,7 +514,7 @@ void ARM::Thumb_LoadStoreMultiple(u16 instr)
             if (rlist & (1 << rb))
                 writeback = false;
 
-            for (auto x : RList(rlist))
+            for (uint x : SetBits(rlist))
             {
                 regs[x] = readWord(addr);
                 addr += 4;
@@ -526,7 +525,7 @@ void ARM::Thumb_LoadStoreMultiple(u16 instr)
         {
             bool begin = true;
 
-            for (auto x : RList(rlist))
+            for (uint x : SetBits(rlist))
             {
                 u32 value = x != rb
                     ? regs[x]

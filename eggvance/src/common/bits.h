@@ -3,60 +3,145 @@
 #include <climits>
 #include <type_traits>
 
-#ifdef _MSC_VER
-#include <intrin.h>
-#endif
+#include "integer.h"
 
-template<unsigned index, unsigned size, typename T>
-inline T bits(T value)
+template<typename T>
+constexpr uint bitSize()
+{
+    return sizeof(T) * CHAR_BIT;
+}
+
+template<uint index, uint size, typename T>
+constexpr T bits(T value)
 {
     static_assert(std::is_integral_v<T>);
-    static_assert(index + size <= CHAR_BIT * sizeof(T));
+    static_assert(index + size <= bitSize<T>());
 
     return (value >> index) & ((1ull << size) - 1);
 }
 
-template<unsigned size, typename T>
-inline T signExtend(T value)
+template<typename T>
+constexpr T shr(T value, uint amount)
 {
     static_assert(std::is_integral_v<T>);
-    static_assert(size <= CHAR_BIT * sizeof(T));
 
-    T mask = 1ull << (size - 1);
+    return static_cast<std::make_unsigned_t<T>>(value) >> amount;
+}
+
+template<typename T>
+constexpr T sar(T value, uint amount)
+{
+    static_assert(std::is_integral_v<T>);
+
+    return static_cast<std::make_signed_t<T>>(value) >> amount;
+}
+
+template<uint size, typename T>
+constexpr T signExtend(T value)
+{
+    static_assert(std::is_integral_v<T>);
+    static_assert(size <= bitSize<T>());
+
+    constexpr T mask = 1ull << (size - 1);
 
     return (value ^ mask) - mask;
 }
 
-inline unsigned rotateRight(unsigned value, unsigned amount)
+template<typename T>
+constexpr T rotateLeft(T value, uint amount)
 {
-    #ifdef _MSC_VER
-    return _rotr(value, amount);
-    #else
-    amount %= 32;
-    if (amount == 0) return value;
-    return (value >> amount) | (value << (32 - amount));
-    #endif
+    static_assert(std::is_integral_v<T>);
+
+    constexpr T mask = bitSize<T>() - 1;
+
+    amount &= mask;
+    return (value << amount) | shr(value, -amount & mask);
 }
 
-inline unsigned popcount(unsigned value)
+template<typename T>
+constexpr T rotateRight(T value, uint amount)
 {
-    #ifdef _MSC_VER
-    return __popcnt(value);
-    #else
-    value = value - ((value >> 1) & 0x5555'5555);
-    value = (value & 0x3333'3333) + ((value >> 2) & 0x3333'3333);
-    return ((value + (value >> 4) & 0x0F0F'0F0F) * 0x0101'0101) >> 24;
-    #endif
+    static_assert(std::is_integral_v<T>);
+
+    constexpr T mask = bitSize<T>() - 1;
+
+    amount &= mask;
+    return shr(value, amount) | (value << (-amount & mask));
 }
 
-inline unsigned bitScanForward(unsigned value)
+template<typename T>
+constexpr uint popcount(T value)
 {
-    #ifdef _MSC_VER
-    unsigned long index = 0;
-    if (!_BitScanForward(&index, value))
-        return 31;
-    return static_cast<unsigned>(index);
-    #else
+    static_assert(std::is_integral_v<T>);
+
+    using U = std::make_unsigned_t<T>;
+
+    U x = static_cast<U>(value);
+
+    x = x - ((x >> 1) & (U) ~(U)0 / 3);
+    x = (x & (U) ~(U)0 / 15 * 3) + ((x >> 2) & (U) ~(U)0 / 15 * 3);
+    x = (x + (x >> 4)) & (U) ~(U)0 / 255 * 15;
+    return (U)(x * ((U) ~(U)0 / 255)) >> (sizeof(U) - 1) * 8;
+}
+
+template<typename T>
+constexpr uint bitScanForward(T value)
+{
+    static_assert(std::is_integral_v<T>);
+
     return popcount((value ^ (value - 1)) >> 1);
-    #endif
 }
+
+template<typename T>
+class SetBits
+{
+public:
+    static_assert(std::is_integral_v<T>);
+
+    constexpr SetBits(T value)
+        : value(value) {}
+
+    class Iterator
+    {
+    public:
+        constexpr Iterator(T value)
+            : value(value) {}
+
+        constexpr Iterator& operator++()
+        {
+            value &= value - 1;
+            return *this;
+        }
+
+        constexpr uint operator*() const
+        {
+            return bitScanForward(value);
+        }
+
+        constexpr bool operator==(const Iterator& other) const
+        {
+            return value == other.value;
+        }
+
+        constexpr bool operator!=(const Iterator& other) const
+        {
+            return value != other.value;
+        }
+
+    private:
+        T value;
+    };
+
+    constexpr Iterator begin() const
+    {
+        return Iterator(value);
+    }
+
+    constexpr Iterator end() const
+    {
+        return Iterator(0);
+    }
+
+private:
+    T value;
+};
