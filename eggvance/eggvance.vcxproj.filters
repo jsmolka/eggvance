@@ -479,6 +479,9 @@
     <ClInclude Include="src\platform\synchronizer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\common\delegate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="eggvance.rc">

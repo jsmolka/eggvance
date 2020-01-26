@@ -464,7 +464,7 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
             for (uint x : SetBits(rlist))
             {
                 u32 value = x != rn
-                    ? x != GPR::PC
+                    ? x != 15
                         ? regs[x] + 0
                         : regs[x] + 4
                     : first

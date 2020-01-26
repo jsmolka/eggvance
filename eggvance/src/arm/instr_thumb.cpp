@@ -471,7 +471,7 @@ void ARM::Thumb_PushPopRegisters(u16 instr)
     int rbit  = bits< 8, 1>(instr);
     int pop   = bits<11, 1>(instr);
 
-    rlist |= rbit << (pop ? GPR::PC : GPR::LR);
+    rlist |= rbit << (pop ? 15 : 14);
 
     if (pop)
     {

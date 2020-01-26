@@ -25,7 +25,7 @@ void ARM::reset()
     flush();
 
     pc.value += 4;
-    pc.on_write = std::bind(&ARM::flush, this);
+    pc.onWrite({ this, &ARM::flush });
 
     io.int_master.reset();
     io.int_enabled.reset();

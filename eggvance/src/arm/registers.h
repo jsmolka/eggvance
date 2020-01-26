@@ -12,22 +12,22 @@ public:
     PSR cpsr;
     PSR spsr;
 
-    GPR& sp = regs[GPR::SP];
-    GPR& lr = regs[GPR::LR];
-    GPR& pc = regs[GPR::PC];
+    GPR& sp = regs[13];
+    GPR& lr = regs[14];
+    GPR& pc = regs[15];
 
 protected:
     void switchMode(PSR::Mode mode);
 
 private:
-    enum Bank
+    enum Bank : uint
     {
-        DEF = 0,
-        FIQ = 1,
-        IRQ = 2,
-        SVC = 3,
-        ABT = 4,
-        UND = 5
+        kBankDef = 0,
+        kBankFiq = 1,
+        kBankIrq = 2,
+        kBankSvc = 3,
+        kBankAbt = 4,
+        kBankUnd = 5
     };
 
     static Bank modeToBank(PSR::Mode mode);

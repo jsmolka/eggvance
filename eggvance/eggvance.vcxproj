@@ -204,6 +204,7 @@
     <ClInclude Include="src\arm\psr.h" />
     <ClInclude Include="src\arm\registers.h" />
     <ClInclude Include="src\common\bits.h" />
+    <ClInclude Include="src\common\delegate.h" />
     <ClInclude Include="src\common\enums.h" />
     <ClInclude Include="src\common\config.h" />
     <ClInclude Include="src\common\constants.h" />
