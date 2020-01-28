@@ -8,12 +8,12 @@ class ARM;
 class GPR
 {
 public:
-    void onWrite(const Delegate<ARM>& callback)
+    inline void onWrite(const Delegate<ARM>& callback)
     {
         this->callback = callback;
     }
 
-    GPR& operator=(u32 value)
+    inline GPR& operator=(u32 value)
     {
         this->value = value;
 
@@ -23,22 +23,22 @@ public:
         return *this;
     }
 
-    GPR& operator=(const GPR& other)
+    inline GPR& operator=(const GPR& other)
     {
         return *this = other.value;
     }
 
-    GPR& operator+=(u32 value)
+    inline GPR& operator+=(u32 value)
     {
         return *this = this->value + value;
     }
 
-    GPR& operator-=(u32 value)
+    inline GPR& operator-=(u32 value)
     {
         return *this = this->value - value;
     }
 
-    operator u32() const
+    inline operator u32() const
     {
         return value;
     }

@@ -558,7 +558,7 @@ void ARM::Thumb_ConditionalBranch(u16 instr)
 {
     int condition = bits<8, 4>(instr);
 
-    if (cpsr.check(PSR::Condition(condition)))
+    if (cpsr.check(condition))
     {
         int offset = bits<0, 8>(instr);
 

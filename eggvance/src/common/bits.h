@@ -83,18 +83,18 @@ public:
         explicit Iterator(uint value)
             : value(value) {}
 
-        Iterator& operator++()
+        inline Iterator& operator++()
         {
             value &= value - 1;
             return *this;
         }
 
-        uint operator*() const
+        inline uint operator*() const
         {
             return bitScanForward(value);
         }
 
-        bool operator!=(const Iterator& other) const
+        inline bool operator!=(const Iterator& other) const
         {
             return value != other.value;
         }
@@ -103,12 +103,12 @@ public:
         uint value;
     };
 
-    Iterator begin() const
+    inline Iterator begin() const
     {
         return Iterator(value);
     }
 
-    Iterator end() const
+    inline Iterator end() const
     {
         return Iterator(0);
     }

@@ -112,7 +112,7 @@ void ARM::execute()
             pipe[0] = pipe[1];
             pipe[1] = readWord(pc);
 
-            if (cpsr.check(PSR::Condition(instr >> 28)))
+            if (cpsr.check(instr >> 28))
             {
                 (this->*instr_arm[armHash(instr)])(instr);
             }
@@ -184,14 +184,14 @@ void ARM::interruptHW()
 {
     u32 lr = pc - 2 * cpsr.size() + 4;
 
-    interrupt(0x18, lr, PSR::Mode::IRQ);
+    interrupt(0x18, lr, PSR::Mode::kModeIrq);
 }
 
 void ARM::interruptSW()
 {
     u32 lr = pc - cpsr.size();
 
-    interrupt(0x08, lr, PSR::Mode::SVC);
+    interrupt(0x08, lr, PSR::Mode::kModeSvc);
 }
 
 bool ARM::interrupted() const

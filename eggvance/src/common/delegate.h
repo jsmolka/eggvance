@@ -16,12 +16,12 @@ public:
     Delegate(T* context, Function function)
         : context(context), function(function) {}
 
-    void operator()(const U& argument) const
+    inline void operator()(const U& argument) const
     {
         (context->*function)(argument);
     }
 
-    operator bool() const
+    inline operator bool() const
     {
         return static_cast<bool>(context);
     }
@@ -45,12 +45,12 @@ public:
     Delegate(T* context, Function function)
         : context(context), function(function) {}
 
-    void operator()() const
+    inline void operator()() const
     {
         (context->*function)();
     }
 
-    operator bool() const
+    inline operator bool() const
     {
         return static_cast<bool>(context);
     }

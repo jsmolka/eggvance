@@ -34,7 +34,7 @@ void Registers::reset()
     }
 }
 
-void Registers::switchMode(PSR::Mode mode)
+void Registers::switchMode(uint mode)
 {
     Bank bank_old = modeToBank(cpsr.mode);
     Bank bank_new = modeToBank(mode);
@@ -70,17 +70,17 @@ void Registers::switchMode(PSR::Mode mode)
     cpsr.mode = mode;
 }
 
-Registers::Bank Registers::modeToBank(PSR::Mode mode)
+Registers::Bank Registers::modeToBank(uint mode)
 {
     switch (mode)
     {
-    case PSR::Mode::USR:
-    case PSR::Mode::SYS: return kBankDef;
-    case PSR::Mode::FIQ: return kBankFiq;
-    case PSR::Mode::IRQ: return kBankIrq;
-    case PSR::Mode::SVC: return kBankSvc;
-    case PSR::Mode::ABT: return kBankAbt;
-    case PSR::Mode::UND: return kBankUnd;
+    case PSR::kModeUsr:
+    case PSR::kModeSys: return kBankDef;
+    case PSR::kModeFiq: return kBankFiq;
+    case PSR::kModeIrq: return kBankIrq;
+    case PSR::kModeSvc: return kBankSvc;
+    case PSR::kModeAbt: return kBankAbt;
+    case PSR::kModeUnd: return kBankUnd;
 
     default:
         EGG_UNREACHABLE;
