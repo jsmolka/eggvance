@@ -9,7 +9,7 @@
 TimerController timerc;
 
 TimerController::TimerController()
-    : timers { 1, 2, 3, 4}
+    : timers { 0, 1, 2, 3 }
 {
     timers[0].next = &timers[1];
     timers[1].next = &timers[2];
