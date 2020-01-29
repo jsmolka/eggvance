@@ -59,14 +59,17 @@ void ARM::run(int cycles)
     }
 }
 
-void ARM::request(Interrupt flag)
+void ARM::request(Interrupt intr)
 {
-    int mask = static_cast<int>(flag);
+    io.int_request |= static_cast<uint>(intr);
 
-    io.int_request |= mask;
-
-    if (io.int_enabled & mask)
+    if (io.int_enabled & io.int_request)
+    {
         io.haltcnt = false;
+
+        if (!cpsr.i && io.int_master)
+            interruptHW();
+    }
 }
 
 void ARM::flush()
@@ -76,46 +79,40 @@ void ARM::flush()
         pc.value &= ~0x1;
         pipe[0] = readHalf(pc + 0);
         pipe[1] = readHalf(pc + 2);
+        pc.value += 2;
     }
     else
     {
         pc.value &= ~0x3;
         pipe[0] = readWord(pc + 0);
         pipe[1] = readWord(pc + 4);
+        pc.value += 4;
     }
-    pc.value += cpsr.size();
 }
 
 void ARM::execute()
 {
     //disasm();
 
-    if (interrupted())
+    if (cpsr.t)
     {
-        interruptHW();
+        u16 instr = pipe[0];
+
+        pipe[0] = pipe[1];
+        pipe[1] = readHalf(pc);
+
+        (this->*instr_thumb[thumbHash(instr)])(instr);
     }
     else
     {
-        if (cpsr.t)
+        u32 instr = pipe[0];
+
+        pipe[0] = pipe[1];
+        pipe[1] = readWord(pc);
+
+        if (cpsr.check(instr >> 28))
         {
-            u16 instr = pipe[0];
-
-            pipe[0] = pipe[1];
-            pipe[1] = readHalf(pc);
-
-            (this->*instr_thumb[thumbHash(instr)])(instr);
-        }
-        else
-        {
-            u32 instr = pipe[0];
-
-            pipe[0] = pipe[1];
-            pipe[1] = readWord(pc);
-
-            if (cpsr.check(instr >> 28))
-            {
-                (this->*instr_arm[armHash(instr)])(instr);
-            }
+            (this->*instr_arm[armHash(instr)])(instr);
         }
     }
     pc.value += cpsr.size();
@@ -184,17 +181,12 @@ void ARM::interruptHW()
 {
     u32 lr = pc - 2 * cpsr.size() + 4;
 
-    interrupt(0x18, lr, PSR::Mode::kModeIrq);
+    interrupt(0x18, lr, PSR::kModeIrq);
 }
 
 void ARM::interruptSW()
 {
     u32 lr = pc - cpsr.size();
 
-    interrupt(0x08, lr, PSR::Mode::kModeSvc);
-}
-
-bool ARM::interrupted() const
-{
-    return !cpsr.i && io.int_master && io.int_enabled & io.int_request;
+    interrupt(0x08, lr, PSR::kModeSvc);
 }

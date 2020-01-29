@@ -35,7 +35,7 @@ public:
     void reset();
 
     void run(int cycles);
-    void request(Interrupt flag);
+    void request(Interrupt intr);
 
     struct IO
     {
