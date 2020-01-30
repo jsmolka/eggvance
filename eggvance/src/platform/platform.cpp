@@ -13,6 +13,7 @@
 #include "ppu/ppu.h"
 #include "system/dmacontroller.h"
 #include "system/keypad.h"
+#include "system/irqhandler.h"
 #include "system/timercontroller.h"
 
 void Platform::init(int argc, char* argv[])
@@ -69,6 +70,7 @@ void Platform::reset()
     mmu.reset();
     ppu.reset();
     dmac.reset();
+    irqh.reset();
     keypad.reset();
     timerc.reset();
 }

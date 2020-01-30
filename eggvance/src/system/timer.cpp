@@ -1,6 +1,6 @@
 #include "timer.h"
 
-#include "arm/arm.h"
+#include "system/irqhandler.h"
 
 constexpr uint limit = 0x1'0000;
 
@@ -30,8 +30,7 @@ void Timer::run(uint cycles)
             next->run(counter / overflow);
 
         if (control.irq)
-            arm.request(static_cast<Interrupt>(
-                static_cast<uint>(Interrupt::Timer0) << id));
+            irqh.request(kIrqTimer0 << id);
 
         counter %= overflow;
         reload   = data.reload;

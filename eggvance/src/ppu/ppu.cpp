@@ -2,12 +2,13 @@
 
 #include <algorithm>
 
-#include "arm/arm.h"
+#include "common/bits.h"
 #include "common/constants.h"
 #include "common/macros.h"
 #include "mmu/mmu.h"
 #include "platform/videodevice.h"
 #include "system/dmacontroller.h"
+#include "system/irqhandler.h"
 
 PPU ppu;
 
@@ -110,7 +111,7 @@ void PPU::hblank()
 
     if (io.dispstat.hblank_irq)
     {
-        arm.request(Interrupt::HBlank);
+        irqh.request(kIrqHBlank);
     }
     dmac.broadcast(DMA::Timing::HBlank);
 }
@@ -127,7 +128,7 @@ void PPU::vblank()
 
     if (io.dispstat.vblank_irq)
     {
-        arm.request(Interrupt::VBlank);
+        irqh.request(kIrqVBlank);
     }
     dmac.broadcast(DMA::Timing::VBlank);
 }
@@ -137,7 +138,7 @@ void PPU::next()
     io.dispstat.vmatch = io.vcount == io.dispstat.vcompare;
     if (io.dispstat.vmatch && io.dispstat.vmatch_irq)
     {
-        arm.request(Interrupt::VMatch);
+        irqh.request(kIrqVMatch);
     }
     io.vcount.next();
 }

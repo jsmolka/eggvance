@@ -7,6 +7,7 @@
 #include "ppu/ppu.h"
 #include "registers/macros.h"
 #include "system/dmacontroller.h"
+#include "system/irqhandler.h"
 #include "system/keypad.h"
 #include "system/timercontroller.h"
 
@@ -151,9 +152,6 @@ u8 IO::readByte(u32 addr)
     READ2(REG_WINOUT,   ppu.io.winout);
     READ2(REG_BLDCNT,   ppu.io.bldcnt);
     READ2(REG_BLDALPHA, ppu.io.bldalpha);
-    READ2(REG_IE,       arm.io.int_enabled);
-    READ2(REG_IF,       arm.io.int_request);
-    READ2(REG_IME,      arm.io.int_master);
     READ2(REG_WAITCNT,  arm.io.waitcnt);
     READ2(REG_KEYINPUT, keypad.io.keyinput);
     READ2(REG_KEYCNT,   keypad.io.keycnt);
@@ -193,6 +191,11 @@ u8 IO::readByte(u32 addr)
     READ4_UNIMP(REG_JOY_TRANS);
     READ2_UNIMP(REG_JOYSTAT);
     READ1_UNIMP(REG_POSTFLG);
+
+    CASE2(REG_IE):
+    CASE2(REG_IF):
+    CASE2(REG_IME):
+        return irqh.read(addr);
 
     CASE2(REG_DMA0CNT_H):
     CASE2(REG_DMA1CNT_H):
@@ -295,9 +298,6 @@ void IO::writeByte(u32 addr, u8 byte)
     WRITE2(REG_BLDCNT,   ppu.io.bldcnt);
     WRITE2(REG_BLDALPHA, ppu.io.bldalpha);
     WRITE2(REG_BLDY,     ppu.io.bldy);
-    WRITE2(REG_IE,       arm.io.int_enabled);
-    WRITE2(REG_IF,       arm.io.int_request);
-    WRITE2(REG_IME,      arm.io.int_master);
     WRITE1(REG_HALTCNT,  arm.io.haltcnt);
     WRITE2(REG_WAITCNT,  arm.io.waitcnt);
     WRITE2(REG_KEYCNT,   keypad.io.keycnt);
@@ -339,6 +339,12 @@ void IO::writeByte(u32 addr, u8 byte)
     WRITE4_UNIMP(REG_JOY_TRANS);
     WRITE2_UNIMP(REG_JOYSTAT);
     WRITE1_UNIMP(REG_POSTFLG);
+
+    CASE2(REG_IE):
+    CASE2(REG_IF):
+    CASE2(REG_IME):
+        irqh.write(addr, byte);
+        break;
 
     CASE4(REG_DMA0SAD):
     CASE4(REG_DMA0DAD):

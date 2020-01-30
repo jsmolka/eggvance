@@ -3,29 +3,8 @@
 #include <array>
 
 #include "registers/haltcontrol.h"
-#include "registers/intenabled.h"
-#include "registers/intmaster.h"
-#include "registers/intrequest.h"
 #include "registers/waitcontrol.h"
 #include "registers.h"
-
-enum class Interrupt
-{
-    VBlank  = 1 <<  0,
-    HBlank  = 1 <<  1,
-    VMatch  = 1 <<  2,
-    Timer0  = 1 <<  3,
-    Timer1  = 1 <<  4,
-    Timer2  = 1 <<  5,
-    Timer3  = 1 <<  6,
-    Serial  = 1 <<  7,
-    DMA0    = 1 <<  8,
-    DMA1    = 1 <<  9,
-    DMA2    = 1 << 10,
-    DMA3    = 1 << 11,
-    Keypad  = 1 << 12,
-    GamePak = 1 << 13
-};
 
 class ARM : public Registers
 {
@@ -35,13 +14,9 @@ public:
     void reset();
 
     void run(int cycles);
-    void request(Interrupt intr);
 
     struct IO
     {
-        IntMaster   int_master;
-        IntEnabled  int_enabled;
-        IntRequest  int_request;
         WaitControl waitcnt;
         HaltControl haltcnt;
     } io;

@@ -6,6 +6,7 @@
 #include "disassemble.h"
 #include "mmu/mmu.h"
 #include "system/dmacontroller.h"
+#include "system/irqhandler.h"
 #include "system/timercontroller.h"
 
 ARM arm;
@@ -27,9 +28,6 @@ void ARM::reset()
     pc.value += 4;
     pc.onWrite({ this, &ARM::flush });
 
-    io.int_master.reset();
-    io.int_enabled.reset();
-    io.int_request.reset();
     io.waitcnt.reset();
     io.haltcnt.reset();
 }
@@ -59,19 +57,6 @@ void ARM::run(int cycles)
     }
 }
 
-void ARM::request(Interrupt intr)
-{
-    io.int_request |= static_cast<uint>(intr);
-
-    if (io.int_enabled & io.int_request)
-    {
-        io.haltcnt = false;
-
-        if (!cpsr.i && io.int_master)
-            interruptHW();
-    }
-}
-
 void ARM::flush()
 {
     if (cpsr.t)
@@ -94,25 +79,32 @@ void ARM::execute()
 {
     //disasm();
 
-    if (cpsr.t)
+    if (!cpsr.i && irqh.requested)
     {
-        u16 instr = pipe[0];
-
-        pipe[0] = pipe[1];
-        pipe[1] = readHalf(pc);
-
-        (this->*instr_thumb[thumbHash(instr)])(instr);
+        interruptHW();
     }
     else
     {
-        u32 instr = pipe[0];
-
-        pipe[0] = pipe[1];
-        pipe[1] = readWord(pc);
-
-        if (cpsr.check(instr >> 28))
+        if (cpsr.t)
         {
-            (this->*instr_arm[armHash(instr)])(instr);
+            u16 instr = pipe[0];
+
+            pipe[0] = pipe[1];
+            pipe[1] = readHalf(pc);
+
+            (this->*instr_thumb[thumbHash(instr)])(instr);
+        }
+        else
+        {
+            u32 instr = pipe[0];
+
+            pipe[0] = pipe[1];
+            pipe[1] = readWord(pc);
+
+            if (cpsr.check(instr >> 28))
+            {
+                (this->*instr_arm[armHash(instr)])(instr);
+            }
         }
     }
     pc.value += cpsr.size();

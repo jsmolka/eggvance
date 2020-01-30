@@ -1,6 +1,6 @@
 #include "keypad.h"
 
-#include "arm/arm.h"
+#include "irqhandler.h"
 #include "platform/inputdevice.h"
 
 Keypad keypad;
@@ -24,8 +24,6 @@ void Keypad::process()
             : (~io.keyinput &  io.keycnt.mask);
 
         if (interrupt)
-        {
-            arm.request(Interrupt::Keypad);
-        }
+            irqh.request(kIrqKeypad);
     }
 }

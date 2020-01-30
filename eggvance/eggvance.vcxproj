@@ -167,6 +167,7 @@
     <ClCompile Include="src\registers\waitcontrol.cpp" />
     <ClCompile Include="src\registers\windowdimension.cpp" />
     <ClCompile Include="src\system\dmacontroller.cpp" />
+    <ClCompile Include="src\system\irqhandler.cpp" />
     <ClCompile Include="src\system\keypad.cpp" />
     <ClCompile Include="src\platform\microclock.cpp" />
     <ClCompile Include="src\mmu\bios.cpp" />
@@ -257,6 +258,7 @@
     <ClInclude Include="src\mmu\gamepak\sram.h" />
     <ClInclude Include="src\mmu\memmap.h" />
     <ClInclude Include="src\mmu\ram.h" />
+    <ClInclude Include="src\system\irqhandler.h" />
     <ClInclude Include="src\system\keypad.h" />
     <ClInclude Include="src\mmu\gamepak\gamepak.h" />
     <ClInclude Include="src\mmu\gamepak\backup.h" />

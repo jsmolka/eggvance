@@ -2,6 +2,7 @@
 
 #include "arm/arm.h"
 #include "mmu/mmu.h"
+#include "system/irqhandler.h"
 
 static constexpr int count_limits[4] = { 
     0x04000, 
@@ -85,15 +86,8 @@ void DMA::run(int& cycles)
     control.enabled = control.repeat;
 
     if (control.irq)
-    {
-        static constexpr Interrupt flags[4] = {
-            Interrupt::DMA0,
-            Interrupt::DMA1,
-            Interrupt::DMA2,
-            Interrupt::DMA3
-        };
-        arm.request(flags[id]);
-    }
+        irqh.request(kIrqDma0 << id);
+
     running = false;
 }
 
