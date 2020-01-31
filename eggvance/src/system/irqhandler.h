@@ -1,8 +1,8 @@
 #pragma once
 
-#include "registers/intmaster.h"
-#include "registers/intenabled.h"
-#include "registers/intrequest.h"
+#include "registers/intrmaster.h"
+#include "registers/intrenable.h"
+#include "registers/intrrequest.h"
 
 enum IRQ
 {
@@ -40,9 +40,9 @@ private:
     u8 read(u32 addr);
     void write(u32 addr, u8 byte);
 
-    IntMaster intr_master;
-    IntEnabled intr_enable;
-    IntRequest intr_request;
+    IntrMaster intr_master;
+    IntrEnable intr_enable;
+    IntrRequest intr_request;
 };
 
 extern IRQHandler irqh;

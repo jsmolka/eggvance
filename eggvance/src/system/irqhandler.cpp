@@ -31,9 +31,9 @@ u8 IRQHandler::read(u32 addr)
 {
     switch (addr)
     {
-    READ2(REG_IE , intr_enable);
-    READ2(REG_IF , intr_request);
-    READ2(REG_IME, intr_master);
+    READ_HALF_REG(REG_IE , intr_enable);
+    READ_HALF_REG(REG_IF , intr_request);
+    READ_HALF_REG(REG_IME, intr_master);
 
     default:
         EGG_UNREACHABLE;
@@ -45,9 +45,9 @@ void IRQHandler::write(u32 addr, u8 byte)
 {
     switch (addr)
     {
-    WRITE2(REG_IE , intr_enable);
-    WRITE2(REG_IF , intr_request);
-    WRITE2(REG_IME, intr_master);
+    WRITE_HALF_REG(REG_IE , intr_enable);
+    WRITE_HALF_REG(REG_IF , intr_request);
+    WRITE_HALF_REG(REG_IME, intr_master);
 
     default:
         EGG_UNREACHABLE;

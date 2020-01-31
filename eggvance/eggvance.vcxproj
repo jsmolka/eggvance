@@ -159,8 +159,8 @@
     <ClCompile Include="src\registers\dmacontrol.cpp" />
     <ClCompile Include="src\registers\dmacount.cpp" />
     <ClCompile Include="src\registers\haltcontrol.cpp" />
-    <ClCompile Include="src\registers\intmaster.cpp" />
-    <ClCompile Include="src\registers\intrequest.cpp" />
+    <ClCompile Include="src\registers\intrmaster.cpp" />
+    <ClCompile Include="src\registers\intrrequest.cpp" />
     <ClCompile Include="src\registers\keycontrol.cpp" />
     <ClCompile Include="src\registers\timercontrol.cpp" />
     <ClCompile Include="src\registers\timerdata.cpp" />
@@ -181,7 +181,7 @@
     <ClCompile Include="src\mmu\mmu.cpp" />
     <ClCompile Include="src\registers\bgcontrol.cpp" />
     <ClCompile Include="src\registers\bgoffset.cpp" />
-    <ClCompile Include="src\registers\intenabled.cpp" />
+    <ClCompile Include="src\registers\intrenable.cpp" />
     <ClCompile Include="src\registers\keyinput.cpp" />
     <ClCompile Include="src\registers\mosaic.cpp" />
     <ClCompile Include="src\registers\vcount.cpp" />
@@ -240,8 +240,8 @@
     <ClInclude Include="src\registers\dmacontrol.h" />
     <ClInclude Include="src\registers\dmacount.h" />
     <ClInclude Include="src\registers\haltcontrol.h" />
-    <ClInclude Include="src\registers\intmaster.h" />
-    <ClInclude Include="src\registers\intrequest.h" />
+    <ClInclude Include="src\registers\intrmaster.h" />
+    <ClInclude Include="src\registers\intrrequest.h" />
     <ClInclude Include="src\registers\keycontrol.h" />
     <ClInclude Include="src\registers\macros.h" />
     <ClInclude Include="src\registers\register.h" />
@@ -267,7 +267,7 @@
     <ClInclude Include="src\mmu\mmu.h" />
     <ClInclude Include="src\registers\bgcontrol.h" />
     <ClInclude Include="src\registers\bgoffset.h" />
-    <ClInclude Include="src\registers\intenabled.h" />
+    <ClInclude Include="src\registers\intrenable.h" />
     <ClInclude Include="src\registers\keyinput.h" />
     <ClInclude Include="src\registers\mosaic.h" />
     <ClInclude Include="src\registers\vcount.h" />

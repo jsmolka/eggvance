@@ -11,3 +11,29 @@
 #define WRITE1(label, reg) CASE1(label): reg.write(addr - label, byte); break
 #define WRITE2(label, reg) CASE2(label): reg.write(addr - label, byte); break
 #define WRITE4(label, reg) CASE4(label): reg.write(addr - label, byte); break
+
+#define READ_BYTE_REG(label, reg)               \
+    case label + 0: return reg.read<0>()
+
+#define READ_HALF_REG(label, reg)               \
+    case label + 0: return reg.read<0>();       \
+    case label + 1: return reg.read<1>()
+
+#define READ_WORD_REG(label, reg)               \
+    case label + 0: return reg.read<0>();       \
+    case label + 1: return reg.read<1>();       \
+    case label + 2: return reg.read<2>();       \
+    case label + 3: return reg.read<3>()
+
+#define WRITE_BYTE_REG(label, reg)              \
+    case label + 0: reg.write<0>(byte); break
+
+#define WRITE_HALF_REG(label, reg)              \
+    case label + 0: reg.write<0>(byte); break;  \
+    case label + 1: reg.write<1>(byte); break
+
+#define WRITE_WORD_REG(label, reg)              \
+    case label + 0: reg.write<0>(byte); break;  \
+    case label + 1: reg.write<1>(byte); break;  \
+    case label + 2: reg.write<2>(byte); break;  \
+    case label + 3: reg.write<3>(byte); break
