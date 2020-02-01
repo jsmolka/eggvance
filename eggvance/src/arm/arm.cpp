@@ -23,10 +23,9 @@ void ARM::reset()
 
     Registers::reset();
 
-    flush();
+    flushWord();
 
-    pc.value += 4;
-    pc.onWrite({ this, &ARM::flush });
+    pc += 4;
 
     io.waitcnt.reset();
     io.haltcnt.reset();
@@ -60,19 +59,25 @@ void ARM::run(int cycles)
 void ARM::flush()
 {
     if (cpsr.t)
-    {
-        pc.value &= ~0x1;
-        pipe[0] = readHalf(pc + 0);
-        pipe[1] = readHalf(pc + 2);
-        pc.value += 2;
-    }
+        flushHalf();
     else
-    {
-        pc.value &= ~0x3;
-        pipe[0] = readWord(pc + 0);
-        pipe[1] = readWord(pc + 4);
-        pc.value += 4;
-    }
+        flushWord();
+}
+
+void ARM::flushHalf()
+{
+    pc &= ~0x1;
+    pipe[0] = readHalf(pc + 0);
+    pipe[1] = readHalf(pc + 2);
+    pc += 2;
+}
+
+void ARM::flushWord()
+{
+    pc &= ~0x3;
+    pipe[0] = readWord(pc + 0);
+    pipe[1] = readWord(pc + 4);
+    pc += 4;
 }
 
 void ARM::execute()
@@ -107,7 +112,7 @@ void ARM::execute()
             }
         }
     }
-    pc.value += cpsr.size();
+    pc += cpsr.size();
 }
 
 void ARM::disasm()
@@ -167,6 +172,8 @@ void ARM::interrupt(u32 pc, u32 lr, PSR::Mode mode)
 
     this->lr = lr;
     this->pc = pc;
+
+    flushWord();
 }
 
 void ARM::interruptHW()

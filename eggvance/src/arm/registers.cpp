@@ -8,8 +8,7 @@
 
 void Registers::reset()
 {
-    std::fill_n(regs, 16, GPR());
-
+    std::memset(regs    , 0, sizeof(regs));
     std::memset(bank_all, 0, sizeof(bank_all));
     std::memset(bank_fiq, 0, sizeof(bank_fiq));
 

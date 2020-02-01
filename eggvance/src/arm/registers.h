@@ -1,6 +1,5 @@
 #pragma once
 
-#include "gpr.h"
 #include "psr.h"
 
 class Registers
@@ -8,13 +7,20 @@ class Registers
 public:
     void reset();
 
-    GPR regs[16];
+    union
+    {
+        struct
+        {
+            u32 gprs[13];
+            u32 sp;
+            u32 lr;
+            u32 pc;
+        };
+        u32 regs[16];
+    };
+
     PSR cpsr;
     PSR spsr;
-
-    GPR& sp = regs[13];
-    GPR& lr = regs[14];
-    GPR& pc = regs[15];
 
 protected:
     void switchMode(PSR::Mode mode);

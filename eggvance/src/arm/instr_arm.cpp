@@ -12,6 +12,7 @@ void ARM::Arm_BranchExchange(u32 instr)
 
     cpsr.t = addr & 0x1;
     pc = addr;
+    flush();
 }
 
 void ARM::Arm_BranchLink(u32 instr)
@@ -25,6 +26,7 @@ void ARM::Arm_BranchLink(u32 instr)
     offset <<= 2;
 
     pc += offset;
+    flushWord();
 }
 
 void ARM::Arm_DataProcessing(u32 instr)
@@ -55,7 +57,7 @@ void ARM::Arm_DataProcessing(u32 instr)
     int opcode = bits<21, 4>(instr);
     int imm_op = bits<25, 1>(instr);
 
-    GPR& dst = regs[rd];
+    u32& dst = regs[rd];
     u32  op1 = regs[rn];
     u32  op2 = 0;
 
@@ -125,6 +127,9 @@ void ARM::Arm_DataProcessing(u32 instr)
         EGG_UNREACHABLE;
         break;
     }
+
+    if (rd == 15)
+        flush();
 }
 
 void ARM::Arm_StatusTransfer(u32 instr)
@@ -191,7 +196,7 @@ void ARM::Arm_Multiply(u32 instr)
     u32  op1 = regs[rm];
     u32  op2 = regs[rs];
     u32  op3 = regs[rn];
-    GPR& dst = regs[rd];
+    u32& dst = regs[rd];
 
     dst = op1 * op2;
     if (accumulate)
@@ -216,8 +221,8 @@ void ARM::Arm_MultiplyLong(u32 instr)
 
     u64  op1  = regs[rm];
     u64  op2  = regs[rs];
-    GPR& dstl = regs[rdl];
-    GPR& dsth = regs[rdh];
+    u32& dstl = regs[rdl];
+    u32& dsth = regs[rdh];
 
     if (sign)
     {
@@ -271,7 +276,7 @@ void ARM::Arm_SingleDataTransfer(u32 instr)
 
     writeback |= !pre_index;
 
-    GPR& dst = regs[rd];
+    u32& dst = regs[rd];
     u32 addr = regs[rn];
 
     u32 offset = 0;
@@ -307,6 +312,9 @@ void ARM::Arm_SingleDataTransfer(u32 instr)
         dst = byte
             ? readByte(addr)
             : readWordRotated(addr);
+
+        if (rd == 15)
+            flushWord();
 
         idle();
     }
@@ -350,7 +358,7 @@ void ARM::Arm_HalfSignedDataTransfer(u32 instr)
 
     writeback |= !pre_index;
 
-    GPR& dst = regs[rd];
+    u32& dst = regs[rd];
     u32 addr = regs[rn];
 
     u32 offset = 0;
@@ -392,6 +400,10 @@ void ARM::Arm_HalfSignedDataTransfer(u32 instr)
             EGG_UNREACHABLE;
             break;
         }
+
+        if (rd == 15)
+            flushWord();
+
         idle();
     }
     else
@@ -455,6 +467,10 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
                 regs[x] = readWord(addr);
                 addr += 4 * pre_index ^ 0x4;
             }
+
+            if (rlist & (1 << 15))
+                flushWord();
+
             idle();
         }
         else
@@ -484,6 +500,7 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
         if (load)
         {
             pc = readWord(addr);
+            flushWord();
         }
         else
         {
@@ -528,7 +545,7 @@ void ARM::Arm_SingleDataSwap(u32 instr)
     int byte = bits<22, 1>(instr);
 
     u32  src = regs[rm];
-    GPR& dst = regs[rd];
+    u32& dst = regs[rd];
     u32 addr = regs[rn];
 
     if (byte)
