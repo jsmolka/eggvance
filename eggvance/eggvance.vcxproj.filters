@@ -186,12 +186,6 @@
     <ClCompile Include="src\common\input.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\arm\instr_arm.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\arm\instr_thumb.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\mmu\bios_data.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -232,6 +226,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\registers\intrenable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\arm\instr_thumb.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\arm\instr_arm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -482,6 +482,9 @@
     <ClInclude Include="src\registers\intrenable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\arm\util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="eggvance.rc">
@@ -491,6 +494,8 @@
   <ItemGroup>
     <None Include="eggvance.toml" />
     <None Include="icon\icon.ase" />
+    <None Include="src\arm\lut_arm.py" />
+    <None Include="src\arm\lut_thumb.py" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />

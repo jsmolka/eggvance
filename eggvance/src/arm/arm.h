@@ -24,10 +24,10 @@ public:
 private:
     enum class Shift
     {
-        LSL = 0b00,
-        LSR = 0b01,
-        ASR = 0b10,
-        ROR = 0b11
+        Lsl = 0b00,
+        Lsr = 0b01,
+        Asr = 0b10,
+        Ror = 0b11
     };
 
     bool isSequential(u32 addr) const;
@@ -88,27 +88,43 @@ private:
     void Arm_Undefined(u32 instr);
     void Arm_GenerateLut();
 
+    template<uint amount, uint opcode>
     void Thumb_MoveShiftedRegister(u16 instr);
+    template<uint rn, uint opcode>
     void Thumb_AddSubtract(u16 instr);
+    template<uint rd, uint opcode>
     void Thumb_ImmediateOperations(u16 instr);
-    void Thumb_ALUOperations(u16 instr);
+    template<uint opcode>
+    void Thumb_AluOperations(u16 instr);
+    template<uint hs, uint hd, uint opcode>
     void Thumb_HighRegisterOperations(u16 instr);
-    void Thumb_LoadPCRelative(u16 instr);
+    template<uint rd>
+    void Thumb_LoadPcRelative(u16 instr);
+    template<uint ro, uint opcode>
     void Thumb_LoadStoreRegisterOffset(u16 instr);
+    template<uint ro, uint opcode>
     void Thumb_LoadStoreByteHalf(u16 instr);
+    template<uint amount, uint opcode>
     void Thumb_LoadStoreImmediateOffset(u16 instr);
+    template<uint amount, uint load>
     void Thumb_LoadStoreHalf(u16 instr);
-    void Thumb_LoadStoreSPRelative(u16 instr);
+    template<uint rd, uint load>
+    void Thumb_LoadStoreSpRelative(u16 instr);
+    template<uint rd, uint use_sp>
     void Thumb_LoadRelativeAddress(u16 instr);
-    void Thumb_AddOffsetSP(u16 instr);
+    template<uint sign>
+    void Thumb_AddOffsetSp(u16 instr);
+    template<uint rbit, uint pop>
     void Thumb_PushPopRegisters(u16 instr);
+    template<uint rb, uint load>
     void Thumb_LoadStoreMultiple(u16 instr);
+    template<uint condition>
     void Thumb_ConditionalBranch(u16 instr);
     void Thumb_SoftwareInterrupt(u16 instr);
     void Thumb_UnconditionalBranch(u16 instr);
+    template<uint second>
     void Thumb_LongBranchLink(u16 instr);
     void Thumb_Undefined(u16 instr);
-    void Thumb_GenerateLut();
 
     int remaining;
     u32 last_addr;
@@ -120,7 +136,7 @@ private:
     } io;
 
     std::array<void(ARM::*)(u32), 0x1000> instr_arm;
-    std::array<void(ARM::*)(u16), 0x0100> instr_thumb;
+    static std::array<void(ARM::*)(u16), 1024> instr_thumb;
 };
 
 extern ARM arm;

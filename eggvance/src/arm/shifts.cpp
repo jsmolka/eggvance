@@ -60,14 +60,14 @@ u32 ARM::asr(u32 value, int amount, bool& carry, bool immediate) const
         }
         else
         {
-            carry = value >> 31;
-            value = carry ? 0xFFFFFFFF : 0;
+            value = static_cast<s32>(value) >> 31;
+            carry = value & 0x1;
         }
     }
     else if (immediate)
     {
-        carry = value >> 31;
-        value = carry ? 0xFFFFFFFF : 0;
+        value = static_cast<s32>(value) >> 31;
+        carry = value & 0x1;
     }
     return value;
 }
@@ -91,10 +91,10 @@ u32 ARM::shift(Shift type, u32 value, int amount, bool& carry, bool immediate) c
 {
     switch (type)
     {
-    case Shift::LSL: return lsl(value, amount, carry);
-    case Shift::LSR: return lsr(value, amount, carry, immediate);
-    case Shift::ASR: return asr(value, amount, carry, immediate);
-    case Shift::ROR: return ror(value, amount, carry, immediate);
+    case Shift::Lsl: return lsl(value, amount, carry);
+    case Shift::Lsr: return lsr(value, amount, carry, immediate);
+    case Shift::Asr: return asr(value, amount, carry, immediate);
+    case Shift::Ror: return ror(value, amount, carry, immediate);
 
     default:
         EGG_UNREACHABLE;

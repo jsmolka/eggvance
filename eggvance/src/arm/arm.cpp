@@ -14,7 +14,6 @@ ARM arm;
 ARM::ARM()
 {
     Arm_GenerateLut();
-    Thumb_GenerateLut();
 }
 
 void ARM::reset()
