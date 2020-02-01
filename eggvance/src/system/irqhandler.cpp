@@ -7,33 +7,40 @@
 
 IRQHandler irqh;
 
+IRQHandler::IRQHandler()
+{
+    requested = false;
+}
+
 void IRQHandler::reset()
 {
     *this = IRQHandler();
 }
 
-void IRQHandler::request(uint irq)
+void IRQHandler::request(IRQ irq)
 {
-    intr_request |= irq;
+    io.intr_request |= static_cast<uint>(irq);
 
     update();
 }
 
 void IRQHandler::update()
 {
-    requested = intr_enable & intr_request && intr_master;
+    requested = io.intr_enable & io.intr_request;
 
-    if (intr_enable & intr_request)
+    if (requested)
         arm.io.haltcnt = false;
+
+    requested &= io.intr_master;
 }
 
 u8 IRQHandler::read(u32 addr)
 {
     switch (addr)
     {
-    READ_HALF_REG(REG_IE , intr_enable);
-    READ_HALF_REG(REG_IF , intr_request);
-    READ_HALF_REG(REG_IME, intr_master);
+    READ_HALF_REG(REG_IE , io.intr_enable);
+    READ_HALF_REG(REG_IF , io.intr_request);
+    READ_HALF_REG(REG_IME, io.intr_master);
 
     default:
         EGG_UNREACHABLE;
@@ -45,9 +52,9 @@ void IRQHandler::write(u32 addr, u8 byte)
 {
     switch (addr)
     {
-    WRITE_HALF_REG(REG_IE , intr_enable);
-    WRITE_HALF_REG(REG_IF , intr_request);
-    WRITE_HALF_REG(REG_IME, intr_master);
+    WRITE_HALF_REG(REG_IE , io.intr_enable);
+    WRITE_HALF_REG(REG_IF , io.intr_request);
+    WRITE_HALF_REG(REG_IME, io.intr_master);
 
     default:
         EGG_UNREACHABLE;

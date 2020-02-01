@@ -24,6 +24,6 @@ void Keypad::process()
             : (~io.keyinput &  io.keycnt.mask);
 
         if (interrupt)
-            irqh.request(kIrqKeypad);
+            irqh.request(IRQ::Keypad);
     }
 }

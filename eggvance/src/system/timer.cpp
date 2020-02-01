@@ -30,7 +30,9 @@ void Timer::run(uint cycles)
             next->run(counter / overflow);
 
         if (control.irq)
-            irqh.request(kIrqTimer0 << id);
+            irqh.request(
+                static_cast<IRQ>(
+                    static_cast<uint>(IRQ::Timer) << id));
 
         counter %= overflow;
         reload   = data.reload;
