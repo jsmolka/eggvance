@@ -427,9 +427,9 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
     u32 addr = regs[rn];
     u32 base = regs[rn];
 
-    uint mode = cpsr.mode;
+    PSR::Mode mode = cpsr.mode;
     if (user_mode)
-        switchMode(PSR::kModeUsr);
+        switchMode(PSR::Mode::USR);
 
     if (rlist != 0)
     {

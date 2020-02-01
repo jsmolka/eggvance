@@ -7,11 +7,6 @@
 
 IRQHandler irqh;
 
-IRQHandler::IRQHandler()
-{
-    requested = false;
-}
-
 void IRQHandler::reset()
 {
     *this = IRQHandler();

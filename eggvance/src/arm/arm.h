@@ -9,17 +9,15 @@
 class ARM : public Registers
 {
 public:
+    friend class DMA;
+    friend class IO;
+    friend class IRQHandler;
+
     ARM();
 
     void reset();
 
     void run(int cycles);
-
-    struct IO
-    {
-        WaitControl waitcnt;
-        HaltControl haltcnt;
-    } io;
 
     u32 pipe[2];
 
@@ -70,7 +68,6 @@ private:
     void interrupt(u32 pc, u32 lr, PSR::Mode mode);
     void interruptHW();
     void interruptSW();
-    bool interrupted() const;
 
     void Arm_BranchExchange(u32 instr);
     void Arm_BranchLink(u32 instr);
@@ -113,6 +110,12 @@ private:
 
     int remaining;
     u32 last_addr;
+
+    struct IO
+    {
+        WaitControl waitcnt;
+        HaltControl haltcnt;
+    } io;
 
     std::array<void(ARM::*)(u32), 0x1000> instr_arm;
     std::array<void(ARM::*)(u16), 0x0100> instr_thumb;

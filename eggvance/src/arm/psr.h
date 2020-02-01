@@ -4,37 +4,56 @@
 #include "common/integer.h"
 #include "common/macros.h"
 
-class PSR
+enum class Condition
 {
-public:
-    enum Mode : uint
+    EQ = 0x0,
+    NE = 0x1,
+    CS = 0x2,
+    CC = 0x3,
+    MI = 0x4,
+    PL = 0x5,
+    VS = 0x6,
+    VC = 0x7,
+    HI = 0x8,
+    LS = 0x9,
+    GE = 0xA,
+    LT = 0xB,
+    GT = 0xC,
+    LE = 0xD,
+    AL = 0xE,
+    NV = 0xF
+};
+
+struct PSR
+{
+    enum class Mode : char
     {
-        kModeUsr = 0b10000,
-        kModeFiq = 0b10001,
-        kModeIrq = 0b10010,
-        kModeSvc = 0b10011,
-        kModeAbt = 0b10111,
-        kModeSys = 0b11111,
-        kModeUnd = 0b11011
+        USR = 0b10000,
+        FIQ = 0b10001,
+        IRQ = 0b10010,
+        SVC = 0b10011,
+        ABT = 0b10111,
+        SYS = 0b11111,
+        UND = 0b11011
     };
 
     inline PSR& operator=(u32 value)
     {
-        mode = bits< 0, 5>(value);
-        t    = bits< 5, 1>(value);
-        f    = bits< 6, 1>(value);
-        i    = bits< 7, 1>(value);
-        v    = bits<28, 1>(value);
-        c    = bits<29, 1>(value);
-        z    = bits<30, 1>(value);
-        n    = bits<31, 1>(value);
+        m = static_cast<Mode>(bits<0, 5>(value));
+        t = bits< 5, 1>(value);
+        f = bits< 6, 1>(value);
+        i = bits< 7, 1>(value);
+        v = bits<28, 1>(value);
+        c = bits<29, 1>(value);
+        z = bits<30, 1>(value);
+        n = bits<31, 1>(value);
 
         return *this;
     }
 
     inline operator u32() const
     {
-        return mode
+        return static_cast<uint>(m)
             | (t <<  5)
             | (f <<  6)
             | (i <<  7)
@@ -49,26 +68,26 @@ public:
         return 2 << (t ^ 0x1);
     }
 
-    inline bool check(uint condition) const
+    inline bool check(Condition condition) const
     {
         switch (condition)
         {
-        case kConditionEQ: return z;
-        case kConditionNE: return !z;
-        case kConditionCS: return c;
-        case kConditionCC: return !c;
-        case kConditionMI: return n;
-        case kConditionPL: return !n;
-        case kConditionVS: return v;
-        case kConditionVC: return !v;
-        case kConditionHI: return c && !z;
-        case kConditionLS: return !c || z;
-        case kConditionGE: return n == v;
-        case kConditionLT: return n != v;
-        case kConditionGT: return !z && (n == v);
-        case kConditionLE: return z || (n != v);
-        case kConditionAL: return true;
-        case kConditionNV: return false;
+        case Condition::EQ: return z;
+        case Condition::NE: return !z;
+        case Condition::CS: return c;
+        case Condition::CC: return !c;
+        case Condition::MI: return n;
+        case Condition::PL: return !n;
+        case Condition::VS: return v;
+        case Condition::VC: return !v;
+        case Condition::HI: return c && !z;
+        case Condition::LS: return !c || z;
+        case Condition::GE: return n == v;
+        case Condition::LT: return n != v;
+        case Condition::GT: return !z && (n == v);
+        case Condition::LE: return z || (n != v);
+        case Condition::AL: return true;
+        case Condition::NV: return false;
 
         default:
             EGG_UNREACHABLE;
@@ -76,33 +95,12 @@ public:
         }
     }
 
-    uint mode;
-    uint t;
-    uint f;
-    uint i;
-    uint v;
-    uint c;
-    uint z;
-    uint n;
-
-private:
-    enum Condition : uint
-    {
-        kConditionEQ = 0x0,
-        kConditionNE = 0x1,
-        kConditionCS = 0x2,
-        kConditionCC = 0x3,
-        kConditionMI = 0x4,
-        kConditionPL = 0x5,
-        kConditionVS = 0x6,
-        kConditionVC = 0x7,
-        kConditionHI = 0x8,
-        kConditionLS = 0x9,
-        kConditionGE = 0xA,
-        kConditionLT = 0xB,
-        kConditionGT = 0xC,
-        kConditionLE = 0xD,
-        kConditionAL = 0xE,
-        kConditionNV = 0xF
-    };
+    Mode m = Mode::SYS;
+    char t = 0;
+    char f = 0;
+    char i = 0;
+    char v = 0;
+    char c = 0;
+    char z = 0;
+    char n = 0;
 };

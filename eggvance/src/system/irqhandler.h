@@ -19,12 +19,10 @@ class IRQHandler
 public:
     friend class IO;
 
-    IRQHandler();
-
     void reset();
     void request(IRQ irq);
 
-    bool requested;
+    bool requested = false;
 
 private:
     void update();

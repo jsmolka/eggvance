@@ -17,7 +17,7 @@ public:
     GPR& pc = regs[15];
 
 protected:
-    void switchMode(uint mode);
+    void switchMode(PSR::Mode mode);
 
 private:
     enum Bank : uint
@@ -30,7 +30,7 @@ private:
         kBankUnd = 5
     };
 
-    static Bank modeToBank(uint mode);
+    static Bank modeToBank(PSR::Mode mode);
 
     u32 bank_all[6][3];
     u32 bank_fiq[2][5];
