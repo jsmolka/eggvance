@@ -33,7 +33,11 @@ u32 ARM::lsr(u32 value, int amount, bool& carry, bool immediate) const
         }
         else
         {
-            carry = 0;
+            if (amount == 32)
+                carry = value >> 31;
+            else
+                carry = 0;
+
             value = 0;
         }
     }
