@@ -36,7 +36,7 @@ void Registers::reset()
 
 void Registers::switchMode(PSR::Mode mode)
 {
-    Bank bank_old = modeToBank(cpsr.mode);
+    Bank bank_old = modeToBank(cpsr.m);
     Bank bank_new = modeToBank(mode);
 
     if (bank_old != bank_new)
@@ -67,7 +67,7 @@ void Registers::switchMode(PSR::Mode mode)
             regs[12] = bank_fiq[fiq_new][4];
         }
     }
-    cpsr.mode = mode;
+    cpsr.m = mode;
 }
 
 Registers::Bank Registers::modeToBank(PSR::Mode mode)

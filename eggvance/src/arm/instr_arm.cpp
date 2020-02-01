@@ -96,7 +96,7 @@ void ARM::Arm_DataProcessing(u32 instr)
     if (rd == 15 && flags)
     {
         PSR spsr = this->spsr;
-        switchMode(spsr.mode);
+        switchMode(spsr.m);
         cpsr = spsr;
 
         flags = false;
@@ -427,7 +427,7 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
     u32 addr = regs[rn];
     u32 base = regs[rn];
 
-    PSR::Mode mode = cpsr.mode;
+    PSR::Mode mode = cpsr.m;
     if (user_mode)
         switchMode(PSR::Mode::USR);
 
