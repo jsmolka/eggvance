@@ -44,10 +44,10 @@ void ARM::Thumb_AddSubtract(u16 instr)
 
     switch (static_cast<Opcode>(opcode))
     {
-    case Opcode::AddReg: dst = util::add<true>(src, regs[rn], cpsr); break;
-    case Opcode::SubReg: dst = util::sub<true>(src, regs[rn], cpsr); break;
-    case Opcode::AddImm: dst = util::add<true>(src, rn, cpsr); break;
-    case Opcode::SubImm: dst = util::sub<true>(src, rn, cpsr); break;
+    case Opcode::AddImm: dst = util::add(src, rn, cpsr); break;
+    case Opcode::SubImm: dst = util::sub(src, rn, cpsr); break;
+    case Opcode::AddReg: dst = util::add(src, regs[rn], cpsr); break;
+    case Opcode::SubReg: dst = util::sub(src, regs[rn], cpsr); break;
 
     default:
         EGG_UNREACHABLE;
@@ -69,13 +69,14 @@ void ARM::Thumb_ImmediateOperations(u16 instr)
     uint offset = bits<0, 8>(instr);
 
     u32& dst = regs[rd];
+    u32  src = regs[rd];
 
     switch (static_cast<Opcode>(opcode))
     {
-    case Opcode::Mov: dst = util::log<true>(     offset, cpsr); break;
-    case Opcode::Cmp:       util::sub<true>(dst, offset, cpsr); break;
-    case Opcode::Add: dst = util::add<true>(dst, offset, cpsr); break;
-    case Opcode::Sub: dst = util::sub<true>(dst, offset, cpsr); break;
+    case Opcode::Mov: dst = util::log(     offset, cpsr); break;
+    case Opcode::Cmp:       util::sub(src, offset, cpsr); break;
+    case Opcode::Add: dst = util::add(src, offset, cpsr); break;
+    case Opcode::Sub: dst = util::sub(src, offset, cpsr); break;
 
     default:
         EGG_UNREACHABLE;
@@ -114,24 +115,24 @@ void ARM::Thumb_AluOperations(u16 instr)
 
     switch (static_cast<Opcode>(opcode))
     {
-    case Opcode::And: dst = util::log<true>(dst &  src, cpsr); break;
-    case Opcode::Orr: dst = util::log<true>(dst |  src, cpsr); break;
-    case Opcode::Eor: dst = util::log<true>(dst ^  src, cpsr); break;
-    case Opcode::Bic: dst = util::log<true>(dst & ~src, cpsr); break;
-    case Opcode::Mvn: dst = util::log<true>(      ~src, cpsr); break;
-    case Opcode::Tst:       util::log<true>(dst &  src, cpsr); break;
     case Opcode::Lsl: dst = util::lslThumbReg(dst, src, cpsr); idle(); break;
     case Opcode::Lsr: dst = util::lsrThumbReg(dst, src, cpsr); idle(); break;
     case Opcode::Asr: dst = util::asrThumbReg(dst, src, cpsr); idle(); break;
     case Opcode::Ror: dst = util::rorThumbReg(dst, src, cpsr); idle(); break;
-    case Opcode::Adc: dst = util::adc<true>(dst, src, cpsr); break;
-    case Opcode::Sbc: dst = util::sbc<true>(dst, src, cpsr); break;
-    case Opcode::Neg: dst = util::sub<true>(  0, src, cpsr); break;
-    case Opcode::Cmp:       util::sub<true>(dst, src, cpsr); break;
-    case Opcode::Cmn:       util::add<true>(dst, src, cpsr); break;
+    case Opcode::And: dst = util::log(dst &  src, cpsr); break;
+    case Opcode::Orr: dst = util::log(dst |  src, cpsr); break;
+    case Opcode::Eor: dst = util::log(dst ^  src, cpsr); break;
+    case Opcode::Bic: dst = util::log(dst & ~src, cpsr); break;
+    case Opcode::Mvn: dst = util::log(      ~src, cpsr); break;
+    case Opcode::Tst:       util::log(dst &  src, cpsr); break;
+    case Opcode::Adc: dst = util::adc(dst,   src, cpsr); break;
+    case Opcode::Sbc: dst = util::sbc(dst,   src, cpsr); break;
+    case Opcode::Neg: dst = util::sub(  0,   src, cpsr); break;
+    case Opcode::Cmp:       util::sub(dst,   src, cpsr); break;
+    case Opcode::Cmn:       util::add(dst,   src, cpsr); break;
     case Opcode::Mul:
         booth(dst, true);
-        dst = util::log<true>(dst * src, cpsr);
+        dst = util::log(dst * src, cpsr);
         break;
 
     default:
@@ -175,7 +176,7 @@ void ARM::Thumb_HighRegisterOperations(u16 instr)
         break;
 
     case Opcode::Cmp:
-        util::sub<true>(dst, src, cpsr);
+        util::sub(dst, src, cpsr);
         break;
 
     case Opcode::Bx:
@@ -357,6 +358,7 @@ void ARM::Thumb_LoadStoreSpRelative(u16 instr)
     uint offset = bits<0, 8>(instr);
 
     u32& dst = regs[rd];
+
     u32 addr = sp + (offset << 2);
 
     if (load)

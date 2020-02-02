@@ -330,14 +330,11 @@ namespace util
         return value;
     }
 
-    template<bool flags>
     inline u32 log(u32 value, PSR& psr)
     {
-        if (flags)
-        {
-            psr.z = zFlag(value);
-            psr.n = nFlag(value);
-        }
+        psr.z = zFlag(value);
+        psr.n = nFlag(value);
+
         return value;
     }
 
@@ -351,18 +348,15 @@ namespace util
         return value;
     }
 
-    template<bool flags>
     inline u32 add(u32 op1, u32 op2, PSR& psr)
     {
         u32 res = op1 + op2;
 
-        if (flags)
-        {
-            psr.z = zFlag(res);
-            psr.n = nFlag(res);
-            psr.c = cFlagAdd(op1, op2);
-            psr.v = vFlagAdd(op1, op2, res);
-        }
+        psr.z = zFlag(res);
+        psr.n = nFlag(res);
+        psr.c = cFlagAdd(op1, op2);
+        psr.v = vFlagAdd(op1, op2, res);
+
         return res;
     }
 
@@ -380,18 +374,15 @@ namespace util
         return res;
     }
 
-    template<bool flags>
     inline u32 sub(u32 op1, u32 op2, PSR& psr)
     {
         u32 res = op1 - op2;
 
-        if (flags)
-        {
-            psr.z = zFlag(res);
-            psr.n = nFlag(res);
-            psr.c = cFlagSub(op1, op2);
-            psr.v = vFlagSub(op1, op2, res);
-        }
+        psr.z = zFlag(res);
+        psr.n = nFlag(res);
+        psr.c = cFlagSub(op1, op2);
+        psr.v = vFlagSub(op1, op2, res);
+
         return res;
     }
 
@@ -409,19 +400,16 @@ namespace util
         return res;
     }
 
-    template<bool flags>
     inline u32 adc(u32 op1, u32 op2, PSR& psr)
     {
         u64 opc = static_cast<u64>(op2) + psr.c;
         u32 res = static_cast<u32>(op1 + opc);
 
-        if (flags)
-        {
-            psr.z = zFlag(res);
-            psr.n = nFlag(res);
-            psr.c = cFlagAdd(op1, opc);
-            psr.v = vFlagAdd(op1, op2, res);
-        }
+        psr.z = zFlag(res);
+        psr.n = nFlag(res);
+        psr.c = cFlagAdd(op1, opc);
+        psr.v = vFlagAdd(op1, op2, res);
+
         return res;
     }
 
@@ -440,19 +428,16 @@ namespace util
         return res;
     }
 
-    template<bool flags>
     inline u32 sbc(u32 op1, u32 op2, PSR& psr)
     {
         u64 opc = static_cast<u64>(op2) - psr.c + 1;
         u32 res = static_cast<u32>(op1 - opc);
 
-        if (flags)
-        {
-            psr.z = zFlag(res);
-            psr.n = nFlag(res);
-            psr.c = cFlagSub(op1, opc);
-            psr.v = vFlagSub(op1, op2, res);
-        }
+        psr.z = zFlag(res);
+        psr.n = nFlag(res);
+        psr.c = cFlagSub(op1, opc);
+        psr.v = vFlagSub(op1, op2, res);
+
         return res;
     }
 
