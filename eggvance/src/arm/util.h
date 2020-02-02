@@ -3,7 +3,6 @@
 #include "psr.h"
 #include "common/bits.h"
 #include "common/integer.h"
-#include "common/macros.h"
 
 namespace util
 {
@@ -37,18 +36,18 @@ namespace util
         return ((op1 ^ op2) & (op2 ^ res ^ (1 << 31))) >> 31;
     }
 
-    inline u32 lslArm(u32 value, u32 amount, bool c_flag, PSR& psr)
+    inline u32 lslArm(u32 value, u32 amount, bool flags, PSR& psr)
     {
         if (amount != 0)
         {
             if (amount < 32)
             {
-                if (c_flag) psr.c = (value << (amount - 1)) >> 31;
+                if (flags) psr.c = (value << (amount - 1)) >> 31;
                 value <<= amount;
             }
             else
             {
-                if (c_flag)
+                if (flags)
                 {
                     if (amount == 32)
                         psr.c = value & 0x1;
@@ -71,8 +70,6 @@ namespace util
                 #pragma warning(suppress:4293)
                 psr.c = (value << (amount - 1)) >> 31;
                 value <<= amount;
-                psr.z = zFlag(value);
-                psr.n = nFlag(value);
             }
             else
             {
@@ -82,15 +79,12 @@ namespace util
                     psr.c = 0;
 
                 value = 0;
-                psr.z = 1;
-                psr.n = 0;
             }
         }
-        else
-        {
-            psr.z = zFlag(value);
-            psr.n = nFlag(value);
-        }
+
+        psr.z = zFlag(value);
+        psr.n = nFlag(value);
+
         return value;
     }
 
@@ -102,8 +96,6 @@ namespace util
             {
                 psr.c = (value << (amount - 1)) >> 31;
                 value <<= amount;
-                psr.z = zFlag(value);
-                psr.n = nFlag(value);
             }
             else
             {
@@ -113,44 +105,40 @@ namespace util
                     psr.c = 0;
 
                 value = 0;
-                psr.z = 1;
-                psr.n = 0;
             }
         }
-        else
-        {
-            psr.z = zFlag(value);
-            psr.n = nFlag(value);
-        }
+
+        psr.z = zFlag(value);
+        psr.n = nFlag(value);
+
         return value;
     }
 
     template<bool immediate>
-    inline u32 lsrArm(u32 value, u32 amount, bool c_flag, PSR& psr)
+    inline u32 lsrArm(u32 value, u32 amount, bool flags, PSR& psr)
     {
         if (amount != 0)
         {
             if (amount < 32)
             {
-                if (c_flag) psr.c = (value >> (amount - 1)) & 0x1;
+                if (flags) psr.c = (value >> (amount - 1)) & 0x1;
                 value >>= amount;
             }
             else
             {
-                if (c_flag)
+                if (flags)
                 {
                     if (amount == 32)
                         psr.c = value >> 31;
                     else
                         psr.c = 0;
                 }
-
                 value = 0;
             }
         }
         else if (immediate)
         {
-            if (c_flag) psr.c = value >> 31;
+            if (flags) psr.c = value >> 31;
             value = 0;
         }
         return value;
@@ -166,8 +154,6 @@ namespace util
                 #pragma warning(suppress:4293)
                 psr.c = (value >> (amount - 1)) & 0x1;
                 value >>= amount;
-                psr.z = zFlag(value);
-                psr.n = nFlag(value);
             }
             else
             {
@@ -177,17 +163,17 @@ namespace util
                     psr.c = 0;
 
                 value = 0;
-                psr.z = 1;
-                psr.n = 0;
             }
         }
         else
         {
             psr.c = value >> 31;
             value = 0;
-            psr.z = 1;
-            psr.n = 0;
         }
+
+        psr.z = zFlag(value);
+        psr.n = nFlag(value);
+
         return value;
     }
 
@@ -199,8 +185,6 @@ namespace util
             {
                 psr.c = (value >> (amount - 1)) & 0x1;
                 value >>= amount;
-                psr.z = zFlag(value);
-                psr.n = nFlag(value);
             }
             else
             {
@@ -210,38 +194,35 @@ namespace util
                     psr.c = 0;
 
                 value = 0;
-                psr.z = 1;
-                psr.n = 0;
             }
         }
-        else
-        {
-            psr.z = zFlag(value);
-            psr.n = nFlag(value);
-        }
+
+        psr.z = zFlag(value);
+        psr.n = nFlag(value);
+
         return value;
     }
 
     template<bool immediate>
-    inline u32 asrArm(u32 value, u32 amount, bool c_flags, PSR& psr)
+    inline u32 asrArm(u32 value, u32 amount, bool flags, PSR& psr)
     {
         if (amount != 0)
         {
             if (amount < 32)
             {
-                if (c_flags) psr.c = (value >> (amount - 1)) & 0x1;
+                if (flags) psr.c = (value >> (amount - 1)) & 0x1;
                 value = static_cast<s32>(value) >> amount;
             }
             else
             {
                 value = static_cast<s32>(value) >> 31;
-                if (c_flags) psr.c = value & 0x1;
+                if (flags) psr.c = value & 0x1;
             }
         }
         else if (immediate)
         {
             value = static_cast<s32>(value) >> 31;
-            if (c_flags) psr.c = value & 0x1;
+            if (flags) psr.c = value & 0x1;
         }
         return value;
     }
@@ -254,16 +235,16 @@ namespace util
             #pragma warning(suppress:4293)
             psr.c = (value >> (amount - 1)) & 0x1;
             value = static_cast<s32>(value) >> amount;
-            psr.z = zFlag(value);
-            psr.n = nFlag(value);
         }
         else
         {
             value = static_cast<s32>(value) >> 31;
-            psr.z = zFlag(value);
-            psr.n = nFlag(value);
             psr.c = value & 0x1;
         }
+
+        psr.z = zFlag(value);
+        psr.n = nFlag(value);
+
         return value;
     }
 
@@ -275,37 +256,32 @@ namespace util
             {
                 psr.c = (value >> (amount - 1)) & 0x1;
                 value = static_cast<s32>(value) >> amount;
-                psr.z = zFlag(value);
-                psr.n = nFlag(value);
             }
             else
             {
                 value = static_cast<s32>(value) >> 31;
-                psr.z = zFlag(value);
-                psr.n = nFlag(value);
                 psr.c = value & 0x1;
             }
         }
-        else
-        {
-            psr.z = zFlag(value);
-            psr.n = nFlag(value);
-        }
+
+        psr.z = zFlag(value);
+        psr.n = nFlag(value);
+
         return value;
     }
 
     template<bool immediate>
-    inline u32 rorArm(u32 value, u32 amount, bool c_flag, PSR& psr)
+    inline u32 rorArm(u32 value, u32 amount, bool flags, PSR& psr)
     {
         if (amount != 0)
         {
             value = rotateRight(value, amount);
-            if (c_flag) psr.c = value >> 31;
+            if (flags) psr.c = value >> 31;
         }
         else if (immediate)
         {
-            uint c = psr.c;
-            if (c_flag) psr.c = value & 0x1;
+            char c = psr.c;
+            if (flags) psr.c = value & 0x1;
             value = (c << 31) | (value >> 1);
         }
         return value;
@@ -316,15 +292,12 @@ namespace util
         if (amount != 0)
         {
             value = rotateRight(value, amount);
-            psr.z = zFlag(value);
-            psr.n = nFlag(value);
             psr.c = value >> 31;
         }
-        else
-        {
-            psr.z = zFlag(value);
-            psr.n = nFlag(value);
-        }
+
+        psr.z = zFlag(value);
+        psr.n = nFlag(value);
+
         return value;
     }
 
