@@ -58,14 +58,8 @@ void ARM::Arm_DataProcessing(u32 instr)
     u32  op1 = regs[rn];
     u32  op2 = 0;
 
-    if (rd == 15 && flags_)
-    {
-        PSR spsr = this->spsr;
-        switchMode(spsr.m);
-        cpsr = spsr;
-
+    if (rd == 15 == flags_)
         flags = false;
-    }
 
     if (imm_op)
     {
@@ -148,7 +142,15 @@ void ARM::Arm_DataProcessing(u32 instr)
     }
 
     if (rd == 15)
+    {
+        if (flags_)
+        {
+            PSR spsr = this->spsr;
+            switchMode(spsr.m);
+            cpsr = spsr;
+        }
         flush();
+    }
 }
 
 template<uint write, uint use_spsr, uint imm_op>
