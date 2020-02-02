@@ -157,8 +157,7 @@ def decode(x):
 
 
 prefix = "    &ARM::Thumb_"
-template = """
-std::array<void(ARM::*)(u16), 1024> ARM::instr_thumb =
+template = """std::array<void(ARM::*)(u16), 1024> ARM::instr_thumb =
 {{
 {}
 }};

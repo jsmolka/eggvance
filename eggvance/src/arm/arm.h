@@ -13,8 +13,6 @@ public:
     friend class IO;
     friend class IRQHandler;
 
-    ARM();
-
     void reset();
 
     void run(int cycles);
@@ -44,20 +42,6 @@ private:
     u32 readHalfRotated(u32 addr);
     u32 readHalfSigned(u32 addr);
 
-    u32 lsl(u32 value, int amount, bool& carry) const;
-    u32 lsr(u32 value, int amount, bool& carry, bool immediate) const;
-    u32 asr(u32 value, int amount, bool& carry, bool immediate) const;
-    u32 ror(u32 value, int amount, bool& carry, bool immediate) const;
-    u32 shift(Shift type, u32 value, int amount, bool& carry, bool immediate) const;
-
-    u32 logical(u32 value, bool flags);
-    u32 logical(u32 value, bool carry, bool flags);
-
-    u32 add(u32 op1, u32 op2, bool flags);
-    u32 sub(u32 op1, u32 op2, bool flags);
-    u32 adc(u32 op1, u32 op2, bool flags);
-    u32 sbc(u32 op1, u32 op2, bool flags);
-
     void flush();
     void flushHalf();
     void flushWord();
@@ -72,21 +56,29 @@ private:
     void interruptSW();
 
     void Arm_BranchExchange(u32 instr);
+    template<uint link>
     void Arm_BranchLink(u32 instr);
+    template<uint flags, uint opcode, uint imm_op>
     void Arm_DataProcessing(u32 instr);
+    template<uint write, uint use_spsr, uint imm_op>
     void Arm_StatusTransfer(u32 instr);
+    template<uint flags, uint accumulate>
     void Arm_Multiply(u32 instr);
+    template<uint flags, uint accumulate, uint sign>
     void Arm_MultiplyLong(u32 instr);
+    template<uint load, uint writeback, uint byte, uint increment, uint pre_index, uint imm_op>
     void Arm_SingleDataTransfer(u32 instr);
+    template<uint opcode, uint load, uint writeback, uint imm_op, uint increment, uint pre_index>
     void Arm_HalfSignedDataTransfer(u32 instr);
+    template<uint load, uint writeback, uint user_mode, uint increment, uint pre_index>
     void Arm_BlockDataTransfer(u32 instr);
+    template<uint byte>
     void Arm_SingleDataSwap(u32 instr);
     void Arm_SoftwareInterrupt(u32 instr);
     void Arm_CoprocessorDataOperations(u32 instr);
     void Arm_CoprocessorDataTransfers(u32 instr);
     void Arm_CoprocessorRegisterTransfers(u32 instr);
     void Arm_Undefined(u32 instr);
-    void Arm_GenerateLut();
 
     template<uint amount, uint opcode>
     void Thumb_MoveShiftedRegister(u16 instr);
@@ -135,7 +127,7 @@ private:
         HaltControl haltcnt;
     } io;
 
-    std::array<void(ARM::*)(u32), 0x1000> instr_arm;
+    static std::array<void(ARM::*)(u32), 4096> instr_arm;
     static std::array<void(ARM::*)(u16), 1024> instr_thumb;
 };
 

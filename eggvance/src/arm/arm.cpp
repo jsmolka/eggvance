@@ -11,11 +11,6 @@
 
 ARM arm;
 
-ARM::ARM()
-{
-    Arm_GenerateLut();
-}
-
 void ARM::reset()
 {
     remaining = 0;

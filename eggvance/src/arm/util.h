@@ -39,6 +39,30 @@ namespace util
             && nFlag(op2) == nFlag(res);
     }
 
+    inline u32 lslArm(u32 value, u32 amount, bool c_flag, PSR& psr)
+    {
+        if (amount != 0)
+        {
+            if (amount < 32)
+            {
+                if (c_flag) psr.c = (value << (amount - 1)) >> 31;
+                value <<= amount;
+            }
+            else
+            {
+                if (c_flag)
+                {
+                    if (amount == 32)
+                        psr.c = value & 0x1;
+                    else
+                        psr.c = 0;
+                }
+                value = 0;
+            }
+        }
+        return value;
+    }
+
     template<uint amount>
     inline u32 lslThumbImm(u32 value, PSR& psr)
     {
@@ -99,6 +123,37 @@ namespace util
         {
             psr.z = zFlag(value);
             psr.n = nFlag(value);
+        }
+        return value;
+    }
+
+    template<bool immediate>
+    inline u32 lsrArm(u32 value, u32 amount, bool c_flag, PSR& psr)
+    {
+        if (amount != 0)
+        {
+            if (amount < 32)
+            {
+                if (c_flag) psr.c = (value >> (amount - 1)) & 0x1;
+                value >>= amount;
+            }
+            else
+            {
+                if (c_flag)
+                {
+                    if (amount == 32)
+                        psr.c = value >> 31;
+                    else
+                        psr.c = 0;
+                }
+
+                value = 0;
+            }
+        }
+        else if (immediate)
+        {
+            if (c_flag) psr.c = value >> 31;
+            value = 0;
         }
         return value;
     }
@@ -169,6 +224,30 @@ namespace util
         return value;
     }
 
+    template<bool immediate>
+    inline u32 asrArm(u32 value, u32 amount, bool c_flags, PSR& psr)
+    {
+        if (amount != 0)
+        {
+            if (amount < 32)
+            {
+                if (c_flags) psr.c = (value >> (amount - 1)) & 0x1;
+                value = static_cast<s32>(value) >> amount;
+            }
+            else
+            {
+                value = static_cast<s32>(value) >> 31;
+                if (c_flags) psr.c = value & 0x1;
+            }
+        }
+        else if (immediate)
+        {
+            value = static_cast<s32>(value) >> 31;
+            if (c_flags) psr.c = value & 0x1;
+        }
+        return value;
+    }
+
     template<uint amount>
     inline u32 asrThumbImm(u32 value, PSR& psr)
     {
@@ -217,6 +296,23 @@ namespace util
         return value;
     }
 
+    template<bool immediate>
+    inline u32 rorArm(u32 value, u32 amount, bool c_flag, PSR& psr)
+    {
+        if (amount != 0)
+        {
+            value = rotateRight(value, amount);
+            if (c_flag) psr.c = value >> 31;
+        }
+        else if (immediate)
+        {
+            uint c = psr.c;
+            if (c_flag) psr.c = value & 0x1;
+            value = (c << 31) | (value >> 1);
+        }
+        return value;
+    }
+
     inline u32 rorThumbReg(u32 value, u32 amount, PSR& psr)
     {
         if (amount != 0)
@@ -245,6 +341,16 @@ namespace util
         return value;
     }
 
+    inline u32 log(u32 value, bool flags, PSR& psr)
+    {
+        if (flags)
+        {
+            psr.z = zFlag(value);
+            psr.n = nFlag(value);
+        }
+        return value;
+    }
+
     template<bool flags>
     inline u32 add(u32 op1, u32 op2, PSR& psr)
     {
@@ -260,8 +366,36 @@ namespace util
         return res;
     }
 
+    inline u32 add(u32 op1, u32 op2, bool flags, PSR& psr)
+    {
+        u32 res = op1 + op2;
+
+        if (flags)
+        {
+            psr.z = zFlag(res);
+            psr.n = nFlag(res);
+            psr.c = cFlagAdd(op1, op2);
+            psr.v = vFlagAdd(op1, op2, res);
+        }
+        return res;
+    }
+
     template<bool flags>
     inline u32 sub(u32 op1, u32 op2, PSR& psr)
+    {
+        u32 res = op1 - op2;
+
+        if (flags)
+        {
+            psr.z = zFlag(res);
+            psr.n = nFlag(res);
+            psr.c = cFlagSub(op1, op2);
+            psr.v = vFlagSub(op1, op2, res);
+        }
+        return res;
+    }
+
+    inline u32 sub(u32 op1, u32 op2, bool flags, PSR& psr)
     {
         u32 res = op1 - op2;
 
@@ -291,8 +425,38 @@ namespace util
         return res;
     }
 
+    inline u32 adc(u32 op1, u32 op2, bool flags, PSR& psr)
+    {
+        u64 opc = static_cast<u64>(op2) + psr.c;
+        u32 res = static_cast<u32>(op1 + opc);
+
+        if (flags)
+        {
+            psr.z = zFlag(res);
+            psr.n = nFlag(res);
+            psr.c = cFlagAdd(op1, opc);
+            psr.v = vFlagAdd(op1, op2, res);
+        }
+        return res;
+    }
+
     template<bool flags>
     inline u32 sbc(u32 op1, u32 op2, PSR& psr)
+    {
+        u64 opc = static_cast<u64>(op2) - psr.c + 1;
+        u32 res = static_cast<u32>(op1 - opc);
+
+        if (flags)
+        {
+            psr.z = zFlag(res);
+            psr.n = nFlag(res);
+            psr.c = cFlagSub(op1, opc);
+            psr.v = vFlagSub(op1, op2, res);
+        }
+        return res;
+    }
+
+    inline u32 sbc(u32 op1, u32 op2, bool flags, PSR& psr)
     {
         u64 opc = static_cast<u64>(op2) - psr.c + 1;
         u32 res = static_cast<u32>(op1 - opc);

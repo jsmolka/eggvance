@@ -179,8 +179,8 @@ void ARM::Thumb_HighRegisterOperations(u16 instr)
         break;
 
     case Opcode::Bx:
-        pc = src;
         cpsr.t = src & 0x1;
+        pc = src;
         flush();
         break;
 

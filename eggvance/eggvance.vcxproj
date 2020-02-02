@@ -129,14 +129,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\arm\arithmetic.cpp" />
     <ClCompile Include="src\arm\arm.cpp" />
     <ClCompile Include="src\arm\bus.cpp" />
     <ClCompile Include="src\arm\disassemble.cpp" />
     <ClCompile Include="src\arm\instr_arm.cpp" />
     <ClCompile Include="src\arm\instr_thumb.cpp" />
     <ClCompile Include="src\arm\registers.cpp" />
-    <ClCompile Include="src\arm\shifts.cpp" />
     <ClCompile Include="src\common\config.cpp" />
     <ClCompile Include="src\common\fs.cpp" />
     <ClCompile Include="src\common\input.cpp" />
