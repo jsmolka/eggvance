@@ -15,9 +15,9 @@ void ARM::Thumb_MoveShiftedRegister(u16 instr)
 
     switch (static_cast<Shift>(opcode))
     {
-    case Shift::Lsl: dst = util::lslThumbImm<amount>(src, cpsr); break;
-    case Shift::Lsr: dst = util::lsrThumbImm<amount>(src, cpsr); break;
-    case Shift::Asr: dst = util::asrThumbImm<amount>(src, cpsr); break;
+    case Shift::Lsl: dst = util::lslThumb<amount>(src, cpsr); break;
+    case Shift::Lsr: dst = util::lsrThumb<amount>(src, cpsr); break;
+    case Shift::Asr: dst = util::asrThumb<amount>(src, cpsr); break;
 
     default:
         EGG_UNREACHABLE;
@@ -115,10 +115,10 @@ void ARM::Thumb_AluOperations(u16 instr)
 
     switch (static_cast<Opcode>(opcode))
     {
-    case Opcode::Lsl: dst = util::lslThumbReg(dst, src, cpsr); idle(); break;
-    case Opcode::Lsr: dst = util::lsrThumbReg(dst, src, cpsr); idle(); break;
-    case Opcode::Asr: dst = util::asrThumbReg(dst, src, cpsr); idle(); break;
-    case Opcode::Ror: dst = util::rorThumbReg(dst, src, cpsr); idle(); break;
+    case Opcode::Lsl: dst = util::lslThumb(dst, src, cpsr); idle(); break;
+    case Opcode::Lsr: dst = util::lsrThumb(dst, src, cpsr); idle(); break;
+    case Opcode::Asr: dst = util::asrThumb(dst, src, cpsr); idle(); break;
+    case Opcode::Ror: dst = util::rorThumb(dst, src, cpsr); idle(); break;
     case Opcode::And: dst = util::log(dst &  src, cpsr); break;
     case Opcode::Orr: dst = util::log(dst |  src, cpsr); break;
     case Opcode::Eor: dst = util::log(dst ^  src, cpsr); break;

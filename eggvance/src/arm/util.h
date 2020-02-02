@@ -7,36 +7,34 @@
 
 namespace util
 {
-    inline bool zFlag(u32 value)
+    inline char zFlag(u32 value)
     {
         return value == 0;
     }
 
-    inline bool nFlag(u32 value)
+    inline char nFlag(u32 value)
     {
         return value >> 31;
     }
 
-    inline bool cFlagAdd(u64 op1, u64 op2)
+    inline char cFlagAdd(u64 op1, u64 op2)
     {
         return (op1 + op2) > 0xFFFF'FFFF;
     }
 
-    inline bool cFlagSub(u64 op1, u64 op2)
+    inline char cFlagSub(u64 op1, u64 op2)
     {
         return op2 <= op1;
     }
 
-    inline bool vFlagAdd(u32 op1, u32 op2, u32 res)
+    inline char vFlagAdd(u32 op1, u32 op2, u32 res)
     {
-        return nFlag(op1) == nFlag(op2)
-            && nFlag(op1) != nFlag(res);
+        return ((op1 ^ res) & (op1 ^ op2 ^ (1 << 31))) >> 31;
     }
 
-    inline bool vFlagSub(u32 op1, u32 op2, u32 res)
+    inline char vFlagSub(u32 op1, u32 op2, u32 res)
     {
-        return nFlag(op2) != nFlag(op1)
-            && nFlag(op2) == nFlag(res);
+        return ((op1 ^ op2) & (op2 ^ res ^ (1 << 31))) >> 31;
     }
 
     inline u32 lslArm(u32 value, u32 amount, bool c_flag, PSR& psr)
@@ -64,7 +62,7 @@ namespace util
     }
 
     template<uint amount>
-    inline u32 lslThumbImm(u32 value, PSR& psr)
+    inline u32 lslThumb(u32 value, PSR& psr)
     {
         if (amount != 0)
         {
@@ -96,7 +94,7 @@ namespace util
         return value;
     }
 
-    inline u32 lslThumbReg(u32 value, u32 amount, PSR& psr)
+    inline u32 lslThumb(u32 value, u32 amount, PSR& psr)
     {
         if (amount != 0)
         {
@@ -159,7 +157,7 @@ namespace util
     }
 
     template<uint amount>
-    inline u32 lsrThumbImm(u32 value, PSR& psr)
+    inline u32 lsrThumb(u32 value, PSR& psr)
     {
         if (amount != 0)
         {
@@ -193,7 +191,7 @@ namespace util
         return value;
     }
 
-    inline u32 lsrThumbReg(u32 value, u32 amount, PSR& psr)
+    inline u32 lsrThumb(u32 value, u32 amount, PSR& psr)
     {
         if (amount != 0)
         {
@@ -249,7 +247,7 @@ namespace util
     }
 
     template<uint amount>
-    inline u32 asrThumbImm(u32 value, PSR& psr)
+    inline u32 asrThumb(u32 value, PSR& psr)
     {
         if (amount != 0 && amount < 32)
         {
@@ -269,7 +267,7 @@ namespace util
         return value;
     }
 
-    inline u32 asrThumbReg(u32 value, u32 amount, PSR& psr)
+    inline u32 asrThumb(u32 value, u32 amount, PSR& psr)
     {
         if (amount != 0)
         {
@@ -313,7 +311,7 @@ namespace util
         return value;
     }
 
-    inline u32 rorThumbReg(u32 value, u32 amount, PSR& psr)
+    inline u32 rorThumb(u32 value, u32 amount, PSR& psr)
     {
         if (amount != 0)
         {
