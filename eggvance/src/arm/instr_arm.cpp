@@ -58,7 +58,7 @@ void ARM::Arm_DataProcessing(u32 instr)
     u32  op1 = regs[rn];
     u32  op2 = 0;
 
-    if (rd == 15 == flags_)
+    if (rd == 15 && flags_)
         flags = false;
 
     if (imm_op)
