@@ -1,8 +1,6 @@
 #pragma once
 
 #include "psr.h"
-#include "common/bits.h"
-#include "common/integer.h"
 
 namespace util
 {
@@ -81,10 +79,6 @@ namespace util
                 value = 0;
             }
         }
-
-        psr.z = zFlag(value);
-        psr.n = nFlag(value);
-
         return value;
     }
 
@@ -107,10 +101,6 @@ namespace util
                 value = 0;
             }
         }
-
-        psr.z = zFlag(value);
-        psr.n = nFlag(value);
-
         return value;
     }
 
@@ -170,10 +160,6 @@ namespace util
             psr.c = value >> 31;
             value = 0;
         }
-
-        psr.z = zFlag(value);
-        psr.n = nFlag(value);
-
         return value;
     }
 
@@ -196,10 +182,6 @@ namespace util
                 value = 0;
             }
         }
-
-        psr.z = zFlag(value);
-        psr.n = nFlag(value);
-
         return value;
     }
 
@@ -241,10 +223,6 @@ namespace util
             value = static_cast<s32>(value) >> 31;
             psr.c = value & 0x1;
         }
-
-        psr.z = zFlag(value);
-        psr.n = nFlag(value);
-
         return value;
     }
 
@@ -263,10 +241,6 @@ namespace util
                 psr.c = value & 0x1;
             }
         }
-
-        psr.z = zFlag(value);
-        psr.n = nFlag(value);
-
         return value;
     }
 
@@ -294,10 +268,6 @@ namespace util
             value = rotateRight(value, amount);
             psr.c = value >> 31;
         }
-
-        psr.z = zFlag(value);
-        psr.n = nFlag(value);
-
         return value;
     }
 

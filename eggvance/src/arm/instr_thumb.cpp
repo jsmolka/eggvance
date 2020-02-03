@@ -15,9 +15,9 @@ void ARM::Thumb_MoveShiftedRegister(u16 instr)
 
     switch (static_cast<Shift>(opcode))
     {
-    case Shift::Lsl: dst = util::lslThumb<amount>(src, cpsr); break;
-    case Shift::Lsr: dst = util::lsrThumb<amount>(src, cpsr); break;
-    case Shift::Asr: dst = util::asrThumb<amount>(src, cpsr); break;
+    case Shift::Lsl: dst = util::log(util::lslThumb<amount>(src, cpsr), cpsr); break;
+    case Shift::Lsr: dst = util::log(util::lsrThumb<amount>(src, cpsr), cpsr); break;
+    case Shift::Asr: dst = util::log(util::asrThumb<amount>(src, cpsr), cpsr); break;
 
     default:
         EGG_UNREACHABLE;
@@ -115,10 +115,10 @@ void ARM::Thumb_AluOperations(u16 instr)
 
     switch (static_cast<Opcode>(opcode))
     {
-    case Opcode::Lsl: dst = util::lslThumb(dst, src, cpsr); idle(); break;
-    case Opcode::Lsr: dst = util::lsrThumb(dst, src, cpsr); idle(); break;
-    case Opcode::Asr: dst = util::asrThumb(dst, src, cpsr); idle(); break;
-    case Opcode::Ror: dst = util::rorThumb(dst, src, cpsr); idle(); break;
+    case Opcode::Lsl: dst = util::log(util::lslThumb(dst, src, cpsr), cpsr); idle(); break;
+    case Opcode::Lsr: dst = util::log(util::lsrThumb(dst, src, cpsr), cpsr); idle(); break;
+    case Opcode::Asr: dst = util::log(util::asrThumb(dst, src, cpsr), cpsr); idle(); break;
+    case Opcode::Ror: dst = util::log(util::rorThumb(dst, src, cpsr), cpsr); idle(); break;
     case Opcode::And: dst = util::log(dst &  src, cpsr); break;
     case Opcode::Orr: dst = util::log(dst |  src, cpsr); break;
     case Opcode::Eor: dst = util::log(dst ^  src, cpsr); break;
@@ -164,7 +164,7 @@ void ARM::Thumb_HighRegisterOperations(u16 instr)
     switch (static_cast<Opcode>(opcode))
     {
     case Opcode::Add:
-        dst = dst + src;
+        dst += src;
         if (rd == 15 && hd)
             flushHalf();
         break;
@@ -358,7 +358,6 @@ void ARM::Thumb_LoadStoreSpRelative(u16 instr)
     uint offset = bits<0, 8>(instr);
 
     u32& dst = regs[rd];
-
     u32 addr = sp + (offset << 2);
 
     if (load)
@@ -382,7 +381,7 @@ void ARM::Thumb_LoadRelativeAddress(u16 instr)
     u32& dst = regs[rd];
 
     if (use_sp)
-        dst = sp + offset;
+        dst = (sp & ~0x0) + offset;
     else
         dst = (pc & ~0x3) + offset;
 }
@@ -535,7 +534,7 @@ void ARM::Thumb_LongBranchLink(u16 instr)
     {
         offset <<= 1;
 
-        u32 next = (pc - 2) | 1;
+        u32 next = (pc - 2) | 0x1;
         pc = lr + offset;
         lr = next;
 
