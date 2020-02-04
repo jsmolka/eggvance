@@ -134,7 +134,7 @@ void ARM::idle()
     remaining--;
 }
 
-void ARM::booth(u32 multiplier, bool ones)
+void ARM::booth(u32 multiplier, bool sign)
 {
     static constexpr u32 masks[3] =
     {
@@ -143,16 +143,15 @@ void ARM::booth(u32 multiplier, bool ones)
         0xFFFF'FF00
     };
 
-    int internal = 4;
     for (u32 mask : masks)
     {
         u32 bits = multiplier & mask;
-        if (bits == 0 || (ones && bits == mask))
-            internal--;
+        if (bits == 0 || (sign && bits == mask))
+            remaining++;
         else
             break;
     }
-    remaining -= internal;
+    remaining -= 4;
 }
 
 void ARM::interrupt(u32 pc, u32 lr, PSR::Mode mode)

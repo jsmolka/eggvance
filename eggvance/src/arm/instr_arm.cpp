@@ -18,10 +18,10 @@ void ARM::Arm_BranchLink(u32 instr)
 {
     uint offset = bits<0, 24>(instr);
 
-    if (link) lr = pc - 4;
-
     offset = signExtend<24>(offset);
     offset <<= 2;
+
+    if (link) lr = pc - 4;
 
     pc += offset;
     flushWord();
@@ -56,7 +56,7 @@ void ARM::Arm_DataProcessing(u32 instr)
 
     u32& dst = regs[rd];
     u32  op1 = regs[rn];
-    u32  op2 = 0;
+    u32  op2;
 
     if (rd == 15 && flags_)
         flags = false;
@@ -65,7 +65,6 @@ void ARM::Arm_DataProcessing(u32 instr)
     {
         uint value  = bits<0, 8>(instr);
         uint amount = bits<8, 4>(instr);
-
         op2 = util::rorArm<false>(value, amount << 1, flags, cpsr);
     }
     else
@@ -96,7 +95,6 @@ void ARM::Arm_DataProcessing(u32 instr)
                 EGG_UNREACHABLE;
                 break;
             }
-
             idle();
         }
         else
@@ -158,11 +156,6 @@ void ARM::Arm_StatusTransfer(u32 instr)
 {
     if (write)
     {
-        constexpr uint f_bit = 1 << 19;
-        constexpr uint s_bit = 1 << 18;
-        constexpr uint x_bit = 1 << 17;
-        constexpr uint c_bit = 1 << 16;
-
         u32 op;
         if (imm_op)
         {
@@ -177,22 +170,21 @@ void ARM::Arm_StatusTransfer(u32 instr)
         }
 
         u32 mask = 0;
-        if (instr & f_bit) mask |= 0xFF00'0000;
-        if (instr & s_bit) mask |= 0x00FF'0000;
-        if (instr & x_bit) mask |= 0x0000'FF00;
-        if (instr & c_bit) mask |= 0x0000'00FF;
+        if (instr & (1 << 19)) mask |= 0xFF00'0000;
+        if (instr & (1 << 18)) mask |= 0x00FF'0000;
+        if (instr & (1 << 17)) mask |= 0x0000'FF00;
+        if (instr & (1 << 16)) mask |= 0x0000'00FF;
 
-        op &= mask;
         if (use_spsr)
         {
-            spsr = (spsr & ~mask) | op;
+            spsr = (spsr & ~mask) | (op & mask);
         }
         else
         {
-            if (instr & c_bit)
+            if (mask & 0xFF)
                 switchMode(static_cast<PSR::Mode>(op & 0x1F));
 
-            cpsr = (cpsr & ~mask) | op;
+            cpsr = (cpsr & ~mask) | (op & mask);
         }
     }
     else
@@ -216,12 +208,15 @@ void ARM::Arm_Multiply(u32 instr)
     u32& dst = regs[rd];
 
     dst = op1 * op2;
+
     if (accumulate)
     {
         dst += op3;
         idle();
     }
-    util::log(dst, flags, cpsr);
+
+    if (flags)
+        util::log(dst, cpsr);
 
     booth(op2, true);
 }
@@ -245,38 +240,25 @@ void ARM::Arm_MultiplyLong(u32 instr)
         op2 = signExtend<32>(op2);
     }
 
-    u64 result = op1 * op2;
+    u64 res = op1 * op2;
+
     if (accumulate)
     {
-        result += (static_cast<u64>(dsth) << 32) | dstl;
+        res += (static_cast<u64>(dsth) << 32) | dstl;
         idle();
     }
 
     if (flags)
     {
-        cpsr.z = result == 0;
-        cpsr.n = result >> 63;
+        cpsr.z = res == 0;
+        cpsr.n = res >> 63;
     }
 
-    dstl = static_cast<u32>(result);
-    dsth = static_cast<u32>(result >> 32);
+    dstl = static_cast<u32>(res);
+    dsth = static_cast<u32>(res >> 32);
 
     booth(static_cast<u32>(op2), sign);
 }
-
-#define INDEX            \
-    if (increment)       \
-        addr += offset;  \
-    else                 \
-        addr -= offset
-
-#define PRE_INDEX        \
-    if (pre_index)       \
-        INDEX
-
-#define POST_INDEX       \
-    if (!pre_index)      \
-        INDEX
 
 template<uint load, uint writeback, uint byte, uint increment, uint pre_index, uint imm_op>
 void ARM::Arm_SingleDataTransfer(u32 instr)
@@ -302,9 +284,7 @@ void ARM::Arm_SingleDataTransfer(u32 instr)
         if (reg_op)
         {
             uint rs = bits<8, 4>(instr);
-
-            amount = regs[rs];
-            amount &= 0xFF;
+            amount = regs[rs] & 0xFF;
         }
         else
         {
@@ -324,7 +304,11 @@ void ARM::Arm_SingleDataTransfer(u32 instr)
         }
     }
 
-    PRE_INDEX;
+    if (!increment)
+        offset = -offset;
+
+    if (pre_index)
+        addr += offset;
 
     if (load)
     {
@@ -349,9 +333,11 @@ void ARM::Arm_SingleDataTransfer(u32 instr)
             writeWord(addr, value);
     }
 
-    if (writeback && (rd != rn || !load))
+    if (writeback && (!load || rd != rn))
     {
-        POST_INDEX;
+        if (!pre_index)
+            addr += offset;
+
         regs[rn] = addr;
     }
 }
@@ -386,7 +372,11 @@ void ARM::Arm_HalfSignedDataTransfer(u32 instr)
         offset = regs[rm];
     }
 
-    PRE_INDEX;
+    if (!increment)
+        offset = -offset;
+
+    if (pre_index)
+        addr += offset;
 
     if (load)
     {
@@ -427,16 +417,14 @@ void ARM::Arm_HalfSignedDataTransfer(u32 instr)
         writeHalf(addr, value);
     }
 
-    if (writeback && (rd != rn || !load))
+    if (writeback && (!load || rd != rn))
     {
-        POST_INDEX;
+        if (!pre_index)
+            addr += offset;
+
         regs[rn] = addr;
     }
 }
-
-#undef INDEX
-#undef PRE_INDEX
-#undef POST_INDEX
 
 template<uint load, uint writeback_, uint user_mode, uint increment, uint pre_index_>
 void ARM::Arm_BlockDataTransfer(u32 instr)
@@ -458,12 +446,13 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
         if (!increment)
         {
             addr -= 4 * popcount(rlist);
+            pre_index ^= 0x1;
+
             if (writeback)
             {
                 regs[rn] = addr;
                 writeback = false;
             }
-            pre_index ^= 0x1;
         }
 
         if (load)
@@ -485,7 +474,7 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
         }
         else
         {
-            bool first = true;
+            bool begin = true;
 
             for (uint x : SetBits(rlist))
             {
@@ -493,7 +482,7 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
                     ? x != 15
                         ? regs[x] + 0
                         : regs[x] + 4
-                    : first
+                    : begin
                         ? base
                         : base + (increment ? 4 : -4) * popcount(rlist);
 
@@ -501,7 +490,7 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
                 writeWord(addr, value);
                 addr += 4 * pre_index ^ 0x4;
 
-                first = false;
+                begin = false;
             }
         }
     }

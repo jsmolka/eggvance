@@ -131,7 +131,7 @@ void ARM::Thumb_AluOperations(u16 instr)
     case Opcode::Cmp:       util::sub(dst,   src, cpsr); break;
     case Opcode::Cmn:       util::add(dst,   src, cpsr); break;
     case Opcode::Mul:
-        booth(dst, true);
+        booth(dst, false);
         dst = util::log(dst * src, cpsr);
         break;
 
