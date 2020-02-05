@@ -120,18 +120,18 @@ void ARM::Thumb_AluOperations(u16 instr)
     case Opcode::Asr: dst = util::log(util::asrThumb(dst, src, cpsr), cpsr); idle(); break;
     case Opcode::Ror: dst = util::log(util::rorThumb(dst, src, cpsr), cpsr); idle(); break;
     case Opcode::And: dst = util::log(dst &  src, cpsr); break;
-    case Opcode::Orr: dst = util::log(dst |  src, cpsr); break;
     case Opcode::Eor: dst = util::log(dst ^  src, cpsr); break;
+    case Opcode::Orr: dst = util::log(dst |  src, cpsr); break;
     case Opcode::Bic: dst = util::log(dst & ~src, cpsr); break;
     case Opcode::Mvn: dst = util::log(      ~src, cpsr); break;
     case Opcode::Tst:       util::log(dst &  src, cpsr); break;
+    case Opcode::Cmn:       util::add(dst,   src, cpsr); break;
+    case Opcode::Cmp:       util::sub(dst,   src, cpsr); break;
     case Opcode::Adc: dst = util::adc(dst,   src, cpsr); break;
     case Opcode::Sbc: dst = util::sbc(dst,   src, cpsr); break;
     case Opcode::Neg: dst = util::sub(  0,   src, cpsr); break;
-    case Opcode::Cmp:       util::sub(dst,   src, cpsr); break;
-    case Opcode::Cmn:       util::add(dst,   src, cpsr); break;
     case Opcode::Mul:
-        booth(dst, false);
+        booth(dst, true);
         dst = util::log(dst * src, cpsr);
         break;
 

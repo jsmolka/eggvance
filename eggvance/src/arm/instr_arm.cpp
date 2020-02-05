@@ -117,22 +117,22 @@ void ARM::Arm_DataProcessing(u32 instr)
 
     switch (static_cast<Opcode>(opcode))
     {
-    case Opcode::Add: dst = util::add(op1,   op2, flags, cpsr); break;
-    case Opcode::Adc: dst = util::adc(op1,   op2, flags, cpsr); break;
-    case Opcode::Sub: dst = util::sub(op1,   op2, flags, cpsr); break;
-    case Opcode::Sbc: dst = util::sbc(op1,   op2, flags, cpsr); break;
-    case Opcode::Rsb: dst = util::sub(op2,   op1, flags, cpsr); break;
-    case Opcode::Rsc: dst = util::sbc(op2,   op1, flags, cpsr); break;
-    case Opcode::Cmn:       util::add(op1,   op2,        cpsr); break;
-    case Opcode::Cmp:       util::sub(op1,   op2,        cpsr); break;
-    case Opcode::Tst:       util::log(op1 &  op2,        cpsr); break;
-    case Opcode::Teq:       util::log(op1 ^  op2,        cpsr); break;
     case Opcode::And: dst = util::log(op1 &  op2, flags, cpsr); break;
     case Opcode::Eor: dst = util::log(op1 ^  op2, flags, cpsr); break;
     case Opcode::Orr: dst = util::log(op1 |  op2, flags, cpsr); break;
     case Opcode::Mov: dst = util::log(       op2, flags, cpsr); break;
     case Opcode::Bic: dst = util::log(op1 & ~op2, flags, cpsr); break;
     case Opcode::Mvn: dst = util::log(      ~op2, flags, cpsr); break;
+    case Opcode::Tst:       util::log(op1 &  op2,        cpsr); break;
+    case Opcode::Teq:       util::log(op1 ^  op2,        cpsr); break;
+    case Opcode::Cmn:       util::add(op1,   op2,        cpsr); break;
+    case Opcode::Cmp:       util::sub(op1,   op2,        cpsr); break;
+    case Opcode::Add: dst = util::add(op1,   op2, flags, cpsr); break;
+    case Opcode::Adc: dst = util::adc(op1,   op2, flags, cpsr); break;
+    case Opcode::Sub: dst = util::sub(op1,   op2, flags, cpsr); break;
+    case Opcode::Sbc: dst = util::sbc(op1,   op2, flags, cpsr); break;
+    case Opcode::Rsb: dst = util::sub(op2,   op1, flags, cpsr); break;
+    case Opcode::Rsc: dst = util::sbc(op2,   op1, flags, cpsr); break;
 
     default:
         EGG_UNREACHABLE;
