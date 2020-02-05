@@ -193,17 +193,17 @@ namespace util
             if (amount < 32)
             {
                 if (flags) psr.c = (value >> (amount - 1)) & 0x1;
-                value = static_cast<s32>(value) >> amount;
+                value = sar(value, amount);
             }
             else
             {
-                value = static_cast<s32>(value) >> 31;
+                value = sar(value, 31);
                 if (flags) psr.c = value & 0x1;
             }
         }
         else if (immediate)
         {
-            value = static_cast<s32>(value) >> 31;
+            value = sar(value, 31);
             if (flags) psr.c = value & 0x1;
         }
         return value;
@@ -216,11 +216,11 @@ namespace util
         {
             #pragma warning(suppress:4293)
             psr.c = (value >> (amount - 1)) & 0x1;
-            value = static_cast<s32>(value) >> amount;
+            value = sar(value, amount);
         }
         else
         {
-            value = static_cast<s32>(value) >> 31;
+            value = sar(value, 31);
             psr.c = value & 0x1;
         }
         return value;
@@ -233,11 +233,11 @@ namespace util
             if (amount < 32)
             {
                 psr.c = (value >> (amount - 1)) & 0x1;
-                value = static_cast<s32>(value) >> amount;
+                value = sar(value, amount);
             }
             else
             {
-                value = static_cast<s32>(value) >> 31;
+                value = sar(value, 31);
                 psr.c = value & 0x1;
             }
         }
