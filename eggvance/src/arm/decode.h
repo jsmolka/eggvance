@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/bits.h"
-#include "common/integer.h"
 
 enum class InstructionArm
 {
@@ -35,8 +34,8 @@ inline InstructionArm decodeArmHash(uint hash)
     if ((hash & 0b1111'0000'0001) == 0b1110'0000'0001) return InstructionArm::CoprocessorRegisterTransfers;
     if ((hash & 0b1110'0000'0000) == 0b1010'0000'0000) return InstructionArm::BranchLink;
     if ((hash & 0b1110'0000'0000) == 0b1000'0000'0000) return InstructionArm::BlockDataTransfer;
-    if ((hash & 0b1110'0000'0001) == 0b0110'0000'0001) return InstructionArm::Undefined;
     if ((hash & 0b1100'0000'0000) == 0b0100'0000'0000) return InstructionArm::SingleDataTransfer;
+    if ((hash & 0b1110'0000'0001) == 0b0110'0000'0001) return InstructionArm::Undefined;
     if ((hash & 0b1111'1111'1111) == 0b0001'0010'0001) return InstructionArm::BranchExchange;
     if ((hash & 0b1111'1100'1111) == 0b0000'0000'1001) return InstructionArm::Multiply;
     if ((hash & 0b1111'1000'1111) == 0b0000'1000'1001) return InstructionArm::MultiplyLong;
@@ -67,16 +66,16 @@ enum class InstructionThumb
     MoveShiftedRegister,
     AddSubtract,
     ImmediateOperations,
-    ALUOperations,
+    AluOperations,
     HighRegisterOperations,
-    LoadPCRelative,
+    LoadPcRelative,
     LoadStoreRegisterOffset,
     LoadStoreByteHalf,
     LoadStoreImmediateOffset,
     LoadStoreHalf,
-    LoadStoreSPRelative,
+    LoadStoreSpRelative,
     LoadRelativeAddress,
-    AddOffsetSP,
+    AddOffsetSp,
     PushPopRegisters,
     LoadStoreMultiple,
     ConditionalBranch,
@@ -95,16 +94,28 @@ inline InstructionThumb decodeThumbHash(uint hash)
     if ((hash & 0b11'1110'0000) == 0b00'0110'0000) return InstructionThumb::AddSubtract;
     if ((hash & 0b11'1000'0000) == 0b00'0000'0000) return InstructionThumb::MoveShiftedRegister;
     if ((hash & 0b11'1000'0000) == 0b00'1000'0000) return InstructionThumb::ImmediateOperations;
-    if ((hash & 0b11'1111'0000) == 0b01'0000'0000) return InstructionThumb::ALUOperations;
-    if ((hash & 0b11'1111'0000) == 0b01'0001'0000) return InstructionThumb::HighRegisterOperations;
-    if ((hash & 0b11'1110'0000) == 0b01'0010'0000) return InstructionThumb::LoadPCRelative;
+    if ((hash & 0b11'1111'0000) == 0b01'0000'0000) return InstructionThumb::AluOperations;
+    if ((hash & 0b11'1111'0000) == 0b01'0001'0000)
+    {
+        uint hs     = bits<0, 1>(hash);
+        uint hd     = bits<1, 1>(hash);
+        uint opcode = bits<2, 2>(hash);
+
+        if (opcode != 0b11 && hs == 0 && hd == 0)
+            return InstructionThumb::Undefined;
+        if (opcode == 0b11 && hd == 1)
+            return InstructionThumb::Undefined;
+
+        return InstructionThumb::HighRegisterOperations;
+    }
+    if ((hash & 0b11'1110'0000) == 0b01'0010'0000) return InstructionThumb::LoadPcRelative;
     if ((hash & 0b11'1100'1000) == 0b01'0100'0000) return InstructionThumb::LoadStoreRegisterOffset;
     if ((hash & 0b11'1100'1000) == 0b01'0100'1000) return InstructionThumb::LoadStoreByteHalf;
     if ((hash & 0b11'1000'0000) == 0b01'1000'0000) return InstructionThumb::LoadStoreImmediateOffset;
     if ((hash & 0b11'1100'0000) == 0b10'0000'0000) return InstructionThumb::LoadStoreHalf;
-    if ((hash & 0b11'1100'0000) == 0b10'0100'0000) return InstructionThumb::LoadStoreSPRelative;
+    if ((hash & 0b11'1100'0000) == 0b10'0100'0000) return InstructionThumb::LoadStoreSpRelative;
     if ((hash & 0b11'1100'0000) == 0b10'1000'0000) return InstructionThumb::LoadRelativeAddress;
-    if ((hash & 0b11'1111'1100) == 0b10'1100'0000) return InstructionThumb::AddOffsetSP;
+    if ((hash & 0b11'1111'1100) == 0b10'1100'0000) return InstructionThumb::AddOffsetSp;
     if ((hash & 0b11'1101'1000) == 0b10'1101'0000) return InstructionThumb::PushPopRegisters;
     if ((hash & 0b11'1100'0000) == 0b11'0000'0000) return InstructionThumb::LoadStoreMultiple;
     if ((hash & 0b11'1111'1100) == 0b11'0111'1100) return InstructionThumb::SoftwareInterrupt;
