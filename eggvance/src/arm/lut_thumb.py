@@ -16,7 +16,8 @@ def decode(x):
 
         return "AddSubtract<{rn}, {opcode}>".format(
             rn=rn,
-            opcode=opcode)
+            opcode=opcode
+        )
 
     if matches("000xxxxxxx", x):
         amount = bits(0, 5, x)
@@ -24,7 +25,8 @@ def decode(x):
 
         return "MoveShiftedRegister<{amount}, {opcode}>".format(
             amount=amount,
-            opcode=opcode)
+            opcode=opcode
+        )
 
     if matches("001xxxxxxx", x):
         rd     = bits(2, 3, x)
@@ -32,13 +34,15 @@ def decode(x):
 
         return "ImmediateOperations<{rd}, {opcode}>".format(
             rd=rd,
-            opcode=opcode)
+            opcode=opcode
+        )
 
     if matches("010000xxxx", x):
         opcode = bits(0, 4, x)
 
         return "AluOperations<{opcode}>".format(
-            opcode=opcode)
+            opcode=opcode
+        )
 
     if matches("010001xxxx", x):
         hs     = bits(0, 1, x)
@@ -53,13 +57,15 @@ def decode(x):
         return "HighRegisterOperations<{hs}, {hd}, {opcode}>".format(
             hs=hs,
             hd=hd,
-            opcode=opcode)
+            opcode=opcode
+        )
 
     if matches("01001xxxxx", x):
         rd = bits(2, 3, x)
 
         return "LoadPcRelative<{rd}>".format(
-            rd=rd)
+            rd=rd
+        )
 
     if matches("0101xx0xxx", x):
         ro     = bits(0, 3, x)
@@ -67,7 +73,8 @@ def decode(x):
 
         return "LoadStoreRegisterOffset<{ro}, {opcode}>".format(
             ro=ro,
-            opcode=opcode)
+            opcode=opcode
+        )
 
     if matches("0101xx1xxx", x):
         ro     = bits(0, 3, x)
@@ -75,7 +82,8 @@ def decode(x):
 
         return "LoadStoreByteHalf<{ro}, {opcode}>".format(
             ro=ro,
-            opcode=opcode)
+            opcode=opcode
+        )
 
     if matches("011xxxxxxx", x):
         offset = bits(0, 5, x)
@@ -83,7 +91,8 @@ def decode(x):
 
         return "LoadStoreImmediateOffset<{offset}, {opcode}>".format(
             offset=offset,
-            opcode=opcode)
+            opcode=opcode
+        )
 
     if matches("1000xxxxxx", x):
         offset = bits(0, 5, x)
@@ -91,7 +100,8 @@ def decode(x):
 
         return "LoadStoreHalf<{offset}, {load}>".format(
             offset=offset,
-            load=load)
+            load=load
+        )
 
     if matches("1001xxxxxx", x):
         rd   = bits(2, 3, x)
@@ -99,7 +109,8 @@ def decode(x):
 
         return "LoadStoreSpRelative<{rd}, {load}>".format(
             rd=rd,
-            load=load)
+            load=load
+        )
 
     if matches("1010xxxxxx", x):
         rd     = bits(2, 3, x)
@@ -107,13 +118,15 @@ def decode(x):
 
         return "LoadRelativeAddress<{rd}, {use_sp}>".format(
             rd=rd,
-            use_sp=use_sp)
+            use_sp=use_sp
+        )
 
     if matches("10110000xx", x):
         sign = bits(1, 1, x)
 
         return "AddOffsetSp<{sign}>".format(
-            sign=sign)
+            sign=sign
+        )
 
     if matches("1011x10xxx", x):
         rbit = bits(2, 1, x)
@@ -121,7 +134,8 @@ def decode(x):
 
         return "PushPopRegisters<{rbit}, {pop}>".format(
             rbit=rbit,
-            pop=pop)
+            pop=pop
+        )
 
     if matches("1100xxxxxx", x):
         rb   = bits(2, 3, x)
@@ -143,7 +157,8 @@ def decode(x):
             return "Undefined"
 
         return "ConditionalBranch<{condition}>".format(
-            condition=condition)
+            condition=condition
+        )
 
     if matches("11100xxxxx", x):
         return "UnconditionalBranch"
@@ -152,7 +167,8 @@ def decode(x):
         second = bits(5, 1, x)
 
         return "LongBranchLink<{second}>".format(
-            second=second)
+            second=second
+        )
 
     return "Undefined"
 

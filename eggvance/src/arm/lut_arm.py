@@ -40,7 +40,8 @@ def decode(x):
             writeback=writeback,
             user_mode=user_mode,
             increment=increment,
-            pre_index=pre_index)
+            pre_index=pre_index
+        )
 
     if matches("011xxxxxxxx1", x):
         return "Undefined"
@@ -59,7 +60,8 @@ def decode(x):
             byte=byte,
             increment=increment,
             pre_index=pre_index,
-            imm_op=reg_op ^ 0x1)
+            imm_op=reg_op ^ 0x1
+        )
 
     if matches("000100100001", x):
         return "BranchExchange"
@@ -70,7 +72,8 @@ def decode(x):
 
         return "Multiply<{flags}, {accumulate}>".format(
             flags=flags,
-            accumulate=accumulate)
+            accumulate=accumulate
+        )
 
     if matches("00001xxx1001", x):
         flags      = bits(4, 1, x)
@@ -80,7 +83,8 @@ def decode(x):
         return "MultiplyLong<{flags}, {accumulate}, {sign}>".format(
             flags=flags,
             accumulate=accumulate,
-            sign=sign)
+            sign=sign
+        )
 
     if matches("00010x001001", x):
         byte = bits(6, 1, x)
@@ -105,7 +109,8 @@ def decode(x):
             writeback=writeback | (pre_index ^ 0x1),
             imm_op=imm_op,
             increment=increment,
-            pre_index=pre_index)
+            pre_index=pre_index
+        )
 
     if matches("00x10xx0xxxx", x):
         write    = bits(5, 1, x)
@@ -115,7 +120,8 @@ def decode(x):
         return "StatusTransfer<{write}, {use_spsr}, {imm_op}>".format(
             write=write,
             use_spsr=use_spsr,
-            imm_op=imm_op)
+            imm_op=imm_op
+        )
 
     if matches("00xxxxxxxxxx", x):
         flags  = bits(4, 1, x)
@@ -128,7 +134,8 @@ def decode(x):
         return "DataProcessing<{flags}, {opcode}, {imm_op}>".format(
             flags=flags,
             opcode=opcode,
-            imm_op=imm_op)
+            imm_op=imm_op
+        )
 
     return "Undefined"
 
