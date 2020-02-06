@@ -114,18 +114,11 @@ void ARM::disasm()
     static u32 operation = 0;
     operation++;
 
-    DisasmData data;
-
-    data.thumb = cpsr.t;
-    data.instr = pipe[0];
-    data.pc    = pc;
-    data.lr    = lr;
-
     fmt::printf("%08X  %08X  %08X  %s\n", 
         operation,
         pc - 2 * cpsr.size(),
-        data.instr, 
-        disassemble(data)
+        pipe[0], 
+        disassemble(pipe[0], pc, lr, cpsr.t)
     );
 }
 
