@@ -42,6 +42,9 @@ def decode(x):
             increment=increment,
             pre_index=pre_index)
 
+    if matches("011xxxxxxxx1", x):
+        return "Undefined"
+
     if matches("01xxxxxxxxxx", x):
         load      = bits(4, 1, x)
         writeback = bits(5, 1, x)
@@ -57,9 +60,6 @@ def decode(x):
             increment=increment,
             pre_index=pre_index,
             imm_op=reg_op ^ 0x1)
-
-    if matches("011xxxxxxxx1", x):
-        return "Undefined"
 
     if matches("000100100001", x):
         return "BranchExchange"
@@ -96,6 +96,9 @@ def decode(x):
         increment = bits(7, 1, x)
         pre_index = bits(8, 1, x)
 
+        if opcode == 0b00:
+            return "Undefined"
+
         return "HalfSignedDataTransfer<{opcode}, {load}, {writeback}, {imm_op}, {increment}, {pre_index}>".format(
             opcode=opcode,
             load=load,
@@ -119,7 +122,7 @@ def decode(x):
         opcode = bits(5, 4, x)
         imm_op = bits(9, 1, x)
 
-        if ((opcode >> 2) == 0b10 and not flags):
+        if (opcode >> 2) == 0b10 and not flags:
             return "Undefined"
 
         return "DataProcessing<{flags}, {opcode}, {imm_op}>".format(

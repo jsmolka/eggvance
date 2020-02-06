@@ -34,13 +34,21 @@ inline InstructionArm decodeArmHash(uint hash)
     if ((hash & 0b1111'0000'0001) == 0b1110'0000'0001) return InstructionArm::CoprocessorRegisterTransfers;
     if ((hash & 0b1110'0000'0000) == 0b1010'0000'0000) return InstructionArm::BranchLink;
     if ((hash & 0b1110'0000'0000) == 0b1000'0000'0000) return InstructionArm::BlockDataTransfer;
-    if ((hash & 0b1100'0000'0000) == 0b0100'0000'0000) return InstructionArm::SingleDataTransfer;
     if ((hash & 0b1110'0000'0001) == 0b0110'0000'0001) return InstructionArm::Undefined;
+    if ((hash & 0b1100'0000'0000) == 0b0100'0000'0000) return InstructionArm::SingleDataTransfer;
     if ((hash & 0b1111'1111'1111) == 0b0001'0010'0001) return InstructionArm::BranchExchange;
     if ((hash & 0b1111'1100'1111) == 0b0000'0000'1001) return InstructionArm::Multiply;
     if ((hash & 0b1111'1000'1111) == 0b0000'1000'1001) return InstructionArm::MultiplyLong;
     if ((hash & 0b1111'1011'1111) == 0b0001'0000'1001) return InstructionArm::SingleDataSwap;
-    if ((hash & 0b1110'0000'1001) == 0b0000'0000'1001) return InstructionArm::HalfSignedDataTransfer;
+    if ((hash & 0b1110'0000'1001) == 0b0000'0000'1001)
+    {
+        uint opcode = bits<1, 2>(hash);
+
+        if (opcode == 0b00)
+            return InstructionArm::Undefined;
+
+        return InstructionArm::HalfSignedDataTransfer;
+    }
     if ((hash & 0b1101'1001'0000) == 0b0001'0000'0000) return InstructionArm::StatusTransfer;
     if ((hash & 0b1100'0000'0000) == 0b0000'0000'0000)
     {
