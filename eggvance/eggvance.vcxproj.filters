@@ -479,6 +479,9 @@
     <ClInclude Include="src\arm\util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\common\mpl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="eggvance.rc">
