@@ -17,6 +17,8 @@ public:
 
     void run(int cycles);
 
+    void updateDispatch();
+
     u32 pipe[2];
 
 private:
@@ -45,7 +47,10 @@ private:
     void flush();
     void flushHalf();
     void flushWord();
+
+    template<uint flags>
     void execute();
+
     void disasm();
 
     void idle();
@@ -126,6 +131,8 @@ private:
         WaitControl waitcnt;
         HaltControl haltcnt;
     } io;
+
+    void(ARM::*dispatch)(void);
 
     static std::array<void(ARM::*)(u32), 4096> instr_arm;
     static std::array<void(ARM::*)(u16), 1024> instr_thumb;

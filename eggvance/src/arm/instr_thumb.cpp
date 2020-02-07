@@ -183,6 +183,8 @@ void ARM::Thumb_HighRegisterOperations(u16 instr)
         cpsr.t = src & 0x1;
         pc = src;
         flush();
+
+        updateDispatch();
         break;
 
     default:

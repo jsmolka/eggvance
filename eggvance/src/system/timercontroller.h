@@ -17,6 +17,8 @@ public:
     u8 readByte(u32 addr);
     void writeByte(u32 addr, u8 byte);
 
+    std::vector<Timer*> active;  // Todo: private
+
 private:
     void runTimers();
     void schedule();
@@ -26,8 +28,6 @@ private:
     uint counter;
 
     Timer timers[4];
-
-    std::vector<Timer*> active;
 };
 
 extern TimerController timerc;

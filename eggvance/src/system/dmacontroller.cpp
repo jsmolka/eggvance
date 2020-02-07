@@ -1,5 +1,6 @@
 #include "dmacontroller.h"
 
+#include "arm/arm.h"
 #include "common/macros.h"
 #include "mmu/memmap.h"
 #include "registers/macros.h"
@@ -32,6 +33,9 @@ void DMAController::run(int& cycles)
                 break;
             }
         }
+        
+        if (!active)
+            arm.updateDispatch();
     }
 }
 
@@ -89,6 +93,8 @@ void DMAController::writeByte(u32 addr, u8 byte)
         EGG_UNREACHABLE;
         break;
     }
+
+    arm.updateDispatch();
 }
 
 void DMAController::emit(DMA::Timing timing, DMA& dma)

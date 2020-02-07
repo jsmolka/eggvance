@@ -27,6 +27,8 @@ void IRQHandler::update()
         arm.io.haltcnt = false;
 
     requested &= io.intr_master;
+
+    arm.updateDispatch();
 }
 
 u8 IRQHandler::read(u32 addr)

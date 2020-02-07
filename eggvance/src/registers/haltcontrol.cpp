@@ -1,5 +1,6 @@
 #include "haltcontrol.h"
 
+#include "arm/arm.h"
 #include "common/macros.h"
 
 HaltControl::operator bool() const
@@ -24,4 +25,6 @@ void HaltControl::write(int index, u8 byte)
     EGG_ASSERT(index <= 0, "Invalid index");
 
     halt = true;
+
+    arm.updateDispatch();
 }

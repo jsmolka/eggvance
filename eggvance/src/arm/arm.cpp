@@ -23,6 +23,8 @@ void ARM::reset()
 
     io.waitcnt.reset();
     io.haltcnt.reset();
+
+    updateDispatch();
 }
 
 void ARM::run(int cycles)
@@ -30,23 +32,55 @@ void ARM::run(int cycles)
     remaining += cycles;
 
     while (remaining > 0)
-    {
-        int last = remaining;
+        (this->*dispatch)();
+}
 
-        if (dmac.active)
-        {
-            dmac.run(remaining);
-        }
-        else
-        {
-            if (io.haltcnt)
-            {
-                timerc.runUntil(remaining);
-                continue;
-            }
-            execute();
-        }
-        timerc.run(last - remaining);
+void ARM::updateDispatch()
+{
+    uint thumb = cpsr.t << 0;
+    uint halt  = io.haltcnt.halt << 1;
+    uint irq   = irqh.requested << 2;
+    uint dma   = (dmac.active ? 1 : 0) << 3;
+    uint timer = (timerc.active.size() > 0 ? 1 : 0) << 4;
+
+    switch (thumb | halt | irq | dma | timer)
+    {
+    case 0b00000: dispatch = &ARM::execute<0b00000>; break;
+    case 0b00001: dispatch = &ARM::execute<0b00001>; break;
+    case 0b00010: dispatch = &ARM::execute<0b00010>; break;
+    case 0b00011: dispatch = &ARM::execute<0b00011>; break;
+    case 0b00100: dispatch = &ARM::execute<0b00100>; break;
+    case 0b00101: dispatch = &ARM::execute<0b00101>; break;
+    case 0b00110: dispatch = &ARM::execute<0b00110>; break;
+    case 0b00111: dispatch = &ARM::execute<0b00111>; break;
+    case 0b01000: dispatch = &ARM::execute<0b01000>; break;
+    case 0b01001: dispatch = &ARM::execute<0b01001>; break;
+    case 0b01010: dispatch = &ARM::execute<0b01010>; break;
+    case 0b01011: dispatch = &ARM::execute<0b01011>; break;
+    case 0b01100: dispatch = &ARM::execute<0b01100>; break;
+    case 0b01101: dispatch = &ARM::execute<0b01101>; break;
+    case 0b01110: dispatch = &ARM::execute<0b01110>; break;
+    case 0b01111: dispatch = &ARM::execute<0b01111>; break;
+    case 0b10000: dispatch = &ARM::execute<0b10000>; break;
+    case 0b10001: dispatch = &ARM::execute<0b10001>; break;
+    case 0b10010: dispatch = &ARM::execute<0b10010>; break;
+    case 0b10011: dispatch = &ARM::execute<0b10011>; break;
+    case 0b10100: dispatch = &ARM::execute<0b10100>; break;
+    case 0b10101: dispatch = &ARM::execute<0b10101>; break;
+    case 0b10110: dispatch = &ARM::execute<0b10110>; break;
+    case 0b10111: dispatch = &ARM::execute<0b10111>; break;
+    case 0b11000: dispatch = &ARM::execute<0b11000>; break;
+    case 0b11001: dispatch = &ARM::execute<0b11001>; break;
+    case 0b11010: dispatch = &ARM::execute<0b11010>; break;
+    case 0b11011: dispatch = &ARM::execute<0b11011>; break;
+    case 0b11100: dispatch = &ARM::execute<0b11100>; break;
+    case 0b11101: dispatch = &ARM::execute<0b11101>; break;
+    case 0b11110: dispatch = &ARM::execute<0b11110>; break;
+    case 0b11111: dispatch = &ARM::execute<0b11111>; break;
+
+    default:
+        EGG_UNREACHABLE;
+        break;
     }
 }
 
@@ -74,39 +108,65 @@ void ARM::flushWord()
     pc += 4;
 }
 
+template<uint flags>
 void ARM::execute()
 {
-    //disasm();
+    constexpr uint thumb = flags & (1 << 0);
+    constexpr uint halt  = flags & (1 << 1);
+    constexpr uint irq   = flags & (1 << 2);
+    constexpr uint dma   = flags & (1 << 3);
+    constexpr uint timer = flags & (1 << 4);
 
-    if (!cpsr.i && irqh.requested)
+    int last = remaining;
+
+    if (dma)
     {
-        interruptHW();
+        dmac.run(remaining);
     }
     else
     {
-        if (cpsr.t)
+        if (halt)
         {
-            u16 instr = pipe[0];
-
-            pipe[0] = pipe[1];
-            pipe[1] = readHalf(pc);
-
-            (this->*instr_thumb[thumbHash(instr)])(instr);
+            timerc.runUntil(remaining);
         }
         else
         {
-            u32 instr = pipe[0];
-
-            pipe[0] = pipe[1];
-            pipe[1] = readWord(pc);
-
-            if (cpsr.check(static_cast<Condition>(instr >> 28)))
+            if (irq && !cpsr.i)
             {
-                (this->*instr_arm[armHash(instr)])(instr);
+                interruptHW();
             }
+            else
+            {
+                //disasm();
+
+                if (thumb)
+                {
+                    u16 instr = pipe[0];
+
+                    pipe[0] = pipe[1];
+                    pipe[1] = readHalf(pc);
+
+                    (this->*instr_thumb[thumbHash(instr)])(instr);
+                }
+                else
+                {
+                    u32 instr = pipe[0];
+
+                    pipe[0] = pipe[1];
+                    pipe[1] = readWord(pc);
+
+                    if (cpsr.check(static_cast<Condition>(instr >> 28)))
+                    {
+                        (this->*instr_arm[armHash(instr)])(instr);
+                    }
+                }
+            }
+            pc += cpsr.size();
         }
     }
-    pc += cpsr.size();
+
+    if (timer)
+        timerc.run(last - remaining);
 }
 
 void ARM::disasm()
@@ -160,6 +220,8 @@ void ARM::interrupt(u32 pc, u32 lr, PSR::Mode mode)
     this->pc = pc;
 
     flushWord();
+
+    updateDispatch();
 }
 
 void ARM::interruptHW()

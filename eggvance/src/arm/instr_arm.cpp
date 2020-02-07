@@ -11,6 +11,8 @@ void ARM::Arm_BranchExchange(u32 instr)
     cpsr.t = addr & 0x1;
     pc = addr;
     flush();
+
+    updateDispatch();
 }
 
 template<uint link>
@@ -146,6 +148,8 @@ void ARM::Arm_DataProcessing(u32 instr)
             PSR spsr = this->spsr;
             switchMode(spsr.m);
             cpsr = spsr;
+
+            updateDispatch();
         }
         flush();
     }

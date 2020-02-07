@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "arm/arm.h"
 #include "common/macros.h"
 #include "mmu/memmap.h"
 #include "registers/macros.h"
@@ -141,6 +142,8 @@ void TimerController::schedule()
             overflow = std::min(overflow, timer.nextOverflow());
         }
     }
+
+    arm.updateDispatch();
 }
 
 void TimerController::reschedule()
