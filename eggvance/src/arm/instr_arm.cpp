@@ -6,13 +6,17 @@ void ARM::Arm_BranchExchange(u32 instr)
 {
     uint rn = bits<0, 4>(instr);
 
-    u32 addr = regs[rn];
+    pc = regs[rn];
 
-    cpsr.t = addr & 0x1;
-    pc = addr;
-    flush();
-
-    updateDispatch();
+    if (cpsr.t = pc & 0x1)
+    {
+        flushHalf();
+        updateDispatch();
+    }
+    else
+    {
+        flushWord();
+    }
 }
 
 template<uint link>
@@ -54,14 +58,11 @@ void ARM::Arm_DataProcessing(u32 instr)
 
     uint rd    = bits<12, 4>(instr);
     uint rn    = bits<16, 4>(instr);
-    uint flags = flags_;
+    uint flags = flags_ && rd != 15;
 
     u32& dst = regs[rd];
     u32  op1 = regs[rn];
     u32  op2;
-
-    if (rd == 15 && flags_)
-        flags = false;
 
     if (imm_op)
     {
@@ -148,10 +149,17 @@ void ARM::Arm_DataProcessing(u32 instr)
             PSR spsr = this->spsr;
             switchMode(spsr.m);
             cpsr = spsr;
+        }
 
+        if (cpsr.t)
+        {
+            flushHalf();
             updateDispatch();
         }
-        flush();
+        else
+        {
+            flushWord();
+        }
     }
 }
 

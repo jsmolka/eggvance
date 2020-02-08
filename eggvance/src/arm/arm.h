@@ -15,13 +15,17 @@ public:
 
     void reset();
 
-    void run(int cycles);
+    void run(uint cycles);
 
     void updateDispatch();
 
     u32 pipe[2];
 
 private:
+    using Dispatch = void(ARM::*)(void);
+
+    Dispatch dispatch;
+
     enum class Shift
     {
         Lsl = 0b00,
@@ -44,7 +48,6 @@ private:
     u32 readHalfRotated(u32 addr);
     u32 readHalfSigned(u32 addr);
 
-    void flush();
     void flushHalf();
     void flushWord();
 
@@ -123,7 +126,7 @@ private:
     void Thumb_LongBranchLink(u16 instr);
     void Thumb_Undefined(u16 instr);
 
-    int remaining;
+    int cycles;
     u32 last_addr;
 
     struct IO
@@ -131,8 +134,6 @@ private:
         WaitControl waitcnt;
         HaltControl haltcnt;
     } io;
-
-    void(ARM::*dispatch)(void);
 
     static std::array<void(ARM::*)(u32), 4096> instr_arm;
     static std::array<void(ARM::*)(u16), 1024> instr_thumb;

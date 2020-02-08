@@ -180,11 +180,16 @@ void ARM::Thumb_HighRegisterOperations(u16 instr)
         break;
 
     case Opcode::Bx:
-        cpsr.t = src & 0x1;
         pc = src;
-        flush();
-
-        updateDispatch();
+        if (cpsr.t = src & 0x1)
+        {
+            flushHalf();
+        }
+        else
+        {
+            flushWord();
+            updateDispatch();
+        }
         break;
 
     default:

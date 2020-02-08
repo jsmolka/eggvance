@@ -43,7 +43,7 @@ void DMAController::broadcast(DMA::Timing timing)
 {
     for (auto& dma : dmas)
     {
-        emit(timing, dma);
+        emit(dma, timing);
     }
 }
 
@@ -93,18 +93,19 @@ void DMAController::writeByte(u32 addr, u8 byte)
         EGG_UNREACHABLE;
         break;
     }
-
-    arm.updateDispatch();
 }
 
-void DMAController::emit(DMA::Timing timing, DMA& dma)
+void DMAController::emit(DMA& dma, DMA::Timing timing)
 {
     if (!dma.running && dma.control.enabled && dma.control.timing == int(timing))
     {
         dma.start();
 
         if (!active || dma.id < active->id)
+        {
             active = &dma;
+            arm.updateDispatch();
+        }
     }
 }
 
@@ -114,6 +115,6 @@ void DMAController::writeControl(DMA& dma, int index, u8 byte)
 
     if (dma.control.reload)
     {
-        emit(DMA::Timing::Immediate, dma);
+        emit(dma, DMA::Timing::Immediate);
     }
 }

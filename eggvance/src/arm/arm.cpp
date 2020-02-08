@@ -4,6 +4,7 @@
 
 #include "decode.h"
 #include "disassemble.h"
+#include "common/mpl.h"
 #include "mmu/mmu.h"
 #include "system/dmacontroller.h"
 #include "system/irqhandler.h"
@@ -13,83 +14,41 @@ ARM arm;
 
 void ARM::reset()
 {
-    remaining = 0;
-
     Registers::reset();
-
-    flushWord();
-
-    pc += 4;
 
     io.waitcnt.reset();
     io.haltcnt.reset();
 
     updateDispatch();
+
+    cycles = 0;
+    flushWord();
+    pc += 4;
 }
 
-void ARM::run(int cycles)
+void ARM::run(uint cycles)
 {
-    remaining += cycles;
+    this->cycles += cycles;
 
-    while (remaining > 0)
+    while (this->cycles > 0)
         (this->*dispatch)();
 }
 
 void ARM::updateDispatch()
 {
-    uint thumb = cpsr.t << 0;
-    uint halt  = io.haltcnt.halt << 1;
-    uint irq   = irqh.requested << 2;
-    uint dma   = (dmac.active ? 1 : 0) << 3;
-    uint timer = (timerc.active.size() > 0 ? 1 : 0) << 4;
+    static constexpr auto dispatchers = mpl::array<Dispatch, 32>([](auto x) {
+        return &ARM::execute<static_cast<uint>(x)>;
+    });
 
-    switch (thumb | halt | irq | dma | timer)
-    {
-    case 0b00000: dispatch = &ARM::execute<0b00000>; break;
-    case 0b00001: dispatch = &ARM::execute<0b00001>; break;
-    case 0b00010: dispatch = &ARM::execute<0b00010>; break;
-    case 0b00011: dispatch = &ARM::execute<0b00011>; break;
-    case 0b00100: dispatch = &ARM::execute<0b00100>; break;
-    case 0b00101: dispatch = &ARM::execute<0b00101>; break;
-    case 0b00110: dispatch = &ARM::execute<0b00110>; break;
-    case 0b00111: dispatch = &ARM::execute<0b00111>; break;
-    case 0b01000: dispatch = &ARM::execute<0b01000>; break;
-    case 0b01001: dispatch = &ARM::execute<0b01001>; break;
-    case 0b01010: dispatch = &ARM::execute<0b01010>; break;
-    case 0b01011: dispatch = &ARM::execute<0b01011>; break;
-    case 0b01100: dispatch = &ARM::execute<0b01100>; break;
-    case 0b01101: dispatch = &ARM::execute<0b01101>; break;
-    case 0b01110: dispatch = &ARM::execute<0b01110>; break;
-    case 0b01111: dispatch = &ARM::execute<0b01111>; break;
-    case 0b10000: dispatch = &ARM::execute<0b10000>; break;
-    case 0b10001: dispatch = &ARM::execute<0b10001>; break;
-    case 0b10010: dispatch = &ARM::execute<0b10010>; break;
-    case 0b10011: dispatch = &ARM::execute<0b10011>; break;
-    case 0b10100: dispatch = &ARM::execute<0b10100>; break;
-    case 0b10101: dispatch = &ARM::execute<0b10101>; break;
-    case 0b10110: dispatch = &ARM::execute<0b10110>; break;
-    case 0b10111: dispatch = &ARM::execute<0b10111>; break;
-    case 0b11000: dispatch = &ARM::execute<0b11000>; break;
-    case 0b11001: dispatch = &ARM::execute<0b11001>; break;
-    case 0b11010: dispatch = &ARM::execute<0b11010>; break;
-    case 0b11011: dispatch = &ARM::execute<0b11011>; break;
-    case 0b11100: dispatch = &ARM::execute<0b11100>; break;
-    case 0b11101: dispatch = &ARM::execute<0b11101>; break;
-    case 0b11110: dispatch = &ARM::execute<0b11110>; break;
-    case 0b11111: dispatch = &ARM::execute<0b11111>; break;
+    uint flags = 0;
 
-    default:
-        EGG_UNREACHABLE;
-        break;
-    }
-}
+    flags |= cpsr.t << 0;
+    flags |= io.haltcnt.halt << 1;
+    flags |= irqh.requested << 2;
+    flags |= (dmac.active ? 1 : 0) << 3;
+    flags |= (timerc.active.size() > 0 ? 1 : 0) << 4;
 
-void ARM::flush()
-{
-    if (cpsr.t)
-        flushHalf();
-    else
-        flushWord();
+    dispatch = dispatchers[flags];
 }
 
 void ARM::flushHalf()
@@ -117,17 +76,17 @@ void ARM::execute()
     constexpr uint dma   = flags & (1 << 3);
     constexpr uint timer = flags & (1 << 4);
 
-    int last = remaining;
+    int last = cycles;
 
     if (dma)
     {
-        dmac.run(remaining);
+        dmac.run(cycles);
     }
     else
     {
         if (halt)
         {
-            timerc.runUntil(remaining);
+            timerc.runUntil(cycles);
         }
         else
         {
@@ -166,7 +125,7 @@ void ARM::execute()
     }
 
     if (timer)
-        timerc.run(last - remaining);
+        timerc.run(last - cycles);
 }
 
 void ARM::disasm()
@@ -184,13 +143,12 @@ void ARM::disasm()
 
 void ARM::idle()
 {
-    remaining--;
+    cycles--;
 }
 
 void ARM::booth(u32 multiplier, bool sign)
 {
-    static constexpr u32 masks[3] =
-    {
+    static constexpr u32 masks[3] = {
         0xFF00'0000,
         0xFFFF'0000,
         0xFFFF'FF00
@@ -200,11 +158,11 @@ void ARM::booth(u32 multiplier, bool sign)
     {
         u32 bits = multiplier & mask;
         if (bits == 0 || (sign && bits == mask))
-            remaining++;
+            cycles++;
         else
             break;
     }
-    remaining -= 4;
+    cycles -= 4;
 }
 
 void ARM::interrupt(u32 pc, u32 lr, PSR::Mode mode)
