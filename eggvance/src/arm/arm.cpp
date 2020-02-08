@@ -4,7 +4,6 @@
 
 #include "decode.h"
 #include "disassemble.h"
-#include "common/mpl.h"
 #include "mmu/mmu.h"
 #include "system/dmacontroller.h"
 #include "system/irqhandler.h"
@@ -30,25 +29,42 @@ void ARM::run(uint cycles)
 {
     this->cycles += cycles;
 
+    #define DISPATCH_CASE(flags)                                \
+        case flags + 0b000: execute<flags + 0b000>(); break;    \
+        case flags + 0b001: execute<flags + 0b001>(); break;    \
+        case flags + 0b010: execute<flags + 0b010>(); break;    \
+        case flags + 0b011: execute<flags + 0b011>(); break;    \
+        case flags + 0b100: execute<flags + 0b100>(); break;    \
+        case flags + 0b101: execute<flags + 0b101>(); break;    \
+        case flags + 0b110: execute<flags + 0b110>(); break;    \
+        case flags + 0b111: execute<flags + 0b111>(); break
+
     while (this->cycles > 0)
-        (this->*dispatch)();
+    {
+        switch (dispatch)
+        {
+        DISPATCH_CASE(0b00000);
+        DISPATCH_CASE(0b01000);
+        DISPATCH_CASE(0b10000);
+        DISPATCH_CASE(0b11000);
+
+        default:
+            EGG_UNREACHABLE;
+            break;
+        }
+    }
+
+    #undef DISPATCH_CASE
 }
 
 void ARM::updateDispatch()
 {
-    static constexpr auto dispatchers = mpl::array<Dispatch, 32>([](auto x) {
-        return &ARM::execute<static_cast<uint>(x)>;
-    });
-
-    uint flags = 0;
-
-    flags |= cpsr.t << 0;
-    flags |= io.haltcnt.halt << 1;
-    flags |= irqh.requested << 2;
-    flags |= (dmac.active ? 1 : 0) << 3;
-    flags |= (timerc.active.size() > 0 ? 1 : 0) << 4;
-
-    dispatch = dispatchers[flags];
+    dispatch = 0;
+    dispatch |= cpsr.t << 0;
+    dispatch |= io.haltcnt.halt << 1;
+    dispatch |= irqh.requested << 2;
+    dispatch |= (dmac.active ? 1 : 0) << 3;
+    dispatch |= (timerc.active.size() > 0 ? 1 : 0) << 4;
 }
 
 void ARM::flushHalf()

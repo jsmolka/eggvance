@@ -22,9 +22,7 @@ public:
     u32 pipe[2];
 
 private:
-    using Dispatch = void(ARM::*)(void);
-
-    Dispatch dispatch;
+    uint dispatch;
 
     enum class Shift
     {
