@@ -64,7 +64,7 @@ void ARM::updateDispatch()
     dispatch |= io.haltcnt.halt << 1;
     dispatch |= irqh.requested << 2;
     dispatch |= (dmac.active ? 1 : 0) << 3;
-    dispatch |= (timerc.active.size() > 0 ? 1 : 0) << 4;
+    dispatch |= timerc.isActive() << 4;
 }
 
 void ARM::flushHalf()
@@ -102,7 +102,7 @@ void ARM::execute()
     {
         if (halt)
         {
-            timerc.runUntil(cycles);
+            timerc.runUntilIrq(cycles);
         }
         else
         {

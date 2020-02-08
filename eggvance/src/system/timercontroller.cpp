@@ -43,7 +43,7 @@ void TimerController::run(int cycles)
     }
 }
 
-void TimerController::runUntil(int& cycles)
+void TimerController::runUntilIrq(int& cycles)
 {
     int remaining = overflow - counter;
     if (remaining < cycles)
@@ -58,12 +58,17 @@ void TimerController::runUntil(int& cycles)
     }
 }
 
+bool TimerController::isActive() const
+{
+    return active.size > 0;
+}
+
 #define READ_TIMER_DATA(label, data)    \
     CASE2(label):                       \
         runTimers();                    \
         return data.read(addr - label)  
 
-u8 TimerController::readByte(u32 addr)
+u8 TimerController::read(u32 addr)
 {
     switch (addr)
     {
@@ -97,7 +102,7 @@ u8 TimerController::readByte(u32 addr)
         break;                                  \
     }
 
-void TimerController::writeByte(u32 addr, u8 byte)
+void TimerController::write(u32 addr, u8 byte)
 {
     switch (addr)
     {

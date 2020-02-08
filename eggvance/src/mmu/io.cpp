@@ -211,7 +211,7 @@ u8 IO::readByte(u32 addr)
     CASE1(REG_TM2CNT_H):
     CASE2(REG_TM3CNT_L):
     CASE1(REG_TM3CNT_H):
-        return timerc.readByte(addr);
+        return timerc.read(addr);
 
     CASE1(REG_TM0CNT_H + 1):
     CASE1(REG_TM1CNT_H + 1):
@@ -373,7 +373,7 @@ void IO::writeByte(u32 addr, u8 byte)
     CASE1(REG_TM2CNT_H):
     CASE2(REG_TM3CNT_L):
     CASE1(REG_TM3CNT_H):
-        timerc.writeByte(addr, byte);
+        timerc.write(addr, byte);
         break;
     }
 }
