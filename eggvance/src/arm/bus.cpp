@@ -1,6 +1,5 @@
 #include "arm.h"
 
-#include "common/bits.h"
 #include "mmu/mmu.h"
 
 bool ARM::isSequential(u32 addr) const

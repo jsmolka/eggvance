@@ -26,14 +26,14 @@ protected:
     void switchMode(PSR::Mode mode);
 
 private:
-    enum Bank : uint
+    enum Bank
     {
-        kBankDef = 0,
-        kBankFiq = 1,
-        kBankIrq = 2,
-        kBankSvc = 3,
-        kBankAbt = 4,
-        kBankUnd = 5
+        BANK_DEF = 0,
+        BANK_FIQ = 1,
+        BANK_IRQ = 2,
+        BANK_SVC = 3,
+        BANK_ABT = 4,
+        BANK_UND = 5
     };
 
     static Bank modeToBank(PSR::Mode mode);

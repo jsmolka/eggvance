@@ -1,40 +1,39 @@
 #pragma once
 
 #include "common/bits.h"
-#include "common/integer.h"
 #include "common/macros.h"
-
-enum class Condition
-{
-    EQ = 0x0,
-    NE = 0x1,
-    CS = 0x2,
-    CC = 0x3,
-    MI = 0x4,
-    PL = 0x5,
-    VS = 0x6,
-    VC = 0x7,
-    HI = 0x8,
-    LS = 0x9,
-    GE = 0xA,
-    LT = 0xB,
-    GT = 0xC,
-    LE = 0xD,
-    AL = 0xE,
-    NV = 0xF
-};
 
 struct PSR
 {
-    enum class Mode : char
+    enum class Mode
     {
-        USR = 0b10000,
-        FIQ = 0b10001,
-        IRQ = 0b10010,
-        SVC = 0b10011,
-        ABT = 0b10111,
-        SYS = 0b11111,
-        UND = 0b11011
+        Usr = 0b10000,
+        Fiq = 0b10001,
+        Irq = 0b10010,
+        Svc = 0b10011,
+        Abt = 0b10111,
+        Sys = 0b11111,
+        Und = 0b11011
+    };
+
+    enum class Condition
+    {
+        EQ = 0x0,
+        NE = 0x1,
+        CS = 0x2,
+        CC = 0x3,
+        MI = 0x4,
+        PL = 0x5,
+        VS = 0x6,
+        VC = 0x7,
+        HI = 0x8,
+        LS = 0x9,
+        GE = 0xA,
+        LT = 0xB,
+        GT = 0xC,
+        LE = 0xD,
+        AL = 0xE,
+        NV = 0xF
     };
 
     inline PSR& operator=(u32 value)
@@ -53,19 +52,19 @@ struct PSR
 
     inline operator u32() const
     {
-        return static_cast<uint>(m)
-            | (t <<  5)
-            | (f <<  6)
-            | (i <<  7)
-            | (v << 28)
-            | (c << 29)
-            | (z << 30)
-            | (n << 31);
+        return static_cast<u32>(m)
+            | (static_cast<u32>(t) <<  5)
+            | (static_cast<u32>(f) <<  6)
+            | (static_cast<u32>(i) <<  7)
+            | (static_cast<u32>(v) << 28)
+            | (static_cast<u32>(c) << 29)
+            | (static_cast<u32>(z) << 30)
+            | (static_cast<u32>(n) << 31);
     }
 
     inline uint size() const
     {
-        return 2 << (t ^ 0x1);
+        return 2 << (static_cast<uint>(t) ^ 0x1);
     }
 
     inline bool check(Condition condition) const
@@ -95,12 +94,12 @@ struct PSR
         }
     }
 
-    Mode m = Mode::SYS;
-    char t = 0;
-    char f = 0;
-    char i = 0;
-    char v = 0;
-    char c = 0;
-    char z = 0;
-    char n = 0;
+    Mode m = Mode::Sys;
+    bool t = false;
+    bool f = false;
+    bool i = false;
+    bool v = false;
+    bool c = false;
+    bool z = false;
+    bool n = false;
 };

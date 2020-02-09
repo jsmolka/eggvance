@@ -504,7 +504,7 @@ void ARM::Thumb_LoadStoreMultiple(u16 instr)
 template<uint condition>
 void ARM::Thumb_ConditionalBranch(u16 instr)
 {
-    if (cpsr.check(static_cast<Condition>(condition)))
+    if (cpsr.check(static_cast<PSR::Condition>(condition)))
     {
         uint offset = bits<0, 8>(instr);
 

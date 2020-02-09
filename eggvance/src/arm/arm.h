@@ -2,9 +2,9 @@
 
 #include <array>
 
+#include "registers.h"
 #include "registers/haltcontrol.h"
 #include "registers/waitcontrol.h"
-#include "registers.h"
 
 class ARM : public Registers
 {

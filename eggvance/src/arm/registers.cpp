@@ -1,9 +1,7 @@
 #include "registers.h"
 
-#include <algorithm>
 #include <cstring>
 
-#include "common/macros.h"
 #include "common/config.h"
 
 void Registers::reset()
@@ -20,11 +18,11 @@ void Registers::reset()
         spsr = 0x0000'0000;
         cpsr = 0x0000'005F;
 
-        bank_all[kBankFiq][0] = 0x0300'7F00;
-        bank_all[kBankAbt][0] = 0x0300'7F00;
-        bank_all[kBankUnd][0] = 0x0300'7F00;
-        bank_all[kBankSvc][0] = 0x0300'7FE0;
-        bank_all[kBankIrq][0] = 0x0300'7FA0;
+        bank_all[BANK_FIQ][0] = 0x0300'7F00;
+        bank_all[BANK_ABT][0] = 0x0300'7F00;
+        bank_all[BANK_UND][0] = 0x0300'7F00;
+        bank_all[BANK_SVC][0] = 0x0300'7FE0;
+        bank_all[BANK_IRQ][0] = 0x0300'7FA0;
     }
     else 
     {
@@ -48,10 +46,10 @@ void Registers::switchMode(PSR::Mode mode)
         lr   = bank_all[bank_new][1];
         spsr = bank_all[bank_new][2];
 
-        if (bank_old == kBankFiq || bank_new == kBankFiq)
+        if (bank_old == BANK_FIQ || bank_new == BANK_FIQ)
         {
-            int fiq_old = bank_old == kBankFiq;
-            int fiq_new = bank_new == kBankFiq;
+            uint fiq_old = static_cast<uint>(bank_old == BANK_FIQ);
+            uint fiq_new = static_cast<uint>(bank_new == BANK_FIQ);
 
             bank_fiq[fiq_old][0] = regs[ 8];
             bank_fiq[fiq_old][1] = regs[ 9];
@@ -73,16 +71,16 @@ Registers::Bank Registers::modeToBank(PSR::Mode mode)
 {
     switch (mode)
     {
-    case PSR::Mode::USR: return kBankDef;
-    case PSR::Mode::SYS: return kBankDef;
-    case PSR::Mode::FIQ: return kBankFiq;
-    case PSR::Mode::IRQ: return kBankIrq;
-    case PSR::Mode::SVC: return kBankSvc;
-    case PSR::Mode::ABT: return kBankAbt;
-    case PSR::Mode::UND: return kBankUnd;
+    case PSR::Mode::Usr: return BANK_DEF;
+    case PSR::Mode::Sys: return BANK_DEF;
+    case PSR::Mode::Fiq: return BANK_FIQ;
+    case PSR::Mode::Irq: return BANK_IRQ;
+    case PSR::Mode::Svc: return BANK_SVC;
+    case PSR::Mode::Abt: return BANK_ABT;
+    case PSR::Mode::Und: return BANK_UND;
 
     default:
         EGG_UNREACHABLE;
-        return kBankDef;
+        return BANK_DEF;
     }
 }

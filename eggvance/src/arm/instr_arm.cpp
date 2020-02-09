@@ -450,7 +450,7 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
 
     PSR::Mode mode = cpsr.m;
     if (user_mode)
-        switchMode(PSR::Mode::USR);
+        switchMode(PSR::Mode::Usr);
 
     if (rlist != 0)
     {

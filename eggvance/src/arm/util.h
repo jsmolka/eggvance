@@ -4,34 +4,34 @@
 
 namespace util
 {
-    inline char zFlag(u32 value)
+    inline bool zFlag(u32 value)
     {
         return value == 0;
     }
 
-    inline char nFlag(u32 value)
+    inline bool nFlag(u32 value)
     {
         return value >> 31;
     }
 
-    inline char cFlagAdd(u64 op1, u64 op2)
+    inline bool cFlagAdd(u64 op1, u64 op2)
     {
         return (op1 + op2) > 0xFFFF'FFFF;
     }
 
-    inline char cFlagSub(u64 op1, u64 op2)
+    inline bool cFlagSub(u64 op1, u64 op2)
     {
         return op2 <= op1;
     }
 
-    inline char vFlagAdd(u32 op1, u32 op2, u32 res)
+    inline bool vFlagAdd(u32 op1, u32 op2, u32 res)
     {
-        return ((op1 ^ res) & (op1 ^ op2 ^ (1 << 31))) >> 31;
+        return ((op1 ^ res) & (~op1 ^ op2)) >> 31;
     }
 
-    inline char vFlagSub(u32 op1, u32 op2, u32 res)
+    inline bool vFlagSub(u32 op1, u32 op2, u32 res)
     {
-        return ((op1 ^ op2) & (op2 ^ res ^ (1 << 31))) >> 31;
+        return ((op1 ^ op2) & (~op2 ^ res)) >> 31;
     }
 
     inline u32 lslArm(u32 value, u32 amount, bool flags, PSR& psr)
@@ -58,7 +58,7 @@ namespace util
         return value;
     }
 
-    template<uint amount>
+    template<u32 amount>
     inline u32 lslThumb(u32 value, PSR& psr)
     {
         if (amount != 0)
@@ -134,7 +134,7 @@ namespace util
         return value;
     }
 
-    template<uint amount>
+    template<u32 amount>
     inline u32 lsrThumb(u32 value, PSR& psr)
     {
         if (amount != 0)
@@ -209,7 +209,7 @@ namespace util
         return value;
     }
 
-    template<uint amount>
+    template<u32 amount>
     inline u32 asrThumb(u32 value, PSR& psr)
     {
         if (amount != 0 && amount < 32)
