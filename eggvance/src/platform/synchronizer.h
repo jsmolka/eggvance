@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/integer.h"
+#include <chrono>
 
 class Synchronizer
 {
@@ -12,9 +12,7 @@ public:
     void endFrame();
 
 private:
-    static u64 sleep(u32 us);
-
-    s64 frame_delta;
-    u64 frame_begin;
-    u64 frame_duration;
+    std::chrono::nanoseconds delta;
+    std::chrono::nanoseconds frame;
+    std::chrono::time_point<std::chrono::high_resolution_clock> begin;
 };

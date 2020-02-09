@@ -201,15 +201,6 @@
     <ClCompile Include="src\platform\sdl\sdlplatform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\platform\microclock.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\platform\framecounter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\platform\synchronizer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\system\irqhandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -226,6 +217,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\arm\instr_arm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\platform\synchronizer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\platform\framecounter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -453,9 +450,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\platform\sdl\sdlplatform.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\platform\microclock.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\platform\framecounter.h">

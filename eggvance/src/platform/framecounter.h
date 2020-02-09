@@ -1,5 +1,7 @@
 #pragma once
 
+#include <chrono>
+
 #include "common/integer.h"
 
 class FrameCounter
@@ -9,9 +11,9 @@ public:
 
     FrameCounter& operator++();
 
-    bool fps(double& value);
+    bool queryFps(double& value);
 
 private:
-    u64 start;
-    int count;
+    std::chrono::time_point<std::chrono::high_resolution_clock> begin;
+    uint count;
 };

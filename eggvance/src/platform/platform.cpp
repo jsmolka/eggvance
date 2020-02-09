@@ -54,11 +54,11 @@ void Platform::main()
 
         emulateFrame();
 
-        double value = 0;
-        if ((++counter).fps(value))
-            video_device->title(fmt::format("{} - {:.1f} fps", title, value));
-
         synchronizer.endFrame();
+
+        double value = 0;
+        if ((++counter).queryFps(value))
+            video_device->title(fmt::format("{} - {:.1f} fps", title, value));
     }
 
     mainHookEnd();

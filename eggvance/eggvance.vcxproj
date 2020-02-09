@@ -173,7 +173,6 @@
     <ClCompile Include="src\system\dmacontroller.cpp" />
     <ClCompile Include="src\system\irqhandler.cpp" />
     <ClCompile Include="src\system\keypad.cpp" />
-    <ClCompile Include="src\platform\microclock.cpp" />
     <ClCompile Include="src\mmu\bios.cpp" />
     <ClCompile Include="src\mmu\gamepak\backup.cpp" />
     <ClCompile Include="src\mmu\gamepak\eeprom.cpp" />
@@ -256,7 +255,6 @@
     <ClInclude Include="src\registers\windowdimension.h" />
     <ClInclude Include="src\system\dma.h" />
     <ClInclude Include="src\system\dmacontroller.h" />
-    <ClInclude Include="src\platform\microclock.h" />
     <ClInclude Include="src\mmu\bios.h" />
     <ClInclude Include="src\mmu\gamepak\eeprom.h" />
     <ClInclude Include="src\mmu\gamepak\flash.h" />

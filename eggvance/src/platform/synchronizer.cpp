@@ -1,9 +1,10 @@
 #include "synchronizer.h"
 
-#include "microclock.h"
+#include <thread>
+
 #include "common/constants.h"
 
-namespace micro = micro_clock;
+using namespace std::chrono;
 
 Synchronizer::Synchronizer()
 {
@@ -12,29 +13,25 @@ Synchronizer::Synchronizer()
 
 void Synchronizer::setFps(double fps)
 {
-    frame_delta = 0;
-    frame_begin = micro::now();
-    frame_duration = static_cast<u64>(1.0e6 / fps);
+    delta = nanoseconds(0);
+    frame = nanoseconds(nanoseconds::rep(nanoseconds::period::den / fps));
+    begin = high_resolution_clock::now();
 }
 
 void Synchronizer::beginFrame()
 {
-    frame_begin = micro::now();
+    begin = high_resolution_clock::now();
 }
 
 void Synchronizer::endFrame()
 {
-    frame_delta += micro::now() - frame_begin;
+    delta += high_resolution_clock::now() - begin;
 
-    if (frame_delta < static_cast<s64>(frame_duration))
-        frame_delta += sleep(static_cast<u32>(frame_duration - frame_delta));
-
-    frame_delta -= frame_duration;
-}
-
-u64 Synchronizer::sleep(u32 us)
-{
-    u64 now = micro::now();
-    micro::sleep(us);
-    return micro::now() - now;
+    if (delta < frame)
+    {
+        auto then = high_resolution_clock::now();
+        std::this_thread::sleep_for(frame - delta);
+        delta += high_resolution_clock::now() - then;
+    }
+    delta -= frame;
 }
