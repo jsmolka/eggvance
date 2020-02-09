@@ -60,7 +60,7 @@ void TimerController::runUntilIrq(int& cycles)
 
 bool TimerController::isActive() const
 {
-    return active.size > 0;
+    return active.size() > 0;
 }
 
 #define READ_TIMER_DATA(label, data)    \

@@ -11,75 +11,84 @@ public:
     using iterator = T*;
 
     SmallVector()
-        : size(0), capacity(N), heap(stack.data()) {}
-
-    ~SmallVector()
-    {
-        if (heap != stack.data())
-            delete[] heap;
-    }
+        : _size(0), _capacity(N), _heap(_stack.data()) {}
 
     SmallVector(const SmallVector&) = delete;
     SmallVector& operator=(const SmallVector&) = delete;
 
+    ~SmallVector()
+    {
+        if (isHeapAllocated())
+            delete[] _heap;
+    }
+
     inline T& operator[](std::size_t index)
     {
-        return heap[index];
+        return _heap[index];
     }
 
     inline void clear()
     {
-        if (heap != stack.data())
+        if (isHeapAllocated())
         {
-            delete[] heap;
-            heap = stack.data();
+            delete[] _heap;
+            _heap = _stack.data();
         }
-        size = 0;
-        capacity = N;
+        _size = 0;
+        _capacity = N;
     }
 
     inline void push_back(T&& item)
     {
-        if (size == capacity)
-            grow();
+        if (_size == _capacity)
+            reallocate(_capacity << 1);
 
-        heap[size++] = std::move(item);
+        _heap[_size++] = std::move(item);
     }
 
     inline void push_back(const T& item)
     {
-        if (size == capacity)
-            grow();
+        if (_size == _capacity)
+            reallocate(_capacity << 1);
 
-        heap[size++] = item;
+        _heap[_size++] = item;
+    }
+
+    inline std::size_t size() const
+    {
+        return _size;
     }
 
     inline iterator begin()
     {
-        return &heap[0];
+        return &_heap[0];
     }
 
     inline iterator end()
     {
-        return &heap[size];
+        return &_heap[_size];
     }
-
-    std::size_t size;
 
 private:
-    inline void grow()
+    inline bool isHeapAllocated() const
     {
-        capacity <<= 1;
-        T* data = new T[capacity];
-        std::copy(begin(), end(), data);
-
-        if (heap != stack.data())
-            delete[] heap;
-
-        heap = data;
+        return _heap != _stack.data();
     }
 
-    std::array<T, N> stack;
-    std::size_t capacity;
-    T* heap;
+    inline void reallocate(std::size_t size)
+    {
+        T* heap = new T[size];
+        std::copy(begin(), end(), heap);
+
+        if (isHeapAllocated())
+            delete[] _heap;
+
+        _heap = heap;
+        _capacity = size;
+    }
+
+    std::array<T, N> _stack;
+    std::size_t _capacity;
+    std::size_t _size;
+    T* _heap;
 };
