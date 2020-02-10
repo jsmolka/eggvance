@@ -86,26 +86,34 @@ void ARM::flushWord()
 template<uint flags>
 void ARM::execute()
 {
-    constexpr uint thumb = flags & (1 << 0);
-    constexpr uint halt  = flags & (1 << 1);
-    constexpr uint irq   = flags & (1 << 2);
-    constexpr uint dma   = flags & (1 << 3);
-    constexpr uint timer = flags & (1 << 4);
-
-    int last = cycles;
+    constexpr bool thumb = static_cast<bool>(flags & (1 << 0));
+    constexpr bool halt  = static_cast<bool>(flags & (1 << 1));
+    constexpr bool irq   = static_cast<bool>(flags & (1 << 2));
+    constexpr bool dma   = static_cast<bool>(flags & (1 << 3));
+    constexpr bool timer = static_cast<bool>(flags & (1 << 4));
 
     if (dma)
     {
+        int last = cycles;
+
         dmac.run(cycles);
+
+        if (timer)
+            timerc.run(last - cycles);
     }
     else
     {
         if (halt)
         {
-            timerc.runUntilIrq(cycles);
+            if (timer)
+                timerc.runUntilIrq(cycles);
+            else
+                cycles = 0;
         }
         else
         {
+            int last = cycles;
+
             if (irq && !cpsr.i)
             {
                 interruptHW();
@@ -137,11 +145,11 @@ void ARM::execute()
                 }
             }
             pc += cpsr.size();
+
+            if (timer)
+                timerc.run(last - cycles);
         }
     }
-
-    if (timer)
-        timerc.run(last - cycles);
 }
 
 void ARM::disasm()
