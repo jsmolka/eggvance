@@ -1,6 +1,5 @@
 #include "sdlplatform.h"
 
-#include "common/config.h"
 #include "mmu/mmu.h"
 #include "platform/audiodevice.h"
 #include "platform/inputdevice.h"

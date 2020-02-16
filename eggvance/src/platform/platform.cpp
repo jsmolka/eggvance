@@ -4,11 +4,8 @@
 
 #include "audiodevice.h"
 #include "inputdevice.h"
-#include "videodevice.h"
 #include "framecounter.h"
 #include "arm/arm.h"
-#include "common/config.h"
-#include "common/fs.h"
 #include "mmu/mmu.h"
 #include "ppu/ppu.h"
 #include "system/dmacontroller.h"
@@ -21,7 +18,6 @@ void Platform::init(int argc, char* argv[])
     initHookBeg();
 
     fs::init(argv[0]);
-
     config.init("eggvance.toml");
     mmu.bios.init(config.bios_file);
 
@@ -29,7 +25,8 @@ void Platform::init(int argc, char* argv[])
     input_device->init();
     video_device->init();
 
-    if (argc > 1) mmu.gamepak.load(argv[1]);
+    if (argc > 1)
+        mmu.gamepak.load(argv[1]);
 
     initHookEnd();
 }
@@ -39,7 +36,6 @@ void Platform::main()
     mainHookBeg();
 
     reset();
-
     updateTitle();
 
     FrameCounter counter;
@@ -49,9 +45,7 @@ void Platform::main()
         synchronizer.beginFrame();
 
         processEvents();
-
         keypad.process();
-
         emulateFrame();
 
         synchronizer.endFrame();
@@ -86,7 +80,7 @@ void Platform::updateTitle()
 
 void Platform::emulateFrame()
 { 
-    for (int x = 0; x < 160; ++x)
+    for (uint x = 0; x < 160; ++x)
     {
         arm.run(960);
         ppu.scanline();
@@ -96,7 +90,7 @@ void Platform::emulateFrame()
     }
 
     ppu.vblank();
-    for (int x = 0; x < 68; ++x)
+    for (uint x = 0; x < 68; ++x)
     {
         arm.run(1232);
         ppu.next();

@@ -17,7 +17,7 @@ int EGG_MAIN(int argc, char* argv[])
         platform.main();
         return 0;
     }
-    catch (std::runtime_error error)
+    catch (const std::runtime_error& error)
     {
         SDL_ShowSimpleMessageBox(0, "Error", error.what(), nullptr);
         return 1;

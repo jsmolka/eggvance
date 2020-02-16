@@ -1,10 +1,10 @@
 #pragma once
 
+#include "synchronizer.h"
+#include "videodevice.h"
 #include "common/config.h"
 #include "common/input.h"
 #include "common/constants.h"
-#include "synchronizer.h"
-#include "videodevice.h"
 
 class Platform
 {

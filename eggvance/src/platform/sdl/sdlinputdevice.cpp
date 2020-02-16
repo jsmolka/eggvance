@@ -34,12 +34,12 @@ void SDLInputDevice::deinit()
     }
 }
 
-int SDLInputDevice::state()
+uint SDLInputDevice::state()
 {
-    int state = keyboardState() | controllerState();
+    uint state = keyboardState() | controllerState();
 
-    constexpr int ud_mask = (1 << SHIFT_UP) | (1 << SHIFT_DOWN);
-    constexpr int lr_mask = (1 << SHIFT_LEFT) | (1 << SHIFT_RIGHT);
+    constexpr uint ud_mask = (1 << SHIFT_UP  ) | (1 << SHIFT_DOWN );
+    constexpr uint lr_mask = (1 << SHIFT_LEFT) | (1 << SHIFT_RIGHT);
 
     if ((state & ud_mask) == ud_mask) state &= ~ud_mask;
     if ((state & lr_mask) == lr_mask) state &= ~lr_mask;
@@ -55,11 +55,11 @@ void SDLInputDevice::deviceEvent(const SDL_ControllerDeviceEvent& event)
         controller = nullptr;
 }
 
-int SDLInputDevice::keyboardState() const
+uint SDLInputDevice::keyboardState() const
 {
     auto keyboard = SDL_GetKeyboardState(nullptr);
 
-    int state = 0;
+    uint state = 0;
     state |= keyboard[controls.keyboard.a     ] << SHIFT_A;
     state |= keyboard[controls.keyboard.b     ] << SHIFT_B;
     state |= keyboard[controls.keyboard.up    ] << SHIFT_UP;
@@ -74,9 +74,9 @@ int SDLInputDevice::keyboardState() const
     return state;
 }
 
-int SDLInputDevice::controllerState() const
+uint SDLInputDevice::controllerState() const
 {
-    int state = 0;
+    uint state = 0;
 
     if (controller)
     {

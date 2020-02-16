@@ -3,11 +3,12 @@
 #include <memory>
 
 #include "device.h"
+#include "common/integer.h"
 
 class InputDevice : public Device
 {
 public:
-    virtual int state() = 0;
+    virtual uint state() = 0;
 
 protected:
     enum Shift

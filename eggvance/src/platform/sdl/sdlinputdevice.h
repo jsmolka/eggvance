@@ -16,7 +16,7 @@ public:
 
     void init() override;
     void deinit() override;
-    int state() override;
+    uint state() override;
 
     void deviceEvent(const SDL_ControllerDeviceEvent& event);
 
@@ -30,8 +30,8 @@ private:
         InputConfig<SDL_GameControllerButton> controller;
     } controls;
 
-    int keyboardState() const;
-    int controllerState() const;
+    uint keyboardState() const;
+    uint controllerState() const;
 
     SDL_GameController* controller;
 };
