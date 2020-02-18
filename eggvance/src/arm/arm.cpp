@@ -92,14 +92,11 @@ void ARM::execute()
     constexpr bool dma   = static_cast<bool>(flags & (1 << 3));
     constexpr bool timer = static_cast<bool>(flags & (1 << 4));
 
+    int last = cycles;
+
     if (dma)
     {
-        int last = cycles;
-
         dmac.run(cycles);
-
-        if (timer)
-            timerc.run(last - cycles);
     }
     else
     {
@@ -109,11 +106,11 @@ void ARM::execute()
                 timerc.runUntilIrq(cycles);
             else
                 cycles = 0;
+
+            return;
         }
         else
         {
-            int last = cycles;
-
             if (irq && !cpsr.i)
             {
                 interruptHW();
@@ -145,11 +142,12 @@ void ARM::execute()
                 }
             }
             pc += cpsr.size();
-
-            if (timer)
-                timerc.run(last - cycles);
         }
     }
+
+    if (timer)
+        timerc.run(last - cycles);
+
 }
 
 void ARM::disasm()
