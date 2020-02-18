@@ -60,10 +60,10 @@ void ARM::run(uint cycles)
 void ARM::updateDispatch()
 {
     dispatch = 0;
-    dispatch |= cpsr.t << 0;
-    dispatch |= io.haltcnt.halt << 1;
-    dispatch |= irqh.requested << 2;
-    dispatch |= (dmac.active ? 1 : 0) << 3;
+    dispatch |= cpsr.t            << 0;
+    dispatch |= io.haltcnt.halt   << 1;
+    dispatch |= irqh.requested    << 2;
+    dispatch |= dmac.isActive()   << 3;
     dispatch |= timerc.isActive() << 4;
 }
 
@@ -147,7 +147,6 @@ void ARM::execute()
 
     if (timer)
         timerc.run(last - cycles);
-
 }
 
 void ARM::disasm()

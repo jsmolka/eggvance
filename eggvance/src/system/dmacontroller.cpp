@@ -17,6 +17,11 @@ void DMAController::reset()
     }
 }
 
+bool DMAController::isActive() const
+{
+    return active;
+}
+
 void DMAController::run(int& cycles)
 {
     active->run(cycles);
