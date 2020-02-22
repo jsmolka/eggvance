@@ -2,12 +2,14 @@
 
 #include "register.h"
 
-class BGOffset : public Register<2>
+class BGOffset : public TRegister<BGOffset, 2>
 {
 public:
-    void reset();
+    inline operator u16()
+    {
+        return *reinterpret_cast<u16*>(data);
+    }
 
-    void write(int index, u8 byte);
-
-    int value;
+    template<uint index>
+    inline u8 read() const = delete;
 };

@@ -104,10 +104,11 @@ void PPU::hblank()
     io.dispstat.hblank = true;
     io.dispstat.vblank = false;
 
-    io.bgx[0].current += io.bgpb[0].value;
-    io.bgx[1].current += io.bgpb[1].value;
-    io.bgy[0].current += io.bgpd[0].value;
-    io.bgy[1].current += io.bgpd[1].value;
+    io.bgx[0].hblank(io.bgpb[0]);
+    io.bgx[0].hblank(io.bgpb[0]);
+    io.bgx[1].hblank(io.bgpb[1]);
+    io.bgy[0].hblank(io.bgpd[0]);
+    io.bgy[1].hblank(io.bgpd[1]);
 
     if (io.dispstat.hblank_irq)
     {
@@ -121,10 +122,10 @@ void PPU::vblank()
     io.dispstat.vblank = true;
     io.dispstat.hblank = false;
 
-    io.bgx[0].current = io.bgx[0].value;
-    io.bgx[1].current = io.bgx[1].value;
-    io.bgy[0].current = io.bgy[0].value;
-    io.bgy[1].current = io.bgy[1].value;
+    io.bgx[0].vblank();
+    io.bgx[1].vblank();
+    io.bgy[0].vblank();
+    io.bgy[1].vblank();
 
     if (io.dispstat.vblank_irq)
     {

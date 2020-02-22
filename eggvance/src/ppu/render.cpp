@@ -5,13 +5,13 @@
 #include "common/macros.h"
 #include "mmu/mmu.h"
 
-Point PPU::transform(int x, int bg) const
+Point PPU::transform(int x, int bg)
 {
     bg -= 2;
 
     return Point(
-        io.bgx[bg].current + io.bgpa[bg].value * x,
-        io.bgy[bg].current + io.bgpc[bg].value * x
+        io.bgx[bg] + io.bgpa[bg] * x,
+        io.bgy[bg] + io.bgpc[bg] * x
     );
 }
 
@@ -44,8 +44,8 @@ void PPU::renderBgMode0(int bg)
     const auto& dims  = io.bgcnt[bg].dims_reg;
 
     Point origin(
-        io.bghofs[bg].value,
-        io.bgvofs[bg].value + io.vcount
+        io.bghofs[bg],
+        io.bgvofs[bg] + io.vcount
     );
 
     origin.x %= dims.w;

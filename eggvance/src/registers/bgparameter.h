@@ -1,13 +1,28 @@
 #pragma once
 
 #include "register.h"
+#include "common/config.h"
 
-class BGParameter : public Register<2>
+template<uint init>
+class BGParameter : public TRegister<BGParameter<init>, 2>
 {
 public:
-    void reset();
+    BGParameter()
+    {
+        if (config.bios_skip)
+            *reinterpret_cast<s16*>(data) = init;
+    }
 
-    void write(int index, u8 byte);
+    inline operator s16()
+    {
+        return *reinterpret_cast<s16*>(data);
+    }
 
-    s16 value;
+    template<uint index>
+    inline u8 read() const = delete;
 };
+
+using BGParameterA = BGParameter<0x0100>;
+using BGParameterB = BGParameter<0x0000>;
+using BGParameterC = BGParameter<0x0000>;
+using BGParameterD = BGParameter<0x0100>;

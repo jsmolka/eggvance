@@ -27,10 +27,10 @@ public:
     BGControl bgcnt[4];
     BGOffset bghofs[4];
     BGOffset bgvofs[4];
-    BGParameter bgpa[2];
-    BGParameter bgpb[2];
-    BGParameter bgpc[2];
-    BGParameter bgpd[2];
+    BGParameterA bgpa[2];
+    BGParameterB bgpb[2];
+    BGParameterC bgpc[2];
+    BGParameterD bgpd[2];
     BGReference bgx[2];
     BGReference bgy[2];
 

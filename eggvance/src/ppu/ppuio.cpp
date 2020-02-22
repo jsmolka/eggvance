@@ -34,12 +34,4 @@ void PPUIO::reset()
     bldcnt.reset();
     bldalpha.reset();
     bldy.reset();
-
-    if (config.bios_skip)
-    {
-        bgpa[0].value = 0x100;
-        bgpa[1].value = 0x100;
-        bgpd[0].value = 0x100;
-        bgpd[1].value = 0x100;
-    }
 }
