@@ -4,7 +4,7 @@
 #include "common/config.h"
 
 template<s16 post_bios>
-class BGParameter : public TRegister<BGParameter<init>, 2>
+class BGParameter : public TRegister<BGParameter<post_bios>, 2>
 {
 public:
     BGParameter()
