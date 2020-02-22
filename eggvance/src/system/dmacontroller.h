@@ -7,8 +7,6 @@ class DMAController
 public:
     void reset();
 
-    bool isActive() const;
-
     void run(int& cycles);
     void broadcast(DMA::Timing timing);
 

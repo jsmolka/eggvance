@@ -1,43 +1,43 @@
 #include "irqhandler.h"
 
 #include "arm/arm.h"
-#include "common/macros.h"
 #include "mmu/memmap.h"
 #include "registers/macros.h"
 
-IRQHandler irqh;
+IrqHandler irqh;
 
-void IRQHandler::reset()
+void IrqHandler::reset()
 {
-    *this = IRQHandler();
+    *this = IrqHandler();
 }
 
-void IRQHandler::request(IRQ irq)
+void IrqHandler::request(Irq irq)
 {
     io.intr_request |= static_cast<uint>(irq);
 
     update();
 }
 
-void IRQHandler::update()
+void IrqHandler::update()
 {
-    requested = io.intr_enable & io.intr_request;
+    bool interrupt = io.intr_enable & io.intr_request;
 
-    if (requested)
-        arm.io.haltcnt = false;
+    if (interrupt)
+        arm.state &= ~ARM::STATE_HALT;
 
-    requested &= io.intr_master;
-
-    arm.updateDispatch();
+    if (interrupt && io.intr_master)
+        arm.state |= ARM::STATE_IRQ;
+    else
+        arm.state &= ~ARM::STATE_IRQ;
 }
 
-u8 IRQHandler::read(u32 addr)
+u8 IrqHandler::read(u32 addr) const
 {
     switch (addr)
     {
-    READ_HALF_REG(REG_IE , io.intr_enable);
+    READ_HALF_REG(REG_IE , io.intr_enable );
     READ_HALF_REG(REG_IF , io.intr_request);
-    READ_HALF_REG(REG_IME, io.intr_master);
+    READ_HALF_REG(REG_IME, io.intr_master );
 
     default:
         EGG_UNREACHABLE;
@@ -45,13 +45,13 @@ u8 IRQHandler::read(u32 addr)
     }
 }
 
-void IRQHandler::write(u32 addr, u8 byte)
+void IrqHandler::write(u32 addr, u8 byte)
 {
     switch (addr)
     {
-    WRITE_HALF_REG(REG_IE , io.intr_enable);
+    WRITE_HALF_REG(REG_IE , io.intr_enable );
     WRITE_HALF_REG(REG_IF , io.intr_request);
-    WRITE_HALF_REG(REG_IME, io.intr_master);
+    WRITE_HALF_REG(REG_IME, io.intr_master );
 
     default:
         EGG_UNREACHABLE;

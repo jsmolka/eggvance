@@ -18,7 +18,7 @@ void ARM::reset()
     io.waitcnt.reset();
     io.haltcnt.reset();
 
-    updateDispatch();
+    state = 0;
 
     cycles = 0;
     flushWord();
@@ -29,19 +29,19 @@ void ARM::run(uint cycles)
 {
     this->cycles += cycles;
 
-    #define DISPATCH_CASE(flags)                                \
-        case flags + 0b000: execute<flags + 0b000>(); break;    \
-        case flags + 0b001: execute<flags + 0b001>(); break;    \
-        case flags + 0b010: execute<flags + 0b010>(); break;    \
-        case flags + 0b011: execute<flags + 0b011>(); break;    \
-        case flags + 0b100: execute<flags + 0b100>(); break;    \
-        case flags + 0b101: execute<flags + 0b101>(); break;    \
-        case flags + 0b110: execute<flags + 0b110>(); break;    \
-        case flags + 0b111: execute<flags + 0b111>(); break
+    #define DISPATCH_CASE(state)                                \
+        case state + 0b000: dispatch<state + 0b000>(); break;   \
+        case state + 0b001: dispatch<state + 0b001>(); break;   \
+        case state + 0b010: dispatch<state + 0b010>(); break;   \
+        case state + 0b011: dispatch<state + 0b011>(); break;   \
+        case state + 0b100: dispatch<state + 0b100>(); break;   \
+        case state + 0b101: dispatch<state + 0b101>(); break;   \
+        case state + 0b110: dispatch<state + 0b110>(); break;   \
+        case state + 0b111: dispatch<state + 0b111>(); break
 
     while (this->cycles > 0)
     {
-        switch (dispatch)
+        switch (state)
         {
         DISPATCH_CASE(0b00000);
         DISPATCH_CASE(0b01000);
@@ -55,16 +55,6 @@ void ARM::run(uint cycles)
     }
 
     #undef DISPATCH_CASE
-}
-
-void ARM::updateDispatch()
-{
-    dispatch = 0;
-    dispatch |= cpsr.t            << 0;
-    dispatch |= io.haltcnt.halt   << 1;
-    dispatch |= irqh.requested    << 2;
-    dispatch |= dmac.isActive()   << 3;
-    dispatch |= timerc.isActive() << 4;
 }
 
 void ARM::flushHalf()
@@ -83,70 +73,67 @@ void ARM::flushWord()
     pc += 4;
 }
 
-template<uint flags>
-void ARM::execute()
+template<uint state>
+void ARM::dispatch()
 {
-    constexpr bool thumb = static_cast<bool>(flags & (1 << 0));
-    constexpr bool halt  = static_cast<bool>(flags & (1 << 1));
-    constexpr bool irq   = static_cast<bool>(flags & (1 << 2));
-    constexpr bool dma   = static_cast<bool>(flags & (1 << 3));
-    constexpr bool timer = static_cast<bool>(flags & (1 << 4));
-
-    int last = cycles;
-
-    if (dma)
+    while (cycles > 0 && this->state == state)
     {
-        dmac.run(cycles);
-    }
-    else
-    {
-        if (halt)
+        int last = cycles;
+
+        if (state & STATE_DMA)
         {
-            if (timer)
-                timerc.runUntilIrq(cycles);
-            else
-                cycles = 0;
-
-            return;
+            dmac.run(cycles);
         }
         else
         {
-            if (irq && !cpsr.i)
+            if (state & STATE_HALT)
             {
-                interruptHW();
+                if (state & STATE_TIMER)
+                    timerc.runUntilIrq(cycles);
+                else
+                    cycles = 0;
+
+                return;
             }
             else
             {
-                //disasm();
-
-                if (thumb)
+                if (state & STATE_IRQ && !cpsr.i)
                 {
-                    u16 instr = pipe[0];
-
-                    pipe[0] = pipe[1];
-                    pipe[1] = readHalf(pc);
-
-                    (this->*instr_thumb[thumbHash(instr)])(instr);
+                    interruptHW();
                 }
                 else
                 {
-                    u32 instr = pipe[0];
+                    //disasm();
 
-                    pipe[0] = pipe[1];
-                    pipe[1] = readWord(pc);
-
-                    if (cpsr.check(static_cast<PSR::Condition>(instr >> 28)))
+                    if (state & STATE_THUMB)
                     {
-                        (this->*instr_arm[armHash(instr)])(instr);
+                        u16 instr = pipe[0];
+
+                        pipe[0] = pipe[1];
+                        pipe[1] = readHalf(pc);
+
+                        (this->*instr_thumb[thumbHash(instr)])(instr);
+                    }
+                    else
+                    {
+                        u32 instr = pipe[0];
+
+                        pipe[0] = pipe[1];
+                        pipe[1] = readWord(pc);
+
+                        if (cpsr.check(static_cast<PSR::Condition>(instr >> 28)))
+                        {
+                            (this->*instr_arm[armHash(instr)])(instr);
+                        }
                     }
                 }
+                pc += cpsr.size();
             }
-            pc += cpsr.size();
         }
-    }
 
-    if (timer)
-        timerc.run(last - cycles);
+        if (state & STATE_TIMER)
+            timerc.run(last - cycles);
+    }
 }
 
 void ARM::disasm()
@@ -199,8 +186,7 @@ void ARM::interrupt(u32 pc, u32 lr, PSR::Mode mode)
     this->pc = pc;
 
     flushWord();
-
-    updateDispatch();
+    state &= ~STATE_THUMB;
 }
 
 void ARM::interruptHW()

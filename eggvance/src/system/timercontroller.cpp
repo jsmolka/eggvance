@@ -58,11 +58,6 @@ void TimerController::runUntilIrq(int& cycles)
     }
 }
 
-bool TimerController::isActive() const
-{
-    return active.size() > 0;
-}
-
 #define READ_TIMER_DATA(label, data)    \
     CASE2(label):                       \
         runTimers();                    \
@@ -148,7 +143,10 @@ void TimerController::schedule()
         }
     }
 
-    arm.updateDispatch();
+    if (active.size() > 0)
+        arm.state |= ARM::STATE_TIMER;
+    else
+        arm.state &= ~ARM::STATE_TIMER;
 }
 
 void TimerController::reschedule()

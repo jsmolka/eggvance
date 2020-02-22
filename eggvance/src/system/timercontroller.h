@@ -15,8 +15,6 @@ public:
     void run(int cycles);
     void runUntilIrq(int& cycles);
 
-    bool isActive() const;
-
 private:
     void runTimers();
     void schedule();

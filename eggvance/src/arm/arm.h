@@ -11,19 +11,24 @@ class ARM : public Registers
 public:
     friend class DMA;
     friend class IO;
-    friend class IRQHandler;
+    friend class MMU;
+
+    enum State
+    {
+        STATE_THUMB = 1 << 0,
+        STATE_HALT  = 1 << 1,
+        STATE_IRQ   = 1 << 2,
+        STATE_DMA   = 1 << 3,
+        STATE_TIMER = 1 << 4
+    };
 
     void reset();
 
     void run(uint cycles);
 
-    void updateDispatch();
-
-    u32 pipe[2];
+    uint state;
 
 private:
-    uint dispatch;
-
     enum class Shift
     {
         Lsl = 0b00,
@@ -49,8 +54,8 @@ private:
     void flushHalf();
     void flushWord();
 
-    template<uint flags>
-    void execute();
+    template<uint state>
+    void dispatch();
 
     void disasm();
 
@@ -126,6 +131,7 @@ private:
 
     int cycles;
     u32 last_addr;
+    u32 pipe[2];
 
     struct IO
     {

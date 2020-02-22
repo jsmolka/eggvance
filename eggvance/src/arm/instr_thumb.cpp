@@ -188,7 +188,7 @@ void ARM::Thumb_HighRegisterOperations(u16 instr)
         else
         {
             flushWord();
-            updateDispatch();
+            state &= ~STATE_THUMB;
         }
         break;
 

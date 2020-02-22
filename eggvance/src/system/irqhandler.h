@@ -4,7 +4,7 @@
 #include "registers/intrenable.h"
 #include "registers/intrrequest.h"
 
-enum class IRQ
+enum class Irq
 {
     VBlank = 1 << 0x0,
     HBlank = 1 << 0x1,
@@ -14,20 +14,18 @@ enum class IRQ
     Keypad = 1 << 0xC
 };
 
-class IRQHandler
+class IrqHandler
 {
 public:
     friend class IO;
 
     void reset();
-    void request(IRQ irq);
-
-    bool requested = false;
+    void request(Irq irq);
 
 private:
     void update();
 
-    u8 read(u32 addr);
+    u8 read(u32 addr) const;
     void write(u32 addr, u8 byte);
 
     struct IO
@@ -38,4 +36,4 @@ private:
     } io;
 };
 
-extern IRQHandler irqh;
+extern IrqHandler irqh;

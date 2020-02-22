@@ -17,11 +17,6 @@ void DMAController::reset()
     }
 }
 
-bool DMAController::isActive() const
-{
-    return active;
-}
-
 void DMAController::run(int& cycles)
 {
     active->run(cycles);
@@ -40,7 +35,7 @@ void DMAController::run(int& cycles)
         }
         
         if (!active)
-            arm.updateDispatch();
+            arm.state &= ~ARM::STATE_DMA;
     }
 }
 
@@ -109,7 +104,7 @@ void DMAController::emit(DMA& dma, DMA::Timing timing)
         if (!active || dma.id < active->id)
         {
             active = &dma;
-            arm.updateDispatch();
+            arm.state |= ARM::STATE_DMA;
         }
     }
 }

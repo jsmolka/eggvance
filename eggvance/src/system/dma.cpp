@@ -87,8 +87,8 @@ void DMA::run(int& cycles)
 
     if (control.irq)
         irqh.request(
-            static_cast<IRQ>(
-                static_cast<uint>(IRQ::Dma) << id));
+            static_cast<Irq>(
+                static_cast<uint>(Irq::Dma) << id));
 
     running = false;
 }

@@ -11,7 +11,7 @@ void ARM::Arm_BranchExchange(u32 instr)
     if (cpsr.t = pc & 0x1)
     {
         flushHalf();
-        updateDispatch();
+        state |= STATE_THUMB;
     }
     else
     {
@@ -154,7 +154,7 @@ void ARM::Arm_DataProcessing(u32 instr)
         if (cpsr.t)
         {
             flushHalf();
-            updateDispatch();
+            state |= STATE_THUMB;
         }
         else
         {
