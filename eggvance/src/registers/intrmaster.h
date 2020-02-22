@@ -1,40 +1,12 @@
 #pragma once
 
-#include "common/integer.h"
+#include "register.h"
 
-class IntrMaster
+class IntrMaster : public TRegister<IntrMaster, 2>
 {
 public:
-    IntrMaster();
-
-    void reset();
-
-    template<uint index>
-    inline u8 read() const
-    {
-        static_assert(index <= 1);
-
-        return data[index];
-    }
-
-    template<uint index>
-    inline void write(u8 byte)
-    {
-        static_assert(index <= 1);
-
-        if (index == 0)
-            master = byte & 0x1;
-
-        data[index] = byte;
-    }
-
     inline operator bool() const
     {
-        return master;
+        return data[0] & 0x1;
     }
-
-    bool master;
-
-private:
-    u8 data[2];
 };

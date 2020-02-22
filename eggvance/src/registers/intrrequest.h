@@ -1,41 +1,27 @@
 #pragma once
 
-#include "common/integer.h"
+#include "register.h"
 
-class IntrRequest
+class IntrRequest : public TRegister<IntrRequest, 2>
 {
 public:
-    IntrRequest();
-
-    void reset();
-
-    template<uint index>
-    inline u8 read() const
+    inline IntrRequest& operator|=(u16 value)
     {
-        static_assert(index <= 1);
+        *reinterpret_cast<u16*>(data) |= value;
 
-        return request >> (8 * index);
+        return *this;
+    }
+
+    inline operator u16()
+    {
+        return *reinterpret_cast<u16*>(data);
     }
 
     template<uint index>
     inline void write(u8 byte)
     {
-        static_assert(index <= 1);
+        static_assert(index < 2);
 
-        reinterpret_cast<u8*>(&request)[index] &= ~byte;
+        data[index] &= ~byte;
     }
-
-    inline operator uint() const
-    {
-        return request;
-    }
-
-    inline IntrRequest& operator|=(uint value)
-    {
-        request |= value;
-
-        return *this;
-    }
-
-    uint request;
 };

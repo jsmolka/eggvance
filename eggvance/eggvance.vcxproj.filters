@@ -204,15 +204,6 @@
     <ClCompile Include="src\system\irqhandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\registers\intrmaster.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\registers\intrrequest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\registers\intrenable.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\arm\instr_thumb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

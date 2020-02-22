@@ -16,3 +16,34 @@ protected:
     }
     u8 data[size];
 };
+
+template<typename T, uint size>
+class TRegister
+{
+public:
+    virtual ~TRegister() = default;
+
+    inline void reset()
+    {
+        static_cast<T&>(*this) = T();
+    }
+
+    template<uint index>
+    inline u8 read() const
+    {
+        static_assert(index < size);
+
+        return data[index];
+    }
+
+    template<uint index>
+    inline void write(u8 byte)
+    {
+        static_assert(index < size);
+
+        data[index] = byte;
+    }
+
+protected:
+    u8 data[size] = {};
+};
