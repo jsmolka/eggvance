@@ -45,12 +45,12 @@ public:
     }
 
 protected:
-    template<typename T>
-    inline T& cast()
+    template<typename U>
+    inline U& cast()
     {
-        static_assert(sizeof(T) <= size);
+        static_assert(sizeof(U) <= size);
 
-        return *reinterpret_cast<T*>(data);
+        return *reinterpret_cast<U*>(data);
     }
 
     u8 data[size] = { 0 };
