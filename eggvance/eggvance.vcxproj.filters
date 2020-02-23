@@ -69,37 +69,10 @@
     <ClCompile Include="src\ppu\oamentry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\registers\blendalpha.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\registers\blendcontrol.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\registers\blendfade.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\registers\displaycontrol.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\registers\displaystatus.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\registers\dmaaddress.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\registers\dmacontrol.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\registers\dmacount.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\registers\haltcontrol.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\registers\keycontrol.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\registers\keyinput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\registers\mosaic.cpp">

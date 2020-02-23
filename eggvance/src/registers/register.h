@@ -45,5 +45,13 @@ public:
     }
 
 protected:
-    u8 data[size] = {};
+    template<typename T>
+    inline T& cast()
+    {
+        static_assert(sizeof(T) <= size);
+
+        return *reinterpret_cast<T*>(data);
+    }
+
+    u8 data[size] = { 0 };
 };

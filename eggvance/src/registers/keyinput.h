@@ -2,16 +2,26 @@
 
 #include "register.h"
 
-class KeyInput : public Register<2>
+class KeyInput : public TRegister<KeyInput, 2>
 {
 public:
-    KeyInput& operator=(u16 value);
-    operator u16() const;
+    KeyInput()
+    {
+        cast<u16>() = 0x03FF;
+    }
 
-    void reset();
+    inline KeyInput& operator=(u16 value)
+    {
+        cast<u16>() = value;
 
-    u8 read(int index);
+        return *this;
+    }
 
-private:
-    u16 value;
+    inline operator u16()
+    {
+        return cast<u16>();
+    }
+
+    template<uint index>
+    inline void write(u8 byte) = delete;
 };

@@ -1,16 +1,13 @@
 #include "haltcontrol.h"
 
 #include "arm/arm.h"
-#include "common/macros.h"
 
-void HaltControl::reset()
+template<uint index>
+inline void HaltControl::write(u8 byte)
 {
-    *this = {};
-}
-
-void HaltControl::write(int index, u8 byte)
-{
-    EGG_ASSERT(index <= 0, "Invalid index");
+    static_assert(index < 1);
 
     arm.state |= ARM::STATE_HALT;
 }
+
+template void HaltControl::write<0>(u8 byte);

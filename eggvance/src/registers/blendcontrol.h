@@ -2,7 +2,7 @@
 
 #include "register.h"
 
-class BlendControl : public Register<2>
+class BlendControl : public TRegister<BlendControl, 2>
 {
 public:
     enum Mode
@@ -13,12 +13,25 @@ public:
         BLACK    = 0b11
     };
 
-    void reset();
+    template<uint index>
+    inline void write(u8 byte)
+    {
+        static_assert(index < 2);
 
-    u8 read(int index);
-    void write(int index, u8 byte);
+        data[index] = byte;
 
-    int mode;
-    int upper;
-    int lower;
+        if (index == 0)
+        {
+            upper = bits<0, 6>(byte);
+            mode  = bits<6, 2>(byte);
+        }
+        else
+        {
+            lower = bits<0, 6>(byte);
+        }
+    }
+
+    uint mode  = 0;
+    uint upper = 0;
+    uint lower = 0;
 };

@@ -32,7 +32,7 @@ void PPU::scanline()
     io.dispstat.vblank = false;
     io.dispstat.hblank = false;
 
-    if (io.dispcnt.force_blank)
+    if (io.dispcnt.blank)
     {
         u32* scanline = &video_device->buffer[SCREEN_W * io.vcount];
         std::fill_n(scanline, SCREEN_W, 0xFFFFFFFF);
@@ -105,7 +105,6 @@ void PPU::hblank()
     io.dispstat.vblank = false;
 
     io.bgx[0].hblank(io.bgpb[0]);
-    io.bgx[0].hblank(io.bgpb[0]);
     io.bgx[1].hblank(io.bgpb[1]);
     io.bgy[0].hblank(io.bgpd[0]);
     io.bgy[1].hblank(io.bgpd[1]);
@@ -177,49 +176,6 @@ bool PPU::mosaicAffected(int bg) const
 bool PPU::mosaicDominant() const
 {
     return io.vcount % io.mosaic.bgs.y == 0;
-}
-
-u16 PPU::blendAlpha(u16 a, u16 b) const
-{
-    int ar = bits< 0, 5>(a);
-    int ag = bits< 5, 5>(a);
-    int ab = bits<10, 5>(a);
-
-    int br = bits< 0, 5>(b);
-    int bg = bits< 5, 5>(b);
-    int bb = bits<10, 5>(b);
-
-    int tr = std::min(31, (ar * io.bldalpha.eva + br * io.bldalpha.evb) >> 4);
-    int tg = std::min(31, (ag * io.bldalpha.eva + bg * io.bldalpha.evb) >> 4);
-    int tb = std::min(31, (ab * io.bldalpha.eva + bb * io.bldalpha.evb) >> 4);
-
-    return (tr << 0) | (tg << 5) | (tb << 10);
-}
-
-u16 PPU::blendWhite(u16 a) const
-{
-    int ar = bits< 0, 5>(a);
-    int ag = bits< 5, 5>(a);
-    int ab = bits<10, 5>(a);
-
-    int tr = std::min(31, ar + (((31 - ar) * io.bldy.evy) >> 4));
-    int tg = std::min(31, ag + (((31 - ag) * io.bldy.evy) >> 4));
-    int tb = std::min(31, ab + (((31 - ab) * io.bldy.evy) >> 4));
-
-    return (tr << 0) | (tg << 5) | (tb << 10);
-}
-
-u16 PPU::blendBlack(u16 a) const
-{
-    int ar = bits< 0, 5>(a);
-    int ag = bits< 5, 5>(a);
-    int ab = bits<10, 5>(a);
-
-    int tr = std::min(31, ar - ((ar * io.bldy.evy) >> 4));
-    int tg = std::min(31, ag - ((ag * io.bldy.evy) >> 4));
-    int tb = std::min(31, ab - ((ab * io.bldy.evy) >> 4));
-
-    return (tr << 0) | (tg << 5) | (tb << 10);
 }
 
 u32 PPU::argb(u16 color)

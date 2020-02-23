@@ -16,7 +16,8 @@ public:
 private:
     void emit(DMA& dma, DMA::Timing timing);
 
-    void writeControl(DMA& dma, int index, u8 byte);
+    template<uint index>
+    void writeControl(DMA& dma, u8 byte);
 
     DMA* active;
     DMA dmas[4] = { 0, 1, 2, 3 };

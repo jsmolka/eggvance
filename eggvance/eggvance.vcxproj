@@ -152,16 +152,8 @@
     <ClCompile Include="src\platform\sdl\sdlvideodevice.cpp" />
     <ClCompile Include="src\ppu\collapse.cpp" />
     <ClCompile Include="src\ppu\mapentry.cpp" />
-    <ClCompile Include="src\registers\blendalpha.cpp" />
-    <ClCompile Include="src\registers\blendcontrol.cpp" />
-    <ClCompile Include="src\registers\blendfade.cpp" />
-    <ClCompile Include="src\registers\displaycontrol.cpp" />
-    <ClCompile Include="src\registers\displaystatus.cpp" />
-    <ClCompile Include="src\registers\dmaaddress.cpp" />
-    <ClCompile Include="src\registers\dmacontrol.cpp" />
     <ClCompile Include="src\registers\dmacount.cpp" />
     <ClCompile Include="src\registers\haltcontrol.cpp" />
-    <ClCompile Include="src\registers\keycontrol.cpp" />
     <ClCompile Include="src\registers\timercontrol.cpp" />
     <ClCompile Include="src\registers\timerdata.cpp" />
     <ClCompile Include="src\registers\waitcontrol.cpp" />
@@ -178,7 +170,6 @@
     <ClCompile Include="src\platform\sdl\main.cpp" />
     <ClCompile Include="src\mmu\gamepak\sram.cpp" />
     <ClCompile Include="src\mmu\mmu.cpp" />
-    <ClCompile Include="src\registers\keyinput.cpp" />
     <ClCompile Include="src\registers\mosaic.cpp" />
     <ClCompile Include="src\registers\vcount.cpp" />
     <ClCompile Include="src\registers\window.cpp" />

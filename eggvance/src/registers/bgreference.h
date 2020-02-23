@@ -29,7 +29,7 @@ public:
 
     inline void hblank(s16 parameter)
     {
-        value += parameter;
+        value += static_cast<s32>(parameter);
     }
 
     inline void vblank()
@@ -38,5 +38,5 @@ public:
     }
 
 private:
-    s32 value;
+    s32 value = 0;
 };

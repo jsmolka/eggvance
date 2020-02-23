@@ -129,7 +129,7 @@ void PPU::collapseBN(const std::vector<BGLayer>& layers)
 
         if (obj_master && object.alpha && findBlendLayers<obj_master>(layers, x, flags, upper, lower))
         {
-            upper = blendAlpha(upper, lower);
+            upper = io.bldalpha.blend(upper, lower);
         }
         else
         {
@@ -137,17 +137,17 @@ void PPU::collapseBN(const std::vector<BGLayer>& layers)
             {
             case BlendControl::Mode::ALPHA:
                 if (findBlendLayers<obj_master>(layers, x, flags, upper, lower))
-                    upper = blendAlpha(upper, lower);
+                    upper = io.bldalpha.blend(upper, lower);
                 break;
 
             case BlendControl::Mode::WHITE:
                 if (findBlendLayers<obj_master>(layers, x, flags, upper))
-                    upper = blendWhite(upper);
+                    upper = io.bldy.blendWhite(upper);
                 break;
 
             case BlendControl::Mode::BLACK:
                 if (findBlendLayers<obj_master>(layers, x, flags, upper))
-                    upper = blendBlack(upper);
+                    upper = io.bldy.blendBlack(upper);
                 break;
 
             case BlendControl::Mode::DISABLED:
@@ -214,7 +214,7 @@ void PPU::collapseBW(const std::vector<BGLayer>& layers)
 
         if (obj_master && object.alpha && findBlendLayers<obj_master>(layers, x, window.flags, upper, lower))
         {
-            upper = blendAlpha(upper, lower);
+            upper = io.bldalpha.blend(upper, lower);
         }
         else if (window.effects)
         {
@@ -222,17 +222,17 @@ void PPU::collapseBW(const std::vector<BGLayer>& layers)
             {
             case BlendControl::Mode::ALPHA:
                 if (findBlendLayers<obj_master>(layers, x, window.flags, upper, lower))
-                    upper = blendAlpha(upper, lower);
+                    upper = io.bldalpha.blend(upper, lower);
                 break;
 
             case BlendControl::Mode::WHITE:
                 if (findBlendLayers<obj_master>(layers, x, window.flags, upper))
-                    upper = blendWhite(upper);
+                    upper = io.bldy.blendWhite(upper);
                 break;
 
             case BlendControl::Mode::BLACK:
                 if (findBlendLayers<obj_master>(layers, x, window.flags, upper))
-                    upper = blendBlack(upper);
+                    upper = io.bldy.blendBlack(upper);
                 break;
 
             case BlendControl::Mode::DISABLED:

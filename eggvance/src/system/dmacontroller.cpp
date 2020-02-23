@@ -51,10 +51,10 @@ u8 DMAController::readByte(u32 addr)
 {    
     switch (addr)
     {
-    READ2(REG_DMA0CNT_H, dmas[0].control);
-    READ2(REG_DMA1CNT_H, dmas[1].control);
-    READ2(REG_DMA2CNT_H, dmas[2].control);
-    READ2(REG_DMA3CNT_H, dmas[3].control);
+    READ_HALF_REG(REG_DMA0CNT_H, dmas[0].control);
+    READ_HALF_REG(REG_DMA1CNT_H, dmas[1].control);
+    READ_HALF_REG(REG_DMA2CNT_H, dmas[2].control);
+    READ_HALF_REG(REG_DMA3CNT_H, dmas[3].control);
 
     default:
         EGG_UNREACHABLE;
@@ -62,38 +62,39 @@ u8 DMAController::readByte(u32 addr)
     }
 }
 
-#define WRITE_DMA_CONTROL(label, dma)           \
-    CASE2(label):                               \
-        writeControl(dma, addr - label, byte);  \
-        break
+#define WRITE_CTRL_REG(label, dma)                      \
+    case label + 0: writeControl<0>(dma, byte); break;  \
+    case label + 1: writeControl<1>(dma, byte); break
 
 void DMAController::writeByte(u32 addr, u8 byte)
 {
     switch (addr)
     {
-    WRITE4(REG_DMA0SAD,   dmas[0].sad);
-    WRITE4(REG_DMA1SAD,   dmas[1].sad);
-    WRITE4(REG_DMA2SAD,   dmas[2].sad);
-    WRITE4(REG_DMA3SAD,   dmas[3].sad);
-    WRITE4(REG_DMA0DAD,   dmas[0].dad);
-    WRITE4(REG_DMA1DAD,   dmas[1].dad);
-    WRITE4(REG_DMA2DAD,   dmas[2].dad);
-    WRITE4(REG_DMA3DAD,   dmas[3].dad);
+    WRITE_WORD_REG(REG_DMA0SAD,   dmas[0].sad);
+    WRITE_WORD_REG(REG_DMA1SAD,   dmas[1].sad);
+    WRITE_WORD_REG(REG_DMA2SAD,   dmas[2].sad);
+    WRITE_WORD_REG(REG_DMA3SAD,   dmas[3].sad);
+    WRITE_WORD_REG(REG_DMA0DAD,   dmas[0].dad);
+    WRITE_WORD_REG(REG_DMA1DAD,   dmas[1].dad);
+    WRITE_WORD_REG(REG_DMA2DAD,   dmas[2].dad);
+    WRITE_WORD_REG(REG_DMA3DAD,   dmas[3].dad);
     WRITE2(REG_DMA0CNT_L, dmas[0].count);
     WRITE2(REG_DMA1CNT_L, dmas[1].count);
     WRITE2(REG_DMA2CNT_L, dmas[2].count);
     WRITE2(REG_DMA3CNT_L, dmas[3].count);
 
-    WRITE_DMA_CONTROL(REG_DMA0CNT_H, dmas[0]);
-    WRITE_DMA_CONTROL(REG_DMA1CNT_H, dmas[1]);
-    WRITE_DMA_CONTROL(REG_DMA2CNT_H, dmas[2]);
-    WRITE_DMA_CONTROL(REG_DMA3CNT_H, dmas[3]);
+    WRITE_CTRL_REG(REG_DMA0CNT_H, dmas[0]);
+    WRITE_CTRL_REG(REG_DMA1CNT_H, dmas[1]);
+    WRITE_CTRL_REG(REG_DMA2CNT_H, dmas[2]);
+    WRITE_CTRL_REG(REG_DMA3CNT_H, dmas[3]);
 
     default:
         EGG_UNREACHABLE;
         break;
     }
 }
+
+#undef WRITE_CTRL_REG
 
 void DMAController::emit(DMA& dma, DMA::Timing timing)
 {
@@ -109,9 +110,10 @@ void DMAController::emit(DMA& dma, DMA::Timing timing)
     }
 }
 
-void DMAController::writeControl(DMA& dma, int index, u8 byte)
+template<uint index>
+void DMAController::writeControl(DMA& dma, u8 byte)
 {
-    dma.control.write(index, byte);
+    dma.control.write<index>(byte);
 
     if (dma.control.reload)
     {

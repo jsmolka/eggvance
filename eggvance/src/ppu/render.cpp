@@ -41,7 +41,7 @@ void PPU::renderBg(RenderFunc func, int bg)
 void PPU::renderBgMode0(int bg)
 {
     const auto& bgcnt = io.bgcnt[bg];
-    const auto& dims  = io.bgcnt[bg].dims_reg;
+    const auto& dims  = io.bgcnt[bg].dimsReg();
 
     Point origin(
         io.bghofs[bg],
@@ -59,7 +59,7 @@ void PPU::renderBgMode0(int bg)
     {
         int offset = 0x800 * block.offset(dims.w / 256) + 2 * tile.offset(0x20);
 
-        u16* map = mmu.vram.data<u16>(bgcnt.base_map + offset);
+        u16* map = mmu.vram.data<u16>(bgcnt.map_block + offset);
 
         for (; tile.x < 32 && x < SCREEN_W; ++tile.x, ++map)
         {
@@ -70,7 +70,7 @@ void PPU::renderBgMode0(int bg)
                 entry.bank = 0;
             }
 
-            u32 addr = bgcnt.base_tile + (0x20 << bgcnt.color_mode) * entry.tile;
+            u32 addr = bgcnt.tile_block + (0x20 << bgcnt.color_mode) * entry.tile;
             if (addr < 0x1'0000)
             {
                 for (; pixel.x < 8 && x < SCREEN_W; ++pixel.x, ++x)
@@ -99,7 +99,7 @@ void PPU::renderBgMode0(int bg)
 void PPU::renderBgMode2(int bg)
 {
     const auto& bgcnt = io.bgcnt[bg];
-    const auto& dims  = io.bgcnt[bg].dims_aff;
+    const auto& dims  = io.bgcnt[bg].dimsAff();
 
     for (int x = 0; x < SCREEN_W; ++x)
     {
@@ -126,8 +126,8 @@ void PPU::renderBgMode2(int bg)
         const auto pixel = texture % 8;
 
         int offset = tile.offset(dims.w / 8);
-        int entry  = mmu.vram.readByteFast(bgcnt.base_map + offset);
-        int index  = mmu.vram.index256x1(bgcnt.base_tile + 0x40 * entry, pixel);
+        int entry  = mmu.vram.readByteFast(bgcnt.map_block + offset);
+        int index  = mmu.vram.index256x1(bgcnt.tile_block + 0x40 * entry, pixel);
 
         backgrounds[bg][x] = mmu.palette.colorBG(index);
     }
@@ -168,7 +168,7 @@ void PPU::renderBgMode4(int bg)
         }
 
         int offset = texture.offset(dims.w);
-        int index  = mmu.vram.readByteFast(io.dispcnt.base_frame + offset);
+        int index  = mmu.vram.readByteFast(io.dispcnt.frame + offset);
 
         backgrounds[bg][x] = mmu.palette.colorBG(index);
     }
@@ -190,7 +190,7 @@ void PPU::renderBgMode5(int bg)
 
         int offset = sizeof(u16) * texture.offset(dims.w);
 
-        backgrounds[bg][x] = mmu.vram.readHalfFast(io.dispcnt.base_frame + offset) & COLOR_MASK;
+        backgrounds[bg][x] = mmu.vram.readHalfFast(io.dispcnt.frame + offset) & COLOR_MASK;
     }
 }
 
@@ -211,7 +211,7 @@ void PPU::renderObjects()
 
         int size  = entry.tileSize();
         int bank  = entry.paletteBank();
-        int tiles = entry.tilesPerRow(ObjectMapping(io.dispcnt.obj_mapping));
+        int tiles = entry.tilesPerRow(ObjectMapping(io.dispcnt.mapping));
 
         Point offset(
             -center.x + origin.x - std::min(origin.x, 0),

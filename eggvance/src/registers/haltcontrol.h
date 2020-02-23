@@ -2,10 +2,12 @@
 
 #include "register.h"
 
-class HaltControl : public Register<1>
+class HaltControl : public TRegister<HaltControl, 1>
 {
 public:
-    void reset();
+    template<uint index>
+    inline u8 read() const = delete;
 
-    void write(int index, u8 byte);
+    template<uint index>
+    inline void write(u8 byte);
 };

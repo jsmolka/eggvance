@@ -42,13 +42,13 @@ void DMA::start()
 
     if (control.reload)
     {
-        sad_addr = sad.addr;
-        dad_addr = dad.addr;
+        sad_addr = sad;
+        dad_addr = dad;
         control.reload = false;
     }
     else if (control.repeat && control.dad_delta == 0b11)
     {
-        dad_addr = dad.addr;
+        dad_addr = dad;
     }
 
     int size = control.word ? 4 : 2;

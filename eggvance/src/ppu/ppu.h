@@ -80,10 +80,6 @@ private:
     template<int obj_master>
     bool findBlendLayers(const std::vector<BGLayer>& layers, int x, int flags, u16& upper, u16& lower);
 
-    u16 blendAlpha(u16 a, u16 b) const;
-    u16 blendWhite(u16 a) const;
-    u16 blendBlack(u16 a) const;
-
     static u32 argb(u16 color);
 
     DoubleBuffer<u16> backgrounds[4];

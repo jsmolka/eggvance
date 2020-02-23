@@ -141,8 +141,8 @@ u8 IO::readByte(u32 addr)
 
     switch (addr)
     {
-    READ2(REG_DISPCNT,  ppu.io.dispcnt);
-    READ2(REG_DISPSTAT, ppu.io.dispstat);
+    READ_HALF_REG(REG_DISPCNT,  ppu.io.dispcnt);
+    READ_HALF_REG(REG_DISPSTAT, ppu.io.dispstat);
     READ2(REG_VCOUNT,   ppu.io.vcount);
     READ_HALF_REG(REG_BG0CNT,   ppu.io.bgcnt[0]);
     READ_HALF_REG(REG_BG1CNT,   ppu.io.bgcnt[1]);
@@ -150,11 +150,11 @@ u8 IO::readByte(u32 addr)
     READ_HALF_REG(REG_BG3CNT,   ppu.io.bgcnt[3]);
     READ2(REG_WININ,    ppu.io.winin);
     READ2(REG_WINOUT,   ppu.io.winout);
-    READ2(REG_BLDCNT,   ppu.io.bldcnt);
-    READ2(REG_BLDALPHA, ppu.io.bldalpha);
+    READ_HALF_REG(REG_BLDCNT,   ppu.io.bldcnt);
+    READ_HALF_REG(REG_BLDALPHA, ppu.io.bldalpha);
     READ2(REG_WAITCNT,  arm.io.waitcnt);
-    READ2(REG_KEYINPUT, keypad.io.keyinput);
-    READ2(REG_KEYCNT,   keypad.io.keycnt);
+    READ_HALF_REG(REG_KEYINPUT, keypad.io.keyinput);
+    READ_HALF_REG(REG_KEYCNT,   keypad.io.keycnt);
 
     READ2_UNIMP(REG_GREENSWAP);
     READ2_UNIMP(REG_SOUND1CNT_L);
@@ -262,8 +262,8 @@ void IO::writeByte(u32 addr, u8 byte)
 
     switch (addr)
     {
-    WRITE2(REG_DISPCNT,  ppu.io.dispcnt);
-    WRITE2(REG_DISPSTAT, ppu.io.dispstat);
+    WRITE_HALF_REG(REG_DISPCNT,  ppu.io.dispcnt);
+    WRITE_HALF_REG(REG_DISPSTAT, ppu.io.dispstat);
     WRITE_HALF_REG(REG_BG0CNT,   ppu.io.bgcnt[0]);
     WRITE_HALF_REG(REG_BG1CNT,   ppu.io.bgcnt[1]);
     WRITE_HALF_REG(REG_BG2CNT,   ppu.io.bgcnt[2]);
@@ -295,12 +295,12 @@ void IO::writeByte(u32 addr, u8 byte)
     WRITE2(REG_WININ,    ppu.io.winin);
     WRITE2(REG_WINOUT,   ppu.io.winout);
     WRITE2(REG_MOSAIC,   ppu.io.mosaic);
-    WRITE2(REG_BLDCNT,   ppu.io.bldcnt);
-    WRITE2(REG_BLDALPHA, ppu.io.bldalpha);
-    WRITE2(REG_BLDY,     ppu.io.bldy);
-    WRITE1(REG_HALTCNT,  arm.io.haltcnt);
+    WRITE_HALF_REG(REG_BLDCNT,   ppu.io.bldcnt);
+    WRITE_HALF_REG(REG_BLDALPHA, ppu.io.bldalpha);
+    WRITE_HALF_REG(REG_BLDY,     ppu.io.bldy);
+    WRITE_BYTE_REG(REG_HALTCNT,  arm.io.haltcnt);
     WRITE2(REG_WAITCNT,  arm.io.waitcnt);
-    WRITE2(REG_KEYCNT,   keypad.io.keycnt);
+    WRITE_HALF_REG(REG_KEYCNT,   keypad.io.keycnt);
 
     WRITE2_UNIMP(REG_GREENSWAP);
     WRITE2_UNIMP(REG_SOUND1CNT_L);

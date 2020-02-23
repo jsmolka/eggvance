@@ -2,12 +2,14 @@
 
 #include "register.h"
 
-class DMAAddress : public Register<4>
+class DMAAddress : public TRegister<DMAAddress, 4>
 {
 public:
-    void reset();
+    inline operator u32()
+    {
+        return *reinterpret_cast<u32*>(data);
+    }
 
-    void write(int index, u8 byte);
-
-    u32 addr;
+    template<uint index>
+    inline u8 read() const = delete;
 };
