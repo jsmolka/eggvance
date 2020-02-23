@@ -1,6 +1,7 @@
 #pragma once
 
 #include "register.h"
+#include "common/bits.h"
 
 class BlendFade : public TRegister<BlendFade, 2>
 {

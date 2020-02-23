@@ -1,6 +1,7 @@
 #pragma once
 
 #include "register.h"
+#include "common/bits.h"
 
 class DMAControl : public TRegister<DMAControl, 2>
 {
