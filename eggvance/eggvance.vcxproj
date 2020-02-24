@@ -154,8 +154,6 @@
     <ClCompile Include="src\ppu\mapentry.cpp" />
     <ClCompile Include="src\registers\dmacount.cpp" />
     <ClCompile Include="src\registers\haltcontrol.cpp" />
-    <ClCompile Include="src\registers\timercontrol.cpp" />
-    <ClCompile Include="src\registers\timerdata.cpp" />
     <ClCompile Include="src\registers\waitcontrol.cpp" />
     <ClCompile Include="src\registers\windowdimension.cpp" />
     <ClCompile Include="src\system\dmacontroller.cpp" />
@@ -170,8 +168,6 @@
     <ClCompile Include="src\platform\sdl\main.cpp" />
     <ClCompile Include="src\mmu\gamepak\sram.cpp" />
     <ClCompile Include="src\mmu\mmu.cpp" />
-    <ClCompile Include="src\registers\mosaic.cpp" />
-    <ClCompile Include="src\registers\vcount.cpp" />
     <ClCompile Include="src\registers\window.cpp" />
     <ClCompile Include="src\system\dma.cpp" />
     <ClCompile Include="src\ppu\ppuio.cpp" />

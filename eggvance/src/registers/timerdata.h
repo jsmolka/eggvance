@@ -2,14 +2,25 @@
 
 #include "register.h"
 
-class TimerData : public Register<2>
+class TimerData : public TRegister<TimerData, 2>
 {
 public:
-    void reset();
+    template<uint index>
+    inline u8 read()
+    {
+        static_assert(index < 2);
 
-    u8 read(int index);
-    void write(int index, u8 byte);
+        return reinterpret_cast<u8*>(&counter)[index];
+    }
 
-    u16 counter;
-    u16 reload;
+    template<uint index>
+    inline void write(u8 byte)
+    {
+        static_assert(index < 2);
+
+        reinterpret_cast<u8*>(&reload)[index] = byte;
+    }
+
+    u16 counter = 0;
+    u16 reload  = 0;
 };

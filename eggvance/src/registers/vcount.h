@@ -2,14 +2,19 @@
 
 #include "register.h"
 
-class VCount : public Register<2>
+class VCount : public TRegister<VCount, 2>
 {
 public:
-    operator int() const;
+    inline operator uint() const
+    {
+        return data[0];
+    }
 
-    void reset();
+    template<uint index>
+    inline void write(u8 byte) = delete;
 
-    u8 read(int index);
-
-    void next();
+    inline void next()
+    {
+        data[0] = (data[0] + 1) % 228;
+    }
 };

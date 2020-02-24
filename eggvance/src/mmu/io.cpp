@@ -143,7 +143,7 @@ u8 IO::readByte(u32 addr)
     {
     READ_HALF_REG(REG_DISPCNT,  ppu.io.dispcnt);
     READ_HALF_REG(REG_DISPSTAT, ppu.io.dispstat);
-    READ2(REG_VCOUNT,   ppu.io.vcount);
+    READ_HALF_REG(REG_VCOUNT,   ppu.io.vcount);
     READ_HALF_REG(REG_BG0CNT,   ppu.io.bgcnt[0]);
     READ_HALF_REG(REG_BG1CNT,   ppu.io.bgcnt[1]);
     READ_HALF_REG(REG_BG2CNT,   ppu.io.bgcnt[2]);
@@ -294,7 +294,7 @@ void IO::writeByte(u32 addr, u8 byte)
     WRITE2(REG_WIN1V,    ppu.io.winv[1]);
     WRITE2(REG_WININ,    ppu.io.winin);
     WRITE2(REG_WINOUT,   ppu.io.winout);
-    WRITE2(REG_MOSAIC,   ppu.io.mosaic);
+    WRITE_HALF_REG(REG_MOSAIC,   ppu.io.mosaic);
     WRITE_HALF_REG(REG_BLDCNT,   ppu.io.bldcnt);
     WRITE_HALF_REG(REG_BLDALPHA, ppu.io.bldalpha);
     WRITE_HALF_REG(REG_BLDY,     ppu.io.bldy);

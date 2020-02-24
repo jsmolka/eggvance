@@ -58,63 +58,64 @@ void TimerController::runUntilIrq(int& cycles)
     }
 }
 
-#define READ_TIMER_DATA(label, data)    \
-    CASE2(label):                       \
-        runTimers();                    \
-        return data.read(addr - label)  
-
 u8 TimerController::read(u32 addr)
 {
+    #define READ_DATA_REG(label, data)                          \
+        case label + 0: runTimers(); return data.read<0>();     \
+        case label + 1: runTimers(); return data.read<1>();
+
     switch (addr)
     {
-    READ_TIMER_DATA(REG_TM0CNT_L, timers[0].data);
-    READ_TIMER_DATA(REG_TM1CNT_L, timers[1].data);
-    READ_TIMER_DATA(REG_TM2CNT_L, timers[2].data);
-    READ_TIMER_DATA(REG_TM3CNT_L, timers[3].data);
-
-    READ1(REG_TM0CNT_H, timers[0].control);
-    READ1(REG_TM1CNT_H, timers[1].control);
-    READ1(REG_TM2CNT_H, timers[2].control);
-    READ1(REG_TM3CNT_H, timers[3].control);
+    READ_DATA_REG(REG_TM0CNT_L, timers[0].data   );
+    READ_DATA_REG(REG_TM1CNT_L, timers[1].data   );
+    READ_DATA_REG(REG_TM2CNT_L, timers[2].data   );
+    READ_DATA_REG(REG_TM3CNT_L, timers[3].data   );
+    READ_BYTE_REG(REG_TM0CNT_H, timers[0].control);
+    READ_BYTE_REG(REG_TM1CNT_H, timers[1].control);
+    READ_BYTE_REG(REG_TM2CNT_H, timers[2].control);
+    READ_BYTE_REG(REG_TM3CNT_H, timers[3].control);
 
     default:
         EGG_UNREACHABLE;
         return 0;
     }
-}
 
-#define WRITE_TIMER_CONTROL(label, timer)       \
-    case label:                                 \
-    {                                           \
-        runTimers();                            \
-        int enabled = timer.control.enabled;    \
-        timer.control.write(0, byte);           \
-        if (!enabled && timer.control.enabled)  \
-            timer.start();                      \
-        else if (enabled)                       \
-            timer.update();                     \
-        schedule();                             \
-        break;                                  \
-    }
+    #undef READ_DATA_REG
+}
 
 void TimerController::write(u32 addr, u8 byte)
 {
+    #define WRITE_CTRL_REG(label, timer)            \
+        case label:                                 \
+        {                                           \
+            runTimers();                            \
+            int enabled = timer.control.enabled;    \
+            timer.control.write<0>(byte);           \
+            if (!enabled && timer.control.enabled)  \
+                timer.start();                      \
+            else if (enabled)                       \
+                timer.update();                     \
+            schedule();                             \
+            break;                                  \
+        }
+
     switch (addr)
     {
-    WRITE2(REG_TM0CNT_L, timers[0].data);
-    WRITE2(REG_TM1CNT_L, timers[1].data);
-    WRITE2(REG_TM2CNT_L, timers[2].data);
-    WRITE2(REG_TM3CNT_L, timers[3].data);
-
-    WRITE_TIMER_CONTROL(REG_TM0CNT_H, timers[0]);
-    WRITE_TIMER_CONTROL(REG_TM1CNT_H, timers[1]);
-    WRITE_TIMER_CONTROL(REG_TM2CNT_H, timers[2]);
-    WRITE_TIMER_CONTROL(REG_TM3CNT_H, timers[3]);
+    WRITE_HALF_REG(REG_TM0CNT_L, timers[0].data);
+    WRITE_HALF_REG(REG_TM1CNT_L, timers[1].data);
+    WRITE_HALF_REG(REG_TM2CNT_L, timers[2].data);
+    WRITE_HALF_REG(REG_TM3CNT_L, timers[3].data);
+    WRITE_CTRL_REG(REG_TM0CNT_H, timers[0]     );
+    WRITE_CTRL_REG(REG_TM1CNT_H, timers[1]     );
+    WRITE_CTRL_REG(REG_TM2CNT_H, timers[2]     );
+    WRITE_CTRL_REG(REG_TM3CNT_H, timers[3]     );
 
     default:
         EGG_UNREACHABLE;
         break;
     }
+
+    #undef WRITE_CTRL_REG
 }
 
 void TimerController::runTimers()
