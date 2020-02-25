@@ -75,9 +75,6 @@
     <ClCompile Include="src\registers\haltcontrol.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\registers\waitcontrol.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\registers\window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

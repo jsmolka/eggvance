@@ -152,7 +152,7 @@ u8 IO::readByte(u32 addr)
     READ2(REG_WINOUT,   ppu.io.winout);
     READ_HALF_REG(REG_BLDCNT,   ppu.io.bldcnt);
     READ_HALF_REG(REG_BLDALPHA, ppu.io.bldalpha);
-    READ2(REG_WAITCNT,  arm.io.waitcnt);
+    READ_HALF_REG(REG_WAITCNT,  arm.io.waitcnt);
     READ_HALF_REG(REG_KEYINPUT, keypad.io.keyinput);
     READ_HALF_REG(REG_KEYCNT,   keypad.io.keycnt);
 
@@ -299,7 +299,7 @@ void IO::writeByte(u32 addr, u8 byte)
     WRITE_HALF_REG(REG_BLDALPHA, ppu.io.bldalpha);
     WRITE_HALF_REG(REG_BLDY,     ppu.io.bldy);
     WRITE_BYTE_REG(REG_HALTCNT,  arm.io.haltcnt);
-    WRITE2(REG_WAITCNT,  arm.io.waitcnt);
+    WRITE_HALF_REG(REG_WAITCNT,  arm.io.waitcnt);
     WRITE_HALF_REG(REG_KEYCNT,   keypad.io.keycnt);
 
     WRITE2_UNIMP(REG_GREENSWAP);

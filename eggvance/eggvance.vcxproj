@@ -154,7 +154,6 @@
     <ClCompile Include="src\ppu\mapentry.cpp" />
     <ClCompile Include="src\registers\dmacount.cpp" />
     <ClCompile Include="src\registers\haltcontrol.cpp" />
-    <ClCompile Include="src\registers\waitcontrol.cpp" />
     <ClCompile Include="src\registers\windowdimension.cpp" />
     <ClCompile Include="src\system\dmacontroller.cpp" />
     <ClCompile Include="src\system\irqhandler.cpp" />
