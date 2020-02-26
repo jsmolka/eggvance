@@ -1,18 +1,30 @@
 #pragma once
 
 #include "register.h"
+#include "common/bits.h"
 
-class DMACount : public Register<2>
+class DMACount : public TRegister<DMACount, 2>
 {
 public:
-    DMACount(int limit);
+    DMACount(uint limit)
+        : limit(limit) {}
 
-    void reset();
+    inline void reset()
+    {
+        *this = DMACount(limit);
+    }
 
-    void write(int index, u8 byte);
+    template<uint index>
+    inline u8 read() const = delete;
 
-    int count() const;
+    inline uint count()
+    {
+        if (cast<u16>() == 0)
+            return limit;
+        else
+            return cast<u16>();
+    }
 
 private:
-    int limit;
+    uint limit;
 };

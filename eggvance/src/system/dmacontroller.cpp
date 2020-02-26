@@ -78,10 +78,10 @@ void DMAController::writeByte(u32 addr, u8 byte)
     WRITE_WORD_REG(REG_DMA1DAD,   dmas[1].dad);
     WRITE_WORD_REG(REG_DMA2DAD,   dmas[2].dad);
     WRITE_WORD_REG(REG_DMA3DAD,   dmas[3].dad);
-    WRITE2(REG_DMA0CNT_L, dmas[0].count);
-    WRITE2(REG_DMA1CNT_L, dmas[1].count);
-    WRITE2(REG_DMA2CNT_L, dmas[2].count);
-    WRITE2(REG_DMA3CNT_L, dmas[3].count);
+    WRITE_HALF_REG(REG_DMA0CNT_L, dmas[0].count);
+    WRITE_HALF_REG(REG_DMA1CNT_L, dmas[1].count);
+    WRITE_HALF_REG(REG_DMA2CNT_L, dmas[2].count);
+    WRITE_HALF_REG(REG_DMA3CNT_L, dmas[3].count);
 
     WRITE_CTRL_REG(REG_DMA0CNT_H, dmas[0]);
     WRITE_CTRL_REG(REG_DMA1CNT_H, dmas[1]);

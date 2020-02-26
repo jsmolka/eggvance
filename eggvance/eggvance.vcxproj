@@ -152,9 +152,7 @@
     <ClCompile Include="src\platform\sdl\sdlvideodevice.cpp" />
     <ClCompile Include="src\ppu\collapse.cpp" />
     <ClCompile Include="src\ppu\mapentry.cpp" />
-    <ClCompile Include="src\registers\dmacount.cpp" />
     <ClCompile Include="src\registers\haltcontrol.cpp" />
-    <ClCompile Include="src\registers\windowdimension.cpp" />
     <ClCompile Include="src\system\dmacontroller.cpp" />
     <ClCompile Include="src\system\irqhandler.cpp" />
     <ClCompile Include="src\system\keypad.cpp" />
@@ -167,7 +165,6 @@
     <ClCompile Include="src\platform\sdl\main.cpp" />
     <ClCompile Include="src\mmu\gamepak\sram.cpp" />
     <ClCompile Include="src\mmu\mmu.cpp" />
-    <ClCompile Include="src\registers\window.cpp" />
     <ClCompile Include="src\system\dma.cpp" />
     <ClCompile Include="src\ppu\ppuio.cpp" />
     <ClCompile Include="src\mmu\oam.cpp" />
