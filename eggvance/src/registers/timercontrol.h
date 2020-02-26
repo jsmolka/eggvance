@@ -4,7 +4,7 @@
 #include "common/bits.h"
 #include "common/macros.h"
 
-class TimerControl : public TRegister<TimerControl, 2>
+class TimerControl : public Register<TimerControl, 2>
 {
 public:
     template<uint index>

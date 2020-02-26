@@ -3,7 +3,7 @@
 #include "register.h"
 #include "common/bits.h"
 
-class KeyControl : public TRegister<KeyControl, 2>
+class KeyControl : public Register<KeyControl, 2>
 {
 public:
     template<uint index>

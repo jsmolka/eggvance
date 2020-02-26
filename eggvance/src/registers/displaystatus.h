@@ -3,7 +3,7 @@
 #include "register.h"
 #include "common/bits.h"
 
-class DisplayStatus : public TRegister<DisplayStatus, 2>
+class DisplayStatus : public Register<DisplayStatus, 2>
 {
 public:
     template<uint index>

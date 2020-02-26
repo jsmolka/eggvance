@@ -3,7 +3,7 @@
 #include "register.h"
 #include "common/bits.h"
 
-class WindowDimension : public TRegister<WindowDimension, 2>
+class WindowDimension : public Register<WindowDimension, 2>
 {
 public:
     WindowDimension(uint limit)

@@ -2,26 +2,11 @@
 
 #include "common/integer.h"
 
-template<int size>
+template<typename T, uint size>
 class Register
 {
 public:
     virtual ~Register() = default;
-
-protected:
-    template<typename T>
-    static inline u8* bcast(T& data)
-    {
-        return reinterpret_cast<u8*>(&data);
-    }
-    u8 data[size];
-};
-
-template<typename T, uint size>
-class TRegister
-{
-public:
-    virtual ~TRegister() = default;
 
     inline void reset()
     {

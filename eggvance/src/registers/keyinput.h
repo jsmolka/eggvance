@@ -2,7 +2,7 @@
 
 #include "register.h"
 
-class KeyInput : public TRegister<KeyInput, 2>
+class KeyInput : public Register<KeyInput, 2>
 {
 public:
     KeyInput()

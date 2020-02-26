@@ -5,7 +5,7 @@
 #include "common/config.h"
 #include "common/macros.h"
 
-class DisplayControl : public TRegister<DisplayControl, 2>
+class DisplayControl : public Register<DisplayControl, 2>
 {
 public:
     DisplayControl()

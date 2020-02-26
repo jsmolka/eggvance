@@ -3,7 +3,7 @@
 #include "register.h"
 #include "common/bits.h"
 
-class Mosaic : public TRegister<Mosaic, 2>
+class Mosaic : public Register<Mosaic, 2>
 {
 public:
     struct Block

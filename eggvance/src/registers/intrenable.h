@@ -2,7 +2,7 @@
 
 #include "register.h"
 
-class IntrEnable : public TRegister<IntrEnable, 2>
+class IntrEnable : public Register<IntrEnable, 2>
 {
 public:
     inline operator u16()

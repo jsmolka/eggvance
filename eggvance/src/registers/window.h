@@ -4,7 +4,7 @@
 #include "common/bits.h"
 #include "ppu/layer.h"
 
-class Window : public TRegister<Window, 1>
+class Window : public Register<Window, 1>
 {
 public:
     template<uint index>
@@ -22,7 +22,7 @@ public:
     uint effects = 0;
 };
 
-class WindowIn : public TRegister<WindowIn, 2>
+class WindowIn : public Register<WindowIn, 2>
 {
 public:
     template<uint index>
@@ -51,7 +51,7 @@ public:
     Window win1;
 };
 
-class WindowOut : public TRegister<WindowOut, 2>
+class WindowOut : public Register<WindowOut, 2>
 {
 public:
     template<uint index>

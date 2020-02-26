@@ -2,7 +2,7 @@
 
 #include "register.h"
 
-class IntrMaster : public TRegister<IntrMaster, 2>
+class IntrMaster : public Register<IntrMaster, 2>
 {
 public:
     inline operator bool() const

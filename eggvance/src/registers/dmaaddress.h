@@ -2,7 +2,7 @@
 
 #include "register.h"
 
-class DMAAddress : public TRegister<DMAAddress, 4>
+class DMAAddress : public Register<DMAAddress, 4>
 {
 public:
     inline operator u32()

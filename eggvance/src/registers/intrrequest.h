@@ -2,7 +2,7 @@
 
 #include "register.h"
 
-class IntrRequest : public TRegister<IntrRequest, 2>
+class IntrRequest : public Register<IntrRequest, 2>
 {
 public:
     inline IntrRequest& operator|=(u16 value)

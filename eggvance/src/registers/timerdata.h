@@ -2,7 +2,7 @@
 
 #include "register.h"
 
-class TimerData : public TRegister<TimerData, 2>
+class TimerData : public Register<TimerData, 2>
 {
 public:
     template<uint index>

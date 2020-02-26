@@ -2,7 +2,7 @@
 
 #include "register.h"
 
-class VCount : public TRegister<VCount, 2>
+class VCount : public Register<VCount, 2>
 {
 public:
     inline operator uint() const

@@ -2,7 +2,7 @@
 
 #include "register.h"
 
-class BGOffset : public TRegister<BGOffset, 2>
+class BGOffset : public Register<BGOffset, 2>
 {
 public:
     inline operator u16()

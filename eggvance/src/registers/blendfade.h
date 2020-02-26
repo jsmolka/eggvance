@@ -3,7 +3,7 @@
 #include "register.h"
 #include "common/bits.h"
 
-class BlendFade : public TRegister<BlendFade, 2>
+class BlendFade : public Register<BlendFade, 2>
 {
 public:
     template<uint index>
