@@ -166,7 +166,6 @@
     <ClCompile Include="src\mmu\gamepak\sram.cpp" />
     <ClCompile Include="src\mmu\mmu.cpp" />
     <ClCompile Include="src\system\dma.cpp" />
-    <ClCompile Include="src\ppu\ppuio.cpp" />
     <ClCompile Include="src\mmu\oam.cpp" />
     <ClCompile Include="src\ppu\oamentry.cpp" />
     <ClCompile Include="src\mmu\palette.cpp" />
@@ -228,7 +227,7 @@
     <ClInclude Include="src\registers\timercontrol.h" />
     <ClInclude Include="src\registers\timerdata.h" />
     <ClInclude Include="src\registers\waitcontrol.h" />
-    <ClInclude Include="src\registers\windowdimension.h" />
+    <ClInclude Include="src\registers\windowrange.h" />
     <ClInclude Include="src\system\dma.h" />
     <ClInclude Include="src\system\dmacontroller.h" />
     <ClInclude Include="src\mmu\bios.h" />

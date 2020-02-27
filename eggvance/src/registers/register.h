@@ -38,5 +38,5 @@ protected:
         return *reinterpret_cast<U*>(data);
     }
 
-    u8 data[size] = { 0 };
+    u8 data[size] = {};
 };

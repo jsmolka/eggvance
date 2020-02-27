@@ -1,6 +1,5 @@
 #pragma once
 
-#include "common/constants.h"
 #include "registers/bgcontrol.h"
 #include "registers/bgoffset.h"
 #include "registers/bgparameter.h"
@@ -13,12 +12,15 @@
 #include "registers/mosaic.h"
 #include "registers/vcount.h"
 #include "registers/window.h"
-#include "registers/windowdimension.h"
+#include "registers/windowrange.h"
 
 class PPUIO
 {
 public:
-    void reset();
+    inline void reset()
+    {
+        *this = PPUIO();
+    }
 
     DisplayControl dispcnt;
     DisplayStatus dispstat;
@@ -34,10 +36,10 @@ public:
     BGReference bgx[2];
     BGReference bgy[2];
 
-    WindowIn winin;
-    WindowOut winout;
-    WindowDimension winh[2] = { SCREEN_W, SCREEN_W };
-    WindowDimension winv[2] = { SCREEN_H, SCREEN_H };
+    WindowInside winin;
+    WindowOutside winout;
+    WindowRangeHor winh[2];
+    WindowRangeVer winv[2];
 
     Mosaic mosaic;
     BlendControl bldcnt;

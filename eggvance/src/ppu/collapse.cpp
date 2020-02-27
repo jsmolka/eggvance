@@ -216,7 +216,7 @@ void PPU::collapseBW(const std::vector<BGLayer>& layers)
         {
             upper = io.bldalpha.blend(upper, lower);
         }
-        else if (window.effects)
+        else if (window.blend)
         {
             switch (blend_mode)
             {
