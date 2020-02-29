@@ -129,7 +129,7 @@ void PPU::collapseBN(const std::vector<BGLayer>& layers)
 
         if (obj_master && object.alpha && findBlendLayers<obj_master>(layers, x, flags, upper, lower))
         {
-            upper = io.bldalpha.blend(upper, lower);
+            upper = io.bldalpha.blendAlpha(upper, lower);
         }
         else
         {
@@ -137,7 +137,7 @@ void PPU::collapseBN(const std::vector<BGLayer>& layers)
             {
             case BlendControl::Mode::ALPHA:
                 if (findBlendLayers<obj_master>(layers, x, flags, upper, lower))
-                    upper = io.bldalpha.blend(upper, lower);
+                    upper = io.bldalpha.blendAlpha(upper, lower);
                 break;
 
             case BlendControl::Mode::WHITE:
@@ -214,7 +214,7 @@ void PPU::collapseBW(const std::vector<BGLayer>& layers)
 
         if (obj_master && object.alpha && findBlendLayers<obj_master>(layers, x, window.flags, upper, lower))
         {
-            upper = io.bldalpha.blend(upper, lower);
+            upper = io.bldalpha.blendAlpha(upper, lower);
         }
         else if (window.blend)
         {
@@ -222,7 +222,7 @@ void PPU::collapseBW(const std::vector<BGLayer>& layers)
             {
             case BlendControl::Mode::ALPHA:
                 if (findBlendLayers<obj_master>(layers, x, window.flags, upper, lower))
-                    upper = io.bldalpha.blend(upper, lower);
+                    upper = io.bldalpha.blendAlpha(upper, lower);
                 break;
 
             case BlendControl::Mode::WHITE:
