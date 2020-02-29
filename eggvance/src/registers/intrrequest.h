@@ -2,19 +2,19 @@
 
 #include "register.h"
 
-class IntrRequest : public Register<IntrRequest, 2>
+class IntrRequest : public RegisterRW<2>
 {
 public:
     inline IntrRequest& operator|=(u16 value)
     {
-        *reinterpret_cast<u16*>(data) |= value;
+        cast<u16>() |= value;
 
         return *this;
     }
 
     inline operator u16()
     {
-        return *reinterpret_cast<u16*>(data);
+        return cast<u16>();
     }
 
     template<uint index>

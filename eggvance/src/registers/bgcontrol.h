@@ -4,7 +4,7 @@
 #include "common/bits.h"
 #include "ppu/dimensions.h"
 
-class BGControl : public Register<BGControl, 2>
+class BGControl : public RegisterRW<2>
 {
 public:
     template<uint index>

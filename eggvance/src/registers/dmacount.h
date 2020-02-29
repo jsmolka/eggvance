@@ -3,7 +3,7 @@
 #include "register.h"
 #include "common/bits.h"
 
-class DMACount : public Register<DMACount, 2>
+class DMACount : public RegisterRW<2>
 {
 public:
     DMACount(uint limit)

@@ -2,7 +2,7 @@
 
 #include "register.h"
 
-class HaltControl : public Register<HaltControl, 1>
+class HaltControl : public RegisterRW<1>
 {
 public:
     template<uint index>

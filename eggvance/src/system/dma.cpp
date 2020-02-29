@@ -29,10 +29,10 @@ void DMA::reset()
     running   = false;
     transfer  = nullptr;
 
-    control.reset();
+    control = DMAControl();
     count.reset();
-    sad.reset();
-    dad.reset();
+    sad = DMAAddress();
+    dad = DMAAddress();
 }
 
 void DMA::start()

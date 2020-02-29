@@ -404,6 +404,9 @@
     <ClInclude Include="src\registers\windowrange.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\common\utility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="eggvance.rc">

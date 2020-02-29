@@ -3,7 +3,7 @@
 #include "register.h"
 #include "common/bits.h"
 
-class BlendControl : public Register<BlendControl, 2>
+class BlendControl : public RegisterRW<2>
 {
 public:
     enum Mode

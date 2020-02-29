@@ -16,7 +16,7 @@ struct Window
     uint blend = 0;
 };
 
-class WindowInside : public Register<WindowInside, 2>
+class WindowInside : public RegisterRW<2>
 {
 public:
     template<uint index>
@@ -36,7 +36,7 @@ public:
     Window win1;
 };
 
-class WindowOutside : public Register<WindowOutside, 2>
+class WindowOutside : public RegisterRW<2>
 {
 public:
     template<uint index>

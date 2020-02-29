@@ -2,12 +2,12 @@
 
 #include "register.h"
 
-class BGOffset : public Register<BGOffset, 2>
+class BGOffset : public RegisterRW<2>
 {
 public:
     inline operator u16()
     {
-        return *reinterpret_cast<u16*>(data);
+        return cast<u16>();
     }
 
     template<uint index>

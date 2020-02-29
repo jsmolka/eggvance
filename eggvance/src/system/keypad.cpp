@@ -7,8 +7,7 @@ Keypad keypad;
 
 void Keypad::reset()
 {
-    io.keycnt.reset();
-    io.keyinput.reset();
+    io = IO();
 }
 
 void Keypad::process()

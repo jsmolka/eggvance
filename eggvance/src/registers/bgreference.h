@@ -3,7 +3,7 @@
 #include "register.h"
 #include "common/bits.h"
 
-class BGReference : public Register<BGReference, 4>
+class BGReference : public RegisterRW<4>
 {
 public:
     inline operator s32() const

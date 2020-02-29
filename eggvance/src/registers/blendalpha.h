@@ -5,7 +5,7 @@
 #include "register.h"
 #include "common/bits.h"
 
-class BlendAlpha : public Register<BlendAlpha, 2>
+class BlendAlpha : public RegisterRW<2>
 {
 public:
     template<uint index>

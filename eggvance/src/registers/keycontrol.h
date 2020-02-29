@@ -3,7 +3,7 @@
 #include "register.h"
 #include "common/bits.h"
 
-class KeyControl : public Register<KeyControl, 2>
+class KeyControl : public RegisterRW<2>
 {
 public:
     template<uint index>
@@ -13,17 +13,17 @@ public:
 
         data[index] = byte;
 
-        u8* maskb = reinterpret_cast<u8*>(&mask);
+        u8* mask = reinterpret_cast<u8*>(&this->mask);
 
         if (index == 0)
         {
-            maskb[0] = byte;
+            mask[0] = byte;
         }
         else
         {
-            maskb[1] = bits<0, 2>(byte);
-            irq      = bits<6, 1>(byte);
-            logic    = bits<7, 1>(byte);
+            mask[1] = bits<0, 2>(byte);
+            irq     = bits<6, 1>(byte);
+            logic   = bits<7, 1>(byte);
         }
     }
 

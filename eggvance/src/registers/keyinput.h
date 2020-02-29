@@ -1,27 +1,29 @@
 #pragma once
 
-#include "register.h"
+#include "common/integer.h"
 
-class KeyInput : public Register<KeyInput, 2>
+class KeyInput
 {
 public:
-    KeyInput()
-    {
-        cast<u16>() = 0x03FF;
-    }
-
     inline KeyInput& operator=(u16 value)
     {
-        cast<u16>() = value;
+        this->value = value;
 
         return *this;
     }
 
-    inline operator u16()
+    inline operator u16() const
     {
-        return cast<u16>();
+        return value;
     }
 
     template<uint index>
-    inline void write(u8 byte) = delete;
+    inline u8 read()
+    {
+        static_assert(index < 2);
+
+        return reinterpret_cast<u8*>(&value)[index];
+    }
+
+    u16 value = 0x03FF;
 };

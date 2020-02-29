@@ -3,7 +3,7 @@
 #include "register.h"
 #include "common/bits.h"
 
-class DMAControl : public Register<DMAControl, 2>
+class DMAControl : public RegisterRW<2>
 {
 public:
     template<uint index>

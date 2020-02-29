@@ -1,8 +1,8 @@
 #pragma once
 
-#include "register.h"
+#include "common/integer.h"
 
-class TimerData : public Register<TimerData, 2>
+class TimerData
 {
 public:
     template<uint index>
@@ -18,9 +18,9 @@ public:
     {
         static_assert(index < 2);
 
-        reinterpret_cast<u8*>(&reload)[index] = byte;
+        reinterpret_cast<u8*>(&initial)[index] = byte;
     }
 
     u16 counter = 0;
-    u16 reload  = 0;
+    u16 initial = 0;
 };

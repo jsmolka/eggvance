@@ -4,21 +4,18 @@
 #include "common/constants.h"
 
 template<uint maximum>
-class WindowRange : public Register<WindowRange<maximum>, 2>
+class WindowRange : public RegisterW<2>
 {
 public:
-    template<uint index>
-    inline u8 read() const = delete;
-
     template<uint index>
     inline void write(u8 byte)
     {
         static_assert(index < 2);
 
-        this->data[index] = byte;
+        data[index] = byte;
 
-        max = this->data[0];
-        min = this->data[1];
+        max = data[0];
+        min = data[1];
 
         if (max > maximum || max < min)
             max = maximum;

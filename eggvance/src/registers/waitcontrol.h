@@ -3,7 +3,7 @@
 #include "register.h"
 #include "common/bits.h"
 
-class WaitControl : public Register<WaitControl, 2>
+class WaitControl : public RegisterRW<2>
 {
 public:
     WaitControl()

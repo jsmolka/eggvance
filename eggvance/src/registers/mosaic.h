@@ -1,13 +1,19 @@
 #pragma once
 
-#include "register.h"
 #include "common/bits.h"
+#include "common/integer.h"
 
-class Mosaic : public Register<Mosaic, 2>
+class Mosaic
 {
 public:
     struct Block
     {
+        inline void write(u8 byte)
+        {
+            x = bits<0, 4>(byte) + 1;
+            y = bits<4, 4>(byte) + 1;
+        }
+
         inline uint mosaicX(uint value) const { return x * (value / x); }
         inline uint mosaicY(uint value) const { return y * (value / y); }
 
@@ -16,23 +22,14 @@ public:
     };
 
     template<uint index>
-    inline u8 read() const = delete;
-
-    template<uint index>
     inline void write(u8 byte)
     {
         static_assert(index < 2);
 
         if (index == 0)
-        {
-            bgs.x = bits<0, 4>(byte) + 1;
-            bgs.y = bits<4, 4>(byte) + 1;
-        }
+            bgs.write(byte);
         else
-        {
-            obj.x = bits<0, 4>(byte) + 1;
-            obj.y = bits<4, 4>(byte) + 1;
-        }
+            obj.write(byte);
     }
 
     Block bgs;

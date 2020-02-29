@@ -4,18 +4,18 @@
 #include "common/config.h"
 
 template<s16 post_bios>
-class BGParameter : public Register<BGParameter<post_bios>, 2>
+class BGParameter : public RegisterRW<2>
 {
 public:
     BGParameter()
     {
         if (config.bios_skip)
-            *reinterpret_cast<s16*>(this->data) = post_bios;
+            cast<s16>() = post_bios;
     }
 
     inline operator s16()
     {
-        return *reinterpret_cast<s16*>(this->data);
+        return cast<s16>();
     }
 
     template<uint index>

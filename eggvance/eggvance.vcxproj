@@ -191,6 +191,7 @@
     <ClInclude Include="src\common\macros.h" />
     <ClInclude Include="src\common\mpl.h" />
     <ClInclude Include="src\common\smallvector.h" />
+    <ClInclude Include="src\common\utility.h" />
     <ClInclude Include="src\platform\audiodevice.h" />
     <ClInclude Include="src\platform\device.h" />
     <ClInclude Include="src\platform\framecounter.h" />

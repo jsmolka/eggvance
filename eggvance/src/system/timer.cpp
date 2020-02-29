@@ -12,8 +12,8 @@ Timer::Timer(uint id)
 
 void Timer::reset()
 {
-    data.reset();
-    control.reset();
+    data = TimerData();
+    control = TimerControl();
 
     counter  = 0;
     reload   = 0;
@@ -35,7 +35,7 @@ void Timer::run(uint cycles)
                     static_cast<uint>(Irq::Timer) << id));
 
         counter %= overflow;
-        reload   = data.reload;
+        reload   = data.initial;
         overflow = prescale(limit - reload);
     }
     data.counter = counter / control.prescaler + reload;
@@ -44,7 +44,7 @@ void Timer::run(uint cycles)
 void Timer::start()
 {
     counter  = 0;
-    reload   = data.reload;
+    reload   = data.initial;
     overflow = prescale(limit - reload);
 }
 

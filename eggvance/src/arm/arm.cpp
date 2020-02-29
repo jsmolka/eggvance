@@ -15,8 +15,7 @@ void ARM::reset()
 {
     Registers::reset();
 
-    io.waitcnt.reset();
-    io.haltcnt.reset();
+    io = IO();
 
     state = 0;
 
