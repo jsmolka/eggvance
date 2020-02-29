@@ -13,32 +13,27 @@ public:
     {
         static_assert(index < 2);
 
+        data[index] = byte;
+
         if (index == 0)
             eva = std::min(16u, bits<0, 5, uint>(byte));
         else
             evb = std::min(16u, bits<0, 5, uint>(byte));
-
-        data[index] = byte;
     }
 
-    inline u16 blend(u16 a, u16 b) const
+    inline u16 blendAlpha(u16 a, u16 b) const
     {
-        uint ar = bits< 0, 5>(a);
-        uint ag = bits< 5, 5>(a);
-        uint ab = bits<10, 5>(a);
+        constexpr uint rmask = 0x1F <<  0;
+        constexpr uint gmask = 0x1F <<  5;
+        constexpr uint bmask = 0x1F << 10;
 
-        uint br = bits< 0, 5>(b);
-        uint bg = bits< 5, 5>(b);
-        uint bb = bits<10, 5>(b);
+        uint tr = std::min(rmask, ((a & rmask) * eva + (b & rmask) * evb) >> 4);
+        uint tg = std::min(gmask, ((a & gmask) * eva + (b & gmask) * evb) >> 4);
+        uint tb = std::min(bmask, ((a & bmask) * eva + (b & bmask) * evb) >> 4);
 
-        uint tr = std::min(31u, (ar * eva + br * evb) >> 4);
-        uint tg = std::min(31u, (ag * eva + bg * evb) >> 4);
-        uint tb = std::min(31u, (ab * eva + bb * evb) >> 4);
-
-        return (tr << 0) | (tg << 5) | (tb << 10);
+        return (tr & rmask) | (tg & gmask) | (tb & bmask);
     }
 
-private:
     uint eva = 0;
     uint evb = 0;
 };
