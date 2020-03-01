@@ -37,3 +37,16 @@
     case label + 1: reg.write<1>(byte); break;  \
     case label + 2: reg.write<2>(byte); break;  \
     case label + 3: reg.write<3>(byte); break
+
+#define WRITE_BYTE_REGX(label, reg, mask)                               \
+    case label + 0: reg.write<0>(byte & ((mask >>  0) & 0xFF)); break;
+
+#define WRITE_HALF_REGX(label, reg, mask)                               \
+    case label + 0: reg.write<0>(byte & ((mask >>  0) & 0xFF)); break;  \
+    case label + 1: reg.write<1>(byte & ((mask >>  8) & 0xFF)); break
+
+#define WRITE_WORD_REGX(label, reg, mask)                               \
+    case label + 0: reg.write<0>(byte & ((mask >>  0) & 0xFF)); break;  \
+    case label + 1: reg.write<1>(byte & ((mask >>  8) & 0xFF)); break;  \
+    case label + 2: reg.write<2>(byte & ((mask >> 16) & 0xFF)); break;  \
+    case label + 3: reg.write<3>(byte & ((mask >> 24) & 0xFF)); break
