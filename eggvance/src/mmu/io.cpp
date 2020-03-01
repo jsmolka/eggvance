@@ -9,6 +9,7 @@
 #include "system/dmacontroller.h"
 #include "system/irqhandler.h"
 #include "system/keypad.h"
+#include "system/serial.h"
 #include "system/timercontroller.h"
 
 #define READ1_UNIMP(label) CASE1(label): return data.readByte(addr)
@@ -141,20 +142,31 @@ u8 IO::readByte(u32 addr)
 
     switch (addr)
     {
-    READ_HALF_REG(REG_DISPCNT,  ppu.io.dispcnt);
-    READ_HALF_REG(REG_DISPSTAT, ppu.io.dispstat);
-    READ_HALF_REG(REG_VCOUNT,   ppu.io.vcount);
-    READ_HALF_REG(REG_BG0CNT,   ppu.io.bgcnt[0]);
-    READ_HALF_REG(REG_BG1CNT,   ppu.io.bgcnt[1]);
-    READ_HALF_REG(REG_BG2CNT,   ppu.io.bgcnt[2]);
-    READ_HALF_REG(REG_BG3CNT,   ppu.io.bgcnt[3]);
-    READ_HALF_REG(REG_WININ,    ppu.io.winin);
-    READ_HALF_REG(REG_WINOUT,   ppu.io.winout);
-    READ_HALF_REG(REG_BLDCNT,   ppu.io.bldcnt);
-    READ_HALF_REG(REG_BLDALPHA, ppu.io.bldalpha);
-    READ_HALF_REG(REG_WAITCNT,  arm.io.waitcnt);
-    READ_HALF_REG(REG_KEYINPUT, keypad.io.keyinput);
-    READ_HALF_REG(REG_KEYCNT,   keypad.io.keycnt);
+    READ_HALF_REG(REG_DISPCNT  , ppu.io.dispcnt);
+    READ_HALF_REG(REG_DISPSTAT , ppu.io.dispstat);
+    READ_HALF_REG(REG_VCOUNT   , ppu.io.vcount);
+    READ_HALF_REG(REG_BG0CNT   , ppu.io.bgcnt[0]);
+    READ_HALF_REG(REG_BG1CNT   , ppu.io.bgcnt[1]);
+    READ_HALF_REG(REG_BG2CNT   , ppu.io.bgcnt[2]);
+    READ_HALF_REG(REG_BG3CNT   , ppu.io.bgcnt[3]);
+    READ_HALF_REG(REG_WININ    , ppu.io.winin);
+    READ_HALF_REG(REG_WINOUT   , ppu.io.winout);
+    READ_HALF_REG(REG_BLDCNT   , ppu.io.bldcnt);
+    READ_HALF_REG(REG_BLDALPHA , ppu.io.bldalpha);
+    READ_HALF_REG(REG_WAITCNT  , arm.io.waitcnt);
+    READ_HALF_REG(REG_KEYINPUT , keypad.io.keyinput);
+    READ_HALF_REG(REG_KEYCNT   , keypad.io.keycnt);
+    READ_HALF_REG(REG_SIOMULTI0, serial.io.siomulti[0]);
+    READ_HALF_REG(REG_SIOMULTI1, serial.io.siomulti[1]);
+    READ_HALF_REG(REG_SIOMULTI2, serial.io.siomulti[2]);
+    READ_HALF_REG(REG_SIOMULTI3, serial.io.siomulti[3]);
+    READ_HALF_REG(REG_SIOCNT   , serial.io.siocnt);
+    READ_HALF_REG(REG_SIOSEND  , serial.io.siosend);
+    READ_HALF_REG(REG_RCNT     , serial.io.rcnt);
+    READ_HALF_REG(REG_JOYCNT   , serial.io.joycnt);
+    READ_WORD_REG(REG_JOY_RECV , serial.io.joyrecv);
+    READ_WORD_REG(REG_JOY_TRANS, serial.io.joytrans);
+    READ_HALF_REG(REG_JOYSTAT  , serial.io.joystat);
 
     READ2_UNIMP(REG_GREENSWAP);
     READ2_UNIMP(REG_SOUND1CNT_L);
@@ -179,17 +191,6 @@ u8 IO::readByte(u32 addr)
     READ2_UNIMP(REG_WAVE_RAM_5);
     READ2_UNIMP(REG_WAVE_RAM_6);
     READ2_UNIMP(REG_WAVE_RAM_7);
-    READ2_UNIMP(REG_SIOMULTI0);
-    READ2_UNIMP(REG_SIOMULTI1);
-    READ2_UNIMP(REG_SIOMULTI2);
-    READ2_UNIMP(REG_SIOMULTI3);
-    READ2_UNIMP(REG_SIOCNT);
-    READ2_UNIMP(REG_SIOMLT_SEND);
-    READ2_UNIMP(REG_RCNT);
-    READ2_UNIMP(REG_JOYCNT);
-    READ4_UNIMP(REG_JOY_RECV);
-    READ4_UNIMP(REG_JOY_TRANS);
-    READ2_UNIMP(REG_JOYSTAT);
     READ1_UNIMP(REG_POSTFLG);
 
     CASE2(REG_IE):
@@ -233,8 +234,10 @@ u8 IO::readByte(u32 addr)
     CASE2(0x15A):
     CASE2(0x206):
         return 0;
+
+    default:
+        return mmu.readUnused(unused);
     }
-    return mmu.readUnused(unused);
 }
 
 u16 IO::readHalf(u32 addr)
@@ -332,7 +335,7 @@ void IO::writeByte(u32 addr, u8 byte)
     WRITE2_UNIMP(REG_SIOMULTI2);
     WRITE2_UNIMP(REG_SIOMULTI3);
     WRITE2_UNIMP(REG_SIOCNT);
-    WRITE2_UNIMP(REG_SIOMLT_SEND);
+    WRITE2_UNIMP(REG_SIOSEND);
     WRITE2_UNIMP(REG_RCNT);
     WRITE2_UNIMP(REG_JOYCNT);
     WRITE4_UNIMP(REG_JOY_RECV);

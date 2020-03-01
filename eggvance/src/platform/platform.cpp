@@ -11,6 +11,7 @@
 #include "system/dmacontroller.h"
 #include "system/keypad.h"
 #include "system/irqhandler.h"
+#include "system/serial.h"
 #include "system/timercontroller.h"
 
 void Platform::init(int argc, char* argv[])
@@ -67,6 +68,7 @@ void Platform::reset()
     irqh.reset();
     keypad.reset();
     timerc.reset();
+    serial = Serial();
 }
 
 void Platform::updateTitle()

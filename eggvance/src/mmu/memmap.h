@@ -113,7 +113,7 @@ enum
     REG_SIOMULTI2   = 0x124,
     REG_SIOMULTI3   = 0x126,
     REG_SIOCNT      = 0x128,
-    REG_SIOMLT_SEND = 0x12A,
+    REG_SIOSEND     = 0x12A,
     REG_SIODATA8    = 0x12A,
     REG_KEYINPUT    = 0x130,
     REG_KEYCNT      = 0x132,
