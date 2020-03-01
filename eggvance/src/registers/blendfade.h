@@ -1,14 +1,10 @@
 #pragma once
 
-#include "register.h"
 #include "common/bits.h"
 
-class BlendFade : public RegisterRW<2>
+class BlendFade
 {
 public:
-    template<uint index>
-    inline u8 read() const = delete;
-
     template<uint index>
     inline void write(u8 byte)
     {
@@ -20,28 +16,36 @@ public:
 
     inline u16 blendWhite(u16 a) const
     {
-        uint ar = bits< 0, 5>(a);
-        uint ag = bits< 5, 5>(a);
-        uint ab = bits<10, 5>(a);
+        constexpr uint rmask = 0x1F <<  0;
+        constexpr uint gmask = 0x1F <<  5;
+        constexpr uint bmask = 0x1F << 10;
 
-        uint tr = std::min(31u, ar + (((31 - ar) * evy) >> 4));
-        uint tg = std::min(31u, ag + (((31 - ag) * evy) >> 4));
-        uint tb = std::min(31u, ab + (((31 - ab) * evy) >> 4));
+        uint r = a & rmask;
+        uint g = a & gmask;
+        uint b = a & bmask;
 
-        return (tr << 0) | (tg << 5) | (tb << 10);
+        r += ((rmask - r) * evy) >> 4;
+        g += ((gmask - g) * evy) >> 4;
+        b += ((bmask - b) * evy) >> 4;
+
+        return (r & rmask) | (g & gmask) | (b & bmask);
     }
 
     inline u16 blendBlack(u16 a) const
     {
-        uint ar = bits< 0, 5>(a);
-        uint ag = bits< 5, 5>(a);
-        uint ab = bits<10, 5>(a);
+        constexpr uint rmask = 0x1F <<  0;
+        constexpr uint gmask = 0x1F <<  5;
+        constexpr uint bmask = 0x1F << 10;
 
-        uint tr = std::min(31u, ar - ((ar * evy) >> 4));
-        uint tg = std::min(31u, ag - ((ag * evy) >> 4));
-        uint tb = std::min(31u, ab - ((ab * evy) >> 4));
+        uint r = a & rmask;
+        uint g = a & gmask;
+        uint b = a & bmask;
 
-        return (tr << 0) | (tg << 5) | (tb << 10);
+        r -= (r * evy) >> 4;
+        g -= (g * evy) >> 4;
+        b -= (b * evy) >> 4;
+
+        return (r & rmask) | (g & gmask) | (b & bmask);
     }
 
 private:
