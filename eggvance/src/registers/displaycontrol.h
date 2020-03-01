@@ -8,11 +8,6 @@
 class DisplayControl : public RegisterRW<2>
 {
 public:
-    DisplayControl()
-    {
-        blank = config.bios_skip;
-    }
-
     template<uint index>
     inline void write(u8 byte)
     {
@@ -65,7 +60,7 @@ public:
     uint frame    = 0;
     uint oam_free = 0;
     uint mapping  = 0;
-    uint blank    = 0;
+    uint blank    = config.bios_skip;
     uint layers   = 0;
     uint win0     = 0;
     uint win1     = 0;

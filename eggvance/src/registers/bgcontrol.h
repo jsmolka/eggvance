@@ -23,33 +23,33 @@ public:
         }
         else
         {
-            map_block   = bits<0, 5>(byte) * 0x800;
-            wraparound  = bits<5, 1>(byte);
-            screen_size = bits<6, 2>(byte);
+            map_block  = bits<0, 5>(byte) * 0x0800;
+            wraparound = bits<5, 1>(byte);
+            dimensions = bits<6, 2>(byte);
         }
     }
 
     inline Dimensions dimsReg() const
     {
         return Dimensions(
-            256 << bits<0, 1>(screen_size),
-            256 << bits<1, 1>(screen_size)
+            256 << bits<0, 1>(dimensions),
+            256 << bits<1, 1>(dimensions)
         );
     }
 
     inline Dimensions dimsAff() const
     {
         return Dimensions(
-            128 << screen_size,
-            128 << screen_size
+            128 << dimensions,
+            128 << dimensions
         );
     }
 
-    uint priority    = 0;
-    uint tile_block  = 0;
-    uint mosaic      = 0;
-    uint color_mode  = 0;
-    uint map_block   = 0;
-    uint wraparound  = 0;
-    uint screen_size = 0;
+    uint priority   = 0;
+    uint tile_block = 0;
+    uint mosaic     = 0;
+    uint color_mode = 0;
+    uint map_block  = 0;
+    uint wraparound = 0;
+    uint dimensions = 0;
 };

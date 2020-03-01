@@ -1,15 +1,22 @@
 #pragma once
 
-#include "register.h"
+#include "common/integer.h"
 
-class DMAAddress : public RegisterRW<4>
+class DMAAddress
 {
 public:
-    inline operator u32()
+    inline operator u32() const
     {
-        return *reinterpret_cast<u32*>(data);
+        return value;
     }
 
     template<uint index>
-    inline u8 read() const = delete;
+    inline void write(u8 byte)
+    {
+        static_assert(index < 4);
+
+        reinterpret_cast<u8*>(&value)[index] = byte;
+    }
+
+    u32 value = 0;
 };

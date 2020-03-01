@@ -1,15 +1,22 @@
 #pragma once
 
-#include "register.h"
+#include "common/integer.h"
 
-class BGOffset : public RegisterRW<2>
+class BGOffset
 {
 public:
-    inline operator u16()
+    inline operator u16() const
     {
-        return cast<u16>();
+        return value;
     }
 
     template<uint index>
-    inline u8 read() const = delete;
+    inline void write(u8 byte)
+    {
+        static_assert(index < 2);
+
+        reinterpret_cast<u8*>(&value)[index] = byte;
+    }
+
+    u16 value = 0;
 };

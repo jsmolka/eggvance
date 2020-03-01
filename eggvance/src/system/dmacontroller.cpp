@@ -98,7 +98,7 @@ void DMAController::writeByte(u32 addr, u8 byte)
 
 void DMAController::emit(DMA& dma, DMA::Timing timing)
 {
-    if (!dma.running && dma.control.enabled && dma.control.timing == int(timing))
+    if (!dma.running && dma.control.enable && dma.control.timing == int(timing))
     {
         dma.start();
 

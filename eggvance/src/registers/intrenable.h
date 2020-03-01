@@ -1,12 +1,30 @@
 #pragma once
 
-#include "register.h"
+#include "common/integer.h"
 
-class IntrEnable : public RegisterRW<2>
+class IntrEnable
 {
 public:
-    inline operator u16()
+    inline operator u16() const
     {
-        return *reinterpret_cast<u16*>(data);
+        return value;
     }
+
+    template<uint index>
+    inline u8 read() const
+    {
+        static_assert(index < 2);
+
+        return reinterpret_cast<const u8*>(&value)[index];
+    }
+
+    template<uint index>
+    inline void write(u8 byte)
+    {
+        static_assert(index < 2);
+
+        reinterpret_cast<u8*>(&value)[index] = byte;
+    }
+
+    u16 value = 0;
 };

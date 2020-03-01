@@ -1,17 +1,27 @@
 #pragma once
 
-#include "register.h"
+#include "common/integer.h"
 
-class VCount : public RegisterR<2>
+class VCount
 {
 public:
     inline operator uint() const
     {
-        return data[0];
+        return value;
+    }
+
+    template<uint index>
+    inline u8 read() const
+    {
+        static_assert(index < 2);
+
+        return reinterpret_cast<const u8*>(&value)[index];
     }
 
     inline void next()
     {
-        data[0] = (data[0] + 1) % 228;
+        value = (value + 1) % 228;
     }
+
+    u16 value = 0;
 };

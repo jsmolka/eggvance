@@ -1,25 +1,25 @@
 #pragma once
 
-#include "register.h"
-#include "common/config.h"
+#include "common/integer.h"
 
-template<s16 post_bios>
-class BGParameter : public RegisterRW<2>
+template<s16 initial>
+class BGParameter
 {
 public:
-    BGParameter()
+    inline operator s16() const
     {
-        if (config.bios_skip)
-            cast<s16>() = post_bios;
-    }
-
-    inline operator s16()
-    {
-        return cast<s16>();
+        return value;
     }
 
     template<uint index>
-    inline u8 read() const = delete;
+    inline void write(u8 byte)
+    {
+        static_assert(index < 2);
+
+        reinterpret_cast<u8*>(&value)[index] = byte;
+    }
+
+    s16 value = initial;
 };
 
 using BGParameterA = BGParameter<0x0100>;

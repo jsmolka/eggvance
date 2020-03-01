@@ -25,15 +25,7 @@ public:
     }
 
 protected:
-    template<typename T>
-    inline T& cast()
-    {
-        static_assert(sizeof(T) <= size);
-
-        return *reinterpret_cast<T*>(data);
-    }
-
-    u8 data[size] = {};
+    u8 data[size] = { 0 };
 };
 
 template<uint size>

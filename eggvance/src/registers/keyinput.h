@@ -18,11 +18,11 @@ public:
     }
 
     template<uint index>
-    inline u8 read()
+    inline u8 read() const
     {
         static_assert(index < 2);
 
-        return reinterpret_cast<u8*>(&value)[index];
+        return reinterpret_cast<const u8*>(&value)[index];
     }
 
     u16 value = 0x03FF;

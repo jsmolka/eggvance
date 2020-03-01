@@ -1,20 +1,28 @@
 #pragma once
 
-#include "register.h"
+#include "common/integer.h"
 
-class IntrRequest : public RegisterRW<2>
+class IntrRequest
 {
 public:
     inline IntrRequest& operator|=(u16 value)
     {
-        cast<u16>() |= value;
+        this->value |= value;
 
         return *this;
     }
 
-    inline operator u16()
+    inline operator u16() const
     {
-        return cast<u16>();
+        return value;
+    }
+
+    template<uint index>
+    inline u8 read() const
+    {
+        static_assert(index < 2);
+
+        return reinterpret_cast<const u8*>(&value)[index];
     }
 
     template<uint index>
@@ -22,6 +30,8 @@ public:
     {
         static_assert(index < 2);
 
-        data[index] &= ~byte;
+        reinterpret_cast<u8*>(&value)[index] &= ~byte;
     }
+
+    u16 value = 0;
 };

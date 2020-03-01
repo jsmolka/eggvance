@@ -1,18 +1,14 @@
 #pragma once
 
-#include "register.h"
 #include "common/bits.h"
 
-class BGReference : public RegisterRW<4>
+class BGReference
 {
 public:
     inline operator s32() const
     {
-        return value;
+        return current;
     }
-
-    template<uint index>
-    inline u8 read() const = delete;
 
     template<uint index>
     inline void write(u8 byte)
@@ -22,21 +18,21 @@ public:
         if (index == 3)
             byte = signExtend<4>(byte);
 
-        data[index] = byte;
+        reinterpret_cast<u8*>(&initial)[index] = byte;
 
-        vblank();
+        current = initial;
     }
 
     inline void hblank(s16 parameter)
     {
-        value += static_cast<s32>(parameter);
+        current += parameter;
     }
 
     inline void vblank()
     {
-        value = *reinterpret_cast<s32*>(data);
+        current = initial;
     }
 
-private:
-    s32 value = 0;
+    s32 initial = 0;
+    s32 current = 0;
 };

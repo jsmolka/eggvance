@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/bits.h"
-#include "common/integer.h"
 
 class Mosaic
 {

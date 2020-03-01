@@ -4,15 +4,7 @@
 #include "mmu/mmu.h"
 #include "system/irqhandler.h"
 
-static constexpr int count_limits[4] = { 
-    0x04000, 
-    0x04000, 
-    0x04000, 
-    0x10000 
-};
-
 DMA::DMA(int id)
-    : count(count_limits[id])
 {
     this->id = id;
 }
@@ -30,7 +22,7 @@ void DMA::reset()
     transfer  = nullptr;
 
     control = DMAControl();
-    count.reset();
+    count = DMACount();
     sad = DMAAddress();
     dad = DMAAddress();
 }
@@ -38,7 +30,7 @@ void DMA::reset()
 void DMA::start()
 {
     running   = true;
-    remaining = count.count();
+    remaining = count.count(id);
 
     if (control.reload)
     {
@@ -46,7 +38,7 @@ void DMA::start()
         dad_addr = dad;
         control.reload = false;
     }
-    else if (control.repeat && control.dad_delta == 0b11)
+    else if (control.repeat && control.dadcnt == 0b11)
     {
         dad_addr = dad;
     }
@@ -58,8 +50,8 @@ void DMA::start()
 
     static constexpr int deltas[4] = { 1, -1, 0, 1 };
 
-    sad_delta = size * deltas[control.sad_delta];
-    dad_delta = size * deltas[control.dad_delta];
+    sad_delta = size * deltas[control.sadcnt];
+    dad_delta = size * deltas[control.dadcnt];
 
     updateCycles();
     updateTransfer();
@@ -83,7 +75,7 @@ void DMA::run(int& cycles)
             return;
     }
 
-    control.enabled = control.repeat;
+    control.enable = control.repeat;
 
     if (control.irq)
         irqh.request(

@@ -1,30 +1,25 @@
 #pragma once
 
-#include "register.h"
 #include "common/bits.h"
 
-class DMACount : public RegisterRW<2>
+class DMACount
 {
 public:
-    DMACount(uint limit)
-        : limit(limit) {}
-
-    inline void reset()
-    {
-        *this = DMACount(limit);
-    }
-
     template<uint index>
-    inline u8 read() const = delete;
-
-    inline uint count()
+    inline void write(u8 byte)
     {
-        if (cast<u16>() == 0)
-            return limit;
-        else
-            return cast<u16>();
+        static_assert(index < 2);
+
+        reinterpret_cast<u8*>(&value)[index] = byte;
     }
 
-private:
-    uint limit;
+    inline uint count(uint id) const
+    {
+        if (value == 0)
+            return id < 3 ? 0x4000 : 0x1'0000;
+        else
+            return value;
+    }
+
+    u16 value = 0;
 };

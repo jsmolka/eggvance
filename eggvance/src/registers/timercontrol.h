@@ -2,7 +2,7 @@
 
 #include "register.h"
 #include "common/bits.h"
-#include "common/utility.h"
+#include "common/macros.h"
 
 class TimerControl : public RegisterRW<2>
 {
@@ -21,9 +21,23 @@ public:
             enabled = bits<7, 1>(byte);
 
             if (cascade)
+            {
                 prescaler = 1;
+            }
             else
-                prescaler = stacklut<1, 64, 256, 1024>(bits<0, 2>(byte));
+            {
+                switch (bits<0, 2>(byte))
+                {
+                case 0: prescaler = 1; break;
+                case 1: prescaler = 64; break;
+                case 2: prescaler = 256; break;
+                case 3: prescaler = 1024; break;
+
+                default:
+                    EGG_UNREACHABLE;
+                    break;
+                }
+            }
         }
     }
 

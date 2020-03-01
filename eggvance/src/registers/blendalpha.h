@@ -27,11 +27,11 @@ public:
         constexpr uint gmask = 0x1F <<  5;
         constexpr uint bmask = 0x1F << 10;
 
-        uint tr = std::min(rmask, ((a & rmask) * eva + (b & rmask) * evb) >> 4);
-        uint tg = std::min(gmask, ((a & gmask) * eva + (b & gmask) * evb) >> 4);
-        uint tb = std::min(bmask, ((a & bmask) * eva + (b & bmask) * evb) >> 4);
+        uint cr = std::min(rmask, ((a & rmask) * eva + (b & rmask) * evb) >> 4);
+        uint cg = std::min(gmask, ((a & gmask) * eva + (b & gmask) * evb) >> 4);
+        uint cb = std::min(bmask, ((a & bmask) * eva + (b & bmask) * evb) >> 4);
 
-        return (tr & rmask) | (tg & gmask) | (tb & bmask);
+        return (cr & rmask) | (cg & gmask) | (cb & bmask);
     }
 
     uint eva = 0;

@@ -6,11 +6,11 @@ class TimerData
 {
 public:
     template<uint index>
-    inline u8 read()
+    inline u8 read() const
     {
         static_assert(index < 2);
 
-        return reinterpret_cast<u8*>(&counter)[index];
+        return reinterpret_cast<const u8*>(&counter)[index];
     }
 
     template<uint index>

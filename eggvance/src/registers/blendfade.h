@@ -48,6 +48,5 @@ public:
         return (r & rmask) | (g & gmask) | (b & bmask);
     }
 
-private:
     uint evy = 0;
 };
