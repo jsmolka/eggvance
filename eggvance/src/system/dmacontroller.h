@@ -10,8 +10,8 @@ public:
     void run(int& cycles);
     void broadcast(DMA::Timing timing);
 
-    u8 readByte(u32 addr);
-    void writeByte(u32 addr, u8 byte);
+    u8 read(u32 addr);
+    void write(u32 addr, u8 byte);
 
 private:
     void emit(DMA& dma, DMA::Timing timing);

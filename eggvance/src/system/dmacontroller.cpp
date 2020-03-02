@@ -47,7 +47,7 @@ void DMAController::broadcast(DMA::Timing timing)
     }
 }
 
-u8 DMAController::readByte(u32 addr)
+u8 DMAController::read(u32 addr)
 {    
     switch (addr)
     {
@@ -55,6 +55,12 @@ u8 DMAController::readByte(u32 addr)
     READ_HALF_REG(REG_DMA1CNT_H, dmas[1].control);
     READ_HALF_REG(REG_DMA2CNT_H, dmas[2].control);
     READ_HALF_REG(REG_DMA3CNT_H, dmas[3].control);
+
+    CASE_HALF_REG(REG_DMA0CNT_L):
+    CASE_HALF_REG(REG_DMA1CNT_L):
+    CASE_HALF_REG(REG_DMA2CNT_L):
+    CASE_HALF_REG(REG_DMA3CNT_L):
+        return 0;
 
     default:
         EGG_UNREACHABLE;
@@ -66,7 +72,7 @@ u8 DMAController::readByte(u32 addr)
     case label + 0: writeControl<0>(dma, byte); break;  \
     case label + 1: writeControl<1>(dma, byte); break
 
-void DMAController::writeByte(u32 addr, u8 byte)
+void DMAController::write(u32 addr, u8 byte)
 {
     switch (addr)
     {
@@ -82,7 +88,6 @@ void DMAController::writeByte(u32 addr, u8 byte)
     WRITE_HALF_REG(REG_DMA1CNT_L, dmas[1].count);
     WRITE_HALF_REG(REG_DMA2CNT_L, dmas[2].count);
     WRITE_HALF_REG(REG_DMA3CNT_L, dmas[3].count);
-
     WRITE_CTRL_REG(REG_DMA0CNT_H, dmas[0]);
     WRITE_CTRL_REG(REG_DMA1CNT_H, dmas[1]);
     WRITE_CTRL_REG(REG_DMA2CNT_H, dmas[2]);
