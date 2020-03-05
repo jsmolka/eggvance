@@ -10,7 +10,7 @@ public:
     void run(int& cycles);
     void broadcast(DMA::Timing timing);
 
-    u8 read(u32 addr);
+    u8 read(u32 addr) const;
     void write(u32 addr, u8 byte);
 
 private:

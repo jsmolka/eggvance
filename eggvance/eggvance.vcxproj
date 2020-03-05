@@ -129,6 +129,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\apu\apu.cpp" />
     <ClCompile Include="src\arm\arm.cpp" />
     <ClCompile Include="src\arm\bus.cpp" />
     <ClCompile Include="src\arm\disassemble.cpp" />
@@ -177,6 +178,8 @@
     <ClCompile Include="src\system\timercontroller.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\apu\apu.h" />
+    <ClInclude Include="src\apu\apuio.h" />
     <ClInclude Include="src\arm\util.h" />
     <ClInclude Include="src\arm\arm.h" />
     <ClInclude Include="src\arm\decode.h" />
@@ -192,6 +195,7 @@
     <ClInclude Include="src\common\macros.h" />
     <ClInclude Include="src\common\mpl.h" />
     <ClInclude Include="src\common\smallvector.h" />
+    <ClInclude Include="src\mmu\miscio.h" />
     <ClInclude Include="src\platform\audiodevice.h" />
     <ClInclude Include="src\platform\device.h" />
     <ClInclude Include="src\platform\framecounter.h" />

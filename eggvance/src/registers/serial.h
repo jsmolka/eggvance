@@ -1,9 +1,19 @@
 #pragma once
 
+#include "common/config.h"
 #include "register.h"
 
 struct SerialIO
 {
+    SerialIO()
+    {
+        if (config.bios_skip)
+        {
+            rcnt.write<0>(0x00);
+            rcnt.write<1>(0x80);
+        }
+    }
+
     RegisterRW<2> rcnt;
     RegisterRW<2> joycnt;
     RegisterRW<4> joyrecv;

@@ -47,7 +47,7 @@ void DMAController::broadcast(DMA::Timing timing)
     }
 }
 
-u8 DMAController::read(u32 addr)
+u8 DMAController::read(u32 addr) const
 {    
     switch (addr)
     {
@@ -55,12 +55,6 @@ u8 DMAController::read(u32 addr)
     READ_HALF_REG(REG_DMA1CNT_H, dmas[1].control);
     READ_HALF_REG(REG_DMA2CNT_H, dmas[2].control);
     READ_HALF_REG(REG_DMA3CNT_H, dmas[3].control);
-
-    CASE_HALF_REG(REG_DMA0CNT_L):
-    CASE_HALF_REG(REG_DMA1CNT_L):
-    CASE_HALF_REG(REG_DMA2CNT_L):
-    CASE_HALF_REG(REG_DMA3CNT_L):
-        return 0;
 
     default:
         EGG_UNREACHABLE;

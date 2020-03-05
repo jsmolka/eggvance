@@ -60,19 +60,19 @@ void TimerController::runUntilIrq(int& cycles)
 
 u8 TimerController::read(u32 addr)
 {
-    #define READ_DATA_REG(label, data)                          \
-        case label + 0: runTimers(); return data.read<0>();     \
-        case label + 1: runTimers(); return data.read<1>()
+    #define READ_DATA_REG(label, reg)                       \
+        case label + 0: runTimers(); return reg.read<0>();  \
+        case label + 1: runTimers(); return reg.read<1>()
 
     switch (addr)
     {
     READ_DATA_REG(REG_TM0CNT_L, timers[0].data   );
-    READ_DATA_REG(REG_TM1CNT_L, timers[1].data   );
-    READ_DATA_REG(REG_TM2CNT_L, timers[2].data   );
-    READ_DATA_REG(REG_TM3CNT_L, timers[3].data   );
     READ_HALF_REG(REG_TM0CNT_H, timers[0].control);
+    READ_DATA_REG(REG_TM1CNT_L, timers[1].data   );
     READ_HALF_REG(REG_TM1CNT_H, timers[1].control);
+    READ_DATA_REG(REG_TM2CNT_L, timers[2].data   );
     READ_HALF_REG(REG_TM2CNT_H, timers[2].control);
+    READ_DATA_REG(REG_TM3CNT_L, timers[3].data   );
     READ_HALF_REG(REG_TM3CNT_H, timers[3].control);
 
     default:

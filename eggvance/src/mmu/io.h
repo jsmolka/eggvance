@@ -1,5 +1,6 @@
 #pragma once
 
+#include "miscio.h"
 #include "ram.h"
 
 class IO
@@ -18,8 +19,7 @@ public:
     void writeWord(u32 addr, u32 word);
 
 private:
-    RAM<0x400> data;
+    MiscIO io;
 
     u8 masks[1024];
-    u8 memcontrol[4];
 };

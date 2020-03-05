@@ -11,4 +11,4 @@ private:
     SerialIO io;
 };
 
-extern Serial serial;
+extern Serial sio;

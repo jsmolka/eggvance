@@ -5,6 +5,7 @@
 #include "audiodevice.h"
 #include "inputdevice.h"
 #include "framecounter.h"
+#include "apu/apu.h"
 #include "arm/arm.h"
 #include "mmu/mmu.h"
 #include "ppu/ppu.h"
@@ -61,6 +62,7 @@ void Platform::main()
 
 void Platform::reset()
 {
+    apu = APU();
     arm.reset();
     mmu.reset();
     ppu.reset();
@@ -68,7 +70,7 @@ void Platform::reset()
     irqh.reset();
     keypad.reset();
     timerc.reset();
-    serial = Serial();
+    sio = Serial();
 }
 
 void Platform::updateTitle()

@@ -1,3 +1,3 @@
 #include "serial.h"
 
-Serial serial;
+Serial sio;

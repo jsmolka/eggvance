@@ -2,6 +2,7 @@
 
 #include "memmap.h"
 #include "mmu.h"
+#include "apu/apu.h"
 #include "arm/arm.h"
 #include "common/config.h"
 #include "ppu/ppu.h"
@@ -11,14 +12,6 @@
 #include "system/keypad.h"
 #include "system/serial.h"
 #include "system/timercontroller.h"
-
-#define READ1_UNIMP(label) CASE1(label): return data.readByte(addr)
-#define READ2_UNIMP(label) CASE2(label): return data.readByte(addr)
-#define READ4_UNIMP(label) CASE4(label): return data.readByte(addr)
-
-#define WRITE1_UNIMP(label) CASE1(label): data.writeByte(addr, byte); break
-#define WRITE2_UNIMP(label) CASE2(label): data.writeByte(addr, byte); break
-#define WRITE4_UNIMP(label) CASE4(label): data.writeByte(addr, byte); break
 
 IO::IO()
 {
@@ -106,25 +99,7 @@ IO::IO()
 
 void IO::reset()
 {
-    data.fill(0);
-
-    if (config.bios_skip)
-    {
-        memcontrol[0] = 0x20;
-        memcontrol[1] = 0x00;
-        memcontrol[2] = 0x00;
-        memcontrol[3] = 0xD0;
-
-        data.writeByte(REG_RCNT + 1, 0x80);
-        data.writeByte(REG_POSTFLG,  0x01);
-    }
-    else
-    {
-        memcontrol[0] = 0x00;
-        memcontrol[1] = 0x00;
-        memcontrol[2] = 0x00;
-        memcontrol[3] = 0x00;
-    }
+    *this = IO();
 }
 
 u8 IO::readByte(u32 addr)
@@ -134,64 +109,77 @@ u8 IO::readByte(u32 addr)
     if (addr >= 0x400'0400)
     {
         if ((addr & 0xFFFC) == 0x800)
-            return memcontrol[addr & 0x3];
+        {
+            switch (addr & 0x3)
+            {
+            case 0: return io.memory_control.read<0>();
+            case 1: return io.memory_control.read<1>();
+            case 2: return io.memory_control.read<2>();
+            case 3: return io.memory_control.read<3>();
+
+            default:
+                EGG_UNREACHABLE;
+                return 0;
+            }
+        }
         else
+        {
             return mmu.readUnused(unused);
+        }
     }
     addr &= 0x3FF;
 
     switch (addr)
     {
-    READ_HALF_REG(REG_DISPCNT  , ppu.io.dispcnt);
-    READ_HALF_REG(REG_DISPSTAT , ppu.io.dispstat);
-    READ_HALF_REG(REG_VCOUNT   , ppu.io.vcount);
-    READ_HALF_REG(REG_BG0CNT   , ppu.io.bgcnt[0]);
-    READ_HALF_REG(REG_BG1CNT   , ppu.io.bgcnt[1]);
-    READ_HALF_REG(REG_BG2CNT   , ppu.io.bgcnt[2]);
-    READ_HALF_REG(REG_BG3CNT   , ppu.io.bgcnt[3]);
-    READ_HALF_REG(REG_WININ    , ppu.io.winin);
-    READ_HALF_REG(REG_WINOUT   , ppu.io.winout);
-    READ_HALF_REG(REG_BLDCNT   , ppu.io.bldcnt);
-    READ_HALF_REG(REG_BLDALPHA , ppu.io.bldalpha);
-    READ_HALF_REG(REG_WAITCNT  , arm.io.waitcnt);
-    READ_HALF_REG(REG_KEYINPUT , keypad.io.keyinput);
-    READ_HALF_REG(REG_KEYCNT   , keypad.io.keycnt);
-    READ_HALF_REG(REG_SIOMULTI0, serial.io.siomulti[0]);
-    READ_HALF_REG(REG_SIOMULTI1, serial.io.siomulti[1]);
-    READ_HALF_REG(REG_SIOMULTI2, serial.io.siomulti[2]);
-    READ_HALF_REG(REG_SIOMULTI3, serial.io.siomulti[3]);
-    READ_HALF_REG(REG_SIOCNT   , serial.io.siocnt);
-    READ_HALF_REG(REG_SIOSEND  , serial.io.siosend);
-    READ_HALF_REG(REG_RCNT     , serial.io.rcnt);
-    READ_HALF_REG(REG_JOYCNT   , serial.io.joycnt);
-    READ_WORD_REG(REG_JOY_RECV , serial.io.joyrecv);
-    READ_WORD_REG(REG_JOY_TRANS, serial.io.joytrans);
-    READ_HALF_REG(REG_JOYSTAT  , serial.io.joystat);
-
-    READ2_UNIMP(REG_GREENSWAP);
-    READ2_UNIMP(REG_SOUND1CNT_L);
-    READ2_UNIMP(REG_SOUND1CNT_H);
-    READ2_UNIMP(REG_SOUND1CNT_X);
-    READ2_UNIMP(REG_SOUND2CNT_L);
-    READ2_UNIMP(REG_SOUND2CNT_H);
-    READ2_UNIMP(REG_SOUND3CNT_L);
-    READ2_UNIMP(REG_SOUND3CNT_H);
-    READ2_UNIMP(REG_SOUND3CNT_X);
-    READ2_UNIMP(REG_SOUND4CNT_L);
-    READ2_UNIMP(REG_SOUND4CNT_H);
-    READ2_UNIMP(REG_SOUNDCNT_L);
-    READ2_UNIMP(REG_SOUNDCNT_H);
-    READ2_UNIMP(REG_SOUNDCNT_X);
-    READ2_UNIMP(REG_SOUNDBIAS);
-    READ2_UNIMP(REG_WAVE_RAM_0);
-    READ2_UNIMP(REG_WAVE_RAM_1);
-    READ2_UNIMP(REG_WAVE_RAM_2);
-    READ2_UNIMP(REG_WAVE_RAM_3);
-    READ2_UNIMP(REG_WAVE_RAM_4);
-    READ2_UNIMP(REG_WAVE_RAM_5);
-    READ2_UNIMP(REG_WAVE_RAM_6);
-    READ2_UNIMP(REG_WAVE_RAM_7);
-    READ1_UNIMP(REG_POSTFLG);
+    READ_HALF_REG(REG_GREENSWAP  , io.greenswap      );
+    READ_HALF_REG(REG_DISPCNT    , ppu.io.dispcnt    );
+    READ_HALF_REG(REG_DISPSTAT   , ppu.io.dispstat   );
+    READ_HALF_REG(REG_VCOUNT     , ppu.io.vcount     );
+    READ_HALF_REG(REG_BG0CNT     , ppu.io.bgcnt[0]   );
+    READ_HALF_REG(REG_BG1CNT     , ppu.io.bgcnt[1]   );
+    READ_HALF_REG(REG_BG2CNT     , ppu.io.bgcnt[2]   );
+    READ_HALF_REG(REG_BG3CNT     , ppu.io.bgcnt[3]   );
+    READ_HALF_REG(REG_WININ      , ppu.io.winin      );
+    READ_HALF_REG(REG_WINOUT     , ppu.io.winout     );
+    READ_HALF_REG(REG_BLDCNT     , ppu.io.bldcnt     );
+    READ_HALF_REG(REG_BLDALPHA   , ppu.io.bldalpha   );
+    READ_HALF_REG(REG_SOUND1CNT_L, apu.io.soundcnt1_l);
+    READ_HALF_REG(REG_SOUND1CNT_H, apu.io.soundcnt1_h);
+    READ_HALF_REG(REG_SOUND1CNT_X, apu.io.soundcnt1_x);
+    READ_HALF_REG(REG_SOUND2CNT_L, apu.io.soundcnt2_l);
+    READ_HALF_REG(REG_SOUND2CNT_H, apu.io.soundcnt2_h);
+    READ_HALF_REG(REG_SOUND3CNT_L, apu.io.soundcnt3_l);
+    READ_HALF_REG(REG_SOUND3CNT_H, apu.io.soundcnt3_h);
+    READ_HALF_REG(REG_SOUND3CNT_X, apu.io.soundcnt3_x);
+    READ_HALF_REG(REG_SOUND4CNT_L, apu.io.soundcnt4_l);
+    READ_HALF_REG(REG_SOUND4CNT_H, apu.io.soundcnt4_h);
+    READ_HALF_REG(REG_SOUNDCNT_L , apu.io.soundcnt_l );
+    READ_HALF_REG(REG_SOUNDCNT_H , apu.io.soundcnt_h );
+    READ_HALF_REG(REG_SOUNDCNT_X , apu.io.soundcnt_x );
+    READ_HALF_REG(REG_SOUNDBIAS  , apu.io.soundbias  );
+    READ_HALF_REG(REG_WAVE_RAM_0 , apu.io.wave_ram[0]);
+    READ_HALF_REG(REG_WAVE_RAM_1 , apu.io.wave_ram[1]);
+    READ_HALF_REG(REG_WAVE_RAM_2 , apu.io.wave_ram[2]);
+    READ_HALF_REG(REG_WAVE_RAM_3 , apu.io.wave_ram[3]);
+    READ_HALF_REG(REG_WAVE_RAM_4 , apu.io.wave_ram[4]);
+    READ_HALF_REG(REG_WAVE_RAM_5 , apu.io.wave_ram[5]);
+    READ_HALF_REG(REG_WAVE_RAM_6 , apu.io.wave_ram[6]);
+    READ_HALF_REG(REG_WAVE_RAM_7 , apu.io.wave_ram[7]);
+    READ_HALF_REG(REG_WAITCNT    , arm.io.waitcnt    );
+    READ_HALF_REG(REG_KEYINPUT   , keypad.io.keyinput);
+    READ_HALF_REG(REG_KEYCNT     , keypad.io.keycnt  );
+    READ_HALF_REG(REG_SIOMULTI0  , sio.io.siomulti[0]);
+    READ_HALF_REG(REG_SIOMULTI1  , sio.io.siomulti[1]);
+    READ_HALF_REG(REG_SIOMULTI2  , sio.io.siomulti[2]);
+    READ_HALF_REG(REG_SIOMULTI3  , sio.io.siomulti[3]);
+    READ_HALF_REG(REG_SIOCNT     , sio.io.siocnt     );
+    READ_HALF_REG(REG_SIOSEND    , sio.io.siosend    );
+    READ_HALF_REG(REG_RCNT       , sio.io.rcnt       );
+    READ_HALF_REG(REG_JOYCNT     , sio.io.joycnt     );
+    READ_WORD_REG(REG_JOY_RECV   , sio.io.joyrecv    );
+    READ_WORD_REG(REG_JOY_TRANS  , sio.io.joytrans   );
+    READ_HALF_REG(REG_JOYSTAT    , sio.io.joystat    );
+    READ_BYTE_REG(REG_POSTFLG    , io.postflag        );
 
     CASE_HALF_REG(REG_IE ):
     CASE_HALF_REG(REG_IF ):
@@ -199,12 +187,14 @@ u8 IO::readByte(u32 addr)
         return irqh.read(addr);
 
     CASE_HALF_REG(REG_DMA0CNT_L):
-    CASE_HALF_REG(REG_DMA0CNT_H):
     CASE_HALF_REG(REG_DMA1CNT_L):
-    CASE_HALF_REG(REG_DMA1CNT_H):
     CASE_HALF_REG(REG_DMA2CNT_L):
-    CASE_HALF_REG(REG_DMA2CNT_H):
     CASE_HALF_REG(REG_DMA3CNT_L):
+        return 0;
+
+    CASE_HALF_REG(REG_DMA0CNT_H):
+    CASE_HALF_REG(REG_DMA1CNT_H):
+    CASE_HALF_REG(REG_DMA2CNT_H):
     CASE_HALF_REG(REG_DMA3CNT_H):
         return dmac.read(addr);
 
@@ -253,14 +243,28 @@ void IO::writeByte(u32 addr, u8 byte)
     if (addr >= 0x400'0400)
     {
         if ((addr & 0xFFFC) == 0x800)
-            memcontrol[addr & 0x3] = byte;
+        {
+            switch (addr & 0x3)
+            {
+            case 0: io.memory_control.write<0>(byte); break;
+            case 1: io.memory_control.write<1>(byte); break;
+            case 2: io.memory_control.write<2>(byte); break;
+            case 3: io.memory_control.write<3>(byte); break;
+
+            default:
+                EGG_UNREACHABLE;
+                break;
+            }
+        }
         return;
     }
+
     addr &= 0x3FF;
     byte &= masks[addr];
 
     switch (addr)
     {
+    WRITE_HALF_REGX(REG_GREENSWAP, io.greenswap   , 0x0000'FFFF);
     WRITE_HALF_REGX(REG_DISPCNT , ppu.io.dispcnt  , 0x0000'FFF7);
     WRITE_HALF_REGX(REG_DISPSTAT, ppu.io.dispstat , 0x0000'FF38);
     WRITE_HALF_REGX(REG_BG0CNT  , ppu.io.bgcnt[0] , 0x0000'DFFF);
@@ -300,44 +304,42 @@ void IO::writeByte(u32 addr, u8 byte)
     WRITE_BYTE_REGX(REG_HALTCNT , arm.io.haltcnt  , 0x0000'00FF);
     WRITE_HALF_REGX(REG_WAITCNT , arm.io.waitcnt  , 0x0000'FFFF);
     WRITE_HALF_REGX(REG_KEYCNT  , keypad.io.keycnt, 0x0000'FFFF);
-
-    WRITE2_UNIMP(REG_GREENSWAP);
-    WRITE2_UNIMP(REG_SOUND1CNT_L);
-    WRITE2_UNIMP(REG_SOUND1CNT_H);
-    WRITE2_UNIMP(REG_SOUND1CNT_X);
-    WRITE2_UNIMP(REG_SOUND2CNT_L);
-    WRITE2_UNIMP(REG_SOUND2CNT_H);
-    WRITE2_UNIMP(REG_SOUND3CNT_L);
-    WRITE2_UNIMP(REG_SOUND3CNT_H);
-    WRITE2_UNIMP(REG_SOUND3CNT_X);
-    WRITE2_UNIMP(REG_SOUND4CNT_L);
-    WRITE2_UNIMP(REG_SOUND4CNT_H);
-    WRITE2_UNIMP(REG_SOUNDCNT_L);
-    WRITE2_UNIMP(REG_SOUNDCNT_H);
-    WRITE2_UNIMP(REG_SOUNDCNT_X);
-    WRITE2_UNIMP(REG_SOUNDBIAS);
-    WRITE2_UNIMP(REG_WAVE_RAM_0);
-    WRITE2_UNIMP(REG_WAVE_RAM_1);
-    WRITE2_UNIMP(REG_WAVE_RAM_2);
-    WRITE2_UNIMP(REG_WAVE_RAM_3);
-    WRITE2_UNIMP(REG_WAVE_RAM_4);
-    WRITE2_UNIMP(REG_WAVE_RAM_5);
-    WRITE2_UNIMP(REG_WAVE_RAM_6);
-    WRITE2_UNIMP(REG_WAVE_RAM_7);
-    WRITE4_UNIMP(REG_FIFO_A);
-    WRITE4_UNIMP(REG_FIFO_B);
-    WRITE2_UNIMP(REG_SIOMULTI0);
-    WRITE2_UNIMP(REG_SIOMULTI1);
-    WRITE2_UNIMP(REG_SIOMULTI2);
-    WRITE2_UNIMP(REG_SIOMULTI3);
-    WRITE2_UNIMP(REG_SIOCNT);
-    WRITE2_UNIMP(REG_SIOSEND);
-    WRITE2_UNIMP(REG_RCNT);
-    WRITE2_UNIMP(REG_JOYCNT);
-    WRITE4_UNIMP(REG_JOY_RECV);
-    WRITE4_UNIMP(REG_JOY_TRANS);
-    WRITE2_UNIMP(REG_JOYSTAT);
-    WRITE1_UNIMP(REG_POSTFLG);
+    WRITE_HALF_REGX(REG_SOUND1CNT_L, apu.io.soundcnt1_l, 0x0000'007F);
+    WRITE_HALF_REGX(REG_SOUND1CNT_H, apu.io.soundcnt1_h, 0x0000'FFC0);
+    WRITE_HALF_REGX(REG_SOUND1CNT_X, apu.io.soundcnt1_x, 0x0000'4000);
+    WRITE_HALF_REGX(REG_SOUND2CNT_L, apu.io.soundcnt2_l, 0x0000'FFC0);
+    WRITE_HALF_REGX(REG_SOUND2CNT_H, apu.io.soundcnt2_h, 0x0000'4000);
+    WRITE_HALF_REGX(REG_SOUND3CNT_L, apu.io.soundcnt3_l, 0x0000'00E0);
+    WRITE_HALF_REGX(REG_SOUND3CNT_H, apu.io.soundcnt3_h, 0x0000'E000);
+    WRITE_HALF_REGX(REG_SOUND3CNT_X, apu.io.soundcnt3_x, 0x0000'4000);
+    WRITE_HALF_REGX(REG_SOUND4CNT_L, apu.io.soundcnt4_l, 0x0000'FF00);
+    WRITE_HALF_REGX(REG_SOUND4CNT_H, apu.io.soundcnt4_h, 0x0000'40FF);
+    WRITE_HALF_REGX(REG_SOUNDCNT_L, apu.io.soundcnt_l, 0x0000'FF77);
+    WRITE_HALF_REGX(REG_SOUNDCNT_H, apu.io.soundcnt_h, 0x0000'770F);
+    WRITE_HALF_REGX(REG_SOUNDCNT_X, apu.io.soundcnt_x, 0x0000'0080);
+    WRITE_HALF_REGX(REG_SOUNDBIAS, apu.io.soundbias, 0x0000'FFFF);
+    WRITE_HALF_REGX(REG_WAVE_RAM_0, apu.io.wave_ram[0], 0x0000'FFFF);
+    WRITE_HALF_REGX(REG_WAVE_RAM_1, apu.io.wave_ram[1], 0x0000'FFFF);
+    WRITE_HALF_REGX(REG_WAVE_RAM_2, apu.io.wave_ram[2], 0x0000'FFFF);
+    WRITE_HALF_REGX(REG_WAVE_RAM_3, apu.io.wave_ram[3], 0x0000'FFFF);
+    WRITE_HALF_REGX(REG_WAVE_RAM_4, apu.io.wave_ram[4], 0x0000'FFFF);
+    WRITE_HALF_REGX(REG_WAVE_RAM_5, apu.io.wave_ram[5], 0x0000'FFFF);
+    WRITE_HALF_REGX(REG_WAVE_RAM_6, apu.io.wave_ram[6], 0x0000'FFFF);
+    WRITE_HALF_REGX(REG_WAVE_RAM_7, apu.io.wave_ram[7], 0x0000'FFFF);
+    WRITE_WORD_REGX(REG_FIFO_A, apu.io.fifo_a, 0xFFFF'FFFF);
+    WRITE_WORD_REGX(REG_FIFO_B, apu.io.fifo_b, 0xFFFF'FFFF);
+    WRITE_HALF_REGX(REG_SIOMULTI0, sio.io.siomulti[0], 0x0000'FFFF);
+    WRITE_HALF_REGX(REG_SIOMULTI1, sio.io.siomulti[1], 0x0000'FFFF);
+    WRITE_HALF_REGX(REG_SIOMULTI2, sio.io.siomulti[2], 0x0000'FFFF);
+    WRITE_HALF_REGX(REG_SIOMULTI3, sio.io.siomulti[3], 0x0000'FFFF);
+    WRITE_HALF_REGX(REG_SIOCNT, sio.io.siocnt, 0x0000'FFFF);
+    WRITE_HALF_REGX(REG_SIOSEND, sio.io.siosend, 0x0000'FFFF);
+    WRITE_HALF_REGX(REG_RCNT, sio.io.rcnt, 0x0000'FFFF);
+    WRITE_HALF_REGX(REG_JOYCNT, sio.io.joycnt, 0x0000'FFFF);
+    WRITE_WORD_REGX(REG_JOY_RECV, sio.io.joyrecv, 0xFFFF'FFFF);
+    WRITE_WORD_REGX(REG_JOY_TRANS, sio.io.joytrans, 0xFFFF'FFFF);
+    WRITE_HALF_REGX(REG_JOYSTAT, sio.io.joystat, 0x0000'FFFF);
+    WRITE_BYTE_REGX(REG_POSTFLG, io.postflag, 0x0000'00FF);
 
     CASE2(REG_IE):
     CASE2(REG_IF):

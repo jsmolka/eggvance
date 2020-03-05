@@ -153,6 +153,9 @@
     <ClCompile Include="src\system\serial.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\apu\apu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="icon\icon.h">
@@ -411,6 +414,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\system\serial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\apu\apu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\apu\apuio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\miscio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
