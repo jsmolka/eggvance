@@ -4,22 +4,31 @@
 #include <array>
 #include <cstddef>
 
-template<typename T, std::size_t N>
-class SmallVector
+template<typename T>
+class SmallVectorBase
 {
 public:
     using iterator = T*;
 
-    SmallVector()
-        : _size(0), _capacity(N), _heap(_stack.data()) {}
+    SmallVectorBase(T* stack, std::size_t stack_size)
+        : _heap(nullptr)
+        , _stack(stack)
+        , _size(0)
+        , _capacity(stack_size)
+        , _stack_size(stack_size) {}
 
-    SmallVector(const SmallVector&) = delete;
-    SmallVector& operator=(const SmallVector&) = delete;
+    SmallVectorBase(const SmallVectorBase&) = delete;
+    SmallVectorBase& operator=(const SmallVectorBase&) = delete;
 
-    ~SmallVector()
+    ~SmallVectorBase()
     {
-        if (isHeapAllocated())
+        if (_heap != _stack)
             delete[] _heap;
+    }
+
+    inline T& operator[](std::size_t index) const
+    {
+        return _heap[index];
     }
 
     inline T& operator[](std::size_t index)
@@ -27,21 +36,26 @@ public:
         return _heap[index];
     }
 
+    inline std::size_t size() const
+    {
+        return _size;
+    }
+
     inline void clear()
     {
-        if (isHeapAllocated())
+        if (_heap != _stack)
         {
             delete[] _heap;
-            _heap = _stack.data();
+            _heap = _stack;
         }
         _size = 0;
-        _capacity = N;
+        _capacity = _stack_size;
     }
 
     inline void push_back(T&& item)
     {
         if (_size == _capacity)
-            reallocate(_capacity << 1);
+            realloc(_capacity << 1);
 
         _heap[_size++] = std::move(item);
     }
@@ -49,14 +63,9 @@ public:
     inline void push_back(const T& item)
     {
         if (_size == _capacity)
-            reallocate(_capacity << 1);
+            realloc(_capacity << 1);
 
         _heap[_size++] = item;
-    }
-
-    inline std::size_t size() const
-    {
-        return _size;
     }
 
     inline iterator begin()
@@ -70,25 +79,33 @@ public:
     }
 
 private:
-    inline bool isHeapAllocated() const
-    {
-        return _heap != _stack.data();
-    }
-
-    inline void reallocate(std::size_t size)
+    inline void realloc(std::size_t size)
     {
         T* heap = new T[size];
         std::copy(begin(), end(), heap);
 
-        if (isHeapAllocated())
+        if (_heap != _stack)
             delete[] _heap;
 
         _heap = heap;
         _capacity = size;
     }
 
-    std::array<T, N> _stack;
-    std::size_t _capacity;
-    std::size_t _size;
     T* _heap;
+    T* _stack;
+
+    std::size_t _size;
+    std::size_t _capacity;
+    std::size_t _stack_size;
+};
+
+template<typename T, std::size_t N>
+class SmallVector : public SmallVectorBase<T>
+{
+public:
+    SmallVector()
+        : SmallVectorBase(stack.data(), N) {}
+
+private:
+    std::array<T, N> stack;
 };
