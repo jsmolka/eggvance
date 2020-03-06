@@ -104,7 +104,7 @@ class SmallVector : public SmallVectorBase<T>
 {
 public:
     SmallVector()
-        : SmallVectorBase(stack.data(), N) {}
+        : SmallVectorBase<T>(stack.data(), N) {}
 
 private:
     std::array<T, N> stack;
