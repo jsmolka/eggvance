@@ -62,38 +62,39 @@ u8 DMAController::read(u32 addr) const
     }
 }
 
-#define WRITE_CTRL_REG(label, dma)                      \
-    case label + 0: writeControl<0>(dma, byte); break;  \
-    case label + 1: writeControl<1>(dma, byte); break
-
 void DMAController::write(u32 addr, u8 byte)
 {
+    #define WRITE_CTRL_REG(label, dma, mask)                \
+        case label + 0: writeControl<0>(dma, byte & ((mask >> 0) & 0xFF)); break;  \
+        case label + 1: writeControl<1>(dma, byte & ((mask >> 8) & 0xFF)); break
+
+
     switch (addr)
     {
-    WRITE_WORD_REG(REG_DMA0SAD,   dmas[0].sad);
-    WRITE_WORD_REG(REG_DMA1SAD,   dmas[1].sad);
-    WRITE_WORD_REG(REG_DMA2SAD,   dmas[2].sad);
-    WRITE_WORD_REG(REG_DMA3SAD,   dmas[3].sad);
-    WRITE_WORD_REG(REG_DMA0DAD,   dmas[0].dad);
-    WRITE_WORD_REG(REG_DMA1DAD,   dmas[1].dad);
-    WRITE_WORD_REG(REG_DMA2DAD,   dmas[2].dad);
-    WRITE_WORD_REG(REG_DMA3DAD,   dmas[3].dad);
-    WRITE_HALF_REG(REG_DMA0CNT_L, dmas[0].count);
-    WRITE_HALF_REG(REG_DMA1CNT_L, dmas[1].count);
-    WRITE_HALF_REG(REG_DMA2CNT_L, dmas[2].count);
-    WRITE_HALF_REG(REG_DMA3CNT_L, dmas[3].count);
-    WRITE_CTRL_REG(REG_DMA0CNT_H, dmas[0]);
-    WRITE_CTRL_REG(REG_DMA1CNT_H, dmas[1]);
-    WRITE_CTRL_REG(REG_DMA2CNT_H, dmas[2]);
-    WRITE_CTRL_REG(REG_DMA3CNT_H, dmas[3]);
+    WRITE_WORD_REG(REG_DMA0SAD,   dmas[0].sad, 0x7FFF'FFFF);
+    WRITE_WORD_REG(REG_DMA1SAD,   dmas[1].sad, 0x0FFF'FFFF);
+    WRITE_WORD_REG(REG_DMA2SAD,   dmas[2].sad, 0x0FFF'FFFF);
+    WRITE_WORD_REG(REG_DMA3SAD,   dmas[3].sad, 0x0FFF'FFFF);
+    WRITE_WORD_REG(REG_DMA0DAD,   dmas[0].dad, 0x7FFF'FFFF);
+    WRITE_WORD_REG(REG_DMA1DAD,   dmas[1].dad, 0x7FFF'FFFF);
+    WRITE_WORD_REG(REG_DMA2DAD,   dmas[2].dad, 0x7FFF'FFFF);
+    WRITE_WORD_REG(REG_DMA3DAD,   dmas[3].dad, 0x0FFF'FFFF);
+    WRITE_HALF_REG(REG_DMA0CNT_L, dmas[0].count, 0x0000'3FFF);
+    WRITE_CTRL_REG(REG_DMA0CNT_H, dmas[0], 0x0000'F7E0);
+    WRITE_HALF_REG(REG_DMA1CNT_L, dmas[1].count, 0x0000'3FFF);
+    WRITE_CTRL_REG(REG_DMA1CNT_H, dmas[1], 0x0000'F7E0);
+    WRITE_HALF_REG(REG_DMA2CNT_L, dmas[2].count, 0x0000'3FFF);
+    WRITE_CTRL_REG(REG_DMA2CNT_H, dmas[2], 0x0000'F7E0);
+    WRITE_HALF_REG(REG_DMA3CNT_L, dmas[3].count, 0x0000'FFFF);
+    WRITE_CTRL_REG(REG_DMA3CNT_H, dmas[3], 0x0000'FFE0);
 
     default:
         EGG_UNREACHABLE;
         break;
     }
-}
 
-#undef WRITE_CTRL_REG
+    #undef WRITE_CTRL_REG
+}
 
 void DMAController::emit(DMA& dma, DMA::Timing timing)
 {

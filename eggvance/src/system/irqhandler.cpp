@@ -49,9 +49,9 @@ void IrqHandler::write(u32 addr, u8 byte)
 {
     switch (addr)
     {
-    WRITE_HALF_REG(REG_IE , io.intr_enable );
-    WRITE_HALF_REG(REG_IF , io.intr_request);
-    WRITE_HALF_REG(REG_IME, io.intr_master );
+    WRITE_HALF_REG(REG_IE , io.intr_enable , 0x0000'3FFF);
+    WRITE_HALF_REG(REG_IF , io.intr_request, 0x0000'3FFF);
+    WRITE_HALF_REG(REG_IME, io.intr_master , 0x0000'0001);
 
     default:
         EGG_UNREACHABLE;

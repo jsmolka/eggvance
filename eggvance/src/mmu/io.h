@@ -6,8 +6,6 @@
 class IO
 {
 public:
-    IO();
-
     void reset();
 
     u8  readByte(u32 addr);
@@ -20,6 +18,4 @@ public:
 
 private:
     MiscIO io;
-
-    u8 masks[1024];
 };

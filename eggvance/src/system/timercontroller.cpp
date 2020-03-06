@@ -90,7 +90,7 @@ void TimerController::write(u32 addr, u8 byte)
         {                                           \
             runTimers();                            \
             int enabled = timer.control.enabled;    \
-            timer.control.write<0>(byte);           \
+            timer.control.write<0>(byte & 0xC7);    \
             if (!enabled && timer.control.enabled)  \
                 timer.start();                      \
             else if (enabled)                       \
@@ -101,10 +101,10 @@ void TimerController::write(u32 addr, u8 byte)
 
     switch (addr)
     {
-    WRITE_HALF_REG(REG_TM0CNT_L, timers[0].data);
-    WRITE_HALF_REG(REG_TM1CNT_L, timers[1].data);
-    WRITE_HALF_REG(REG_TM2CNT_L, timers[2].data);
-    WRITE_HALF_REG(REG_TM3CNT_L, timers[3].data);
+    WRITE_HALF_REG(REG_TM0CNT_L, timers[0].data, 0x0000'FFFF);
+    WRITE_HALF_REG(REG_TM1CNT_L, timers[1].data, 0x0000'FFFF);
+    WRITE_HALF_REG(REG_TM2CNT_L, timers[2].data, 0x0000'FFFF);
+    WRITE_HALF_REG(REG_TM3CNT_L, timers[3].data, 0x0000'FFFF);
     WRITE_CTRL_REG(REG_TM0CNT_H, timers[0]     );
     WRITE_CTRL_REG(REG_TM1CNT_H, timers[1]     );
     WRITE_CTRL_REG(REG_TM2CNT_H, timers[2]     );
