@@ -1,71 +1,87 @@
 #pragma once
 
-#include <cstddef>
-#include <cstring>
+#include <array>
 
 #include "common/integer.h"
 
-template<std::size_t ram_size>
+template<typename T, std::size_t N>
 class RAM
 {
 public:
     virtual ~RAM() = default;
 
-    template<typename T>
-    static inline u32 align(u32 addr)
-    {
-        return addr & ~(sizeof(T) - 1);
-    }
-
-    inline virtual u32 mirror(u32 addr) const
-    {
-        return addr & (ram_size - 1);
-    }
-
-    template<typename T>
-    inline T* data(std::size_t addr)
-    {
-        return reinterpret_cast<T*>(&ram[addr]);
-    }
-
     inline std::size_t size() const
     {
-        return ram_size;
+        return N;
     }
 
-    inline void fill(u8 value)
+    template<typename U>
+    inline U* data(u32 addr)
     {
-        std::memset(ram, value, sizeof(ram));
+        return reinterpret_cast<U*>(&_data[addr]);
     }
 
-    inline u8  readByte(u32 addr) { return read<u8 >(addr); }
-    inline u16 readHalf(u32 addr) { return read<u16>(addr); }
-    inline u32 readWord(u32 addr) { return read<u32>(addr); }
+    template<typename U>
+    inline const U* data(u32 addr) const
+    {
+        return reinterpret_cast<const U*>(&_data[addr]);
+    }
 
-    inline u8  readByteFast(u32 addr) { return *data<u8 >(addr); }
-    inline u16 readHalfFast(u32 addr) { return *data<u16>(addr); }
-    inline u32 readWordFast(u32 addr) { return *data<u32>(addr); }
+    template<typename U>
+    inline U readFast(u32 addr) const
+    {
+        return *data<U>(addr);
+    }
+
+    template<typename U>
+    inline void writeFast(u32 addr, U value)
+    {
+        *data<U>(addr) = value;
+    }
+
+    inline u8  readByte(u32 addr) const { return read<u8 >(addr); }
+    inline u16 readHalf(u32 addr) const { return read<u16>(addr); }
+    inline u32 readWord(u32 addr) const { return read<u32>(addr); }
 
     inline void writeByte(u32 addr, u8  byte) { write<u8 >(addr, byte); }
     inline void writeHalf(u32 addr, u16 half) { write<u16>(addr, half); }
     inline void writeWord(u32 addr, u32 word) { write<u32>(addr, word); }
 
-    inline void writeByteFast(u32 addr, u8  byte) { *data<u8 >(addr) = byte; }
-    inline void writeHalfFast(u32 addr, u16 half) { *data<u16>(addr) = half; }
-    inline void writeWordFast(u32 addr, u32 word) { *data<u32>(addr) = word; }
+protected:
+    template<typename U>
+    static inline u32 align(u32 addr)
+    {
+        return addr & ~(sizeof(U) - 1);
+    }
 
 private:
-    template<typename T>
-    inline T read(u32 addr)
+    template<typename U>
+    inline U read(u32 addr) const
     {
-        return *data<T>(mirror(align<T>(addr)));
+        addr = align<U>(addr);
+        addr = T::mirror(addr);
+
+        return readFast<U>(addr);
     }
 
-    template<typename T>
-    inline void write(u32 addr, T value)
+    template<typename U>
+    inline void write(u32 addr, U value)
     {
-        *data<T>(mirror(align<T>(addr))) = value;
+        addr = align<U>(addr);
+        addr = T::mirror(addr);
+
+        writeFast<U>(addr, value);
     }
 
-    u8 ram[ram_size];
+    std::array<u8, N> _data = { 0 };
+};
+
+template<std::size_t N>
+class MirroredRAM : public RAM<MirroredRAM<N>, N>
+{
+public:
+    static inline u32 mirror(u32 addr)
+    {
+        return addr & (N - 1);
+    }
 };

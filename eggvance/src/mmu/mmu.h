@@ -30,8 +30,8 @@ public:
     IO io;
 
 private:
-    RAM<0x40000> ewram;
-    RAM<0x08000> iwram;
+    MirroredRAM<0x40000> ewram;
+    MirroredRAM<0x08000> iwram;
 };
 
 extern MMU mmu;

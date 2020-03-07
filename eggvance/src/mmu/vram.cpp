@@ -5,7 +5,7 @@
 
 void VRAM::reset()
 {
-    fill(0);
+    *this = VRAM();
 }
 
 void VRAM::writeByte(u32 addr, u8 byte)
@@ -16,7 +16,7 @@ void VRAM::writeByte(u32 addr, u8 byte)
     {
         addr = align<u16>(addr);
 
-        writeHalfFast(addr, byte * 0x0101);
+        writeFast<u16>(addr, byte * 0x0101);
     }
 }
 
@@ -29,24 +29,14 @@ int VRAM::index(u32 addr, const Point& pixel, ColorMode mode)
 
 int VRAM::index256x1(u32 addr, const Point& pixel)
 {
-    return readByteFast(addr + pixel.offset(8));
+    return readFast<u8>(addr + pixel.offset(8));
 }
 
 int VRAM::index16x16(u32 addr, const Point& pixel)
 {
-    int data = readByteFast(addr + pixel.offset(8) / 2);
+    int data = readFast<u8>(addr + pixel.offset(8) / 2);
 
     return (pixel.x & 0x1)
         ? bits<4, 4>(data)
         : bits<0, 4>(data);
-}
-
-u32 VRAM::mirror(u32 addr) const
-{
-    addr &= 0x1'FFFF;
-
-    if (addr >= 0x1'8000)
-        addr -= 0x0'8000;
-
-    return addr;
 }

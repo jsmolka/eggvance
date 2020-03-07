@@ -14,8 +14,8 @@ void MMU::reset()
     oam.reset();
     io = IO();
 
-    ewram.fill(0);
-    iwram.fill(0);
+    ewram = decltype(ewram)();
+    iwram = decltype(iwram)();
 }
 
 u8 MMU::readByte(u32 addr)

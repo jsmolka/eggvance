@@ -4,7 +4,7 @@
 
 void Palette::reset()
 {
-    fill(0);
+    *this = Palette();
 }
 
 void Palette::writeByte(u32 addr, u8 byte)
@@ -28,15 +28,15 @@ u16 Palette::colorBG(int index, int bank)
 
 u16 Palette::colorFGOpaque(int index, int bank)
 {
-    return readHalfFast(0x200 + 0x20 * bank + 2 * index) & COLOR_MASK;
+    return readFast<u16>(0x200 + 0x20 * bank + 2 * index) & COLOR_MASK;
 }
 
 u16 Palette::colorBGOpaque(int index, int bank)
 {
-    return readHalfFast(0x20 * bank + 2 * index) & COLOR_MASK;
+    return readFast<u16>(0x20 * bank + 2 * index) & COLOR_MASK;
 }
 
 u16 Palette::backdrop()
 {
-    return readWordFast(0) & COLOR_MASK;
+    return readFast<u16>(0) & COLOR_MASK;
 }

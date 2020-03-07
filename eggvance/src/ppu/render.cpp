@@ -126,7 +126,7 @@ void PPU::renderBgMode2(int bg)
         const auto pixel = texture % 8;
 
         int offset = tile.offset(dims.w / 8);
-        int entry  = mmu.vram.readByteFast(bgcnt.map_block + offset);
+        int entry  = mmu.vram.readFast<u8>(bgcnt.map_block + offset);
         int index  = mmu.vram.index256x1(bgcnt.tile_block + 0x40 * entry, pixel);
 
         backgrounds[bg][x] = mmu.palette.colorBG(index);
@@ -149,7 +149,7 @@ void PPU::renderBgMode3(int bg)
 
         int offset = sizeof(u16) * texture.offset(dims.w);
 
-        backgrounds[bg][x] = mmu.vram.readHalfFast(offset) & COLOR_MASK;
+        backgrounds[bg][x] = mmu.vram.readFast<u16>(offset) & COLOR_MASK;
     }
 }
 
@@ -168,7 +168,7 @@ void PPU::renderBgMode4(int bg)
         }
 
         int offset = texture.offset(dims.w);
-        int index  = mmu.vram.readByteFast(io.dispcnt.frame + offset);
+        int index  = mmu.vram.readFast<u8>(io.dispcnt.frame + offset);
 
         backgrounds[bg][x] = mmu.palette.colorBG(index);
     }
@@ -190,7 +190,7 @@ void PPU::renderBgMode5(int bg)
 
         int offset = sizeof(u16) * texture.offset(dims.w);
 
-        backgrounds[bg][x] = mmu.vram.readHalfFast(io.dispcnt.frame + offset) & COLOR_MASK;
+        backgrounds[bg][x] = mmu.vram.readFast<u16>(io.dispcnt.frame + offset) & COLOR_MASK;
     }
 }
 
@@ -238,7 +238,7 @@ void PPU::renderObjects()
             const auto tile  = texture / 8;
             const auto pixel = texture % 8;
 
-            u32 addr = mmu.vram.mirror(entry.base_tile + size * tile.offset(tiles));
+            u32 addr = VRAM::mirror(entry.base_tile + size * tile.offset(tiles));
             if (addr < 0x1'4000 && io.dispcnt.isBitmap())
                 continue;
 

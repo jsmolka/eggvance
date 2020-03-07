@@ -4,7 +4,7 @@
 #include "common/enums.h"
 #include "ppu/point.h"
 
-class VRAM : public RAM<0x1'8000>
+class VRAM : public RAM<VRAM, 0x1'8000>
 {
 public:
     void reset();
@@ -15,5 +15,13 @@ public:
     int index256x1(u32 addr, const Point& pixel);
     int index16x16(u32 addr, const Point& pixel);
 
-    u32 mirror(u32 addr) const override final;
+    static inline u32 mirror(u32 addr)
+    {
+        addr &= 0x1'FFFF;
+
+        if (addr >= 0x1'8000)
+            addr -= 0x0'8000;
+
+        return addr;
+    }
 };

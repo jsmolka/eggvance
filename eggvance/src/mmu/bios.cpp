@@ -9,7 +9,7 @@
 void BIOS::reset()
 {
     if (config.bios_skip)
-        last_fetched = data.readWordFast(0xE4);
+        last_fetched = data.readFast<u32>(0xE4);
     else
         last_fetched = 0;
 }

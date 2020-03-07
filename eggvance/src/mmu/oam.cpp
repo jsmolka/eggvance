@@ -4,11 +4,7 @@
 
 void OAM::reset()
 {
-    for (auto& entry : entries)
-    {
-        entry.reset();
-    }
-    fill(0);
+    *this = OAM();
 }
 
 void OAM::writeHalf(u32 addr, u16 half)
@@ -20,7 +16,7 @@ void OAM::writeHalf(u32 addr, u16 half)
     if (attr < 0x6)
         entries[addr >> 3].writeHalf(attr, half);
 
-    writeHalfFast(addr, half);
+    writeFast<u16>(addr, half);
 }
 
 void OAM::writeWord(u32 addr, u32 word)
@@ -34,9 +30,9 @@ void OAM::writeWord(u32 addr, u32 word)
 Matrix OAM::matrix(int index)
 {
     return Matrix(
-        readHalfFast(0x20 * index + 0x06),
-        readHalfFast(0x20 * index + 0x0E),
-        readHalfFast(0x20 * index + 0x16),
-        readHalfFast(0x20 * index + 0x1E)
+        readFast<u16>(0x20 * index + 0x06),
+        readFast<u16>(0x20 * index + 0x0E),
+        readFast<u16>(0x20 * index + 0x16),
+        readFast<u16>(0x20 * index + 0x1E)
     );
 }
