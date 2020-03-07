@@ -1,5 +1,6 @@
 #include "bios.h"
 
+#include <cstring>
 #include <fstream>
 #include <stdexcept>
 

@@ -16,6 +16,25 @@ u8 IO::readByte(u32 addr) const
 {
     u32 unmasked = addr;
 
+    if (addr > 0x0400'0400)
+    {
+        if ((addr & 0xFFFC) == 0x800)
+        {
+            switch (addr & 0x3)
+            {
+            case 0: return io.memory_control.read<0>();
+            case 1: return io.memory_control.read<1>();
+            case 2: return io.memory_control.read<2>();
+            case 3: return io.memory_control.read<3>();
+
+            default:
+                EGG_UNREACHABLE;
+                return 0;
+            }
+        }
+        return mmu.readUnused(addr);
+    }
+
     addr &= 0x3FF;
 
     switch (addr)
@@ -111,20 +130,6 @@ u8 IO::readByte(u32 addr) const
         return 0;
 
     default:
-        if ((unmasked & 0xFFFC) == 0x800)
-        {
-            switch (unmasked & 0x3)
-            {
-            case 0: return io.memory_control.read<0>();
-            case 1: return io.memory_control.read<1>();
-            case 2: return io.memory_control.read<2>();
-            case 3: return io.memory_control.read<3>();
-
-            default:
-                EGG_UNREACHABLE;
-                return 0;
-            }
-        }
         return mmu.readUnused(unmasked);
     }
 }
@@ -155,7 +160,24 @@ u32 IO::readWord(u32 addr) const
 
 void IO::writeByte(u32 addr, u8 byte)
 {
-    u32 unmasked = addr;
+    if (addr > 0x0400'0400)
+    {
+        if ((addr & 0xFFFC) == 0x800)
+        {
+            switch (addr & 0x3)
+            {
+            case 0: io.memory_control.write<0>(byte); break;
+            case 1: io.memory_control.write<1>(byte); break;
+            case 2: io.memory_control.write<2>(byte); break;
+            case 3: io.memory_control.write<3>(byte); break;
+
+            default:
+                EGG_UNREACHABLE;
+                break;
+            }
+        }
+        return;
+    }
 
     addr &= 0x3FF;
 
@@ -273,22 +295,6 @@ void IO::writeByte(u32 addr, u8 byte)
     CASE_BYTE_REG(REG_TM3CNT_H):
         timerc.write(addr, byte);
         break;
-
-    default:
-        if ((unmasked & 0xFFFC) == 0x800)
-        {
-            switch (unmasked & 0x3)
-            {
-            case 0: io.memory_control.write<0>(byte); break;
-            case 1: io.memory_control.write<1>(byte); break;
-            case 2: io.memory_control.write<2>(byte); break;
-            case 3: io.memory_control.write<3>(byte); break;
-
-            default:
-                EGG_UNREACHABLE;
-                break;
-            }
-        }
     }
 }
 
