@@ -1,16 +1,13 @@
 #pragma once
 
 #include "miscio.h"
-#include "ram.h"
 
 class IO
 {
 public:
-    void reset();
-
-    u8  readByte(u32 addr);
-    u16 readHalf(u32 addr);
-    u32 readWord(u32 addr);
+    u8  readByte(u32 addr) const;
+    u16 readHalf(u32 addr) const;
+    u32 readWord(u32 addr) const;
 
     void writeByte(u32 addr, u8  byte);
     void writeHalf(u32 addr, u16 half);

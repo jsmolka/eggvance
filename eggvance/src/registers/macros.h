@@ -26,14 +26,14 @@
     case label + 2: return reg.read<2>();       \
     case label + 3: return reg.read<3>()
 
-#define WRITE_BYTE_REG(label, reg, mask)                               \
-    case label + 0: reg.write<0>(byte & ((mask >>  0) & 0xFF)); break;
+#define WRITE_BYTE_REG(label, reg, mask)                                \
+    case label + 0: reg.write<0>(byte & ((mask >>  0) & 0xFF)); break
 
-#define WRITE_HALF_REG(label, reg, mask)                               \
+#define WRITE_HALF_REG(label, reg, mask)                                \
     case label + 0: reg.write<0>(byte & ((mask >>  0) & 0xFF)); break;  \
     case label + 1: reg.write<1>(byte & ((mask >>  8) & 0xFF)); break
 
-#define WRITE_WORD_REG(label, reg, mask)                               \
+#define WRITE_WORD_REG(label, reg, mask)                                \
     case label + 0: reg.write<0>(byte & ((mask >>  0) & 0xFF)); break;  \
     case label + 1: reg.write<1>(byte & ((mask >>  8) & 0xFF)); break;  \
     case label + 2: reg.write<2>(byte & ((mask >> 16) & 0xFF)); break;  \

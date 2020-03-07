@@ -12,7 +12,7 @@ void MMU::reset()
     palette.reset();
     vram.reset();
     oam.reset();
-    io.reset();
+    io = IO();
 
     ewram.fill(0);
     iwram.fill(0);

@@ -4,7 +4,6 @@
 #include "mmu.h"
 #include "apu/apu.h"
 #include "arm/arm.h"
-#include "common/config.h"
 #include "ppu/ppu.h"
 #include "registers/macros.h"
 #include "system/dmacontroller.h"
@@ -13,36 +12,10 @@
 #include "system/serial.h"
 #include "system/timercontroller.h"
 
-void IO::reset()
+u8 IO::readByte(u32 addr) const
 {
-    *this = IO();
-}
+    u32 unmasked = addr;
 
-u8 IO::readByte(u32 addr)
-{
-    u32 unused = addr;
-
-    if (addr >= 0x400'0400)
-    {
-        if ((addr & 0xFFFC) == 0x800)
-        {
-            switch (addr & 0x3)
-            {
-            case 0: return io.memory_control.read<0>();
-            case 1: return io.memory_control.read<1>();
-            case 2: return io.memory_control.read<2>();
-            case 3: return io.memory_control.read<3>();
-
-            default:
-                EGG_UNREACHABLE;
-                return 0;
-            }
-        }
-        else
-        {
-            return mmu.readUnused(unused);
-        }
-    }
     addr &= 0x3FF;
 
     switch (addr)
@@ -95,7 +68,7 @@ u8 IO::readByte(u32 addr)
     READ_WORD_REG(REG_JOY_RECV   , sio.io.joyrecv    );
     READ_WORD_REG(REG_JOY_TRANS  , sio.io.joytrans   );
     READ_HALF_REG(REG_JOYSTAT    , sio.io.joystat    );
-    READ_BYTE_REG(REG_POSTFLG    , io.postflag        );
+    READ_BYTE_REG(REG_POSTFLG    , io.postflag       );
 
     CASE_HALF_REG(REG_IE ):
     CASE_HALF_REG(REG_IF ):
@@ -138,87 +111,96 @@ u8 IO::readByte(u32 addr)
         return 0;
 
     default:
-        return mmu.readUnused(unused);
+        if ((unmasked & 0xFFFC) == 0x800)
+        {
+            switch (unmasked & 0x3)
+            {
+            case 0: return io.memory_control.read<0>();
+            case 1: return io.memory_control.read<1>();
+            case 2: return io.memory_control.read<2>();
+            case 3: return io.memory_control.read<3>();
+
+            default:
+                EGG_UNREACHABLE;
+                return 0;
+            }
+        }
+        return mmu.readUnused(unmasked);
     }
 }
 
-u16 IO::readHalf(u32 addr)
+u16 IO::readHalf(u32 addr) const
 {
     addr &= ~0x1;
-    return readByte(addr) | readByte(addr + 1) << 8;
+
+    u16 value = 0;
+    value |= readByte(addr + 0) << 0;
+    value |= readByte(addr + 1) << 8;
+
+    return value;
 }
 
-u32 IO::readWord(u32 addr)
+u32 IO::readWord(u32 addr) const
 {
     addr &= ~0x3;
-    return readHalf(addr) | readHalf(addr + 2) << 16;
+
+    u32 value = 0;
+    value |= readByte(addr + 0) <<  0;
+    value |= readByte(addr + 1) <<  8;
+    value |= readByte(addr + 2) << 16;
+    value |= readByte(addr + 3) << 24;
+
+    return value;
 }
 
 void IO::writeByte(u32 addr, u8 byte)
 {
-    if (addr >= 0x400'0400)
-    {
-        if ((addr & 0xFFFC) == 0x800)
-        {
-            switch (addr & 0x3)
-            {
-            case 0: io.memory_control.write<0>(byte); break;
-            case 1: io.memory_control.write<1>(byte); break;
-            case 2: io.memory_control.write<2>(byte); break;
-            case 3: io.memory_control.write<3>(byte); break;
-
-            default:
-                EGG_UNREACHABLE;
-                break;
-            }
-        }
-        return;
-    }
+    u32 unmasked = addr;
 
     addr &= 0x3FF;
 
     switch (addr)
     {
-    WRITE_HALF_REG(REG_GREENSWAP, io.greenswap   , 0x0000'FFFF);
-    WRITE_HALF_REG(REG_DISPCNT , ppu.io.dispcnt  , 0x0000'FFF7);
-    WRITE_HALF_REG(REG_DISPSTAT, ppu.io.dispstat , 0x0000'FF38);
-    WRITE_HALF_REG(REG_BG0CNT  , ppu.io.bgcnt[0] , 0x0000'DFFF);
-    WRITE_HALF_REG(REG_BG1CNT  , ppu.io.bgcnt[1] , 0x0000'DFFF);
-    WRITE_HALF_REG(REG_BG2CNT  , ppu.io.bgcnt[2] , 0x0000'FFFF);
-    WRITE_HALF_REG(REG_BG3CNT  , ppu.io.bgcnt[3] , 0x0000'FFFF);
-    WRITE_HALF_REG(REG_BG0HOFS , ppu.io.bghofs[0], 0x0000'01FF);
-    WRITE_HALF_REG(REG_BG0VOFS , ppu.io.bgvofs[0], 0x0000'01FF);
-    WRITE_HALF_REG(REG_BG1HOFS , ppu.io.bghofs[1], 0x0000'01FF);
-    WRITE_HALF_REG(REG_BG1VOFS , ppu.io.bgvofs[1], 0x0000'01FF);
-    WRITE_HALF_REG(REG_BG2HOFS , ppu.io.bghofs[2], 0x0000'01FF);
-    WRITE_HALF_REG(REG_BG2VOFS , ppu.io.bgvofs[2], 0x0000'01FF);
-    WRITE_HALF_REG(REG_BG3HOFS , ppu.io.bghofs[3], 0x0000'01FF);
-    WRITE_HALF_REG(REG_BG3VOFS , ppu.io.bgvofs[3], 0x0000'01FF);
-    WRITE_HALF_REG(REG_BG2PA   , ppu.io.bgpa[0]  , 0x0000'FFFF);
-    WRITE_HALF_REG(REG_BG2PB   , ppu.io.bgpb[0]  , 0x0000'FFFF);
-    WRITE_HALF_REG(REG_BG2PC   , ppu.io.bgpc[0]  , 0x0000'FFFF);
-    WRITE_HALF_REG(REG_BG2PD   , ppu.io.bgpd[0]  , 0x0000'FFFF);
-    WRITE_HALF_REG(REG_BG3PA   , ppu.io.bgpa[1]  , 0x0000'FFFF);
-    WRITE_HALF_REG(REG_BG3PB   , ppu.io.bgpb[1]  , 0x0000'FFFF);
-    WRITE_HALF_REG(REG_BG3PC   , ppu.io.bgpc[1]  , 0x0000'FFFF);
-    WRITE_HALF_REG(REG_BG3PD   , ppu.io.bgpd[1]  , 0x0000'FFFF);
-    WRITE_WORD_REG(REG_BG2X    , ppu.io.bgx[0]   , 0x0FFF'FFFF);
-    WRITE_WORD_REG(REG_BG2Y    , ppu.io.bgy[0]   , 0x0FFF'FFFF);
-    WRITE_WORD_REG(REG_BG3X    , ppu.io.bgx[1]   , 0x0FFF'FFFF);
-    WRITE_WORD_REG(REG_BG3Y    , ppu.io.bgy[1]   , 0x0FFF'FFFF);
-    WRITE_HALF_REG(REG_WIN0H   , ppu.io.winh[0]  , 0x0000'FFFF);
-    WRITE_HALF_REG(REG_WIN0V   , ppu.io.winv[0]  , 0x0000'FFFF);
-    WRITE_HALF_REG(REG_WIN1H   , ppu.io.winh[1]  , 0x0000'FFFF);
-    WRITE_HALF_REG(REG_WIN1V   , ppu.io.winv[1]  , 0x0000'FFFF);
-    WRITE_HALF_REG(REG_WININ   , ppu.io.winin    , 0x0000'3F3F);
-    WRITE_HALF_REG(REG_WINOUT  , ppu.io.winout   , 0x0000'3F3F);
-    WRITE_HALF_REG(REG_MOSAIC  , ppu.io.mosaic   , 0x0000'FFFF);
-    WRITE_HALF_REG(REG_BLDCNT  , ppu.io.bldcnt   , 0x0000'3FFF);
-    WRITE_HALF_REG(REG_BLDALPHA, ppu.io.bldalpha , 0x0000'1F1F);
-    WRITE_HALF_REG(REG_BLDY    , ppu.io.bldy     , 0x0000'001F);
-    WRITE_BYTE_REG(REG_HALTCNT , arm.io.haltcnt  , 0x0000'00FF);
-    WRITE_HALF_REG(REG_WAITCNT , arm.io.waitcnt  , 0x0000'FFFF);
-    WRITE_HALF_REG(REG_KEYCNT  , keypad.io.keycnt, 0x0000'FFFF);
+    WRITE_HALF_REG(REG_GREENSWAP  , io.greenswap      , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_DISPCNT    , ppu.io.dispcnt    , 0x0000'FFF7);
+    WRITE_HALF_REG(REG_DISPSTAT   , ppu.io.dispstat   , 0x0000'FF38);
+    WRITE_HALF_REG(REG_BG0CNT     , ppu.io.bgcnt[0]   , 0x0000'DFFF);
+    WRITE_HALF_REG(REG_BG1CNT     , ppu.io.bgcnt[1]   , 0x0000'DFFF);
+    WRITE_HALF_REG(REG_BG2CNT     , ppu.io.bgcnt[2]   , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_BG3CNT     , ppu.io.bgcnt[3]   , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_BG0HOFS    , ppu.io.bghofs[0]  , 0x0000'01FF);
+    WRITE_HALF_REG(REG_BG0VOFS    , ppu.io.bgvofs[0]  , 0x0000'01FF);
+    WRITE_HALF_REG(REG_BG1HOFS    , ppu.io.bghofs[1]  , 0x0000'01FF);
+    WRITE_HALF_REG(REG_BG1VOFS    , ppu.io.bgvofs[1]  , 0x0000'01FF);
+    WRITE_HALF_REG(REG_BG2HOFS    , ppu.io.bghofs[2]  , 0x0000'01FF);
+    WRITE_HALF_REG(REG_BG2VOFS    , ppu.io.bgvofs[2]  , 0x0000'01FF);
+    WRITE_HALF_REG(REG_BG3HOFS    , ppu.io.bghofs[3]  , 0x0000'01FF);
+    WRITE_HALF_REG(REG_BG3VOFS    , ppu.io.bgvofs[3]  , 0x0000'01FF);
+    WRITE_HALF_REG(REG_BG2PA      , ppu.io.bgpa[0]    , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_BG2PB      , ppu.io.bgpb[0]    , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_BG2PC      , ppu.io.bgpc[0]    , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_BG2PD      , ppu.io.bgpd[0]    , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_BG3PA      , ppu.io.bgpa[1]    , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_BG3PB      , ppu.io.bgpb[1]    , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_BG3PC      , ppu.io.bgpc[1]    , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_BG3PD      , ppu.io.bgpd[1]    , 0x0000'FFFF);
+    WRITE_WORD_REG(REG_BG2X       , ppu.io.bgx[0]     , 0x0FFF'FFFF);
+    WRITE_WORD_REG(REG_BG2Y       , ppu.io.bgy[0]     , 0x0FFF'FFFF);
+    WRITE_WORD_REG(REG_BG3X       , ppu.io.bgx[1]     , 0x0FFF'FFFF);
+    WRITE_WORD_REG(REG_BG3Y       , ppu.io.bgy[1]     , 0x0FFF'FFFF);
+    WRITE_HALF_REG(REG_WIN0H      , ppu.io.winh[0]    , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_WIN0V      , ppu.io.winv[0]    , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_WIN1H      , ppu.io.winh[1]    , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_WIN1V      , ppu.io.winv[1]    , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_WININ      , ppu.io.winin      , 0x0000'3F3F);
+    WRITE_HALF_REG(REG_WINOUT     , ppu.io.winout     , 0x0000'3F3F);
+    WRITE_HALF_REG(REG_MOSAIC     , ppu.io.mosaic     , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_BLDCNT     , ppu.io.bldcnt     , 0x0000'3FFF);
+    WRITE_HALF_REG(REG_BLDALPHA   , ppu.io.bldalpha   , 0x0000'1F1F);
+    WRITE_HALF_REG(REG_BLDY       , ppu.io.bldy       , 0x0000'001F);
+    WRITE_BYTE_REG(REG_HALTCNT    , arm.io.haltcnt    , 0x0000'00FF);
+    WRITE_HALF_REG(REG_WAITCNT    , arm.io.waitcnt    , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_KEYCNT     , keypad.io.keycnt  , 0x0000'FFFF);
     WRITE_HALF_REG(REG_SOUND1CNT_L, apu.io.soundcnt1_l, 0x0000'007F);
     WRITE_HALF_REG(REG_SOUND1CNT_H, apu.io.soundcnt1_h, 0x0000'FFC0);
     WRITE_HALF_REG(REG_SOUND1CNT_X, apu.io.soundcnt1_x, 0x0000'4000);
@@ -229,47 +211,47 @@ void IO::writeByte(u32 addr, u8 byte)
     WRITE_HALF_REG(REG_SOUND3CNT_X, apu.io.soundcnt3_x, 0x0000'4000);
     WRITE_HALF_REG(REG_SOUND4CNT_L, apu.io.soundcnt4_l, 0x0000'FF00);
     WRITE_HALF_REG(REG_SOUND4CNT_H, apu.io.soundcnt4_h, 0x0000'40FF);
-    WRITE_HALF_REG(REG_SOUNDCNT_L, apu.io.soundcnt_l, 0x0000'FF77);
-    WRITE_HALF_REG(REG_SOUNDCNT_H, apu.io.soundcnt_h, 0x0000'770F);
-    WRITE_HALF_REG(REG_SOUNDCNT_X, apu.io.soundcnt_x, 0x0000'0080);
-    WRITE_HALF_REG(REG_SOUNDBIAS, apu.io.soundbias, 0x0000'FFFF);
-    WRITE_HALF_REG(REG_WAVE_RAM_0, apu.io.wave_ram[0], 0x0000'FFFF);
-    WRITE_HALF_REG(REG_WAVE_RAM_1, apu.io.wave_ram[1], 0x0000'FFFF);
-    WRITE_HALF_REG(REG_WAVE_RAM_2, apu.io.wave_ram[2], 0x0000'FFFF);
-    WRITE_HALF_REG(REG_WAVE_RAM_3, apu.io.wave_ram[3], 0x0000'FFFF);
-    WRITE_HALF_REG(REG_WAVE_RAM_4, apu.io.wave_ram[4], 0x0000'FFFF);
-    WRITE_HALF_REG(REG_WAVE_RAM_5, apu.io.wave_ram[5], 0x0000'FFFF);
-    WRITE_HALF_REG(REG_WAVE_RAM_6, apu.io.wave_ram[6], 0x0000'FFFF);
-    WRITE_HALF_REG(REG_WAVE_RAM_7, apu.io.wave_ram[7], 0x0000'FFFF);
-    WRITE_WORD_REG(REG_FIFO_A, apu.io.fifo_a, 0xFFFF'FFFF);
-    WRITE_WORD_REG(REG_FIFO_B, apu.io.fifo_b, 0xFFFF'FFFF);
-    WRITE_HALF_REG(REG_SIOMULTI0, sio.io.siomulti[0], 0x0000'FFFF);
-    WRITE_HALF_REG(REG_SIOMULTI1, sio.io.siomulti[1], 0x0000'FFFF);
-    WRITE_HALF_REG(REG_SIOMULTI2, sio.io.siomulti[2], 0x0000'FFFF);
-    WRITE_HALF_REG(REG_SIOMULTI3, sio.io.siomulti[3], 0x0000'FFFF);
-    WRITE_HALF_REG(REG_SIOCNT, sio.io.siocnt, 0x0000'FFFF);
-    WRITE_HALF_REG(REG_SIOSEND, sio.io.siosend, 0x0000'FFFF);
-    WRITE_HALF_REG(REG_RCNT, sio.io.rcnt, 0x0000'FFFF);
-    WRITE_HALF_REG(REG_JOYCNT, sio.io.joycnt, 0x0000'FFFF);
-    WRITE_WORD_REG(REG_JOY_RECV, sio.io.joyrecv, 0xFFFF'FFFF);
-    WRITE_WORD_REG(REG_JOY_TRANS, sio.io.joytrans, 0xFFFF'FFFF);
-    WRITE_HALF_REG(REG_JOYSTAT, sio.io.joystat, 0x0000'FFFF);
-    WRITE_BYTE_REG(REG_POSTFLG, io.postflag, 0x0000'00FF);
+    WRITE_HALF_REG(REG_SOUNDCNT_L , apu.io.soundcnt_l , 0x0000'FF77);
+    WRITE_HALF_REG(REG_SOUNDCNT_H , apu.io.soundcnt_h , 0x0000'770F);
+    WRITE_HALF_REG(REG_SOUNDCNT_X , apu.io.soundcnt_x , 0x0000'0080);
+    WRITE_HALF_REG(REG_SOUNDBIAS  , apu.io.soundbias  , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_WAVE_RAM_0 , apu.io.wave_ram[0], 0x0000'FFFF);
+    WRITE_HALF_REG(REG_WAVE_RAM_1 , apu.io.wave_ram[1], 0x0000'FFFF);
+    WRITE_HALF_REG(REG_WAVE_RAM_2 , apu.io.wave_ram[2], 0x0000'FFFF);
+    WRITE_HALF_REG(REG_WAVE_RAM_3 , apu.io.wave_ram[3], 0x0000'FFFF);
+    WRITE_HALF_REG(REG_WAVE_RAM_4 , apu.io.wave_ram[4], 0x0000'FFFF);
+    WRITE_HALF_REG(REG_WAVE_RAM_5 , apu.io.wave_ram[5], 0x0000'FFFF);
+    WRITE_HALF_REG(REG_WAVE_RAM_6 , apu.io.wave_ram[6], 0x0000'FFFF);
+    WRITE_HALF_REG(REG_WAVE_RAM_7 , apu.io.wave_ram[7], 0x0000'FFFF);
+    WRITE_WORD_REG(REG_FIFO_A     , apu.io.fifo_a     , 0xFFFF'FFFF);
+    WRITE_WORD_REG(REG_FIFO_B     , apu.io.fifo_b     , 0xFFFF'FFFF);
+    WRITE_HALF_REG(REG_SIOMULTI0  , sio.io.siomulti[0], 0x0000'FFFF);
+    WRITE_HALF_REG(REG_SIOMULTI1  , sio.io.siomulti[1], 0x0000'FFFF);
+    WRITE_HALF_REG(REG_SIOMULTI2  , sio.io.siomulti[2], 0x0000'FFFF);
+    WRITE_HALF_REG(REG_SIOMULTI3  , sio.io.siomulti[3], 0x0000'FFFF);
+    WRITE_HALF_REG(REG_SIOCNT     , sio.io.siocnt     , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_SIOSEND    , sio.io.siosend    , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_RCNT       , sio.io.rcnt       , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_JOYCNT     , sio.io.joycnt     , 0x0000'FFFF);
+    WRITE_WORD_REG(REG_JOY_RECV   , sio.io.joyrecv    , 0xFFFF'FFFF);
+    WRITE_WORD_REG(REG_JOY_TRANS  , sio.io.joytrans   , 0xFFFF'FFFF);
+    WRITE_HALF_REG(REG_JOYSTAT    , sio.io.joystat    , 0x0000'FFFF);
+    WRITE_BYTE_REG(REG_POSTFLG    , io.postflag       , 0x0000'00FF);
 
-    CASE_HALF_REG(REG_IE):
-    CASE_HALF_REG(REG_IF):
+    CASE_HALF_REG(REG_IE ):
+    CASE_HALF_REG(REG_IF ):
     CASE_HALF_REG(REG_IME):
         irqh.write(addr, byte);
         break;
 
-    CASE_WORD_REG(REG_DMA0SAD):
-    CASE_WORD_REG(REG_DMA0DAD):
-    CASE_WORD_REG(REG_DMA1SAD):
-    CASE_WORD_REG(REG_DMA1DAD):
-    CASE_WORD_REG(REG_DMA2SAD):
-    CASE_WORD_REG(REG_DMA2DAD):
-    CASE_WORD_REG(REG_DMA3SAD):
-    CASE_WORD_REG(REG_DMA3DAD):
+    CASE_WORD_REG(REG_DMA0SAD  ):
+    CASE_WORD_REG(REG_DMA0DAD  ):
+    CASE_WORD_REG(REG_DMA1SAD  ):
+    CASE_WORD_REG(REG_DMA1DAD  ):
+    CASE_WORD_REG(REG_DMA2SAD  ):
+    CASE_WORD_REG(REG_DMA2DAD  ):
+    CASE_WORD_REG(REG_DMA3SAD  ):
+    CASE_WORD_REG(REG_DMA3DAD  ):
     CASE_HALF_REG(REG_DMA0CNT_L):
     CASE_HALF_REG(REG_DMA0CNT_H):
     CASE_HALF_REG(REG_DMA1CNT_L):
@@ -291,12 +273,29 @@ void IO::writeByte(u32 addr, u8 byte)
     CASE_BYTE_REG(REG_TM3CNT_H):
         timerc.write(addr, byte);
         break;
+
+    default:
+        if ((unmasked & 0xFFFC) == 0x800)
+        {
+            switch (unmasked & 0x3)
+            {
+            case 0: io.memory_control.write<0>(byte); break;
+            case 1: io.memory_control.write<1>(byte); break;
+            case 2: io.memory_control.write<2>(byte); break;
+            case 3: io.memory_control.write<3>(byte); break;
+
+            default:
+                EGG_UNREACHABLE;
+                break;
+            }
+        }
     }
 }
 
 void IO::writeHalf(u32 addr, u16 half)
 {
     addr &= ~0x1;
+
     writeByte(addr + 0, (half >> 0) & 0xFF);
     writeByte(addr + 1, (half >> 8) & 0xFF);
 }
@@ -304,6 +303,9 @@ void IO::writeHalf(u32 addr, u16 half)
 void IO::writeWord(u32 addr, u32 word)
 {
     addr &= ~0x3;
-    writeHalf(addr + 0, (word >>  0) & 0xFFFF);
-    writeHalf(addr + 2, (word >> 16) & 0xFFFF);
+
+    writeByte(addr + 0, (word >>  0) & 0xFF);
+    writeByte(addr + 1, (word >>  8) & 0xFF);
+    writeByte(addr + 2, (word >> 16) & 0xFF);
+    writeByte(addr + 3, (word >> 24) & 0xFF);
 }
