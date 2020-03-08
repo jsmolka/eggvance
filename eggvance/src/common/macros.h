@@ -19,3 +19,14 @@
 #else
 #  define EGG_UNREACHABLE EGG_ASSERT(false, "Unreachable")
 #endif
+
+#ifdef SCOPED_ENUM
+#  undef SCOPED_ENUM
+#endif
+
+#define SCOPED_ENUM(name, ...)  \
+    struct name                 \
+    {                           \
+        name() = delete;        \
+        enum { __VA_ARGS__ };   \
+    }

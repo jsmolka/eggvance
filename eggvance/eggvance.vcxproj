@@ -154,7 +154,7 @@
     <ClCompile Include="src\ppu\collapse.cpp" />
     <ClCompile Include="src\ppu\mapentry.cpp" />
     <ClCompile Include="src\registers\haltcontrol.cpp" />
-    <ClCompile Include="src\system\dmacontroller.cpp" />
+    <ClCompile Include="src\dma\dmac.cpp" />
     <ClCompile Include="src\system\irqhandler.cpp" />
     <ClCompile Include="src\system\keypad.cpp" />
     <ClCompile Include="src\mmu\bios.cpp" />
@@ -166,7 +166,7 @@
     <ClCompile Include="src\platform\sdl\main.cpp" />
     <ClCompile Include="src\mmu\gamepak\sram.cpp" />
     <ClCompile Include="src\mmu\mmu.cpp" />
-    <ClCompile Include="src\system\dma.cpp" />
+    <ClCompile Include="src\dma\dma.cpp" />
     <ClCompile Include="src\mmu\oam.cpp" />
     <ClCompile Include="src\ppu\oamentry.cpp" />
     <ClCompile Include="src\mmu\palette.cpp" />
@@ -195,6 +195,7 @@
     <ClInclude Include="src\common\macros.h" />
     <ClInclude Include="src\common\mpl.h" />
     <ClInclude Include="src\common\smallvector.h" />
+    <ClInclude Include="src\dma\io\dma_io.h" />
     <ClInclude Include="src\mmu\miscio.h" />
     <ClInclude Include="src\platform\audiodevice.h" />
     <ClInclude Include="src\platform\device.h" />
@@ -220,9 +221,9 @@
     <ClInclude Include="src\registers\blendfade.h" />
     <ClInclude Include="src\registers\displaycontrol.h" />
     <ClInclude Include="src\registers\displaystatus.h" />
-    <ClInclude Include="src\registers\dmaaddress.h" />
-    <ClInclude Include="src\registers\dmacontrol.h" />
-    <ClInclude Include="src\registers\dmacount.h" />
+    <ClInclude Include="src\dma\io\dmaaddress.h" />
+    <ClInclude Include="src\dma\io\dmacontrol.h" />
+    <ClInclude Include="src\dma\io\dmacount.h" />
     <ClInclude Include="src\registers\haltcontrol.h" />
     <ClInclude Include="src\registers\intrmaster.h" />
     <ClInclude Include="src\registers\intrrequest.h" />
@@ -234,8 +235,8 @@
     <ClInclude Include="src\registers\timerdata.h" />
     <ClInclude Include="src\registers\waitcontrol.h" />
     <ClInclude Include="src\registers\windowrange.h" />
-    <ClInclude Include="src\system\dma.h" />
-    <ClInclude Include="src\system\dmacontroller.h" />
+    <ClInclude Include="src\dma\dma.h" />
+    <ClInclude Include="src\dma\dmac.h" />
     <ClInclude Include="src\mmu\bios.h" />
     <ClInclude Include="src\mmu\gamepak\eeprom.h" />
     <ClInclude Include="src\mmu\gamepak\flash.h" />

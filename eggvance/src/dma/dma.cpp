@@ -4,67 +4,56 @@
 #include "mmu/mmu.h"
 #include "system/irqhandler.h"
 
-DMA::DMA(int id)
+static constexpr int deltas[4] = { 1, -1, 0, 1 };
+
+SCOPED_ENUM(AddressControl,
+    Increment = 0b00,
+    Decrement = 0b01,
+    Fixed     = 0b10,
+    Reload    = 0b11
+);
+
+DMA::DMA(uint id)
 {
     this->id = id;
-}
-
-void DMA::reset()
-{
-    remaining = 0;
-    sad_addr  = 0;
-    dad_addr  = 0;
-    sad_delta = 0;
-    dad_delta = 0;
-    cycles_s  = 0;
-    cycles_n  = 0;
-    running   = false;
-    transfer  = nullptr;
-
-    control = DMAControl();
-    count = DMACount();
-    sad = DMAAddress();
-    dad = DMAAddress();
 }
 
 void DMA::start()
 {
     running   = true;
-    remaining = count.count(id);
+    remaining = io.count.count(id);
 
-    if (control.reload)
+    if (io.control.reload)
     {
-        sad_addr = sad;
-        dad_addr = dad;
-        control.reload = false;
+        sad = io.sad;
+        dad = io.dad;
+        io.control.reload = false;
     }
-    else if (control.repeat && control.dadcnt == 0b11)
+    else if (io.control.repeat && io.control.dadcnt == AddressControl::Reload)
     {
-        dad_addr = dad;
+        dad = io.dad;
     }
 
-    int size = control.word ? 4 : 2;
+    uint size = 2 << io.control.word;
 
-    sad_addr &= ~(size - 1);
-    dad_addr &= ~(size - 1);
+    sad &= ~(size - 1);
+    dad &= ~(size - 1);
 
-    static constexpr int deltas[4] = { 1, -1, 0, 1 };
-
-    sad_delta = size * deltas[control.sadcnt];
-    dad_delta = size * deltas[control.dadcnt];
+    sad_delta = size * deltas[io.control.sadcnt];
+    dad_delta = size * deltas[io.control.dadcnt];
 
     updateCycles();
     updateTransfer();
 }
 
-void DMA::run(int& cycles)
+void DMA::run(cycle_t& cycles)
 {
     while (remaining-- > 0)
     {
         (this->*transfer)();
 
-        sad_addr += sad_delta;
-        dad_addr += dad_delta;
+        sad += sad_delta;
+        dad += dad_delta;
 
         if (remaining == 0)
             cycles -= cycles_n;
@@ -75,9 +64,9 @@ void DMA::run(int& cycles)
             return;
     }
 
-    control.enable = control.repeat;
+    io.control.enable = io.control.repeat;
 
-    if (control.irq)
+    if (io.control.irq)
         irqh.request(
             static_cast<Irq>(
                 static_cast<uint>(Irq::Dma) << id));
@@ -97,7 +86,7 @@ bool DMA::inGamePak(u32 addr)
 
 void DMA::updateCycles()
 {
-    if (inGamePak(sad_addr) && inGamePak(dad_addr))
+    if (inGamePak(sad) && inGamePak(dad))
     {
         cycles_s = 4;
         cycles_n = 4;
@@ -108,26 +97,26 @@ void DMA::updateCycles()
         cycles_n = 2;
     }
 
-    if (control.word)
+    if (io.control.word)
     {
-        cycles_s += arm.io.waitcnt.cyclesWord(sad_addr, true);
-        cycles_s += arm.io.waitcnt.cyclesWord(dad_addr, true);
-        cycles_n += arm.io.waitcnt.cyclesWord(sad_addr, false);
-        cycles_n += arm.io.waitcnt.cyclesWord(dad_addr, false);
+        cycles_s += arm.io.waitcnt.cyclesWord(sad, true);
+        cycles_s += arm.io.waitcnt.cyclesWord(dad, true);
+        cycles_n += arm.io.waitcnt.cyclesWord(sad, false);
+        cycles_n += arm.io.waitcnt.cyclesWord(dad, false);
     }
     else
     {
-        cycles_s += arm.io.waitcnt.cyclesHalf(sad_addr, true);
-        cycles_s += arm.io.waitcnt.cyclesHalf(dad_addr, true);
-        cycles_n += arm.io.waitcnt.cyclesHalf(sad_addr, false);
-        cycles_n += arm.io.waitcnt.cyclesHalf(dad_addr, false);
+        cycles_s += arm.io.waitcnt.cyclesHalf(sad, true);
+        cycles_s += arm.io.waitcnt.cyclesHalf(dad, true);
+        cycles_n += arm.io.waitcnt.cyclesHalf(sad, false);
+        cycles_n += arm.io.waitcnt.cyclesHalf(dad, false);
     }
 }
 
 void DMA::updateTransfer()
 {
-    bool eeprom_w = id == 3 && inEEPROM(dad_addr);
-    bool eeprom_r = id == 3 && inEEPROM(sad_addr);
+    bool eeprom_w = id == 3 && inEEPROM(dad);
+    bool eeprom_r = id == 3 && inEEPROM(sad);
 
     if ((eeprom_r || eeprom_w) && mmu.gamepak.backup->type == Backup::Type::EEPROM)
     {
@@ -140,7 +129,7 @@ void DMA::updateTransfer()
     }
     else
     {
-        if (control.word)
+        if (io.control.word)
             transfer = &DMA::transferWord;
         else
             transfer = &DMA::transferHalf;
@@ -149,14 +138,14 @@ void DMA::updateTransfer()
 
 void DMA::transferHalf()
 {
-    u32 half = mmu.readHalf(sad_addr);
-    mmu.writeHalf(dad_addr, half);
+    u32 half = mmu.readHalf(sad);
+    mmu.writeHalf(dad, half);
 }
 
 void DMA::transferWord()
 {
-    u32 word = mmu.readWord(sad_addr);
-    mmu.writeWord(dad_addr, word);
+    u32 word = mmu.readWord(sad);
+    mmu.writeWord(dad, word);
 }
 
 void DMA::initEEPROM()
@@ -185,12 +174,12 @@ void DMA::initEEPROM()
 
 void DMA::readEEPROM()
 {
-    u8 byte = mmu.gamepak.backup->readByte(sad_addr);
-    mmu.writeHalf(dad_addr, byte);
+    u8 byte = mmu.gamepak.backup->readByte(sad);
+    mmu.writeHalf(dad, byte);
 }
 
 void DMA::writeEEPROM()
 {
-    u8 byte = static_cast<u8>(mmu.readHalf(sad_addr));
-    mmu.gamepak.backup->writeByte(dad_addr, byte);
+    u8 byte = static_cast<u8>(mmu.readHalf(sad));
+    mmu.gamepak.backup->writeByte(dad, byte);
 }

@@ -5,21 +5,21 @@
 class DMAController
 {
 public:
-    void reset();
+    friend class IO;
 
     void run(int& cycles);
     void broadcast(DMA::Timing timing);
 
+private:
     u8 read(u32 addr) const;
     void write(u32 addr, u8 byte);
-
-private:
+    
     void emit(DMA& dma, DMA::Timing timing);
 
     template<uint index>
     void writeControl(DMA& dma, u8 byte);
 
-    DMA* active;
+    DMA* active = nullptr;
     DMA dmas[4] = { 0, 1, 2, 3 };
 };
 

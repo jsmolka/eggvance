@@ -4,8 +4,8 @@
 
 #include "decode.h"
 #include "disassemble.h"
+#include "dma/dmac.h"
 #include "mmu/mmu.h"
-#include "system/dmacontroller.h"
 #include "system/irqhandler.h"
 #include "system/timercontroller.h"
 

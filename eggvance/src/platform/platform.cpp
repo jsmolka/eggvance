@@ -7,9 +7,9 @@
 #include "framecounter.h"
 #include "apu/apu.h"
 #include "arm/arm.h"
+#include "dma/dmac.h"
 #include "mmu/mmu.h"
 #include "ppu/ppu.h"
-#include "system/dmacontroller.h"
 #include "system/keypad.h"
 #include "system/irqhandler.h"
 #include "system/serial.h"
@@ -66,7 +66,7 @@ void Platform::reset()
     arm.reset();
     mmu.reset();
     ppu.reset();
-    dmac.reset();
+    dmac = DMAController();
     irqh.reset();
     keypad.reset();
     timerc.reset();

@@ -84,12 +84,6 @@
     <ClCompile Include="src\mmu\gamepak\sram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\system\dma.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\system\dmacontroller.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\system\keypad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -154,6 +148,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\apu\apu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dma\dma.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dma\dmac.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -269,15 +269,6 @@
     <ClInclude Include="src\registers\displaystatus.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\registers\dmaaddress.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\registers\dmacontrol.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\registers\dmacount.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\registers\haltcontrol.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -324,12 +315,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\mmu\gamepak\sram.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\system\dma.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\system\dmacontroller.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\system\keypad.h">
@@ -423,6 +408,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\mmu\miscio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dma\dma.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dma\dmac.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dma\io\dma_io.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dma\io\dmaaddress.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dma\io\dmacontrol.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dma\io\dmacount.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
