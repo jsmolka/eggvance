@@ -20,7 +20,7 @@ void ARM::Thumb_MoveShiftedRegister(u16 instr)
     case Shift::Asr: dst = util::log(util::asrThumb<amount>(src, cpsr), cpsr); break;
 
     default:
-        EGG_UNREACHABLE;
+        UNREACHABLE;
         break;
     }
 }
@@ -50,7 +50,7 @@ void ARM::Thumb_AddSubtract(u16 instr)
     case Opcode::SubReg: dst = util::sub(src, regs[rn], cpsr); break;
 
     default:
-        EGG_UNREACHABLE;
+        UNREACHABLE;
         break;
     }
 }
@@ -79,7 +79,7 @@ void ARM::Thumb_ImmediateOperations(u16 instr)
     case Opcode::Sub: dst = util::sub(src, offset, cpsr); break;
 
     default:
-        EGG_UNREACHABLE;
+        UNREACHABLE;
         break;
     }
 }
@@ -136,7 +136,7 @@ void ARM::Thumb_AluOperations(u16 instr)
         break;
 
     default:
-        EGG_UNREACHABLE;
+        UNREACHABLE;
         break;
     }
 }
@@ -193,7 +193,7 @@ void ARM::Thumb_HighRegisterOperations(u16 instr)
         break;
 
     default:
-        EGG_UNREACHABLE;
+        UNREACHABLE;
         break;
     }
 }
@@ -246,7 +246,7 @@ void ARM::Thumb_LoadStoreRegisterOffset(u16 instr)
         break;
 
     default:
-        EGG_UNREACHABLE;
+        UNREACHABLE;
         break;
     }
 }
@@ -291,7 +291,7 @@ void ARM::Thumb_LoadStoreByteHalf(u16 instr)
         break;
 
     default:
-        EGG_UNREACHABLE;
+        UNREACHABLE;
         break;
     }
 }
@@ -334,7 +334,7 @@ void ARM::Thumb_LoadStoreImmediateOffset(u16 instr)
         break;
 
     default:
-        EGG_UNREACHABLE;
+        UNREACHABLE;
         break;
     }
 }
@@ -558,7 +558,7 @@ void ARM::Thumb_LongBranchLink(u16 instr)
 
 void ARM::Thumb_Undefined(u16 instr)
 {
-    EGG_ASSERT(false, __FUNCTION__);
+    ASSERT(false, __FUNCTION__);
 }
 
 std::array<void(ARM::*)(u16), 1024> ARM::instr_thumb =

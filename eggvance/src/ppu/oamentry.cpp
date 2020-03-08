@@ -41,7 +41,7 @@ void OAMEntry::reset()
 
 void OAMEntry::writeHalf(int attr, u16 half)
 {
-    EGG_ASSERT((attr & 0x6) < 0x6, "Invalid attribute");
+    ASSERT((attr & 0x6) < 0x6, "Invalid attribute");
 
     switch (attr)
     {
@@ -71,7 +71,7 @@ void OAMEntry::writeHalf(int attr, u16 half)
         break;
 
     default:
-        EGG_UNREACHABLE;
+        UNREACHABLE;
         break;
     }
 

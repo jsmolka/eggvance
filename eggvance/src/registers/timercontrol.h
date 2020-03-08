@@ -34,7 +34,7 @@ public:
                 case 3: prescaler = 1024; break;
 
                 default:
-                    EGG_UNREACHABLE;
+                    UNREACHABLE;
                     break;
                 }
             }

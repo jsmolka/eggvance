@@ -278,9 +278,6 @@
     <ClInclude Include="src\registers\keyinput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\registers\macros.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\registers\mosaic.h">
       <Filter>Header Files</Filter>
     </ClInclude>

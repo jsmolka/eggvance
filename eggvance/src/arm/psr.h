@@ -89,7 +89,7 @@ struct PSR
         case Condition::NV: return false;
 
         default:
-            EGG_UNREACHABLE;
+            UNREACHABLE;
             return false;
         }
     }

@@ -46,7 +46,7 @@ public:
         case 7: return false;
 
         default:
-            EGG_UNREACHABLE;
+            UNREACHABLE;
             return false;
         }
     }

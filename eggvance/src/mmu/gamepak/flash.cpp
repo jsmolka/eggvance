@@ -18,7 +18,7 @@ Flash::Flash(const Path& file, Backup::Type type)
         break;
 
     default:
-        EGG_UNREACHABLE;
+        UNREACHABLE;
         break;
     }
 

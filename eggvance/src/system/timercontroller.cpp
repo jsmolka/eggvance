@@ -5,7 +5,6 @@
 #include "arm/arm.h"
 #include "common/macros.h"
 #include "mmu/memmap.h"
-#include "registers/macros.h"
 
 TimerController timerc;
 
@@ -76,7 +75,7 @@ u8 TimerController::read(u32 addr)
     READ_HALF_REG(REG_TM3CNT_H, timers[3].control);
 
     default:
-        EGG_UNREACHABLE;
+        UNREACHABLE;
         return 0;
     }
 
@@ -111,7 +110,7 @@ void TimerController::write(u32 addr, u8 byte)
     WRITE_CTRL_REG(REG_TM3CNT_H, timers[3]     );
 
     default:
-        EGG_UNREACHABLE;
+        UNREACHABLE;
         break;
     }
 

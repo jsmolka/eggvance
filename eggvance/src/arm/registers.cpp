@@ -80,7 +80,7 @@ Registers::Bank Registers::modeToBank(PSR::Mode mode)
     case PSR::Mode::Und: return BANK_UND;
 
     default:
-        EGG_UNREACHABLE;
+        UNREACHABLE;
         return BANK_DEF;
     }
 }

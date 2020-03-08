@@ -95,7 +95,7 @@ void ARM::Arm_DataProcessing(u32 instr)
             case Shift::Ror: op2 = util::rorArm<false>(op2, amount, flags, cpsr); break;
 
             default:
-                EGG_UNREACHABLE;
+                UNREACHABLE;
                 break;
             }
             idle();
@@ -112,7 +112,7 @@ void ARM::Arm_DataProcessing(u32 instr)
             case Shift::Ror: op2 = util::rorArm<true>(op2, amount, flags, cpsr); break;
 
             default:
-                EGG_UNREACHABLE;
+                UNREACHABLE;
                 break;
             }
         }
@@ -138,7 +138,7 @@ void ARM::Arm_DataProcessing(u32 instr)
     case Opcode::Rsc: dst = util::sbc(op2,   op1, flags, cpsr); break;
 
     default:
-        EGG_UNREACHABLE;
+        UNREACHABLE;
         break;
     }
 
@@ -311,7 +311,7 @@ void ARM::Arm_SingleDataTransfer(u32 instr)
         case Shift::Ror: offset = util::rorArm<true>(regs[rm], amount, false, cpsr); break;
 
         default:
-            EGG_UNREACHABLE;
+            UNREACHABLE;
             break;
         }
     }
@@ -410,7 +410,7 @@ void ARM::Arm_HalfSignedDataTransfer(u32 instr)
             break;
 
         default:
-            EGG_UNREACHABLE;
+            UNREACHABLE;
             break;
         }
 
@@ -530,7 +530,7 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
             case Suffix::IB: writeWord(addr + 0x04, pc + 4); break;
 
             default:
-                EGG_UNREACHABLE;
+                UNREACHABLE;
                 break;
             }
         }
@@ -578,22 +578,22 @@ void ARM::Arm_SoftwareInterrupt(u32 instr)
 
 void ARM::Arm_CoprocessorDataOperations(u32 instr)
 {
-    EGG_ASSERT(false, __FUNCTION__);
+    ASSERT(false, __FUNCTION__);
 }
 
 void ARM::Arm_CoprocessorDataTransfers(u32 instr)
 {
-    EGG_ASSERT(false, __FUNCTION__);
+    ASSERT(false, __FUNCTION__);
 }
 
 void ARM::Arm_CoprocessorRegisterTransfers(u32 instr)
 {
-    EGG_ASSERT(false, __FUNCTION__);
+    ASSERT(false, __FUNCTION__);
 }
 
 void ARM::Arm_Undefined(u32 instr)
 {
-    EGG_ASSERT(false, __FUNCTION__);
+    ASSERT(false, __FUNCTION__);
 }
 
 std::array<void(ARM::*)(u32), 4096> ARM::instr_arm =

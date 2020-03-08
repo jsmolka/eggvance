@@ -268,7 +268,7 @@ void PPU::renderObjects()
                 break;
 
             default:
-                EGG_UNREACHABLE;
+                UNREACHABLE;
                 break;
             }
             objects_exist = true;

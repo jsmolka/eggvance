@@ -1,8 +1,8 @@
 #include "irqhandler.h"
 
 #include "arm/arm.h"
+#include "common/macros.h"
 #include "mmu/memmap.h"
-#include "registers/macros.h"
 
 IrqHandler irqh;
 
@@ -40,7 +40,7 @@ u8 IrqHandler::read(u32 addr) const
     READ_HALF_REG(REG_IME, io.intr_master );
 
     default:
-        EGG_UNREACHABLE;
+        UNREACHABLE;
         return 0;
     }
 }
@@ -54,7 +54,7 @@ void IrqHandler::write(u32 addr, u8 byte)
     WRITE_HALF_REG(REG_IME, io.intr_master , 0x0000'0001);
 
     default:
-        EGG_UNREACHABLE;
+        UNREACHABLE;
         break;
     }
     update();

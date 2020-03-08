@@ -2,31 +2,60 @@
 
 #include <cassert>
 
-#define EGG_ASSERT(cond, msg) assert((cond) && msg)
-
-#ifdef _MSC_VER
-#define EGG_INLINE __forceinline
-#else
-#define EGGE_INLINE __attribute__((always_inline))
-#endif
+#define ASSERT(cond, msg) assert((cond) && msg)
 
 #ifdef NDEBUG
 #  ifdef _MSC_VER
-#  define EGG_UNREACHABLE __assume(0)
+#  define UNREACHABLE __assume(0)
 #  else
-#  define EGG_UNREACHABLE __builtin_unreachable()
+#  define UNREACHABLE __builtin_unreachable()
 #  endif
 #else
-#  define EGG_UNREACHABLE EGG_ASSERT(false, "Unreachable")
+#  define UNREACHABLE ASSERT(false, "Unreachable")
 #endif
 
-#ifdef SCOPED_ENUM
-#  undef SCOPED_ENUM
-#endif
-
-#define SCOPED_ENUM(name, ...)  \
-    struct name                 \
-    {                           \
-        name() = delete;        \
-        enum { __VA_ARGS__ };   \
+#define SCOPED_ENUM(name, ...)                                          \
+    struct name                                                         \
+    {                                                                   \
+        name() = delete;                                                \
+        enum { __VA_ARGS__ };                                           \
     }
+
+#define CASE_BYTE_REG(label)                                            \
+    case label + 0
+
+#define CASE_HALF_REG(label)                                            \
+    case label + 0:                                                     \
+    case label + 1
+
+#define CASE_WORD_REG(label)                                            \
+    case label + 0:                                                     \
+    case label + 1:                                                     \
+    case label + 2:                                                     \
+    case label + 3
+
+#define READ_BYTE_REG(label, reg)                                       \
+    case label + 0: return reg.read<0>()
+
+#define READ_HALF_REG(label, reg)                                       \
+    case label + 0: return reg.read<0>();                               \
+    case label + 1: return reg.read<1>()
+
+#define READ_WORD_REG(label, reg)                                       \
+    case label + 0: return reg.read<0>();                               \
+    case label + 1: return reg.read<1>();                               \
+    case label + 2: return reg.read<2>();                               \
+    case label + 3: return reg.read<3>()
+
+#define WRITE_BYTE_REG(label, reg, mask)                                \
+    case label + 0: reg.write<0>(byte & ((mask >>  0) & 0xFF)); break
+
+#define WRITE_HALF_REG(label, reg, mask)                                \
+    case label + 0: reg.write<0>(byte & ((mask >>  0) & 0xFF)); break;  \
+    case label + 1: reg.write<1>(byte & ((mask >>  8) & 0xFF)); break
+
+#define WRITE_WORD_REG(label, reg, mask)                                \
+    case label + 0: reg.write<0>(byte & ((mask >>  0) & 0xFF)); break;  \
+    case label + 1: reg.write<1>(byte & ((mask >>  8) & 0xFF)); break;  \
+    case label + 2: reg.write<2>(byte & ((mask >> 16) & 0xFF)); break;  \
+    case label + 3: reg.write<3>(byte & ((mask >> 24) & 0xFF)); break

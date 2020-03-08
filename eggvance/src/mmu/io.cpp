@@ -4,9 +4,9 @@
 #include "mmu.h"
 #include "apu/apu.h"
 #include "arm/arm.h"
+#include "common/macros.h"
 #include "dma/dmac.h"
 #include "ppu/ppu.h"
-#include "registers/macros.h"
 #include "system/irqhandler.h"
 #include "system/keypad.h"
 #include "system/serial.h"
@@ -28,7 +28,7 @@ u8 IO::readByte(u32 addr) const
             case 3: return io.memory_control.read<3>();
 
             default:
-                EGG_UNREACHABLE;
+                UNREACHABLE;
                 return 0;
             }
         }
@@ -172,7 +172,7 @@ void IO::writeByte(u32 addr, u8 byte)
             case 3: io.memory_control.write<3>(byte); break;
 
             default:
-                EGG_UNREACHABLE;
+                UNREACHABLE;
                 break;
             }
         }

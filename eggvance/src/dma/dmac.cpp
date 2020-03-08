@@ -3,7 +3,6 @@
 #include "arm/arm.h"
 #include "common/macros.h"
 #include "mmu/memmap.h"
-#include "registers/macros.h"
 
 DMAController dmac;
 
@@ -47,7 +46,7 @@ u8 DMAController::read(u32 addr) const
     READ_HALF_REG(REG_DMA3CNT_H, dmas[3].io.control);
 
     default:
-        EGG_UNREACHABLE;
+        UNREACHABLE;
         return 0;
     }
 }
@@ -79,7 +78,7 @@ void DMAController::write(u32 addr, u8 byte)
     WRITE_CTRL_REG(REG_DMA3CNT_H, dmas[3], 0x0000'FFE0);
 
     default:
-        EGG_UNREACHABLE;
+        UNREACHABLE;
         break;
     }
 

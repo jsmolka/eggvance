@@ -48,7 +48,7 @@ void ARM::run(uint cycles)
         DISPATCH_CASE(0b11000);
 
         default:
-            EGG_UNREACHABLE;
+            UNREACHABLE;
             break;
         }
     }

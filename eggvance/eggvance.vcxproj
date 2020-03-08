@@ -228,7 +228,6 @@
     <ClInclude Include="src\registers\intrmaster.h" />
     <ClInclude Include="src\registers\intrrequest.h" />
     <ClInclude Include="src\registers\keycontrol.h" />
-    <ClInclude Include="src\registers\macros.h" />
     <ClInclude Include="src\registers\register.h" />
     <ClInclude Include="src\registers\serial.h" />
     <ClInclude Include="src\registers\timercontrol.h" />
