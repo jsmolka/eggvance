@@ -10,7 +10,7 @@
 #include "system/irqhandler.h"
 #include "system/keypad.h"
 #include "system/serial.h"
-#include "system/timercontroller.h"
+#include "timer/timerc.h"
 
 u8 IO::readByte(u32 addr) const
 {

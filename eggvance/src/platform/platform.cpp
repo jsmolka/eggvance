@@ -13,7 +13,7 @@
 #include "system/keypad.h"
 #include "system/irqhandler.h"
 #include "system/serial.h"
-#include "system/timercontroller.h"
+#include "timer/timerc.h"
 
 void Platform::init(int argc, char* argv[])
 {

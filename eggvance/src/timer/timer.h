@@ -1,14 +1,11 @@
 #pragma once
 
-#include "registers/timerdata.h"
-#include "registers/timercontrol.h"
+#include "io/timer_io.h"
 
 class Timer
 {
 public:
     Timer(uint id);
-
-    void reset();
 
     void run(uint cycles);
     void start();
@@ -17,14 +14,13 @@ public:
     uint nextOverflow() const;
 
     uint id;
-    Timer* next;
-    TimerData data;
-    TimerControl control;
+    Timer* next = nullptr;
+    TimerIO io;
 
 private:
     uint prescale(uint value) const;
 
-    uint counter;
-    uint reload;
-    uint overflow;
+    uint counter  = 0;
+    uint reload   = 0;
+    uint overflow = 0;
 };

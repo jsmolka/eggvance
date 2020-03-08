@@ -174,8 +174,8 @@
     <ClCompile Include="src\ppu\render.cpp" />
     <ClCompile Include="src\mmu\vram.cpp" />
     <ClCompile Include="src\system\serial.cpp" />
-    <ClCompile Include="src\system\timer.cpp" />
-    <ClCompile Include="src\system\timercontroller.cpp" />
+    <ClCompile Include="src\timer\timer.cpp" />
+    <ClCompile Include="src\timer\timerc.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\apu\apu.h" />
@@ -230,8 +230,8 @@
     <ClInclude Include="src\registers\keycontrol.h" />
     <ClInclude Include="src\registers\register.h" />
     <ClInclude Include="src\registers\serial.h" />
-    <ClInclude Include="src\registers\timercontrol.h" />
-    <ClInclude Include="src\registers\timerdata.h" />
+    <ClInclude Include="src\timer\io\timercontrol.h" />
+    <ClInclude Include="src\timer\io\timerdata.h" />
     <ClInclude Include="src\registers\waitcontrol.h" />
     <ClInclude Include="src\registers\windowrange.h" />
     <ClInclude Include="src\dma\dma.h" />
@@ -265,8 +265,9 @@
     <ClInclude Include="src\ppu\ppu.h" />
     <ClInclude Include="src\mmu\vram.h" />
     <ClInclude Include="src\system\serial.h" />
-    <ClInclude Include="src\system\timer.h" />
-    <ClInclude Include="src\system\timercontroller.h" />
+    <ClInclude Include="src\timer\io\timer_io.h" />
+    <ClInclude Include="src\timer\timer.h" />
+    <ClInclude Include="src\timer\timerc.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="eggvance.rc" />

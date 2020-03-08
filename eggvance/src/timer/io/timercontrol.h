@@ -1,8 +1,8 @@
 #pragma once
 
-#include "register.h"
 #include "common/bits.h"
 #include "common/macros.h"
+#include "registers/register.h"
 
 class TimerControl : public RegisterRW<2>
 {

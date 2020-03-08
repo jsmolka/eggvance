@@ -1,4 +1,4 @@
-#include "timercontroller.h"
+#include "timerc.h"
 
 #include <algorithm>
 
@@ -9,7 +9,6 @@
 TimerController timerc;
 
 TimerController::TimerController()
-    : timers { 0, 1, 2, 3 }
 {
     timers[0].next = &timers[1];
     timers[1].next = &timers[2];
@@ -22,10 +21,10 @@ void TimerController::reset()
 {
     active.clear();
 
-    timers[0].reset();
-    timers[1].reset();
-    timers[2].reset();
-    timers[3].reset();
+    timers[0] = Timer(0);
+    timers[1] = Timer(1);
+    timers[2] = Timer(2);
+    timers[3] = Timer(3);
 
     counter  = 0;
     overflow = 0x7FFF'FFFF;
@@ -65,14 +64,14 @@ u8 TimerController::read(u32 addr)
 
     switch (addr)
     {
-    READ_DATA_REG(REG_TM0CNT_L, timers[0].data   );
-    READ_HALF_REG(REG_TM0CNT_H, timers[0].control);
-    READ_DATA_REG(REG_TM1CNT_L, timers[1].data   );
-    READ_HALF_REG(REG_TM1CNT_H, timers[1].control);
-    READ_DATA_REG(REG_TM2CNT_L, timers[2].data   );
-    READ_HALF_REG(REG_TM2CNT_H, timers[2].control);
-    READ_DATA_REG(REG_TM3CNT_L, timers[3].data   );
-    READ_HALF_REG(REG_TM3CNT_H, timers[3].control);
+    READ_DATA_REG(REG_TM0CNT_L, timers[0].io.data   );
+    READ_HALF_REG(REG_TM0CNT_H, timers[0].io.control);
+    READ_DATA_REG(REG_TM1CNT_L, timers[1].io.data   );
+    READ_HALF_REG(REG_TM1CNT_H, timers[1].io.control);
+    READ_DATA_REG(REG_TM2CNT_L, timers[2].io.data   );
+    READ_HALF_REG(REG_TM2CNT_H, timers[2].io.control);
+    READ_DATA_REG(REG_TM3CNT_L, timers[3].io.data   );
+    READ_HALF_REG(REG_TM3CNT_H, timers[3].io.control);
 
     default:
         UNREACHABLE;
@@ -84,26 +83,26 @@ u8 TimerController::read(u32 addr)
 
 void TimerController::write(u32 addr, u8 byte)
 {
-    #define WRITE_CTRL_REG(label, timer)            \
-        case label:                                 \
-        {                                           \
-            runTimers();                            \
-            int enabled = timer.control.enabled;    \
-            timer.control.write<0>(byte & 0xC7);    \
-            if (!enabled && timer.control.enabled)  \
-                timer.start();                      \
-            else if (enabled)                       \
-                timer.update();                     \
-            schedule();                             \
-            break;                                  \
+    #define WRITE_CTRL_REG(label, timer)                \
+        case label:                                     \
+        {                                               \
+            runTimers();                                \
+            int enabled = timer.io.control.enabled;     \
+            timer.io.control.write<0>(byte & 0xC7);     \
+            if (!enabled && timer.io.control.enabled)   \
+                timer.start();                          \
+            else if (enabled)                           \
+                timer.update();                         \
+            schedule();                                 \
+            break;                                      \
         }
 
     switch (addr)
     {
-    WRITE_HALF_REG(REG_TM0CNT_L, timers[0].data, 0x0000'FFFF);
-    WRITE_HALF_REG(REG_TM1CNT_L, timers[1].data, 0x0000'FFFF);
-    WRITE_HALF_REG(REG_TM2CNT_L, timers[2].data, 0x0000'FFFF);
-    WRITE_HALF_REG(REG_TM3CNT_L, timers[3].data, 0x0000'FFFF);
+    WRITE_HALF_REG(REG_TM0CNT_L, timers[0].io.data, 0x0000'FFFF);
+    WRITE_HALF_REG(REG_TM1CNT_L, timers[1].io.data, 0x0000'FFFF);
+    WRITE_HALF_REG(REG_TM2CNT_L, timers[2].io.data, 0x0000'FFFF);
+    WRITE_HALF_REG(REG_TM3CNT_L, timers[3].io.data, 0x0000'FFFF);
     WRITE_CTRL_REG(REG_TM0CNT_H, timers[0]     );
     WRITE_CTRL_REG(REG_TM1CNT_H, timers[1]     );
     WRITE_CTRL_REG(REG_TM2CNT_H, timers[2]     );
@@ -135,7 +134,7 @@ void TimerController::schedule()
 
     for (auto& timer : timers)
     {
-        if (timer.control.enabled && !timer.control.cascade)
+        if (timer.io.control.enabled && !timer.io.control.cascade)
         {
             active.push_back(&timer);
 

@@ -7,7 +7,7 @@
 #include "dma/dmac.h"
 #include "mmu/mmu.h"
 #include "system/irqhandler.h"
-#include "system/timercontroller.h"
+#include "timer/timerc.h"
 
 ARM arm;
 

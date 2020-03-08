@@ -23,10 +23,10 @@ private:
     u8 read(u32 addr);
     void write(u32 addr, u8 byte);
 
-    uint overflow;
-    uint counter;
+    uint overflow = 0x7FFF'FFFF;
+    uint counter  = 0;
 
-    Timer timers[4];
+    Timer timers[4] = { 0, 1, 2, 3 };
     SmallVector<Timer*, 4> active;
 };
 
