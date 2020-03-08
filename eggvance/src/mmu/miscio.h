@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/config.h"
-#include "registers/register.h"
+#include "common/register.h"
 
 struct MiscIO
 {

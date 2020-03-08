@@ -1,8 +1,8 @@
 #include "dma.h"
 
 #include "arm/arm.h"
+#include "interrupt/irqhandler.h"
 #include "mmu/mmu.h"
-#include "system/irqhandler.h"
 
 static constexpr int deltas[4] = { 1, -1, 0, 1 };
 

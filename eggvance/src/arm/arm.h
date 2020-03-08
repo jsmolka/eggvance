@@ -3,8 +3,7 @@
 #include <array>
 
 #include "registers.h"
-#include "registers/haltcontrol.h"
-#include "registers/waitcontrol.h"
+#include "io/arm_io.h"
 
 class ARM : public Registers
 {
@@ -133,11 +132,7 @@ private:
     u32 last_addr;
     u32 pipe[2];
 
-    struct IO
-    {
-        WaitControl waitcnt;
-        HaltControl haltcnt;
-    } io;
+    ARMIO io;
 
     static std::array<void(ARM::*)(u32), 4096> instr_arm;
     static std::array<void(ARM::*)(u16), 1024> instr_thumb;

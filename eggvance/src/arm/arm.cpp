@@ -5,8 +5,8 @@
 #include "decode.h"
 #include "disassemble.h"
 #include "dma/dmac.h"
+#include "interrupt/irqhandler.h"
 #include "mmu/mmu.h"
-#include "system/irqhandler.h"
 #include "timer/timerc.h"
 
 ARM arm;
@@ -15,7 +15,7 @@ void ARM::reset()
 {
     Registers::reset();
 
-    io = IO();
+    io = ARMIO();
 
     state = 0;
 

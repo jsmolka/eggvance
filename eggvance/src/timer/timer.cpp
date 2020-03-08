@@ -1,6 +1,6 @@
 #include "timer.h"
 
-#include "system/irqhandler.h"
+#include "interrupt/irqhandler.h"
 
 constexpr uint limit = 0x1'0000;
 

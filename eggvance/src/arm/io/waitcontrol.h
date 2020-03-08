@@ -1,7 +1,7 @@
 #pragma once
 
-#include "register.h"
 #include "common/bits.h"
+#include "common/register.h"
 
 class WaitControl : public RegisterRW<2>
 {

@@ -2,8 +2,8 @@
 
 #include <algorithm>
 
-#include "register.h"
 #include "common/bits.h"
+#include "common/register.h"
 
 class BlendAlpha : public RegisterRW<2>
 {

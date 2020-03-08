@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/bits.h"
-#include "registers/register.h"
+#include "common/register.h"
 
 class DMAControl : public RegisterRW<2>
 {

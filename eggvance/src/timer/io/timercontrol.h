@@ -2,7 +2,7 @@
 
 #include "common/bits.h"
 #include "common/macros.h"
-#include "registers/register.h"
+#include "common/register.h"
 
 class TimerControl : public RegisterRW<2>
 {

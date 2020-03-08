@@ -1,8 +1,6 @@
 #pragma once
 
-#include "registers/intrmaster.h"
-#include "registers/intrenable.h"
-#include "registers/intrrequest.h"
+#include "io/intr_io.h"
 
 enum class Irq
 {
@@ -19,7 +17,6 @@ class IrqHandler
 public:
     friend class IO;
 
-    void reset();
     void request(Irq irq);
 
 private:
@@ -28,12 +25,7 @@ private:
     u8 read(u32 addr) const;
     void write(u32 addr, u8 byte);
 
-    struct IO
-    {
-        IntrMaster intr_master;
-        IntrEnable intr_enable;
-        IntrRequest intr_request;
-    } io;
+    IntrIO io;
 };
 
 extern IrqHandler irqh;

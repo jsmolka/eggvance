@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/config.h"
-#include "register.h"
+#include "common/register.h"
 
 struct SerialIO
 {

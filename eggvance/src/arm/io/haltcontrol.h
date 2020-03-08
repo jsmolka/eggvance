@@ -1,6 +1,6 @@
 #pragma once
 
-#include "register.h"
+#include "common/register.h"
 
 class HaltControl : public RegisterW<1>
 {

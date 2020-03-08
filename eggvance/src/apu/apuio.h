@@ -1,6 +1,6 @@
 #pragma once
 
-#include "registers/register.h"
+#include "common/register.h"
 
 struct APUIO
 {

@@ -6,10 +6,10 @@
 #include "arm/arm.h"
 #include "common/macros.h"
 #include "dma/dmac.h"
+#include "interrupt/irqhandler.h"
+#include "keypad/keypad.h"
 #include "ppu/ppu.h"
-#include "system/irqhandler.h"
-#include "system/keypad.h"
-#include "system/serial.h"
+#include "sio/sio.h"
 #include "timer/timerc.h"
 
 u8 IO::readByte(u32 addr) const

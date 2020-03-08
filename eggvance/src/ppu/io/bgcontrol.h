@@ -1,7 +1,7 @@
 #pragma once
 
-#include "register.h"
 #include "common/bits.h"
+#include "common/register.h"
 #include "ppu/dimensions.h"
 
 class BGControl : public RegisterRW<2>

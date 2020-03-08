@@ -1,14 +1,9 @@
 #include "keypad.h"
 
-#include "irqhandler.h"
+#include "interrupt/irqhandler.h"
 #include "platform/inputdevice.h"
 
 Keypad keypad;
-
-void Keypad::reset()
-{
-    io = IO();
-}
 
 void Keypad::process()
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/integer.h"
+#include "integer.h"
 
 template<uint size>
 class RegisterRW

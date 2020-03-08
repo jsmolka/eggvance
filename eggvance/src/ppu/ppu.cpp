@@ -6,9 +6,9 @@
 #include "common/constants.h"
 #include "common/macros.h"
 #include "dma/dmac.h"
+#include "interrupt/irqhandler.h"
 #include "mmu/mmu.h"
 #include "platform/videodevice.h"
-#include "system/irqhandler.h"
 
 PPU ppu;
 

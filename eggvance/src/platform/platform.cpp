@@ -8,11 +8,11 @@
 #include "apu/apu.h"
 #include "arm/arm.h"
 #include "dma/dmac.h"
+#include "interrupt/irqhandler.h"
+#include "keypad/keypad.h"
 #include "mmu/mmu.h"
 #include "ppu/ppu.h"
-#include "system/keypad.h"
-#include "system/irqhandler.h"
-#include "system/serial.h"
+#include "sio/sio.h"
 #include "timer/timerc.h"
 
 void Platform::init(int argc, char* argv[])
@@ -67,10 +67,10 @@ void Platform::reset()
     mmu.reset();
     ppu.reset();
     dmac = DMAController();
-    irqh.reset();
-    keypad.reset();
+    irqh = IrqHandler();
+    keypad = Keypad();
     timerc.reset();
-    sio = Serial();
+    sio = SIO();
 }
 
 void Platform::updateTitle()

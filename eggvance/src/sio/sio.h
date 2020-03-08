@@ -1,8 +1,8 @@
 #pragma once
 
-#include "registers/serial.h"
+#include "io/serial.h"
 
-class Serial
+class SIO
 {
 public:
     friend class IO;
@@ -11,4 +11,4 @@ private:
     SerialIO io;
 };
 
-extern Serial sio;
+extern SIO sio;
