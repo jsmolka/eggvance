@@ -5,14 +5,12 @@
 #include "audiodevice.h"
 #include "inputdevice.h"
 #include "framecounter.h"
-#include "apu/apu.h"
 #include "arm/arm.h"
 #include "dma/dmac.h"
 #include "interrupt/irqhandler.h"
 #include "keypad/keypad.h"
 #include "mmu/mmu.h"
 #include "ppu/ppu.h"
-#include "sio/sio.h"
 #include "timer/timerc.h"
 
 void Platform::init(int argc, char* argv[])
@@ -62,7 +60,6 @@ void Platform::main()
 
 void Platform::reset()
 {
-    apu = APU();
     arm.reset();
     mmu.reset();
     ppu.reset();
@@ -70,7 +67,6 @@ void Platform::reset()
     irqh = IrqHandler();
     keypad = Keypad();
     timerc.reset();
-    sio = SIO();
 }
 
 void Platform::updateTitle()

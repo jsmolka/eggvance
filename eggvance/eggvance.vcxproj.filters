@@ -129,9 +129,6 @@
     <ClCompile Include="src\platform\framecounter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\apu\apu.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\dma\dma.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -148,9 +145,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\keypad\keypad.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\sio\sio.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\arm\io\haltcontrol.cpp">
@@ -305,15 +299,6 @@
     <ClInclude Include="src\common\smallvector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\apu\apu.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\apu\apuio.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\miscio.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\dma\dma.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -374,12 +359,6 @@
     <ClInclude Include="src\keypad\io\keycontrol.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\sio\io\serial.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\sio\sio.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\arm\io\haltcontrol.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -432,6 +411,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\arm\io\arm_io.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\unusedio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

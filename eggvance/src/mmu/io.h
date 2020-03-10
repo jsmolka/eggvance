@@ -1,6 +1,6 @@
 #pragma once
 
-#include "miscio.h"
+#include "unusedio.h"
 
 class IO
 {
@@ -14,5 +14,5 @@ public:
     void writeWord(u32 addr, u32 word);
 
 private:
-    MiscIO io;
+    UnusedIO io;
 };

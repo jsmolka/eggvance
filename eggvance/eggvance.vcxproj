@@ -129,7 +129,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\apu\apu.cpp" />
     <ClCompile Include="src\arm\arm.cpp" />
     <ClCompile Include="src\arm\bus.cpp" />
     <ClCompile Include="src\arm\disassemble.cpp" />
@@ -173,13 +172,10 @@
     <ClCompile Include="src\ppu\ppu.cpp" />
     <ClCompile Include="src\ppu\render.cpp" />
     <ClCompile Include="src\mmu\vram.cpp" />
-    <ClCompile Include="src\sio\sio.cpp" />
     <ClCompile Include="src\timer\timer.cpp" />
     <ClCompile Include="src\timer\timerc.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\apu\apu.h" />
-    <ClInclude Include="src\apu\apuio.h" />
     <ClInclude Include="src\arm\io\arm_io.h" />
     <ClInclude Include="src\arm\util.h" />
     <ClInclude Include="src\arm\arm.h" />
@@ -198,7 +194,7 @@
     <ClInclude Include="src\dma\io\dma_io.h" />
     <ClInclude Include="src\interrupt\io\intr_io.h" />
     <ClInclude Include="src\keypad\io\keypad_io.h" />
-    <ClInclude Include="src\mmu\miscio.h" />
+    <ClInclude Include="src\mmu\unusedio.h" />
     <ClInclude Include="src\platform\audiodevice.h" />
     <ClInclude Include="src\platform\device.h" />
     <ClInclude Include="src\platform\framecounter.h" />
@@ -231,7 +227,6 @@
     <ClInclude Include="src\interrupt\io\intrrequest.h" />
     <ClInclude Include="src\keypad\io\keycontrol.h" />
     <ClInclude Include="src\common\register.h" />
-    <ClInclude Include="src\sio\io\serial.h" />
     <ClInclude Include="src\timer\io\timercontrol.h" />
     <ClInclude Include="src\timer\io\timerdata.h" />
     <ClInclude Include="src\arm\io\waitcontrol.h" />
@@ -266,7 +261,6 @@
     <ClInclude Include="src\mmu\palette.h" />
     <ClInclude Include="src\ppu\ppu.h" />
     <ClInclude Include="src\mmu\vram.h" />
-    <ClInclude Include="src\sio\sio.h" />
     <ClInclude Include="src\timer\io\timer_io.h" />
     <ClInclude Include="src\timer\timer.h" />
     <ClInclude Include="src\timer\timerc.h" />

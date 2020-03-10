@@ -2,14 +2,12 @@
 
 #include "memmap.h"
 #include "mmu.h"
-#include "apu/apu.h"
 #include "arm/arm.h"
 #include "common/macros.h"
 #include "dma/dmac.h"
 #include "interrupt/irqhandler.h"
 #include "keypad/keypad.h"
 #include "ppu/ppu.h"
-#include "sio/sio.h"
 #include "timer/timerc.h"
 
 u8 IO::readByte(u32 addr) const
@@ -51,42 +49,42 @@ u8 IO::readByte(u32 addr) const
     READ_HALF_REG(REG_WINOUT     , ppu.io.winout     );
     READ_HALF_REG(REG_BLDCNT     , ppu.io.bldcnt     );
     READ_HALF_REG(REG_BLDALPHA   , ppu.io.bldalpha   );
-    READ_HALF_REG(REG_SOUND1CNT_L, apu.io.soundcnt1_l);
-    READ_HALF_REG(REG_SOUND1CNT_H, apu.io.soundcnt1_h);
-    READ_HALF_REG(REG_SOUND1CNT_X, apu.io.soundcnt1_x);
-    READ_HALF_REG(REG_SOUND2CNT_L, apu.io.soundcnt2_l);
-    READ_HALF_REG(REG_SOUND2CNT_H, apu.io.soundcnt2_h);
-    READ_HALF_REG(REG_SOUND3CNT_L, apu.io.soundcnt3_l);
-    READ_HALF_REG(REG_SOUND3CNT_H, apu.io.soundcnt3_h);
-    READ_HALF_REG(REG_SOUND3CNT_X, apu.io.soundcnt3_x);
-    READ_HALF_REG(REG_SOUND4CNT_L, apu.io.soundcnt4_l);
-    READ_HALF_REG(REG_SOUND4CNT_H, apu.io.soundcnt4_h);
-    READ_HALF_REG(REG_SOUNDCNT_L , apu.io.soundcnt_l );
-    READ_HALF_REG(REG_SOUNDCNT_H , apu.io.soundcnt_h );
-    READ_HALF_REG(REG_SOUNDCNT_X , apu.io.soundcnt_x );
-    READ_HALF_REG(REG_SOUNDBIAS  , apu.io.soundbias  );
-    READ_HALF_REG(REG_WAVE_RAM_0 , apu.io.wave_ram[0]);
-    READ_HALF_REG(REG_WAVE_RAM_1 , apu.io.wave_ram[1]);
-    READ_HALF_REG(REG_WAVE_RAM_2 , apu.io.wave_ram[2]);
-    READ_HALF_REG(REG_WAVE_RAM_3 , apu.io.wave_ram[3]);
-    READ_HALF_REG(REG_WAVE_RAM_4 , apu.io.wave_ram[4]);
-    READ_HALF_REG(REG_WAVE_RAM_5 , apu.io.wave_ram[5]);
-    READ_HALF_REG(REG_WAVE_RAM_6 , apu.io.wave_ram[6]);
-    READ_HALF_REG(REG_WAVE_RAM_7 , apu.io.wave_ram[7]);
+    READ_HALF_REG(REG_SOUND1CNT_L, io.soundcnt1_l    );
+    READ_HALF_REG(REG_SOUND1CNT_H, io.soundcnt1_h    );
+    READ_HALF_REG(REG_SOUND1CNT_X, io.soundcnt1_x    );
+    READ_HALF_REG(REG_SOUND2CNT_L, io.soundcnt2_l    );
+    READ_HALF_REG(REG_SOUND2CNT_H, io.soundcnt2_h    );
+    READ_HALF_REG(REG_SOUND3CNT_L, io.soundcnt3_l    );
+    READ_HALF_REG(REG_SOUND3CNT_H, io.soundcnt3_h    );
+    READ_HALF_REG(REG_SOUND3CNT_X, io.soundcnt3_x    );
+    READ_HALF_REG(REG_SOUND4CNT_L, io.soundcnt4_l    );
+    READ_HALF_REG(REG_SOUND4CNT_H, io.soundcnt4_h    );
+    READ_HALF_REG(REG_SOUNDCNT_L , io.soundcnt_l     );
+    READ_HALF_REG(REG_SOUNDCNT_H , io.soundcnt_h     );
+    READ_HALF_REG(REG_SOUNDCNT_X , io.soundcnt_x     );
+    READ_HALF_REG(REG_SOUNDBIAS  , io.soundbias      );
+    READ_HALF_REG(REG_WAVE_RAM_0 , io.wave_ram[0]    );
+    READ_HALF_REG(REG_WAVE_RAM_1 , io.wave_ram[1]    );
+    READ_HALF_REG(REG_WAVE_RAM_2 , io.wave_ram[2]    );
+    READ_HALF_REG(REG_WAVE_RAM_3 , io.wave_ram[3]    );
+    READ_HALF_REG(REG_WAVE_RAM_4 , io.wave_ram[4]    );
+    READ_HALF_REG(REG_WAVE_RAM_5 , io.wave_ram[5]    );
+    READ_HALF_REG(REG_WAVE_RAM_6 , io.wave_ram[6]    );
+    READ_HALF_REG(REG_WAVE_RAM_7 , io.wave_ram[7]    );
     READ_HALF_REG(REG_WAITCNT    , arm.io.waitcnt    );
     READ_HALF_REG(REG_KEYINPUT   , keypad.io.keyinput);
     READ_HALF_REG(REG_KEYCNT     , keypad.io.keycnt  );
-    READ_HALF_REG(REG_SIOMULTI0  , sio.io.siomulti[0]);
-    READ_HALF_REG(REG_SIOMULTI1  , sio.io.siomulti[1]);
-    READ_HALF_REG(REG_SIOMULTI2  , sio.io.siomulti[2]);
-    READ_HALF_REG(REG_SIOMULTI3  , sio.io.siomulti[3]);
-    READ_HALF_REG(REG_SIOCNT     , sio.io.siocnt     );
-    READ_HALF_REG(REG_SIOSEND    , sio.io.siosend    );
-    READ_HALF_REG(REG_RCNT       , sio.io.rcnt       );
-    READ_HALF_REG(REG_JOYCNT     , sio.io.joycnt     );
-    READ_WORD_REG(REG_JOY_RECV   , sio.io.joyrecv    );
-    READ_WORD_REG(REG_JOY_TRANS  , sio.io.joytrans   );
-    READ_HALF_REG(REG_JOYSTAT    , sio.io.joystat    );
+    READ_HALF_REG(REG_SIOMULTI0  , io.siomulti[0]    );
+    READ_HALF_REG(REG_SIOMULTI1  , io.siomulti[1]    );
+    READ_HALF_REG(REG_SIOMULTI2  , io.siomulti[2]    );
+    READ_HALF_REG(REG_SIOMULTI3  , io.siomulti[3]    );
+    READ_HALF_REG(REG_SIOCNT     , io.siocnt         );
+    READ_HALF_REG(REG_SIOSEND    , io.siosend        );
+    READ_HALF_REG(REG_RCNT       , io.rcnt           );
+    READ_HALF_REG(REG_JOYCNT     , io.joycnt         );
+    READ_WORD_REG(REG_JOY_RECV   , io.joyrecv        );
+    READ_WORD_REG(REG_JOY_TRANS  , io.joytrans       );
+    READ_HALF_REG(REG_JOYSTAT    , io.joystat        );
     READ_BYTE_REG(REG_POSTFLG    , io.postflag       );
 
     CASE_HALF_REG(REG_IE ):
@@ -223,41 +221,41 @@ void IO::writeByte(u32 addr, u8 byte)
     WRITE_BYTE_REG(REG_HALTCNT    , arm.io.haltcnt    , 0x0000'00FF);
     WRITE_HALF_REG(REG_WAITCNT    , arm.io.waitcnt    , 0x0000'FFFF);
     WRITE_HALF_REG(REG_KEYCNT     , keypad.io.keycnt  , 0x0000'FFFF);
-    WRITE_HALF_REG(REG_SOUND1CNT_L, apu.io.soundcnt1_l, 0x0000'007F);
-    WRITE_HALF_REG(REG_SOUND1CNT_H, apu.io.soundcnt1_h, 0x0000'FFC0);
-    WRITE_HALF_REG(REG_SOUND1CNT_X, apu.io.soundcnt1_x, 0x0000'4000);
-    WRITE_HALF_REG(REG_SOUND2CNT_L, apu.io.soundcnt2_l, 0x0000'FFC0);
-    WRITE_HALF_REG(REG_SOUND2CNT_H, apu.io.soundcnt2_h, 0x0000'4000);
-    WRITE_HALF_REG(REG_SOUND3CNT_L, apu.io.soundcnt3_l, 0x0000'00E0);
-    WRITE_HALF_REG(REG_SOUND3CNT_H, apu.io.soundcnt3_h, 0x0000'E000);
-    WRITE_HALF_REG(REG_SOUND3CNT_X, apu.io.soundcnt3_x, 0x0000'4000);
-    WRITE_HALF_REG(REG_SOUND4CNT_L, apu.io.soundcnt4_l, 0x0000'FF00);
-    WRITE_HALF_REG(REG_SOUND4CNT_H, apu.io.soundcnt4_h, 0x0000'40FF);
-    WRITE_HALF_REG(REG_SOUNDCNT_L , apu.io.soundcnt_l , 0x0000'FF77);
-    WRITE_HALF_REG(REG_SOUNDCNT_H , apu.io.soundcnt_h , 0x0000'770F);
-    WRITE_HALF_REG(REG_SOUNDCNT_X , apu.io.soundcnt_x , 0x0000'0080);
-    WRITE_HALF_REG(REG_SOUNDBIAS  , apu.io.soundbias  , 0x0000'FFFF);
-    WRITE_HALF_REG(REG_WAVE_RAM_0 , apu.io.wave_ram[0], 0x0000'FFFF);
-    WRITE_HALF_REG(REG_WAVE_RAM_1 , apu.io.wave_ram[1], 0x0000'FFFF);
-    WRITE_HALF_REG(REG_WAVE_RAM_2 , apu.io.wave_ram[2], 0x0000'FFFF);
-    WRITE_HALF_REG(REG_WAVE_RAM_3 , apu.io.wave_ram[3], 0x0000'FFFF);
-    WRITE_HALF_REG(REG_WAVE_RAM_4 , apu.io.wave_ram[4], 0x0000'FFFF);
-    WRITE_HALF_REG(REG_WAVE_RAM_5 , apu.io.wave_ram[5], 0x0000'FFFF);
-    WRITE_HALF_REG(REG_WAVE_RAM_6 , apu.io.wave_ram[6], 0x0000'FFFF);
-    WRITE_HALF_REG(REG_WAVE_RAM_7 , apu.io.wave_ram[7], 0x0000'FFFF);
-    WRITE_WORD_REG(REG_FIFO_A     , apu.io.fifo_a     , 0xFFFF'FFFF);
-    WRITE_WORD_REG(REG_FIFO_B     , apu.io.fifo_b     , 0xFFFF'FFFF);
-    WRITE_HALF_REG(REG_SIOMULTI0  , sio.io.siomulti[0], 0x0000'FFFF);
-    WRITE_HALF_REG(REG_SIOMULTI1  , sio.io.siomulti[1], 0x0000'FFFF);
-    WRITE_HALF_REG(REG_SIOMULTI2  , sio.io.siomulti[2], 0x0000'FFFF);
-    WRITE_HALF_REG(REG_SIOMULTI3  , sio.io.siomulti[3], 0x0000'FFFF);
-    WRITE_HALF_REG(REG_SIOCNT     , sio.io.siocnt     , 0x0000'FFFF);
-    WRITE_HALF_REG(REG_SIOSEND    , sio.io.siosend    , 0x0000'FFFF);
-    WRITE_HALF_REG(REG_RCNT       , sio.io.rcnt       , 0x0000'FFFF);
-    WRITE_HALF_REG(REG_JOYCNT     , sio.io.joycnt     , 0x0000'FFFF);
-    WRITE_WORD_REG(REG_JOY_RECV   , sio.io.joyrecv    , 0xFFFF'FFFF);
-    WRITE_WORD_REG(REG_JOY_TRANS  , sio.io.joytrans   , 0xFFFF'FFFF);
-    WRITE_HALF_REG(REG_JOYSTAT    , sio.io.joystat    , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_SOUND1CNT_L, io.soundcnt1_l    , 0x0000'007F);
+    WRITE_HALF_REG(REG_SOUND1CNT_H, io.soundcnt1_h    , 0x0000'FFC0);
+    WRITE_HALF_REG(REG_SOUND1CNT_X, io.soundcnt1_x    , 0x0000'4000);
+    WRITE_HALF_REG(REG_SOUND2CNT_L, io.soundcnt2_l    , 0x0000'FFC0);
+    WRITE_HALF_REG(REG_SOUND2CNT_H, io.soundcnt2_h    , 0x0000'4000);
+    WRITE_HALF_REG(REG_SOUND3CNT_L, io.soundcnt3_l    , 0x0000'00E0);
+    WRITE_HALF_REG(REG_SOUND3CNT_H, io.soundcnt3_h    , 0x0000'E000);
+    WRITE_HALF_REG(REG_SOUND3CNT_X, io.soundcnt3_x    , 0x0000'4000);
+    WRITE_HALF_REG(REG_SOUND4CNT_L, io.soundcnt4_l    , 0x0000'FF00);
+    WRITE_HALF_REG(REG_SOUND4CNT_H, io.soundcnt4_h    , 0x0000'40FF);
+    WRITE_HALF_REG(REG_SOUNDCNT_L , io.soundcnt_l     , 0x0000'FF77);
+    WRITE_HALF_REG(REG_SOUNDCNT_H , io.soundcnt_h     , 0x0000'770F);
+    WRITE_HALF_REG(REG_SOUNDCNT_X , io.soundcnt_x     , 0x0000'0080);
+    WRITE_HALF_REG(REG_SOUNDBIAS  , io.soundbias      , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_WAVE_RAM_0 , io.wave_ram[0]    , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_WAVE_RAM_1 , io.wave_ram[1]    , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_WAVE_RAM_2 , io.wave_ram[2]    , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_WAVE_RAM_3 , io.wave_ram[3]    , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_WAVE_RAM_4 , io.wave_ram[4]    , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_WAVE_RAM_5 , io.wave_ram[5]    , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_WAVE_RAM_6 , io.wave_ram[6]    , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_WAVE_RAM_7 , io.wave_ram[7]    , 0x0000'FFFF);
+    WRITE_WORD_REG(REG_FIFO_A     , io.fifo_a         , 0xFFFF'FFFF);
+    WRITE_WORD_REG(REG_FIFO_B     , io.fifo_b         , 0xFFFF'FFFF);
+    WRITE_HALF_REG(REG_SIOMULTI0  , io.siomulti[0]    , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_SIOMULTI1  , io.siomulti[1]    , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_SIOMULTI2  , io.siomulti[2]    , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_SIOMULTI3  , io.siomulti[3]    , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_SIOCNT     , io.siocnt         , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_SIOSEND    , io.siosend        , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_RCNT       , io.rcnt           , 0x0000'FFFF);
+    WRITE_HALF_REG(REG_JOYCNT     , io.joycnt         , 0x0000'FFFF);
+    WRITE_WORD_REG(REG_JOY_RECV   , io.joyrecv        , 0xFFFF'FFFF);
+    WRITE_WORD_REG(REG_JOY_TRANS  , io.joytrans       , 0xFFFF'FFFF);
+    WRITE_HALF_REG(REG_JOYSTAT    , io.joystat        , 0x0000'FFFF);
     WRITE_BYTE_REG(REG_POSTFLG    , io.postflag       , 0x0000'00FF);
 
     CASE_HALF_REG(REG_IE ):
