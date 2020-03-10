@@ -7,17 +7,16 @@ Keypad keypad;
 
 void Keypad::process()
 {
-    u16 previous = io.keyinput;
+    u16 prev = io.input;
+    io.input = input_device->state();
 
-    io.keyinput = input_device->state();
-
-    if (previous != io.keyinput && io.keycnt.irq)
+    if (prev != io.input && io.control.irq)
     {
-        bool interrupt = io.keycnt.logic
-            ? (~io.keyinput == io.keycnt.mask)
-            : (~io.keyinput &  io.keycnt.mask);
+        bool interrupt = io.control.logic
+            ? (~io.input == io.control.mask)
+            : (~io.input &  io.control.mask);
 
         if (interrupt)
-            irqh.request(Irq::Keypad);
+            irqh.request(IRQ::Keypad);
     }
 }

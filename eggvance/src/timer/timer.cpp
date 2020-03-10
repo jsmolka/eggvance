@@ -20,8 +20,8 @@ void Timer::run(uint cycles)
 
         if (io.control.irq)
             irqh.request(
-                static_cast<Irq>(
-                    static_cast<uint>(Irq::Timer) << id));
+                static_cast<IRQ>(
+                    static_cast<uint>(IRQ::Timer) << id));
 
         counter %= overflow;
         reload   = io.data.initial;

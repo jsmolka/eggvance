@@ -103,10 +103,10 @@ void TimerController::write(u32 addr, u8 byte)
     WRITE_HALF_REG(REG_TM1CNT_L, timers[1].io.data, 0x0000'FFFF);
     WRITE_HALF_REG(REG_TM2CNT_L, timers[2].io.data, 0x0000'FFFF);
     WRITE_HALF_REG(REG_TM3CNT_L, timers[3].io.data, 0x0000'FFFF);
-    WRITE_CTRL_REG(REG_TM0CNT_H, timers[0]     );
-    WRITE_CTRL_REG(REG_TM1CNT_H, timers[1]     );
-    WRITE_CTRL_REG(REG_TM2CNT_H, timers[2]     );
-    WRITE_CTRL_REG(REG_TM3CNT_H, timers[3]     );
+    WRITE_CTRL_REG(REG_TM0CNT_H, timers[0]                     );
+    WRITE_CTRL_REG(REG_TM1CNT_H, timers[1]                     );
+    WRITE_CTRL_REG(REG_TM2CNT_H, timers[2]                     );
+    WRITE_CTRL_REG(REG_TM3CNT_H, timers[3]                     );
 
     default:
         UNREACHABLE;

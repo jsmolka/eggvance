@@ -4,7 +4,7 @@
 #include "dmacontrol.h"
 #include "dmacount.h"
 
-struct DmaIo
+struct DMAIO
 {
     DMACount count;
     DMAAddress sad;

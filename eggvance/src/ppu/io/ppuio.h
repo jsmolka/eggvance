@@ -14,14 +14,8 @@
 #include "window.h"
 #include "windowrange.h"
 
-class PPUIO
+struct PPUIO
 {
-public:
-    inline void reset()
-    {
-        *this = PPUIO();
-    }
-
     DisplayControl dispcnt;
     DisplayStatus dispstat;
     VCount vcount;

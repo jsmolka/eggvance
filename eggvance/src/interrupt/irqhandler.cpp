@@ -4,16 +4,16 @@
 #include "common/macros.h"
 #include "mmu/memmap.h"
 
-IrqHandler irqh;
+IRQHandler irqh;
 
-void IrqHandler::request(Irq irq)
+void IRQHandler::request(IRQ irq)
 {
     io.request |= static_cast<uint>(irq);
 
     update();
 }
 
-void IrqHandler::update()
+void IRQHandler::update()
 {
     bool interrupt = io.enable & io.request;
 
@@ -26,7 +26,7 @@ void IrqHandler::update()
         arm.state &= ~ARM::STATE_IRQ;
 }
 
-u8 IrqHandler::read(u32 addr) const
+u8 IRQHandler::read(u32 addr) const
 {
     switch (addr)
     {
@@ -40,7 +40,7 @@ u8 IrqHandler::read(u32 addr) const
     }
 }
 
-void IrqHandler::write(u32 addr, u8 byte)
+void IRQHandler::write(u32 addr, u8 byte)
 {
     switch (addr)
     {

@@ -5,7 +5,7 @@
 #include "buffer.h"
 #include "dimensions.h"
 #include "layer.h"
-#include "io/ppu_io.h"
+#include "io/ppuio.h"
 
 class PPU
 {

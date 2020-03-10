@@ -7,14 +7,14 @@ struct UnusedIO
 {
     UnusedIO()
     {
-        postflag.write<0>(config.bios_skip);
-
         if (config.bios_skip)
         {
-            memory_control.write<0>(0x20);
-            memory_control.write<1>(0x00);
-            memory_control.write<2>(0x00);
-            memory_control.write<3>(0xD0);
+            memcontrol.write<0>(0x20);
+            memcontrol.write<1>(0x00);
+            memcontrol.write<2>(0x00);
+            memcontrol.write<3>(0xD0);
+
+            postflag.write<0>(0x01);
 
             rcnt.write<0>(0x00);
             rcnt.write<1>(0x80);
@@ -23,17 +23,14 @@ struct UnusedIO
 
     RegisterRW<1> postflag;
     RegisterRW<2> greenswap;
-    RegisterRW<4> memory_control;
+    RegisterRW<4> memcontrol;
 
     RegisterRW<2> rcnt;
     RegisterRW<2> joycnt;
     RegisterRW<4> joyrecv;
     RegisterRW<4> joytrans;
     RegisterRW<2> joystat;
-
     RegisterRW<2> siocnt;
-    RegisterRW<2> siodata8;
-    RegisterRW<4> siodata32;
     RegisterRW<2> siomulti[4];
     RegisterRW<2> siosend;
 
@@ -51,8 +48,6 @@ struct UnusedIO
     RegisterRW<2> soundcnt_h;
     RegisterRW<2> soundcnt_x;
     RegisterRW<2> soundbias;
-    RegisterRW<2> wave_ram[8];
-
-    RegisterW<4> fifo_a;
-    RegisterW<4> fifo_b;
+    RegisterRW<2> waveram[8];
+    RegisterRW<4> fifo[2];
 };

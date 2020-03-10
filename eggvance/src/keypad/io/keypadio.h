@@ -5,6 +5,6 @@
 
 struct KeypadIO
 {
-    KeyControl keycnt;
-    KeyInput keyinput;
+    KeyControl control;
+    KeyInput input;
 };

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "io/dma_io.h"
+#include "io/dmaio.h"
 
 class DMA
 {
@@ -20,7 +20,7 @@ public:
 
     uint id      = 0;
     bool running = false;
-    DmaIo io;
+    DMAIO io;
 
 private:
     using Transfer = void(DMA::*)(void);

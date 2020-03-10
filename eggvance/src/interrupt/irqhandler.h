@@ -1,8 +1,8 @@
 #pragma once
 
-#include "io/intr_io.h"
+#include "io/intrio.h"
 
-enum class Irq
+enum class IRQ
 {
     VBlank = 1 << 0x0,
     HBlank = 1 << 0x1,
@@ -12,12 +12,12 @@ enum class Irq
     Keypad = 1 << 0xC
 };
 
-class IrqHandler
+class IRQHandler
 {
 public:
     friend class IO;
 
-    void request(Irq irq);
+    void request(IRQ irq);
 
 private:
     void update();
@@ -28,4 +28,4 @@ private:
     IntrIO io;
 };
 
-extern IrqHandler irqh;
+extern IRQHandler irqh;

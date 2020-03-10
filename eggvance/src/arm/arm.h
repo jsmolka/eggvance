@@ -3,7 +3,7 @@
 #include <array>
 
 #include "registers.h"
-#include "io/arm_io.h"
+#include "io/armio.h"
 
 class ARM : public Registers
 {

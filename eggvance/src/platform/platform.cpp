@@ -64,7 +64,7 @@ void Platform::reset()
     mmu.reset();
     ppu.reset();
     dmac = DMAController();
-    irqh = IrqHandler();
+    irqh = IRQHandler();
     keypad = Keypad();
     timerc.reset();
 }

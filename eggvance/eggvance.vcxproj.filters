@@ -141,13 +141,13 @@
     <ClCompile Include="src\timer\timerc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\interrupt\irqhandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\keypad\keypad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\arm\io\haltcontrol.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\interrupt\irqhandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -305,9 +305,6 @@
     <ClInclude Include="src\dma\dmac.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\dma\io\dma_io.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\dma\io\dmaaddress.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -329,28 +326,7 @@
     <ClInclude Include="src\timer\io\timerdata.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\timer\io\timer_io.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\interrupt\irqhandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\interrupt\io\intrenable.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\interrupt\io\intrmaster.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\interrupt\io\intrrequest.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\interrupt\io\intr_io.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\keypad\keypad.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\keypad\io\keypad_io.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\keypad\io\keyinput.h">
@@ -407,13 +383,37 @@
     <ClInclude Include="src\common\register.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\ppu\io\ppu_io.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\arm\io\arm_io.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\mmu\unusedio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\arm\io\armio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dma\io\dmaio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\keypad\io\keypadio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ppu\io\ppuio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\timer\io\timerio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\interrupt\io\intrenable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\interrupt\io\intrio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\interrupt\io\intrmaster.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\interrupt\io\intrrequest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\interrupt\irqhandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
