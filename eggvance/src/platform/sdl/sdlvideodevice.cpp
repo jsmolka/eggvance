@@ -62,10 +62,10 @@ void SDLVideoDevice::renderIcon()
     SDL_SetRenderDrawColor(renderer, 56, 56, 56, 1);
     SDL_RenderClear(renderer);
 
-    for (const auto& pixel : icon)
+    for (const auto& pixel : egg::icon::pixels)
     {
-        SDL_SetRenderDrawColor(renderer, pixel.r, pixel.g, pixel.b, 1);
-        SDL_RenderDrawPoint(renderer, pixel.x + 1, pixel.y + 1);
+        SDL_SetRenderDrawColor(renderer, pixel.r(), pixel.g(), pixel.b(), 1);
+        SDL_RenderDrawPoint(renderer, pixel.x() + 1, pixel.y() + 1);
     }
 }
 

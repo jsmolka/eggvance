@@ -61,7 +61,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)icon\;$(ProjectDir)external\fmt\include;$(ProjectDir)external\tinytoml\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)icon\cpp\;$(ProjectDir)external\fmt\include;$(ProjectDir)external\tinytoml\include</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
       <DisableSpecificWarnings>26451;26495;26812;6385;6386;6262;26444</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -86,7 +86,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release with console|x64'">
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)icon\;$(ProjectDir)external\fmt\include;$(ProjectDir)external\tinytoml\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)icon\cpp\;$(ProjectDir)external\fmt\include;$(ProjectDir)external\tinytoml\include</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
       <DisableSpecificWarnings>26451;26495;26812;6385;6386;6262;26444</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -111,7 +111,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release with symbols|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)icon\;$(ProjectDir)external\fmt\include;$(ProjectDir)external\tinytoml\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)icon\cpp\;$(ProjectDir)external\fmt\include;$(ProjectDir)external\tinytoml\include</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
       <DisableSpecificWarnings>26451;26495;26812;6385;6386;6262;26444</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -129,6 +129,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="icon\cpp\icon.cpp" />
     <ClCompile Include="src\arm\arm.cpp" />
     <ClCompile Include="src\arm\bus.cpp" />
     <ClCompile Include="src\arm\disassemble.cpp" />
@@ -161,7 +162,6 @@
     <ClCompile Include="src\mmu\gamepak\eeprom.cpp" />
     <ClCompile Include="src\mmu\gamepak\flash.cpp" />
     <ClCompile Include="src\mmu\gamepak\gamepak.cpp" />
-    <ClCompile Include="icon\icon.cpp" />
     <ClCompile Include="src\platform\sdl\main.cpp" />
     <ClCompile Include="src\mmu\gamepak\sram.cpp" />
     <ClCompile Include="src\mmu\mmu.cpp" />
@@ -176,6 +176,7 @@
     <ClCompile Include="src\timer\timerc.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="icon\cpp\icon.h" />
     <ClInclude Include="src\arm\io\armio.h" />
     <ClInclude Include="src\arm\util.h" />
     <ClInclude Include="src\arm\arm.h" />
@@ -244,7 +245,6 @@
     <ClInclude Include="src\mmu\gamepak\gamepak.h" />
     <ClInclude Include="src\mmu\gamepak\backup.h" />
     <ClInclude Include="src\common\integer.h" />
-    <ClInclude Include="icon\icon.h" />
     <ClInclude Include="src\mmu\mmu.h" />
     <ClInclude Include="src\ppu\io\bgcontrol.h" />
     <ClInclude Include="src\ppu\io\bgoffset.h" />

@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="icon\icon.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\arm\registers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -150,11 +147,11 @@
     <ClCompile Include="src\interrupt\irqhandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="icon\cpp\icon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="icon\icon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\common\integer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -414,6 +411,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\interrupt\irqhandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="icon\cpp\icon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

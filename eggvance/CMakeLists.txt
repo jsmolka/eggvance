@@ -13,12 +13,12 @@ add_definitions(-DSDL_MAIN_HANDLED)
 include_directories(${SDL2_INCLUDE_DIRS})
 include_directories(external/fmt/include)
 include_directories(external/tinytoml/include)
-include_directories(icon)
+include_directories(icon/cpp)
 include_directories(src)
 
 file(GLOB_RECURSE SOURCE_FILES
-  ${PROJECT_SOURCE_DIR}/icon/*.h
-  ${PROJECT_SOURCE_DIR}/icon/*.cpp
+  ${PROJECT_SOURCE_DIR}/icon/cpp/*.h
+  ${PROJECT_SOURCE_DIR}/icon/cpp/*.cpp
   ${PROJECT_SOURCE_DIR}/src/*.h
   ${PROJECT_SOURCE_DIR}/src/*.cpp
 )
