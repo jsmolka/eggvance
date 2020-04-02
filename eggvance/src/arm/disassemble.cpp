@@ -543,7 +543,7 @@ std::string Arm_SoftwareInterrupt(u32 instr)
         ? bios_funcs[comment]
         : "unknown";
 
-    return fmt::format(MNEMONIC"{:X}, {}", "swi", comment, func);
+    return fmt::format(MNEMONIC"{:X} - {}", "swi", comment, func);
 }
 
 std::string Thumb_MoveShiftedRegister(u16 instr)
@@ -868,7 +868,7 @@ std::string Thumb_SoftwareInterrupt(u16 instr)
         ? bios_funcs[comment]
         : "unknown";
 
-    return fmt::format(MNEMONIC"{}", "swi", func);
+    return fmt::format(MNEMONIC"{:X} - {}", "swi", comment, func);
 
 }
 
