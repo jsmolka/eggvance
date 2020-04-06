@@ -5,6 +5,6 @@
 
 struct TimerIO
 {
-    TimerData data = {};
-    TimerControl control = {};
+    TimerData data;
+    TimerControl ctrl;
 };

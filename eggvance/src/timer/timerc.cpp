@@ -65,13 +65,13 @@ u8 TimerController::read(u32 addr)
     switch (addr)
     {
     READ_DATA_REG(REG_TM0CNT_L, timers[0].io.data   );
-    READ_HALF_REG(REG_TM0CNT_H, timers[0].io.control);
+    READ_HALF_REG(REG_TM0CNT_H, timers[0].io.ctrl);
     READ_DATA_REG(REG_TM1CNT_L, timers[1].io.data   );
-    READ_HALF_REG(REG_TM1CNT_H, timers[1].io.control);
+    READ_HALF_REG(REG_TM1CNT_H, timers[1].io.ctrl);
     READ_DATA_REG(REG_TM2CNT_L, timers[2].io.data   );
-    READ_HALF_REG(REG_TM2CNT_H, timers[2].io.control);
+    READ_HALF_REG(REG_TM2CNT_H, timers[2].io.ctrl);
     READ_DATA_REG(REG_TM3CNT_L, timers[3].io.data   );
-    READ_HALF_REG(REG_TM3CNT_H, timers[3].io.control);
+    READ_HALF_REG(REG_TM3CNT_H, timers[3].io.ctrl);
 
     default:
         UNREACHABLE;
@@ -83,18 +83,18 @@ u8 TimerController::read(u32 addr)
 
 void TimerController::write(u32 addr, u8 byte)
 {
-    #define WRITE_CTRL_REG(label, timer)                \
-        case label:                                     \
-        {                                               \
-            runTimers();                                \
-            int enabled = timer.io.control.enabled;     \
-            timer.io.control.write<0>(byte & 0xC7);     \
-            if (!enabled && timer.io.control.enabled)   \
-                timer.start();                          \
-            else if (enabled)                           \
-                timer.update();                         \
-            schedule();                                 \
-            break;                                      \
+    #define WRITE_CTRL_REG(label, timer)          \
+        case label:                               \
+        {                                         \
+            runTimers();                          \
+            uint enable = timer.io.ctrl.enable;   \
+            timer.io.ctrl.write<0>(byte & 0xC7);  \
+            if (!enable && timer.io.ctrl.enable)  \
+                timer.start();                    \
+            else if (enable)                      \
+                timer.update();                   \
+            schedule();                           \
+            break;                                \
         }
 
     switch (addr)
@@ -134,7 +134,7 @@ void TimerController::schedule()
 
     for (auto& timer : timers)
     {
-        if (timer.io.control.enabled && !timer.io.control.cascade)
+        if (timer.io.ctrl.enable && !timer.io.ctrl.cascade)
         {
             active.push_back(&timer);
 

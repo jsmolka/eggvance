@@ -18,20 +18,20 @@ public:
         {
             cascade = bits<2, 1>(byte);
             irq     = bits<6, 1>(byte);
-            enabled = bits<7, 1>(byte);
+            enable  = bits<7, 1>(byte);
 
             if (cascade)
             {
-                prescaler = 1;
+                prescale = 1;
             }
             else
             {
                 switch (bits<0, 2>(byte))
                 {
-                case 0: prescaler = 1; break;
-                case 1: prescaler = 64; break;
-                case 2: prescaler = 256; break;
-                case 3: prescaler = 1024; break;
+                case 0: prescale = 1; break;
+                case 1: prescale = 64; break;
+                case 2: prescale = 256; break;
+                case 3: prescale = 1024; break;
 
                 default:
                     UNREACHABLE;
@@ -41,8 +41,8 @@ public:
         }
     }
 
-    uint prescaler = 1;
-    uint cascade   = 0;
-    uint irq       = 0;
-    uint enabled   = 0;
+    uint prescale = 1;
+    uint cascade  = 0;
+    uint irq      = 0;
+    uint enable   = 0;
 };

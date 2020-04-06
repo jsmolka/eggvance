@@ -7,9 +7,9 @@ class Timer
 public:
     Timer(uint id);
 
-    void run(uint cycles);
     void start();
     void update();
+    void run(uint cycles);
 
     uint nextOverflow() const;
 
@@ -18,9 +18,7 @@ public:
     TimerIO io;
 
 private:
-    uint prescale(uint value) const;
-
     uint counter  = 0;
-    uint reload   = 0;
+    uint initial  = 0;
     uint overflow = 0;
 };
