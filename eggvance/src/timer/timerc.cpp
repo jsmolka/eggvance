@@ -10,10 +10,6 @@ TimerController timerc;
 
 TimerController::TimerController()
 {
-    timers[0].next = &timers[1];
-    timers[1].next = &timers[2];
-    timers[2].next = &timers[3];
-
     reset();
 }
 
@@ -25,6 +21,10 @@ void TimerController::reset()
     timers[1] = Timer(1);
     timers[2] = Timer(2);
     timers[3] = Timer(3);
+
+    timers[0].next = &timers[1];
+    timers[1].next = &timers[2];
+    timers[2].next = &timers[3];
 
     counter  = 0;
     overflow = 0x7FFF'FFFF;
