@@ -1,3 +1,5 @@
+#ifdef PLATFORM_SDL
+
 #include <stdexcept>
 #include <fmt/format.h>
 
@@ -207,3 +209,5 @@ int MAIN(int argc, char* argv[])
         return 1;
     }
 }
+
+#endif

@@ -1,16 +1,31 @@
 cmake_minimum_required(VERSION 3.8)
 
-project(eggvance)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -flto")
 
-find_package(SDL2 REQUIRED)
+set(PLATFORM "SDL" CACHE STRING "Platform <SDL|EMSCRIPTEN>")
+
+if(PLATFORM STREQUAL "SDL")
+  project(eggvance)
+
+  add_definitions(-DPLATFORM_SDL)
+  add_definitions(-DSDL_MAIN_HANDLED)  
+
+  find_package(SDL2 REQUIRED)
+  include_directories(${SDL2_INCLUDE_DIRS})
+elseif(PLATFORM STREQUAL "EMSCRIPTEN")
+  project(eggvance.html)
+
+  add_definitions(-DPLATFORM_EMSCRIPTEN)
+  add_definitions(-DSDL_MAIN_HANDLED) 
+  
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s USE_SDL=2 -s ALLOW_MEMORY_GROWTH=1 -s FORCE_FILESYSTEM=1 -s \"EXTRA_EXPORTED_RUNTIME_METHODS=['ccall']\" --shell-file ../eggshell.html")
+else()
+  message(FATAL_ERROR "Invalid platform")
+endif()
 
 add_definitions(-DFMT_HEADER_ONLY)
-add_definitions(-DSDL_MAIN_HANDLED)
 
-include_directories(${SDL2_INCLUDE_DIRS})
 include_directories(external/fmt/include)
 include_directories(external/tinytoml/include)
 include_directories(icon/cpp)
@@ -25,7 +40,9 @@ file(GLOB_RECURSE SOURCE_FILES
 
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILES})
 
-target_link_libraries(${CMAKE_PROJECT_NAME} ${SDL2_LIBRARIES})
+if (PLATFORM STREQUAL "SDL")
+  target_link_libraries(${CMAKE_PROJECT_NAME} ${SDL2_LIBRARIES})
+endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   target_link_libraries(${CMAKE_PROJECT_NAME} stdc++fs)

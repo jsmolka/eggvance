@@ -2,7 +2,7 @@
 
 #include <string>
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__EMSCRIPTEN__)
 #include <SDL2/SDL.h>
 #else
 #include "SDL.h"

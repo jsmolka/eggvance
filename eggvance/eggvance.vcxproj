@@ -67,7 +67,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/Ob3 %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>FMT_HEADER_ONLY;SDL_MAIN_HANDLED;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PLATFORM_SDL;FMT_HEADER_ONLY;SDL_MAIN_HANDLED;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
     </ClCompile>
@@ -92,7 +92,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/Ob3 %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>FMT_HEADER_ONLY;SDL_MAIN_HANDLED;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PLATFORM_SDL;FMT_HEADER_ONLY;SDL_MAIN_HANDLED;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
     </ClCompile>
@@ -116,7 +116,7 @@
       <DisableSpecificWarnings>26451;26495;26812;6385;6386;6262;26444</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>FMT_HEADER_ONLY;SDL_MAIN_HANDLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PLATFORM_SDL;FMT_HEADER_ONLY;SDL_MAIN_HANDLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SupportJustMyCode>true</SupportJustMyCode>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -141,9 +141,10 @@
     <ClCompile Include="src\common\input.cpp" />
     <ClCompile Include="src\platform\audiodevice.cpp" />
     <ClCompile Include="src\platform\common.cpp" />
+    <ClCompile Include="src\platform\sdl\main_emscripten.cpp" />
     <ClCompile Include="src\platform\framecounter.cpp" />
     <ClCompile Include="src\platform\inputdevice.cpp" />
-    <ClCompile Include="src\platform\sdl\main.cpp" />
+    <ClCompile Include="src\platform\sdl\main_sdl.cpp" />
     <ClCompile Include="src\platform\synchronizer.cpp" />
     <ClCompile Include="src\platform\videodevice.cpp" />
     <ClCompile Include="src\mmu\bios_data.cpp" />

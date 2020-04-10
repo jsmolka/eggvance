@@ -2,15 +2,20 @@
 
 #include <toml/toml.h>
 
+#include "common/fs.h"
+
 Config config;
 
 void Config::init(const Path& file)
 {
     try
     {
-        initFile(file);
+        if (std_filesystem::exists(fs::relativeToExe(file)))
+            initFile(fs::relativeToExe(file));
+        else
+            initDefault();
     }
-    catch (std::exception ex)
+    catch (const std::exception&)
     {
         initDefault();
     }
@@ -18,7 +23,7 @@ void Config::init(const Path& file)
 
 void Config::initFile(const Path& file)
 {
-    auto stream = std::ifstream(fs::relativeToExe(file));
+    auto stream = std::ifstream(file);
     auto result = toml::parse(stream);
     if (!result.valid())
         throw std::exception();

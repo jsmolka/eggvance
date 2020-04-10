@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>eggvance</title>
+    <style>
+      .hidden {
+        display: none;
+      }
+
+      .canvas {
+        padding: 0px;
+        border: 0px none;
+        background-color: black;
+      }
+    </style>
+    <div>
+      <button onclick="inputRom.click(); Module.eggvanceLoadRom()">Open ROM</button>
+      <input id="rom-input" class="hidden" type="file">
+    </div>
+  </head>
+  <body>
+    <canvas class="canvas" id="canvas" oncontextmenu="event.preventDefault()" tabindex=-1></canvas>
+    <script type='text/javascript'>
+      const inputRom = document.getElementById('rom-input');
+
+      function readBinaryData(file) {
+        const reader = new FileReader();
+        reader.onload = function() {
+          const data = new Uint8Array(reader.result);
+          const filename = "rom.gba";
+
+          Module.ccall("eggvanceUnloadRom", null, ['string'], [filename]);
+          Module["FS_createDataFile"]('/', filename, data, true, true, true);
+          Module.ccall('eggvanceLoadRom', null, ['string'], [filename]);
+        }
+        reader.readAsArrayBuffer(file);
+      }
+
+      var Module = {
+        preRun: [],
+        postRun: [],
+        canvas: document.getElementById('canvas'),
+        eggvanceLoadRom: function() {
+          if (inputRom.files.length === 0)
+            return;
+
+          readBinaryData(inputRom.files[0]);
+        },
+        eggvanceLoadSave: function(file) {
+
+        }
+      };
+    </script>
+    {{{ SCRIPT }}}
+  </body>
+</html>
