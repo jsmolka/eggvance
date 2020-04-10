@@ -55,6 +55,16 @@ brew install sdl2
 
 Build like on Linux.
 
+### Emscripten
+Setup [emscripten](https://emscripten.org/docs/getting_started/downloads.html).
+
+```
+mkdir eggvance/build
+cd eggvance/build/
+emmake cmake -DPLATFORM=EMSCRIPTEN ..
+emmake make
+```
+
 ## Issues
 - no audio emulation
 - no link cable emulation
