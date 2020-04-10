@@ -66,7 +66,7 @@ void processEvents()
     }
 }
 
-void icon()
+void idle()
 {
     int w;
     int h;
@@ -88,9 +88,9 @@ void emulate()
 
 #ifdef __cplusplus
 extern "C" {
-    #endif
+#endif
 
-    EMSCRIPTEN_KEEPALIVE void eggvanceLoadRom(const char* filename)
+    EMSCRIPTEN_KEEPALIVE void loadRom(const char* filename)
     {
         mmu.gamepak.load(filename);
         common::reset();
@@ -99,20 +99,29 @@ extern "C" {
         emscripten_set_main_loop(emulate, 0, 1);
     }
 
-    EMSCRIPTEN_KEEPALIVE void eggvanceUnloadRom(const char* filename)
+    EMSCRIPTEN_KEEPALIVE void loadBackup(const char* filename)
+    {
+        mmu.gamepak.loadBackup(filename);
+        common::reset();
+
+        emscripten_cancel_main_loop();
+        emscripten_set_main_loop(emulate, 0, 1);
+    }
+
+    EMSCRIPTEN_KEEPALIVE void removeFile(const char* filename)
     {
         if (std_filesystem::exists(filename))
             std_filesystem::remove(filename);
     }
 
-    #ifdef __cplusplus
+#ifdef __cplusplus
 }
 #endif
 
 int main(int argc, char* argv[])
 {
     init(argc, argv);
-    emscripten_set_main_loop(icon, 0, 1);
+    emscripten_set_main_loop(idle, 0, 1);
     return 0;
 }
 

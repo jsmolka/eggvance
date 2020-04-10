@@ -3,8 +3,7 @@
 #include "common/fs.h"
 
 Backup::Backup()
-    : file()
-    , type(Type::None)
+    : type(Type::None)
 {
 
 }

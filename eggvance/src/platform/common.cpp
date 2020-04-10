@@ -26,8 +26,11 @@ void common::init(
     ::input_device = input_device;
     ::video_device = video_device;
 
-    if (argc > 1)
-        mmu.gamepak.load(argv[1]);
+    switch (argc)
+    {
+    case 2: mmu.gamepak.load(argv[1]); break;
+    case 3: mmu.gamepak.load(argv[1], argv[2]); break;
+    }
 }
 
 void common::reset()

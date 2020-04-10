@@ -7,6 +7,21 @@
 #include "sram.h"
 #include "common/config.h"
 
+struct BackupConfig
+{
+    std::string id;
+    Backup::Type type;
+};
+
+static const BackupConfig backup_configs[5] =
+{
+    { "SRAM"     , Backup::Type::SRAM     },
+    { "EEPROM"   , Backup::Type::EEPROM   },
+    { "FLASH_"   , Backup::Type::Flash64  },
+    { "FLASH512_", Backup::Type::Flash64  },
+    { "FLASH1M_" , Backup::Type::Flash128 }
+};
+
 u8 GamePak::readByte(u32 addr)
 {
     if (addr < data.size())
@@ -31,61 +46,36 @@ u32 GamePak::readWord(u32 addr)
         return readUnused(addr);
 }
 
+bool GamePak::load(const Path& file, const Path& backup)
+{
+    if (!fs::read(file, data))
+        return false;
+
+    initHeader();
+    initBackup(backup, backupType());
+
+    return true;
+}
+
 bool GamePak::load(const Path& file)
 {
-    if (this->file != file)
-    {
-        if (!fs::read(file, data))
-            return false;
+    auto backup = Path(file).replace_extension("sav");
+    if (!config.save_dir.empty())
+        backup = config.save_dir / backup.filename();
 
-        header = parseHeader();
+    return load(file, backup);
+}
 
-        auto backup_file = toBackupFile(file);
-        auto backup_type = parseBackupType();
+bool GamePak::loadBackup(const Path& file)
+{
+    initBackup(file, backup->type);
 
-        switch (backup_type)
-        {
-        case Backup::Type::SRAM:
-            backup = std::make_unique<SRAM>(backup_file);
-            break;
-
-        case Backup::Type::EEPROM:
-            backup = std::make_unique<EEPROM>(backup_file);
-            break;
-
-        case Backup::Type::Flash64:
-        case Backup::Type::Flash128:
-            backup = std::make_unique<Flash>(backup_file, backup_type);
-            break;
-
-        default:
-            backup = std::make_unique<Backup>();
-            break;
-        }
-    }
-    return true;
+    return fs::read(file, backup->data);;
 }
 
 std::size_t GamePak::size() const
 {
     return data.size();
-}
-
-Path GamePak::toBackupFile(const Path& file)
-{
-    auto backup = Path(file).replace_extension("sav");
-
-    if (config.save_dir.empty())
-        return backup;
-    else
-        return config.save_dir / backup.filename();
-}
-
-std::string GamePak::makeString(u8* data, int size)
-{
-    std::string str(reinterpret_cast<char*>(data), size);
-    str.erase(std::find(str.begin(), str.end(), '\0'), str.end());
-    return str;
 }
 
 u32 GamePak::readUnused(u32 addr)
@@ -94,35 +84,53 @@ u32 GamePak::readUnused(u32 addr)
     return (addr & 0xFFFF) | ((addr + 1) & 0xFFFF) << 16;
 }
 
-GamePak::Header GamePak::parseHeader()
+void GamePak::initHeader()
 {
-    return {
-        makeString(&data[0xA0], 12),
-        makeString(&data[0xB0], 2),
-        makeString(&data[0xAC], 4)
+    auto toString = [](u8* data, uint size)
+    {
+        std::string str(reinterpret_cast<char*>(data), size);
+        str.erase(std::find(str.begin(), str.end(), '\0'), str.end());
+        return str;
     };
+
+    header.title = toString(&data[0xA0], 12);
+    header.maker = toString(&data[0xB0],  2);
+    header.code  = toString(&data[0xAC],  4);
 }
 
-Backup::Type GamePak::parseBackupType()
+void GamePak::initBackup(const Path& file, Backup::Type type)
 {
-    static const std::pair<std::string, Backup::Type> backup_types[5] = {
-        { "SRAM",      Backup::Type::SRAM     },
-        { "EEPROM",    Backup::Type::EEPROM   },
-        { "FLASH_",    Backup::Type::Flash64  },
-        { "FLASH512_", Backup::Type::Flash64  },
-        { "FLASH1M_",  Backup::Type::Flash128 }
-    };
+    backup = nullptr;
 
-    std::string id;
-    Backup::Type type;
-
-    for (int x = 0xC0; x < data.size(); x += 4)
+    switch (type)
     {
-        for (const auto& save_type : backup_types)
+    case Backup::Type::SRAM:
+        backup = std::make_unique<SRAM>(file);
+        break;
+
+    case Backup::Type::EEPROM:
+        backup = std::make_unique<EEPROM>(file);
+        break;
+
+    case Backup::Type::Flash64:
+    case Backup::Type::Flash128:
+        backup = std::make_unique<Flash>(file, type);
+        break;
+
+    default:
+        backup = std::make_unique<Backup>();
+        break;
+    }
+}
+
+Backup::Type GamePak::backupType() const
+{
+    for (uint x = 0xC0; x < data.size(); x += 4)
+    {
+        for (const auto& config : backup_configs)
         {
-            std::tie(id, type) = save_type;
-            if (std::memcmp(id.data(), &data[x], id.size()) == 0)
-                return type;
+            if (std::memcmp(config.id.data(), &data[x], config.id.size()) == 0)
+                return config.type;
         }
     }
     return Backup::Type::None;

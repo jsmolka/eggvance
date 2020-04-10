@@ -21,19 +21,21 @@ public:
     u16 readHalf(u32 addr);
     u32 readWord(u32 addr);
 
+    bool load(const Path& file, const Path& backup);
     bool load(const Path& file);
+    bool loadBackup(const Path& file);
 
     std::size_t size() const;
 
     std::unique_ptr<Backup> backup;
 
 private:
-    static Path toBackupFile(const Path& file);
-    static std::string makeString(u8* data, int size);
     static u32 readUnused(u32 addr);
 
-    Header parseHeader();
-    Backup::Type parseBackupType();
+    void initHeader();
+    void initBackup(const Path& file, Backup::Type type);
+
+    Backup::Type backupType() const;
 
     Path file;
     std::vector<u8> data;

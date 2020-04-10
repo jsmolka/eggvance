@@ -1,0 +1,69 @@
+﻿<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>eggvance</title>
+  </head>
+  <body>
+    <canvas class="canvas" id="canvas" oncontextmenu="event.preventDefault()" tabindex=-1 style="background-color: black"></canvas>
+    <div style="display: flex; margin-top: 8px">
+      <div style="margin-right: 8px">
+        <button onclick="inputRom.click(); Module.loadRom()">Load rom</button>
+        <input id="rom-input" class="hidden" type="file" style="display: none">
+      </div>
+      <div>
+        <button onclick="inputBackup.click(); Module.loadBackup()">Load save</button>
+        <input id="backup-input" class="hidden" type="file" style="display: none">
+      </div>
+    </div>
+    <script type='text/javascript'>
+      const inputRom = document.getElementById('rom-input');
+      const inputBackup = document.getElementById('backup-input');
+
+      function readFile(file, callback) {
+        const reader = new FileReader();
+        reader.onload = function() {
+          callback(new Uint8Array(reader.result));
+        }
+        reader.readAsArrayBuffer(file);
+      }
+
+      let id = 0;
+      var Module = {
+        canvas: document.getElementById('canvas'),
+        loadRom: function() {
+          if (inputRom.files.length === 0)
+            return;
+
+          readFile(inputRom.files[0], data => {
+            const gba = () => id + '.gba';
+            const sav = () => id + '.sav';
+
+            Module.ccall('removeFile', null, ['string'], [gba()]);
+            Module.ccall('removeFile', null, ['string'], [sav()]);
+            id++;
+
+            Module["FS_createDataFile"]('/', gba(), data, true, true, true);
+            Module.ccall('loadRom', null, ['string'], [gba()]);
+          });
+        },
+        loadBackup: function(file) {
+          if (inputBackup.files.length === 0)
+            return;
+
+          readFile(inputBackup.files[0], data => {
+            const sav = () => id + '.sav';
+
+            Module.ccall('removeFile', null, ['string'], [sav()]);
+            id++;
+
+            Module["FS_createDataFile"]('/', sav(), data, true, true, true);
+            Module.ccall('loadBackup', null, ['string'], [sav()]);
+          });
+        }
+      };
+    </script>
+    {{{ SCRIPT }}}
+  </body>
+</html>

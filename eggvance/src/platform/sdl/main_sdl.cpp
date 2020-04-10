@@ -13,12 +13,6 @@
 #include "platform/framecounter.h"
 #include "platform/synchronizer.h"
 
-#ifdef _MSC_VER
-#define MAIN SDL_main
-#else
-#define MAIN main
-#endif
-
 bool running = true;
 Synchronizer synchronizer;
 std::string title = "eggvance";
@@ -55,7 +49,15 @@ bool dropEvent(const SDL_DropEvent& event)
     SDL_free(event.file);
     SDL_RaiseWindow(sdl_video_device->window);
 
-    return mmu.gamepak.load(file);
+    bool romLoaded = false;
+    if (file.extension() == ".gba")
+        romLoaded = mmu.gamepak.load(file);
+    else
+        mmu.gamepak.loadBackup(file);
+
+    common::reset();
+
+    return romLoaded;
 }
 
 bool dropAwait()
@@ -153,8 +155,7 @@ void processEvents()
             break;
 
         case SDL_DROPFILE:
-            if (dropEvent(event.drop))
-               common::reset();
+            dropEvent(event.drop);
             break;
         }
     }
@@ -195,7 +196,7 @@ void loop()
     }
 }
 
-int MAIN(int argc, char* argv[])
+int main(int argc, char* argv[])
 {
     try
     {

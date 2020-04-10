@@ -424,6 +424,7 @@
     <None Include="icon\icon.ase" />
     <None Include="src\arm\lut_arm.py" />
     <None Include="src\arm\lut_thumb.py" />
+    <None Include="eggvance.html" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />

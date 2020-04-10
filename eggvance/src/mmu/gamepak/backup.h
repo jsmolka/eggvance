@@ -24,9 +24,7 @@ public:
     virtual u8 readByte(u32 addr);
     virtual void writeByte(u32 addr, u8 byte);
 
+    Path file;
     Type type;
     std::vector<u8> data;
-
-private:
-    Path file;
 };
