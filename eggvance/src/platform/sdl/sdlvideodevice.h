@@ -18,10 +18,10 @@ public:
     void init() override;
     void deinit() override;
     void present() override;
-    void fullscreen() override;
-    void title(const std::string& title) override;
 
+    void fullscreen();
     void renderIcon();
+    void title(const std::string& title);
 
     SDL_Window* window;
     SDL_Renderer* renderer;

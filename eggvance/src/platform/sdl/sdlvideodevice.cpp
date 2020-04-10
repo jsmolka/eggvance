@@ -52,11 +52,6 @@ void SDLVideoDevice::fullscreen()
     SDL_ShowCursor(SDL_ShowCursor(SDL_QUERY) ^ 0x1);
 }
 
-void SDLVideoDevice::title(const std::string& title)
-{
-    SDL_SetWindowTitle(window, title.c_str());
-}
-
 void SDLVideoDevice::renderIcon()
 {
     SDL_SetRenderDrawColor(renderer, 56, 56, 56, 1);
@@ -67,6 +62,11 @@ void SDLVideoDevice::renderIcon()
         SDL_SetRenderDrawColor(renderer, pixel.r(), pixel.g(), pixel.b(), 1);
         SDL_RenderDrawPoint(renderer, pixel.x() + 1, pixel.y() + 1);
     }
+}
+
+void SDLVideoDevice::title(const std::string& title)
+{
+    SDL_SetWindowTitle(window, title.c_str());
 }
 
 bool SDLVideoDevice::createWindow()
