@@ -5,7 +5,7 @@
 
 #ifdef _MSC_VER
 #include <intrin.h>
-#else
+#elif not defined __EMSCRIPTEN__
 #include <x86intrin.h>
 #endif
 
