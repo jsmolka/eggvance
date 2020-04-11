@@ -52,7 +52,6 @@ void init(int argc, char* argv[])
 
     shortcuts.keyboard = config.shortcuts.keyboard.convert<SDL_Scancode>(SDLInputDevice::convertKey);
     shortcuts.controller = config.shortcuts.controller.convert<SDL_GameControllerButton>(SDLInputDevice::convertButton);
-    shortcuts.keyboard.fullscreen = SDL_SCANCODE_T;
 }
 
 template<typename T>

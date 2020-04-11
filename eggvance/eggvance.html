@@ -23,6 +23,43 @@
       let fileId = 0;
       var Module = {
         canvas: document.getElementById('canvas'),
+        preInit() {
+          FS.writeFile('eggvance.toml', `
+            [general]
+            bios_file = ""
+            bios_skip = true
+            save_dir = ""
+            deadzone = 16000
+
+            [multipliers]
+            fps_multiplier_1 = 2.0
+            fps_multiplier_2 = 4.0
+            fps_multiplier_3 = 6.0
+            fps_multiplier_4 = 8.0
+
+            [controls]
+            a      = ["U", "B"            ]
+            b      = ["H", "A"            ]
+            up     = ["W", "DPUP"         ]
+            down   = ["S", "DPDOWN"       ]
+            left   = ["A", "DPLEFT"       ]
+            right  = ["D", "DPRIGHT"      ]
+            start  = ["G", "START"        ]
+            select = ["F", "BACK"         ]
+            l      = ["Q", "LEFTSHOULDER" ]
+            r      = ["I", "RIGHTSHOULDER"]
+
+            [shortcuts]
+            reset         = ["R", ""]
+            fullscreen    = ["T", ""]
+            fps_default   = ["1", ""]
+            fps_custom_1  = ["2", ""]
+            fps_custom_2  = ["3", ""]
+            fps_custom_3  = ["4", ""]
+            fps_custom_4  = ["5", ""]
+            fps_unlimited = ["6", ""]
+          `);
+        },
         loadFile(input, callback) {
           if (input.files.length === 0)
             return;
@@ -34,14 +71,14 @@
           reader.readAsArrayBuffer(input.files[0]);
           input.value = '';
         },
-        loadRom: function() {
+        loadRom() {
           this.loadFile(inputRom, data => {
             fileId++;
             FS.writeFile(`rom${fileId}.gba`, data);
             this.eggvanceLoadRom(`rom${fileId}.gba`);
           });
         },
-        loadBackup: function(file) {
+        loadBackup(file) {
           this.loadFile(inputBackup, data => {
             fileId++;
             FS.writeFile(`rom${fileId}.sav`, data);
