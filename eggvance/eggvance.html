@@ -1,69 +1,51 @@
 ﻿<!doctype html>
-<html lang="en-us">
+<html lang="en">
   <head>
     <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>eggvance</title>
   </head>
   <body>
-    <canvas class="canvas" id="canvas" oncontextmenu="event.preventDefault()" tabindex=-1 style="background-color: black"></canvas>
+    <canvas id="canvas" oncontextmenu="event.preventDefault()" style="background-color: black"></canvas>
     <div style="display: flex; margin-top: 8px">
       <div style="margin-right: 8px">
         <button onclick="inputRom.click(); Module.loadRom()">Load rom</button>
-        <input id="rom-input" class="hidden" type="file" style="display: none">
+        <input id="rom-input" type="file" style="display: none">
       </div>
       <div>
         <button onclick="inputBackup.click(); Module.loadBackup()">Load save</button>
-        <input id="backup-input" class="hidden" type="file" style="display: none">
+        <input id="backup-input" type="file" style="display: none">
       </div>
     </div>
     <script type='text/javascript'>
       const inputRom = document.getElementById('rom-input');
       const inputBackup = document.getElementById('backup-input');
 
-      function readFile(file, callback) {
-        const reader = new FileReader();
-        reader.onload = function() {
-          callback(new Uint8Array(reader.result));
-        }
-        reader.readAsArrayBuffer(file);
-      }
-
-      function createFile(filename, data) {
-        Module['FS_createDataFile']('/', filename, data, true, true, true);
-      }
-
-      let id = 0;
+      let fileId = 0;
       var Module = {
         canvas: document.getElementById('canvas'),
-        loadRom: function() {
-          if (inputRom.files.length === 0)
+        loadFile(input, callback) {
+          if (input.files.length === 0)
             return;
 
-          readFile(inputRom.files[0], data => {
-            const gba = () => id + '.gba';
-            const sav = () => id + '.sav';
-
-            Module.eggvanceRemoveFile(gba());
-            Module.eggvanceRemoveFile(sav());
-
-            id++;
-            createFile(gba(), data);
-            Module.eggvanceLoadRom(gba());
+          const reader = new FileReader();
+          reader.onload = function() {
+            callback(new Uint8Array(reader.result));
+          }
+          reader.readAsArrayBuffer(input.files[0]);
+          input.value = '';
+        },
+        loadRom: function() {
+          this.loadFile(inputRom, data => {
+            fileId++;
+            FS.writeFile(`rom${fileId}.gba`, data);
+            this.eggvanceLoadRom(`rom${fileId}.gba`);
           });
         },
         loadBackup: function(file) {
-          if (inputBackup.files.length === 0)
-            return;
-
-          readFile(inputBackup.files[0], data => {
-            const sav = () => id + '.sav';
-
-            Module.eggvanceRemoveFile(sav());
-
-            id++;
-            createFile(sav(), data);
-            Module.eggvanceLoadBackup(sav());
+          this.loadFile(inputBackup, data => {
+            fileId++;
+            FS.writeFile(`rom${fileId}.sav`, data);
+            this.eggvanceLoadBackup(`rom${fileId}.sav`);
           });
         }
       };

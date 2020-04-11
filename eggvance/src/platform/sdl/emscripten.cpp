@@ -145,17 +145,10 @@ void eggvanceLoadBackup(const std::string& filename)
     emulateLoop(REFRESH_RATE);
 }
 
-void eggvanceRemoveFile(const std::string& filename)
-{
-    if (std_filesystem::exists(filename))
-        std_filesystem::remove(filename);
-}
-
 EMSCRIPTEN_BINDINGS(eggvance)
 {
     function("eggvanceLoadRom", &eggvanceLoadRom);
     function("eggvanceLoadBackup", &eggvanceLoadBackup);
-    function("eggvanceRemoveFile", &eggvanceRemoveFile);
 }
 
 int main(int argc, char* argv[])
