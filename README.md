@@ -10,7 +10,7 @@ A Game Boy Advance emulator.
 eggvance rom.gba [backup.sav]
 ```
 
-Games and save files can also be dropped in the opened emulator window. Even though the included [BIOS](https://github.com/Nebuleon/ReGBA/tree/master/bios) should be enough to run most games, it is recommended to download the original one. Its location and other things can be customized in the [config](https://github.com/jsmolka/eggvance/blob/master/eggvance/eggvance.toml).
+Games and save files can also be dropped in the emulator window. Even though the included [BIOS](https://github.com/Nebuleon/ReGBA/tree/master/bios) should be enough to run most games, it is recommended to download the original one. Its location and other things can be customized in the [config](https://github.com/jsmolka/eggvance/blob/master/eggvance/eggvance.toml).
 
 ## Binaries
 Binaries are available in two forms.

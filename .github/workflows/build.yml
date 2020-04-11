@@ -104,3 +104,39 @@ jobs:
         with:
           name: eggvance-macos
           path: upload
+
+  build-emscripten:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Setup submodules
+        run: git submodule update --init
+
+      - name: Setup emscripten
+        run: |
+          git clone https://github.com/emscripten-core/emsdk.git
+          ./emsdk/emsdk install latest
+          ./emsdk/emsdk activate latest
+
+      - name: Build eggvance
+        run: |
+          source ./emsdk/emsdk_env.sh
+          mkdir eggvance/build
+          cd eggvance/build
+          emmake cmake -DCMAKE_BUILD_TYPE=Release -DPLATFORM=EMSCRIPTEN ..
+          emmake make
+
+      - name: Collect files
+        run: |
+          mkdir upload
+          mv eggvance/build/eggvance.html upload
+          mv eggvance/build/eggvance.wasm upload
+          mv eggvance/build/eggvance.js upload
+
+      - name: Upload files
+        uses: actions/upload-artifact@master
+        with:
+          name: eggvance-emscripten
+          path: upload
