@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -flto")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -flto -fno-rtti")
 
 set(PLATFORM "SDL" CACHE STRING "Platform <SDL|EMSCRIPTEN>")
 
@@ -16,7 +16,7 @@ elseif(PLATFORM STREQUAL "EMSCRIPTEN")
   project(eggvance.html)
 
   add_definitions(-DPLATFORM_EMSCRIPTEN)
-  
+
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s USE_SDL=2 -s ALLOW_MEMORY_GROWTH=1 -s FORCE_FILESYSTEM=1 -s \"EXTRA_EXPORTED_RUNTIME_METHODS=['ccall']\" --shell-file ../eggvance.html")
 else()
   message(FATAL_ERROR "Invalid platform")
