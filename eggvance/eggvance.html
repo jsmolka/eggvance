@@ -29,6 +29,10 @@
         reader.readAsArrayBuffer(file);
       }
 
+      function createFile(filename, data) {
+        Module['FS_createDataFile']('/', filename, data, true, true, true);
+      }
+
       let id = 0;
       var Module = {
         canvas: document.getElementById('canvas'),
@@ -40,12 +44,12 @@
             const gba = () => id + '.gba';
             const sav = () => id + '.sav';
 
-            Module.ccall('removeFile', null, ['string'], [gba()]);
-            Module.ccall('removeFile', null, ['string'], [sav()]);
-            id++;
+            Module.eggvanceRemoveFile(gba());
+            Module.eggvanceRemoveFile(sav());
 
-            Module["FS_createDataFile"]('/', gba(), data, true, true, true);
-            Module.ccall('loadRom', null, ['string'], [gba()]);
+            id++;
+            createFile(gba(), data);
+            Module.eggvanceLoadRom(gba());
           });
         },
         loadBackup: function(file) {
@@ -55,11 +59,11 @@
           readFile(inputBackup.files[0], data => {
             const sav = () => id + '.sav';
 
-            Module.ccall('removeFile', null, ['string'], [sav()]);
-            id++;
+            Module.eggvanceRemoveFile(sav());
 
-            Module["FS_createDataFile"]('/', sav(), data, true, true, true);
-            Module.ccall('loadBackup', null, ['string'], [sav()]);
+            id++;
+            createFile(sav(), data);
+            Module.eggvanceLoadBackup(sav());
           });
         }
       };

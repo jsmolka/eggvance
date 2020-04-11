@@ -1,7 +1,7 @@
-#define PLATFORM_EMSCRIPTEN
 #ifdef PLATFORM_EMSCRIPTEN
 
 #include <emscripten.h>
+#include <emscripten/bind.h>
 #include <fmt/format.h>
 
 #include "sdlaudiodevice.h"
@@ -12,6 +12,8 @@
 #include "mmu/mmu.h"
 #include "platform/common.h"
 #include "platform/framecounter.h"
+
+using namespace emscripten;
 
 FrameCounter counter;
 
@@ -98,7 +100,6 @@ void processEvents()
 
         case SDL_CONTROLLERDEVICEADDED:
         case SDL_CONTROLLERDEVICEREMOVED:
-            std::printf("controller");
             sdl_input_device->deviceEvent(event.cdevice);
             break;
         }
@@ -130,33 +131,32 @@ void emulate()
         sdl_video_device->title(fmt::format("eggvance - {:.1f} fps", value));
 }
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-    EMSCRIPTEN_KEEPALIVE void loadRom(const char* filename)
-    {
-        mmu.gamepak.load(filename);
-        common::reset();
-        emulateLoop(REFRESH_RATE);
-    }
-
-    EMSCRIPTEN_KEEPALIVE void loadBackup(const char* filename)
-    {
-        mmu.gamepak.loadBackup(filename);
-        common::reset();
-        emulateLoop(REFRESH_RATE);
-    }
-
-    EMSCRIPTEN_KEEPALIVE void removeFile(const char* filename)
-    {
-        if (std_filesystem::exists(filename))
-            std_filesystem::remove(filename);
-    }
-
-#ifdef __cplusplus
+void eggvanceLoadRom(const std::string& filename)
+{
+    mmu.gamepak.load(filename);
+    common::reset();
+    emulateLoop(REFRESH_RATE);
 }
-#endif
+
+void eggvanceLoadBackup(const std::string& filename)
+{
+    mmu.gamepak.loadBackup(filename);
+    common::reset();
+    emulateLoop(REFRESH_RATE);
+}
+
+void eggvanceRemoveFile(const std::string& filename)
+{
+    if (std_filesystem::exists(filename))
+        std_filesystem::remove(filename);
+}
+
+EMSCRIPTEN_BINDINGS(eggvance)
+{
+    function("eggvanceLoadRom", &eggvanceLoadRom);
+    function("eggvanceLoadBackup", &eggvanceLoadBackup);
+    function("eggvanceRemoveFile", &eggvanceRemoveFile);
+}
 
 int main(int argc, char* argv[])
 {

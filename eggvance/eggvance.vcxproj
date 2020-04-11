@@ -141,7 +141,7 @@
     <ClCompile Include="src\common\input.cpp" />
     <ClCompile Include="src\platform\audiodevice.cpp" />
     <ClCompile Include="src\platform\common.cpp" />
-    <ClCompile Include="src\platform\sdl\main_emscripten.cpp" />
+    <ClCompile Include="src\platform\sdl\emscripten.cpp" />
     <ClCompile Include="src\platform\framecounter.cpp" />
     <ClCompile Include="src\platform\inputdevice.cpp" />
     <ClCompile Include="src\platform\sdl\main_sdl.cpp" />
