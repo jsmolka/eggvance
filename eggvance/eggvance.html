@@ -8,12 +8,12 @@
     <canvas id="canvas" oncontextmenu="event.preventDefault()" style="background-color: black"></canvas>
     <div style="display: flex; margin-top: 8px">
       <div style="margin-right: 8px">
-        <button onclick="inputRom.click(); Module.loadRom()">Load rom</button>
-        <input id="rom-input" type="file" style="display: none">
+        <button onclick="inputRom.click()">Load rom</button>
+        <input id="rom-input" type="file" style="display: none" onchange="Module.loadRom()">
       </div>
       <div>
-        <button onclick="inputBackup.click(); Module.loadBackup()">Load save</button>
-        <input id="backup-input" type="file" style="display: none">
+        <button onclick="inputBackup.click()">Load save</button>
+        <input id="backup-input" type="file" style="display: none" onchange="Module.loadBackup()">
       </div>
     </div>
     <script type='text/javascript'>
