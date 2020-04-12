@@ -1,18 +1,19 @@
 #pragma once
 
 #include <chrono>
+#include <functional>
 
 class Synchronizer
 {
 public:
+    using Frame = std::function<void(void)>;
+
     Synchronizer();
 
     void setFps(double fps);
-    void beginFrame();
-    void endFrame();
+    void synchronize(const Frame& frame);
 
 private:
     std::chrono::nanoseconds delta;
-    std::chrono::nanoseconds frame;
-    std::chrono::time_point<std::chrono::high_resolution_clock> begin;
+    std::chrono::nanoseconds duration;
 };

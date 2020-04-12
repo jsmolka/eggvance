@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "audiodevice.h"
 #include "inputdevice.h"
 #include "videodevice.h"
@@ -15,4 +17,6 @@ namespace common
 
     void reset();
     void frame();
+
+    std::string title(const std::string& game, double fps);
 }

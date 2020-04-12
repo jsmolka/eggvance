@@ -1,5 +1,7 @@
 #include "common.h"
 
+#include <fmt/format.h>
+
 #include "arm/arm.h"
 #include "dma/dmac.h"
 #include "keypad/keypad.h"
@@ -68,4 +70,15 @@ void common::frame()
     ppu.io.dispstat.hblank = false;
     ppu.io.dispstat.vblank = false;
     ppu.present();
+}
+
+std::string common::title(const std::string& game, double fps)
+{
+    return fmt::format(
+        game.empty()
+            ? "eggvance - {fps:.1f}"
+            : "eggvance - {game} - {fps:.1f}",
+        fmt::arg("fps", fps),
+        fmt::arg("game", game)
+    );
 }

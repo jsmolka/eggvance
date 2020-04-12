@@ -14,24 +14,20 @@ Synchronizer::Synchronizer()
 void Synchronizer::setFps(double fps)
 {
     delta = nanoseconds(0);
-    frame = nanoseconds(nanoseconds::rep(nanoseconds::period::den / fps));
-    begin = high_resolution_clock::now();
+    duration = nanoseconds(nanoseconds::rep(nanoseconds::period::den / fps));
 }
 
-void Synchronizer::beginFrame()
+void Synchronizer::synchronize(const Frame& frame)
 {
-    begin = high_resolution_clock::now();
-}
-
-void Synchronizer::endFrame()
-{
-    delta += high_resolution_clock::now() - begin;
-
-    if (delta < frame)
+    auto beg = high_resolution_clock::now();
+    frame();
+    auto end = high_resolution_clock::now();
+    
+    delta += end - beg;
+    if (delta < duration)
     {
-        auto then = high_resolution_clock::now();
-        std::this_thread::sleep_for(frame - delta);
-        delta += high_resolution_clock::now() - then;
+        std::this_thread::sleep_for(duration - delta);
+        delta += high_resolution_clock::now() - end;
     }
-    delta -= frame;
+    delta -= duration;
 }

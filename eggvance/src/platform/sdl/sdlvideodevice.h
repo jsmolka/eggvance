@@ -21,6 +21,7 @@ public:
 
     void fullscreen();
     void renderIcon();
+    void clear(uint color);
     void title(const std::string& title);
 
     SDL_Window* window;

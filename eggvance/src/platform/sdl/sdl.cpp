@@ -1,8 +1,6 @@
-#ifdef PLATFORM_EMSCRIPTEN
+#ifdef PLATFORM_SDL
 
-#include <emscripten.h>
-#include <emscripten/bind.h>
-#include <fmt/format.h>
+#include <stdexcept>
 
 #include "sdlaudiodevice.h"
 #include "sdlinputdevice.h"
@@ -12,10 +10,10 @@
 #include "mmu/mmu.h"
 #include "platform/common.h"
 #include "platform/framecounter.h"
+#include "platform/synchronizer.h"
 
-using namespace emscripten;
-
-FrameCounter counter;
+bool running = true;
+Synchronizer synchronizer;
 
 auto sdl_audio_device = std::make_shared<SDLAudioDevice>();
 auto sdl_input_device = std::make_shared<SDLInputDevice>();
@@ -27,22 +25,10 @@ struct Shortcuts
     ShortcutConfig<SDL_GameControllerButton> controller;
 } shortcuts;
 
-void idle();
-void idleMain()
-{
-    emscripten_cancel_main_loop();
-    emscripten_set_main_loop(idle, 0, 1);
-}
-
-void emulate();
-void emulateMain(uint fps)
-{
-    emscripten_cancel_main_loop();
-    emscripten_set_main_loop(emulate, fps, 1);
-}
-
 void init(int argc, char* argv[])
 {
+    SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
+
     common::init(
         argc, argv,
         sdl_audio_device,
@@ -52,6 +38,21 @@ void init(int argc, char* argv[])
 
     shortcuts.keyboard = config.shortcuts.keyboard.convert<SDL_Scancode>(SDLInputDevice::convertKey);
     shortcuts.controller = config.shortcuts.controller.convert<SDL_GameControllerButton>(SDLInputDevice::convertButton);
+}
+
+void dropEvent(const SDL_DropEvent& event)
+{
+    Path file(event.file);
+
+    SDL_free(event.file);
+    SDL_RaiseWindow(sdl_video_device->window);
+
+    if (file.extension() == ".gba")
+        mmu.gamepak.load(file);
+    else
+        mmu.gamepak.loadBackup(file);
+
+    common::reset();
 }
 
 template<typename T>
@@ -64,22 +65,22 @@ void processInput(const ShortcutConfig<T>& shortcuts, T input)
         sdl_video_device->fullscreen();
 
     if (input == shortcuts.fps_default)
-        emulateMain(REFRESH_RATE);
+        synchronizer.setFps(REFRESH_RATE);
 
     if (input == shortcuts.fps_custom_1)
-        emulateMain(REFRESH_RATE * config.fps_multipliers[0]);
+        synchronizer.setFps(REFRESH_RATE * config.fps_multipliers[0]);
 
     if (input == shortcuts.fps_custom_2)
-        emulateMain(REFRESH_RATE * config.fps_multipliers[1]);
+        synchronizer.setFps(REFRESH_RATE * config.fps_multipliers[1]);
 
     if (input == shortcuts.fps_custom_3)
-        emulateMain(REFRESH_RATE * config.fps_multipliers[2]);
+        synchronizer.setFps(REFRESH_RATE * config.fps_multipliers[2]);
 
     if (input == shortcuts.fps_custom_4)
-        emulateMain(REFRESH_RATE * config.fps_multipliers[3]);
+        synchronizer.setFps(REFRESH_RATE * config.fps_multipliers[3]);
 
     if (input == shortcuts.fps_unlimited)
-        emulateMain(6000);
+        synchronizer.setFps(REFRESH_RATE * 1000);
 }
 
 void processEvents()
@@ -89,6 +90,10 @@ void processEvents()
     {
         switch (event.type)
         {
+        case SDL_QUIT:
+            running = false;
+            break;
+
         case SDL_KEYDOWN:
             processInput(shortcuts.keyboard, event.key.keysym.scancode);
             break;
@@ -101,54 +106,56 @@ void processEvents()
         case SDL_CONTROLLERDEVICEREMOVED:
             sdl_input_device->deviceEvent(event.cdevice);
             break;
+
+        case SDL_DROPFILE:
+            dropEvent(event.drop);
+            break;
         }
     }
 }
 
-void idle()
-{
-    processEvents();
-    sdl_video_device->clear(255);
-    sdl_video_device->renderIcon();
-    SDL_RenderPresent(sdl_video_device->renderer);
-}
-
 void emulate()
 {
-    processEvents();
-    keypad.process();
-    common::frame();
+    while (running && mmu.gamepak.size() == 0)
+    {
+        processEvents();
+        sdl_video_device->clear(56);
+        sdl_video_device->renderIcon();
+        SDL_RenderPresent(sdl_video_device->renderer);
+        SDL_Delay(16);
+    }
 
-    double value = 0;
-    if ((++counter).queryFps(value))
-        sdl_video_device->title(common::title("", value));
-}
-
-void eggvanceLoadRom(const std::string& filename)
-{
-    mmu.gamepak.load(filename);
     common::reset();
-    emulateMain(REFRESH_RATE);
-}
 
-void eggvanceLoadBackup(const std::string& filename)
-{
-    mmu.gamepak.loadBackup(filename);
-    common::reset();
-    emulateMain(REFRESH_RATE);
-}
+    FrameCounter counter;
 
-EMSCRIPTEN_BINDINGS(eggvance)
-{
-    function("eggvanceLoadRom", &eggvanceLoadRom);
-    function("eggvanceLoadBackup", &eggvanceLoadBackup);
+    while (running)
+    {
+        synchronizer.synchronize([](){
+            processEvents();
+            keypad.process();
+            common::frame();
+        });
+
+        double value = 0;
+        if ((++counter).queryFps(value))
+            sdl_video_device->title(common::title(mmu.gamepak.header.title, value));
+    }
 }
 
 int main(int argc, char* argv[])
 {
-    init(argc, argv);
-    idleMain();
-    return 0;
+    try
+    {
+        init(argc, argv);
+        emulate();
+        return 0;
+    }
+    catch (const std::exception& ex)
+    {
+        SDL_ShowSimpleMessageBox(0, "Error", ex.what(), nullptr);
+        return 1;
+    }
 }
 
 #endif

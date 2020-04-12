@@ -54,14 +54,34 @@ void SDLVideoDevice::fullscreen()
 
 void SDLVideoDevice::renderIcon()
 {
-    SDL_SetRenderDrawColor(renderer, 56, 56, 56, 1);
-    SDL_RenderClear(renderer);
+    int w;
+    int h;
+    SDL_RenderGetLogicalSize(renderer, &w, &h);
+    SDL_RenderSetLogicalSize(renderer, 18, 18);
 
     for (const auto& pixel : egg::icon::pixels)
     {
-        SDL_SetRenderDrawColor(renderer, pixel.r(), pixel.g(), pixel.b(), 1);
-        SDL_RenderDrawPoint(renderer, pixel.x() + 1, pixel.y() + 1);
+        SDL_SetRenderDrawColor(
+            renderer,
+            pixel.r(),
+            pixel.g(),
+            pixel.b(),
+            SDL_ALPHA_OPAQUE
+        );
+        SDL_RenderDrawPoint(
+            renderer,
+            pixel.x() + 1,
+            pixel.y() + 1
+        );
     }
+
+    SDL_RenderSetLogicalSize(renderer, w, h);
+}
+
+void SDLVideoDevice::clear(uint color)
+{
+    SDL_SetRenderDrawColor(renderer, color, color, color, SDL_ALPHA_OPAQUE);
+    SDL_RenderClear(renderer);
 }
 
 void SDLVideoDevice::title(const std::string& title)

@@ -78,15 +78,6 @@
     <ClCompile Include="src\mmu\gamepak\sram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\platform\sdl\sdlaudiodevice.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\platform\sdl\sdlinputdevice.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\platform\sdl\sdlvideodevice.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\common\input.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -138,16 +129,25 @@
     <ClCompile Include="src\platform\common.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\platform\synchronizer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\platform\framecounter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\platform\sdl\main_sdl.cpp">
+    <ClCompile Include="src\platform\sdl\emscripten.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\platform\sdl\emscripten.cpp">
+    <ClCompile Include="src\platform\sdl\sdl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\platform\sdl\sdlvideodevice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\platform\sdl\sdlinputdevice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\platform\sdl\sdlaudiodevice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\platform\synchronizer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -246,15 +246,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ppu\layer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\platform\sdl\sdlaudiodevice.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\platform\sdl\sdlvideodevice.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\platform\sdl\sdlinputdevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\common\input.h">
@@ -407,10 +398,19 @@
     <ClInclude Include="src\platform\common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\platform\synchronizer.h">
+    <ClInclude Include="src\platform\framecounter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\platform\framecounter.h">
+    <ClInclude Include="src\platform\sdl\sdlvideodevice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\platform\sdl\sdlinputdevice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\platform\sdl\sdlaudiodevice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\platform\synchronizer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
