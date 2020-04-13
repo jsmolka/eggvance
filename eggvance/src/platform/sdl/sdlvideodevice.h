@@ -1,14 +1,13 @@
 #pragma once
 
-#include <string>
+#include "common/defines.h"
+#include "platform/videodevice.h"
 
-#if defined(_MSC_VER) || defined(__EMSCRIPTEN__)
+#if COMPILER_MSVC || COMPILER_EMSCRIPTEN
 #include <SDL2/SDL.h>
 #else
 #include "SDL.h"
 #endif
-
-#include "platform/videodevice.h"
 
 class SDLVideoDevice : public VideoDevice
 {
@@ -18,11 +17,11 @@ public:
     void init() override;
     void deinit() override;
     void present() override;
+    void fullscreen() override;
+    void setWindowTitle(const std::string& title) override;
 
-    void fullscreen();
     void renderIcon();
     void clear(uint color);
-    void title(const std::string& title);
 
     SDL_Window* window;
     SDL_Renderer* renderer;

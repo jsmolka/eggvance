@@ -1,3 +1,3 @@
 #include "inputdevice.h"
 
-std::shared_ptr<InputDevice> input_device = nullptr;
+std::shared_ptr<InputDevice> input_device;

@@ -1,3 +1,3 @@
 #include "audiodevice.h"
 
-std::shared_ptr<AudioDevice> audio_device = nullptr;
+std::shared_ptr<AudioDevice> audio_device;

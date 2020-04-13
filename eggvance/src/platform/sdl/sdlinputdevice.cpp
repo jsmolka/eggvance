@@ -38,8 +38,8 @@ uint SDLInputDevice::state()
 {
     uint state = keyboardState() | controllerState();
 
-    constexpr uint ud_mask = (1 << SHIFT_UP  ) | (1 << SHIFT_DOWN );
-    constexpr uint lr_mask = (1 << SHIFT_LEFT) | (1 << SHIFT_RIGHT);
+    constexpr uint ud_mask = (1 << kBitUp  ) | (1 << kBitDown );
+    constexpr uint lr_mask = (1 << kBitLeft) | (1 << kBitRight);
 
     if ((state & ud_mask) == ud_mask) state &= ~ud_mask;
     if ((state & lr_mask) == lr_mask) state &= ~lr_mask;
@@ -47,7 +47,7 @@ uint SDLInputDevice::state()
     return ~state;
 }
 
-void SDLInputDevice::deviceEvent(const SDL_ControllerDeviceEvent& event)
+void SDLInputDevice::processDeviceEvent(const SDL_ControllerDeviceEvent& event)
 {
     if (event.type == SDL_CONTROLLERDEVICEADDED)
         controller = SDL_GameControllerOpen(event.which);
@@ -60,16 +60,16 @@ uint SDLInputDevice::keyboardState() const
     auto keyboard = SDL_GetKeyboardState(nullptr);
 
     uint state = 0;
-    state |= keyboard[controls.keyboard.a     ] << SHIFT_A;
-    state |= keyboard[controls.keyboard.b     ] << SHIFT_B;
-    state |= keyboard[controls.keyboard.up    ] << SHIFT_UP;
-    state |= keyboard[controls.keyboard.down  ] << SHIFT_DOWN;
-    state |= keyboard[controls.keyboard.left  ] << SHIFT_LEFT;
-    state |= keyboard[controls.keyboard.right ] << SHIFT_RIGHT;
-    state |= keyboard[controls.keyboard.start ] << SHIFT_START;
-    state |= keyboard[controls.keyboard.select] << SHIFT_SELECT;
-    state |= keyboard[controls.keyboard.l     ] << SHIFT_L;
-    state |= keyboard[controls.keyboard.r     ] << SHIFT_R;
+    state |= keyboard[controls.keyboard.a     ] << kBitA;
+    state |= keyboard[controls.keyboard.b     ] << kBitB;
+    state |= keyboard[controls.keyboard.up    ] << kBitUp;
+    state |= keyboard[controls.keyboard.down  ] << kBitDown;
+    state |= keyboard[controls.keyboard.left  ] << kBitLeft;
+    state |= keyboard[controls.keyboard.right ] << kBitRight;
+    state |= keyboard[controls.keyboard.start ] << kBitStart;
+    state |= keyboard[controls.keyboard.select] << kBitSelect;
+    state |= keyboard[controls.keyboard.l     ] << kBitL;
+    state |= keyboard[controls.keyboard.r     ] << kBitR;
 
     return state;
 }
@@ -77,31 +77,30 @@ uint SDLInputDevice::keyboardState() const
 uint SDLInputDevice::controllerState() const
 {
     uint state = 0;
-
     if (controller)
     {
-        state |= SDL_GameControllerGetButton(controller, controls.controller.a     ) << SHIFT_A;
-        state |= SDL_GameControllerGetButton(controller, controls.controller.b     ) << SHIFT_B;
-        state |= SDL_GameControllerGetButton(controller, controls.controller.up    ) << SHIFT_UP;
-        state |= SDL_GameControllerGetButton(controller, controls.controller.down  ) << SHIFT_DOWN;
-        state |= SDL_GameControllerGetButton(controller, controls.controller.left  ) << SHIFT_LEFT;
-        state |= SDL_GameControllerGetButton(controller, controls.controller.right ) << SHIFT_RIGHT;
-        state |= SDL_GameControllerGetButton(controller, controls.controller.start ) << SHIFT_START;
-        state |= SDL_GameControllerGetButton(controller, controls.controller.select) << SHIFT_SELECT;
-        state |= SDL_GameControllerGetButton(controller, controls.controller.l     ) << SHIFT_L;
-        state |= SDL_GameControllerGetButton(controller, controls.controller.r     ) << SHIFT_R;
+        state |= SDL_GameControllerGetButton(controller, controls.controller.a     ) << kBitA;
+        state |= SDL_GameControllerGetButton(controller, controls.controller.b     ) << kBitB;
+        state |= SDL_GameControllerGetButton(controller, controls.controller.up    ) << kBitUp;
+        state |= SDL_GameControllerGetButton(controller, controls.controller.down  ) << kBitDown;
+        state |= SDL_GameControllerGetButton(controller, controls.controller.left  ) << kBitLeft;
+        state |= SDL_GameControllerGetButton(controller, controls.controller.right ) << kBitRight;
+        state |= SDL_GameControllerGetButton(controller, controls.controller.start ) << kBitStart;
+        state |= SDL_GameControllerGetButton(controller, controls.controller.select) << kBitSelect;
+        state |= SDL_GameControllerGetButton(controller, controls.controller.l     ) << kBitL;
+        state |= SDL_GameControllerGetButton(controller, controls.controller.r     ) << kBitR;
 
         int axis_lx = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTX);
         int axis_ly = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTY);
         int axis_tl = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_TRIGGERLEFT);
         int axis_tr = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_TRIGGERRIGHT);
 
-        state |= (axis_lx < 0 && std::abs(axis_lx) > config.deadzone) << SHIFT_LEFT;
-        state |= (axis_lx > 0 && std::abs(axis_lx) > config.deadzone) << SHIFT_RIGHT;
-        state |= (axis_ly < 0 && std::abs(axis_ly) > config.deadzone) << SHIFT_UP;
-        state |= (axis_ly > 0 && std::abs(axis_ly) > config.deadzone) << SHIFT_DOWN;
-        state |= (axis_tl > config.deadzone) << SHIFT_L;
-        state |= (axis_tr > config.deadzone) << SHIFT_R;
+        state |= (axis_lx < 0 && std::abs(axis_lx) > config.deadzone) << kBitLeft;
+        state |= (axis_lx > 0 && std::abs(axis_lx) > config.deadzone) << kBitRight;
+        state |= (axis_ly < 0 && std::abs(axis_ly) > config.deadzone) << kBitUp;
+        state |= (axis_ly > 0 && std::abs(axis_ly) > config.deadzone) << kBitDown;
+        state |= (axis_tl > config.deadzone) << kBitL;
+        state |= (axis_tr > config.deadzone) << kBitR;
     }
     return state;
 }

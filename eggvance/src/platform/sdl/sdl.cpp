@@ -13,6 +13,7 @@
 #include "platform/synchronizer.h"
 
 bool running = true;
+FrameCounter counter;
 Synchronizer synchronizer;
 
 auto sdl_audio_device = std::make_shared<SDLAudioDevice>();
@@ -40,7 +41,7 @@ void init(int argc, char* argv[])
     shortcuts.controller = config.shortcuts.controller.convert<SDL_GameControllerButton>(SDLInputDevice::convertButton);
 }
 
-void dropEvent(const SDL_DropEvent& event)
+void processDropEvent(const SDL_DropEvent& event)
 {
     Path file(event.file);
 
@@ -48,15 +49,21 @@ void dropEvent(const SDL_DropEvent& event)
     SDL_RaiseWindow(sdl_video_device->window);
 
     if (file.extension() == ".gba")
+    {
         mmu.gamepak.load(file);
+        common::reset();
+        common::updateWindowTitle();
+        counter = FrameCounter();
+    }
     else
+    {
         mmu.gamepak.loadBackup(file);
-
-    common::reset();
+        common::reset();
+    }
 }
 
 template<typename T>
-void processInput(const ShortcutConfig<T>& shortcuts, T input)
+void processInputEvent(const ShortcutConfig<T>& shortcuts, T input)
 {
     if (input == shortcuts.reset)
         common::reset();
@@ -95,20 +102,20 @@ void processEvents()
             break;
 
         case SDL_KEYDOWN:
-            processInput(shortcuts.keyboard, event.key.keysym.scancode);
+            processInputEvent(shortcuts.keyboard, event.key.keysym.scancode);
             break;
 
         case SDL_CONTROLLERBUTTONDOWN:
-            processInput(shortcuts.controller, SDL_GameControllerButton(event.cbutton.button));
+            processInputEvent(shortcuts.controller, SDL_GameControllerButton(event.cbutton.button));
             break;
 
         case SDL_CONTROLLERDEVICEADDED:
         case SDL_CONTROLLERDEVICEREMOVED:
-            sdl_input_device->deviceEvent(event.cdevice);
+            sdl_input_device->processDeviceEvent(event.cdevice);
             break;
 
         case SDL_DROPFILE:
-            dropEvent(event.drop);
+            processDropEvent(event.drop);
             break;
         }
     }
@@ -119,27 +126,29 @@ void emulate()
     while (running && mmu.gamepak.size() == 0)
     {
         processEvents();
-        sdl_video_device->clear(56);
+        sdl_video_device->clear(0x383838);
         sdl_video_device->renderIcon();
         SDL_RenderPresent(sdl_video_device->renderer);
         SDL_Delay(16);
     }
 
     common::reset();
+    common::updateWindowTitle();
 
-    FrameCounter counter;
+    counter = FrameCounter();
 
     while (running)
     {
-        synchronizer.synchronize([](){
+        synchronizer.synchronize([]()
+        {
             processEvents();
             keypad.process();
             common::frame();
         });
 
-        double value = 0;
-        if ((++counter).queryFps(value))
-            sdl_video_device->title(common::title(mmu.gamepak.header.title, value));
+        double fps = 0;
+        if ((++counter).queryFps(fps))
+            common::updateWindowTitle(fps);
     }
 }
 
@@ -151,9 +160,9 @@ int main(int argc, char* argv[])
         emulate();
         return 0;
     }
-    catch (const std::exception& ex)
+    catch (const std::runtime_error& error)
     {
-        SDL_ShowSimpleMessageBox(0, "Error", ex.what(), nullptr);
+        SDL_ShowSimpleMessageBox(0, "Error", error.what(), nullptr);
         return 1;
     }
 }

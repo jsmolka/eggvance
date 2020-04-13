@@ -1,15 +1,19 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
-#include "device.h"
 #include "common/constants.h"
 #include "common/integer.h"
 
-class VideoDevice : public Device
+class VideoDevice
 {
 public:
+    virtual void init() = 0;
+    virtual void deinit() = 0;
     virtual void present() = 0;
+    virtual void fullscreen() = 0;
+    virtual void setWindowTitle(const std::string& title) = 0;
 
     u32 buffer[SCREEN_H * SCREEN_W];
 };

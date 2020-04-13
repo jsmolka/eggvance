@@ -72,13 +72,26 @@ void common::frame()
     ppu.present();
 }
 
-std::string common::title(const std::string& game, double fps)
+void common::updateWindowTitle()
 {
-    return fmt::format(
-        game.empty()
-            ? "eggvance - {fps:.1f}"
-            : "eggvance - {game} - {fps:.1f}",
-        fmt::arg("fps", fps),
-        fmt::arg("game", game)
+    const auto title = fmt::format(
+        mmu.gamepak.header.title.empty()
+            ? "eggvance"
+            : "eggvance - {0}",
+        mmu.gamepak.header.title
     );
+
+    video_device->setWindowTitle(title);
+}
+
+void common::updateWindowTitle(double fps)
+{
+    const auto title = fmt::format(
+        mmu.gamepak.header.title.empty()
+            ? "eggvance - {1:.1f} fps"
+            : "eggvance - {0} - {1:.1f} fps",
+        mmu.gamepak.header.title, fps
+    );
+
+    video_device->setWindowTitle(title);
 }

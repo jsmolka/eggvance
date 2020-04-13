@@ -185,6 +185,7 @@
     <ClInclude Include="src\arm\psr.h" />
     <ClInclude Include="src\arm\registers.h" />
     <ClInclude Include="src\common\bits.h" />
+    <ClInclude Include="src\common\defines.h" />
     <ClInclude Include="src\common\enums.h" />
     <ClInclude Include="src\common\config.h" />
     <ClInclude Include="src\common\constants.h" />
@@ -198,7 +199,6 @@
     <ClInclude Include="src\mmu\unusedio.h" />
     <ClInclude Include="src\platform\audiodevice.h" />
     <ClInclude Include="src\platform\common.h" />
-    <ClInclude Include="src\platform\device.h" />
     <ClInclude Include="src\platform\framecounter.h" />
     <ClInclude Include="src\platform\inputdevice.h" />
     <ClInclude Include="src\platform\synchronizer.h" />

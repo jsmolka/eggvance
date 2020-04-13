@@ -1,12 +1,13 @@
 #pragma once
 
-#if defined(_MSC_VER) || defined(__EMSCRIPTEN__)
+#include "common/defines.h"
+#include "platform/audiodevice.h"
+
+#if COMPILER_MSVC || COMPILER_EMSCRIPTEN
 #include <SDL2/SDL.h>
 #else
 #include "SDL.h"
 #endif
-
-#include "platform/audiodevice.h"
 
 class SDLAudioDevice : public AudioDevice
 {

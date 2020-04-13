@@ -2,27 +2,28 @@
 
 #include <memory>
 
-#include "device.h"
 #include "common/integer.h"
 
-class InputDevice : public Device
+class InputDevice
 {
 public:
+    virtual void init() = 0;
+    virtual void deinit() = 0;
     virtual uint state() = 0;
 
 protected:
-    enum Shift
+    enum ButtonBit
     {
-        SHIFT_A      = 0,
-        SHIFT_B      = 1,
-        SHIFT_SELECT = 2,
-        SHIFT_START  = 3,
-        SHIFT_RIGHT  = 4,
-        SHIFT_LEFT   = 5,
-        SHIFT_UP     = 6,
-        SHIFT_DOWN   = 7,
-        SHIFT_R      = 8,
-        SHIFT_L      = 9
+        kBitA      = 0,
+        kBitB      = 1,
+        kBitSelect = 2,
+        kBitStart  = 3,
+        kBitRight  = 4,
+        kBitLeft   = 5,
+        kBitUp     = 6,
+        kBitDown   = 7,
+        kBitR      = 8,
+        kBitL      = 9
     };
 };
 

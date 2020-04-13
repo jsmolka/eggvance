@@ -18,5 +18,6 @@ namespace common
     void reset();
     void frame();
 
-    std::string title(const std::string& game, double fps);
+    void updateWindowTitle();
+    void updateWindowTitle(double fps);
 }

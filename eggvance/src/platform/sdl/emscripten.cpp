@@ -2,7 +2,6 @@
 
 #include <emscripten.h>
 #include <emscripten/bind.h>
-#include <fmt/format.h>
 
 #include "sdlaudiodevice.h"
 #include "sdlinputdevice.h"
@@ -55,7 +54,7 @@ void init(int argc, char* argv[])
 }
 
 template<typename T>
-void processInput(const ShortcutConfig<T>& shortcuts, T input)
+void processInputEvent(const ShortcutConfig<T>& shortcuts, T input)
 {
     if (input == shortcuts.reset)
         common::reset();
@@ -90,16 +89,16 @@ void processEvents()
         switch (event.type)
         {
         case SDL_KEYDOWN:
-            processInput(shortcuts.keyboard, event.key.keysym.scancode);
+            processInputEvent(shortcuts.keyboard, event.key.keysym.scancode);
             break;
 
         case SDL_CONTROLLERBUTTONDOWN:
-            processInput(shortcuts.controller, SDL_GameControllerButton(event.cbutton.button));
+            processInputEvent(shortcuts.controller, SDL_GameControllerButton(event.cbutton.button));
             break;
 
         case SDL_CONTROLLERDEVICEADDED:
         case SDL_CONTROLLERDEVICEREMOVED:
-            sdl_input_device->deviceEvent(event.cdevice);
+            sdl_input_device->processDeviceEvent(event.cdevice);
             break;
         }
     }
@@ -108,7 +107,7 @@ void processEvents()
 void idle()
 {
     processEvents();
-    sdl_video_device->clear(255);
+    sdl_video_device->clear(0xFFFFFF);
     sdl_video_device->renderIcon();
     SDL_RenderPresent(sdl_video_device->renderer);
 }
@@ -119,15 +118,17 @@ void emulate()
     keypad.process();
     common::frame();
 
-    double value = 0;
-    if ((++counter).queryFps(value))
-        sdl_video_device->title(common::title("", value));
+    double fps = 0;
+    if ((++counter).queryFps(fps))
+        common::updateWindowTitle(fps);
 }
 
 void eggvanceLoadRom(const std::string& filename)
 {
     mmu.gamepak.load(filename);
     common::reset();
+    common::updateWindowTitle();
+    counter = FrameCounter();
     emulateMain(REFRESH_RATE);
 }
 

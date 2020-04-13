@@ -260,9 +260,6 @@
     <ClInclude Include="src\platform\audiodevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\platform\device.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\platform\inputdevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -411,6 +408,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\platform\synchronizer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common\defines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

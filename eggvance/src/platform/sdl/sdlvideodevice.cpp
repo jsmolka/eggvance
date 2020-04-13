@@ -31,25 +31,26 @@ void SDLVideoDevice::deinit()
         SDL_DestroyTexture(texture);
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
-
         SDL_QuitSubSystem(SDL_INIT_VIDEO);
     }
 }
 
 void SDLVideoDevice::present()
 {
-    SDL_UpdateTexture(
-        texture, nullptr,
-        buffer, sizeof(u32) * SCREEN_W
-    );
+    SDL_UpdateTexture(texture, nullptr, buffer, sizeof(u32) * SCREEN_W);
     SDL_RenderCopy(renderer, texture, nullptr, nullptr);
     SDL_RenderPresent(renderer);
 }
 
 void SDLVideoDevice::fullscreen()
 {
-    SDL_SetWindowFullscreen(window, SDL_GetWindowFlags(window) ^ SDL_WINDOW_FULLSCREEN_DESKTOP);
     SDL_ShowCursor(SDL_ShowCursor(SDL_QUERY) ^ 0x1);
+    SDL_SetWindowFullscreen(window, SDL_GetWindowFlags(window) ^ SDL_WINDOW_FULLSCREEN_DESKTOP);
+}
+
+void SDLVideoDevice::setWindowTitle(const std::string& title)
+{
+    SDL_SetWindowTitle(window, title.c_str());
 }
 
 void SDLVideoDevice::renderIcon()
@@ -80,13 +81,14 @@ void SDLVideoDevice::renderIcon()
 
 void SDLVideoDevice::clear(uint color)
 {
-    SDL_SetRenderDrawColor(renderer, color, color, color, SDL_ALPHA_OPAQUE);
+    SDL_SetRenderDrawColor(
+        renderer,
+        (color >> 16) & 0xFF,
+        (color >>  8) & 0xFF,
+        (color >>  0) & 0xFF,
+        SDL_ALPHA_OPAQUE
+    );
     SDL_RenderClear(renderer);
-}
-
-void SDLVideoDevice::title(const std::string& title)
-{
-    SDL_SetWindowTitle(window, title.c_str());
 }
 
 bool SDLVideoDevice::createWindow()
