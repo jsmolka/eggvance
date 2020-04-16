@@ -53,7 +53,7 @@ struct BGLayer : public Layer
 
     constexpr bool opaque(int x) const
     {
-        return data[x] != TRANSPARENT;
+        return data[x] != kTransparent;
     }
 
     constexpr u16 color(int x) const
@@ -69,7 +69,7 @@ struct ObjectLayer : public Layer
 {
     constexpr ObjectLayer()
         : Layer(4)
-        , color(TRANSPARENT)
+        , color(kTransparent)
         , window(false)
         , alpha(false)
     {
@@ -78,7 +78,7 @@ struct ObjectLayer : public Layer
 
     constexpr bool opaque() const
     {
-        return color != TRANSPARENT;
+        return color != kTransparent;
     }
 
     u16  color;

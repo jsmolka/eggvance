@@ -115,7 +115,7 @@ bool OAMEntry::isVisible(int vcount) const
 
 bool OAMEntry::isVisibleX() const
 {
-    return (origin.x + bounds.w) >= 0 && origin.x < SCREEN_W;
+    return (origin.x + bounds.w) >= 0 && origin.x < kScreenW;
 }
 
 bool OAMEntry::isVisibleY(int vcount) const
@@ -125,8 +125,8 @@ bool OAMEntry::isVisibleY(int vcount) const
 
 void OAMEntry::update()
 {
-    if (origin.x >= SCREEN_W) origin.x -= 512;
-    if (origin.y >= SCREEN_H) origin.y -= 256;
+    if (origin.x >= kScreenW) origin.x -= 512;
+    if (origin.y >= kScreenH) origin.y -= 256;
 
     dims = sizes[shape][size];
     bounds = dims << double_size;

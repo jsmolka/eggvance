@@ -37,7 +37,7 @@ void SDLVideoDevice::deinit()
 
 void SDLVideoDevice::present()
 {
-    SDL_UpdateTexture(texture, nullptr, buffer, sizeof(u32) * SCREEN_W);
+    SDL_UpdateTexture(texture, nullptr, buffer, sizeof(u32) * kScreenW);
     SDL_RenderCopy(renderer, texture, nullptr, nullptr);
     SDL_RenderPresent(renderer);
 }
@@ -97,7 +97,7 @@ bool SDLVideoDevice::createWindow()
         "eggvance",
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
-        2 * SCREEN_W, 2 * SCREEN_H,
+        2 * kScreenW, 2 * kScreenH,
         SDL_WINDOW_RESIZABLE
     );
 }
@@ -107,7 +107,7 @@ bool SDLVideoDevice::createRenderer()
     renderer = SDL_CreateRenderer(
         window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE
     );
-    SDL_RenderSetLogicalSize(renderer, SCREEN_W, SCREEN_H);
+    SDL_RenderSetLogicalSize(renderer, kScreenW, kScreenH);
 
     return renderer;
 }
@@ -118,6 +118,6 @@ bool SDLVideoDevice::createTexture()
         renderer,
         SDL_PIXELFORMAT_ARGB8888,
         SDL_TEXTUREACCESS_STREAMING,
-        SCREEN_W, SCREEN_H
+        kScreenW, kScreenH
     );
 }

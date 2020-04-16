@@ -5,7 +5,7 @@
 #include "common/constants.h"
 
 template<typename T>
-using Buffer = std::array<T, SCREEN_W>;
+using Buffer = std::array<T, kScreenW>;
 
 template<typename T>
 class DoubleBuffer

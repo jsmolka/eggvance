@@ -63,19 +63,19 @@ void processInputEvent(const ShortcutConfig<T>& shortcuts, T input)
         sdl_video_device->fullscreen();
 
     if (input == shortcuts.fps_default)
-        emulateMain(REFRESH_RATE);
+        emulateMain(kRefreshRate);
 
     if (input == shortcuts.fps_custom_1)
-        emulateMain(REFRESH_RATE * config.fps_multipliers[0]);
+        emulateMain(kRefreshRate * config.fps_multipliers[0]);
 
     if (input == shortcuts.fps_custom_2)
-        emulateMain(REFRESH_RATE * config.fps_multipliers[1]);
+        emulateMain(kRefreshRate * config.fps_multipliers[1]);
 
     if (input == shortcuts.fps_custom_3)
-        emulateMain(REFRESH_RATE * config.fps_multipliers[2]);
+        emulateMain(kRefreshRate * config.fps_multipliers[2]);
 
     if (input == shortcuts.fps_custom_4)
-        emulateMain(REFRESH_RATE * config.fps_multipliers[3]);
+        emulateMain(kRefreshRate * config.fps_multipliers[3]);
 
     if (input == shortcuts.fps_unlimited)
         emulateMain(6000);
@@ -129,14 +129,14 @@ void eggvanceLoadRom(const std::string& filename)
     common::reset();
     common::updateWindowTitle();
     counter = FrameCounter();
-    emulateMain(REFRESH_RATE);
+    emulateMain(kRefreshRate);
 }
 
 void eggvanceLoadBackup(const std::string& filename)
 {
     mmu.gamepak.loadBackup(filename);
     common::reset();
-    emulateMain(REFRESH_RATE);
+    emulateMain(kRefreshRate);
 }
 
 EMSCRIPTEN_BINDINGS(eggvance)

@@ -18,9 +18,9 @@ void PPU::reset()
 
     for (auto& background : backgrounds)
     {
-        background.fill(TRANSPARENT);
+        background.fill(kTransparent);
         background.flip();
-        background.fill(TRANSPARENT);
+        background.fill(kTransparent);
     }
     objects.fill({});
     objects_exist = false;
@@ -34,8 +34,8 @@ void PPU::scanline()
 
     if (io.dispcnt.blank)
     {
-        u32* scanline = &video_device->buffer[SCREEN_W * io.vcount];
-        std::fill_n(scanline, SCREEN_W, 0xFFFFFFFF);
+        u32* scanline = &video_device->buffer[kScreenW * io.vcount];
+        std::fill_n(scanline, kScreenW, 0xFFFFFFFF);
         return;
     }
 
@@ -158,7 +158,7 @@ void PPU::mosaic(int bg)
         return;
 
     u16 color;
-    for (int x = 0; x < SCREEN_W; ++x)
+    for (int x = 0; x < kScreenW; ++x)
     {
         if (x % mosaic_x == 0)
         {

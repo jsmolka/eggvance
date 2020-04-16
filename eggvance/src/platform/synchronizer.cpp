@@ -8,7 +8,7 @@ using namespace std::chrono;
 
 Synchronizer::Synchronizer()
 {
-    setFps(REFRESH_RATE);
+    setFps(kRefreshRate);
 }
 
 void Synchronizer::setFps(double fps)

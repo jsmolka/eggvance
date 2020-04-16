@@ -55,13 +55,13 @@ void PPU::renderBgMode0(int bg)
     auto block = origin / 256;
     auto tile  = origin / 8 % 32;
 
-    for (int x = 0; x < SCREEN_W; block.x ^= (dims.w / 256) == 2)
+    for (int x = 0; x < kScreenW; block.x ^= (dims.w / 256) == 2)
     {
         int offset = 0x800 * block.offset(dims.w / 256) + 2 * tile.offset(0x20);
 
         u16* map = mmu.vram.data<u16>(bgcnt.map_block + offset);
 
-        for (; tile.x < 32 && x < SCREEN_W; ++tile.x, ++map)
+        for (; tile.x < 32 && x < kScreenW; ++tile.x, ++map)
         {
             MapEntry entry(*map);
 
@@ -73,7 +73,7 @@ void PPU::renderBgMode0(int bg)
             u32 addr = bgcnt.tile_block + (0x20 << bgcnt.color_mode) * entry.tile;
             if (addr < 0x1'0000)
             {
-                for (; pixel.x < 8 && x < SCREEN_W; ++pixel.x, ++x)
+                for (; pixel.x < 8 && x < kScreenW; ++pixel.x, ++x)
                 {
                     int index = mmu.vram.index(
                         addr,
@@ -85,9 +85,9 @@ void PPU::renderBgMode0(int bg)
             }
             else
             {
-                for (; pixel.x < 8 && x < SCREEN_W; ++pixel.x, ++x)
+                for (; pixel.x < 8 && x < kScreenW; ++pixel.x, ++x)
                 {
-                    backgrounds[bg][x] = TRANSPARENT;
+                    backgrounds[bg][x] = kTransparent;
                 }
             }
             pixel.x = 0;
@@ -101,7 +101,7 @@ void PPU::renderBgMode2(int bg)
     const auto& bgcnt = io.bgcnt[bg];
     const auto& dims  = io.bgcnt[bg].dimsAff();
 
-    for (int x = 0; x < SCREEN_W; ++x)
+    for (int x = 0; x < kScreenW; ++x)
     {
         auto texture = transform(x, bg) >> 8;
 
@@ -117,7 +117,7 @@ void PPU::renderBgMode2(int bg)
             }
             else
             {
-                backgrounds[bg][x] = TRANSPARENT;
+                backgrounds[bg][x] = kTransparent;
                 continue;
             }
         }
@@ -135,35 +135,35 @@ void PPU::renderBgMode2(int bg)
 
 void PPU::renderBgMode3(int bg)
 {
-    static constexpr Dimensions dims(SCREEN_W, SCREEN_H);
+    static constexpr Dimensions dims(kScreenW, kScreenH);
 
-    for (int x = 0; x < SCREEN_W; ++x)
+    for (int x = 0; x < kScreenW; ++x)
     {
         const auto texture = transform(x, bg) >> 8;
 
         if (!dims.contains(texture))
         {
-            backgrounds[bg][x] = TRANSPARENT;
+            backgrounds[bg][x] = kTransparent;
             continue;
         }
 
         int offset = sizeof(u16) * texture.offset(dims.w);
 
-        backgrounds[bg][x] = mmu.vram.readFast<u16>(offset) & COLOR_MASK;
+        backgrounds[bg][x] = mmu.vram.readFast<u16>(offset) & kColorMask;
     }
 }
 
 void PPU::renderBgMode4(int bg)
 {
-    static constexpr Dimensions dims(SCREEN_W, SCREEN_H);
+    static constexpr Dimensions dims(kScreenW, kScreenH);
 
-    for (int x = 0; x < SCREEN_W; ++x)
+    for (int x = 0; x < kScreenW; ++x)
     {
         const auto texture = transform(x, bg) >> 8;
 
         if (!dims.contains(texture))
         {
-            backgrounds[bg][x] = TRANSPARENT;
+            backgrounds[bg][x] = kTransparent;
             continue;
         }
 
@@ -178,19 +178,19 @@ void PPU::renderBgMode5(int bg)
 {
     static constexpr Dimensions dims(160, 128);
 
-    for (int x = 0; x < SCREEN_W; ++x)
+    for (int x = 0; x < kScreenW; ++x)
     {
         const auto texture = transform(x, bg) >> 8;
 
         if (!dims.contains(texture))
         {
-            backgrounds[bg][x] = TRANSPARENT;
+            backgrounds[bg][x] = kTransparent;
             continue;
         }
 
         int offset = sizeof(u16) * texture.offset(dims.w);
 
-        backgrounds[bg][x] = mmu.vram.readFast<u16>(io.dispcnt.frame + offset) & COLOR_MASK;
+        backgrounds[bg][x] = mmu.vram.readFast<u16>(io.dispcnt.frame + offset) & kColorMask;
     }
 }
 
@@ -218,7 +218,7 @@ void PPU::renderObjects()
             -center.y + io.vcount
         );
 
-        int end = std::min(origin.x + bounds.w, SCREEN_W);
+        int end = std::min(origin.x + bounds.w, kScreenW);
 
         for (int x = center.x + offset.x; x < end; ++x, ++offset.x)
         {

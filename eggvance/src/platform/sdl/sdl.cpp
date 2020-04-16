@@ -72,22 +72,22 @@ void processInputEvent(const ShortcutConfig<T>& shortcuts, T input)
         sdl_video_device->fullscreen();
 
     if (input == shortcuts.fps_default)
-        synchronizer.setFps(REFRESH_RATE);
+        synchronizer.setFps(kRefreshRate);
 
     if (input == shortcuts.fps_custom_1)
-        synchronizer.setFps(REFRESH_RATE * config.fps_multipliers[0]);
+        synchronizer.setFps(kRefreshRate * config.fps_multipliers[0]);
 
     if (input == shortcuts.fps_custom_2)
-        synchronizer.setFps(REFRESH_RATE * config.fps_multipliers[1]);
+        synchronizer.setFps(kRefreshRate * config.fps_multipliers[1]);
 
     if (input == shortcuts.fps_custom_3)
-        synchronizer.setFps(REFRESH_RATE * config.fps_multipliers[2]);
+        synchronizer.setFps(kRefreshRate * config.fps_multipliers[2]);
 
     if (input == shortcuts.fps_custom_4)
-        synchronizer.setFps(REFRESH_RATE * config.fps_multipliers[3]);
+        synchronizer.setFps(kRefreshRate * config.fps_multipliers[3]);
 
     if (input == shortcuts.fps_unlimited)
-        synchronizer.setFps(REFRESH_RATE * 1000);
+        synchronizer.setFps(kRefreshRate * 1000);
 }
 
 void processEvents()

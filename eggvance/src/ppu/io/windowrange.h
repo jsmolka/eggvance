@@ -30,5 +30,5 @@ public:
     uint max = 0;
 };
 
-using WindowRangeHor = WindowRange<SCREEN_W>;
-using WindowRangeVer = WindowRange<SCREEN_H>;
+using WindowRangeHor = WindowRange<kScreenW>;
+using WindowRangeVer = WindowRange<kScreenH>;

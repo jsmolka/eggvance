@@ -15,7 +15,7 @@ public:
     virtual void fullscreen() = 0;
     virtual void setWindowTitle(const std::string& title) = 0;
 
-    u32 buffer[SCREEN_H * SCREEN_W];
+    u32 buffer[kScreenH * kScreenW];
 };
 
 extern std::shared_ptr<VideoDevice> video_device;

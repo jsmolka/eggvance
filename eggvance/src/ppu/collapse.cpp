@@ -56,9 +56,9 @@ void PPU::collapse(const std::vector<BGLayer>& layers)
 template<int obj_master>
 void PPU::collapseNN(const std::vector<BGLayer>& layers)
 {
-    u32* scanline = &video_device->buffer[SCREEN_W * io.vcount];
+    u32* scanline = &video_device->buffer[kScreenW * io.vcount];
 
-    for (int x = 0; x < SCREEN_W; ++x)
+    for (int x = 0; x < kScreenW; ++x)
     {
         scanline[x] = argb(upperLayer<obj_master>(layers, x));
     }
@@ -87,9 +87,9 @@ void PPU::collapseNW(const std::vector<BGLayer>& layers)
 template<int obj_master, int win_master>
 void PPU::collapseNW(const std::vector<BGLayer>& layers)
 {
-    u32* scanline = &video_device->buffer[SCREEN_W * io.vcount];
+    u32* scanline = &video_device->buffer[kScreenW * io.vcount];
 
-    for (int x = 0; x < SCREEN_W; ++x)
+    for (int x = 0; x < kScreenW; ++x)
     {
         const auto& window = activeWindow<win_master>(x);
 
@@ -118,9 +118,9 @@ void PPU::collapseBN(const std::vector<BGLayer>& layers)
 {
     constexpr int flags = 0xFFFF;
 
-    u32* scanline = &video_device->buffer[SCREEN_W * io.vcount];
+    u32* scanline = &video_device->buffer[kScreenW * io.vcount];
 
-    for (int x = 0; x < SCREEN_W; ++x)
+    for (int x = 0; x < kScreenW; ++x)
     {
         u16 upper = MISSING_PIXEL;
         u16 lower = MISSING_PIXEL;
@@ -202,9 +202,9 @@ void PPU::collapseBW(const std::vector<BGLayer>& layers)
 template<int obj_master, int blend_mode, int win_master>
 void PPU::collapseBW(const std::vector<BGLayer>& layers)
 {
-    u32* scanline = &video_device->buffer[SCREEN_W * io.vcount];
+    u32* scanline = &video_device->buffer[kScreenW * io.vcount];
 
-    for (int x = 0; x < SCREEN_W; ++x)
+    for (int x = 0; x < kScreenW; ++x)
     {
         u16 upper = MISSING_PIXEL;
         u16 lower = MISSING_PIXEL;
