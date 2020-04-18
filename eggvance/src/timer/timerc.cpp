@@ -6,6 +6,8 @@
 #include "common/macros.h"
 #include "mmu/memmap.h"
 
+constexpr auto kOverflowInitial = 0x4000'0000;
+
 TimerController timerc;
 
 TimerController::TimerController()
@@ -15,19 +17,14 @@ TimerController::TimerController()
 
 void TimerController::reset()
 {
-    active.clear();
-
-    timers[0] = Timer(0);
-    timers[1] = Timer(1);
-    timers[2] = Timer(2);
-    timers[3] = Timer(3);
+    active_timers.clear();
 
     timers[0].next = &timers[1];
     timers[1].next = &timers[2];
     timers[2].next = &timers[3];
 
-    counter  = 0;
-    overflow = 0x7FFF'FFFF;
+    counter = 0;
+    overflow = kOverflowInitial;
 }
 
 void TimerController::run(int cycles)
@@ -64,13 +61,13 @@ u8 TimerController::read(u32 addr)
 
     switch (addr)
     {
-    READ_DATA_REG(REG_TM0CNT_L, timers[0].io.data   );
+    READ_DATA_REG(REG_TM0CNT_L, timers[0].io.data);
     READ_HALF_REG(REG_TM0CNT_H, timers[0].io.ctrl);
-    READ_DATA_REG(REG_TM1CNT_L, timers[1].io.data   );
+    READ_DATA_REG(REG_TM1CNT_L, timers[1].io.data);
     READ_HALF_REG(REG_TM1CNT_H, timers[1].io.ctrl);
-    READ_DATA_REG(REG_TM2CNT_L, timers[2].io.data   );
+    READ_DATA_REG(REG_TM2CNT_L, timers[2].io.data);
     READ_HALF_REG(REG_TM2CNT_H, timers[2].io.ctrl);
-    READ_DATA_REG(REG_TM3CNT_L, timers[3].io.data   );
+    READ_DATA_REG(REG_TM3CNT_L, timers[3].io.data);
     READ_HALF_REG(REG_TM3CNT_H, timers[3].io.ctrl);
 
     default:
@@ -83,44 +80,41 @@ u8 TimerController::read(u32 addr)
 
 void TimerController::write(u32 addr, u8 byte)
 {
-    #define WRITE_CTRL_REG(label, timer)          \
-        case label:                               \
-        {                                         \
-            runTimers();                          \
-            uint enable = timer.io.ctrl.enable;   \
-            timer.io.ctrl.write<0>(byte & 0xC7);  \
-            if (!enable && timer.io.ctrl.enable)  \
-                timer.start();                    \
-            else if (enable)                      \
-                timer.update();                   \
-            schedule();                           \
-            break;                                \
-        }
-
     switch (addr)
     {
-    WRITE_HALF_REG(REG_TM0CNT_L, timers[0].io.data, 0x0000'FFFF);
-    WRITE_HALF_REG(REG_TM1CNT_L, timers[1].io.data, 0x0000'FFFF);
-    WRITE_HALF_REG(REG_TM2CNT_L, timers[2].io.data, 0x0000'FFFF);
-    WRITE_HALF_REG(REG_TM3CNT_L, timers[3].io.data, 0x0000'FFFF);
-    WRITE_CTRL_REG(REG_TM0CNT_H, timers[0]                     );
-    WRITE_CTRL_REG(REG_TM1CNT_H, timers[1]                     );
-    WRITE_CTRL_REG(REG_TM2CNT_H, timers[2]                     );
-    WRITE_CTRL_REG(REG_TM3CNT_H, timers[3]                     );
+    WRITE_HALF_REG(REG_TM0CNT_L, timers[0].io.data, 0xFFFF);
+    WRITE_HALF_REG(REG_TM1CNT_L, timers[1].io.data, 0xFFFF);
+    WRITE_HALF_REG(REG_TM2CNT_L, timers[2].io.data, 0xFFFF);
+    WRITE_HALF_REG(REG_TM3CNT_L, timers[3].io.data, 0xFFFF);
+
+    case REG_TM0CNT_H: writeControl(timers[0], byte); break;
+    case REG_TM1CNT_H: writeControl(timers[1], byte); break;
+    case REG_TM2CNT_H: writeControl(timers[2], byte); break;
+    case REG_TM3CNT_H: writeControl(timers[3], byte); break;
 
     default:
         UNREACHABLE;
         break;
     }
+}
 
-    #undef WRITE_CTRL_REG
+void TimerController::writeControl(Timer& timer, u8 byte)
+{
+    runTimers();
+    uint enable = timer.io.ctrl.enable;   
+    timer.io.ctrl.write<0>(byte & 0xC7);  
+    if (!enable && timer.io.ctrl.enable)  
+        timer.init();                    
+    else if (enable)                      
+        timer.update();                   
+    schedule();                           
 }
 
 void TimerController::runTimers()
 {
-    for (auto& timer : active)
+    for (Timer& timer : active_timers)
     {
-        timer->run(counter);
+        timer.run(counter);
     }
     overflow -= counter;
     counter = 0;
@@ -128,21 +122,21 @@ void TimerController::runTimers()
 
 void TimerController::schedule()
 {
-    active.clear();
+    active_timers.clear();
 
-    overflow = 0x7FFF'FFFF;
+    overflow = kOverflowInitial;
 
     for (auto& timer : timers)
     {
         if (timer.io.ctrl.enable && !timer.io.ctrl.cascade)
         {
-            active.push_back(&timer);
+            active_timers.push_back(std::ref(timer));
 
             overflow = std::min(overflow, timer.nextOverflow());
         }
     }
 
-    if (active.size() > 0)
+    if (active_timers.size() > 0)
         arm.state |= ARM::STATE_TIMER;
     else
         arm.state &= ~ARM::STATE_TIMER;
@@ -150,10 +144,10 @@ void TimerController::schedule()
 
 void TimerController::reschedule()
 {
-    overflow = 0x7FFF'FFFF;
+    overflow = kOverflowInitial;
 
-    for (auto& timer : active)
+    for (Timer& timer : active_timers)
     {
-        overflow = std::min(overflow, timer->nextOverflow());
+        overflow = std::min(overflow, timer.nextOverflow());
     }
 }

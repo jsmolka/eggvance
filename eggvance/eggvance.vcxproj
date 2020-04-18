@@ -192,7 +192,6 @@
     <ClInclude Include="src\common\critical.h" />
     <ClInclude Include="src\common\fs.h" />
     <ClInclude Include="src\common\macros.h" />
-    <ClInclude Include="src\common\smallvector.h" />
     <ClInclude Include="src\dma\io\dmaio.h" />
     <ClInclude Include="src\interrupt\io\intrio.h" />
     <ClInclude Include="src\keypad\io\keypadio.h" />

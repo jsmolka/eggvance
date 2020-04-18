@@ -5,20 +5,20 @@
 class Timer
 {
 public:
-    Timer(uint id);
+    Timer(int id);
 
-    void start();
+    void init();
     void update();
-    void run(uint cycles);
+    void run(int cycles);
 
-    uint nextOverflow() const;
+    int nextOverflow() const;
 
-    uint id;
+    int id;
     Timer* next = nullptr;
     TimerIO io;
 
 private:
-    uint counter  = 0;
-    uint initial  = 0;
-    uint overflow = 0;
+    int counter  = 0;
+    int initial  = 0;
+    int overflow = 0;
 };

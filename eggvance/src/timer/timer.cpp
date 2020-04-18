@@ -2,25 +2,28 @@
 
 #include "interrupt/irqhandler.h"
 
-constexpr uint kLimit = 0x1'0000;
+constexpr auto kTimerOverflow = 0x1'0000;
 
-Timer::Timer(uint id)
-    : id(id) {}
+Timer::Timer(int id)
+    : id(id)
+{
 
-void Timer::start()
+}
+
+void Timer::init()
 {
     counter  = 0;
     initial  = io.data.initial;
-    overflow = io.ctrl.prescale * (kLimit - initial);
+    overflow = io.ctrl.prescale * (kTimerOverflow - initial);
 }
 
 void Timer::update()
 {
     counter  = io.ctrl.prescale * (io.data.counter - initial);
-    overflow = io.ctrl.prescale * (kLimit - initial);
+    overflow = io.ctrl.prescale * (kTimerOverflow - initial);
 }
 
-void Timer::run(uint cycles)
+void Timer::run(int cycles)
 {
     counter += cycles;
     
@@ -36,12 +39,12 @@ void Timer::run(uint cycles)
 
         counter %= overflow;
         initial  = io.data.initial;
-        overflow = io.ctrl.prescale * (kLimit - initial);
+        overflow = io.ctrl.prescale * (kTimerOverflow - initial);
     }
     io.data.counter = counter / io.ctrl.prescale + initial;
 }
 
-uint Timer::nextOverflow() const
+int Timer::nextOverflow() const
 {
     return overflow - counter;
 }

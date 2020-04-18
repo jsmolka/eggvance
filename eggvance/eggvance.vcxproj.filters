@@ -269,9 +269,6 @@
     <ClInclude Include="src\arm\util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\common\smallvector.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\dma\dma.h">
       <Filter>Header Files</Filter>
     </ClInclude>
