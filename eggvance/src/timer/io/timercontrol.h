@@ -16,9 +16,9 @@ public:
 
         if (index == 0)
         {
-            cascade = bits<2, 1>(byte);
-            irq     = bits<6, 1>(byte);
-            enable  = bits<7, 1>(byte);
+            cascade = bits::seq<2, 1>(byte);
+            irq     = bits::seq<6, 1>(byte);
+            enable  = bits::seq<7, 1>(byte);
 
             if (cascade)
             {
@@ -26,7 +26,7 @@ public:
             }
             else
             {
-                switch (bits<0, 2>(byte))
+                switch (bits::seq<0, 2>(byte))
                 {
                 case 0: prescale = 1; break;
                 case 1: prescale = 64; break;

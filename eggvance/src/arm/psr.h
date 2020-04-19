@@ -38,14 +38,14 @@ struct PSR
 
     inline PSR& operator=(u32 value)
     {
-        m = static_cast<Mode>(bits<0, 5>(value));
-        t = bits< 5, 1>(value);
-        f = bits< 6, 1>(value);
-        i = bits< 7, 1>(value);
-        v = bits<28, 1>(value);
-        c = bits<29, 1>(value);
-        z = bits<30, 1>(value);
-        n = bits<31, 1>(value);
+        m = static_cast<Mode>(bits::seq<0, 5>(value));
+        t = bits::seq< 5, 1>(value);
+        f = bits::seq< 6, 1>(value);
+        i = bits::seq< 7, 1>(value);
+        v = bits::seq<28, 1>(value);
+        c = bits::seq<29, 1>(value);
+        z = bits::seq<30, 1>(value);
+        n = bits::seq<31, 1>(value);
 
         return *this;
     }

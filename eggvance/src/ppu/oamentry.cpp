@@ -46,28 +46,28 @@ void OAMEntry::writeHalf(int attr, u16 half)
     switch (attr)
     {
     case 0:
-        origin.y    = bits< 0, 8>(half);
-        affine      = bits< 8, 1>(half);
-        double_size = bits< 9, 1>(half);
-        disabled    = bits< 9, 1>(half);
-        mode        = bits<10, 2>(half);
-        mosaic      = bits<12, 1>(half);
-        color_mode  = bits<13, 1>(half);
-        shape       = bits<14, 2>(half);
+        origin.y    = bits::seq< 0, 8>(half);
+        affine      = bits::seq< 8, 1>(half);
+        double_size = bits::seq< 9, 1>(half);
+        disabled    = bits::seq< 9, 1>(half);
+        mode        = bits::seq<10, 2>(half);
+        mosaic      = bits::seq<12, 1>(half);
+        color_mode  = bits::seq<13, 1>(half);
+        shape       = bits::seq<14, 2>(half);
         break;
 
     case 2:
-        origin.x = bits< 0, 9>(half);
-        matrix   = bits< 9, 5>(half);
-        flip_x   = bits<12, 1>(half);
-        flip_y   = bits<13, 1>(half);
-        size     = bits<14, 2>(half);
+        origin.x = bits::seq< 0, 9>(half);
+        matrix   = bits::seq< 9, 5>(half);
+        flip_x   = bits::seq<12, 1>(half);
+        flip_y   = bits::seq<13, 1>(half);
+        size     = bits::seq<14, 2>(half);
         break;
 
     case 4:
-        tile  = bits< 0, 10>(half);
-        prio  = bits<10,  2>(half);
-        bank  = bits<12,  4>(half);
+        tile  = bits::seq< 0, 10>(half);
+        prio  = bits::seq<10,  2>(half);
+        bank  = bits::seq<12,  4>(half);
         break;
 
     default:

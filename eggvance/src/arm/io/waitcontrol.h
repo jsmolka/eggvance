@@ -20,17 +20,17 @@ public:
 
         if (index == 0)
         {
-            sram  = bits<0, 2>(byte);
-            ws0_n = bits<2, 2>(byte);
-            ws0_s = bits<4, 1>(byte);
-            ws1_n = bits<5, 2>(byte);
-            ws1_s = bits<7, 1>(byte);
+            sram  = bits::seq<0, 2>(byte);
+            ws0_n = bits::seq<2, 2>(byte);
+            ws0_s = bits::seq<4, 1>(byte);
+            ws1_n = bits::seq<5, 2>(byte);
+            ws1_s = bits::seq<7, 1>(byte);
         }
         else
         {
-            ws2_n    = bits<0, 2>(byte);
-            ws2_s    = bits<2, 1>(byte);
-            prefetch = bits<6, 1>(byte);
+            ws2_n    = bits::seq<0, 2>(byte);
+            ws2_s    = bits::seq<2, 1>(byte);
+            prefetch = bits::seq<6, 1>(byte);
         }
         updateCycles();
     }

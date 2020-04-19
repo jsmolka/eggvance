@@ -26,9 +26,9 @@ public:
 
         if (index == 0)
         {
-            vblank_irq = bits<3, 1>(byte);
-            hblank_irq = bits<4, 1>(byte);
-            vmatch_irq = bits<5, 1>(byte);
+            vblank_irq = bits::seq<3, 1>(byte);
+            hblank_irq = bits::seq<4, 1>(byte);
+            vmatch_irq = bits::seq<5, 1>(byte);
         }
         else
         {

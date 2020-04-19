@@ -11,7 +11,7 @@ public:
         static_assert(index < 2);
 
         if (index == 0)
-            evy = std::min(16u, bits<0, 5, uint>(byte));
+            evy = std::min<uint>(16u, bits::seq<0, 5>(byte));
     }
 
     inline u16 blendWhite(u16 a) const

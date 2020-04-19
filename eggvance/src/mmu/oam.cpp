@@ -23,8 +23,8 @@ void OAM::writeWord(u32 addr, u32 word)
 {
     addr = align<u32>(addr);
 
-    writeHalf(addr + 0, bits< 0, 16>(word));
-    writeHalf(addr + 2, bits<16, 16>(word));
+    writeHalf(addr + 0, bits::seq< 0, 16>(word));
+    writeHalf(addr + 2, bits::seq<16, 16>(word));
 }
 
 Matrix OAM::matrix(int index)

@@ -23,12 +23,12 @@ public:
 
         if (index == 0)
         {
-            upper = bits<0, 6>(byte);
-            mode  = bits<6, 2>(byte);
+            upper = bits::seq<0, 6>(byte);
+            mode  = bits::seq<6, 2>(byte);
         }
         else
         {
-            lower = bits<0, 6>(byte);
+            lower = bits::seq<0, 6>(byte);
         }
     }
 

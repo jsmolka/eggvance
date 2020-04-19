@@ -16,7 +16,7 @@ public:
         static_assert(index < 4);
 
         if (index == 3)
-            byte = signExtend<4>(byte);
+            byte = bits::sx<4>(byte);
 
         reinterpret_cast<u8*>(&initial)[index] = byte;
 

@@ -4,7 +4,7 @@
 
 void ARM::Arm_BranchExchange(u32 instr)
 {
-    uint rn = bits<0, 4>(instr);
+    uint rn = bits::seq<0, 4>(instr);
 
     pc = regs[rn];
 
@@ -22,9 +22,9 @@ void ARM::Arm_BranchExchange(u32 instr)
 template<uint link>
 void ARM::Arm_BranchLink(u32 instr)
 {
-    uint offset = bits<0, 24>(instr);
+    uint offset = bits::seq<0, 24>(instr);
 
-    offset = signExtend<24>(offset);
+    offset = bits::sx<24>(offset);
     offset <<= 2;
 
     if (link) lr = pc - 4;
@@ -56,8 +56,8 @@ void ARM::Arm_DataProcessing(u32 instr)
         Mvn = 0b1111
     };
 
-    uint rd    = bits<12, 4>(instr);
-    uint rn    = bits<16, 4>(instr);
+    uint rd    = bits::seq<12, 4>(instr);
+    uint rn    = bits::seq<16, 4>(instr);
     uint flags = flags_ && rd != 15;
 
     u32& dst = regs[rd];
@@ -66,21 +66,21 @@ void ARM::Arm_DataProcessing(u32 instr)
 
     if (imm_op)
     {
-        uint value  = bits<0, 8>(instr);
-        uint amount = bits<8, 4>(instr);
+        uint value  = bits::seq<0, 8>(instr);
+        uint amount = bits::seq<8, 4>(instr);
         op2 = util::rorArm<false>(value, amount << 1, flags, cpsr);
     }
     else
     {
-        uint rm     = bits<0, 4>(instr);
-        uint reg_op = bits<4, 1>(instr);
-        uint shift  = bits<5, 2>(instr);
+        uint rm     = bits::seq<0, 4>(instr);
+        uint reg_op = bits::seq<4, 1>(instr);
+        uint shift  = bits::seq<5, 2>(instr);
 
         op2 = regs[rm];
 
         if (reg_op)
         {
-            uint rs = bits<8, 4>(instr);
+            uint rs = bits::seq<8, 4>(instr);
 
             if (rn == 15) op1 += 4;
             if (rm == 15) op2 += 4;
@@ -102,7 +102,7 @@ void ARM::Arm_DataProcessing(u32 instr)
         }
         else
         {
-            uint amount = bits<7, 5>(instr);
+            uint amount = bits::seq<7, 5>(instr);
 
             switch (static_cast<Shift>(shift))
             {
@@ -171,13 +171,13 @@ void ARM::Arm_StatusTransfer(u32 instr)
         u32 op;
         if (imm_op)
         {
-            uint value  = bits<0, 8>(instr);
-            uint amount = bits<8, 4>(instr);
-            op = rotateRight(value, amount << 1);
+            uint value  = bits::seq<0, 8>(instr);
+            uint amount = bits::seq<8, 4>(instr);
+            op = bits::ror(value, amount << 1);
         }
         else
         {
-            uint rm = bits<0, 4>(instr);
+            uint rm = bits::seq<0, 4>(instr);
             op = regs[rm];
         }
 
@@ -201,7 +201,7 @@ void ARM::Arm_StatusTransfer(u32 instr)
     }
     else
     {
-        uint rd = bits<12, 4>(instr);
+        uint rd = bits::seq<12, 4>(instr);
         regs[rd] = use_spsr ? spsr : cpsr;
     }
 }
@@ -209,10 +209,10 @@ void ARM::Arm_StatusTransfer(u32 instr)
 template<uint flags, uint accumulate>
 void ARM::Arm_Multiply(u32 instr)
 {
-    uint rm = bits< 0, 4>(instr);
-    uint rs = bits< 8, 4>(instr);
-    uint rn = bits<12, 4>(instr);
-    uint rd = bits<16, 4>(instr);
+    uint rm = bits::seq< 0, 4>(instr);
+    uint rs = bits::seq< 8, 4>(instr);
+    uint rn = bits::seq<12, 4>(instr);
+    uint rd = bits::seq<16, 4>(instr);
 
     u32  op1 = regs[rm];
     u32  op2 = regs[rs];
@@ -236,10 +236,10 @@ void ARM::Arm_Multiply(u32 instr)
 template<uint flags, uint accumulate, uint sign>
 void ARM::Arm_MultiplyLong(u32 instr)
 {
-    uint rm  = bits< 0, 4>(instr);
-    uint rs  = bits< 8, 4>(instr);
-    uint rdl = bits<12, 4>(instr);
-    uint rdh = bits<16, 4>(instr);
+    uint rm  = bits::seq< 0, 4>(instr);
+    uint rs  = bits::seq< 8, 4>(instr);
+    uint rdl = bits::seq<12, 4>(instr);
+    uint rdh = bits::seq<16, 4>(instr);
 
     u64  op1  = regs[rm];
     u64  op2  = regs[rs];
@@ -248,8 +248,8 @@ void ARM::Arm_MultiplyLong(u32 instr)
 
     if (sign)
     {
-        op1 = signExtend<32>(op1);
-        op2 = signExtend<32>(op2);
+        op1 = bits::sx<32>(op1);
+        op2 = bits::sx<32>(op2);
     }
 
     u64 res = op1 * op2;
@@ -275,8 +275,8 @@ void ARM::Arm_MultiplyLong(u32 instr)
 template<uint load, uint writeback, uint byte, uint increment, uint pre_index, uint imm_op>
 void ARM::Arm_SingleDataTransfer(u32 instr)
 {
-    uint rd = bits<12, 4>(instr);
-    uint rn = bits<16, 4>(instr);
+    uint rd = bits::seq<12, 4>(instr);
+    uint rn = bits::seq<16, 4>(instr);
 
     u32& dst = regs[rd];
     u32 addr = regs[rn];
@@ -284,23 +284,23 @@ void ARM::Arm_SingleDataTransfer(u32 instr)
     u32 offset;
     if (imm_op)
     {
-        offset = bits<0, 12>(instr);
+        offset = bits::seq<0, 12>(instr);
     }
     else
     {
-        uint rm     = bits<0, 4>(instr);
-        uint reg_op = bits<4, 1>(instr);
-        uint shift  = bits<5, 2>(instr);
+        uint rm     = bits::seq<0, 4>(instr);
+        uint reg_op = bits::seq<4, 1>(instr);
+        uint shift  = bits::seq<5, 2>(instr);
 
         uint amount;
         if (reg_op)
         {
-            uint rs = bits<8, 4>(instr);
+            uint rs = bits::seq<8, 4>(instr);
             amount = regs[rs] & 0xFF;
         }
         else
         {
-            amount = bits<7, 5>(instr);
+            amount = bits::seq<7, 5>(instr);
         }
 
         switch (static_cast<Shift>(shift))
@@ -367,8 +367,8 @@ void ARM::Arm_HalfSignedDataTransfer(u32 instr)
 
     static_assert(static_cast<Opcode>(opcode) != Opcode::Swap);
 
-    uint rd = bits<12, 4>(instr);
-    uint rn = bits<16, 4>(instr);
+    uint rd = bits::seq<12, 4>(instr);
+    uint rn = bits::seq<16, 4>(instr);
 
     u32& dst = regs[rd];
     u32 addr = regs[rn];
@@ -376,13 +376,13 @@ void ARM::Arm_HalfSignedDataTransfer(u32 instr)
     u32 offset;
     if (imm_op)
     {
-        uint lower = bits<0, 4>(instr);
-        uint upper = bits<8, 4>(instr);
+        uint lower = bits::seq<0, 4>(instr);
+        uint upper = bits::seq<8, 4>(instr);
         offset = (upper << 4) | lower;
     }
     else
     {
-        uint rm = bits<0, 4>(instr);
+        uint rm = bits::seq<0, 4>(instr);
         offset = regs[rm];
     }
 
@@ -402,7 +402,7 @@ void ARM::Arm_HalfSignedDataTransfer(u32 instr)
 
         case Opcode::Ldrsb:
             dst = readByte(addr);
-            dst = signExtend<8>(dst);
+            dst = bits::sx<8>(dst);
             break;
 
         case Opcode::Ldrsh:
@@ -440,8 +440,8 @@ void ARM::Arm_HalfSignedDataTransfer(u32 instr)
 template<uint load, uint writeback_, uint user_mode, uint increment, uint pre_index_>
 void ARM::Arm_BlockDataTransfer(u32 instr)
 {
-    uint rlist     = bits< 0, 16>(instr);
-    uint rn        = bits<16,  4>(instr);
+    uint rlist     = bits::seq< 0, 16>(instr);
+    uint rn        = bits::seq<16,  4>(instr);
     uint writeback = writeback_;
     uint pre_index = pre_index_;
 
@@ -456,7 +456,7 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
     {
         if (!increment)
         {
-            addr -= 4 * popcount(rlist);
+            addr -= 4 * bits::popcnt(rlist);
             pre_index ^= 0x1;
 
             if (writeback)
@@ -471,7 +471,7 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
             if (rlist & (1 << rn))
                 writeback = false;
 
-            for (uint x : SetBits(rlist))
+            for (uint x : bits::iter(rlist))
             {
                 addr += 4 * pre_index;
                 regs[x] = readWord(addr);
@@ -487,7 +487,7 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
         {
             bool begin = true;
 
-            for (uint x : SetBits(rlist))
+            for (uint x : bits::iter(rlist))
             {
                 u32 value = x != rn
                     ? x != 15
@@ -495,7 +495,7 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
                         : regs[x] + 4
                     : begin
                         ? base
-                        : base + (increment ? 4 : -4) * popcount(rlist);
+                        : base + (increment ? 4 : -4) * bits::popcnt(rlist);
 
                 addr += 4 * pre_index;
                 writeWord(addr, value);
@@ -550,9 +550,9 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
 template<uint byte>
 void ARM::Arm_SingleDataSwap(u32 instr)
 {
-    uint rm = bits< 0, 4>(instr);
-    uint rd = bits<12, 4>(instr);
-    uint rn = bits<16, 4>(instr);
+    uint rm = bits::seq< 0, 4>(instr);
+    uint rd = bits::seq<12, 4>(instr);
+    uint rn = bits::seq<16, 4>(instr);
 
     u32  src = regs[rm];
     u32& dst = regs[rd];

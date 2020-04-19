@@ -17,18 +17,18 @@ public:
 
         if (index == 0)
         {
-            mode     = bits<0, 3>(byte);
-            frame    = bits<4, 1>(byte) * 0xA000;
-            oam_free = bits<5, 1>(byte);
-            mapping  = bits<6, 1>(byte);
-            blank    = bits<7, 1>(byte);
+            mode     = bits::seq<0, 3>(byte);
+            frame    = bits::seq<4, 1>(byte) * 0xA000;
+            oam_free = bits::seq<5, 1>(byte);
+            mapping  = bits::seq<6, 1>(byte);
+            blank    = bits::seq<7, 1>(byte);
         }
         else
         {
-            layers = bits<0, 5>(byte);
-            win0   = bits<5, 1>(byte);
-            win1   = bits<6, 1>(byte);
-            winobj = bits<7, 1>(byte);
+            layers = bits::seq<0, 5>(byte);
+            win0   = bits::seq<5, 1>(byte);
+            win1   = bits::seq<6, 1>(byte);
+            winobj = bits::seq<7, 1>(byte);
         }
     }
 

@@ -7,8 +7,8 @@ void ARM::Thumb_MoveShiftedRegister(u16 instr)
 {
     static_assert(static_cast<Shift>(opcode) != Shift::Ror);
 
-    uint rd = bits<0, 3>(instr);
-    uint rs = bits<3, 3>(instr);
+    uint rd = bits::seq<0, 3>(instr);
+    uint rs = bits::seq<3, 3>(instr);
 
     u32& dst = regs[rd];
     u32  src = regs[rs];
@@ -36,8 +36,8 @@ void ARM::Thumb_AddSubtract(u16 instr)
         SubImm = 0b11
     };
 
-    uint rd = bits<0, 3>(instr);
-    uint rs = bits<3, 3>(instr);
+    uint rd = bits::seq<0, 3>(instr);
+    uint rs = bits::seq<3, 3>(instr);
 
     u32& dst = regs[rd];
     u32  src = regs[rs];
@@ -66,7 +66,7 @@ void ARM::Thumb_ImmediateOperations(u16 instr)
         Sub = 0b11
     };
 
-    uint offset = bits<0, 8>(instr);
+    uint offset = bits::seq<0, 8>(instr);
 
     u32& dst = regs[rd];
     u32  src = regs[rd];
@@ -107,8 +107,8 @@ void ARM::Thumb_AluOperations(u16 instr)
         Mvn = 0b1111
     };
 
-    uint rd = bits<0, 3>(instr);
-    uint rs = bits<3, 3>(instr);
+    uint rd = bits::seq<0, 3>(instr);
+    uint rs = bits::seq<3, 3>(instr);
 
     u32& dst = regs[rd];
     u32  src = regs[rs];
@@ -152,8 +152,8 @@ void ARM::Thumb_HighRegisterOperations(u16 instr)
         Bx  = 0b11
     };
 
-    uint rd = bits<0, 3>(instr);
-    uint rs = bits<3, 3>(instr);
+    uint rd = bits::seq<0, 3>(instr);
+    uint rs = bits::seq<3, 3>(instr);
 
     rs |= hs << 3;
     rd |= hd << 3;
@@ -201,7 +201,7 @@ void ARM::Thumb_HighRegisterOperations(u16 instr)
 template<uint rd>
 void ARM::Thumb_LoadPcRelative(u16 instr)
 {
-    uint offset = bits<0, 8>(instr);
+    uint offset = bits::seq<0, 8>(instr);
 
     regs[rd] = readWord((pc & ~0x3) + (offset << 2));
 
@@ -219,8 +219,8 @@ void ARM::Thumb_LoadStoreRegisterOffset(u16 instr)
         Ldrb = 0b11
     };
 
-    uint rd = bits<0, 3>(instr);
-    uint rb = bits<3, 3>(instr);
+    uint rd = bits::seq<0, 3>(instr);
+    uint rb = bits::seq<3, 3>(instr);
 
     u32& dst = regs[rd];
     u32 addr = regs[rb] + regs[ro];
@@ -262,8 +262,8 @@ void ARM::Thumb_LoadStoreByteHalf(u16 instr)
         Ldrsh = 0b11
     };
 
-    uint rd = bits<0, 3>(instr);
-    uint rb = bits<3, 3>(instr);
+    uint rd = bits::seq<0, 3>(instr);
+    uint rb = bits::seq<3, 3>(instr);
 
     u32& dst = regs[rd];
     u32 addr = regs[rb] + regs[ro];
@@ -276,7 +276,7 @@ void ARM::Thumb_LoadStoreByteHalf(u16 instr)
 
     case Opcode::Ldrsb:
         dst = readByte(addr);
-        dst = signExtend<8>(dst);
+        dst = bits::sx<8>(dst);
         idle();
         break;
 
@@ -307,8 +307,8 @@ void ARM::Thumb_LoadStoreImmediateOffset(u16 instr)
         Ldrb = 0b11
     };
 
-    uint rd = bits<0, 3>(instr);
-    uint rb = bits<3, 3>(instr);
+    uint rd = bits::seq<0, 3>(instr);
+    uint rb = bits::seq<3, 3>(instr);
 
     u32& dst = regs[rd];
     u32 addr = regs[rb] + (amount << (~opcode & 0x2));
@@ -342,8 +342,8 @@ void ARM::Thumb_LoadStoreImmediateOffset(u16 instr)
 template<uint amount, uint load>
 void ARM::Thumb_LoadStoreHalf(u16 instr)
 {
-    uint rd = bits<0, 3>(instr);
-    uint rb = bits<3, 3>(instr);
+    uint rd = bits::seq<0, 3>(instr);
+    uint rb = bits::seq<3, 3>(instr);
 
     u32& dst = regs[rd];
     u32 addr = regs[rb] + (amount << 1);
@@ -362,7 +362,7 @@ void ARM::Thumb_LoadStoreHalf(u16 instr)
 template<uint rd, uint load>
 void ARM::Thumb_LoadStoreSpRelative(u16 instr)
 {
-    uint offset = bits<0, 8>(instr);
+    uint offset = bits::seq<0, 8>(instr);
 
     u32& dst = regs[rd];
     u32 addr = sp + (offset << 2);
@@ -381,7 +381,7 @@ void ARM::Thumb_LoadStoreSpRelative(u16 instr)
 template<uint rd, uint use_sp>
 void ARM::Thumb_LoadRelativeAddress(u16 instr)
 {
-    uint offset = bits<0, 8>(instr);
+    uint offset = bits::seq<0, 8>(instr);
 
     offset <<= 2;
 
@@ -396,7 +396,7 @@ void ARM::Thumb_LoadRelativeAddress(u16 instr)
 template<uint sign>
 void ARM::Thumb_AddOffsetSp(u16 instr)
 {
-    uint offset = bits<0, 7>(instr);
+    uint offset = bits::seq<0, 7>(instr);
 
     offset <<= 2;
 
@@ -409,13 +409,13 @@ void ARM::Thumb_AddOffsetSp(u16 instr)
 template<uint rbit, uint pop>
 void ARM::Thumb_PushPopRegisters(u16 instr)
 {
-    uint rlist = bits<0, 8>(instr);
+    uint rlist = bits::seq<0, 8>(instr);
 
     rlist |= rbit << (pop ? 15 : 14);
 
     if (pop)
     {
-        for (uint x : SetBits(rlist))
+        for (uint x : bits::iter(rlist))
         {
             regs[x] = readWord(sp);
             sp += 4;
@@ -428,11 +428,11 @@ void ARM::Thumb_PushPopRegisters(u16 instr)
     }
     else
     {
-        sp -= 4 * popcount(rlist);
+        sp -= 4 * bits::popcnt(rlist);
 
         u32 addr = sp;
 
-        for (uint x : SetBits(rlist))
+        for (uint x : bits::iter(rlist))
         {
             writeWord(addr, regs[x]);
             addr += 4;
@@ -443,7 +443,7 @@ void ARM::Thumb_PushPopRegisters(u16 instr)
 template<uint rb, uint load>
 void ARM::Thumb_LoadStoreMultiple(u16 instr)
 {
-    uint rlist = bits<0, 8>(instr);
+    uint rlist = bits::seq<0, 8>(instr);
 
     u32 addr = regs[rb];
     u32 base = regs[rb];
@@ -457,7 +457,7 @@ void ARM::Thumb_LoadStoreMultiple(u16 instr)
             if (rlist & (1 << rb))
                 writeback = false;
 
-            for (uint x : SetBits(rlist))
+            for (uint x : bits::iter(rlist))
             {
                 regs[x] = readWord(addr);
                 addr += 4;
@@ -468,13 +468,13 @@ void ARM::Thumb_LoadStoreMultiple(u16 instr)
         {
             bool begin = true;
 
-            for (uint x : SetBits(rlist))
+            for (uint x : bits::iter(rlist))
             {
                 u32 value = x != rb
                     ? regs[x]
                     : begin
                         ? base
-                        : base + 4 * popcount(rlist);
+                        : base + 4 * bits::popcnt(rlist);
 
                 writeWord(addr, value);
                 addr += 4;
@@ -506,9 +506,9 @@ void ARM::Thumb_ConditionalBranch(u16 instr)
 {
     if (cpsr.check(static_cast<PSR::Condition>(condition)))
     {
-        uint offset = bits<0, 8>(instr);
+        uint offset = bits::seq<0, 8>(instr);
 
-        offset = signExtend<8>(offset);
+        offset = bits::sx<8>(offset);
         offset <<= 1;
 
         pc += offset;
@@ -523,9 +523,9 @@ void ARM::Thumb_SoftwareInterrupt(u16 instr)
 
 void ARM::Thumb_UnconditionalBranch(u16 instr)
 {
-    uint offset = bits<0, 11>(instr);
+    uint offset = bits::seq<0, 11>(instr);
 
-    offset = signExtend<11>(offset);
+    offset = bits::sx<11>(offset);
     offset <<= 1;
 
     pc += offset;
@@ -535,7 +535,7 @@ void ARM::Thumb_UnconditionalBranch(u16 instr)
 template<uint second>
 void ARM::Thumb_LongBranchLink(u16 instr)
 {
-    uint offset = bits<0, 11>(instr);
+    uint offset = bits::seq<0, 11>(instr);
 
     if (second)
     {
@@ -549,7 +549,7 @@ void ARM::Thumb_LongBranchLink(u16 instr)
     }
     else
     {
-        offset = signExtend<11>(offset);
+        offset = bits::sx<11>(offset);
         offset <<= 12;
 
         lr = pc + offset;

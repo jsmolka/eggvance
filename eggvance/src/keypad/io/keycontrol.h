@@ -21,9 +21,9 @@ public:
         }
         else
         {
-            mask[1] = bits<0, 2>(byte);
-            irq     = bits<6, 1>(byte);
-            logic   = bits<7, 1>(byte);
+            mask[1] = bits::seq<0, 2>(byte);
+            irq     = bits::seq<6, 1>(byte);
+            logic   = bits::seq<7, 1>(byte);
         }
     }
 

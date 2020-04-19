@@ -42,7 +42,7 @@ inline InstructionArm decodeArmHash(uint hash)
     if ((hash & 0b1111'1011'1111) == 0b0001'0000'1001) return InstructionArm::SingleDataSwap;
     if ((hash & 0b1110'0000'1001) == 0b0000'0000'1001)
     {
-        uint opcode = bits<1, 2>(hash);
+        uint opcode = bits::seq<1, 2>(hash);
 
         if (opcode == 0b00)
             return InstructionArm::Undefined;
@@ -52,8 +52,8 @@ inline InstructionArm decodeArmHash(uint hash)
     if ((hash & 0b1101'1001'0000) == 0b0001'0000'0000) return InstructionArm::StatusTransfer;
     if ((hash & 0b1100'0000'0000) == 0b0000'0000'0000)
     {
-        uint flags  = bits<4, 1>(hash);
-        uint opcode = bits<5, 4>(hash);
+        uint flags  = bits::seq<4, 1>(hash);
+        uint opcode = bits::seq<5, 4>(hash);
 
         if ((opcode >> 2) == 0b10 && !flags)
             return InstructionArm::Undefined;
@@ -105,9 +105,9 @@ inline InstructionThumb decodeThumbHash(uint hash)
     if ((hash & 0b11'1111'0000) == 0b01'0000'0000) return InstructionThumb::AluOperations;
     if ((hash & 0b11'1111'0000) == 0b01'0001'0000)
     {
-        uint hs     = bits<0, 1>(hash);
-        uint hd     = bits<1, 1>(hash);
-        uint opcode = bits<2, 2>(hash);
+        uint hs     = bits::seq<0, 1>(hash);
+        uint hd     = bits::seq<1, 1>(hash);
+        uint opcode = bits::seq<2, 2>(hash);
 
         if (opcode != 0b11 && hs == 0 && hd == 0)
             return InstructionThumb::Undefined;
@@ -129,7 +129,7 @@ inline InstructionThumb decodeThumbHash(uint hash)
     if ((hash & 0b11'1111'1100) == 0b11'0111'1100) return InstructionThumb::SoftwareInterrupt;
     if ((hash & 0b11'1100'0000) == 0b11'0100'0000)
     {
-        uint condition = bits<2, 4>(hash);
+        uint condition = bits::seq<2, 4>(hash);
 
         if (condition == 0b1110)
             return InstructionThumb::Undefined;

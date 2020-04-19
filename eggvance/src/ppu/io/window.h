@@ -8,8 +8,8 @@ struct Window
 {
     inline void write(u8 byte)
     {
-        flags = bits<0, 5>(byte) | LF_BDP;
-        blend = bits<5, 1>(byte);
+        flags = bits::seq<0, 5>(byte) | LF_BDP;
+        blend = bits::seq<5, 1>(byte);
     }
 
     uint flags = 0;

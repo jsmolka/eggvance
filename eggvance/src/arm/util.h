@@ -193,17 +193,17 @@ namespace util
             if (amount < 32)
             {
                 if (flags) psr.c = (value >> (amount - 1)) & 0x1;
-                value = sar(value, amount);
+                value = bits::sar(value, amount);
             }
             else
             {
-                value = sar(value, 31);
+                value = bits::sar(value, 31);
                 if (flags) psr.c = value & 0x1;
             }
         }
         else if (immediate)
         {
-            value = sar(value, 31);
+            value = bits::sar(value, 31);
             if (flags) psr.c = value & 0x1;
         }
         return value;
@@ -216,11 +216,11 @@ namespace util
         {
             #pragma warning(suppress:4293)
             psr.c = (value >> (amount - 1)) & 0x1;
-            value = sar(value, amount);
+            value = bits::sar(value, amount);
         }
         else
         {
-            value = sar(value, 31);
+            value = bits::sar(value, 31);
             psr.c = value & 0x1;
         }
         return value;
@@ -233,11 +233,11 @@ namespace util
             if (amount < 32)
             {
                 psr.c = (value >> (amount - 1)) & 0x1;
-                value = sar(value, amount);
+                value = bits::sar(value, amount);
             }
             else
             {
-                value = sar(value, 31);
+                value = bits::sar(value, 31);
                 psr.c = value & 0x1;
             }
         }
@@ -249,7 +249,7 @@ namespace util
     {
         if (amount != 0)
         {
-            value = rotateRight(value, amount);
+            value = bits::ror(value, amount);
             if (flags) psr.c = value >> 31;
         }
         else if (immediate)
@@ -265,7 +265,7 @@ namespace util
     {
         if (amount != 0)
         {
-            value = rotateRight(value, amount);
+            value = bits::ror(value, amount);
             psr.c = value >> 31;
         }
         return value;

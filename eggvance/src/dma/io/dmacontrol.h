@@ -26,18 +26,18 @@ public:
 
         if (index == 0)
         {
-            dadcnt = bits<5, 2>(byte);
-            sadcnt = bits<7, 1>(byte) << 0 | (sadcnt & ~0x1);
+            dadcnt = bits::seq<5, 2>(byte);
+            sadcnt = bits::seq<7, 1>(byte) << 0 | (sadcnt & ~0x1);
         }
         else
         {
-            sadcnt = bits<0, 1>(byte) << 1 | (sadcnt & ~0x2);
-            repeat = bits<1, 1>(byte);
-            word   = bits<2, 1>(byte);
-            timing = bits<4, 2>(byte);
-            irq    = bits<6, 1>(byte);
-            reload = bits<7, 1>(byte) ^ enable;
-            enable = bits<7, 1>(byte);
+            sadcnt = bits::seq<0, 1>(byte) << 1 | (sadcnt & ~0x2);
+            repeat = bits::seq<1, 1>(byte);
+            word   = bits::seq<2, 1>(byte);
+            timing = bits::seq<4, 2>(byte);
+            irq    = bits::seq<6, 1>(byte);
+            reload = bits::seq<7, 1>(byte) ^ enable;
+            enable = bits::seq<7, 1>(byte);
         }
     }
 

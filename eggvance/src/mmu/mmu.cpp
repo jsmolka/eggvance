@@ -310,7 +310,7 @@ void MMU::writeHalf(u32 addr, u16 half)
         if (gamepak.backup->type == Backup::Type::SRAM)
         {
             addr &= 0x7FFF;
-            half = rotateRight(half, (addr & 0x3) << 3);
+            half = bits::ror(half, (addr & 0x3) << 3);
             gamepak.backup->writeByte(addr, half & 0xFF);
         }
         break;
@@ -361,7 +361,7 @@ void MMU::writeWord(u32 addr, u32 word)
         if (gamepak.backup->type == Backup::Type::SRAM)
         {
             addr &= 0x7FFF;
-            word = rotateRight(word, (addr & 0x3) << 3);
+            word = bits::ror(word, (addr & 0x3) << 3);
             gamepak.backup->writeByte(addr, word & 0xFF);
         }
         break;

@@ -9,8 +9,8 @@ public:
     {
         inline void write(u8 byte)
         {
-            x = bits<0, 4>(byte) + 1;
-            y = bits<4, 4>(byte) + 1;
+            x = bits::seq<0, 4>(byte) + 1;
+            y = bits::seq<4, 4>(byte) + 1;
         }
 
         inline uint mosaicX(uint value) const { return x * (value / x); }

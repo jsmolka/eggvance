@@ -3,116 +3,200 @@
 #include <climits>
 #include <type_traits>
 
-#ifdef _MSC_VER
+#include "defines.h"
+#include "integer.h"
+#include "macros.h"
+
+#if COMPILER_MSVC
 #include <intrin.h>
-#elif not defined __EMSCRIPTEN__
+#elif !COMPILER_EMSCRIPTEN
 #include <x86intrin.h>
 #endif
 
-#include "integer.h"
-
-template<uint index, uint size, typename T>
-inline T bits(T value)
+namespace bits
 {
-    static_assert(std::is_integral_v<T>);
-    static_assert(index + size <= sizeof(T) * CHAR_BIT);
+    template<uint index, uint size, typename T>
+    T seq(T value)
+    {
+        static_assert(std::is_integral_v<T>);
+        static_assert(index + size <= CHAR_BIT * sizeof(T));
 
-    return (value >> index) & ((1ull << size) - 1);
-}
+        return (value >> index) & ((1ull << size) - 1);
+    }
 
-template<typename T>
-inline T sar(T value, uint amount)
-{
-    static_assert(std::is_integral_v<T>);
+    template<typename T>
+    T sar(T value, uint amount)
+    {
+        static_assert(std::is_integral_v<T>);
 
-    return static_cast<std::make_signed_t<T>>(value) >> amount;
-}
+        return static_cast<std::make_signed_t<T>>(value) >> amount;
+    }
 
-template<uint size, typename T>
-inline T signExtend(T value)
-{
-    static_assert(std::is_integral_v<T>);
-    static_assert(size <= sizeof(T) * CHAR_BIT);
+    template<typename T>
+    T shr(T value, uint amount)
+    {
+        static_assert(std::is_integral_v<T>);
 
-    constexpr T mask = 1ull << (size - 1);
+        return static_cast<std::make_unsigned_t<T>>(value) >> amount;
+    }
 
-    return (value ^ mask) - mask;
-}
+    template<uint size, typename T>
+    T sx(T value)
+    {
+        static_assert(std::is_integral_v<T>);
+        static_assert(size <= CHAR_BIT * sizeof(T));
 
-inline uint rotateRight(uint value, uint amount)
-{
-    #ifdef _MSC_VER
-    return _rotr(value, amount);
-    #elif defined __clang__
-    return __builtin_rotateright32(value, amount);
-    #else
-    amount &= 31;
-    return (value >> amount) | (value << (-amount & 31));
-    #endif
-}
+        constexpr T mask = 1ull << (size - 1);
 
-inline uint popcount(uint value)
-{
-    #ifdef _MSC_VER
-    return __popcnt(value);
-    #else
-    return __builtin_popcount(value);
-    #endif
-}
+        return (value ^ mask) - mask;
+    }
 
-inline uint bitScanForward(uint value)
-{
-    #ifdef _MSC_VER
-    unsigned long index;
-    _BitScanForward(&index, value);
-    return static_cast<uint>(index);
-    #else
-    return __builtin_ctz(value);
-    #endif
-}
+    template<typename T>
+    T ror(T value, uint amount)
+    {
+        #if COMPILER_MSVC
+        if constexpr (sizeof(T) == 1) return _rotr8 (value, amount);
+        if constexpr (sizeof(T) == 2) return _rotr16(value, amount);
+        if constexpr (sizeof(T) == 4) return _rotr  (value, amount);
+        if constexpr (sizeof(T) == 8) return _rotr64(value, amount);
+        UNREACHABLE;
+        #elif COMPILER_CLANG
+        if constexpr (sizeof(T) == 1) return __builtin_rotateright8 (value, amount);
+        if constexpr (sizeof(T) == 2) return __builtin_rotateright16(value, amount);
+        if constexpr (sizeof(T) == 4) return __builtin_rotateright32(value, amount);
+        if constexpr (sizeof(T) == 8) return __builtin_rotateright64(value, amount);
+        UNREACHABLE;
+        #else
+        constexpr T mask = CHAR_BIT * sizeof(T) - 1;
+        amount &= mask;
+        return (value >> amount) | (value << (-amount & mask));
+        #endif
+    }
 
-class SetBits
-{
-public:
-    explicit SetBits(uint value)
-        : value(value) {}
+    template<typename T>
+    T rol(T value, uint amount)
+    {
+        #if COMPILER_MSVC
+        if constexpr (sizeof(T) == 1) return _rotl8 (value, amount);
+        if constexpr (sizeof(T) == 2) return _rotl16(value, amount);
+        if constexpr (sizeof(T) == 4) return _rotl  (value, amount);
+        if constexpr (sizeof(T) == 8) return _rotl64(value, amount);
+        UNREACHABLE;
+        #elif COMPILER_CLANG
+        if constexpr (sizeof(T) == 1) return __builtin_rotateleft8 (value, amount);
+        if constexpr (sizeof(T) == 2) return __builtin_rotateleft16(value, amount);
+        if constexpr (sizeof(T) == 4) return __builtin_rotateleft32(value, amount);
+        if constexpr (sizeof(T) == 8) return __builtin_rotateleft64(value, amount);
+        UNREACHABLE;
+        #else
+        constexpr T mask = CHAR_BIT * sizeof(T) - 1;
+        amount &= mask;
+        return (value << amount) | (value >> (-amount & mask));
+        #endif
+    }
 
-    class Iterator
+    template<typename T>
+    uint clz(T value)
+    {
+        #if COMPILER_MSVC
+        unsigned long index;
+        if constexpr (sizeof(T) <= 4)
+            _BitScanReverse(&index, value);
+        else
+            _BitScanReverse64(&index, value);
+        return static_cast<uint>(index);
+        #else
+        if constexpr (sizeof(T) <= 4)
+            return __builtin_clz(value);
+        else
+            return __builtin_clzll(value);
+        #endif
+    }
+
+    template<typename T>
+    uint ctz(T value)
+    {
+        #if COMPILER_MSVC
+        unsigned long index;
+        if constexpr (sizeof(T) <= 4)
+            _BitScanForward(&index, value);
+        else
+            _BitScanForward64(&index, value);
+        return static_cast<uint>(index);
+        #else
+        if constexpr (sizeof(T) <= 4)
+            return __builtin_ctz(value);
+        else
+            return __builtin_ctzll(value);
+        #endif
+    }
+
+    template<typename T>
+    uint popcnt(T value)
+    {
+        #ifdef COMPILER_MSVC
+        if constexpr (sizeof(T) <= 2) return __popcnt16(value);
+        if constexpr (sizeof(T) == 4) return __popcnt  (value);
+        if constexpr (sizeof(T) == 8) return __popcnt64(value);
+        UNREACHABLE;
+        #else
+        if constexpr (sizeof(T) <= 4)
+            return __builtin_popcount(value);
+        else
+            return __builtin_popcountll(value);
+        #endif
+    }
+
+    template<typename T>
+    class SetBitsIterator
     {
     public:
-        explicit Iterator(uint value)
+        class Iterator
+        {
+        public:
+            explicit Iterator(T value)
+                : value(value) {}
+
+            Iterator& operator++()
+            {
+                value &= value - 1;
+                return *this;
+            }
+
+            uint operator*() const
+            {
+                return bits::ctz(value);
+            }
+
+            bool operator!=(const Iterator& other) const
+            {
+                return value != other.value;
+            }
+
+        private:
+            T value;
+        };
+
+        explicit SetBitsIterator(T value)
             : value(value) {}
 
-        inline Iterator& operator++()
+        Iterator begin()
         {
-            value &= value - 1;
-            return *this;
+            return Iterator(value);
         }
 
-        inline uint operator*() const
+        Iterator end()
         {
-            return bitScanForward(value);
-        }
-
-        inline bool operator!=(const Iterator& other) const
-        {
-            return value != other.value;
+            return Iterator(0);
         }
 
     private:
-        uint value;
+        T value;
     };
 
-    inline Iterator begin() const
+    template<typename T>
+    SetBitsIterator<T> iter(T value)
     {
-        return Iterator(value);
+        return SetBitsIterator<T>(value);
     }
-
-    inline Iterator end() const
-    {
-        return Iterator(0);
-    }
-
-private:
-    uint value;
-};
+}
