@@ -150,5 +150,5 @@ struct ShortcutConfig
     T fps_unlimited;
 };
 
-Key keyByName(const std::string& name);
-Button buttonByName(const std::string& name);
+Key keyByName(std::string name);
+Button buttonByName(std::string name);

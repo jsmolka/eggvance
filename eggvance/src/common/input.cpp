@@ -1,8 +1,9 @@
 #include "input.h"
 
-#include <unordered_map>
+#include <algorithm>
+#include <string_view>
 
-static std::unordered_map<std::string, Key> key_map =
+static constexpr std::pair<std::string_view, Key> key_map[] =
 {
     { "A"        , KEY_A         },
     { "B"        , KEY_B         },
@@ -64,17 +65,19 @@ static std::unordered_map<std::string, Key> key_map =
     { "CAPSLOCK" , KEY_CAPSLOCK  }
 };
 
-Key keyByName(const std::string& name)
+Key keyByName(std::string name)
 {
-    const auto pair = key_map.find(name);
+    std::transform(name.begin(), name.end(), name.begin(), std::toupper);
 
-    if (pair != key_map.end())
-        return pair->second;
-    else
-        return KEY_NONE;
+    for (const auto& [key, value] : key_map)
+    {
+        if (key == name)
+            return value;
+    }
+    return KEY_NONE;
 }
 
-static std::unordered_map<std::string, Button> button_map = 
+static constexpr std::pair<std::string_view, Button> button_map[] = 
 {
     { "A"            , BTN_A             },
     { "B"            , BTN_B             },
@@ -93,12 +96,14 @@ static std::unordered_map<std::string, Button> button_map =
     { "DPRIGHT"      , BTN_DPAD_RIGHT    }
 };
 
-Button buttonByName(const std::string& name)
+Button buttonByName(std::string name)
 {
-    const auto pair = button_map.find(name);
+    std::transform(name.begin(), name.end(), name.begin(), std::toupper);
 
-    if (pair != button_map.end())
-        return pair->second;
-    else
-        return BTN_NONE;
+    for (const auto& [key, value] : button_map)
+    {
+        if (key == name)
+            return value;
+    }
+    return BTN_NONE;
 }
