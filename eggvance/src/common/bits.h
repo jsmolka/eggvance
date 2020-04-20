@@ -134,7 +134,7 @@ namespace bits
     template<typename T>
     uint popcnt(T value)
     {
-        #ifdef COMPILER_MSVC
+        #if COMPILER_MSVC
         if constexpr (sizeof(T) <= 2) return __popcnt16(value);
         if constexpr (sizeof(T) == 4) return __popcnt  (value);
         if constexpr (sizeof(T) == 8) return __popcnt64(value);
