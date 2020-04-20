@@ -1,6 +1,7 @@
 #include "input.h"
 
 #include <algorithm>
+#include <cctype>
 #include <string_view>
 
 static constexpr std::pair<std::string_view, Key> key_map[] =
@@ -65,18 +66,6 @@ static constexpr std::pair<std::string_view, Key> key_map[] =
     { "CAPSLOCK" , KEY_CAPSLOCK  }
 };
 
-Key keyByName(std::string name)
-{
-    std::transform(name.begin(), name.end(), name.begin(), std::toupper);
-
-    for (const auto& [key, value] : key_map)
-    {
-        if (key == name)
-            return value;
-    }
-    return KEY_NONE;
-}
-
 static constexpr std::pair<std::string_view, Button> button_map[] = 
 {
     { "A"            , BTN_A             },
@@ -96,10 +85,28 @@ static constexpr std::pair<std::string_view, Button> button_map[] =
     { "DPRIGHT"      , BTN_DPAD_RIGHT    }
 };
 
+static std::string upper(std::string str)
+{
+    std::transform(str.begin(), str.end(), str.begin(),
+        [](unsigned char c) { return std::toupper(c); });
+
+    return str;
+}
+
+Key keyByName(std::string name)
+{
+    name = upper(name);
+    for (const auto& [key, value] : key_map)
+    {
+        if (key == name)
+            return value;
+    }
+    return KEY_NONE;
+}
+
 Button buttonByName(std::string name)
 {
-    std::transform(name.begin(), name.end(), name.begin(), std::toupper);
-
+    name = upper(name);
     for (const auto& [key, value] : button_map)
     {
         if (key == name)
