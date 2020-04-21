@@ -63,13 +63,13 @@
       <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)icon\cpp\;$(ProjectDir)external\fmt\include;$(ProjectDir)external\tinytoml\include</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
-      <DisableSpecificWarnings>26451;26495;26812;6385;6386;6262;26444</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/Ob3 %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>NOMINMAX;PLATFORM_SDL;FMT_HEADER_ONLY;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <WarningLevel>Level2</WarningLevel>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -88,13 +88,13 @@
       <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)icon\cpp\;$(ProjectDir)external\fmt\include;$(ProjectDir)external\tinytoml\include</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
-      <DisableSpecificWarnings>26451;26495;26812;6385;6386;6262;26444</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/Ob3 %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>NOMINMAX;PLATFORM_SDL;FMT_HEADER_ONLY;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <WarningLevel>Level2</WarningLevel>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -113,7 +113,6 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)icon\cpp\;$(ProjectDir)external\fmt\include;$(ProjectDir)external\tinytoml\include</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
-      <DisableSpecificWarnings>26451;26495;26812;6385;6386;6262;26444</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PreprocessorDefinitions>NOMINMAX;PLATFORM_SDL;FMT_HEADER_ONLY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -121,6 +120,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <WarningLevel>Level2</WarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

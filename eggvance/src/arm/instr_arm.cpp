@@ -317,7 +317,7 @@ void ARM::Arm_SingleDataTransfer(u32 instr)
     }
 
     if (!increment)
-        offset = -offset;
+        offset = -static_cast<int>(offset);
 
     if (pre_index)
         addr += offset;
@@ -387,7 +387,7 @@ void ARM::Arm_HalfSignedDataTransfer(u32 instr)
     }
 
     if (!increment)
-        offset = -offset;
+        offset = -static_cast<int>(offset);
 
     if (pre_index)
         addr += offset;
