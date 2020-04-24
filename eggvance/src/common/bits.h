@@ -166,8 +166,8 @@ namespace bits
             return bits::ctz(value);
         }
 
-        bool operator==(const BitIterator& other) const { return value == other.value; }
-        bool operator!=(const BitIterator& other) const { return value != other.value; }
+        bool operator==(BitIterator other) const { return value == other.value; }
+        bool operator!=(BitIterator other) const { return value != other.value; }
 
     private:
         T value;
