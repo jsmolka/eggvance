@@ -5,6 +5,7 @@
 
 #include "defines.h"
 #include "integer.h"
+#include "iterator.h"
 #include "macros.h"
 
 #if COMPILER_MSVC
@@ -148,55 +149,36 @@ namespace bits
     }
 
     template<typename T>
-    class SetBitsIterator
+    class BitIterator
     {
     public:
-        class Iterator
-        {
-        public:
-            explicit Iterator(T value)
-                : value(value) {}
-
-            Iterator& operator++()
-            {
-                value &= value - 1;
-                return *this;
-            }
-
-            uint operator*() const
-            {
-                return bits::ctz(value);
-            }
-
-            bool operator!=(const Iterator& other) const
-            {
-                return value != other.value;
-            }
-
-        private:
-            T value;
-        };
-
-        explicit SetBitsIterator(T value)
+        explicit BitIterator(T value)
             : value(value) {}
 
-        Iterator begin()
+        BitIterator& operator++()
         {
-            return Iterator(value);
+            value &= value - 1;
+            return *this;
         }
 
-        Iterator end()
+        uint operator*() const
         {
-            return Iterator(0);
+            return bits::ctz(value);
         }
+
+        bool operator==(const BitIterator& other) const { return value == other.value; }
+        bool operator!=(const BitIterator& other) const { return value != other.value; }
 
     private:
         T value;
     };
 
     template<typename T>
-    SetBitsIterator<T> iter(T value)
+    auto iter(T value)
     {
-        return SetBitsIterator<T>(value);
+        return IteratorRange(
+            BitIterator<T>(value),
+            BitIterator<T>(0)
+        );
     }
 }

@@ -410,6 +410,9 @@
     <ClInclude Include="src\common\defines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\common\iterator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="eggvance.rc">
