@@ -14,13 +14,6 @@
 #  define UNREACHABLE ASSERT(false, "Unreachable")
 #endif
 
-#define SCOPED_ENUM(name, ...)                                          \
-    struct name                                                         \
-    {                                                                   \
-        name() = delete;                                                \
-        enum { __VA_ARGS__ };                                           \
-    }
-
 #define CASE_BYTE_REG(label)                                            \
     case label + 0
 

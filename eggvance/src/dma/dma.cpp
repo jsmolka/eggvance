@@ -6,12 +6,13 @@
 
 static constexpr int deltas[4] = { 1, -1, 0, 1 };
 
-SCOPED_ENUM(AddressControl,
-    Increment = 0b00,
-    Decrement = 0b01,
-    Fixed     = 0b10,
-    Reload    = 0b11
-);
+enum AddressControl
+{
+    kAddressControlIncrement,
+    kAddressControlDecrement,
+    kAddressControlFixed,
+    kAddressControlReload
+};
 
 DMA::DMA(uint id)
 {
@@ -29,7 +30,7 @@ void DMA::start()
         dad = io.dad;
         io.control.reload = false;
     }
-    else if (io.control.repeat && io.control.dadcnt == AddressControl::Reload)
+    else if (io.control.repeat && io.control.dadcnt == kAddressControlReload)
     {
         dad = io.dad;
     }
