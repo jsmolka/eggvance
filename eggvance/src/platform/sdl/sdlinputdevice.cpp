@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-#include "common/config.h"
+#include "base/config.h"
 
 SDLInputDevice::~SDLInputDevice()
 {

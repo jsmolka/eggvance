@@ -5,7 +5,7 @@
 #include <stdexcept>
 
 #include "arm/arm.h"
-#include "common/config.h"
+#include "base/config.h"
 
 void BIOS::reset()
 {

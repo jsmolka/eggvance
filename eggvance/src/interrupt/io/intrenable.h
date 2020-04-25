@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/integer.h"
+#include "base/integer.h"
 
 class IntrEnable
 {

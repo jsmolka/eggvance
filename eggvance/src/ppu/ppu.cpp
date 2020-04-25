@@ -2,9 +2,9 @@
 
 #include <algorithm>
 
-#include "common/bits.h"
-#include "common/constants.h"
-#include "common/macros.h"
+#include "base/bits.h"
+#include "base/constants.h"
+#include "base/macros.h"
 #include "dma/dmac.h"
 #include "interrupt/irqhandler.h"
 #include "mmu/mmu.h"

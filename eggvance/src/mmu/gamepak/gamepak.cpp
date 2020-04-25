@@ -5,7 +5,7 @@
 #include "eeprom.h"
 #include "flash.h"
 #include "sram.h"
-#include "common/config.h"
+#include "base/config.h"
 
 struct BackupConfig
 {

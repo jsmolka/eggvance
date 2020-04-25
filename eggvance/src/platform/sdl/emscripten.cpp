@@ -6,7 +6,7 @@
 #include "sdlaudiodevice.h"
 #include "sdlinputdevice.h"
 #include "sdlvideodevice.h"
-#include "common/config.h"
+#include "base/config.h"
 #include "keypad/keypad.h"
 #include "mmu/mmu.h"
 #include "platform/common.h"

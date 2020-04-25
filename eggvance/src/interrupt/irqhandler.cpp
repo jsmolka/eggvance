@@ -1,7 +1,7 @@
 #include "irqhandler.h"
 
 #include "arm/arm.h"
-#include "common/macros.h"
+#include "base/macros.h"
 #include "mmu/memmap.h"
 
 IRQHandler irqh;

@@ -3,8 +3,8 @@
 #include <memory>
 #include <string>
 
-#include "common/constants.h"
-#include "common/integer.h"
+#include "base/constants.h"
+#include "base/integer.h"
 
 class VideoDevice
 {

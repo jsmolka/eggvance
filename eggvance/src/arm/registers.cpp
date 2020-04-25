@@ -2,7 +2,7 @@
 
 #include <cstring>
 
-#include "common/config.h"
+#include "base/config.h"
 
 void Registers::reset()
 {

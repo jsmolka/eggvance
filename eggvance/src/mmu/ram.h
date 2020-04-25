@@ -2,7 +2,7 @@
 
 #include <array>
 
-#include "common/integer.h"
+#include "base/integer.h"
 
 template<typename T, std::size_t N>
 class RAM

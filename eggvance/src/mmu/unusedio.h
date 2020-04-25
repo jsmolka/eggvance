@@ -1,7 +1,7 @@
 #pragma once
 
-#include "common/config.h"
-#include "common/register.h"
+#include "base/config.h"
+#include "base/register.h"
 
 struct UnusedIO
 {

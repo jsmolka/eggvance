@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/defines.h"
+#include "base/defines.h"
 #include "platform/videodevice.h"
 
 #if COMPILER_MSVC || COMPILER_EMSCRIPTEN

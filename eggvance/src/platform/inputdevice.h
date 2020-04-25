@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "common/integer.h"
+#include "base/integer.h"
 
 class InputDevice
 {

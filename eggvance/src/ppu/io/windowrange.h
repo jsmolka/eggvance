@@ -1,7 +1,7 @@
 #pragma once
 
-#include "common/constants.h"
-#include "common/register.h"
+#include "base/constants.h"
+#include "base/register.h"
 
 template<uint maximum>
 class WindowRange : public RegisterW<2>

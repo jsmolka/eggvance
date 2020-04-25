@@ -2,7 +2,7 @@
 
 #include "matrix.h"
 #include "mapentry.h"
-#include "common/macros.h"
+#include "base/macros.h"
 #include "mmu/mmu.h"
 
 Point PPU::transform(int x, int bg)

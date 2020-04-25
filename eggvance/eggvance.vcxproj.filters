@@ -18,9 +18,6 @@
     <ClCompile Include="src\arm\registers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\config.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\arm\arm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -78,13 +75,7 @@
     <ClCompile Include="src\mmu\gamepak\sram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\input.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\mmu\bios_data.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\fs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\platform\audiodevice.cpp">
@@ -150,21 +141,21 @@
     <ClCompile Include="src\platform\synchronizer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\base\config.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\base\fs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\base\input.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\common\integer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\arm\psr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\arm\registers.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\common\config.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\common\macros.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\arm\arm.h">
@@ -183,9 +174,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ppu\buffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\common\constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\mmu\oam.h">
@@ -224,9 +212,6 @@
     <ClInclude Include="src\ppu\matrix.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\common\enums.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\ppu\oamentry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -246,15 +231,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ppu\layer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\common\input.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\common\bits.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\common\fs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\platform\audiodevice.h">
@@ -350,9 +326,6 @@
     <ClInclude Include="src\ppu\io\windowrange.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\common\register.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\mmu\unusedio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -407,10 +380,37 @@
     <ClInclude Include="src\platform\synchronizer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\common\defines.h">
+    <ClInclude Include="src\base\bits.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\common\iterator.h">
+    <ClInclude Include="src\base\config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\constants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\defines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\enums.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\fs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\input.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\iterator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\macros.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\register.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\integer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "common/defines.h"
-#include "common/input.h"
+#include "base/defines.h"
+#include "base/input.h"
 #include "platform/inputdevice.h"
 
 #if COMPILER_MSVC || COMPILER_EMSCRIPTEN

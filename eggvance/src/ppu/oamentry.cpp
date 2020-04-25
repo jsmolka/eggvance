@@ -1,8 +1,8 @@
 #include "oamentry.h"
 
-#include "common/bits.h"
-#include "common/constants.h"
-#include "common/macros.h"
+#include "base/bits.h"
+#include "base/constants.h"
+#include "base/macros.h"
 
 static constexpr Dimensions sizes[4][4] =
 {

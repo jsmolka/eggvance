@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/defines.h"
+#include "base/defines.h"
 #include "platform/audiodevice.h"
 
 #if COMPILER_MSVC || COMPILER_EMSCRIPTEN

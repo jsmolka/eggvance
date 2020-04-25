@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include "common/macros.h"
+#include "base/macros.h"
 
 Flash::Flash(const Path& file, Backup::Type type)
     : Backup(file, type)

@@ -2,7 +2,7 @@
 
 #include <array>
 
-#include "common/constants.h"
+#include "base/constants.h"
 
 template<typename T>
 using Buffer = std::array<T, kScreenW>;

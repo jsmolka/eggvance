@@ -2,7 +2,7 @@
 
 #include <chrono>
 
-#include "common/integer.h"
+#include "base/integer.h"
 
 class FrameCounter
 {

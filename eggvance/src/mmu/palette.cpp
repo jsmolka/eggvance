@@ -1,6 +1,6 @@
 #include "palette.h"
 
-#include "common/constants.h"
+#include "base/constants.h"
 
 void Palette::reset()
 {

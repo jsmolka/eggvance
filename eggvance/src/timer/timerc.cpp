@@ -3,7 +3,7 @@
 #include <algorithm>
 
 #include "arm/arm.h"
-#include "common/macros.h"
+#include "base/macros.h"
 #include "mmu/memmap.h"
 
 constexpr auto kOverflowInitial = 0x4000'0000;

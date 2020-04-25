@@ -3,7 +3,7 @@
 #include "memmap.h"
 #include "mmu.h"
 #include "arm/arm.h"
-#include "common/macros.h"
+#include "base/macros.h"
 #include "dma/dmac.h"
 #include "interrupt/irqhandler.h"
 #include "keypad/keypad.h"

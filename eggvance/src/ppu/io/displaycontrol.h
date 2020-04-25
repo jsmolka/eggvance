@@ -1,9 +1,9 @@
 #pragma once
 
-#include "common/bits.h"
-#include "common/config.h"
-#include "common/macros.h"
-#include "common/register.h"
+#include "base/bits.h"
+#include "base/config.h"
+#include "base/macros.h"
+#include "base/register.h"
 
 class DisplayControl : public RegisterRW<2>
 {

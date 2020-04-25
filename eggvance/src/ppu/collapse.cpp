@@ -2,8 +2,8 @@
 
 #include <algorithm>
 
-#include "common/constants.h"
-#include "common/macros.h"
+#include "base/constants.h"
+#include "base/macros.h"
 #include "mmu/mmu.h"
 #include "platform/videodevice.h"
 

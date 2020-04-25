@@ -2,7 +2,7 @@
 
 #include "memmap.h"
 #include "arm/arm.h"
-#include "common/bits.h"
+#include "base/bits.h"
 
 MMU mmu;
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/bits.h"
+#include "base/bits.h"
 
 class BlendFade
 {
