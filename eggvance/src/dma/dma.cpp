@@ -51,7 +51,7 @@ void DMA::run(int& cycles)
 {
     while (remaining-- > 0)
     {
-        (this->*transfer)();
+        transfer();
 
         sad += sad_delta;
         dad += dad_delta;
@@ -124,29 +124,38 @@ void DMA::updateTransfer()
         initEEPROM();
 
         if (eeprom_w)
-            transfer = &DMA::writeEEPROM;
+        {
+            transfer = [&]() {
+                u8 byte = static_cast<u8>(mmu.readHalf(sad));
+                mmu.gamepak.backup->writeByte(dad, byte);
+            };
+        }
         else
-            transfer = &DMA::readEEPROM;
+        {
+            transfer = [&]() {
+                u8 byte = mmu.gamepak.backup->readByte(sad);
+                mmu.writeHalf(dad, byte);
+            };
+
+        }
     }
     else
     {
         if (io.control.word)
-            transfer = &DMA::transferWord;
+        {
+            transfer = [&]() {
+                u32 word = mmu.readWord(sad);
+                mmu.writeWord(dad, word);
+            };
+        }
         else
-            transfer = &DMA::transferHalf;
+        {
+            transfer = [&]() {
+                u16 half = mmu.readHalf(sad);
+                mmu.writeHalf(dad, half);
+            };
+        }
     }
-}
-
-void DMA::transferHalf()
-{
-    u32 half = mmu.readHalf(sad);
-    mmu.writeHalf(dad, half);
-}
-
-void DMA::transferWord()
-{
-    u32 word = mmu.readWord(sad);
-    mmu.writeWord(dad, word);
 }
 
 void DMA::initEEPROM()
@@ -171,16 +180,4 @@ void DMA::initEEPROM()
             break;
         }
     }
-}
-
-void DMA::readEEPROM()
-{
-    u8 byte = mmu.gamepak.backup->readByte(sad);
-    mmu.writeHalf(dad, byte);
-}
-
-void DMA::writeEEPROM()
-{
-    u8 byte = static_cast<u8>(mmu.readHalf(sad));
-    mmu.gamepak.backup->writeByte(dad, byte);
 }

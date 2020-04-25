@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 #include "io/dmaio.h"
 
 class DMA
@@ -23,20 +25,13 @@ public:
     DMAIO io;
 
 private:
-    using Transfer = void(DMA::*)(void);
-
     static bool inEEPROM(u32 addr);
     static bool inGamePak(u32 addr);
 
     void updateCycles();
     void updateTransfer();
 
-    void transferHalf();
-    void transferWord();
-
     void initEEPROM();
-    void readEEPROM();
-    void writeEEPROM();
 
     int remaining = 0;
     int cycles_s  = 0;
@@ -45,5 +40,6 @@ private:
     u32 dad       = 0;
     int sad_delta = 0;
     int dad_delta = 0;
-    Transfer transfer = nullptr;
+
+    std::function<void(void)> transfer;
 };
