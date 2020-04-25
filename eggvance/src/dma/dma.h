@@ -16,7 +16,7 @@ public:
     DMA(uint id);
 
     void start();
-    void run(cycle_t& cycles);
+    void run(int& cycles);
 
     uint id      = 0;
     bool running = false;
@@ -38,12 +38,12 @@ private:
     void readEEPROM();
     void writeEEPROM();
 
-    cycle_t remaining = 0;
-    cycle_t cycles_s  = 0;
-    cycle_t cycles_n  = 0;
-    u32 sad           = 0;
-    u32 dad           = 0;
-    int sad_delta     = 0;
-    int dad_delta     = 0;
+    int remaining = 0;
+    int cycles_s  = 0;
+    int cycles_n  = 0;
+    u32 sad       = 0;
+    u32 dad       = 0;
+    int sad_delta = 0;
+    int dad_delta = 0;
     Transfer transfer = nullptr;
 };

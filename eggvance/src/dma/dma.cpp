@@ -46,7 +46,7 @@ void DMA::start()
     updateTransfer();
 }
 
-void DMA::run(cycle_t& cycles)
+void DMA::run(int& cycles)
 {
     while (remaining-- > 0)
     {
