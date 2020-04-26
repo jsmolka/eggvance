@@ -26,7 +26,7 @@ std::wstring encode(const std::string& string)
 
     return result;
     #else
-    return std::wstring(str.begin(), str.end());
+    return std::wstring(string.begin(), string.end());
     #endif
 }
 
