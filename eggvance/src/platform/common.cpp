@@ -16,7 +16,8 @@ void common::init(
     const std::shared_ptr<InputDevice>& input_device, 
     const std::shared_ptr<VideoDevice>& video_device)
 {
-    fs::init(argv[0]);
+    fs::init(argc, argv);
+
     config.init("eggvance.toml");
     mmu.bios.init(config.bios_file);
 
@@ -30,8 +31,8 @@ void common::init(
 
     switch (argc)
     {
-    case 2: mmu.gamepak.load(argv[1]); break;
-    case 3: mmu.gamepak.load(argv[1], argv[2]); break;
+    case 2: mmu.gamepak.load(fs::make_path(argv[1])); break;
+    case 3: mmu.gamepak.load(fs::make_path(argv[1]), fs::make_path(argv[2])); break;
     }
 }
 

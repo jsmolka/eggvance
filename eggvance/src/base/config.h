@@ -6,11 +6,11 @@
 class Config
 {
 public:
-    void init(const Path& file);
+    void init(const std::string& file);
 
-    Path bios_file;
+    fs::path bios_file;
+    fs::path save_dir;
     bool bios_skip;
-    Path save_dir;
     int deadzone;
 
     struct Controls
@@ -28,7 +28,7 @@ public:
     double fps_multipliers[4];
 
 private:
-    void initFile(const Path& file);
+    void initFile(const fs::path& file);
     void initDefault();
 };
 

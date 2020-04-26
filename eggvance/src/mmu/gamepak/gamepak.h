@@ -21,9 +21,9 @@ public:
     u16 readHalf(u32 addr);
     u32 readWord(u32 addr);
 
-    bool load(const Path& file, const Path& backup);
-    bool load(const Path& file);
-    bool loadBackup(const Path& file);
+    bool load(const fs::path& file, const fs::path& backup);
+    bool load(const fs::path& file);
+    bool loadBackup(const fs::path& file);
 
     std::size_t size() const;
 
@@ -33,10 +33,10 @@ private:
     static u32 readUnused(u32 addr);
 
     void initHeader();
-    void initBackup(const Path& file, Backup::Type type);
+    void initBackup(const fs::path& file, Backup::Type type);
 
     Backup::Type backupType() const;
 
-    Path file;
+    fs::path file;
     std::vector<u8> data;
 };

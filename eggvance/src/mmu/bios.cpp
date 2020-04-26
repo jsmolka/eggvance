@@ -15,21 +15,21 @@ void BIOS::reset()
         last_fetched = 0;
 }
 
-void BIOS::init(const Path& file)
+void BIOS::init(const fs::path& path)
 {
-    if (file.empty())
-    {
-        std::memcpy(data.data<u8>(0), replacement_bios.data(), 0x4000);
-    }
-    else
+    if (fs::is_regular_file(path))
     {
         static constexpr u64 expected_hash = 0xECCF5E4CEA50816E;
 
-        if (!read(config.bios_file))
+        if (!read(path))
             throw std::runtime_error("Cannot read BIOS");
 
         if (hash(data.data<u32>(0), 0x1000) != expected_hash)
-            throw std::runtime_error("Invalid BIOS hash");
+            throw std::runtime_error("Unexpected BIOS hash");
+    }
+    else
+    {
+        std::memcpy(data.data<u8>(0), replacement_bios.data(), 0x4000);
     }
 }
 
@@ -62,9 +62,9 @@ u32 BIOS::readProtected(u32 addr) const
     return last_fetched >> (addr & 0x3);
 }
 
-bool BIOS::read(const Path& file)
+bool BIOS::read(const fs::path& path)
 {
-    std::ifstream stream(file, std::ios::binary);
+    std::ifstream stream(path, std::ios::binary);
     if (!stream.is_open())
         return false;
 

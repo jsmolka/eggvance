@@ -1,18 +1,16 @@
 #include "backup.h"
 
-#include "base/fs.h"
-
 Backup::Backup()
     : type(Type::None)
 {
 
 }
 
-Backup::Backup(const Path& file, Type type)
+Backup::Backup(const fs::path& file, Type type)
     : file(file)
     , type(type)
 {
-    if (fs::isFile(file))
+    if (fs::is_regular_file(file))
         fs::read(file, data);
 }
 

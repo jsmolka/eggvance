@@ -1,41 +1,82 @@
 #pragma once
 
-#if __has_include(<filesystem>)
-#include <filesystem>
-namespace std_filesystem = std::filesystem;
-#else
-#include <experimental/filesystem>
-namespace std_filesystem = std::experimental::filesystem;
-#endif
+#include <array>
+#include <fstream>
 #include <vector>
 
-#include "integer.h"
-
-struct Path : public std_filesystem::path
-{
-    Path() = default;
-    Path(const char* path);
-    Path(const std::string& path);
-    Path(const std::wstring& path);
-    Path(const std_filesystem::path& path);
-
-    template<typename T>
-    Path& operator=(const T& path)
-    {
-        return *this = Path(path);
-    }
-};
+#ifdef __cpp_lib_filesystem
+#include <filesystem>
+#else
+#include <experimental/filesystem>
+#endif
 
 namespace fs
 {
-    void init(const Path& executable);
+    #ifdef __cpp_lib_filesystem
+    using namespace std::filesystem;
+    #else
+    using namespace std::experimental::filesystem;
+    #endif
 
-    bool read(const Path& file, std::vector<u8>& dst);
-    bool write(const Path& file, std::vector<u8>& src);
+    void init(int argc, char* argv[]);
 
-    bool isFile(const Path& path);
-    bool isDirectory(const Path& path);
+    path exe_relative(const path& path);
 
-    bool makeDirectory(const Path& path);
-    Path relativeToExe(const Path& path);
+    template<typename T>
+    path make_path(const T& path)
+    {
+        return fs::path(path);
+    }
+
+    template<> path make_path(const char* const& path);
+    template<> path make_path(const std::string& path);
+
+    template<typename T>
+    bool read(const path& file, std::vector<T>& dst)
+    {
+        auto stream = std::ifstream(file, std::ios::binary);
+        if (!stream.is_open())
+            return false;
+
+        stream.seekg(0, std::ios::end);
+        std::size_t size = stream.tellg();
+        stream.seekg(0, std::ios::beg);
+
+        dst.resize((size + sizeof(T) - 1) / sizeof(T));
+
+        stream.read(reinterpret_cast<char*>(dst.data()), size);
+
+        return true;
+    }
+
+    template<typename T, std::size_t N>
+    bool read(const path& file, std::array<T, N>& dst)
+    {
+        auto stream = std::ifstream(file, std::ios::binary);
+        if (!stream.is_open())
+            return false;
+
+        stream.seekg(0, std::ios::end);
+        std::size_t size = stream.tellg();
+        stream.seekg(0, std::ios::beg);
+
+        if (size != (N * sizeof(T)))
+            return false;
+
+        stream.read(reinterpret_cast<char*>(dst.data()), size);
+
+        return true;
+    }
+
+    template<typename T>
+    bool write(const path& file, const T& src)
+    {
+        auto stream = std::ofstream(file, std::ios::binary);
+        if (!stream.is_open())
+            return false;
+
+        stream.write(reinterpret_cast<const char*>(src.data()), src.size() * sizeof(T::value_type));
+
+        return true;
+    }
 }

@@ -10,7 +10,7 @@ class BIOS
 public:
     void reset();
 
-    void init(const Path& file);
+    void init(const fs::path& path);
 
     u8  readByte(u32 addr);
     u16 readHalf(u32 addr);
@@ -19,7 +19,7 @@ public:
 private:
     u32 readProtected(u32 addr) const;
 
-    bool read(const Path& file);
+    bool read(const fs::path& path);
     static u64 hash(u32* data, int size);
 
     u32 last_fetched;

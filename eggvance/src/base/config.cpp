@@ -2,16 +2,14 @@
 
 #include <toml/toml.h>
 
-#include "base/fs.h"
-
 Config config;
 
-void Config::init(const Path& file)
+void Config::init(const std::string& file)
 {
     try
     {
-        if (std_filesystem::exists(fs::relativeToExe(file)))
-            initFile(fs::relativeToExe(file));
+        if (fs::exists(fs::exe_relative(fs::make_path(file))))
+            initFile(fs::exe_relative(fs::make_path(file)));
         else
             initDefault();
     }
@@ -21,7 +19,7 @@ void Config::init(const Path& file)
     }
 }
 
-void Config::initFile(const Path& file)
+void Config::initFile(const fs::path& file)
 {
     auto stream = std::ifstream(file);
     auto result = toml::parse(stream);
@@ -30,21 +28,21 @@ void Config::initFile(const Path& file)
 
     auto& value = result.value;
 
-    bios_file = value.get<std::string>("general.bios_file");
-    save_dir  = value.get<std::string>("general.save_dir");
+    bios_file = fs::make_path(value.get<std::string>("general.bios_file"));
+    save_dir  = fs::make_path(value.get<std::string>("general.save_dir"));
     bios_skip = value.get<bool>("general.bios_skip");
     deadzone  = value.get<int>("general.deadzone");
 
     if (bios_file.is_relative() && !bios_file.empty())
-        bios_file = fs::relativeToExe(bios_file);
+        bios_file = fs::exe_relative(bios_file);
 
     if (!save_dir.empty())
     {
         if (save_dir.is_relative())
-            save_dir = fs::relativeToExe(save_dir);
+            save_dir = fs::exe_relative(save_dir);
 
-        if (!fs::isDirectory(save_dir))
-            fs::makeDirectory(save_dir);
+        if (!fs::is_directory(save_dir))
+            fs::create_directories(save_dir);
     }
 
     fps_multipliers[0] = value.get<double>("multipliers.fps_multiplier_1");
@@ -115,9 +113,9 @@ void Config::initFile(const Path& file)
 
 void Config::initDefault()
 {
-    bios_file = Path();
+    bios_file = fs::path();
     bios_skip = true;
-    save_dir  = Path();
+    save_dir  = fs::path();
     deadzone  = 16000;
 
     fps_multipliers[0] = 2.0;

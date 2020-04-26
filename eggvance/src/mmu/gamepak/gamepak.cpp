@@ -46,7 +46,7 @@ u32 GamePak::readWord(u32 addr)
         return readUnused(addr);
 }
 
-bool GamePak::load(const Path& file, const Path& backup)
+bool GamePak::load(const fs::path& file, const fs::path& backup)
 {
     if (!fs::read(file, data))
         return false;
@@ -57,16 +57,16 @@ bool GamePak::load(const Path& file, const Path& backup)
     return true;
 }
 
-bool GamePak::load(const Path& file)
+bool GamePak::load(const fs::path& file)
 {
-    auto backup = Path(file).replace_extension("sav");
+    auto backup = fs::path(file).replace_extension("sav");
     if (!config.save_dir.empty())
         backup = config.save_dir / backup.filename();
 
     return load(file, backup);
 }
 
-bool GamePak::loadBackup(const Path& file)
+bool GamePak::loadBackup(const fs::path& file)
 {
     initBackup(file, backup->type);
 
@@ -98,7 +98,7 @@ void GamePak::initHeader()
     header.code  = toString(&data[0xAC],  4);
 }
 
-void GamePak::initBackup(const Path& file, Backup::Type type)
+void GamePak::initBackup(const fs::path& file, Backup::Type type)
 {
     backup = nullptr;
 

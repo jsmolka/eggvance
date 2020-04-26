@@ -5,7 +5,7 @@
 class Flash : public Backup
 {
 public:
-    Flash(const Path& file, Backup::Type type);
+    Flash(const fs::path& file, Backup::Type type);
 
     virtual u8 readByte(u32 addr) override final;
     virtual void writeByte(u32 addr, u8 byte) override final;

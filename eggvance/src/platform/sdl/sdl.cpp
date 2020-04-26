@@ -43,7 +43,7 @@ void init(int argc, char* argv[])
 
 void processDropEvent(const SDL_DropEvent& event)
 {
-    Path file(event.file);
+    auto file = fs::make_path(event.file);
 
     SDL_free(event.file);
     SDL_RaiseWindow(sdl_video_device->window);

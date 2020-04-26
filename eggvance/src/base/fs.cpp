@@ -1,94 +1,54 @@
 #include "fs.h"
 
-#include <fstream>
-
-#ifdef _MSC_VER
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
-static Path executable;
+static fs::path exe;
 
-Path::Path(const char* path)
-    : Path(std::string(path)) {}
-
-Path::Path(const std::string& path)
-    : std_filesystem::path(path)
+std::wstring encode(const std::string& string)
 {
-    #ifdef _MSC_VER
+    #ifdef _WIN32
     int size = MultiByteToWideChar(
         CP_UTF8, MB_ERR_INVALID_CHARS,
-        path.data(), static_cast<int>(path.size()),
+        string.data(), static_cast<int>(string.size()),
         nullptr, 0
     );
 
-    std::wstring data;
-    data.resize(size);
+    std::wstring result;
+    result.resize(size);
 
-    if (!MultiByteToWideChar(
+    MultiByteToWideChar(
         CP_UTF8, MB_ERR_INVALID_CHARS,
-        path.data(), static_cast<int>(path.size()),
-        data.data(), static_cast<int>(data.size())
-    )) return;
+        string.data(), static_cast<int>(string.size()),
+        result.data(), static_cast<int>(result.size())
+    );
 
-    *this = data;
+    return result;
+    #else
+    return std::wstring(str.begin(), str.end());
     #endif
 }
 
-Path::Path(const std::wstring& path)
-    : std_filesystem::path(path) {}
-
-Path::Path(const std_filesystem::path& path)
-    : std_filesystem::path(path) {}
-
-void fs::init(const Path& executable)
+void fs::init(int argc, char* argv[])
 {
-    ::executable = executable;
+    if (argc > 0)
+        exe = canonical(encode(argv[0]));
 }
 
-bool fs::read(const Path& file, std::vector<u8>& dst)
+fs::path fs::exe_relative(const fs::path& path)
 {
-    auto stream = std::ifstream(file, std::ios::binary);
-    if (!stream.is_open())
-        return false;
-
-    stream.seekg(0, std::ios::end);
-    std::streampos size = stream.tellg();
-    stream.seekg(0, std::ios::beg);
-
-    dst.resize(size);
-
-    stream.read(reinterpret_cast<char*>(dst.data()), size);
-
-    return true;
+    return exe.parent_path() / path;
 }
 
-bool fs::write(const Path& file, std::vector<u8>& src)
+template<>
+fs::path fs::make_path(const char* const& path)
 {
-    auto stream = std::ofstream(file, std::ios::binary);
-    if (!stream.is_open())
-        return false;
-
-    stream.write(reinterpret_cast<char*>(src.data()), src.size());
-
-    return true;
+    return fs::path(encode(path));
 }
 
-bool fs::isFile(const Path& path)
+template<>
+fs::path fs::make_path(const std::string& path)
 {
-    return std_filesystem::is_regular_file(path);
-}
-
-bool fs::isDirectory(const Path& path)
-{
-    return std_filesystem::is_directory(path);
-}
-
-bool fs::makeDirectory(const Path& path)
-{
-    return std_filesystem::create_directories(path);
-}
-
-Path fs::relativeToExe(const Path& path)
-{
-    return executable.parent_path() / path;
+    return fs::path(encode(path));
 }

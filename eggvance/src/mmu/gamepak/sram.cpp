@@ -1,6 +1,6 @@
 #include "sram.h"
 
-SRAM::SRAM(const Path& file)
+SRAM::SRAM(const fs::path& file)
     : Backup(file, Backup::Type::SRAM)
 {
     data.resize(0x8000, 0);
