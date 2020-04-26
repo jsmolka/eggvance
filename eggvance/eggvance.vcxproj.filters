@@ -389,9 +389,6 @@
     <ClInclude Include="src\base\constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\base\defines.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\base\enums.h">
       <Filter>Header Files</Filter>
     </ClInclude>

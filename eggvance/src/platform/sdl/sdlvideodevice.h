@@ -1,13 +1,12 @@
 #pragma once
 
-#include "base/defines.h"
-#include "platform/videodevice.h"
-
-#if COMPILER_MSVC || COMPILER_EMSCRIPTEN
+#if defined (_MSC_VER) || defined (__EMSCRIPTEN__)
 #include <SDL2/SDL.h>
 #else
 #include "SDL.h"
 #endif
+
+#include "platform/videodevice.h"
 
 class SDLVideoDevice : public VideoDevice
 {

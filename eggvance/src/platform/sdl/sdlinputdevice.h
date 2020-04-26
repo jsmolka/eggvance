@@ -1,14 +1,13 @@
 #pragma once
 
-#include "base/defines.h"
-#include "base/input.h"
-#include "platform/inputdevice.h"
-
-#if COMPILER_MSVC || COMPILER_EMSCRIPTEN
+#if defined (_MSC_VER) || defined (__EMSCRIPTEN__)
 #include <SDL2/SDL.h>
 #else
 #include "SDL.h"
 #endif
+
+#include "base/input.h"
+#include "platform/inputdevice.h"
 
 class SDLInputDevice : public InputDevice
 {

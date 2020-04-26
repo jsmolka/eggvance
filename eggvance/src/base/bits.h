@@ -3,16 +3,15 @@
 #include <climits>
 #include <type_traits>
 
-#include "defines.h"
-#include "integer.h"
-#include "iterator.h"
-#include "macros.h"
-
-#if COMPILER_MSVC
+#ifdef _MSC_VER
 #include <intrin.h>
-#elif !COMPILER_EMSCRIPTEN
+#elif not defined(__EMSCRIPTEN__)
 #include <x86intrin.h>
 #endif
+
+#include <base/integer.h>
+#include <base/iterator.h>
+#include <base/macros.h>
 
 namespace bits
 {
@@ -55,13 +54,15 @@ namespace bits
     template<typename T>
     T ror(T value, uint amount)
     {
-        #if COMPILER_MSVC
+        static_assert(std::is_integral_v<T>);
+
+        #ifdef _MSC_VER
         if constexpr (sizeof(T) == 1) return _rotr8 (value, amount);
         if constexpr (sizeof(T) == 2) return _rotr16(value, amount);
         if constexpr (sizeof(T) == 4) return _rotr  (value, amount);
         if constexpr (sizeof(T) == 8) return _rotr64(value, amount);
         UNREACHABLE;
-        #elif COMPILER_CLANG
+        #elif defined (__clang__)
         if constexpr (sizeof(T) == 1) return __builtin_rotateright8 (value, amount);
         if constexpr (sizeof(T) == 2) return __builtin_rotateright16(value, amount);
         if constexpr (sizeof(T) == 4) return __builtin_rotateright32(value, amount);
@@ -77,13 +78,15 @@ namespace bits
     template<typename T>
     T rol(T value, uint amount)
     {
-        #if COMPILER_MSVC
+        static_assert(std::is_integral_v<T>);
+
+        #ifdef _MSC_VER
         if constexpr (sizeof(T) == 1) return _rotl8 (value, amount);
         if constexpr (sizeof(T) == 2) return _rotl16(value, amount);
         if constexpr (sizeof(T) == 4) return _rotl  (value, amount);
         if constexpr (sizeof(T) == 8) return _rotl64(value, amount);
         UNREACHABLE;
-        #elif COMPILER_CLANG
+        #elif defined (__clang__)
         if constexpr (sizeof(T) == 1) return __builtin_rotateleft8 (value, amount);
         if constexpr (sizeof(T) == 2) return __builtin_rotateleft16(value, amount);
         if constexpr (sizeof(T) == 4) return __builtin_rotateleft32(value, amount);
@@ -99,7 +102,9 @@ namespace bits
     template<typename T>
     uint clz(T value)
     {
-        #if COMPILER_MSVC
+        static_assert(std::is_integral_v<T>);
+
+        #ifdef _MSC_VER
         unsigned long index;
         if constexpr (sizeof(T) <= 4)
             _BitScanReverse(&index, value);
@@ -117,7 +122,9 @@ namespace bits
     template<typename T>
     uint ctz(T value)
     {
-        #if COMPILER_MSVC
+        static_assert(std::is_integral_v<T>);
+
+        #ifdef _MSC_VER
         unsigned long index;
         if constexpr (sizeof(T) <= 4)
             _BitScanForward(&index, value);
@@ -135,7 +142,9 @@ namespace bits
     template<typename T>
     uint popcnt(T value)
     {
-        #if COMPILER_MSVC
+        static_assert(std::is_integral_v<T>);
+
+        #ifdef _MSC_VER
         if constexpr (sizeof(T) <= 2) return __popcnt16(value);
         if constexpr (sizeof(T) == 4) return __popcnt  (value);
         if constexpr (sizeof(T) == 8) return __popcnt64(value);
@@ -151,19 +160,21 @@ namespace bits
     template<typename T>
     class BitIterator
     {
+        static_assert(std::is_integral_v<T>);
+
     public:
         explicit BitIterator(T value)
             : value(value) {}
+
+        uint operator*() const
+        {
+            return ctz(value);
+        }
 
         BitIterator& operator++()
         {
             value &= value - 1;
             return *this;
-        }
-
-        uint operator*() const
-        {
-            return bits::ctz(value);
         }
 
         bool operator==(BitIterator other) const { return value == other.value; }
@@ -176,6 +187,8 @@ namespace bits
     template<typename T>
     auto iter(T value)
     {
+        static_assert(std::is_integral_v<T>);
+
         return IteratorRange(
             BitIterator<T>(value),
             BitIterator<T>(0)

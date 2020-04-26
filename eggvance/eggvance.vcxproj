@@ -185,7 +185,6 @@
     <ClInclude Include="src\arm\psr.h" />
     <ClInclude Include="src\arm\registers.h" />
     <ClInclude Include="src\base\bits.h" />
-    <ClInclude Include="src\base\defines.h" />
     <ClInclude Include="src\base\enums.h" />
     <ClInclude Include="src\base\config.h" />
     <ClInclude Include="src\base\constants.h" />
