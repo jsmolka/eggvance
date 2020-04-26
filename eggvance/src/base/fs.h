@@ -75,7 +75,7 @@ namespace fs
         if (!stream.is_open())
             return false;
 
-        stream.write(reinterpret_cast<const char*>(src.data()), src.size() * sizeof(T::value_type));
+        stream.write(reinterpret_cast<const char*>(src.data()), src.size() * sizeof(typename T::value_type));
 
         return true;
     }
