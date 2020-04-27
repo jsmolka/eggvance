@@ -64,11 +64,29 @@ void ARM::Arm_DataProcessing(u32 instr)
     u32  op1 = regs[rn];
     u32  op2;
 
+    constexpr bool logical = [&]() {
+        switch (static_cast<Opcode>(opcode))
+        {
+        case Opcode::And:
+        case Opcode::Eor:
+        case Opcode::Orr:
+        case Opcode::Mov:
+        case Opcode::Bic:
+        case Opcode::Mvn:
+        case Opcode::Tst:
+        case Opcode::Teq:
+            return true;
+
+        default:
+            return false;
+        }
+    }();
+
     if (imm_op)
     {
         uint value  = bits::seq<0, 8>(instr);
         uint amount = bits::seq<8, 4>(instr);
-        op2 = util::rorArm<false>(value, amount << 1, flags, cpsr);
+        op2 = util::rorArm<false>(value, amount << 1, flags && logical, cpsr);
     }
     else
     {
@@ -89,10 +107,10 @@ void ARM::Arm_DataProcessing(u32 instr)
 
             switch (static_cast<Shift>(shift))
             {
-            case Shift::Lsl: op2 = util::lslArm(op2, amount, flags, cpsr); break;
-            case Shift::Lsr: op2 = util::lsrArm<false>(op2, amount, flags, cpsr); break;
-            case Shift::Asr: op2 = util::asrArm<false>(op2, amount, flags, cpsr); break;
-            case Shift::Ror: op2 = util::rorArm<false>(op2, amount, flags, cpsr); break;
+            case Shift::Lsl: op2 = util::lslArm       (op2, amount, flags && logical, cpsr); break;
+            case Shift::Lsr: op2 = util::lsrArm<false>(op2, amount, flags && logical, cpsr); break;
+            case Shift::Asr: op2 = util::asrArm<false>(op2, amount, flags && logical, cpsr); break;
+            case Shift::Ror: op2 = util::rorArm<false>(op2, amount, flags && logical, cpsr); break;
 
             default:
                 UNREACHABLE;
@@ -106,10 +124,10 @@ void ARM::Arm_DataProcessing(u32 instr)
 
             switch (static_cast<Shift>(shift))
             {
-            case Shift::Lsl: op2 = util::lslArm(op2, amount, flags, cpsr); break;
-            case Shift::Lsr: op2 = util::lsrArm<true>(op2, amount, flags, cpsr); break;
-            case Shift::Asr: op2 = util::asrArm<true>(op2, amount, flags, cpsr); break;
-            case Shift::Ror: op2 = util::rorArm<true>(op2, amount, flags, cpsr); break;
+            case Shift::Lsl: op2 = util::lslArm      (op2, amount, flags && logical, cpsr); break;
+            case Shift::Lsr: op2 = util::lsrArm<true>(op2, amount, flags && logical, cpsr); break;
+            case Shift::Asr: op2 = util::asrArm<true>(op2, amount, flags && logical, cpsr); break;
+            case Shift::Ror: op2 = util::rorArm<true>(op2, amount, flags && logical, cpsr); break;
 
             default:
                 UNREACHABLE;
