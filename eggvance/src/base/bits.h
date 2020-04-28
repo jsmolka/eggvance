@@ -9,9 +9,9 @@
 #include <x86intrin.h>
 #endif
 
-#include <base/integer.h>
-#include <base/iterator.h>
-#include <base/macros.h>
+#include "base/integer.h"
+#include "base/iterator.h"
+#include "base/macros.h"
 
 namespace bits
 {
@@ -57,16 +57,16 @@ namespace bits
         static_assert(std::is_integral_v<T>);
 
         #ifdef _MSC_VER
-        if constexpr (sizeof(T) == 1) return _rotr8 (value, amount);
-        if constexpr (sizeof(T) == 2) return _rotr16(value, amount);
-        if constexpr (sizeof(T) == 4) return _rotr  (value, amount);
-        if constexpr (sizeof(T) == 8) return _rotr64(value, amount);
+        if (sizeof(T) == 1) return _rotr8 (value, amount);
+        if (sizeof(T) == 2) return _rotr16(value, amount);
+        if (sizeof(T) == 4) return _rotr  (value, amount);
+        if (sizeof(T) == 8) return _rotr64(value, amount);
         UNREACHABLE;
         #elif defined (__clang__)
-        if constexpr (sizeof(T) == 1) return __builtin_rotateright8 (value, amount);
-        if constexpr (sizeof(T) == 2) return __builtin_rotateright16(value, amount);
-        if constexpr (sizeof(T) == 4) return __builtin_rotateright32(value, amount);
-        if constexpr (sizeof(T) == 8) return __builtin_rotateright64(value, amount);
+        if (sizeof(T) == 1) return __builtin_rotateright8 (value, amount);
+        if (sizeof(T) == 2) return __builtin_rotateright16(value, amount);
+        if (sizeof(T) == 4) return __builtin_rotateright32(value, amount);
+        if (sizeof(T) == 8) return __builtin_rotateright64(value, amount);
         UNREACHABLE;
         #else
         constexpr T mask = CHAR_BIT * sizeof(T) - 1;
@@ -81,16 +81,16 @@ namespace bits
         static_assert(std::is_integral_v<T>);
 
         #ifdef _MSC_VER
-        if constexpr (sizeof(T) == 1) return _rotl8 (value, amount);
-        if constexpr (sizeof(T) == 2) return _rotl16(value, amount);
-        if constexpr (sizeof(T) == 4) return _rotl  (value, amount);
-        if constexpr (sizeof(T) == 8) return _rotl64(value, amount);
+        if (sizeof(T) == 1) return _rotl8 (value, amount);
+        if (sizeof(T) == 2) return _rotl16(value, amount);
+        if (sizeof(T) == 4) return _rotl  (value, amount);
+        if (sizeof(T) == 8) return _rotl64(value, amount);
         UNREACHABLE;
         #elif defined (__clang__)
-        if constexpr (sizeof(T) == 1) return __builtin_rotateleft8 (value, amount);
-        if constexpr (sizeof(T) == 2) return __builtin_rotateleft16(value, amount);
-        if constexpr (sizeof(T) == 4) return __builtin_rotateleft32(value, amount);
-        if constexpr (sizeof(T) == 8) return __builtin_rotateleft64(value, amount);
+        if (sizeof(T) == 1) return __builtin_rotateleft8 (value, amount);
+        if (sizeof(T) == 2) return __builtin_rotateleft16(value, amount);
+        if (sizeof(T) == 4) return __builtin_rotateleft32(value, amount);
+        if (sizeof(T) == 8) return __builtin_rotateleft64(value, amount);
         UNREACHABLE;
         #else
         constexpr T mask = CHAR_BIT * sizeof(T) - 1;
@@ -106,13 +106,13 @@ namespace bits
 
         #ifdef _MSC_VER
         unsigned long index;
-        if constexpr (sizeof(T) <= 4)
+        if (sizeof(T) <= 4)
             _BitScanReverse(&index, value);
         else
             _BitScanReverse64(&index, value);
         return static_cast<uint>(index);
         #else
-        if constexpr (sizeof(T) <= 4)
+        if (sizeof(T) <= 4)
             return __builtin_clz(value);
         else
             return __builtin_clzll(value);
@@ -126,13 +126,13 @@ namespace bits
 
         #ifdef _MSC_VER
         unsigned long index;
-        if constexpr (sizeof(T) <= 4)
+        if (sizeof(T) <= 4)
             _BitScanForward(&index, value);
         else
             _BitScanForward64(&index, value);
         return static_cast<uint>(index);
         #else
-        if constexpr (sizeof(T) <= 4)
+        if (sizeof(T) <= 4)
             return __builtin_ctz(value);
         else
             return __builtin_ctzll(value);
@@ -145,12 +145,12 @@ namespace bits
         static_assert(std::is_integral_v<T>);
 
         #ifdef _MSC_VER
-        if constexpr (sizeof(T) <= 2) return __popcnt16(value);
-        if constexpr (sizeof(T) == 4) return __popcnt  (value);
-        if constexpr (sizeof(T) == 8) return __popcnt64(value);
+        if (sizeof(T) <= 2) return __popcnt16(value);
+        if (sizeof(T) == 4) return __popcnt  (value);
+        if (sizeof(T) == 8) return __popcnt64(value);
         UNREACHABLE;
         #else
-        if constexpr (sizeof(T) <= 4)
+        if (sizeof(T) <= 4)
             return __builtin_popcount(value);
         else
             return __builtin_popcountll(value);
@@ -185,13 +185,10 @@ namespace bits
     };
 
     template<typename T>
-    auto iter(T value)
+    IteratorRange<BitIterator<T>> iter(T value)
     {
         static_assert(std::is_integral_v<T>);
 
-        return IteratorRange(
-            BitIterator<T>(value),
-            BitIterator<T>(0)
-        );
+        return { BitIterator<T>(value), BitIterator<T>(0) };
     }
 }
