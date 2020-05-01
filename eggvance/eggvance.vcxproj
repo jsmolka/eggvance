@@ -75,7 +75,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>SDL2main.lib</AdditionalDependencies>
+      <AdditionalDependencies>SDL2main.lib;shell32.lib</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <MapFileName>$(SolutionDir)bin\intermediate\$(Configuration)\$(TargetName).map</MapFileName>
@@ -100,7 +100,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>SDL2main.lib</AdditionalDependencies>
+      <AdditionalDependencies>SDL2main.lib;shell32.lib</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <MapFileName>$(SolutionDir)bin\intermediate\$(Configuration)\$(TargetName).map</MapFileName>
@@ -124,7 +124,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>SDL2main.lib</AdditionalDependencies>
+      <AdditionalDependencies>SDL2main.lib;shell32.lib</AdditionalDependencies>
       <ProgramDatabaseFile>$(SolutionDir)bin\intermediate\$(Configuration)\$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
   </ItemDefinitionGroup>
