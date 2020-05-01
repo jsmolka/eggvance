@@ -33,7 +33,7 @@ std::wstring encode(const std::string& string)
 void fs::init(int argc, char* argv[])
 {
     if (argc > 0)
-        exe = canonical(encode(argv[0]));
+        exe = weakly_canonical(encode(argv[0]));
 }
 
 fs::path fs::exe_relative(const fs::path& path)
