@@ -126,7 +126,7 @@ void emulate()
     while (running && mmu.gamepak.size() == 0)
     {
         processEvents();
-        sdl_video_device->clear(0x383838);
+        sdl_video_device->clear(0x2B3137);
         sdl_video_device->renderIcon();
         SDL_RenderPresent(sdl_video_device->renderer);
         SDL_Delay(16);
