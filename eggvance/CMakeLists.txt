@@ -18,7 +18,7 @@ elseif(PLATFORM STREQUAL "EMSCRIPTEN")
 
   add_definitions(-DPLATFORM_EMSCRIPTEN)
 
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s USE_SDL=2 -s ALLOW_MEMORY_GROWTH=1 -s FORCE_FILESYSTEM=1 --bind --shell-file ../eggvance.html")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s USE_SDL=2 -s ALLOW_MEMORY_GROWTH=1 -s FORCE_FILESYSTEM=1 -DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0 --bind --shell-file ../eggvance.html")
 else()
   message(FATAL_ERROR "Invalid platform")
 endif()
