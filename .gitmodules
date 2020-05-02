@@ -2,10 +2,10 @@
     path = eggvance/external/fmt
     url = https://github.com/fmtlib/fmt
 
+[submodule "eggvance/external/icon"]
+    path = eggvance/external/icon
+    url = https://github.com/jsmolka/icon
+
 [submodule "eggvance/external/tinytoml"]
     path = eggvance/external/tinytoml
     url = https://github.com/mayah/tinytoml
-
-[submodule "eggvance/icon"]
-    path = eggvance/icon
-    url = https://github.com/jsmolka/icon

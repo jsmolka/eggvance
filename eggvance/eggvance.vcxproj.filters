@@ -114,9 +114,6 @@
     <ClCompile Include="src\interrupt\irqhandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="icon\cpp\icon.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\platform\common.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -148,6 +145,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\base\fs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="external\icon\include\eggception\icon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -359,9 +359,6 @@
     <ClInclude Include="src\interrupt\irqhandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="icon\cpp\icon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\platform\common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -408,6 +405,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\base\fs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="external\icon\include\eggception\icon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

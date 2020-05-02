@@ -25,13 +25,13 @@ endif()
 add_definitions(-DFMT_HEADER_ONLY)
 
 include_directories(external/fmt/include)
+include_directories(external/icon/include)
 include_directories(external/tinytoml/include)
-include_directories(icon/cpp)
 include_directories(src)
 
 file(GLOB_RECURSE SOURCE_FILES
-  ${PROJECT_SOURCE_DIR}/icon/cpp/*.h
-  ${PROJECT_SOURCE_DIR}/icon/cpp/*.cpp
+  ${PROJECT_SOURCE_DIR}/external/icon/include/*.h
+  ${PROJECT_SOURCE_DIR}/external/icon/include/*.cpp
   ${PROJECT_SOURCE_DIR}/src/*.h
   ${PROJECT_SOURCE_DIR}/src/*.cpp
 )

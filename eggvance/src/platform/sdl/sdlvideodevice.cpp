@@ -1,8 +1,7 @@
 #include "sdlvideodevice.h"
 
 #include <stdexcept>
-
-#include "icon.h"
+#include <eggception/icon.h>
 
 SDLVideoDevice::~SDLVideoDevice()
 {
@@ -60,7 +59,7 @@ void SDLVideoDevice::renderIcon()
     SDL_RenderGetLogicalSize(renderer, &w, &h);
     SDL_RenderSetLogicalSize(renderer, 18, 18);
 
-    for (const auto& pixel : egg::icon::pixels)
+    for (const auto& pixel : eggception::icon::pixels)
     {
         SDL_SetRenderDrawColor(
             renderer,
