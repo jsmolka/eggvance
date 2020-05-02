@@ -4,12 +4,20 @@
 
 Config config;
 
-void Config::init(const std::string& file)
+void Config::init(int argc, char* argv[])
 {
+    if (argc > 0)
+    {
+        parent = fs::make_path(argv[0]).parent_path();
+        if constexpr (!fs::experimental)
+            parent = fs::weakly_canonical(parent);
+    }
+
     try
     {
-        if (fs::exists(fs::exe_relative(fs::make_path(file))))
-            initFile(fs::exe_relative(fs::make_path(file)));
+        auto config = parent / "eggvance.toml";
+        if (fs::exists(config))
+            initFile(config);
         else
             initDefault();
     }
@@ -34,12 +42,12 @@ void Config::initFile(const fs::path& file)
     deadzone  = value.get<int>("general.deadzone");
 
     if (bios_file.is_relative() && !bios_file.empty())
-        bios_file = fs::exe_relative(bios_file);
+        bios_file = parent / bios_file;
 
     if (!save_dir.empty())
     {
         if (save_dir.is_relative())
-            save_dir = fs::exe_relative(save_dir);
+            save_dir = parent / save_dir;
 
         if (!fs::is_directory(save_dir))
             fs::create_directories(save_dir);

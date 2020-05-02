@@ -16,9 +16,7 @@ void common::init(
     const std::shared_ptr<InputDevice>& input_device, 
     const std::shared_ptr<VideoDevice>& video_device)
 {
-    fs::init(argc, argv);
-
-    config.init("eggvance.toml");
+    config.init(argc, argv);
     mmu.bios.init(config.bios_file);
 
     audio_device->init();

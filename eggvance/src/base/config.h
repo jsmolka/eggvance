@@ -1,12 +1,12 @@
 #pragma once
 
-#include "fs.h"
-#include "input.h"
+#include "base/fs.h"
+#include "base/input.h"
 
 class Config
 {
 public:
-    void init(const std::string& file);
+    void init(int argc, char* argv[]);
 
     fs::path bios_file;
     fs::path save_dir;
@@ -28,6 +28,8 @@ public:
     double fps_multipliers[4];
 
 private:
+    fs::path parent;
+
     void initFile(const fs::path& file);
     void initDefault();
 };

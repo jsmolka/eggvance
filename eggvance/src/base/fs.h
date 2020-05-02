@@ -14,22 +14,13 @@ namespace fs
 {
     #ifdef __cpp_lib_filesystem
     using namespace std::filesystem;
+    constexpr bool experimental = false;
     #else
     using namespace std::experimental::filesystem;
+    constexpr bool experimental = true;
     #endif
 
-    void init(int argc, char* argv[]);
-
-    path exe_relative(const path& path);
-
-    template<typename T>
-    path make_path(const T& path)
-    {
-        return fs::path(path);
-    }
-
-    template<> path make_path(const char* const& path);
-    template<> path make_path(const std::string& path);
+    path make_path(const std::string& path);
 
     template<typename T>
     bool read(const path& file, std::vector<T>& dst)

@@ -4,51 +4,26 @@
 #include <windows.h>
 #endif
 
-static fs::path exe;
-
-std::wstring encode(const std::string& string)
+fs::path fs::make_path(const std::string& path)
 {
     #ifdef _WIN32
     int size = MultiByteToWideChar(
-        CP_UTF8, MB_ERR_INVALID_CHARS,
-        string.data(), static_cast<int>(string.size()),
+        CP_UTF8, 0,
+        path.data(), static_cast<int>(path.size()),
         nullptr, 0
     );
 
-    std::wstring result;
-    result.resize(size);
+    std::wstring utf8;
+    utf8.resize(size);
 
     MultiByteToWideChar(
-        CP_UTF8, MB_ERR_INVALID_CHARS,
-        string.data(), static_cast<int>(string.size()),
-        result.data(), static_cast<int>(result.size())
+        CP_UTF8, 0,
+        path.data(), static_cast<int>(path.size()),
+        utf8.data(), static_cast<int>(utf8.size())
     );
 
-    return result;
+    return utf8;
     #else
-    return std::wstring(string.begin(), string.end());
+    return path;
     #endif
-}
-
-void fs::init(int argc, char* argv[])
-{
-    if (argc > 0)
-        exe = weakly_canonical(encode(argv[0]));
-}
-
-fs::path fs::exe_relative(const fs::path& path)
-{
-    return exe.parent_path() / path;
-}
-
-template<>
-fs::path fs::make_path(const char* const& path)
-{
-    return fs::path(encode(path));
-}
-
-template<>
-fs::path fs::make_path(const std::string& path)
-{
-    return fs::path(encode(path));
 }
