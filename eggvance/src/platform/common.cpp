@@ -29,8 +29,8 @@ void common::init(
 
     switch (argc)
     {
-    case 2: mmu.gamepak.load(fs::make_path(argv[1])); break;
-    case 3: mmu.gamepak.load(fs::make_path(argv[1]), fs::make_path(argv[2])); break;
+    case 2: mmu.gamepak.load(fs::u8path(argv[1])); break;
+    case 3: mmu.gamepak.load(fs::u8path(argv[1]), fs::u8path(argv[2])); break;
     }
 }
 

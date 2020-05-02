@@ -7,11 +7,7 @@ Config config;
 void Config::init(int argc, char* argv[])
 {
     if (argc > 0)
-    {
-        parent = fs::make_path(argv[0]).parent_path();
-        if constexpr (!fs::experimental)
-            parent = fs::weakly_canonical(parent);
-    }
+        parent = fs::u8path(argv[0]).parent_path();
 
     try
     {
@@ -36,8 +32,8 @@ void Config::initFile(const fs::path& file)
 
     auto& value = result.value;
 
-    bios_file = fs::make_path(value.get<std::string>("general.bios_file"));
-    save_dir  = fs::make_path(value.get<std::string>("general.save_dir"));
+    bios_file = fs::u8path(value.get<std::string>("general.bios_file"));
+    save_dir  = fs::u8path(value.get<std::string>("general.save_dir"));
     bios_skip = value.get<bool>("general.bios_skip");
     deadzone  = value.get<int>("general.deadzone");
 

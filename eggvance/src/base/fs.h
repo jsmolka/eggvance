@@ -14,13 +14,9 @@ namespace fs
 {
     #ifdef __cpp_lib_filesystem
     using namespace std::filesystem;
-    constexpr bool experimental = false;
     #else
     using namespace std::experimental::filesystem;
-    constexpr bool experimental = true;
     #endif
-
-    path make_path(const std::string& path);
 
     template<typename T>
     bool read(const path& file, std::vector<T>& dst)

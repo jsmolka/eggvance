@@ -144,9 +144,6 @@
     <ClCompile Include="src\base\input.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\base\fs.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="external\icon\include\eggception\icon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

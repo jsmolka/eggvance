@@ -137,7 +137,6 @@
     <ClCompile Include="src\arm\instr_thumb.cpp" />
     <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\base\config.cpp" />
-    <ClCompile Include="src\base\fs.cpp" />
     <ClCompile Include="src\base\input.cpp" />
     <ClCompile Include="src\platform\audiodevice.cpp" />
     <ClCompile Include="src\platform\common.cpp" />
