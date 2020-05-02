@@ -8,10 +8,9 @@ class Config
 public:
     void init(int argc, char* argv[]);
 
+    fs::path save_path;
     fs::path bios_file;
-    fs::path save_dir;
     bool bios_skip;
-    int deadzone;
 
     struct Controls
     {
@@ -25,13 +24,13 @@ public:
         ShortcutConfig<Button> controller;
     } shortcuts;
 
-    double fps_multipliers[4];
+    double framerate[4];
 
 private:
-    fs::path parent;
-
     void initFile(const fs::path& file);
     void initDefault();
+
+    fs::path parent;
 };
 
 extern Config config;

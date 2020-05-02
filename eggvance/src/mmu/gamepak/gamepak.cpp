@@ -60,8 +60,8 @@ bool GamePak::load(const fs::path& file, const fs::path& backup)
 bool GamePak::load(const fs::path& file)
 {
     auto backup = fs::path(file).replace_extension("sav");
-    if (!config.save_dir.empty())
-        backup = config.save_dir / backup.filename();
+    if (!config.save_path.empty())
+        backup = config.save_path / backup.filename();
 
     return load(file, backup);
 }

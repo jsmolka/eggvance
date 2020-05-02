@@ -79,6 +79,8 @@ uint SDLInputDevice::controllerState() const
     uint state = 0;
     if (controller)
     {
+        static constexpr auto deadzone = 16000;
+
         state |= SDL_GameControllerGetButton(controller, controls.controller.a     ) << kBitA;
         state |= SDL_GameControllerGetButton(controller, controls.controller.b     ) << kBitB;
         state |= SDL_GameControllerGetButton(controller, controls.controller.up    ) << kBitUp;
@@ -95,12 +97,12 @@ uint SDLInputDevice::controllerState() const
         int axis_tl = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_TRIGGERLEFT);
         int axis_tr = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_TRIGGERRIGHT);
 
-        state |= (axis_lx < 0 && std::abs(axis_lx) > config.deadzone) << kBitLeft;
-        state |= (axis_lx > 0 && std::abs(axis_lx) > config.deadzone) << kBitRight;
-        state |= (axis_ly < 0 && std::abs(axis_ly) > config.deadzone) << kBitUp;
-        state |= (axis_ly > 0 && std::abs(axis_ly) > config.deadzone) << kBitDown;
-        state |= (axis_tl > config.deadzone) << kBitL;
-        state |= (axis_tr > config.deadzone) << kBitR;
+        state |= (axis_lx < 0 && std::abs(axis_lx) > deadzone) << kBitLeft;
+        state |= (axis_lx > 0 && std::abs(axis_lx) > deadzone) << kBitRight;
+        state |= (axis_ly < 0 && std::abs(axis_ly) > deadzone) << kBitUp;
+        state |= (axis_ly > 0 && std::abs(axis_ly) > deadzone) << kBitDown;
+        state |= (axis_tl > deadzone) << kBitL;
+        state |= (axis_tr > deadzone) << kBitR;
     }
     return state;
 }
@@ -175,21 +177,21 @@ SDL_GameControllerButton SDLInputDevice::convertButton(Button button)
 {
     switch (button)
     {
-    case BTN_A:             return SDL_CONTROLLER_BUTTON_A;
-    case BTN_B:             return SDL_CONTROLLER_BUTTON_B;
-    case BTN_X:             return SDL_CONTROLLER_BUTTON_X;
-    case BTN_Y:             return SDL_CONTROLLER_BUTTON_Y;
-    case BTN_BACK:          return SDL_CONTROLLER_BUTTON_BACK;
-    case BTN_GUIDE:         return SDL_CONTROLLER_BUTTON_GUIDE;
-    case BTN_START:         return SDL_CONTROLLER_BUTTON_START;
-    case BTN_LEFTSTICK:     return SDL_CONTROLLER_BUTTON_LEFTSTICK;
-    case BTN_RIGHTSTICK:    return SDL_CONTROLLER_BUTTON_RIGHTSTICK;
-    case BTN_LEFTSHOULDER:  return SDL_CONTROLLER_BUTTON_LEFTSHOULDER;
-    case BTN_RIGHTSHOULDER: return SDL_CONTROLLER_BUTTON_RIGHTSHOULDER;
-    case BTN_DPAD_UP:       return SDL_CONTROLLER_BUTTON_DPAD_UP;
-    case BTN_DPAD_DOWN:     return SDL_CONTROLLER_BUTTON_DPAD_DOWN;
-    case BTN_DPAD_LEFT:     return SDL_CONTROLLER_BUTTON_DPAD_LEFT;
-    case BTN_DPAD_RIGHT:    return SDL_CONTROLLER_BUTTON_DPAD_RIGHT;
+    case BTN_A:      return SDL_CONTROLLER_BUTTON_A;
+    case BTN_B:      return SDL_CONTROLLER_BUTTON_B;
+    case BTN_X:      return SDL_CONTROLLER_BUTTON_X;
+    case BTN_Y:      return SDL_CONTROLLER_BUTTON_Y;
+    case BTN_BACK:   return SDL_CONTROLLER_BUTTON_BACK;
+    case BTN_GUIDE:  return SDL_CONTROLLER_BUTTON_GUIDE;
+    case BTN_START:  return SDL_CONTROLLER_BUTTON_START;
+    case BTN_LSTICK: return SDL_CONTROLLER_BUTTON_LEFTSTICK;
+    case BTN_RSTICK: return SDL_CONTROLLER_BUTTON_RIGHTSTICK;
+    case BTN_L:      return SDL_CONTROLLER_BUTTON_LEFTSHOULDER;
+    case BTN_R:      return SDL_CONTROLLER_BUTTON_RIGHTSHOULDER;
+    case BTN_UP:     return SDL_CONTROLLER_BUTTON_DPAD_UP;
+    case BTN_DOWN:   return SDL_CONTROLLER_BUTTON_DPAD_DOWN;
+    case BTN_LEFT:   return SDL_CONTROLLER_BUTTON_DPAD_LEFT;
+    case BTN_RIGHT:  return SDL_CONTROLLER_BUTTON_DPAD_RIGHT;
     }
     return SDL_CONTROLLER_BUTTON_INVALID;
 }

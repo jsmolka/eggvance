@@ -62,22 +62,22 @@ void processInputEvent(const ShortcutConfig<T>& shortcuts, T input)
     if (input == shortcuts.fullscreen)
         sdl_video_device->fullscreen();
 
-    if (input == shortcuts.fps_default)
+    if (input == shortcuts.fr_hardware)
         emulateMain(kRefreshRate);
 
-    if (input == shortcuts.fps_custom_1)
-        emulateMain(kRefreshRate * config.fps_multipliers[0]);
+    if (input == shortcuts.fr_custom_1)
+        emulateMain(config.framerate[0]);
 
-    if (input == shortcuts.fps_custom_2)
-        emulateMain(kRefreshRate * config.fps_multipliers[1]);
+    if (input == shortcuts.fr_custom_2)
+        emulateMain(config.framerate[1]);
 
-    if (input == shortcuts.fps_custom_3)
-        emulateMain(kRefreshRate * config.fps_multipliers[2]);
+    if (input == shortcuts.fr_custom_3)
+        emulateMain(config.framerate[2]);
 
-    if (input == shortcuts.fps_custom_4)
-        emulateMain(kRefreshRate * config.fps_multipliers[3]);
+    if (input == shortcuts.fr_custom_4)
+        emulateMain(config.framerate[3]);
 
-    if (input == shortcuts.fps_unlimited)
+    if (input == shortcuts.fr_unbound)
         emulateMain(6000);
 }
 

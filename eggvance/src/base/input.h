@@ -76,14 +76,14 @@ enum Button
     BTN_BACK,
     BTN_GUIDE,
     BTN_START,
-    BTN_LEFTSTICK,
-    BTN_RIGHTSTICK,
-    BTN_LEFTSHOULDER,
-    BTN_RIGHTSHOULDER,
-    BTN_DPAD_UP,
-    BTN_DPAD_DOWN,
-    BTN_DPAD_LEFT,
-    BTN_DPAD_RIGHT
+    BTN_LSTICK,
+    BTN_RSTICK,
+    BTN_L,
+    BTN_R,
+    BTN_UP,
+    BTN_DOWN,
+    BTN_LEFT,
+    BTN_RIGHT
 };
 
 template<typename T>
@@ -128,26 +128,26 @@ struct ShortcutConfig
     {
         ShortcutConfig<U> result;
 
-        result.reset         = converter(reset);
-        result.fullscreen    = converter(fullscreen);
-        result.fps_default   = converter(fps_default);
-        result.fps_custom_1  = converter(fps_custom_1);
-        result.fps_custom_2  = converter(fps_custom_2);
-        result.fps_custom_3  = converter(fps_custom_3);
-        result.fps_custom_4  = converter(fps_custom_4);
-        result.fps_unlimited = converter(fps_unlimited);
+        result.reset       = converter(reset);
+        result.fullscreen  = converter(fullscreen);
+        result.fr_hardware = converter(fr_hardware);
+        result.fr_custom_1 = converter(fr_custom_1);
+        result.fr_custom_2 = converter(fr_custom_2);
+        result.fr_custom_3 = converter(fr_custom_3);
+        result.fr_custom_4 = converter(fr_custom_4);
+        result.fr_unbound  = converter(fr_unbound);
 
         return result;
     }
 
     T reset;
     T fullscreen;
-    T fps_default;
-    T fps_custom_1;
-    T fps_custom_2;
-    T fps_custom_3;
-    T fps_custom_4;
-    T fps_unlimited;
+    T fr_hardware;
+    T fr_custom_1;
+    T fr_custom_2;
+    T fr_custom_3;
+    T fr_custom_4;
+    T fr_unbound;
 };
 
 Key keyByName(std::string name);

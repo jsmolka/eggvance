@@ -68,21 +68,21 @@ static constexpr std::pair<std::string_view, Key> key_map[] =
 
 static constexpr std::pair<std::string_view, Button> button_map[] = 
 {
-    { "A"            , BTN_A             },
-    { "B"            , BTN_B             },
-    { "X"            , BTN_X             },
-    { "Y"            , BTN_Y             },
-    { "BACK"         , BTN_BACK          },
-    { "GUIDE"        , BTN_GUIDE         },
-    { "START"        , BTN_START         },
-    { "LEFTSTICK"    , BTN_LEFTSTICK     },
-    { "RIGHTSTICK"   , BTN_RIGHTSTICK    },
-    { "LEFTSHOULDER" , BTN_LEFTSHOULDER  },
-    { "RIGHTSHOULDER", BTN_RIGHTSHOULDER },
-    { "DPUP"         , BTN_DPAD_UP       },
-    { "DPDOWN"       , BTN_DPAD_DOWN     },
-    { "DPLEFT"       , BTN_DPAD_LEFT     },
-    { "DPRIGHT"      , BTN_DPAD_RIGHT    }
+    { "A"     , BTN_A             },
+    { "B"     , BTN_B             },
+    { "X"     , BTN_X             },
+    { "Y"     , BTN_Y             },
+    { "BACK"  , BTN_BACK          },
+    { "GUIDE" , BTN_GUIDE         },
+    { "START" , BTN_START         },
+    { "LSTICK", BTN_LSTICK     },
+    { "RSTICK", BTN_RSTICK    },
+    { "L"     , BTN_L  },
+    { "R"     , BTN_R },
+    { "UP"    , BTN_UP       },
+    { "DOWN"  , BTN_DOWN     },
+    { "LEFT"  , BTN_LEFT     },
+    { "RIGHT" , BTN_RIGHT    }
 };
 
 static std::string upper(std::string str)

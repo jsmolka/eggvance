@@ -2,6 +2,8 @@
 
 #include <toml/toml.h>
 
+#include "base/constants.h"
+
 Config config;
 
 void Config::init(int argc, char* argv[])
@@ -32,27 +34,26 @@ void Config::initFile(const fs::path& file)
 
     auto& value = result.value;
 
+    save_path = fs::u8path(value.get<std::string>("general.save_path"));
     bios_file = fs::u8path(value.get<std::string>("general.bios_file"));
-    save_dir  = fs::u8path(value.get<std::string>("general.save_dir"));
     bios_skip = value.get<bool>("general.bios_skip");
-    deadzone  = value.get<int>("general.deadzone");
 
     if (bios_file.is_relative() && !bios_file.empty())
         bios_file = parent / bios_file;
 
-    if (!save_dir.empty())
+    if (!save_path.empty())
     {
-        if (save_dir.is_relative())
-            save_dir = parent / save_dir;
+        if (save_path.is_relative())
+            save_path = parent / save_path;
 
-        if (!fs::is_directory(save_dir))
-            fs::create_directories(save_dir);
+        if (!fs::is_directory(save_path))
+            fs::create_directories(save_path);
     }
 
-    fps_multipliers[0] = value.get<double>("multipliers.fps_multiplier_1");
-    fps_multipliers[1] = value.get<double>("multipliers.fps_multiplier_2");
-    fps_multipliers[2] = value.get<double>("multipliers.fps_multiplier_3");
-    fps_multipliers[3] = value.get<double>("multipliers.fps_multiplier_4");
+    framerate[0] = value.get<double>("framerate.custom_1");
+    framerate[1] = value.get<double>("framerate.custom_2");
+    framerate[2] = value.get<double>("framerate.custom_3");
+    framerate[3] = value.get<double>("framerate.custom_4");
 
     const auto a      = value.get<std::vector<std::string>>("controls.a"     );
     const auto b      = value.get<std::vector<std::string>>("controls.b"     );
@@ -87,45 +88,44 @@ void Config::initFile(const fs::path& file)
     controls.controller.l      = buttonByName(l[1]);
     controls.controller.r      = buttonByName(r[1]);
 
-    const auto reset         = value.get<std::vector<std::string>>("shortcuts.reset"        );
-    const auto fullscreen    = value.get<std::vector<std::string>>("shortcuts.fullscreen"   );
-    const auto fps_default   = value.get<std::vector<std::string>>("shortcuts.fps_default"  );
-    const auto fps_custom_1  = value.get<std::vector<std::string>>("shortcuts.fps_custom_1" );
-    const auto fps_custom_2  = value.get<std::vector<std::string>>("shortcuts.fps_custom_2" );
-    const auto fps_custom_3  = value.get<std::vector<std::string>>("shortcuts.fps_custom_3" );
-    const auto fps_custom_4  = value.get<std::vector<std::string>>("shortcuts.fps_custom_4" );
-    const auto fps_unlimited = value.get<std::vector<std::string>>("shortcuts.fps_unlimited");
+    const auto reset       = value.get<std::vector<std::string>>("shortcuts.reset"      );
+    const auto fullscreen  = value.get<std::vector<std::string>>("shortcuts.fullscreen" );
+    const auto fr_hardware = value.get<std::vector<std::string>>("shortcuts.fr_hardware");
+    const auto fr_custom_1 = value.get<std::vector<std::string>>("shortcuts.fr_custom_1");
+    const auto fr_custom_2 = value.get<std::vector<std::string>>("shortcuts.fr_custom_2");
+    const auto fr_custom_3 = value.get<std::vector<std::string>>("shortcuts.fr_custom_3");
+    const auto fr_custom_4 = value.get<std::vector<std::string>>("shortcuts.fr_custom_4");
+    const auto fr_unbound  = value.get<std::vector<std::string>>("shortcuts.fr_unbound" );
 
-    shortcuts.keyboard.reset         = keyByName(reset[0]);
-    shortcuts.keyboard.fullscreen    = keyByName(fullscreen[0]);
-    shortcuts.keyboard.fps_default   = keyByName(fps_default[0]);
-    shortcuts.keyboard.fps_custom_1  = keyByName(fps_custom_1[0]);
-    shortcuts.keyboard.fps_custom_2  = keyByName(fps_custom_2[0]);
-    shortcuts.keyboard.fps_custom_3  = keyByName(fps_custom_3[0]);
-    shortcuts.keyboard.fps_custom_4  = keyByName(fps_custom_4[0]);
-    shortcuts.keyboard.fps_unlimited = keyByName(fps_unlimited[0]);
+    shortcuts.keyboard.reset       = keyByName(reset[0]);
+    shortcuts.keyboard.fullscreen  = keyByName(fullscreen[0]);
+    shortcuts.keyboard.fr_hardware = keyByName(fr_hardware[0]);
+    shortcuts.keyboard.fr_custom_1 = keyByName(fr_custom_1[0]);
+    shortcuts.keyboard.fr_custom_2 = keyByName(fr_custom_2[0]);
+    shortcuts.keyboard.fr_custom_3 = keyByName(fr_custom_3[0]);
+    shortcuts.keyboard.fr_custom_4 = keyByName(fr_custom_4[0]);
+    shortcuts.keyboard.fr_unbound  = keyByName(fr_unbound[0]);
 
-    shortcuts.controller.reset         = buttonByName(reset[1]);
-    shortcuts.controller.fullscreen    = buttonByName(fullscreen[1]);
-    shortcuts.controller.fps_default   = buttonByName(fps_default[1]);
-    shortcuts.controller.fps_custom_1  = buttonByName(fps_custom_1[1]);
-    shortcuts.controller.fps_custom_2  = buttonByName(fps_custom_2[1]);
-    shortcuts.controller.fps_custom_3  = buttonByName(fps_custom_3[1]);
-    shortcuts.controller.fps_custom_4  = buttonByName(fps_custom_4[1]);
-    shortcuts.controller.fps_unlimited = buttonByName(fps_unlimited[1]);
+    shortcuts.controller.reset       = buttonByName(reset[1]);
+    shortcuts.controller.fullscreen  = buttonByName(fullscreen[1]);
+    shortcuts.controller.fr_hardware = buttonByName(fr_hardware[1]);
+    shortcuts.controller.fr_custom_1 = buttonByName(fr_custom_1[1]);
+    shortcuts.controller.fr_custom_2 = buttonByName(fr_custom_2[1]);
+    shortcuts.controller.fr_custom_3 = buttonByName(fr_custom_3[1]);
+    shortcuts.controller.fr_custom_4 = buttonByName(fr_custom_4[1]);
+    shortcuts.controller.fr_unbound  = buttonByName(fr_unbound[1]);
 }
 
 void Config::initDefault()
 {
+    save_path = fs::path();
     bios_file = fs::path();
     bios_skip = true;
-    save_dir  = fs::path();
-    deadzone  = 16000;
 
-    fps_multipliers[0] = 2.0;
-    fps_multipliers[1] = 4.0;
-    fps_multipliers[2] = 6.0;
-    fps_multipliers[3] = 8.0;
+    framerate[0] = 2.0 * kRefreshRate;
+    framerate[1] = 4.0 * kRefreshRate;
+    framerate[2] = 6.0 * kRefreshRate;
+    framerate[3] = 8.0 * kRefreshRate;
 
     controls.keyboard.a      = KEY_U;
     controls.keyboard.b      = KEY_H;
@@ -140,30 +140,30 @@ void Config::initDefault()
 
     controls.controller.a      = BTN_B;
     controls.controller.b      = BTN_A;
-    controls.controller.up     = BTN_DPAD_UP;
-    controls.controller.down   = BTN_DPAD_DOWN;
-    controls.controller.left   = BTN_DPAD_LEFT;
-    controls.controller.right  = BTN_DPAD_RIGHT;
+    controls.controller.up     = BTN_UP;
+    controls.controller.down   = BTN_DOWN;
+    controls.controller.left   = BTN_LEFT;
+    controls.controller.right  = BTN_RIGHT;
     controls.controller.start  = BTN_START;
     controls.controller.select = BTN_BACK;
-    controls.controller.l      = BTN_LEFTSHOULDER;
-    controls.controller.r      = BTN_RIGHTSHOULDER;
+    controls.controller.l      = BTN_L;
+    controls.controller.r      = BTN_R;
 
-    shortcuts.keyboard.reset         = KEY_R;
-    shortcuts.keyboard.fullscreen    = KEY_F11;
-    shortcuts.keyboard.fps_default   = KEY_1;
-    shortcuts.keyboard.fps_custom_1  = KEY_2;
-    shortcuts.keyboard.fps_custom_2  = KEY_3;
-    shortcuts.keyboard.fps_custom_3  = KEY_4;
-    shortcuts.keyboard.fps_custom_4  = KEY_5;
-    shortcuts.keyboard.fps_unlimited = KEY_6;
+    shortcuts.keyboard.reset       = KEY_R;
+    shortcuts.keyboard.fullscreen  = KEY_F11;
+    shortcuts.keyboard.fr_hardware = KEY_1;
+    shortcuts.keyboard.fr_custom_1 = KEY_2;
+    shortcuts.keyboard.fr_custom_2 = KEY_3;
+    shortcuts.keyboard.fr_custom_3 = KEY_4;
+    shortcuts.keyboard.fr_custom_4 = KEY_5;
+    shortcuts.keyboard.fr_unbound  = KEY_6;
 
-    shortcuts.controller.reset         = BTN_NONE;
-    shortcuts.controller.fullscreen    = BTN_NONE;
-    shortcuts.controller.fps_default   = BTN_NONE;
-    shortcuts.controller.fps_custom_1  = BTN_NONE;
-    shortcuts.controller.fps_custom_2  = BTN_NONE;
-    shortcuts.controller.fps_custom_3  = BTN_NONE;
-    shortcuts.controller.fps_custom_4  = BTN_NONE;
-    shortcuts.controller.fps_unlimited = BTN_NONE;
+    shortcuts.controller.reset       = BTN_NONE;
+    shortcuts.controller.fullscreen  = BTN_NONE;
+    shortcuts.controller.fr_hardware = BTN_NONE;
+    shortcuts.controller.fr_custom_1 = BTN_NONE;
+    shortcuts.controller.fr_custom_2 = BTN_NONE;
+    shortcuts.controller.fr_custom_3 = BTN_NONE;
+    shortcuts.controller.fr_custom_4 = BTN_NONE;
+    shortcuts.controller.fr_unbound  = BTN_NONE;
 }
