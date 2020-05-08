@@ -20,10 +20,10 @@ auto sdl_audio_device = std::make_shared<SDLAudioDevice>();
 auto sdl_input_device = std::make_shared<SDLInputDevice>();
 auto sdl_video_device = std::make_shared<SDLVideoDevice>();
 
-struct Shortcuts
+struct
 {
-    ShortcutConfig<SDL_Scancode> keyboard;
-    ShortcutConfig<SDL_GameControllerButton> controller;
+    Shortcuts<SDL_Scancode> keyboard;
+    Shortcuts<SDL_GameControllerButton> controller;
 } shortcuts;
 
 void idle();
@@ -54,7 +54,7 @@ void init(int argc, char* argv[])
 }
 
 template<typename T>
-void processInputEvent(const ShortcutConfig<T>& shortcuts, T input)
+void processInputEvent(const Shortcuts<T>& shortcuts, T input)
 {
     if (input == shortcuts.reset)
         common::reset();

@@ -87,12 +87,12 @@ enum Button
 };
 
 template<typename T>
-struct InputConfig
+struct Controls
 {
     template<typename U>
-    InputConfig<U> convert(const std::function<U(T)>& converter)
+    Controls<U> convert(const std::function<U(T)>& converter)
     {
-        InputConfig<U> result;
+        Controls<U> result;
 
         result.a      = converter(a);
         result.b      = converter(b);
@@ -121,12 +121,12 @@ struct InputConfig
 };
 
 template<typename T>
-struct ShortcutConfig
+struct Shortcuts
 {
     template<typename U>
-    ShortcutConfig<U> convert(const std::function<U(T)>& converter)
+    Shortcuts<U> convert(const std::function<U(T)>& converter)
     {
-        ShortcutConfig<U> result;
+        Shortcuts<U> result;
 
         result.reset       = converter(reset);
         result.fullscreen  = converter(fullscreen);

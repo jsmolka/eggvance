@@ -8,29 +8,26 @@ class Config
 public:
     void init(int argc, char* argv[]);
 
+    struct
+    {
+        Controls<Key> keyboard;
+        Controls<Button> controller;
+    } controls;
+
+    struct
+    {
+        Shortcuts<Key> keyboard;
+        Shortcuts<Button> controller;
+    } shortcuts;
+
+    double framerate[4];
     fs::path save_path;
     fs::path bios_file;
     bool bios_skip;
 
-    struct Controls
-    {
-        InputConfig<Key> keyboard;
-        InputConfig<Button> controller;
-    } controls;
-
-    struct Shortcuts
-    {
-        ShortcutConfig<Key> keyboard;
-        ShortcutConfig<Button> controller;
-    } shortcuts;
-
-    double framerate[4];
-
 private:
     void initFile(const fs::path& file);
     void initDefault();
-
-    fs::path parent;
 };
 
 extern Config config;

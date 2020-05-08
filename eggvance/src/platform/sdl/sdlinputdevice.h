@@ -24,10 +24,10 @@ public:
     static SDL_GameControllerButton convertButton(Button button);
 
 private:
-    struct Controls
+    struct
     {
-        InputConfig<SDL_Scancode> keyboard;
-        InputConfig<SDL_GameControllerButton> controller;
+        Controls<SDL_Scancode> keyboard;
+        Controls<SDL_GameControllerButton> controller;
     } controls;
     
     SDL_GameController* controller;

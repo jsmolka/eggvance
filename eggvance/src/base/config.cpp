@@ -8,16 +8,9 @@ Config config;
 
 void Config::init(int argc, char* argv[])
 {
-    if (argc > 0)
-        parent = fs::u8path(argv[0]).parent_path();
-
     try
     {
-        auto config = parent / "eggvance.toml";
-        if (fs::exists(config))
-            initFile(config);
-        else
-            initDefault();
+        initFile(fs::u8path(argv[0]).parent_path() / "eggvance.toml");
     }
     catch (const std::exception&)
     {
@@ -32,22 +25,25 @@ void Config::initFile(const fs::path& file)
     if (!result.valid())
         throw std::exception();
 
-    auto& value = result.value;
+    const auto value = result.value;
 
     save_path = fs::u8path(value.get<std::string>("general.save_path"));
     bios_file = fs::u8path(value.get<std::string>("general.bios_file"));
     bios_skip = value.get<bool>("general.bios_skip");
 
-    if (bios_file.is_relative() && !bios_file.empty())
-        bios_file = parent / bios_file;
-
     if (!save_path.empty())
     {
         if (save_path.is_relative())
-            save_path = parent / save_path;
+            save_path = file.parent_path() / save_path;
 
         if (!fs::is_directory(save_path))
             fs::create_directories(save_path);
+    }
+
+    if (!bios_file.empty())
+    {
+        if (bios_file.is_relative())
+            bios_file = file.parent_path() / bios_file;
     }
 
     framerate[0] = value.get<double>("framerate.custom_1");
