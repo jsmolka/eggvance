@@ -4,113 +4,99 @@
 #include <cctype>
 #include <string_view>
 
-static constexpr std::pair<std::string_view, Key> key_map[] =
-{
-    { "A"        , KEY_A         },
-    { "B"        , KEY_B         },
-    { "C"        , KEY_C         },
-    { "D"        , KEY_D         },
-    { "E"        , KEY_E         },
-    { "F"        , KEY_F         },
-    { "G"        , KEY_G         },
-    { "H"        , KEY_H         },
-    { "I"        , KEY_I         },
-    { "J"        , KEY_J         },
-    { "K"        , KEY_K         },
-    { "L"        , KEY_L         },
-    { "M"        , KEY_M         },
-    { "N"        , KEY_N         },
-    { "O"        , KEY_O         },
-    { "P"        , KEY_P         },
-    { "Q"        , KEY_Q         },
-    { "R"        , KEY_R         },
-    { "S"        , KEY_S         },
-    { "T"        , KEY_T         },
-    { "U"        , KEY_U         },
-    { "V"        , KEY_V         },
-    { "W"        , KEY_W         },
-    { "X"        , KEY_X         },
-    { "Y"        , KEY_Y         },
-    { "Z"        , KEY_Z         },
-    { "0"        , KEY_0         },
-    { "1"        , KEY_1         },
-    { "2"        , KEY_2         },
-    { "3"        , KEY_3         },
-    { "4"        , KEY_4         },
-    { "5"        , KEY_5         },
-    { "6"        , KEY_6         },
-    { "7"        , KEY_7         },
-    { "8"        , KEY_8         },
-    { "9"        , KEY_9         },
-    { "F1"       , KEY_F1        },
-    { "F2"       , KEY_F2        },
-    { "F3"       , KEY_F3        },
-    { "F4"       , KEY_F4        },
-    { "F5"       , KEY_F5        },
-    { "F6"       , KEY_F6        },
-    { "F7"       , KEY_F7        },
-    { "F8"       , KEY_F8        },
-    { "F9"       , KEY_F9        },
-    { "F10"      , KEY_F10       },
-    { "F11"      , KEY_F11       },
-    { "F12"      , KEY_F12       },
-    { "UP"       , KEY_UP        },
-    { "DOWN"     , KEY_DOWN      },
-    { "LEFT"     , KEY_LEFT      },
-    { "RIGHT"    , KEY_RIGHT     },
-    { "RETURN"   , KEY_RETURN    },
-    { "ESCAPE"   , KEY_ESCAPE    },
-    { "BACKSPACE", KEY_BACKSPACE },
-    { "TAB"      , KEY_TAB       },
-    { "SPACE"    , KEY_SPACE     },
-    { "CAPSLOCK" , KEY_CAPSLOCK  }
-};
-
-static constexpr std::pair<std::string_view, Button> button_map[] = 
-{
-    { "A"     , BTN_A             },
-    { "B"     , BTN_B             },
-    { "X"     , BTN_X             },
-    { "Y"     , BTN_Y             },
-    { "BACK"  , BTN_BACK          },
-    { "GUIDE" , BTN_GUIDE         },
-    { "START" , BTN_START         },
-    { "LSTICK", BTN_LSTICK     },
-    { "RSTICK", BTN_RSTICK    },
-    { "L"     , BTN_L  },
-    { "R"     , BTN_R },
-    { "UP"    , BTN_UP       },
-    { "DOWN"  , BTN_DOWN     },
-    { "LEFT"  , BTN_LEFT     },
-    { "RIGHT" , BTN_RIGHT    }
-};
-
-static std::string upper(std::string str)
-{
-    std::transform(str.begin(), str.end(), str.begin(),
-        [](unsigned char c) { return std::toupper(c); });
-
-    return str;
-}
-
 Key keyByName(std::string name)
 {
-    name = upper(name);
+    static constexpr std::pair<std::string_view, Key> key_map[] =
+    {
+        { "A"  , Key::A   },
+        { "B"  , Key::B   },
+        { "C"  , Key::C   },
+        { "D"  , Key::D   },
+        { "E"  , Key::E   },
+        { "F"  , Key::F   },
+        { "G"  , Key::G   },
+        { "H"  , Key::H   },
+        { "I"  , Key::I   },
+        { "J"  , Key::J   },
+        { "K"  , Key::K   },
+        { "L"  , Key::L   },
+        { "M"  , Key::M   },
+        { "N"  , Key::N   },
+        { "O"  , Key::O   },
+        { "P"  , Key::P   },
+        { "Q"  , Key::Q   },
+        { "R"  , Key::R   },
+        { "S"  , Key::S   },
+        { "T"  , Key::T   },
+        { "U"  , Key::U   },
+        { "V"  , Key::V   },
+        { "W"  , Key::W   },
+        { "X"  , Key::X   },
+        { "Y"  , Key::Y   },
+        { "Z"  , Key::Z   },
+        { "0"  , Key::N0  },
+        { "1"  , Key::N1  },
+        { "2"  , Key::N2  },
+        { "3"  , Key::N3  },
+        { "4"  , Key::N4  },
+        { "5"  , Key::N5  },
+        { "6"  , Key::N6  },
+        { "7"  , Key::N7  },
+        { "8"  , Key::N8  },
+        { "9"  , Key::N9  },
+        { "F1" , Key::F1  },
+        { "F2" , Key::F2  },
+        { "F3" , Key::F3  },
+        { "F4" , Key::F4  },
+        { "F5" , Key::F5  },
+        { "F6" , Key::F6  },
+        { "F7" , Key::F7  },
+        { "F8" , Key::F8  },
+        { "F9" , Key::F9  },
+        { "F10", Key::F10 },
+        { "F11", Key::F11 },
+        { "F12", Key::F12 }
+    };
+
+    std::transform(name.begin(), name.end(), name.begin(),
+        [](unsigned char c) { return std::toupper(c); });
+
     for (const auto& [key, value] : key_map)
     {
         if (key == name)
             return value;
     }
-    return KEY_NONE;
+    return Key::None;
 }
 
 Button buttonByName(std::string name)
 {
-    name = upper(name);
+    static constexpr std::pair<std::string_view, Button> button_map[] =
+    {
+        { "A"     , Button::A      },
+        { "B"     , Button::B      },
+        { "X"     , Button::X      },
+        { "Y"     , Button::Y      },
+        { "BACK"  , Button::Back   },
+        { "GUIDE" , Button::Guide  },
+        { "START" , Button::Start  },
+        { "LSTICK", Button::LStick },
+        { "RSTICK", Button::RStick },
+        { "L"     , Button::L      },
+        { "R"     , Button::R      },
+        { "UP"    , Button::Up     },
+        { "DOWN"  , Button::Down   },
+        { "LEFT"  , Button::Left   },
+        { "RIGHT" , Button::Right  }
+    };
+
+    std::transform(name.begin(), name.end(), name.begin(),
+        [](unsigned char c) { return std::toupper(c); });
+
     for (const auto& [key, value] : button_map)
     {
         if (key == name)
             return value;
     }
-    return BTN_NONE;
+    return Button::None;
 }

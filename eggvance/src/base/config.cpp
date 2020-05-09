@@ -25,11 +25,11 @@ void Config::initFile(const fs::path& file)
     if (!result.valid())
         throw std::exception();
 
-    const auto value = result.value;
+    const auto toml = result.value;
 
-    save_path = fs::u8path(value.get<std::string>("general.save_path"));
-    bios_file = fs::u8path(value.get<std::string>("general.bios_file"));
-    bios_skip = value.get<bool>("general.bios_skip");
+    save_path = fs::u8path(toml.get<std::string>("general.save_path"));
+    bios_file = fs::u8path(toml.get<std::string>("general.bios_file"));
+    bios_skip = toml.get<bool>("general.bios_skip");
 
     if (!save_path.empty())
     {
@@ -46,21 +46,21 @@ void Config::initFile(const fs::path& file)
             bios_file = file.parent_path() / bios_file;
     }
 
-    framerate[0] = value.get<double>("framerate.custom_1");
-    framerate[1] = value.get<double>("framerate.custom_2");
-    framerate[2] = value.get<double>("framerate.custom_3");
-    framerate[3] = value.get<double>("framerate.custom_4");
+    framerate[0] = toml.get<double>("framerate.custom_1");
+    framerate[1] = toml.get<double>("framerate.custom_2");
+    framerate[2] = toml.get<double>("framerate.custom_3");
+    framerate[3] = toml.get<double>("framerate.custom_4");
 
-    const auto a      = value.get<std::vector<std::string>>("controls.a"     );
-    const auto b      = value.get<std::vector<std::string>>("controls.b"     );
-    const auto up     = value.get<std::vector<std::string>>("controls.up"    );
-    const auto down   = value.get<std::vector<std::string>>("controls.down"  );
-    const auto left   = value.get<std::vector<std::string>>("controls.left"  );
-    const auto right  = value.get<std::vector<std::string>>("controls.right" );
-    const auto start  = value.get<std::vector<std::string>>("controls.start" );
-    const auto select = value.get<std::vector<std::string>>("controls.select");
-    const auto l      = value.get<std::vector<std::string>>("controls.l"     );
-    const auto r      = value.get<std::vector<std::string>>("controls.r"     );
+    const auto a      = toml.get<std::vector<std::string>>("controls.a");
+    const auto b      = toml.get<std::vector<std::string>>("controls.b");
+    const auto up     = toml.get<std::vector<std::string>>("controls.up");
+    const auto down   = toml.get<std::vector<std::string>>("controls.down");
+    const auto left   = toml.get<std::vector<std::string>>("controls.left");
+    const auto right  = toml.get<std::vector<std::string>>("controls.right");
+    const auto start  = toml.get<std::vector<std::string>>("controls.start");
+    const auto select = toml.get<std::vector<std::string>>("controls.select");
+    const auto l      = toml.get<std::vector<std::string>>("controls.l");
+    const auto r      = toml.get<std::vector<std::string>>("controls.r");
 
     controls.keyboard.a      = keyByName(a[0]);
     controls.keyboard.b      = keyByName(b[0]);
@@ -84,14 +84,14 @@ void Config::initFile(const fs::path& file)
     controls.controller.l      = buttonByName(l[1]);
     controls.controller.r      = buttonByName(r[1]);
 
-    const auto reset       = value.get<std::vector<std::string>>("shortcuts.reset"      );
-    const auto fullscreen  = value.get<std::vector<std::string>>("shortcuts.fullscreen" );
-    const auto fr_hardware = value.get<std::vector<std::string>>("shortcuts.fr_hardware");
-    const auto fr_custom_1 = value.get<std::vector<std::string>>("shortcuts.fr_custom_1");
-    const auto fr_custom_2 = value.get<std::vector<std::string>>("shortcuts.fr_custom_2");
-    const auto fr_custom_3 = value.get<std::vector<std::string>>("shortcuts.fr_custom_3");
-    const auto fr_custom_4 = value.get<std::vector<std::string>>("shortcuts.fr_custom_4");
-    const auto fr_unbound  = value.get<std::vector<std::string>>("shortcuts.fr_unbound" );
+    const auto reset       = toml.get<std::vector<std::string>>("shortcuts.reset");
+    const auto fullscreen  = toml.get<std::vector<std::string>>("shortcuts.fullscreen");
+    const auto fr_hardware = toml.get<std::vector<std::string>>("shortcuts.fr_hardware");
+    const auto fr_custom_1 = toml.get<std::vector<std::string>>("shortcuts.fr_custom_1");
+    const auto fr_custom_2 = toml.get<std::vector<std::string>>("shortcuts.fr_custom_2");
+    const auto fr_custom_3 = toml.get<std::vector<std::string>>("shortcuts.fr_custom_3");
+    const auto fr_custom_4 = toml.get<std::vector<std::string>>("shortcuts.fr_custom_4");
+    const auto fr_unbound  = toml.get<std::vector<std::string>>("shortcuts.fr_unbound");
 
     shortcuts.keyboard.reset       = keyByName(reset[0]);
     shortcuts.keyboard.fullscreen  = keyByName(fullscreen[0]);
@@ -123,43 +123,43 @@ void Config::initDefault()
     framerate[2] = 6.0 * kRefreshRate;
     framerate[3] = 8.0 * kRefreshRate;
 
-    controls.keyboard.a      = KEY_U;
-    controls.keyboard.b      = KEY_H;
-    controls.keyboard.up     = KEY_W;
-    controls.keyboard.down   = KEY_S;
-    controls.keyboard.left   = KEY_A;
-    controls.keyboard.right  = KEY_D;
-    controls.keyboard.start  = KEY_G;
-    controls.keyboard.select = KEY_F;
-    controls.keyboard.l      = KEY_Q;
-    controls.keyboard.r      = KEY_I;
+    controls.keyboard.a      = Key::U;
+    controls.keyboard.b      = Key::H;
+    controls.keyboard.up     = Key::W;
+    controls.keyboard.down   = Key::S;
+    controls.keyboard.left   = Key::A;
+    controls.keyboard.right  = Key::D;
+    controls.keyboard.start  = Key::G;
+    controls.keyboard.select = Key::F;
+    controls.keyboard.l      = Key::Q;
+    controls.keyboard.r      = Key::I;
 
-    controls.controller.a      = BTN_B;
-    controls.controller.b      = BTN_A;
-    controls.controller.up     = BTN_UP;
-    controls.controller.down   = BTN_DOWN;
-    controls.controller.left   = BTN_LEFT;
-    controls.controller.right  = BTN_RIGHT;
-    controls.controller.start  = BTN_START;
-    controls.controller.select = BTN_BACK;
-    controls.controller.l      = BTN_L;
-    controls.controller.r      = BTN_R;
+    controls.controller.a      = Button::B;
+    controls.controller.b      = Button::A;
+    controls.controller.up     = Button::Up;
+    controls.controller.down   = Button::Down;
+    controls.controller.left   = Button::Left;
+    controls.controller.right  = Button::Right;
+    controls.controller.start  = Button::Start;
+    controls.controller.select = Button::Back;
+    controls.controller.l      = Button::L;
+    controls.controller.r      = Button::R;
 
-    shortcuts.keyboard.reset       = KEY_R;
-    shortcuts.keyboard.fullscreen  = KEY_F11;
-    shortcuts.keyboard.fr_hardware = KEY_1;
-    shortcuts.keyboard.fr_custom_1 = KEY_2;
-    shortcuts.keyboard.fr_custom_2 = KEY_3;
-    shortcuts.keyboard.fr_custom_3 = KEY_4;
-    shortcuts.keyboard.fr_custom_4 = KEY_5;
-    shortcuts.keyboard.fr_unbound  = KEY_6;
+    shortcuts.keyboard.reset       = Key::R;
+    shortcuts.keyboard.fullscreen  = Key::F11;
+    shortcuts.keyboard.fr_hardware = Key::N1;
+    shortcuts.keyboard.fr_custom_1 = Key::N2;
+    shortcuts.keyboard.fr_custom_2 = Key::N3;
+    shortcuts.keyboard.fr_custom_3 = Key::N4;
+    shortcuts.keyboard.fr_custom_4 = Key::N5;
+    shortcuts.keyboard.fr_unbound  = Key::N6;
 
-    shortcuts.controller.reset       = BTN_NONE;
-    shortcuts.controller.fullscreen  = BTN_NONE;
-    shortcuts.controller.fr_hardware = BTN_NONE;
-    shortcuts.controller.fr_custom_1 = BTN_NONE;
-    shortcuts.controller.fr_custom_2 = BTN_NONE;
-    shortcuts.controller.fr_custom_3 = BTN_NONE;
-    shortcuts.controller.fr_custom_4 = BTN_NONE;
-    shortcuts.controller.fr_unbound  = BTN_NONE;
+    shortcuts.controller.reset       = Button::None;
+    shortcuts.controller.fullscreen  = Button::None;
+    shortcuts.controller.fr_hardware = Button::None;
+    shortcuts.controller.fr_custom_1 = Button::None;
+    shortcuts.controller.fr_custom_2 = Button::None;
+    shortcuts.controller.fr_custom_3 = Button::None;
+    shortcuts.controller.fr_custom_4 = Button::None;
+    shortcuts.controller.fr_unbound  = Button::None;
 }
