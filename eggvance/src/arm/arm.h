@@ -2,8 +2,8 @@
 
 #include <array>
 
-#include "registers.h"
 #include "io/armio.h"
+#include "registers.h"
 
 class ARM : public Registers
 {
@@ -14,11 +14,11 @@ public:
 
     enum State
     {
-        STATE_THUMB = 1 << 0,
-        STATE_HALT  = 1 << 1,
-        STATE_IRQ   = 1 << 2,
-        STATE_DMA   = 1 << 3,
-        STATE_TIMER = 1 << 4
+        kStateThumb = 1 << 0,
+        kStateHalt  = 1 << 1,
+        kStateIrq   = 1 << 2,
+        kStateDma   = 1 << 3,
+        kStateTimer = 1 << 4
     };
 
     void reset();
@@ -28,12 +28,12 @@ public:
     uint state;
 
 private:
-    enum class Shift
+    enum Shift
     {
-        Lsl = 0b00,
-        Lsr = 0b01,
-        Asr = 0b10,
-        Ror = 0b11
+        kShiftLsl = 0b00,
+        kShiftLsr = 0b01,
+        kShiftAsr = 0b10,
+        kShiftRor = 0b11
     };
 
     bool isSequential(u32 addr) const;

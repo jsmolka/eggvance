@@ -23,20 +23,20 @@ public:
     PSR spsr;
 
 protected:
-    void switchMode(PSR::Mode mode);
+    void switchMode(uint mode);
 
 private:
     enum Bank
     {
-        BANK_DEF = 0,
-        BANK_FIQ = 1,
-        BANK_IRQ = 2,
-        BANK_SVC = 3,
-        BANK_ABT = 4,
-        BANK_UND = 5
+        kBankDef = 0,
+        kBankFiq = 1,
+        kBankIrq = 2,
+        kBankSvc = 3,
+        kBankAbt = 4,
+        kBankUnd = 5
     };
 
-    static Bank modeToBank(PSR::Mode mode);
+    static Bank modeToBank(uint mode);
 
     u32 bank_all[6][3];
     u32 bank_fiq[2][5];

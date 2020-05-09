@@ -18,11 +18,11 @@ void Registers::reset()
         spsr = 0x0000'0000;
         cpsr = 0x0000'005F;
 
-        bank_all[BANK_FIQ][0] = 0x0300'7F00;
-        bank_all[BANK_ABT][0] = 0x0300'7F00;
-        bank_all[BANK_UND][0] = 0x0300'7F00;
-        bank_all[BANK_SVC][0] = 0x0300'7FE0;
-        bank_all[BANK_IRQ][0] = 0x0300'7FA0;
+        bank_all[kBankFiq][0] = 0x0300'7F00;
+        bank_all[kBankAbt][0] = 0x0300'7F00;
+        bank_all[kBankUnd][0] = 0x0300'7F00;
+        bank_all[kBankSvc][0] = 0x0300'7FE0;
+        bank_all[kBankIrq][0] = 0x0300'7FA0;
     }
     else 
     {
@@ -31,7 +31,7 @@ void Registers::reset()
     }
 }
 
-void Registers::switchMode(PSR::Mode mode)
+void Registers::switchMode(uint mode)
 {
     Bank bank_old = modeToBank(cpsr.m);
     Bank bank_new = modeToBank(mode);
@@ -46,10 +46,10 @@ void Registers::switchMode(PSR::Mode mode)
         lr   = bank_all[bank_new][1];
         spsr = bank_all[bank_new][2];
 
-        if (bank_old == BANK_FIQ || bank_new == BANK_FIQ)
+        if (bank_old == kBankFiq || bank_new == kBankFiq)
         {
-            uint fiq_old = static_cast<uint>(bank_old == BANK_FIQ);
-            uint fiq_new = static_cast<uint>(bank_new == BANK_FIQ);
+            uint fiq_old = bank_old == kBankFiq;
+            uint fiq_new = bank_new == kBankFiq;
 
             bank_fiq[fiq_old][0] = regs[ 8];
             bank_fiq[fiq_old][1] = regs[ 9];
@@ -67,20 +67,20 @@ void Registers::switchMode(PSR::Mode mode)
     cpsr.m = mode;
 }
 
-Registers::Bank Registers::modeToBank(PSR::Mode mode)
+Registers::Bank Registers::modeToBank(uint mode)
 {
     switch (mode)
     {
-    case PSR::Mode::Usr: return BANK_DEF;
-    case PSR::Mode::Sys: return BANK_DEF;
-    case PSR::Mode::Fiq: return BANK_FIQ;
-    case PSR::Mode::Irq: return BANK_IRQ;
-    case PSR::Mode::Svc: return BANK_SVC;
-    case PSR::Mode::Abt: return BANK_ABT;
-    case PSR::Mode::Und: return BANK_UND;
+    case PSR::kModeUsr: return kBankDef;
+    case PSR::kModeSys: return kBankDef;
+    case PSR::kModeFiq: return kBankFiq;
+    case PSR::kModeIrq: return kBankIrq;
+    case PSR::kModeSvc: return kBankSvc;
+    case PSR::kModeAbt: return kBankAbt;
+    case PSR::kModeUnd: return kBankUnd;
 
     default:
         UNREACHABLE;
-        return BANK_DEF;
+        return kBankDef;
     }
 }

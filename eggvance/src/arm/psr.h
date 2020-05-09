@@ -3,42 +3,23 @@
 #include "base/bits.h"
 #include "base/macros.h"
 
-struct PSR
+class PSR
 {
-    enum class Mode
+public:
+    enum Mode
     {
-        Usr = 0b10000,
-        Fiq = 0b10001,
-        Irq = 0b10010,
-        Svc = 0b10011,
-        Abt = 0b10111,
-        Sys = 0b11111,
-        Und = 0b11011
+        kModeUsr = 0b10000,
+        kModeFiq = 0b10001,
+        kModeIrq = 0b10010,
+        kModeSvc = 0b10011,
+        kModeAbt = 0b10111,
+        kModeSys = 0b11111,
+        kModeUnd = 0b11011
     };
 
-    enum class Condition
+    PSR& operator=(u32 value)
     {
-        EQ = 0x0,
-        NE = 0x1,
-        CS = 0x2,
-        CC = 0x3,
-        MI = 0x4,
-        PL = 0x5,
-        VS = 0x6,
-        VC = 0x7,
-        HI = 0x8,
-        LS = 0x9,
-        GE = 0xA,
-        LT = 0xB,
-        GT = 0xC,
-        LE = 0xD,
-        AL = 0xE,
-        NV = 0xF
-    };
-
-    inline PSR& operator=(u32 value)
-    {
-        m = static_cast<Mode>(bits::seq<0, 5>(value));
+        m = bits::seq< 0, 5>(value);
         t = bits::seq< 5, 1>(value);
         f = bits::seq< 6, 1>(value);
         i = bits::seq< 7, 1>(value);
@@ -50,16 +31,9 @@ struct PSR
         return *this;
     }
 
-    inline operator u32() const
+    operator u32() const
     {
-        return static_cast<u32>(m)
-            | (static_cast<u32>(t) <<  5)
-            | (static_cast<u32>(f) <<  6)
-            | (static_cast<u32>(i) <<  7)
-            | (static_cast<u32>(v) << 28)
-            | (static_cast<u32>(c) << 29)
-            | (static_cast<u32>(z) << 30)
-            | (static_cast<u32>(n) << 31);
+        return (m << 0) | (t << 5) | (f << 6) | (i << 7) | (v << 28) | (c << 29) | (z << 30) | (n << 31);
     }
 
     inline uint size() const
@@ -67,26 +41,26 @@ struct PSR
         return 2 << (static_cast<uint>(t) ^ 0x1);
     }
 
-    inline bool check(Condition condition) const
+    bool check(uint condition) const
     {
         switch (condition)
         {
-        case Condition::EQ: return z;
-        case Condition::NE: return !z;
-        case Condition::CS: return c;
-        case Condition::CC: return !c;
-        case Condition::MI: return n;
-        case Condition::PL: return !n;
-        case Condition::VS: return v;
-        case Condition::VC: return !v;
-        case Condition::HI: return c && !z;
-        case Condition::LS: return !c || z;
-        case Condition::GE: return n == v;
-        case Condition::LT: return n != v;
-        case Condition::GT: return !z && (n == v);
-        case Condition::LE: return z || (n != v);
-        case Condition::AL: return true;
-        case Condition::NV: return false;
+        case kConditionEQ: return z;
+        case kConditionNE: return !z;
+        case kConditionCS: return c;
+        case kConditionCC: return !c;
+        case kConditionMI: return n;
+        case kConditionPL: return !n;
+        case kConditionVS: return v;
+        case kConditionVC: return !v;
+        case kConditionHI: return c && !z;
+        case kConditionLS: return !c || z;
+        case kConditionGE: return n == v;
+        case kConditionLT: return n != v;
+        case kConditionGT: return !z && (n == v);
+        case kConditionLE: return z || (n != v);
+        case kConditionAL: return true;
+        case kConditionNV: return false;
 
         default:
             UNREACHABLE;
@@ -94,12 +68,33 @@ struct PSR
         }
     }
 
-    Mode m = Mode::Sys;
-    bool t = false;
-    bool f = false;
-    bool i = false;
-    bool v = false;
-    bool c = false;
-    bool z = false;
-    bool n = false;
+    uint m = kModeSys;
+    uint t = 0;
+    uint f = 0;
+    uint i = 0;
+    uint v = 0;
+    uint c = 0;
+    uint z = 0;
+    uint n = 0;
+
+private:
+    enum Condition
+    {
+        kConditionEQ = 0x0,
+        kConditionNE = 0x1,
+        kConditionCS = 0x2,
+        kConditionCC = 0x3,
+        kConditionMI = 0x4,
+        kConditionPL = 0x5,
+        kConditionVS = 0x6,
+        kConditionVC = 0x7,
+        kConditionHI = 0x8,
+        kConditionLS = 0x9,
+        kConditionGE = 0xA,
+        kConditionLT = 0xB,
+        kConditionGT = 0xC,
+        kConditionLE = 0xD,
+        kConditionAL = 0xE,
+        kConditionNV = 0xF
+    };
 };

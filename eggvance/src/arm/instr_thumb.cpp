@@ -5,7 +5,7 @@
 template<uint amount, uint opcode>
 void ARM::Thumb_MoveShiftedRegister(u16 instr)
 {
-    static_assert(static_cast<Shift>(opcode) != Shift::Ror);
+    static_assert(opcode != kShiftRor);
 
     uint rd = bits::seq<0, 3>(instr);
     uint rs = bits::seq<3, 3>(instr);
@@ -13,11 +13,11 @@ void ARM::Thumb_MoveShiftedRegister(u16 instr)
     u32& dst = regs[rd];
     u32  src = regs[rs];
 
-    switch (static_cast<Shift>(opcode))
+    switch (opcode)
     {
-    case Shift::Lsl: dst = util::log(util::lslThumb<amount>(src, cpsr), cpsr); break;
-    case Shift::Lsr: dst = util::log(util::lsrThumb<amount>(src, cpsr), cpsr); break;
-    case Shift::Asr: dst = util::log(util::asrThumb<amount>(src, cpsr), cpsr); break;
+    case kShiftLsl: dst = util::log(util::lslThumb<amount>(src, cpsr), cpsr); break;
+    case kShiftLsr: dst = util::log(util::lsrThumb<amount>(src, cpsr), cpsr); break;
+    case kShiftAsr: dst = util::log(util::asrThumb<amount>(src, cpsr), cpsr); break;
 
     default:
         UNREACHABLE;
@@ -28,12 +28,12 @@ void ARM::Thumb_MoveShiftedRegister(u16 instr)
 template<uint rn, uint opcode>
 void ARM::Thumb_AddSubtract(u16 instr)
 {
-    enum class Opcode
+    enum Opcode
     {
-        AddReg = 0b00,
-        SubReg = 0b01,
-        AddImm = 0b10,
-        SubImm = 0b11
+        kOpcodeAddReg = 0b00,
+        kOpcodeSubReg = 0b01,
+        kOpcodeAddImm = 0b10,
+        kOpcodeSubImm = 0b11
     };
 
     uint rd = bits::seq<0, 3>(instr);
@@ -42,12 +42,12 @@ void ARM::Thumb_AddSubtract(u16 instr)
     u32& dst = regs[rd];
     u32  src = regs[rs];
 
-    switch (static_cast<Opcode>(opcode))
+    switch (opcode)
     {
-    case Opcode::AddImm: dst = util::add(src, rn, cpsr); break;
-    case Opcode::SubImm: dst = util::sub(src, rn, cpsr); break;
-    case Opcode::AddReg: dst = util::add(src, regs[rn], cpsr); break;
-    case Opcode::SubReg: dst = util::sub(src, regs[rn], cpsr); break;
+    case kOpcodeAddImm: dst = util::add(src, rn, cpsr); break;
+    case kOpcodeSubImm: dst = util::sub(src, rn, cpsr); break;
+    case kOpcodeAddReg: dst = util::add(src, regs[rn], cpsr); break;
+    case kOpcodeSubReg: dst = util::sub(src, regs[rn], cpsr); break;
 
     default:
         UNREACHABLE;
@@ -58,12 +58,12 @@ void ARM::Thumb_AddSubtract(u16 instr)
 template<uint rd, uint opcode>
 void ARM::Thumb_ImmediateOperations(u16 instr)
 {
-    enum class Opcode
+    enum Opcode
     {
-        Mov = 0b00,
-        Cmp = 0b01,
-        Add = 0b10,
-        Sub = 0b11
+        kOpcodeMov = 0b00,
+        kOpcodeCmp = 0b01,
+        kOpcodeAdd = 0b10,
+        kOpcodeSub = 0b11
     };
 
     uint offset = bits::seq<0, 8>(instr);
@@ -71,12 +71,12 @@ void ARM::Thumb_ImmediateOperations(u16 instr)
     u32& dst = regs[rd];
     u32  src = regs[rd];
 
-    switch (static_cast<Opcode>(opcode))
+    switch (opcode)
     {
-    case Opcode::Mov: dst = util::log(     offset, cpsr); break;
-    case Opcode::Cmp:       util::sub(src, offset, cpsr); break;
-    case Opcode::Add: dst = util::add(src, offset, cpsr); break;
-    case Opcode::Sub: dst = util::sub(src, offset, cpsr); break;
+    case kOpcodeMov: dst = util::log(     offset, cpsr); break;
+    case kOpcodeCmp:       util::sub(src, offset, cpsr); break;
+    case kOpcodeAdd: dst = util::add(src, offset, cpsr); break;
+    case kOpcodeSub: dst = util::sub(src, offset, cpsr); break;
 
     default:
         UNREACHABLE;
@@ -87,24 +87,24 @@ void ARM::Thumb_ImmediateOperations(u16 instr)
 template<uint opcode>
 void ARM::Thumb_AluOperations(u16 instr)
 {
-    enum class Opcode
+    enum Opcode
     {
-        And = 0b0000,
-        Eor = 0b0001,
-        Lsl = 0b0010,
-        Lsr = 0b0011,
-        Asr = 0b0100,
-        Adc = 0b0101,
-        Sbc = 0b0110,
-        Ror = 0b0111,
-        Tst = 0b1000,
-        Neg = 0b1001,
-        Cmp = 0b1010,
-        Cmn = 0b1011,
-        Orr = 0b1100,
-        Mul = 0b1101,
-        Bic = 0b1110,
-        Mvn = 0b1111
+        kOpcodeAnd = 0b0000,
+        kOpcodeEor = 0b0001,
+        kOpcodeLsl = 0b0010,
+        kOpcodeLsr = 0b0011,
+        kOpcodeAsr = 0b0100,
+        kOpcodeAdc = 0b0101,
+        kOpcodeSbc = 0b0110,
+        kOpcodeRor = 0b0111,
+        kOpcodeTst = 0b1000,
+        kOpcodeNeg = 0b1001,
+        kOpcodeCmp = 0b1010,
+        kOpcodeCmn = 0b1011,
+        kOpcodeOrr = 0b1100,
+        kOpcodeMul = 0b1101,
+        kOpcodeBic = 0b1110,
+        kOpcodeMvn = 0b1111
     };
 
     uint rd = bits::seq<0, 3>(instr);
@@ -113,24 +113,24 @@ void ARM::Thumb_AluOperations(u16 instr)
     u32& dst = regs[rd];
     u32  src = regs[rs];
 
-    switch (static_cast<Opcode>(opcode))
+    switch (opcode)
     {
-    case Opcode::Lsl: dst = util::log(util::lslThumb(dst, src, cpsr), cpsr); idle(); break;
-    case Opcode::Lsr: dst = util::log(util::lsrThumb(dst, src, cpsr), cpsr); idle(); break;
-    case Opcode::Asr: dst = util::log(util::asrThumb(dst, src, cpsr), cpsr); idle(); break;
-    case Opcode::Ror: dst = util::log(util::rorThumb(dst, src, cpsr), cpsr); idle(); break;
-    case Opcode::And: dst = util::log(dst &  src, cpsr); break;
-    case Opcode::Eor: dst = util::log(dst ^  src, cpsr); break;
-    case Opcode::Orr: dst = util::log(dst |  src, cpsr); break;
-    case Opcode::Bic: dst = util::log(dst & ~src, cpsr); break;
-    case Opcode::Mvn: dst = util::log(      ~src, cpsr); break;
-    case Opcode::Tst:       util::log(dst &  src, cpsr); break;
-    case Opcode::Cmn:       util::add(dst,   src, cpsr); break;
-    case Opcode::Cmp:       util::sub(dst,   src, cpsr); break;
-    case Opcode::Adc: dst = util::adc(dst,   src, cpsr); break;
-    case Opcode::Sbc: dst = util::sbc(dst,   src, cpsr); break;
-    case Opcode::Neg: dst = util::sub(  0,   src, cpsr); break;
-    case Opcode::Mul:
+    case kOpcodeLsl: dst = util::log(util::lslThumb(dst, src, cpsr), cpsr); idle(); break;
+    case kOpcodeLsr: dst = util::log(util::lsrThumb(dst, src, cpsr), cpsr); idle(); break;
+    case kOpcodeAsr: dst = util::log(util::asrThumb(dst, src, cpsr), cpsr); idle(); break;
+    case kOpcodeRor: dst = util::log(util::rorThumb(dst, src, cpsr), cpsr); idle(); break;
+    case kOpcodeAnd: dst = util::log(dst &  src, cpsr); break;
+    case kOpcodeEor: dst = util::log(dst ^  src, cpsr); break;
+    case kOpcodeOrr: dst = util::log(dst |  src, cpsr); break;
+    case kOpcodeBic: dst = util::log(dst & ~src, cpsr); break;
+    case kOpcodeMvn: dst = util::log(      ~src, cpsr); break;
+    case kOpcodeTst:       util::log(dst &  src, cpsr); break;
+    case kOpcodeCmn:       util::add(dst,   src, cpsr); break;
+    case kOpcodeCmp:       util::sub(dst,   src, cpsr); break;
+    case kOpcodeAdc: dst = util::adc(dst,   src, cpsr); break;
+    case kOpcodeSbc: dst = util::sbc(dst,   src, cpsr); break;
+    case kOpcodeNeg: dst = util::sub(  0,   src, cpsr); break;
+    case kOpcodeMul:
         booth(dst, true);
         dst = util::log(dst * src, cpsr);
         break;
@@ -144,12 +144,12 @@ void ARM::Thumb_AluOperations(u16 instr)
 template<uint hs, uint hd, uint opcode>
 void ARM::Thumb_HighRegisterOperations(u16 instr)
 {
-    enum class Opcode
+    enum Opcode
     {
-        Add = 0b00,
-        Cmp = 0b01,
-        Mov = 0b10,
-        Bx  = 0b11
+        kOpcodeAdd = 0b00,
+        kOpcodeCmp = 0b01,
+        kOpcodeMov = 0b10,
+        kOpcodeBx  = 0b11
     };
 
     uint rd = bits::seq<0, 3>(instr);
@@ -161,25 +161,25 @@ void ARM::Thumb_HighRegisterOperations(u16 instr)
     u32& dst = regs[rd];
     u32  src = regs[rs];
 
-    switch (static_cast<Opcode>(opcode))
+    switch (opcode)
     {
-    case Opcode::Add:
+    case kOpcodeAdd:
         dst += src;
         if (rd == 15 && hd)
             flushHalf();
         break;
 
-    case Opcode::Mov:
+    case kOpcodeMov:
         dst = src;
         if (rd == 15 && hd)
             flushHalf();
         break;
 
-    case Opcode::Cmp:
+    case kOpcodeCmp:
         util::sub(dst, src, cpsr);
         break;
 
-    case Opcode::Bx:
+    case kOpcodeBx:
         pc = src;
         if (cpsr.t = src & 0x1)
         {
@@ -188,7 +188,7 @@ void ARM::Thumb_HighRegisterOperations(u16 instr)
         else
         {
             flushWord();
-            state &= ~STATE_THUMB;
+            state &= ~kStateThumb;
         }
         break;
 
@@ -211,12 +211,12 @@ void ARM::Thumb_LoadPcRelative(u16 instr)
 template<uint ro, uint opcode>
 void ARM::Thumb_LoadStoreRegisterOffset(u16 instr)
 {
-    enum class Opcode
+    enum Opcode
     {
-        Str  = 0b00,
-        Strb = 0b01,
-        Ldr  = 0b10,
-        Ldrb = 0b11
+        kOpcodeStr  = 0b00,
+        kOpcodeStrb = 0b01,
+        kOpcodeLdr  = 0b10,
+        kOpcodeLdrb = 0b11
     };
 
     uint rd = bits::seq<0, 3>(instr);
@@ -225,22 +225,22 @@ void ARM::Thumb_LoadStoreRegisterOffset(u16 instr)
     u32& dst = regs[rd];
     u32 addr = regs[rb] + regs[ro];
 
-    switch (static_cast<Opcode>(opcode))
+    switch (opcode)
     {
-    case Opcode::Str:
+    case kOpcodeStr:
         writeWord(addr, dst);
         break;
 
-    case Opcode::Strb:
+    case kOpcodeStrb:
         writeByte(addr, dst);
         break;
 
-    case Opcode::Ldr:
+    case kOpcodeLdr:
         dst = readWordRotated(addr);
         idle();
         break;
 
-    case Opcode::Ldrb:
+    case kOpcodeLdrb:
         dst = readByte(addr);
         idle();
         break;
@@ -254,12 +254,12 @@ void ARM::Thumb_LoadStoreRegisterOffset(u16 instr)
 template<uint ro, uint opcode>
 void ARM::Thumb_LoadStoreByteHalf(u16 instr)
 {
-    enum class Opcode
+    enum Opcode
     {
-        Strh  = 0b00,
-        Ldrsb = 0b01,
-        Ldrh  = 0b10,
-        Ldrsh = 0b11
+        kOpcodeStrh  = 0b00,
+        kOpcodeLdrsb = 0b01,
+        kOpcodeLdrh  = 0b10,
+        kOpcodeLdrsh = 0b11
     };
 
     uint rd = bits::seq<0, 3>(instr);
@@ -268,24 +268,24 @@ void ARM::Thumb_LoadStoreByteHalf(u16 instr)
     u32& dst = regs[rd];
     u32 addr = regs[rb] + regs[ro];
 
-    switch (static_cast<Opcode>(opcode))
+    switch (opcode)
     {
-    case Opcode::Strh:
+    case kOpcodeStrh:
         writeHalf(addr, dst);
         break;
 
-    case Opcode::Ldrsb:
+    case kOpcodeLdrsb:
         dst = readByte(addr);
         dst = bits::sx<8>(dst);
         idle();
         break;
 
-    case Opcode::Ldrh:
+    case kOpcodeLdrh:
         dst = readHalfRotated(addr);
         idle();
         break;
 
-    case Opcode::Ldrsh:
+    case kOpcodeLdrsh:
         dst = readHalfSigned(addr);
         idle();
         break;
@@ -299,12 +299,12 @@ void ARM::Thumb_LoadStoreByteHalf(u16 instr)
 template<uint amount, uint opcode>
 void ARM::Thumb_LoadStoreImmediateOffset(u16 instr)
 {
-    enum class Opcode
+    enum Opcode
     {
-        Str  = 0b00,
-        Ldr  = 0b01,
-        Strb = 0b10,
-        Ldrb = 0b11
+        kOpcodeStr  = 0b00,
+        kOpcodeLdr  = 0b01,
+        kOpcodeStrb = 0b10,
+        kOpcodeLdrb = 0b11
     };
 
     uint rd = bits::seq<0, 3>(instr);
@@ -313,22 +313,22 @@ void ARM::Thumb_LoadStoreImmediateOffset(u16 instr)
     u32& dst = regs[rd];
     u32 addr = regs[rb] + (amount << (~opcode & 0x2));
 
-    switch (static_cast<Opcode>(opcode))
+    switch (opcode)
     {
-    case Opcode::Str:
+    case kOpcodeStr:
         writeWord(addr, dst);
         break;
 
-    case Opcode::Strb:
+    case kOpcodeStrb:
         writeByte(addr, dst);
         break;
 
-    case Opcode::Ldr:
+    case kOpcodeLdr:
         dst = readWordRotated(addr);
         idle();
         break;
 
-    case Opcode::Ldrb:
+    case kOpcodeLdrb:
         dst = readByte(addr);
         idle();
         break;
@@ -504,7 +504,7 @@ void ARM::Thumb_LoadStoreMultiple(u16 instr)
 template<uint condition>
 void ARM::Thumb_ConditionalBranch(u16 instr)
 {
-    if (cpsr.check(static_cast<PSR::Condition>(condition)))
+    if (cpsr.check(condition))
     {
         uint offset = bits::seq<0, 8>(instr);
 

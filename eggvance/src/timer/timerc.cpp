@@ -137,9 +137,9 @@ void TimerController::schedule()
     }
 
     if (active_timers.size() > 0)
-        arm.state |= ARM::STATE_TIMER;
+        arm.state |= ARM::kStateTimer;
     else
-        arm.state &= ~ARM::STATE_TIMER;
+        arm.state &= ~ARM::kStateTimer;
 }
 
 void TimerController::reschedule()

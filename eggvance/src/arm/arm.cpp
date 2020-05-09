@@ -79,15 +79,15 @@ void ARM::dispatch()
     {
         int last = cycles;
 
-        if (state & STATE_DMA)
+        if (state & kStateDma)
         {
             dmac.run(cycles);
         }
         else
         {
-            if (state & STATE_HALT)
+            if (state & kStateHalt)
             {
-                if (state & STATE_TIMER)
+                if (state & kStateTimer)
                     timerc.runUntilIrq(cycles);
                 else
                     cycles = 0;
@@ -96,7 +96,7 @@ void ARM::dispatch()
             }
             else
             {
-                if (state & STATE_IRQ && !cpsr.i)
+                if (state & kStateIrq && !cpsr.i)
                 {
                     interruptHW();
                 }
@@ -104,7 +104,7 @@ void ARM::dispatch()
                 {
                     //disasm();
 
-                    if (state & STATE_THUMB)
+                    if (state & kStateThumb)
                     {
                         u16 instr = pipe[0];
 
@@ -120,7 +120,7 @@ void ARM::dispatch()
                         pipe[0] = pipe[1];
                         pipe[1] = readWord(pc);
 
-                        if (cpsr.check(static_cast<PSR::Condition>(instr >> 28)))
+                        if (cpsr.check(instr >> 28))
                         {
                             (this->*instr_arm[armHash(instr)])(instr);
                         }
@@ -130,7 +130,7 @@ void ARM::dispatch()
             }
         }
 
-        if (state & STATE_TIMER)
+        if (state & kStateTimer)
             timerc.run(last - cycles);
     }
 }
@@ -185,19 +185,19 @@ void ARM::interrupt(u32 pc, u32 lr, PSR::Mode mode)
     this->pc = pc;
 
     flushWord();
-    state &= ~STATE_THUMB;
+    state &= ~kStateThumb;
 }
 
 void ARM::interruptHW()
 {
     u32 lr = pc - 2 * cpsr.size() + 4;
 
-    interrupt(0x18, lr, PSR::Mode::Irq);
+    interrupt(0x18, lr, PSR::Mode::kModeIrq);
 }
 
 void ARM::interruptSW()
 {
     u32 lr = pc - cpsr.size();
 
-    interrupt(0x08, lr, PSR::Mode::Svc);
+    interrupt(0x08, lr, PSR::Mode::kModeSvc);
 }

@@ -18,12 +18,12 @@ void IRQHandler::update()
     bool interrupt = io.enable & io.request;
 
     if (interrupt)
-        arm.state &= ~ARM::STATE_HALT;
+        arm.state &= ~ARM::kStateHalt;
 
     if (interrupt && io.master)
-        arm.state |= ARM::STATE_IRQ;
+        arm.state |= ARM::kStateIrq;
     else
-        arm.state &= ~ARM::STATE_IRQ;
+        arm.state &= ~ARM::kStateIrq;
 }
 
 u8 IRQHandler::read(u32 addr) const

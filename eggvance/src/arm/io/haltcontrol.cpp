@@ -7,7 +7,7 @@ inline void HaltControl::write(u8 byte)
 {
     static_assert(index < 1);
 
-    arm.state |= ARM::STATE_HALT;
+    arm.state |= ARM::kStateHalt;
 }
 
 template void HaltControl::write<0>(u8 byte);
