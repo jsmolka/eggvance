@@ -2,7 +2,7 @@
 
 #include <fmt/format.h>
 
-#include "decode.h"
+#include "arm/decode.h"
 
 #define MNEMONIC "{:<8}"
 
@@ -52,7 +52,7 @@ static constexpr const char* bios_funcs[43] = {
     "SoundGetJumpList"
 };
 
-std::string reg(uint reg)
+static const char* reg(uint n)
 {
     static constexpr const char* regs[16] = {
          "r0", "r1",  "r2",  "r3",
@@ -60,15 +60,26 @@ std::string reg(uint reg)
          "r8", "r9", "r10", "r11",
         "r12", "sp",  "lr",  "pc"
     };
-    return regs[reg & 0xF];
+    return regs[n];
 }
 
-std::string hex(u32 value)
+static const char* condition(u32 instr)
+{
+    static constexpr const char*  conditions[16] = {
+        "eq", "ne", "cs", "cc",
+        "mi", "pl", "vs", "vc",
+        "hi", "ls", "ge", "lt",
+        "gt", "le",   "", "nv"
+    };
+    return conditions[instr >> 28];
+}
+
+static std::string hex(u32 value)
 {
     return fmt::format("{:X}h", value);
 }
 
-std::string rlist(u16 rlist)
+static std::string rlist(u16 rlist)
 {
     if (rlist == 0)
         return "{}";
@@ -89,18 +100,7 @@ std::string rlist(u16 rlist)
     return list;
 }
 
-std::string condition(u32 instr)
-{
-    static constexpr const char* conditions[16] = {
-        "eq", "ne", "cs", "cc",
-        "mi", "pl", "vs", "vc",
-        "hi", "ls", "ge", "lt",
-        "gt", "le",   "", "nv"
-    };
-    return conditions[instr >> 28];
-}
-
-std::string shiftedRegister(uint data)
+static std::string shiftedRegister(uint data)
 {
     static constexpr const char* mnemonic[4] = {
         "lsl", "lsr", "asr", "ror"
@@ -119,15 +119,14 @@ std::string shiftedRegister(uint data)
     else
     {
         uint amount = bits::seq<7, 5>(data);
-        if (!amount)
-            return reg(rm);
+        if (!amount) return std::string(reg(rm));
 
         offset = hex(amount);
     }
     return fmt::format("{},{} {}", reg(rm), mnemonic[shift], offset);
 }
 
-u32 rotatedImmediate(uint data)
+static u32 rotatedImmediate(uint data)
 {
     uint value  = bits::seq<0, 8>(data);
     uint amount = bits::seq<8, 4>(data);
@@ -135,16 +134,16 @@ u32 rotatedImmediate(uint data)
     return bits::ror(value, amount << 1);
 }
 
-std::string Arm_BranchExchange(u32 instr)
+static std::string Arm_BranchExchange(u32 instr)
 {
     uint rn = bits::seq<0, 4>(instr);
 
-    auto mnemonic = fmt::format("bx{}", condition(instr));
+    const auto mnemonic = fmt::format("bx{}", condition(instr));
 
     return fmt::format(MNEMONIC"{}", mnemonic, reg(rn));
 }
 
-std::string Arm_BranchLink(u32 instr, u32 pc)
+static std::string Arm_BranchLink(u32 instr, u32 pc)
 {
     uint offset = bits::seq< 0, 24>(instr);
     uint link   = bits::seq<24,  1>(instr);
@@ -152,12 +151,12 @@ std::string Arm_BranchLink(u32 instr, u32 pc)
     offset = bits::sx<24>(offset);
     offset <<= 2;
 
-    auto mnemonic = fmt::format("{}{}", link ? "bl" : "b", condition(instr));
+    const auto mnemonic = fmt::format("{}{}", link ? "bl" : "b", condition(instr));
 
     return fmt::format(MNEMONIC"{}", mnemonic, hex(pc + offset));
 }
 
-std::string Arm_DataProcessing(u32 instr, u32 pc)
+static std::string Arm_DataProcessing(u32 instr, u32 pc)
 {
     static constexpr const char* mnemonics[16] = {
         "and", "eor", "sub", "rsb",
@@ -188,7 +187,7 @@ std::string Arm_DataProcessing(u32 instr, u32 pc)
         operand = shiftedRegister(instr);
     }
 
-    auto mnemonic = fmt::format(
+    const auto mnemonic = fmt::format(
         "{}{}{}",
         mnemonics[opcode],
         condition(instr),
@@ -250,7 +249,7 @@ std::string Arm_DataProcessing(u32 instr, u32 pc)
     }
 }
 
-std::string Arm_StatusTransfer(u32 instr)
+static std::string Arm_StatusTransfer(u32 instr)
 {
     uint write = bits::seq<21, 1>(instr);
     uint spsr  = bits::seq<22, 1>(instr);
@@ -280,7 +279,7 @@ std::string Arm_StatusTransfer(u32 instr)
         if (instr & (1 << 17)) fsxc.append("x");
         if (instr & (1 << 16)) fsxc.append("c");
 
-        auto mnemonic = fmt::format("msr{}", condition(instr));
+        const auto mnemonic = fmt::format("msr{}", condition(instr));
 
         return fmt::format(
             MNEMONIC"{}_{},{}",
@@ -294,7 +293,7 @@ std::string Arm_StatusTransfer(u32 instr)
     {
         uint rd = bits::seq<12, 4>(instr);
 
-        auto mnemonic = fmt::format("mrs{}", condition(instr));
+        const auto mnemonic = fmt::format("mrs{}", condition(instr));
 
         return fmt::format(
             MNEMONIC"{},{}",
@@ -305,7 +304,7 @@ std::string Arm_StatusTransfer(u32 instr)
     }
 }
 
-std::string Arm_Multiply(u32 instr)
+static std::string Arm_Multiply(u32 instr)
 {
     uint rm         = bits::seq< 0, 4>(instr);
     uint rs         = bits::seq< 8, 4>(instr);
@@ -314,7 +313,7 @@ std::string Arm_Multiply(u32 instr)
     uint flags      = bits::seq<20, 1>(instr);
     uint accumulate = bits::seq<21, 1>(instr);
 
-    auto mnemonic = fmt::format(
+    const auto mnemonic = fmt::format(
         "{}{}{}",
         accumulate ? "mla" : "mul",
         condition(instr),
@@ -344,7 +343,7 @@ std::string Arm_Multiply(u32 instr)
     }
 }
 
-std::string Arm_MultiplyLong(u32 instr)
+static std::string Arm_MultiplyLong(u32 instr)
 {
     static constexpr const char* mnemonics[4] = {
         "umull", "umlal", "smull", "smlal"
@@ -357,7 +356,7 @@ std::string Arm_MultiplyLong(u32 instr)
     uint flags  = bits::seq<20, 1>(instr);
     uint opcode = bits::seq<21, 2>(instr);
 
-    auto mnemonic = fmt::format(
+    const auto mnemonic = fmt::format(
         "{}{}{}", 
         mnemonics[opcode],
         condition(instr),
@@ -374,7 +373,7 @@ std::string Arm_MultiplyLong(u32 instr)
     );
 }
 
-std::string Arm_SingleDataTransfer(u32 instr)
+static std::string Arm_SingleDataTransfer(u32 instr)
 {
     uint data      = bits::seq< 0, 12>(instr);
     uint rd        = bits::seq<12,  4>(instr);
@@ -392,7 +391,7 @@ std::string Arm_SingleDataTransfer(u32 instr)
     else
         offset = hex(data);
 
-    auto mnemonic = fmt::format(
+    const auto mnemonic = fmt::format(
         "{}{}{}",
         load ? "ldr" : "str",
         condition(instr),
@@ -424,7 +423,7 @@ std::string Arm_SingleDataTransfer(u32 instr)
     }
 }
 
-std::string Arm_HalfSignedDataTransfer(u32 instr)
+static std::string Arm_HalfSignedDataTransfer(u32 instr)
 {
     uint half      = bits::seq< 5, 1>(instr);
     uint sign      = bits::seq< 6, 1>(instr);
@@ -441,7 +440,7 @@ std::string Arm_HalfSignedDataTransfer(u32 instr)
     {
         uint lower = bits::seq<0, 4>(instr);
         uint upper = bits::seq<8, 4>(instr);
-        offset = hex(upper << 4 | lower);
+        offset = hex((upper << 4) | lower);
     }
     else
     {
@@ -449,7 +448,7 @@ std::string Arm_HalfSignedDataTransfer(u32 instr)
         offset = reg(rm);
     }
 
-    auto mnemonic = fmt::format(
+    const auto mnemonic = fmt::format(
         "{}{}{}{}",
         load ? "ldr" : "str",
         condition(instr),
@@ -482,7 +481,7 @@ std::string Arm_HalfSignedDataTransfer(u32 instr)
     }
 }
 
-std::string Arm_BlockDataTransfer(u32 instr)
+static std::string Arm_BlockDataTransfer(u32 instr)
 {
     static constexpr const char* suffixes[2][4] = {
         { "fa", "fd", "ea", "ed" },
@@ -496,7 +495,7 @@ std::string Arm_BlockDataTransfer(u32 instr)
     uint user_mode = bits::seq<22,  1>(instr);
     uint opcode    = bits::seq<23,  2>(instr);
 
-    auto mnemonic = fmt::format(
+    const auto mnemonic = fmt::format(
         "{}{}{}",
         load ? "ldm" : "stm",
         condition(instr),
@@ -513,14 +512,14 @@ std::string Arm_BlockDataTransfer(u32 instr)
     );
 }
 
-std::string Arm_SingleDataSwap(u32 instr)
+static std::string Arm_SingleDataSwap(u32 instr)
 {
     uint rm   = bits::seq< 0, 4>(instr);
     uint rd   = bits::seq<12, 4>(instr);
     uint rn   = bits::seq<16, 4>(instr);
     uint byte = bits::seq<22, 1>(instr);
 
-    auto mnemonic = fmt::format(
+    const auto mnemonic = fmt::format(
         "swp{}{}",
         condition(instr),
         byte ? "b" : ""
@@ -535,7 +534,7 @@ std::string Arm_SingleDataSwap(u32 instr)
     );
 }
 
-std::string Arm_SoftwareInterrupt(u32 instr)
+static std::string Arm_SoftwareInterrupt(u32 instr)
 {
     uint comment = bits::seq<16, 8>(instr);
 
@@ -546,7 +545,7 @@ std::string Arm_SoftwareInterrupt(u32 instr)
     return fmt::format(MNEMONIC"{:X} - {}", "swi", comment, func);
 }
 
-std::string Thumb_MoveShiftedRegister(u16 instr)
+static std::string Thumb_MoveShiftedRegister(u16 instr)
 {
     static constexpr const char* mnemonics[4] = {
         "lsl", "lsr", "asr", "???"
@@ -566,7 +565,7 @@ std::string Thumb_MoveShiftedRegister(u16 instr)
     );
 }
 
-std::string Thumb_AddSubtract(u16 instr)
+static std::string Thumb_AddSubtract(u16 instr)
 {
     uint rd       = bits::seq< 0, 3>(instr);
     uint rs       = bits::seq< 3, 3>(instr);
@@ -595,7 +594,7 @@ std::string Thumb_AddSubtract(u16 instr)
     }
 }
 
-std::string Thumb_ImmediateOperations(u16 instr)
+static std::string Thumb_ImmediateOperations(u16 instr)
 {
     static constexpr const char* mnemonics[4] = {
         "mov", "cmp", "add", "sub"
@@ -613,7 +612,7 @@ std::string Thumb_ImmediateOperations(u16 instr)
     );
 }
 
-std::string Thumb_AluOperations(u16 instr)
+static std::string Thumb_AluOperations(u16 instr)
 {
     static constexpr const char* mnemonics[16] = {
         "and", "eor", "lsl", "lsr",
@@ -634,7 +633,7 @@ std::string Thumb_AluOperations(u16 instr)
     );
 }
 
-std::string Thumb_HighRegisterOperations(u16 instr)
+static std::string Thumb_HighRegisterOperations(u16 instr)
 {
     static constexpr const char* mnemonics[4] = {
         "add", "cmp", "mov", "bx"
@@ -655,7 +654,7 @@ std::string Thumb_HighRegisterOperations(u16 instr)
         return fmt::format(MNEMONIC"{},{}", mnemonics[opcode], reg(rd), reg(rs));
 }
 
-std::string Thumb_LoadPcRelative(u16 instr, u32 pc)
+static std::string Thumb_LoadPcRelative(u16 instr, u32 pc)
 {
     uint offset = bits::seq<0, 8>(instr);
     uint rd     = bits::seq<8, 3>(instr);
@@ -670,7 +669,7 @@ std::string Thumb_LoadPcRelative(u16 instr, u32 pc)
     );
 }
 
-std::string Thumb_LoadStoreRegisterOffset(u16 instr)
+static std::string Thumb_LoadStoreRegisterOffset(u16 instr)
 {
     static constexpr const char* mnemonics[4] = {
         "str", "strb", "ldr", "ldrb"
@@ -690,7 +689,7 @@ std::string Thumb_LoadStoreRegisterOffset(u16 instr)
     );
 }
 
-std::string Thumb_LoadStoreByteHalf(u16 instr)
+static std::string Thumb_LoadStoreByteHalf(u16 instr)
 {
     static constexpr const char* mnemonics[4] = {
         "strh", "ldrsb", "ldrh", "ldrsh"
@@ -710,7 +709,7 @@ std::string Thumb_LoadStoreByteHalf(u16 instr)
     );
 }
 
-std::string Thumb_LoadStoreImmediateOffset(u16 instr)
+static std::string Thumb_LoadStoreImmediateOffset(u16 instr)
 {
     static constexpr const char* mnemonics[4] = {
         "str", "ldr", "strb", "ldrb"
@@ -732,7 +731,7 @@ std::string Thumb_LoadStoreImmediateOffset(u16 instr)
     );
 }
 
-std::string Thumb_LoadStoreHalf(u16 instr)
+static std::string Thumb_LoadStoreHalf(u16 instr)
 {
     uint rd     = bits::seq< 0, 3>(instr);
     uint rb     = bits::seq< 3, 3>(instr);
@@ -750,7 +749,7 @@ std::string Thumb_LoadStoreHalf(u16 instr)
     );
 }
 
-std::string Thumb_LoadStoreSpRelative(u16 instr)
+static std::string Thumb_LoadStoreSpRelative(u16 instr)
 {
     uint offset = bits::seq< 0, 8>(instr);
     uint rd     = bits::seq< 8, 3>(instr);
@@ -766,7 +765,7 @@ std::string Thumb_LoadStoreSpRelative(u16 instr)
     );
 }
 
-std::string Thumb_LoadRelativeAddress(u16 instr, u32 pc)
+static std::string Thumb_LoadRelativeAddress(u16 instr, u32 pc)
 {
     uint offset = bits::seq< 0, 8>(instr);
     uint rd     = bits::seq< 8, 3>(instr);
@@ -794,7 +793,7 @@ std::string Thumb_LoadRelativeAddress(u16 instr, u32 pc)
     }
 }
 
-std::string Thumb_AddOffsetSp(u16 instr)
+static std::string Thumb_AddOffsetSp(u16 instr)
 {
     uint offset = bits::seq<0, 7>(instr);
     uint sign   = bits::seq<7, 1>(instr);
@@ -809,7 +808,7 @@ std::string Thumb_AddOffsetSp(u16 instr)
     );
 }
 
-std::string Thumb_PushPopRegisters(u16 instr)
+static std::string Thumb_PushPopRegisters(u16 instr)
 {
     uint rlist = bits::seq< 0, 8>(instr);
     uint rbit  = bits::seq< 8, 1>(instr);
@@ -824,7 +823,7 @@ std::string Thumb_PushPopRegisters(u16 instr)
     );
 }
 
-std::string Thumb_LoadStoreMultiple(u16 instr)
+static std::string Thumb_LoadStoreMultiple(u16 instr)
 {
     uint rlist = bits::seq< 0, 8>(instr);
     uint rb    = bits::seq< 8, 3>(instr);
@@ -838,7 +837,7 @@ std::string Thumb_LoadStoreMultiple(u16 instr)
     );
 }
 
-const std::string Thumb_ConditionalBranch(u16 instr, u32 pc)
+static std::string Thumb_ConditionalBranch(u16 instr, u32 pc)
 {
     static constexpr const char* mnemonics[16] = {
         "beq", "bne", "bcs", "bcc",
@@ -860,7 +859,7 @@ const std::string Thumb_ConditionalBranch(u16 instr, u32 pc)
     );
 }
 
-std::string Thumb_SoftwareInterrupt(u16 instr)
+static std::string Thumb_SoftwareInterrupt(u16 instr)
 {
     uint comment = bits::seq<0, 8>(instr);
 
@@ -872,7 +871,7 @@ std::string Thumb_SoftwareInterrupt(u16 instr)
 
 }
 
-std::string Thumb_UnconditionalBranch(u16 instr, u32 pc)
+static std::string Thumb_UnconditionalBranch(u16 instr, u32 pc)
 {
     uint offset = bits::seq<0, 11>(instr);
 
@@ -882,7 +881,7 @@ std::string Thumb_UnconditionalBranch(u16 instr, u32 pc)
     return fmt::format(MNEMONIC"{}", "b", hex(pc + offset));
 }
 
-const std::string Thumb_LongBranchLink(u16 instr, u32 lr)
+static std::string Thumb_LongBranchLink(u16 instr, u32 lr)
 {
     uint offset = bits::seq< 0, 11>(instr);
     uint second = bits::seq<11,  1>(instr);
@@ -902,42 +901,42 @@ std::string disassemble(u32 instr, u32 pc, u32 lr, bool thumb)
     {
         switch (decodeThumb(instr))
         {
-        case InstructionThumb::MoveShiftedRegister: return Thumb_MoveShiftedRegister(instr);
-        case InstructionThumb::AddSubtract: return Thumb_AddSubtract(instr);
-        case InstructionThumb::ImmediateOperations: return Thumb_ImmediateOperations(instr);
-        case InstructionThumb::AluOperations: return Thumb_AluOperations(instr);
-        case InstructionThumb::HighRegisterOperations: return Thumb_HighRegisterOperations(instr);
-        case InstructionThumb::LoadPcRelative: return Thumb_LoadPcRelative(instr, pc);
-        case InstructionThumb::LoadStoreRegisterOffset: return Thumb_LoadStoreRegisterOffset(instr);
-        case InstructionThumb::LoadStoreByteHalf: return Thumb_LoadStoreByteHalf(instr);
+        case InstructionThumb::MoveShiftedRegister:      return Thumb_MoveShiftedRegister(instr);
+        case InstructionThumb::AddSubtract:              return Thumb_AddSubtract(instr);
+        case InstructionThumb::ImmediateOperations:      return Thumb_ImmediateOperations(instr);
+        case InstructionThumb::AluOperations:            return Thumb_AluOperations(instr);
+        case InstructionThumb::HighRegisterOperations:   return Thumb_HighRegisterOperations(instr);
+        case InstructionThumb::LoadPcRelative:           return Thumb_LoadPcRelative(instr, pc);
+        case InstructionThumb::LoadStoreRegisterOffset:  return Thumb_LoadStoreRegisterOffset(instr);
+        case InstructionThumb::LoadStoreByteHalf:        return Thumb_LoadStoreByteHalf(instr);
         case InstructionThumb::LoadStoreImmediateOffset: return Thumb_LoadStoreImmediateOffset(instr);
-        case InstructionThumb::LoadStoreHalf: return Thumb_LoadStoreHalf(instr);
-        case InstructionThumb::LoadStoreSpRelative: return Thumb_LoadStoreSpRelative(instr);
-        case InstructionThumb::LoadRelativeAddress: return Thumb_LoadRelativeAddress(instr, pc);
-        case InstructionThumb::AddOffsetSp: return Thumb_AddOffsetSp(instr);
-        case InstructionThumb::PushPopRegisters: return Thumb_PushPopRegisters(instr);
-        case InstructionThumb::LoadStoreMultiple: return Thumb_LoadStoreMultiple(instr);
-        case InstructionThumb::ConditionalBranch: return Thumb_ConditionalBranch(instr, pc);
-        case InstructionThumb::SoftwareInterrupt: return Thumb_SoftwareInterrupt(instr);
-        case InstructionThumb::UnconditionalBranch: return Thumb_UnconditionalBranch(instr, pc);
-        case InstructionThumb::LongBranchLink: return Thumb_LongBranchLink(instr, lr);
+        case InstructionThumb::LoadStoreHalf:            return Thumb_LoadStoreHalf(instr);
+        case InstructionThumb::LoadStoreSpRelative:      return Thumb_LoadStoreSpRelative(instr);
+        case InstructionThumb::LoadRelativeAddress:      return Thumb_LoadRelativeAddress(instr, pc);
+        case InstructionThumb::AddOffsetSp:              return Thumb_AddOffsetSp(instr);
+        case InstructionThumb::PushPopRegisters:         return Thumb_PushPopRegisters(instr);
+        case InstructionThumb::LoadStoreMultiple:        return Thumb_LoadStoreMultiple(instr);
+        case InstructionThumb::ConditionalBranch:        return Thumb_ConditionalBranch(instr, pc);
+        case InstructionThumb::SoftwareInterrupt:        return Thumb_SoftwareInterrupt(instr);
+        case InstructionThumb::UnconditionalBranch:      return Thumb_UnconditionalBranch(instr, pc);
+        case InstructionThumb::LongBranchLink:           return Thumb_LongBranchLink(instr, lr);
         }
     }
     else
     {
         switch (decodeArm(instr))
         {
-        case InstructionArm::BranchExchange: return Arm_BranchExchange(instr);
-        case InstructionArm::BranchLink: return Arm_BranchLink(instr, pc);
-        case InstructionArm::DataProcessing: return Arm_DataProcessing(instr, pc);
-        case InstructionArm::StatusTransfer: return Arm_StatusTransfer(instr);
-        case InstructionArm::Multiply: return Arm_Multiply(instr);
-        case InstructionArm::MultiplyLong: return Arm_MultiplyLong(instr);
-        case InstructionArm::SingleDataTransfer: return Arm_SingleDataTransfer(instr);
+        case InstructionArm::BranchExchange:         return Arm_BranchExchange(instr);
+        case InstructionArm::BranchLink:             return Arm_BranchLink(instr, pc);
+        case InstructionArm::DataProcessing:         return Arm_DataProcessing(instr, pc);
+        case InstructionArm::StatusTransfer:         return Arm_StatusTransfer(instr);
+        case InstructionArm::Multiply:               return Arm_Multiply(instr);
+        case InstructionArm::MultiplyLong:           return Arm_MultiplyLong(instr);
+        case InstructionArm::SingleDataTransfer:     return Arm_SingleDataTransfer(instr);
         case InstructionArm::HalfSignedDataTransfer: return Arm_HalfSignedDataTransfer(instr);
-        case InstructionArm::BlockDataTransfer: return Arm_BlockDataTransfer(instr);
-        case InstructionArm::SingleDataSwap: return Arm_SingleDataSwap(instr);
-        case InstructionArm::SoftwareInterrupt: return Arm_SoftwareInterrupt(instr);
+        case InstructionArm::BlockDataTransfer:      return Arm_BlockDataTransfer(instr);
+        case InstructionArm::SingleDataSwap:         return Arm_SingleDataSwap(instr);
+        case InstructionArm::SoftwareInterrupt:      return Arm_SoftwareInterrupt(instr);
         }
     }
     return "undef";

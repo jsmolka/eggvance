@@ -12,7 +12,7 @@ public:
     }
 
     template<uint index>
-    inline void write(u8 byte)
+    void write(u8 byte)
     {
         static_assert(index < 2);
 
@@ -35,12 +35,12 @@ public:
         updateCycles();
     }
 
-    inline uint cyclesHalf(u32 addr, bool sequential) const
+    int cyclesHalf(u32 addr, bool sequential) const
     {
         return cycles_half[static_cast<uint>(sequential)][addr >> 24];
     }
 
-    inline uint cyclesWord(u32 addr, bool sequential) const
+    int cyclesWord(u32 addr, bool sequential) const
     {
         return cycles_word[static_cast<uint>(sequential)][addr >> 24];
     }
@@ -55,14 +55,12 @@ public:
     uint prefetch = 0;
 
 private:
-    inline void updateCycles()
+    void updateCycles()
     {
-        // Todo: +1
-
-        static constexpr uint nonseq[4] = { 4, 3, 2, 8 };
-        static constexpr uint ws0seq[4] = { 2, 1 };
-        static constexpr uint ws1seq[4] = { 4, 1 };
-        static constexpr uint ws2seq[4] = { 8, 1 };
+        static constexpr int nonseq[4] = { 4, 3, 2, 8 };
+        static constexpr int ws0seq[2] = { 2, 1 };
+        static constexpr int ws1seq[2] = { 4, 1 };
+        static constexpr int ws2seq[2] = { 8, 1 };
 
         cycles_half[0][0x8] = cycles_half[0][0x9] = nonseq[ws0_n];
         cycles_half[1][0x8] = cycles_half[1][0x9] = ws0seq[ws0_s];
@@ -84,13 +82,13 @@ private:
         cycles_word[1][0xE] = cycles_word[1][0xF] = nonseq[sram];
     }
 
-    uint cycles_half[2][256]
+    int cycles_half[2][256]
     {
         { 1, 1, 3, 1, 1, 1, 1, 1 },
         { 1, 1, 3, 1, 1, 1, 1, 1 }
     };
 
-    uint cycles_word[2][256]
+    int cycles_word[2][256]
     {
         { 1, 1, 6, 1, 1, 2, 2, 1 },
         { 1, 1, 6, 1, 1, 2, 2, 1 }

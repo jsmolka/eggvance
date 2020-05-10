@@ -3,7 +3,7 @@
 #include "arm/arm.h"
 
 template<uint index>
-inline void HaltControl::write(u8 byte)
+void HaltControl::write(u8 byte)
 {
     static_assert(index < 1);
 

@@ -326,9 +326,6 @@
     <ClInclude Include="src\mmu\unusedio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\arm\io\armio.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\dma\io\dmaio.h">
       <Filter>Header Files</Filter>
     </ClInclude>

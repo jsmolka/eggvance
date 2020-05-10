@@ -70,7 +70,7 @@ void ARM::dispatch()
 {
     while (cycles > 0 && this->state == state)
     {
-        int last = cycles;
+        int previous = cycles;
 
         if (state & kStateDma)
         {
@@ -124,7 +124,7 @@ void ARM::dispatch()
         }
 
         if (state & kStateTimer)
-            timerc.run(last - cycles);
+            timerc.run(previous - cycles);
     }
 }
 

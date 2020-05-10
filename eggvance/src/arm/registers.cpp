@@ -1,7 +1,5 @@
 #include "registers.h"
 
-#include <cstring>
-
 #include "base/config.h"
 
 Registers::Registers()

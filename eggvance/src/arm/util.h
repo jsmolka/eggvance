@@ -1,6 +1,6 @@
 #pragma once
 
-#include "psr.h"
+#include "arm/psr.h"
 
 namespace util
 {
@@ -58,14 +58,13 @@ namespace util
         return value;
     }
 
-    template<u32 amount>
+    template<uint amount>
     inline u32 lslThumb(u32 value, PSR& psr)
     {
-        if (amount != 0)
+        if constexpr (amount != 0)
         {
             if (amount < 32)
             {
-                #pragma warning(suppress:4293)
                 psr.c = (value << (amount - 1)) >> 31;
                 value <<= amount;
             }
@@ -134,14 +133,13 @@ namespace util
         return value;
     }
 
-    template<u32 amount>
+    template<uint amount>
     inline u32 lsrThumb(u32 value, PSR& psr)
     {
-        if (amount != 0)
+        if constexpr (amount != 0)
         {
             if (amount < 32)
             {
-                #pragma warning(suppress:4293)
                 psr.c = (value >> (amount - 1)) & 0x1;
                 value >>= amount;
             }
@@ -212,9 +210,8 @@ namespace util
     template<u32 amount>
     inline u32 asrThumb(u32 value, PSR& psr)
     {
-        if (amount != 0 && amount < 32)
+        if constexpr (amount != 0 && amount < 32)
         {
-            #pragma warning(suppress:4293)
             psr.c = (value >> (amount - 1)) & 0x1;
             value = bits::sar(value, amount);
         }
@@ -254,7 +251,7 @@ namespace util
         }
         else if (immediate)
         {
-            char c = psr.c;
+            uint c = psr.c;
             if (flags) psr.c = value & 0x1;
             value = (c << 31) | (value >> 1);
         }

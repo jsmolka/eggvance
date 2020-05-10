@@ -3,7 +3,8 @@
 #include <array>
 
 #include "arm/registers.h"
-#include "arm/io/armio.h"
+#include "arm/io/haltcontrol.h"
+#include "arm/io/waitcontrol.h"
 
 class ARM : public Registers
 {
@@ -129,10 +130,14 @@ private:
     void Thumb_Undefined(u16 instr);
 
     int cycles    = 0;
-    u32 last_addr = 0;
+    u32 prev_addr = 0;
     u32 pipe[2]   = { 0 };
 
-    ARMIO io;
+    struct IO
+    {
+        HaltControl haltcnt;
+        WaitControl waitcnt;
+    } io;
 
     static std::array<void(ARM::*)(u32), 4096> instr_arm;
     static std::array<void(ARM::*)(u16), 1024> instr_thumb;
