@@ -1,6 +1,6 @@
 #include "arm.h"
 
-#include "util.h"
+#include "arm/util.h"
 
 template<uint amount, uint opcode>
 void ARM::Thumb_MoveShiftedRegister(u16 instr)
@@ -44,8 +44,8 @@ void ARM::Thumb_AddSubtract(u16 instr)
 
     switch (opcode)
     {
-    case kOpcodeAddImm: dst = util::add(src, rn, cpsr); break;
-    case kOpcodeSubImm: dst = util::sub(src, rn, cpsr); break;
+    case kOpcodeAddImm: dst = util::add(src,       rn, cpsr); break;
+    case kOpcodeSubImm: dst = util::sub(src,       rn, cpsr); break;
     case kOpcodeAddReg: dst = util::add(src, regs[rn], cpsr); break;
     case kOpcodeSubReg: dst = util::sub(src, regs[rn], cpsr); break;
 
@@ -466,20 +466,16 @@ void ARM::Thumb_LoadStoreMultiple(u16 instr)
         }
         else
         {
-            bool begin = true;
-
             for (uint x : bits::iter(rlist))
             {
                 u32 value = x != rb
                     ? regs[x]
-                    : begin
+                    : x == bits::ctz(rlist)
                         ? base
                         : base + 4 * bits::popcnt(rlist);
 
                 writeWord(addr, value);
                 addr += 4;
-
-                begin = false;
             }
         }
     }

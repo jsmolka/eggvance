@@ -2,8 +2,8 @@
 
 #include <fmt/printf.h>
 
-#include "decode.h"
-#include "disassemble.h"
+#include "arm/decode.h"
+#include "arm/disassemble.h"
 #include "dma/dmac.h"
 #include "interrupt/irqhandler.h"
 #include "mmu/mmu.h"
@@ -11,20 +11,13 @@
 
 ARM arm;
 
-void ARM::reset()
+ARM::ARM()
 {
-    Registers::reset();
-
-    io = ARMIO();
-
-    state = 0;
-
-    cycles = 0;
     flushWord();
     pc += 4;
 }
 
-void ARM::run(uint cycles)
+void ARM::run(int cycles)
 {
     this->cycles += cycles;
 

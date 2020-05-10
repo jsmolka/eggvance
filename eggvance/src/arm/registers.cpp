@@ -4,12 +4,8 @@
 
 #include "base/config.h"
 
-void Registers::reset()
+Registers::Registers()
 {
-    std::memset(regs    , 0, sizeof(regs));
-    std::memset(bank_all, 0, sizeof(bank_all));
-    std::memset(bank_fiq, 0, sizeof(bank_fiq));
-
     if (config.bios_skip)
     {
         sp   = 0x0300'7F00;

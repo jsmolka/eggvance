@@ -1,6 +1,6 @@
 #include "arm.h"
 
-#include "util.h"
+#include "arm/util.h"
 
 void ARM::Arm_BranchExchange(u32 instr)
 {
@@ -209,7 +209,7 @@ void ARM::Arm_StatusTransfer(u32 instr)
         }
         else
         {
-            if (mask & 0xFF)
+            if (instr & (1 << 16))
                 switchMode(op & 0x1F);
 
             cpsr = (cpsr & ~mask) | (op & mask);
@@ -351,7 +351,7 @@ void ARM::Arm_SingleDataTransfer(u32 instr)
     }
     else
     {
-        u32 value = (rd == 15)
+        u32 value = rd == 15
             ? dst + 4
             : dst + 0;
 
@@ -458,6 +458,7 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
 {
     uint rlist     = bits::seq< 0, 16>(instr);
     uint rn        = bits::seq<16,  4>(instr);
+
     uint writeback = writeback_;
     uint pre_index = pre_index_;
 
@@ -501,23 +502,19 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
         }
         else
         {
-            bool begin = true;
-
             for (uint x : bits::iter(rlist))
             {
                 u32 value = x != rn
                     ? x != 15
                         ? regs[x] + 0
                         : regs[x] + 4
-                    : begin
+                    : x == bits::ctz(rlist)
                         ? base
                         : base + (increment ? 4 : -4) * bits::popcnt(rlist);
 
                 addr += 4 * pre_index;
                 writeWord(addr, value);
                 addr += 4 * pre_index ^ 0x4;
-
-                begin = false;
             }
         }
     }

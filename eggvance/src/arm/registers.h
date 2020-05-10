@@ -5,7 +5,7 @@
 class Registers
 {
 public:
-    void reset();
+    Registers();
 
     union
     {
@@ -16,7 +16,7 @@ public:
             u32 lr;
             u32 pc;
         };
-        u32 regs[16];
+        u32 regs[16] = { 0 };
     };
 
     PSR cpsr;
@@ -38,6 +38,6 @@ private:
 
     static Bank modeToBank(uint mode);
 
-    u32 bank_all[6][3];
-    u32 bank_fiq[2][5];
+    u32 bank_all[6][3] = { 0 };
+    u32 bank_fiq[2][5] = { 0 };
 };

@@ -36,9 +36,9 @@ public:
         return (m << 0) | (t << 5) | (f << 6) | (i << 7) | (v << 28) | (c << 29) | (z << 30) | (n << 31);
     }
 
-    inline uint size() const
+    uint size() const
     {
-        return 2 << (static_cast<uint>(t) ^ 0x1);
+        return 2 << (t ^ 0x1);
     }
 
     bool check(uint condition) const

@@ -36,7 +36,7 @@ void common::init(
 
 void common::reset()
 {
-    arm.reset();
+    arm = ARM();
     mmu.reset();
     ppu.reset();
     dmac = DMAController();

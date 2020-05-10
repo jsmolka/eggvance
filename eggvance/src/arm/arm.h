@@ -2,8 +2,8 @@
 
 #include <array>
 
-#include "io/armio.h"
-#include "registers.h"
+#include "arm/registers.h"
+#include "arm/io/armio.h"
 
 class ARM : public Registers
 {
@@ -21,11 +21,11 @@ public:
         kStateTimer = 1 << 4
     };
 
-    void reset();
+    ARM();
 
-    void run(uint cycles);
+    void run(int cycles);
 
-    uint state;
+    uint state = 0;
 
 private:
     enum Shift
@@ -128,9 +128,9 @@ private:
     void Thumb_LongBranchLink(u16 instr);
     void Thumb_Undefined(u16 instr);
 
-    int cycles;
-    u32 last_addr;
-    u32 pipe[2];
+    int cycles    = 0;
+    u32 last_addr = 0;
+    u32 pipe[2]   = { 0 };
 
     ARMIO io;
 
