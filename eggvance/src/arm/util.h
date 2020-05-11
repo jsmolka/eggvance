@@ -34,60 +34,13 @@ namespace util
         return ((op1 ^ op2) & (~op2 ^ res)) >> 31;
     }
 
-    inline u32 lslArm(u32 value, u32 amount, bool flags, PSR& psr)
+    inline u32 lsl(u32 value, u32 amount, bool flags, PSR& psr)
     {
         if (amount != 0)
         {
             if (amount < 32)
             {
                 if (flags) psr.c = (value << (amount - 1)) >> 31;
-                value <<= amount;
-            }
-            else
-            {
-                if (flags)
-                {
-                    if (amount == 32)
-                        psr.c = value & 0x1;
-                    else
-                        psr.c = 0;
-                }
-                value = 0;
-            }
-        }
-        return value;
-    }
-
-    template<uint amount>
-    inline u32 lslThumb(u32 value, PSR& psr)
-    {
-        if constexpr (amount != 0)
-        {
-            if (amount < 32)
-            {
-                psr.c = (value << (amount - 1)) >> 31;
-                value <<= amount;
-            }
-            else
-            {
-                if (amount == 32)
-                    psr.c = value & 0x1;
-                else
-                    psr.c = 0;
-
-                value = 0;
-            }
-        }
-        return value;
-    }
-
-    inline u32 lslThumb(u32 value, u32 amount, PSR& psr)
-    {
-        if (amount != 0)
-        {
-            if (amount < 32)
-            {
-                psr.c = (value << (amount - 1)) >> 31;
                 value <<= amount;
             }
             else
@@ -104,7 +57,7 @@ namespace util
     }
 
     template<bool immediate>
-    inline u32 lsrArm(u32 value, u32 amount, bool flags, PSR& psr)
+    inline u32 lsr(u32 value, u32 amount, bool flags, PSR& psr)
     {
         if (amount != 0)
         {
@@ -133,58 +86,8 @@ namespace util
         return value;
     }
 
-    template<uint amount>
-    inline u32 lsrThumb(u32 value, PSR& psr)
-    {
-        if constexpr (amount != 0)
-        {
-            if (amount < 32)
-            {
-                psr.c = (value >> (amount - 1)) & 0x1;
-                value >>= amount;
-            }
-            else
-            {
-                if (amount == 32)
-                    psr.c = value >> 31;
-                else
-                    psr.c = 0;
-
-                value = 0;
-            }
-        }
-        else
-        {
-            psr.c = value >> 31;
-            value = 0;
-        }
-        return value;
-    }
-
-    inline u32 lsrThumb(u32 value, u32 amount, PSR& psr)
-    {
-        if (amount != 0)
-        {
-            if (amount < 32)
-            {
-                psr.c = (value >> (amount - 1)) & 0x1;
-                value >>= amount;
-            }
-            else
-            {
-                if (amount == 32)
-                    psr.c = value >> 31;
-                else
-                    psr.c = 0;
-
-                value = 0;
-            }
-        }
-        return value;
-    }
-
     template<bool immediate>
-    inline u32 asrArm(u32 value, u32 amount, bool flags, PSR& psr)
+    inline u32 asr(u32 value, u32 amount, bool flags, PSR& psr)
     {
         if (amount != 0)
         {
@@ -207,42 +110,8 @@ namespace util
         return value;
     }
 
-    template<u32 amount>
-    inline u32 asrThumb(u32 value, PSR& psr)
-    {
-        if constexpr (amount != 0 && amount < 32)
-        {
-            psr.c = (value >> (amount - 1)) & 0x1;
-            value = bits::sar(value, amount);
-        }
-        else
-        {
-            value = bits::sar(value, 31);
-            psr.c = value & 0x1;
-        }
-        return value;
-    }
-
-    inline u32 asrThumb(u32 value, u32 amount, PSR& psr)
-    {
-        if (amount != 0)
-        {
-            if (amount < 32)
-            {
-                psr.c = (value >> (amount - 1)) & 0x1;
-                value = bits::sar(value, amount);
-            }
-            else
-            {
-                value = bits::sar(value, 31);
-                psr.c = value & 0x1;
-            }
-        }
-        return value;
-    }
-
     template<bool immediate>
-    inline u32 rorArm(u32 value, u32 amount, bool flags, PSR& psr)
+    inline u32 ror(u32 value, u32 amount, bool flags, PSR& psr)
     {
         if (amount != 0)
         {
@@ -254,16 +123,6 @@ namespace util
             uint c = psr.c;
             if (flags) psr.c = value & 0x1;
             value = (c << 31) | (value >> 1);
-        }
-        return value;
-    }
-
-    inline u32 rorThumb(u32 value, u32 amount, PSR& psr)
-    {
-        if (amount != 0)
-        {
-            value = bits::ror(value, amount);
-            psr.c = value >> 31;
         }
         return value;
     }

@@ -179,12 +179,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\icon\include\eggception\icon.h" />
-    <ClInclude Include="src\arm\util.h" />
     <ClInclude Include="src\arm\arm.h" />
     <ClInclude Include="src\arm\decode.h" />
     <ClInclude Include="src\arm\disassemble.h" />
     <ClInclude Include="src\arm\psr.h" />
     <ClInclude Include="src\arm\registers.h" />
+    <ClInclude Include="src\arm\util.h" />
     <ClInclude Include="src\base\bits.h" />
     <ClInclude Include="src\base\enums.h" />
     <ClInclude Include="src\base\config.h" />

@@ -84,7 +84,7 @@ void ARM::Arm_DataProcessing(u32 instr)
     {
         uint value  = bits::seq<0, 8>(instr);
         uint amount = bits::seq<8, 4>(instr);
-        op2 = util::rorArm<false>(value, amount << 1, flags && logical, cpsr);
+        op2 = util::ror<false>(value, amount << 1, flags && logical, cpsr);
     }
     else
     {
@@ -105,10 +105,10 @@ void ARM::Arm_DataProcessing(u32 instr)
 
             switch (shift)
             {
-            case kShiftLsl: op2 = util::lslArm       (op2, amount, flags && logical, cpsr); break;
-            case kShiftLsr: op2 = util::lsrArm<false>(op2, amount, flags && logical, cpsr); break;
-            case kShiftAsr: op2 = util::asrArm<false>(op2, amount, flags && logical, cpsr); break;
-            case kShiftRor: op2 = util::rorArm<false>(op2, amount, flags && logical, cpsr); break;
+            case kShiftLsl: op2 = util::lsl       (op2, amount, flags && logical, cpsr); break;
+            case kShiftLsr: op2 = util::lsr<false>(op2, amount, flags && logical, cpsr); break;
+            case kShiftAsr: op2 = util::asr<false>(op2, amount, flags && logical, cpsr); break;
+            case kShiftRor: op2 = util::ror<false>(op2, amount, flags && logical, cpsr); break;
 
             default:
                 UNREACHABLE;
@@ -122,10 +122,10 @@ void ARM::Arm_DataProcessing(u32 instr)
 
             switch (shift)
             {
-            case kShiftLsl: op2 = util::lslArm      (op2, amount, flags && logical, cpsr); break;
-            case kShiftLsr: op2 = util::lsrArm<true>(op2, amount, flags && logical, cpsr); break;
-            case kShiftAsr: op2 = util::asrArm<true>(op2, amount, flags && logical, cpsr); break;
-            case kShiftRor: op2 = util::rorArm<true>(op2, amount, flags && logical, cpsr); break;
+            case kShiftLsl: op2 = util::lsl      (op2, amount, flags && logical, cpsr); break;
+            case kShiftLsr: op2 = util::lsr<true>(op2, amount, flags && logical, cpsr); break;
+            case kShiftAsr: op2 = util::asr<true>(op2, amount, flags && logical, cpsr); break;
+            case kShiftRor: op2 = util::ror<true>(op2, amount, flags && logical, cpsr); break;
 
             default:
                 UNREACHABLE;
@@ -321,10 +321,10 @@ void ARM::Arm_SingleDataTransfer(u32 instr)
 
         switch (shift)
         {
-        case kShiftLsl: offset = util::lslArm      (regs[rm], amount, false, cpsr); break;
-        case kShiftLsr: offset = util::lsrArm<true>(regs[rm], amount, false, cpsr); break;
-        case kShiftAsr: offset = util::asrArm<true>(regs[rm], amount, false, cpsr); break;
-        case kShiftRor: offset = util::rorArm<true>(regs[rm], amount, false, cpsr); break;
+        case kShiftLsl: offset = util::lsl      (regs[rm], amount, false, cpsr); break;
+        case kShiftLsr: offset = util::lsr<true>(regs[rm], amount, false, cpsr); break;
+        case kShiftAsr: offset = util::asr<true>(regs[rm], amount, false, cpsr); break;
+        case kShiftRor: offset = util::ror<true>(regs[rm], amount, false, cpsr); break;
 
         default:
             UNREACHABLE;

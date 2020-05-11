@@ -15,9 +15,9 @@ void ARM::Thumb_MoveShiftedRegister(u16 instr)
 
     switch (opcode)
     {
-    case kShiftLsl: dst = util::log(util::lslThumb<amount>(src, cpsr), cpsr); break;
-    case kShiftLsr: dst = util::log(util::lsrThumb<amount>(src, cpsr), cpsr); break;
-    case kShiftAsr: dst = util::log(util::asrThumb<amount>(src, cpsr), cpsr); break;
+    case kShiftLsl: dst = util::log(util::lsl      (src, amount, true, cpsr), cpsr); break;
+    case kShiftLsr: dst = util::log(util::lsr<true>(src, amount, true, cpsr), cpsr); break;
+    case kShiftAsr: dst = util::log(util::asr<true>(src, amount, true, cpsr), cpsr); break;
 
     default:
         UNREACHABLE;
@@ -115,10 +115,10 @@ void ARM::Thumb_AluOperations(u16 instr)
 
     switch (opcode)
     {
-    case kOpcodeLsl: dst = util::log(util::lslThumb(dst, src, cpsr), cpsr); idle(); break;
-    case kOpcodeLsr: dst = util::log(util::lsrThumb(dst, src, cpsr), cpsr); idle(); break;
-    case kOpcodeAsr: dst = util::log(util::asrThumb(dst, src, cpsr), cpsr); idle(); break;
-    case kOpcodeRor: dst = util::log(util::rorThumb(dst, src, cpsr), cpsr); idle(); break;
+    case kOpcodeLsl: dst = util::log(util::lsl       (dst, src, true, cpsr), cpsr); idle(); break;
+    case kOpcodeLsr: dst = util::log(util::lsr<false>(dst, src, true, cpsr), cpsr); idle(); break;
+    case kOpcodeAsr: dst = util::log(util::asr<false>(dst, src, true, cpsr), cpsr); idle(); break;
+    case kOpcodeRor: dst = util::log(util::ror<false>(dst, src, true, cpsr), cpsr); idle(); break;
     case kOpcodeAnd: dst = util::log(dst &  src, cpsr); break;
     case kOpcodeEor: dst = util::log(dst ^  src, cpsr); break;
     case kOpcodeOrr: dst = util::log(dst |  src, cpsr); break;
