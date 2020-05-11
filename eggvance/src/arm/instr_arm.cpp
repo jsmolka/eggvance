@@ -1,7 +1,5 @@
 #include "arm.h"
 
-#include "arm/util.h"
-
 void ARM::Arm_BranchExchange(u32 instr)
 {
     uint rn = bits::seq<0, 4>(instr);
@@ -84,7 +82,7 @@ void ARM::Arm_DataProcessing(u32 instr)
     {
         uint value  = bits::seq<0, 8>(instr);
         uint amount = bits::seq<8, 4>(instr);
-        op2 = util::ror<false>(value, amount << 1, flags && logical, cpsr);
+        op2 = ror<false>(value, amount << 1, flags && logical);
     }
     else
     {
@@ -105,10 +103,10 @@ void ARM::Arm_DataProcessing(u32 instr)
 
             switch (shift)
             {
-            case kShiftLsl: op2 = util::lsl       (op2, amount, flags && logical, cpsr); break;
-            case kShiftLsr: op2 = util::lsr<false>(op2, amount, flags && logical, cpsr); break;
-            case kShiftAsr: op2 = util::asr<false>(op2, amount, flags && logical, cpsr); break;
-            case kShiftRor: op2 = util::ror<false>(op2, amount, flags && logical, cpsr); break;
+            case kShiftLsl: op2 = lsl       (op2, amount, flags && logical); break;
+            case kShiftLsr: op2 = lsr<false>(op2, amount, flags && logical); break;
+            case kShiftAsr: op2 = asr<false>(op2, amount, flags && logical); break;
+            case kShiftRor: op2 = ror<false>(op2, amount, flags && logical); break;
 
             default:
                 UNREACHABLE;
@@ -122,10 +120,10 @@ void ARM::Arm_DataProcessing(u32 instr)
 
             switch (shift)
             {
-            case kShiftLsl: op2 = util::lsl      (op2, amount, flags && logical, cpsr); break;
-            case kShiftLsr: op2 = util::lsr<true>(op2, amount, flags && logical, cpsr); break;
-            case kShiftAsr: op2 = util::asr<true>(op2, amount, flags && logical, cpsr); break;
-            case kShiftRor: op2 = util::ror<true>(op2, amount, flags && logical, cpsr); break;
+            case kShiftLsl: op2 = lsl      (op2, amount, flags && logical); break;
+            case kShiftLsr: op2 = lsr<true>(op2, amount, flags && logical); break;
+            case kShiftAsr: op2 = asr<true>(op2, amount, flags && logical); break;
+            case kShiftRor: op2 = ror<true>(op2, amount, flags && logical); break;
 
             default:
                 UNREACHABLE;
@@ -136,22 +134,22 @@ void ARM::Arm_DataProcessing(u32 instr)
 
     switch (opcode)
     {
-    case kOpcodeAnd: dst = util::log(op1 &  op2, flags, cpsr); break;
-    case kOpcodeEor: dst = util::log(op1 ^  op2, flags, cpsr); break;
-    case kOpcodeOrr: dst = util::log(op1 |  op2, flags, cpsr); break;
-    case kOpcodeMov: dst = util::log(       op2, flags, cpsr); break;
-    case kOpcodeBic: dst = util::log(op1 & ~op2, flags, cpsr); break;
-    case kOpcodeMvn: dst = util::log(      ~op2, flags, cpsr); break;
-    case kOpcodeTst:       util::log(op1 &  op2,        cpsr); break;
-    case kOpcodeTeq:       util::log(op1 ^  op2,        cpsr); break;
-    case kOpcodeCmn:       util::add(op1,   op2,        cpsr); break;
-    case kOpcodeCmp:       util::sub(op1,   op2,        cpsr); break;
-    case kOpcodeAdd: dst = util::add(op1,   op2, flags, cpsr); break;
-    case kOpcodeAdc: dst = util::adc(op1,   op2, flags, cpsr); break;
-    case kOpcodeSub: dst = util::sub(op1,   op2, flags, cpsr); break;
-    case kOpcodeSbc: dst = util::sbc(op1,   op2, flags, cpsr); break;
-    case kOpcodeRsb: dst = util::sub(op2,   op1, flags, cpsr); break;
-    case kOpcodeRsc: dst = util::sbc(op2,   op1, flags, cpsr); break;
+    case kOpcodeAnd: dst = log(op1 &  op2, flags); break;
+    case kOpcodeEor: dst = log(op1 ^  op2, flags); break;
+    case kOpcodeOrr: dst = log(op1 |  op2, flags); break;
+    case kOpcodeMov: dst = log(       op2, flags); break;
+    case kOpcodeBic: dst = log(op1 & ~op2, flags); break;
+    case kOpcodeMvn: dst = log(      ~op2, flags); break;
+    case kOpcodeTst:       log(op1 &  op2, true ); break;
+    case kOpcodeTeq:       log(op1 ^  op2, true ); break;
+    case kOpcodeCmn:       add(op1,   op2, true ); break;
+    case kOpcodeCmp:       sub(op1,   op2, true ); break;
+    case kOpcodeAdd: dst = add(op1,   op2, flags); break;
+    case kOpcodeAdc: dst = adc(op1,   op2, flags); break;
+    case kOpcodeSub: dst = sub(op1,   op2, flags); break;
+    case kOpcodeSbc: dst = sbc(op1,   op2, flags); break;
+    case kOpcodeRsb: dst = sub(op2,   op1, flags); break;
+    case kOpcodeRsc: dst = sbc(op2,   op1, flags); break;
 
     default:
         UNREACHABLE;
@@ -242,9 +240,7 @@ void ARM::Arm_Multiply(u32 instr)
         dst += op3;
         idle();
     }
-
-    if (flags)
-        util::log(dst, cpsr);
+    log(dst, flags);
 
     booth(op2, true);
 }
@@ -275,12 +271,7 @@ void ARM::Arm_MultiplyLong(u32 instr)
         res += (static_cast<u64>(dsth) << 32) | dstl;
         idle();
     }
-
-    if (flags)
-    {
-        cpsr.z = res == 0;
-        cpsr.n = res >> 63;
-    }
+    log(res, flags);
 
     dstl = static_cast<u32>(res);
     dsth = static_cast<u32>(res >> 32);
@@ -321,10 +312,10 @@ void ARM::Arm_SingleDataTransfer(u32 instr)
 
         switch (shift)
         {
-        case kShiftLsl: offset = util::lsl      (regs[rm], amount, false, cpsr); break;
-        case kShiftLsr: offset = util::lsr<true>(regs[rm], amount, false, cpsr); break;
-        case kShiftAsr: offset = util::asr<true>(regs[rm], amount, false, cpsr); break;
-        case kShiftRor: offset = util::ror<true>(regs[rm], amount, false, cpsr); break;
+        case kShiftLsl: offset = lsl      (regs[rm], amount, false); break;
+        case kShiftLsr: offset = lsr<true>(regs[rm], amount, false); break;
+        case kShiftAsr: offset = asr<true>(regs[rm], amount, false); break;
+        case kShiftRor: offset = ror<true>(regs[rm], amount, false); break;
 
         default:
             UNREACHABLE;

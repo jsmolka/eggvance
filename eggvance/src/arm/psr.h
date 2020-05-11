@@ -1,7 +1,6 @@
 #pragma once
 
 #include "base/bits.h"
-#include "base/macros.h"
 
 class PSR
 {
@@ -34,6 +33,42 @@ public:
     operator u32() const
     {
         return (m << 0) | (t << 5) | (f << 6) | (i << 7) | (v << 28) | (c << 29) | (z << 30) | (n << 31);
+    }
+
+    template<typename T>
+    void setZ(T value)
+    {
+        static_assert(std::is_integral_v<T>);
+
+        z = value == 0;
+    }
+
+    template<typename T>
+    void setN(T value)
+    {
+        static_assert(std::is_integral_v<T>);
+
+        n = bits::msb(value);
+    }
+
+    void setCAdd(u64 op1, u64 op2)
+    {
+        c = op1 + op2 > 0xFFFF'FFFFull;
+    }
+
+    void setCSub(u64 op1, u64 op2)
+    {
+        c = op2 <= op1;
+    }
+
+    void setVAdd(u32 op1, u32 op2, u32 res)
+    {
+        v = ((op1 ^ res) & (~op1 ^ op2)) >> 31;
+    }
+
+    void setVSub(u32 op1, u32 op2, u32 res)
+    {
+        v = ((op1 ^ op2) & (~op2 ^ res)) >> 31;
     }
 
     uint size() const

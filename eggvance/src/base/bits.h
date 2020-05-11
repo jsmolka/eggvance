@@ -40,6 +40,14 @@ namespace bits
         return static_cast<std::make_unsigned_t<T>>(value) >> amount;
     }
 
+    template<typename T>
+    T msb(T value)
+    {
+        static_assert(std::is_integral_v<T>);
+
+        return shr(value, CHAR_BIT * sizeof(T) - 1);
+    }
+
     template<uint size, typename T>
     T sx(T value)
     {

@@ -128,7 +128,7 @@ void ARM::dispatch()
     }
 }
 
-void ARM::disasm()
+void ARM::disasm() const
 {
     static u32 operation = 0;
     operation++;

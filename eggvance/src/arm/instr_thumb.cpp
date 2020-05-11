@@ -1,7 +1,5 @@
 #include "arm.h"
 
-#include "arm/util.h"
-
 template<uint amount, uint opcode>
 void ARM::Thumb_MoveShiftedRegister(u16 instr)
 {
@@ -15,9 +13,9 @@ void ARM::Thumb_MoveShiftedRegister(u16 instr)
 
     switch (opcode)
     {
-    case kShiftLsl: dst = util::log(util::lsl      (src, amount, true, cpsr), cpsr); break;
-    case kShiftLsr: dst = util::log(util::lsr<true>(src, amount, true, cpsr), cpsr); break;
-    case kShiftAsr: dst = util::log(util::asr<true>(src, amount, true, cpsr), cpsr); break;
+    case kShiftLsl: dst = log(lsl      (src, amount)); break;
+    case kShiftLsr: dst = log(lsr<true>(src, amount)); break;
+    case kShiftAsr: dst = log(asr<true>(src, amount)); break;
 
     default:
         UNREACHABLE;
@@ -44,10 +42,10 @@ void ARM::Thumb_AddSubtract(u16 instr)
 
     switch (opcode)
     {
-    case kOpcodeAddImm: dst = util::add(src,       rn, cpsr); break;
-    case kOpcodeSubImm: dst = util::sub(src,       rn, cpsr); break;
-    case kOpcodeAddReg: dst = util::add(src, regs[rn], cpsr); break;
-    case kOpcodeSubReg: dst = util::sub(src, regs[rn], cpsr); break;
+    case kOpcodeAddImm: dst = add(src,       rn); break;
+    case kOpcodeSubImm: dst = sub(src,       rn); break;
+    case kOpcodeAddReg: dst = add(src, regs[rn]); break;
+    case kOpcodeSubReg: dst = sub(src, regs[rn]); break;
 
     default:
         UNREACHABLE;
@@ -73,10 +71,10 @@ void ARM::Thumb_ImmediateOperations(u16 instr)
 
     switch (opcode)
     {
-    case kOpcodeMov: dst = util::log(     offset, cpsr); break;
-    case kOpcodeCmp:       util::sub(src, offset, cpsr); break;
-    case kOpcodeAdd: dst = util::add(src, offset, cpsr); break;
-    case kOpcodeSub: dst = util::sub(src, offset, cpsr); break;
+    case kOpcodeMov: dst = log(     offset); break;
+    case kOpcodeCmp:       sub(src, offset); break;
+    case kOpcodeAdd: dst = add(src, offset); break;
+    case kOpcodeSub: dst = sub(src, offset); break;
 
     default:
         UNREACHABLE;
@@ -115,24 +113,24 @@ void ARM::Thumb_AluOperations(u16 instr)
 
     switch (opcode)
     {
-    case kOpcodeLsl: dst = util::log(util::lsl       (dst, src, true, cpsr), cpsr); idle(); break;
-    case kOpcodeLsr: dst = util::log(util::lsr<false>(dst, src, true, cpsr), cpsr); idle(); break;
-    case kOpcodeAsr: dst = util::log(util::asr<false>(dst, src, true, cpsr), cpsr); idle(); break;
-    case kOpcodeRor: dst = util::log(util::ror<false>(dst, src, true, cpsr), cpsr); idle(); break;
-    case kOpcodeAnd: dst = util::log(dst &  src, cpsr); break;
-    case kOpcodeEor: dst = util::log(dst ^  src, cpsr); break;
-    case kOpcodeOrr: dst = util::log(dst |  src, cpsr); break;
-    case kOpcodeBic: dst = util::log(dst & ~src, cpsr); break;
-    case kOpcodeMvn: dst = util::log(      ~src, cpsr); break;
-    case kOpcodeTst:       util::log(dst &  src, cpsr); break;
-    case kOpcodeCmn:       util::add(dst,   src, cpsr); break;
-    case kOpcodeCmp:       util::sub(dst,   src, cpsr); break;
-    case kOpcodeAdc: dst = util::adc(dst,   src, cpsr); break;
-    case kOpcodeSbc: dst = util::sbc(dst,   src, cpsr); break;
-    case kOpcodeNeg: dst = util::sub(  0,   src, cpsr); break;
+    case kOpcodeLsl: dst = log(lsl       (dst, src)); idle(); break;
+    case kOpcodeLsr: dst = log(lsr<false>(dst, src)); idle(); break;
+    case kOpcodeAsr: dst = log(asr<false>(dst, src)); idle(); break;
+    case kOpcodeRor: dst = log(ror<false>(dst, src)); idle(); break;
+    case kOpcodeAnd: dst = log(dst &  src); break;
+    case kOpcodeEor: dst = log(dst ^  src); break;
+    case kOpcodeOrr: dst = log(dst |  src); break;
+    case kOpcodeBic: dst = log(dst & ~src); break;
+    case kOpcodeMvn: dst = log(      ~src); break;
+    case kOpcodeTst:       log(dst &  src); break;
+    case kOpcodeCmn:       add(dst,   src); break;
+    case kOpcodeCmp:       sub(dst,   src); break;
+    case kOpcodeAdc: dst = adc(dst,   src); break;
+    case kOpcodeSbc: dst = sbc(dst,   src); break;
+    case kOpcodeNeg: dst = sub(  0,   src); break;
     case kOpcodeMul:
         booth(dst, true);
-        dst = util::log(dst * src, cpsr);
+        dst = log(dst * src);
         break;
 
     default:
@@ -176,7 +174,7 @@ void ARM::Thumb_HighRegisterOperations(u16 instr)
         break;
 
     case kOpcodeCmp:
-        util::sub(dst, src, cpsr);
+        sub(dst, src);
         break;
 
     case kOpcodeBx:

@@ -10,4 +10,4 @@ void HaltControl::write(u8 byte)
     arm.state |= ARM::kStateHalt;
 }
 
-template void HaltControl::write<0>(u8 byte);
+template void HaltControl::write<0>(u8);

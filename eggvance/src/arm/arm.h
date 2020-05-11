@@ -37,6 +37,22 @@ private:
         kShiftRor = 0b11
     };
 
+    u32 lsl(u32 value, u32 amount, bool flags = true);
+    template<bool immediate>
+    u32 lsr(u32 value, u32 amount, bool flags = true);
+    template<bool immediate>
+    u32 asr(u32 value, u32 amount, bool flags = true);
+    template<bool immediate>
+    u32 ror(u32 value, u32 amount, bool flags = true);
+
+    template<typename T>
+    T log(T value, bool flags = true);
+
+    u32 add(u32 op1, u32 op2, bool flags = true);
+    u32 sub(u32 op1, u32 op2, bool flags = true);
+    u32 adc(u32 op1, u32 op2, bool flags = true);
+    u32 sbc(u32 op1, u32 op2, bool flags = true);
+
     bool isSequential(u32 addr) const;
 
     u8  readByte(u32 addr);
@@ -57,7 +73,7 @@ private:
     template<uint state>
     void dispatch();
 
-    void disasm();
+    void disasm() const;
 
     void idle();
     void booth(u32 multiplier, bool ones);
