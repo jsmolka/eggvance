@@ -388,7 +388,7 @@ void ARM::Thumb_LoadRelativeAddress(u16 instr)
     if (use_sp)
         dst = (sp & ~0x0) + offset;
     else
-        dst = (pc & ~0x3) + offset;
+        dst = (pc & ~0x2) + offset;
 }
 
 template<uint sign>
