@@ -484,8 +484,8 @@ static std::string Arm_HalfSignedDataTransfer(u32 instr)
 static std::string Arm_BlockDataTransfer(u32 instr)
 {
     static constexpr const char* suffixes[2][4] = {
-        { "fa", "fd", "ea", "ed" },
-        { "ed", "ea", "fd", "fa" }
+        { "ed", "ea", "fd", "fa" },
+        { "fa", "fd", "ea", "ed" }
     };
 
     uint rlist     = bits::seq< 0, 16>(instr);
