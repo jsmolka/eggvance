@@ -92,10 +92,6 @@ void PPU::scanline()
         renderBg(&PPU::renderBgMode5, 2);
         collapse(2, 3);
         break;
-
-    default:
-        UNREACHABLE;
-        break;
     }
 }
 

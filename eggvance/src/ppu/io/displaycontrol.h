@@ -42,11 +42,8 @@ public:
         case 3: return 0b10100 & layers;
         case 4: return 0b10100 & layers;
         case 5: return 0b10100 & layers;
-        case 6: return false;
-        case 7: return false;
 
         default:
-            UNREACHABLE;
             return false;
         }
     }

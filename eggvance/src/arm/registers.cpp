@@ -74,7 +74,6 @@ Registers::Bank Registers::modeToBank(uint mode)
     case PSR::kModeUnd: return kBankUnd;
 
     default:
-        UNREACHABLE;
         return kBankDef;
     }
 }
