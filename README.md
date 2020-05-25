@@ -1,7 +1,3 @@
-<div align="center">
-  <img alt="icon" height="128" src="https://raw.githubusercontent.com/jsmolka/icon/master/bin/icon-512.png">
-</div>
-
 # eggvance
 A Game Boy Advance emulator.
 

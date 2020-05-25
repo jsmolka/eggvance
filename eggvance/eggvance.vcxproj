@@ -132,7 +132,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="external\icon\include\eggception\icon.cpp" />
+    <ClCompile Include="external\icon\include\eggcpt\icon.cpp" />
     <ClCompile Include="src\arm\arm.cpp" />
     <ClCompile Include="src\arm\bus.cpp" />
     <ClCompile Include="src\arm\disassemble.cpp" />
@@ -179,7 +179,7 @@
     <ClCompile Include="src\timer\timerc.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="external\icon\include\eggception\icon.h" />
+    <ClInclude Include="external\icon\include\eggcpt\icon.h" />
     <ClInclude Include="src\arm\arm.h" />
     <ClInclude Include="src\arm\decode.h" />
     <ClInclude Include="src\arm\disassemble.h" />
