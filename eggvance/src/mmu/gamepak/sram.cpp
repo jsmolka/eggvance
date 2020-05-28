@@ -3,7 +3,7 @@
 SRAM::SRAM(const fs::path& file)
     : Backup(file, Backup::Type::SRAM)
 {
-    data.resize(0x8000, 0);
+    data.resize(0x8000, 0xFF);
 }
 
 u8 SRAM::readByte(u32 addr)
