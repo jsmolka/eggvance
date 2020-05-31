@@ -1,11 +1,11 @@
 #pragma once
 
-#include "backup.h"
+#include "gamepak/save.h"
 
-class Flash : public Backup
+class Flash : public Save
 {
 public:
-    Flash(const fs::path& file, Backup::Type type);
+    Flash(const fs::path& file, uint size);
 
     virtual u8 readByte(u32 addr) override final;
     virtual void writeByte(u32 addr, u8 byte) override final;
@@ -26,4 +26,18 @@ private:
     bool erase;
     u32 command;
     u8* bank;
+};
+
+class Flash64 : public Flash
+{
+public:
+    Flash64(const fs::path& file)
+        : Flash(file, 0x10'000) {}
+};
+
+class Flash128 : public Flash
+{
+public:
+    Flash128(const fs::path& file)
+        : Flash(file, 0x20'000) {}
 };

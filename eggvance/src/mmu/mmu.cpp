@@ -55,7 +55,7 @@ u8 MMU::readByte(u32 addr)
         return gamepak.readByte(addr);
 
     case REGION_GAMEPAK2_EX:
-        if (gamepak.backup->type == Backup::Type::EEPROM)
+        if (gamepak.save->type == Save::Type::Eeprom)
         {
             if (gamepak.size() <= 0x100'0000 || addr >= 0xDFF'FF00)
                 return 1;
@@ -64,24 +64,24 @@ u8 MMU::readByte(u32 addr)
         return gamepak.readByte(addr);
     
     case REGION_SRAM:
-        switch (gamepak.backup->type)
+        switch (gamepak.save->type)
         {
-        case Backup::Type::SRAM:
+        case Save::Type::Sram:
             addr &= 0x7FFF;
-            return gamepak.backup->readByte(addr);
+            return gamepak.save->readByte(addr);
 
-        case Backup::Type::Flash64:
-        case Backup::Type::Flash128:
+        case Save::Type::Flash64:
+        case Save::Type::Flash128:
             addr &= 0xFFFF;
-            return gamepak.backup->readByte(addr);
+            return gamepak.save->readByte(addr);
         }
         return 0;
 
     case REGION_SRAM_MIRROR:
-        if (gamepak.backup->type == Backup::Type::SRAM)
+        if (gamepak.save->type == Save::Type::Sram)
         {
             addr &= 0x7FFF;
-            return gamepak.backup->readByte(addr);
+            return gamepak.save->readByte(addr);
         }
         return 0;
     }
@@ -125,7 +125,7 @@ u16 MMU::readHalf(u32 addr)
         return gamepak.readHalf(addr);
 
     case REGION_GAMEPAK2_EX:
-        if (gamepak.backup->type == Backup::Type::EEPROM)
+        if (gamepak.save->type == Save::Type::Eeprom)
         {
             if (gamepak.size() <= 0x100'0000 || addr >= 0xDFF'FF00)
                 return 1;
@@ -135,10 +135,10 @@ u16 MMU::readHalf(u32 addr)
 
     case REGION_SRAM:
     case REGION_SRAM_MIRROR:
-        if (gamepak.backup->type == Backup::Type::SRAM)
+        if (gamepak.save->type == Save::Type::Sram)
         {
             addr &= 0x7FFF;
-            return gamepak.backup->readByte(addr) * 0x0101;
+            return gamepak.save->readByte(addr) * 0x0101;
         }
         return 0;
     }
@@ -182,7 +182,7 @@ u32 MMU::readWord(u32 addr)
         return gamepak.readWord(addr);
 
     case REGION_GAMEPAK2_EX:
-        if (gamepak.backup->type == Backup::Type::EEPROM)
+        if (gamepak.save->type == Save::Type::Eeprom)
         {
             if (gamepak.size() <= 0x100'0000 || addr >= 0xDFF'FF00)
                 return 1;
@@ -192,10 +192,10 @@ u32 MMU::readWord(u32 addr)
 
     case REGION_SRAM:
     case REGION_SRAM_MIRROR:
-        if (gamepak.backup->type == Backup::Type::SRAM)
+        if (gamepak.save->type == Save::Type::Sram)
         {
             addr &= 0x7FFF;
-            return gamepak.backup->readByte(addr) * 0x01010101;
+            return gamepak.save->readByte(addr) * 0x01010101;
         }
         return 0;
     }
@@ -241,26 +241,26 @@ void MMU::writeByte(u32 addr, u8 byte)
         break;
 
     case REGION_SRAM:
-        switch (gamepak.backup->type)
+        switch (gamepak.save->type)
         {
-        case Backup::Type::SRAM:
+        case Save::Type::Sram:
             addr &= 0x7FFF;
-            gamepak.backup->writeByte(addr, byte);
+            gamepak.save->writeByte(addr, byte);
             break;
 
-        case Backup::Type::Flash64:
-        case Backup::Type::Flash128:
+        case Save::Type::Flash64:
+        case Save::Type::Flash128:
             addr &= 0xFFFF;
-            gamepak.backup->writeByte(addr, byte);
+            gamepak.save->writeByte(addr, byte);
             break;
         }
         break;
 
     case REGION_SRAM_MIRROR:
-        if (gamepak.backup->type == Backup::Type::SRAM)
+        if (gamepak.save->type == Save::Type::Sram)
         {
             addr &= 0x7FFF;
-            gamepak.backup->writeByte(addr, byte);
+            gamepak.save->writeByte(addr, byte);
         }
         break;
     }
@@ -307,11 +307,11 @@ void MMU::writeHalf(u32 addr, u16 half)
 
     case REGION_SRAM:
     case REGION_SRAM_MIRROR:
-        if (gamepak.backup->type == Backup::Type::SRAM)
+        if (gamepak.save->type == Save::Type::Sram)
         {
             addr &= 0x7FFF;
             half = bits::ror(half, (addr & 0x3) << 3);
-            gamepak.backup->writeByte(addr, half & 0xFF);
+            gamepak.save->writeByte(addr, half & 0xFF);
         }
         break;
     }
@@ -358,11 +358,11 @@ void MMU::writeWord(u32 addr, u32 word)
 
     case REGION_SRAM:
     case REGION_SRAM_MIRROR:
-        if (gamepak.backup->type == Backup::Type::SRAM)
+        if (gamepak.save->type == Save::Type::Sram)
         {
             addr &= 0x7FFF;
             word = bits::ror(word, (addr & 0x3) << 3);
-            gamepak.backup->writeByte(addr, word & 0xFF);
+            gamepak.save->writeByte(addr, word & 0xFF);
         }
         break;
     }

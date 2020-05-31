@@ -57,7 +57,7 @@ void processDropEvent(const SDL_DropEvent& event)
     }
     else
     {
-        mmu.gamepak.loadBackup(file);
+        mmu.gamepak.loadSave(file);
         common::reset();
     }
 }

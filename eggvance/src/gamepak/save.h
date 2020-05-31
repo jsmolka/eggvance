@@ -5,21 +5,22 @@
 #include "base/fs.h"
 #include "base/integer.h"
 
-class Backup
+struct Save
 {
-public:
     enum class Type
     {
         None,
-        SRAM,
-        EEPROM,
+        Sram,
+        Eeprom,
         Flash64,
         Flash128
     };
 
-    Backup();
-    Backup(const fs::path& file, Type type);
-    virtual ~Backup();
+    Save();
+    Save(const fs::path& file, Type type);
+    virtual ~Save();
+
+    static Type parse(const std::vector<u8>& rom);
 
     virtual u8 readByte(u32 addr);
     virtual void writeByte(u32 addr, u8 byte);

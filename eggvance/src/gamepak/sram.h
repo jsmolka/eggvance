@@ -1,11 +1,11 @@
 #pragma once
 
-#include "backup.h"
+#include "gamepak.h"
 
-class SRAM : public Backup
+class Sram : public Save
 {
 public:
-    SRAM(const fs::path& file);
+    Sram(const fs::path& file);
 
     virtual u8 readByte(u32 addr) override final;
     virtual void writeByte(u32 addr, u8 byte) override final;

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "backup.h"
+#include "gamepak/save.h"
 
-class EEPROM : public Backup
+class Eeprom : public Save
 {
 public:
-    EEPROM(const fs::path& file);
+    Eeprom(const fs::path& file);
 
     virtual u8 readByte(u32 addr) override final;
     virtual void writeByte(u32, u8 byte) override final;

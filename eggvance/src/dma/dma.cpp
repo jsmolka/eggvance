@@ -119,7 +119,7 @@ void DMA::updateTransfer()
     bool eeprom_w = id == 3 && inEEPROM(dad);
     bool eeprom_r = id == 3 && inEEPROM(sad);
 
-    if ((eeprom_r || eeprom_w) && mmu.gamepak.backup->type == Backup::Type::EEPROM)
+    if ((eeprom_r || eeprom_w) && mmu.gamepak.save->type == Save::Type::Eeprom)
     {
         initEEPROM();
 
@@ -127,13 +127,13 @@ void DMA::updateTransfer()
         {
             transfer = [&]() {
                 u8 byte = static_cast<u8>(mmu.readHalf(sad));
-                mmu.gamepak.backup->writeByte(dad, byte);
+                mmu.gamepak.save->writeByte(dad, byte);
             };
         }
         else
         {
             transfer = [&]() {
-                u8 byte = mmu.gamepak.backup->readByte(sad);
+                u8 byte = mmu.gamepak.save->readByte(sad);
                 mmu.writeHalf(dad, byte);
             };
 
@@ -163,20 +163,20 @@ void DMA::initEEPROM()
     // Guessing EEPROM size in advance seems to be pretty much impossible.
     // That's why we base the size on the first write (which should happen
     // before the first read).
-    if (mmu.gamepak.backup->data.empty())
+    if (mmu.gamepak.save->data.empty())
     {
         switch (remaining)
         {
         // Bus width 6
         case  9:  // Set address for reading
         case 73:  // Write data to address
-            mmu.gamepak.backup->data.resize(0x0200, 0);
+            mmu.gamepak.save->data.resize(0x0200, 0);
             break;
 
         // Bus width 14
         case 17:  // Set address for reading
         case 81:  // Write data to address
-            mmu.gamepak.backup->data.resize(0x2000, 0);
+            mmu.gamepak.save->data.resize(0x2000, 0);
             break;
         }
     }

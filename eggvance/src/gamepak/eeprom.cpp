@@ -1,13 +1,13 @@
 #include "eeprom.h"
 
-EEPROM::EEPROM(const fs::path& file)
-    : Backup(file, Backup::Type::EEPROM)
+Eeprom::Eeprom(const fs::path& file)
+    : Save(file, Save::Type::Eeprom)
 {
     resetBuffer();
     state = State::Receive;
 }
 
-u8 EEPROM::readByte(u32 addr)
+u8 Eeprom::readByte(u32 addr)
 {
     switch (state)
     {
@@ -35,7 +35,7 @@ u8 EEPROM::readByte(u32 addr)
     return 1;
 }
 
-void EEPROM::writeByte(u32, u8 byte)
+void Eeprom::writeByte(u32, u8 byte)
 {
     if (state == State::Read || state == State::ReadNibble)
         return;
@@ -107,13 +107,13 @@ void EEPROM::writeByte(u32, u8 byte)
     }
 }
 
-void EEPROM::resetBuffer()
+void Eeprom::resetBuffer()
 {
     buffer = 0;
     transmitted = 0;
 }
 
-int EEPROM::bus() const
+int Eeprom::bus() const
 {
     return data.size() == 0x2000 ? 14 : 6;
 }

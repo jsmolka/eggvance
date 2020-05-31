@@ -4,23 +4,10 @@
 
 #include "base/macros.h"
 
-Flash::Flash(const fs::path& file, Backup::Type type)
-    : Backup(file, type)
+Flash::Flash(const fs::path& file, uint size)
+    : Save(file, size == 0x10'000 ? Type::Flash64 : Type::Flash128)
 {
-    switch (type)
-    {
-    case Backup::Type::Flash64:
-        data.resize(0x10000, 0xFF);
-        break;
-
-    case Backup::Type::Flash128:
-        data.resize(0x20000, 0xFF);
-        break;
-
-    default:
-        UNREACHABLE;
-        break;
-    }
+    data.resize(size, 0xFF);
 
     id = false;
     erase = false;
