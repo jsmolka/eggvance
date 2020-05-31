@@ -132,9 +132,9 @@ void eggvanceLoadRom(const std::string& filename)
     emulateMain(kRefreshRate);
 }
 
-void eggvanceLoadBackup(const std::string& filename)
+void eggvanceLoadSave(const std::string& filename)
 {
-    mmu.gamepak.loadBackup(filename);
+    mmu.gamepak.loadSave(filename);
     common::reset();
     emulateMain(kRefreshRate);
 }
@@ -142,7 +142,7 @@ void eggvanceLoadBackup(const std::string& filename)
 EMSCRIPTEN_BINDINGS(eggvance)
 {
     function("eggvanceLoadRom", &eggvanceLoadRom);
-    function("eggvanceLoadBackup", &eggvanceLoadBackup);
+    function("eggvanceLoadSave", &eggvanceLoadSave);
 }
 
 int main(int argc, char* argv[])

@@ -77,7 +77,7 @@
           this.loadFile(inputBackup, data => {
             fileId++;
             FS.writeFile(`rom${fileId}.sav`, data);
-            this.eggvanceLoadBackup(`rom${fileId}.sav`);
+            this.eggvanceLoadSave(`rom${fileId}.sav`);
           });
         }
       };
