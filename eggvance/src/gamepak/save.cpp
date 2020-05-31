@@ -14,7 +14,7 @@ static constexpr std::pair<std::string_view, Save::Type> save_types[5] =
     { "FLASH1M_" , Save::Type::Flash128 }
 };
 
-static constexpr std::size_t maxIdSize = [&]()
+static constexpr std::size_t maxIdSize = []()
 {
     std::size_t max = 0;
     for (const auto& [id, type] : save_types)
