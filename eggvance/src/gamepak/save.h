@@ -5,8 +5,9 @@
 #include "base/fs.h"
 #include "base/integer.h"
 
-struct Save
+class Save
 {
+public:
     enum class Type
     {
         None,

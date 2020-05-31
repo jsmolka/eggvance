@@ -145,7 +145,10 @@
     <ClCompile Include="src\gamepak\eeprom.cpp" />
     <ClCompile Include="src\gamepak\flash.cpp" />
     <ClCompile Include="src\gamepak\gamepak.cpp" />
+    <ClCompile Include="src\gamepak\gpio.cpp" />
     <ClCompile Include="src\gamepak\header.cpp" />
+    <ClCompile Include="src\gamepak\overrides.cpp" />
+    <ClCompile Include="src\gamepak\rtc.cpp" />
     <ClCompile Include="src\gamepak\save.cpp" />
     <ClCompile Include="src\gamepak\sram.cpp" />
     <ClCompile Include="src\platform\audiodevice.cpp" />
@@ -200,6 +203,7 @@
     <ClInclude Include="src\gamepak\gamepak.h" />
     <ClInclude Include="src\gamepak\gpio.h" />
     <ClInclude Include="src\gamepak\header.h" />
+    <ClInclude Include="src\gamepak\rtc.h" />
     <ClInclude Include="src\gamepak\save.h" />
     <ClInclude Include="src\gamepak\sram.h" />
     <ClInclude Include="src\interrupt\io\intrio.h" />

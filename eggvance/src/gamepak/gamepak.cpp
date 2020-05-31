@@ -43,6 +43,9 @@ void GamePak::load(const fs::path& rom_file, const fs::path& save_file)
 
     header = Header(rom);
 
+    save = std::make_unique<Save>();
+    gpio = std::make_unique<Gpio>();
+
     initSave(save_file, Save::parse(rom));
 }
 
@@ -69,8 +72,6 @@ u32 GamePak::readUnused(u32 addr)
 
 void GamePak::initSave(const fs::path& file, Save::Type type)
 {
-    save = nullptr;
-
     switch (type)
     {
     case Save::Type::Sram:
@@ -87,10 +88,6 @@ void GamePak::initSave(const fs::path& file, Save::Type type)
 
     case Save::Type::Flash128:
         save = std::make_unique<Flash128>(file);
-        break;
-
-    default:
-        save = std::make_unique<Save>();
         break;
     }
 }

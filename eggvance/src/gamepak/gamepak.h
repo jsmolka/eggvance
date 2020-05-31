@@ -1,7 +1,11 @@
 #pragma once
 
+#include <array>
 #include <memory>
+#include <string_view>
+#include <vector>
 
+#include "gamepak/gpio.h"
 #include "gamepak/header.h"
 #include "gamepak/save.h"
 
@@ -19,12 +23,24 @@ public:
     void loadSave(const fs::path& save_file);
 
     Header header;
+    std::unique_ptr<Gpio> gpio;
     std::unique_ptr<Save> save;
 
 private:
+    struct Override
+    {
+        std::string_view code;
+        Save::Type save_type;
+        Gpio::Type gpio_type;
+        uint save_size;
+        bool mirror;
+    };
+
     static u32 readUnused(u32 addr);
 
     void initSave(const fs::path& file, Save::Type type);
+
+    const static std::vector<Override> overrides;
 
     fs::path file;
     std::vector<u8> rom;
