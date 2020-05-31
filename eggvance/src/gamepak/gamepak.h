@@ -2,7 +2,7 @@
 
 #include <array>
 #include <memory>
-#include <string_view>
+#include <string>
 #include <vector>
 
 #include "gamepak/gpio.h"
@@ -29,10 +29,9 @@ public:
 private:
     struct Override
     {
-        std::string_view code;
-        Save::Type save_type;
-        Gpio::Type gpio_type;
-        uint save_size;
+        std::string code;
+        Save::Type save;
+        Gpio::Type gpio;
         bool mirror;
     };
 
