@@ -31,6 +31,9 @@ void Config::initFile(const fs::path& file)
     bios_file = fs::u8path(toml.get<std::string>("general.bios_file"));
     bios_skip = toml.get<bool>("general.bios_skip");
 
+    save_type = toml.get<std::string>("cartridge.save_type");
+    gpio_type = toml.get<std::string>("cartridge.gpio_type");
+
     if (!save_path.empty())
     {
         if (save_path.is_relative())
@@ -117,6 +120,9 @@ void Config::initDefault()
     save_path = fs::path();
     bios_file = fs::path();
     bios_skip = true;
+
+    save_type = "auto";
+    gpio_type = "auto";
 
     framerate[0] = 2.0 * kRefreshRate;
     framerate[1] = 4.0 * kRefreshRate;

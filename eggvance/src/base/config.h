@@ -25,6 +25,9 @@ public:
     fs::path bios_file;
     bool bios_skip;
 
+    std::string save_type;
+    std::string gpio_type;
+
 private:
     void initFile(const fs::path& file);
     void initDefault();

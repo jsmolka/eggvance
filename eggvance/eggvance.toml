@@ -3,6 +3,10 @@ save_path = ""
 bios_file = ""
 bios_skip = true
 
+[cartridge]
+save_type = "auto"
+gpio_type = "auto"
+
 [framerate]
 custom_1 = 119.474
 custom_2 = 238.948
