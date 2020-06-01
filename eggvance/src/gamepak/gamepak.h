@@ -2,7 +2,8 @@
 
 #include <array>
 #include <memory>
-#include <string>
+#include <optional>
+#include <string_view>
 #include <vector>
 
 #include "gamepak/gpio.h"
@@ -25,18 +26,21 @@ public:
     Header header;
     std::unique_ptr<Gpio> gpio;
     std::unique_ptr<Save> save;
+    bool mirroring;
 
 private:
     struct Override
     {
-        std::string code;
-        Save::Type save;
-        Gpio::Type gpio;
-        bool mirror;
+        std::string_view code;
+        Save::Type save_type;
+        Gpio::Type gpio_type;
+        bool mirroring;
     };
 
     static u32 readUnused(u32 addr);
+    static std::optional<Override> findOverride(const std::string& code);
 
+    void initGpio(Gpio::Type type);
     void initSave(const fs::path& file, Save::Type type);
 
     const static std::vector<Override> overrides;
