@@ -7,7 +7,7 @@ class KeyInput
 public:
     inline KeyInput& operator=(u16 value)
     {
-        this->value = value;
+        this->value = value & ~0xFC00;
 
         return *this;
     }
