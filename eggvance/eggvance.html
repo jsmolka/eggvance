@@ -5,19 +5,32 @@
     <title>eggvance</title>
   </head>
   <body>
-    <canvas id="canvas" oncontextmenu="event.preventDefault()" style="background: white"></canvas>
+    <canvas id="canvas" style="background: white"></canvas>
     <input id="rom-input" type="file" style="display: none" onchange="Module.loadRom()">
-    <input id="backup-input" type="file" style="display: none" onchange="Module.loadBackup()">
+    <input id="save-input" type="file" style="display: none" onchange="Module.loadSave()">
     <div style="display: flex; margin-top: 8px">
       <button onclick="inputRom.click()" style="margin-right: 8px">Load rom</button>
-      <button onclick="inputBackup.click()">Load save</button>
+      <button onclick="inputSave.click()">Load save</button>
     </div>
     <script type='text/javascript'>
-      const inputRom = document.getElementById('rom-input');
-      const inputBackup = document.getElementById('backup-input');
+      const inputRom  = document.getElementById('rom-input');
+      const inputSave = document.getElementById('save-input');
 
-      let fileId = 0;
+      class FileSystem {
+        constructor() {
+          this.id = 0;
+        }
+
+        write(data) {
+          const filename = `data${this.id++}.bin`;
+          FS.writeFile(filename, data);
+
+          return filename;
+        }
+      }
+
       var Module = {
+        fs: new FileSystem(),
         canvas: document.getElementById('canvas'),
         preInit() {
           FS.writeFile('eggvance.toml', `
@@ -25,10 +38,10 @@
             save_path = ""
             bios_file = ""
             bios_skip = true
-			
-			[cartridge]
-			save_type = "auto"
-			gpio_type = "auto"
+
+            [cartridge]
+            save_type = "auto"
+            gpio_type = "auto"
 
             [framerate]
             custom_1 = 119.474
@@ -59,32 +72,52 @@
             fr_unbound  = ["6", ""]
           `);
         },
-        loadFile(input, callback) {
-          if (input.files.length === 0)
-            return;
+        async readUrl(url) {
+          return new Promise(resolve => {
+            const request = new XMLHttpRequest();
 
-          const reader = new FileReader();
-          reader.onload = function() {
-            callback(new Uint8Array(reader.result));
-          }
-          reader.readAsArrayBuffer(input.files[0]);
-          input.value = '';
-        },
-        loadRom() {
-          this.loadFile(inputRom, data => {
-            fileId++;
-            FS.writeFile(`rom${fileId}.gba`, data);
-            this.eggvanceLoadRom(`rom${fileId}.gba`);
+            request.open('GET', url);
+            request.responseType = 'arraybuffer';
+            request.onload = event => {
+              resolve(new Uint8Array(request.response));
+            }
+            request.send();
           });
         },
-        loadBackup(file) {
-          this.loadFile(inputBackup, data => {
-            fileId++;
-            FS.writeFile(`rom${fileId}.sav`, data);
-            this.eggvanceLoadSave(`rom${fileId}.sav`);
+        async readFile(input) {
+          return new Promise(resolve => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              resolve(new Uint8Array(reader.result));
+            }
+            reader.readAsArrayBuffer(input.files[0]);
+            input.value = '';
           });
+        },
+        async loadRom() {
+          const data = await this.readFile(inputRom);
+          this.eggvanceLoadRom(this.fs.write(data));
+        },
+        async loadSave() {
+          const data = await this.readFile(inputSave);
+          this.eggvanceLoadSave(this.fs.write(data));
         }
       };
+
+      window.onload = () => {
+        const canvas = document.getElementById('canvas');
+        const width  = canvas.clientWidth;
+        const height = 2 * width / 3;
+
+        const style = document.createElement('style');
+        style.appendChild(document.createTextNode(`#canvas { width: ${width}px; height: ${height}px }`));
+        document.head.appendChild(style);
+
+        window.onresize = () => {
+          style.remove();
+          canvas.height = 2 * canvas.width / 3;
+        }
+      }
     </script>
     {{{ SCRIPT }}}
   </body>

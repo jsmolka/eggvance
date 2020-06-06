@@ -3,18 +3,20 @@
 #include <emscripten.h>
 #include <emscripten/bind.h>
 
-#include "sdlaudiodevice.h"
-#include "sdlinputdevice.h"
-#include "sdlvideodevice.h"
 #include "base/config.h"
 #include "keypad/keypad.h"
 #include "mmu/mmu.h"
 #include "platform/common.h"
 #include "platform/framecounter.h"
+#include "platform/sdl/sdlaudiodevice.h"
+#include "platform/sdl/sdlinputdevice.h"
+#include "platform/sdl/sdlvideodevice.h"
 
 using namespace emscripten;
 
 FrameCounter counter;
+
+u32 background = 0xFFFFFF;
 
 auto sdl_audio_device = std::make_shared<SDLAudioDevice>();
 auto sdl_input_device = std::make_shared<SDLInputDevice>();
@@ -107,7 +109,7 @@ void processEvents()
 void idle()
 {
     processEvents();
-    sdl_video_device->clear(0xFFFFFF);
+    sdl_video_device->clear(background);
     sdl_video_device->renderIcon();
     SDL_RenderPresent(sdl_video_device->renderer);
 }
@@ -139,10 +141,16 @@ void eggvanceLoadSave(const std::string& filename)
     emulateMain(kRefreshRate);
 }
 
+void eggvanceSetBackground(u32 color)
+{
+    background = color;
+}
+
 EMSCRIPTEN_BINDINGS(eggvance)
 {
     function("eggvanceLoadRom", &eggvanceLoadRom);
     function("eggvanceLoadSave", &eggvanceLoadSave);
+    function("eggvanceSetBackground", &eggvanceSetBackground);
 }
 
 int main(int argc, char* argv[])
