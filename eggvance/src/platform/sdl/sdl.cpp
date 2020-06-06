@@ -160,9 +160,9 @@ int main(int argc, char* argv[])
         emulate();
         return 0;
     }
-    catch (const std::runtime_error& error)
+    catch (const std::exception& ex)
     {
-        SDL_ShowSimpleMessageBox(0, "Error", error.what(), nullptr);
+        SDL_ShowSimpleMessageBox(0, "Exception", ex.what(), nullptr);
         return 1;
     }
 }

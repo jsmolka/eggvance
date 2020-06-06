@@ -155,9 +155,17 @@ EMSCRIPTEN_BINDINGS(eggvance)
 
 int main(int argc, char* argv[])
 {
-    init(argc, argv);
-    idleMain();
-    return 0;
+    try
+    {
+        init(argc, argv);
+        idleMain();
+        return 0;
+    }
+    catch (const std::exception& ex)
+    {
+        std::puts(ex.what());
+        return 1;
+    }
 }
 
 #endif
