@@ -7,11 +7,11 @@
 
 static constexpr std::pair<std::string_view, Save::Type> save_types[5] =
 {
-    { "SRAM"     , Save::Type::Sram     },
-    { "EEPROM"   , Save::Type::Eeprom   },
-    { "FLASH_"   , Save::Type::Flash64  },
-    { "FLASH512_", Save::Type::Flash64  },
-    { "FLASH1M_" , Save::Type::Flash128 }
+    { "SRAM_V"    , Save::Type::Sram     },
+    { "EEPROM_V"  , Save::Type::Eeprom   },
+    { "FLASH_V"   , Save::Type::Flash64  },
+    { "FLASH512_V", Save::Type::Flash64  },
+    { "FLASH1M_V" , Save::Type::Flash128 }
 };
 
 static constexpr std::size_t maxIdSize = []()
