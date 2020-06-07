@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <numeric>
 
-template<std::size_t N>
+template<uint N>
 static std::string makePrintable(const u8 (&data)[N])
 {
     std::string str(reinterpret_cast<const char*>(data), N);
@@ -28,8 +28,8 @@ Header::Header(const std::vector<u8>& rom)
 
 u8 Header::complement(const Data& data)
 {
-    const u8* beg = reinterpret_cast<const u8*>(&data) + 0xA0;
-    const u8* end = reinterpret_cast<const u8*>(&data) + 0xBD;
+    const u8* beg = reinterpret_cast<const u8*>(&data.game_title);
+    const u8* end = reinterpret_cast<const u8*>(&data.complement);
 
     return -(std::accumulate<const u8*, u8>(beg, end, 0) + 0x19);
 }

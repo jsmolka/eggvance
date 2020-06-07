@@ -7,13 +7,6 @@
 
 class Header
 {
-public:
-    Header() = default;
-    explicit Header(const std::vector<u8>& rom);
-
-    std::string title;
-    std::string code;
-
 private:
     struct Data
     {
@@ -31,5 +24,15 @@ private:
         u16 checksum;
     };
 
+public:
+    Header() = default;
+    explicit Header(const std::vector<u8>& rom);
+
+    static constexpr uint size = sizeof(Data);
+
+    std::string title;
+    std::string code;
+
+private:
     static u8 complement(const Data& data);
 };
