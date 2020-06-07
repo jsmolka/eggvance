@@ -68,12 +68,12 @@ u8 MMU::readByte(u32 addr)
         {
         case Save::Type::Sram:
             addr &= 0x7FFF;
-            return gamepak.save->readByte(addr);
+            return gamepak.save->read(addr);
 
         case Save::Type::Flash64:
         case Save::Type::Flash128:
             addr &= 0xFFFF;
-            return gamepak.save->readByte(addr);
+            return gamepak.save->read(addr);
         }
         return 0;
 
@@ -81,7 +81,7 @@ u8 MMU::readByte(u32 addr)
         if (gamepak.save->type == Save::Type::Sram)
         {
             addr &= 0x7FFF;
-            return gamepak.save->readByte(addr);
+            return gamepak.save->read(addr);
         }
         return 0;
     }
@@ -138,7 +138,7 @@ u16 MMU::readHalf(u32 addr)
         if (gamepak.save->type == Save::Type::Sram)
         {
             addr &= 0x7FFF;
-            return gamepak.save->readByte(addr) * 0x0101;
+            return gamepak.save->read(addr) * 0x0101;
         }
         return 0;
     }
@@ -195,7 +195,7 @@ u32 MMU::readWord(u32 addr)
         if (gamepak.save->type == Save::Type::Sram)
         {
             addr &= 0x7FFF;
-            return gamepak.save->readByte(addr) * 0x01010101;
+            return gamepak.save->read(addr) * 0x01010101;
         }
         return 0;
     }
@@ -245,13 +245,13 @@ void MMU::writeByte(u32 addr, u8 byte)
         {
         case Save::Type::Sram:
             addr &= 0x7FFF;
-            gamepak.save->writeByte(addr, byte);
+            gamepak.save->write(addr, byte);
             break;
 
         case Save::Type::Flash64:
         case Save::Type::Flash128:
             addr &= 0xFFFF;
-            gamepak.save->writeByte(addr, byte);
+            gamepak.save->write(addr, byte);
             break;
         }
         break;
@@ -260,7 +260,7 @@ void MMU::writeByte(u32 addr, u8 byte)
         if (gamepak.save->type == Save::Type::Sram)
         {
             addr &= 0x7FFF;
-            gamepak.save->writeByte(addr, byte);
+            gamepak.save->write(addr, byte);
         }
         break;
     }
@@ -311,7 +311,7 @@ void MMU::writeHalf(u32 addr, u16 half)
         {
             addr &= 0x7FFF;
             half = bits::ror(half, (addr & 0x3) << 3);
-            gamepak.save->writeByte(addr, half & 0xFF);
+            gamepak.save->write(addr, half & 0xFF);
         }
         break;
     }
@@ -362,7 +362,7 @@ void MMU::writeWord(u32 addr, u32 word)
         {
             addr &= 0x7FFF;
             word = bits::ror(word, (addr & 0x3) << 3);
-            gamepak.save->writeByte(addr, word & 0xFF);
+            gamepak.save->write(addr, word & 0xFF);
         }
         break;
     }

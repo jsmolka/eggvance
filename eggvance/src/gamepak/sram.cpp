@@ -6,12 +6,12 @@ Sram::Sram(const fs::path& file)
     data.resize(0x8000, 0xFF);
 }
 
-u8 Sram::readByte(u32 addr)
+u8 Sram::read(u32 addr)
 {
     return data[addr];
 }
 
-void Sram::writeByte(u32 addr, u8 byte)
+void Sram::write(u32 addr, u8 byte)
 {
     data[addr] = byte;
 }

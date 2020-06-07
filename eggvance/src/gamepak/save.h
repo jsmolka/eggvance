@@ -23,8 +23,8 @@ public:
 
     static Type parse(const std::vector<u8>& rom);
 
-    virtual u8 readByte(u32 addr);
-    virtual void writeByte(u32 addr, u8 byte);
+    virtual u8 read(u32 addr);
+    virtual void write(u32 addr, u8 byte);
 
     Type type;
     fs::path file;

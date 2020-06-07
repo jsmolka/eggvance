@@ -15,7 +15,7 @@ Flash::Flash(const fs::path& file, uint size)
     bank = &data[0];
 }
 
-u8 Flash::readByte(u32 addr)
+u8 Flash::read(u32 addr)
 {
     if (id)
     {
@@ -28,7 +28,7 @@ u8 Flash::readByte(u32 addr)
     return bank[addr];
 }
 
-void Flash::writeByte(u32 addr, u8 byte)
+void Flash::write(u32 addr, u8 byte)
 {
     switch (command)
     {

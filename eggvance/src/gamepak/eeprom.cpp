@@ -7,7 +7,7 @@ Eeprom::Eeprom(const fs::path& file)
     state = State::Receive;
 }
 
-u8 Eeprom::readByte(u32 addr)
+u8 Eeprom::read(u32 addr)
 {
     switch (state)
     {
@@ -35,7 +35,7 @@ u8 Eeprom::readByte(u32 addr)
     return 1;
 }
 
-void Eeprom::writeByte(u32, u8 byte)
+void Eeprom::write(u32, u8 byte)
 {
     if (state == State::Read || state == State::ReadNibble)
         return;

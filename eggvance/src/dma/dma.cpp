@@ -127,13 +127,13 @@ void DMA::updateTransfer()
         {
             transfer = [&]() {
                 u8 byte = static_cast<u8>(mmu.readHalf(sad));
-                mmu.gamepak.save->writeByte(dad, byte);
+                mmu.gamepak.save->write(dad, byte);
             };
         }
         else
         {
             transfer = [&]() {
-                u8 byte = mmu.gamepak.save->readByte(sad);
+                u8 byte = mmu.gamepak.save->read(sad);
                 mmu.writeHalf(dad, byte);
             };
 

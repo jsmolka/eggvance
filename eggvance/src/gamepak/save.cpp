@@ -56,12 +56,12 @@ Save::Type Save::parse(const std::vector<u8>& rom)
     return Type::None;
 }
 
-u8 Save::readByte(u32 addr)
+u8 Save::read(u32 addr)
 {
     return 0;
 }
 
-void Save::writeByte(u32 addr, u8 byte)
+void Save::write(u32 addr, u8 byte)
 {
 
 }
