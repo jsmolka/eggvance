@@ -61,6 +61,8 @@ const std::vector<GamePak::Override> GamePak::overrides =
     { "AFXE", Save::Type::Flash64 , Gpio::Type::None, false },  // Final Fantasy Tactics Advance
     { "BFTJ", Save::Type::Flash128, Gpio::Type::None, false },  // F-Zero - Climax
     { "AGFE", Save::Type::Flash64 , Gpio::Type::None, false },  // Golden Sun: The Lost Age
+    { "AI2E", Save::Type::None    , Gpio::Type::None, false },  // Iridion II
+    { "AI2P", Save::Type::None    , Gpio::Type::None, false },  // Iridion II
     { "KHPJ", Save::Type::Eeprom  , Gpio::Type::None, false },  // Koro Koro Puzzle - Happy Panechu!
     { "BLJJ", Save::Type::Flash64 , Gpio::Type::Rtc , false },  // Legendz - Yomigaeru Shiren no Shima
     { "BLJK", Save::Type::Flash64 , Gpio::Type::Rtc , false },  // Legendz - Yomigaeru Shiren no Shima KOR
@@ -126,6 +128,7 @@ const std::vector<GamePak::Override> GamePak::overrides =
     { "AX4P", Save::Type::Flash128, Gpio::Type::None, false },  // Super Mario Advance 4
     { "ALUE", Save::Type::Eeprom  , Gpio::Type::None, false },  // Super Monkey Ball Jr.
     { "ALUP", Save::Type::Eeprom  , Gpio::Type::None, false },  // Super Monkey Ball Jr.
+    { "A2YE", Save::Type::None    , Gpio::Type::None, false },  // Top Gun - Combat Zones
     { "BUHJ", Save::Type::Eeprom  , Gpio::Type::None, false },  // Ueki no Housoku - Jingi Sakuretsu! Nouryokusha Battle
     { "RZWJ", Save::Type::Sram    , Gpio::Type::None, false },  // Wario Ware Twisted
     { "RZWE", Save::Type::Sram    , Gpio::Type::None, false },  // Wario Ware Twisted
