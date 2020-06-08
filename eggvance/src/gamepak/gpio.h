@@ -15,7 +15,7 @@ public:
     Gpio(Type type);
 
     virtual u16 read(u32 addr);
-    virtual void write(u32 addr, u16 data);
+    virtual void write(u32 addr, u16 half);
 
-    Type type;
+    const Type type;
 };

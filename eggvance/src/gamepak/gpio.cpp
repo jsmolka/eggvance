@@ -17,7 +17,7 @@ u16 Gpio::read(u32 addr)
     return 0;
 }
 
-void Gpio::write(u32 addr, u16 data)
+void Gpio::write(u32 addr, u16 half)
 {
 
 }
