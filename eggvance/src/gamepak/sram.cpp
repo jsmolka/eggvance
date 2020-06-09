@@ -1,7 +1,7 @@
 #include "sram.h"
 
 Sram::Sram(const fs::path& file)
-    : Save(file, Save::Type::Sram)
+    : Save(file, Type::Sram)
 {
     data.resize(0x8000, 0xFF);
 }

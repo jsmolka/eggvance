@@ -7,8 +7,8 @@ class Flash : public Save
 public:
     Flash(const fs::path& file, uint size);
 
-    virtual u8 read(u32 addr) override final;
-    virtual void write(u32 addr, u8 byte) override final;
+    u8 read(u32 addr) final;
+    void write(u32 addr, u8 byte) final;
 
 private:
     enum Command

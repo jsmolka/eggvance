@@ -5,10 +5,10 @@
 class Eeprom : public Save
 {
 public:
-    Eeprom(const fs::path& file);
+    explicit Eeprom(const fs::path& file);
 
-    virtual u8 read(u32 addr) override final;
-    virtual void write(u32, u8 byte) override final;
+    u8 read(u32 addr) final;
+    void write(u32, u8 byte) final;
 
 private:
     enum class State

@@ -26,7 +26,7 @@ public:
     virtual u8 read(u32 addr);
     virtual void write(u32 addr, u8 byte);
 
-    Type type;
-    fs::path file;
+    const Type type;
+    const fs::path file;
     std::vector<u8> data;
 };

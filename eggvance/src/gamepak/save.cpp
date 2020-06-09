@@ -5,23 +5,7 @@
 #include <string_view>
 #include <utility>
 
-static constexpr std::pair<std::string_view, Save::Type> save_types[5] =
-{
-    { "SRAM_V"    , Save::Type::Sram     },
-    { "EEPROM_V"  , Save::Type::Eeprom   },
-    { "FLASH_V"   , Save::Type::Flash64  },
-    { "FLASH512_V", Save::Type::Flash64  },
-    { "FLASH1M_V" , Save::Type::Flash128 }
-};
-
-static constexpr std::size_t maxIdSize = []()
-{
-    std::size_t max = 0;
-    for (const auto& [id, type] : save_types)
-        max = std::max(id.size(), max);
-
-    return max;
-}();
+#include "gamepak/header.h"
 
 Save::Save()
     : type(Type::None)
@@ -39,17 +23,36 @@ Save::Save(const fs::path& file, Type type)
 
 Save::~Save()
 {
-    if (type != Type::None)
+    if (!data.empty())
         fs::write(file, data);
 }
 
 Save::Type Save::parse(const std::vector<u8>& rom)
 {
-    for (uint x = 0xC0; x < (rom.size() - maxIdSize); x += 4)
+    static constexpr std::pair<std::string_view, Save::Type> identifiers[] =
     {
-        for (const auto& [id, type] : save_types)
+        { "SRAM_V"    , Save::Type::Sram     },
+        { "SRAM_F_V"  , Save::Type::Sram     },
+        { "EEPROM_V"  , Save::Type::Eeprom   },
+        { "FLASH_V"   , Save::Type::Flash64  },
+        { "FLASH512_V", Save::Type::Flash64  },
+        { "FLASH1M_V" , Save::Type::Flash128 }
+    };
+
+    static constexpr std::size_t maxIdentifier = []()
+    {
+        std::size_t max = 0;
+        for (const auto& [id, type] : identifiers)
+            max = std::max(id.size(), max);
+
+        return max;
+    }();
+
+    for (uint x = Header::size; x < (rom.size() - maxIdentifier); x += 4)
+    {
+        for (const auto& [id, type] : identifiers)
         {
-            if (std::memcmp(id.data(), &rom[x], id.size()) == 0)
+            if (std::memcmp(&rom[x], id.data(), id.size()) == 0)
                 return type;
         }
     }
