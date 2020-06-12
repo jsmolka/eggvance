@@ -170,13 +170,13 @@ void DMA::initEEPROM()
         // Bus width 6
         case  9:  // Set address for reading
         case 73:  // Write data to address
-            mmu.gamepak.save->data.resize(0x0200, 0);
+            mmu.gamepak.save->data.resize(0x0200, 0xFF);
             break;
 
         // Bus width 14
         case 17:  // Set address for reading
         case 81:  // Write data to address
-            mmu.gamepak.save->data.resize(0x2000, 0);
+            mmu.gamepak.save->data.resize(0x2000, 0xFF);
             break;
         }
     }
