@@ -5,7 +5,7 @@ Sram::Sram(const fs::path& file)
 {
     data.resize(0x8000, 0xFF);
 }
-
+ 
 u8 Sram::read(u32 addr)
 {
     return data[addr];

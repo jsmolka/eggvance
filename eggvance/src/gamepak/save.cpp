@@ -1,6 +1,5 @@
 #include "save.h"
 
-#include <algorithm>
 #include <cstring>
 #include <string_view>
 #include <utility>
@@ -39,20 +38,12 @@ Save::Type Save::parse(const std::vector<u8>& rom)
         { "FLASH1M_V" , Save::Type::Flash128 }
     };
 
-    static constexpr std::size_t maxIdentifier = []()
-    {
-        std::size_t max = 0;
-        for (const auto& [id, type] : identifiers)
-            max = std::max(id.size(), max);
-
-        return max;
-    }();
-
-    for (uint x = Header::size; x < (rom.size() - maxIdentifier); x += 4)
+    for (uint x = Header::size; x < rom.size(); x += 4)
     {
         for (const auto& [id, type] : identifiers)
         {
-            if (std::memcmp(&rom[x], id.data(), id.size()) == 0)
+            if (x + id.size() < rom.size()
+                    && std::memcmp(&rom[x], id.data(), id.size()) == 0)
                 return type;
         }
     }
