@@ -28,7 +28,7 @@ public:
     Header() = default;
     explicit Header(const std::vector<u8>& rom);
 
-    static constexpr uint size = sizeof(Data);
+    static constexpr uint kSize = sizeof(Data);
 
     std::string title;
     std::string code;

@@ -2,42 +2,42 @@
 
 #include "gamepak/save.h"
 
+template<uint size>
 class Flash : public Save
 {
+    static_assert(size == 0x10'000 || size == 0x20'000);
+
 public:
-    Flash(const fs::path& file, uint size);
+    explicit Flash(const fs::path& file);
 
     u8 read(u32 addr) final;
     void write(u32 addr, u8 byte) final;
 
+    static constexpr uint kSize = size;
+
 private:
     enum Command
     {
-        CMD_ERASE         = 0xAA5580,
-        CMD_ERASE_CHIP    = 0xAA5510,
-        CMD_ERASE_SECTOR  = 0xAA5530,
-        CMD_WRITE_BYTE    = 0xAA55A0,
-        CMD_SWITCH_BANK   = 0xAA55B0,
-        CMD_CHIP_ID_ENTER = 0xAA5590,
-        CMD_CHIP_ID_EXIT  = 0xAA55F0
+        kCommandErase       = 0xAA5580,
+        kCommandEraseChip   = 0xAA5510,
+        kCommandEraseSector = 0xAA5530,
+        kCommandWriteByte   = 0xAA55A0,
+        kCommandSwitchBank  = 0xAA55B0,
+        kCommandChipEnter   = 0xAA5590,
+        kCommandChipExit    = 0xAA55F0
     };
 
-    bool id;
-    bool erase;
-    u32 command;
-    u8* bank;
+    enum Chip
+    {
+        kChipMacronix64  = 0x1CC2,
+        kChipMacronix128 = 0x09C2
+    };
+
+    bool chip = false;
+    bool erase = false;
+    uint command = 0;
+    u8* bank = nullptr;
 };
 
-class Flash64 : public Flash
-{
-public:
-    Flash64(const fs::path& file)
-        : Flash(file, 0x10'000) {}
-};
-
-class Flash128 : public Flash
-{
-public:
-    Flash128(const fs::path& file)
-        : Flash(file, 0x20'000) {}
-};
+using Flash64  = Flash<0x10'000>;
+using Flash128 = Flash<0x20'000>;

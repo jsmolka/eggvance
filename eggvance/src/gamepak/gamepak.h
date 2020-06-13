@@ -43,7 +43,7 @@ private:
     void initGpio(Gpio::Type type);
     void initSave(const fs::path& file, Save::Type type);
 
-    const static std::vector<Override> overrides;
+    static const std::vector<Override> overrides;
 
     fs::path file;
     std::vector<u8> rom;

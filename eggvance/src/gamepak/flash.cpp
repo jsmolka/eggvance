@@ -2,44 +2,41 @@
 
 #include <algorithm>
 
-#include "base/macros.h"
-
-Flash::Flash(const fs::path& file, uint size)
+template<uint size>
+Flash<size>::Flash(const fs::path& file)
     : Save(file, size == 0x10'000 ? Type::Flash64 : Type::Flash128)
 {
     data.resize(size, 0xFF);
 
-    id = false;
-    erase = false;
-    command = 0;
-    bank = &data[0];
+    bank = data.data();
 }
 
-u8 Flash::read(u32 addr)
+template<uint size>
+u8 Flash<size>::read(u32 addr)
 {
-    if (id)
-    {
-        switch (addr)
-        {
-        case 0: return data.size() == 0x20000 ? 0xC2 : 0xBF;
-        case 1: return data.size() == 0x20000 ? 0x09 : 0xD4;
-        }
-    }
+    constexpr uint macronix = size == 0x10'000
+        ? kChipMacronix64
+        : kChipMacronix128;
+
+    if (chip && addr < 2)
+        return (macronix >> (8 * addr)) & 0xFF;
+
     return bank[addr];
 }
 
-void Flash::write(u32 addr, u8 byte)
+template<uint size>
+void Flash<size>::write(u32 addr, u8 byte)
 {
     switch (command)
     {
-    case CMD_WRITE_BYTE:
+    case kCommandWriteByte:
         bank[addr] = byte;
         command = 0;
         return;
 
-    case CMD_SWITCH_BANK:
-        if (data.size() == 0x20000)
-            bank = &data[(byte & 0x1) * 0x10000];
+    case kCommandSwitchBank:
+        if (size == 0x20'000)
+            bank = &data[0x10'000 * (byte & 0x1)];
         command = 0;
         return;
     }
@@ -57,11 +54,11 @@ void Flash::write(u32 addr, u8 byte)
 
         switch (command)
         {
-        case CMD_ERASE:
+        case kCommandErase:
             erase = true;
             break;
 
-        case CMD_ERASE_CHIP:
+        case kCommandEraseChip:
             if (erase)
             {
                 std::fill(data.begin(), data.end(), 0xFF);
@@ -69,12 +66,12 @@ void Flash::write(u32 addr, u8 byte)
             }
             break;
 
-        case CMD_CHIP_ID_ENTER:
-            id = true;
+        case kCommandChipEnter:
+            chip = true;
             break;
 
-        case CMD_CHIP_ID_EXIT:
-            id = false;
+        case kCommandChipExit:
+            chip = false;
             break;
         }
         break;
@@ -85,7 +82,7 @@ void Flash::write(u32 addr, u8 byte)
             command <<= 8;
             command |= byte;
 
-            if (erase && command == CMD_ERASE_SECTOR)
+            if (erase && command == kCommandEraseSector)
             {
                 u8* sector = bank + (addr & 0xF000);
                 std::fill_n(sector, 0x1000, 0xFF);
@@ -95,3 +92,6 @@ void Flash::write(u32 addr, u8 byte)
         break;
     }
 }
+
+template class Flash<0x10'000>;
+template class Flash<0x20'000>;

@@ -147,9 +147,6 @@
     <ClCompile Include="src\gamepak\eeprom.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\gamepak\flash.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\gamepak\sram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -160,6 +157,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\gamepak\gpio.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gamepak\flash.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

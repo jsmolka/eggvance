@@ -28,7 +28,7 @@ Save::~Save()
 
 Save::Type Save::parse(const std::vector<u8>& rom)
 {
-    static constexpr std::pair<std::string_view, Save::Type> identifiers[] =
+    static constexpr std::pair<std::string_view, Save::Type> kIdentifiers[] =
     {
         { "SRAM_V"    , Save::Type::Sram     },
         { "SRAM_F_V"  , Save::Type::Sram     },
@@ -38,9 +38,9 @@ Save::Type Save::parse(const std::vector<u8>& rom)
         { "FLASH1M_V" , Save::Type::Flash128 }
     };
 
-    for (uint x = Header::size; x < rom.size(); x += 4)
+    for (uint x = Header::kSize; x < rom.size(); x += 4)
     {
-        for (const auto& [id, type] : identifiers)
+        for (const auto& [id, type] : kIdentifiers)
         {
             if (x + id.size() < rom.size()
                     && std::memcmp(&rom[x], id.data(), id.size()) == 0)

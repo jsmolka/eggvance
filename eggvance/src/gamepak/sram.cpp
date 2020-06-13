@@ -3,7 +3,7 @@
 Sram::Sram(const fs::path& file)
     : Save(file, Type::Sram)
 {
-    data.resize(0x8000, 0xFF);
+    data.resize(kSize, 0xFF);
 }
  
 u8 Sram::read(u32 addr)
