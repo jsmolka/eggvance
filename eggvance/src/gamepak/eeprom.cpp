@@ -42,7 +42,7 @@ void Eeprom::write(u32 addr, u8 byte)
     case State::Receive:
         if (count == 2)
         {
-            static constexpr State states[4] = {
+            static constexpr State kStates[4] = {
                 State::Receive,
                 State::Receive,
                 State::WriteSetAddress,
@@ -50,7 +50,7 @@ void Eeprom::write(u32 addr, u8 byte)
             };
 
             address = 0;
-            setState(states[buffer]);
+            setState(kStates[buffer]);
         }
         break;
 
