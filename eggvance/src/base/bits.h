@@ -118,7 +118,7 @@ namespace bits
             _BitScanReverse(&index, value);
         else
             _BitScanReverse64(&index, value);
-        return static_cast<uint>(index);
+        return (CHAR_BIT * sizeof(T) - 1) - static_cast<uint>(index);
         #else
         if (sizeof(T) <= 4)
             return __builtin_clz(value);
@@ -163,6 +163,17 @@ namespace bits
         else
             return __builtin_popcountll(value);
         #endif
+    }
+
+    template<typename T>
+    T nextPowerTwo(T value)
+    {
+        static_assert(std::is_integral_v<T>);
+        static_assert(std::is_unsigned_v<T>);
+
+        return value == 1
+            ? 1
+            : 1 << ((CHAR_BIT * sizeof(T)) - clz(value - 1));
     }
 
     template<typename T>
