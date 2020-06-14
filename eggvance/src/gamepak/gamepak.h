@@ -26,7 +26,6 @@ public:
     Header header;
     std::unique_ptr<Gpio> gpio;
     std::unique_ptr<Save> save;
-    bool mirroring;
 
 private:
     struct Override
@@ -34,7 +33,6 @@ private:
         std::string_view code;
         Save::Type save_type;
         Gpio::Type gpio_type;
-        bool mirroring;
     };
 
     static u32 readUnused(u32 addr);

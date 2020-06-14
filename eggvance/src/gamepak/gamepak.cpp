@@ -49,14 +49,11 @@ void GamePak::load(const fs::path& rom_file, const fs::path& save_file)
 
     if (const auto override = findOverride(header.code))
     {
-        mirroring = override->mirroring;
         save_type = override->save_type;
         gpio_type = override->gpio_type;
     }
     else
     {
-        mirroring = false;
-
         if (config.save_type == "auto")     save_type = Save::parse(rom);
         if (config.save_type == "sram")     save_type = Save::Type::Sram;
         if (config.save_type == "flash64")  save_type = Save::Type::Flash64;
