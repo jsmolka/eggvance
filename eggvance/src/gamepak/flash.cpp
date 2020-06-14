@@ -49,8 +49,7 @@ void Flash<size>::write(u32 addr, u8 byte)
         [[fallthrough]];
 
     case 0x2AAA:
-        command <<= 8;
-        command |= byte;
+        command = (command << 8) | byte;
 
         switch (command)
         {
@@ -61,17 +60,14 @@ void Flash<size>::write(u32 addr, u8 byte)
         case kCommandEraseChip:
             if (erase)
             {
-                std::fill(data.begin(), data.end(), 0xFF);
+                std::fill_n(data.begin(), size, 0xFF);
                 erase = false;
             }
             break;
 
         case kCommandChipEnter:
-            chip = true;
-            break;
-
         case kCommandChipExit:
-            chip = false;
+            chip = command == kCommandChipEnter;
             break;
         }
         break;
@@ -79,8 +75,7 @@ void Flash<size>::write(u32 addr, u8 byte)
     default:
         if ((addr & 0xFFF) == 0 && byte == 0x30)
         {
-            command <<= 8;
-            command |= byte;
+            command = (command << 8) | byte;
 
             if (erase && command == kCommandEraseSector)
             {

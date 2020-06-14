@@ -3,7 +3,6 @@
 Eeprom::Eeprom(const fs::path& file)
     : Save(file, Save::Type::Eeprom)
 {
-    resetBuffer();
     state = State::Receive;
 }
 
@@ -11,109 +10,91 @@ u8 Eeprom::read(u32 addr)
 {
     switch (state)
     {
-    case State::ReadNibble:
-        if (++transmitted == 4)
-        {
-            state = State::Read;
-            resetBuffer();
-        }
+    case State::ReadUnused:
+        if (++count == 4)
+            setState(State::Read);
         break;
 
     case State::Read:
         {
-            int off = transmitted / 8;
-            int bit = transmitted % 8;
+            uint index  = count % 8;
+            uint offset = count / 8;
 
-            if (++transmitted == 64)
-            {
-                state = State::Receive;
-                resetBuffer();
-            }
-            return (data[address + off] >> (7 - bit)) & 0x1;
+            if (++count == 64)
+                setState(State::Receive);
+
+            return (data[address + offset] >> (7 - index)) & 0x1;
         }
     }
     return 1;
 }
 
-void Eeprom::write(u32, u8 byte)
+void Eeprom::write(u32 addr, u8 byte)
 {
-    if (state == State::Read || state == State::ReadNibble)
+    if (state == State::Read || state == State::ReadUnused)
         return;
 
-    byte &= 0x1;
-    transmitted++;
-
-    buffer <<= 1;
-    buffer |= byte;
+    count++;
+    buffer = (buffer << 1) | (byte & 0x1);
 
     switch (state)
     {
     case State::Receive:
-        if (transmitted == 2)
+        if (count == 2)
         {
-            switch (buffer)
-            {
-            case 0b10:
-                state = State::WriteAddress;
-                break;
+            static constexpr State states[4] = {
+                State::Receive,
+                State::Receive,
+                State::WriteSetAddress,
+                State::ReadSetAddress
+            };
 
-            case 0b11:
-                state = State::ReadAddress;
-                break;
-            }
             address = 0;
-            resetBuffer();
+            setState(states[buffer]);
         }
         break;
 
-    case State::ReadAddress:
-        if (transmitted == bus())
+    case State::ReadSetAddress:
+        if (count == (data.size() == 0x2000 ? 14 : 6))
         {
             address = buffer << 3;
-        }
-        else if (transmitted > bus())
-        {
-            state = State::ReadNibble;
-            resetBuffer();
+            setState(State::ReadSetAddressEnd);
         }
         break;
 
-    case State::WriteAddress:
-        if (transmitted == bus())
+    case State::ReadSetAddressEnd:
+        setState(State::ReadUnused);
+        break;
+
+    case State::WriteSetAddress:
+        if (count == (data.size() == 0x2000 ? 14 : 6))
         {
             address = buffer << 3;
-            state = State::Write;
-            resetBuffer();
+            setState(State::Write);
         }
         break;
 
     case State::Write:
+        if (count % 8 == 0)
         {
-            if (transmitted <= 64)
-            {
-                int off = (transmitted - 1) / 8;
-                int bit = (transmitted - 1) % 8;
+            data[address++] = buffer;
+            buffer = 0;
 
-                data[address + off] &= ~(1 << (7 - bit));
-                data[address + off] |= byte << (7 - bit);
-            }
-            else if (transmitted > 64)
-            {
-                state = State::Receive;
-                resetBuffer();
-            }
-            break;
+            if (count == 64)
+                setState(State::WriteEnd);
         }
+        break;
+
+    case State::WriteEnd:
+        setState(State::Receive);
+        break;
     }
 }
 
-void Eeprom::resetBuffer()
+void Eeprom::setState(State state)
 {
-    buffer = 0;
-    transmitted = 0;
-}
+    this->state = state;
 
-int Eeprom::bus() const
-{
-    return data.size() == 0x2000 ? 14 : 6;
+    count = 0;
+    buffer = 0;
 }

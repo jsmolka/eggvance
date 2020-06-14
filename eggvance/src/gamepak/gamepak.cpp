@@ -15,26 +15,17 @@ std::size_t GamePak::size() const
 
 u8 GamePak::readByte(u32 addr) const
 {
-    if (addr < rom.size())
-        return *reinterpret_cast<const u8*>(&rom[addr]);
-    else
-        return readUnused(addr);
+    return read<u8>(addr);
 }
 
 u16 GamePak::readHalf(u32 addr) const
 {
-    if (addr < rom.size())
-        return *reinterpret_cast<const u16*>(&rom[addr]);
-    else
-        return readUnused(addr);
+    return read<u16>(addr);
 }
 
 u32 GamePak::readWord(u32 addr) const
 {
-    if (addr < rom.size())
-        return *reinterpret_cast<const u32*>(&rom[addr]);
-    else
-        return readUnused(addr);
+    return read<u32>(addr);
 }
 
 void GamePak::load(const fs::path& rom_file, const fs::path& save_file)
@@ -68,7 +59,9 @@ void GamePak::load(const fs::path& rom_file, const fs::path& save_file)
 
 void GamePak::load(const fs::path& rom_file)
 {
-    auto save_file = fs::path(rom_file).replace_extension("sav");
+    auto save_file = rom_file;
+    save_file.replace_extension("sav");
+
     if (!config.save_path.empty())
         save_file = config.save_path / save_file.filename();
 
@@ -139,4 +132,15 @@ void GamePak::initSave(const fs::path& file, Save::Type type)
         save = std::make_unique<Save>();
         break;
     }
+}
+
+template<typename T>
+T GamePak::read(u32 addr) const
+{
+    addr &= 0x200'0000 - sizeof(T);
+
+    if (addr < rom.size())
+        return *reinterpret_cast<const T*>(&rom[addr]);
+    else
+        return readUnused(addr);
 }

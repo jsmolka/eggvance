@@ -12,7 +12,7 @@ public:
     };
 
     Gpio();
-    Gpio(Type type);
+    explicit Gpio(Type type);
 
     virtual u16 read(u32 addr);
     virtual void write(u32 addr, u16 half);

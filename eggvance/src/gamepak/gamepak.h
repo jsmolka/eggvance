@@ -41,6 +41,9 @@ private:
     void initGpio(Gpio::Type type);
     void initSave(const fs::path& file, Save::Type type);
 
+    template<typename T>
+    T read(u32 addr) const;
+
     static const std::vector<Override> overrides;
 
     fs::path file;

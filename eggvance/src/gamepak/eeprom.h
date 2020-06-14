@@ -8,24 +8,24 @@ public:
     explicit Eeprom(const fs::path& file);
 
     u8 read(u32 addr) final;
-    void write(u32, u8 byte) final;
+    void write(u32 addr, u8 byte) final;
 
 private:
     enum class State
     {
         Receive,
+        ReadSetAddress,
+        ReadSetAddressEnd,
+        ReadUnused,
         Read,
-        ReadNibble,
-        ReadAddress,
-        Write,   
-        WriteAddress
+        WriteSetAddress,
+        Write,
+        WriteEnd
     } state;
 
-    void resetBuffer();
+    void setState(State state);
 
-    int bus() const;
-
-    int buffer;
-    int address;
-    int transmitted;
+    uint count = 0;
+    uint buffer = 0;
+    uint address = 0;
 };

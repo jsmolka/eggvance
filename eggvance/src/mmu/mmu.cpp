@@ -51,16 +51,13 @@ u8 MMU::readByte(u32 addr)
     case REGION_GAMEPAK1:
     case REGION_GAMEPAK1_EX:
     case REGION_GAMEPAK2:
-        addr &= 0x1FF'FFFF;
         return gamepak.readByte(addr);
 
     case REGION_GAMEPAK2_EX:
-        if (gamepak.save->type == Save::Type::Eeprom)
-        {
-            if (gamepak.size() <= 0x100'0000 || addr >= 0xDFF'FF00)
-                return 1;
-        }
-        addr &= 0x1FF'FFFF;
+        if (gamepak.save->type == Save::Type::Eeprom
+                && (gamepak.size() <= 0x100'0000 || addr >= 0xDFF'FF00))
+            return 1;
+
         return gamepak.readByte(addr);
     
     case REGION_SRAM:
@@ -105,16 +102,13 @@ u16 MMU::readHalf(u32 addr)
     case REGION_GAMEPAK1:
     case REGION_GAMEPAK1_EX:
     case REGION_GAMEPAK2:
-        addr &= 0x1FF'FFFE;
         return gamepak.readHalf(addr);
 
     case REGION_GAMEPAK2_EX:
-        if (gamepak.save->type == Save::Type::Eeprom)
-        {
-            if (gamepak.size() <= 0x100'0000 || addr >= 0xDFF'FF00)
-                return 1;
-        }
-        addr &= 0x1FF'FFFE;
+        if (gamepak.save->type == Save::Type::Eeprom
+                && (gamepak.size() <= 0x100'0000 || addr >= 0xDFF'FF00))
+            return 1;
+
         return gamepak.readHalf(addr);
 
     case REGION_SRAM:
@@ -159,16 +153,13 @@ u32 MMU::readWord(u32 addr)
     case REGION_GAMEPAK1:
     case REGION_GAMEPAK1_EX:
     case REGION_GAMEPAK2:
-        addr &= 0x1FF'FFFC;
         return gamepak.readWord(addr);
 
     case REGION_GAMEPAK2_EX:
-        if (gamepak.save->type == Save::Type::Eeprom)
-        {
-            if (gamepak.size() <= 0x100'0000 || addr >= 0xDFF'FF00)
-                return 1;
-        }
-        addr &= 0x1FF'FFFC;
+        if (gamepak.save->type == Save::Type::Eeprom
+                && (gamepak.size() <= 0x100'0000 || addr >= 0xDFF'FF00))
+            return 1;
+
         return gamepak.readWord(addr);
 
     case REGION_SRAM:
