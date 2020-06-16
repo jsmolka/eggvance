@@ -1,5 +1,6 @@
 #pragma once
 
+#include <climits>
 #include <type_traits>
 
 #include "base/integer.h"
