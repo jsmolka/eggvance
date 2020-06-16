@@ -257,7 +257,7 @@ void MMU::writeHalf(u32 addr, u16 half)
 
     case REGION_SRAM:
     case REGION_SRAM_MIRROR:
-        writeSave(addr, bits::ror(half, (addr & 0x3) << 3));
+        writeSave(addr, half >> ((addr & 0x1) << 3));
         break;
     }
 }
@@ -303,7 +303,7 @@ void MMU::writeWord(u32 addr, u32 word)
 
     case REGION_SRAM:
     case REGION_SRAM_MIRROR:
-        writeSave(addr, bits::ror(word, (addr & 0x3) << 3));
+        writeSave(addr, word >> ((addr & 0x3) << 3));
         break;
     }
 }
