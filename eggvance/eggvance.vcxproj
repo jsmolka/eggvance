@@ -206,7 +206,7 @@
     <ClInclude Include="src\gamepak\rtc.h" />
     <ClInclude Include="src\gamepak\save.h" />
     <ClInclude Include="src\gamepak\sram.h" />
-    <ClInclude Include="src\interrupt\io\intrio.h" />
+    <ClInclude Include="src\interrupt\io.h" />
     <ClInclude Include="src\keypad\io\keypadio.h" />
     <ClInclude Include="src\mmu\unusedio.h" />
     <ClInclude Include="src\platform\audiodevice.h" />
@@ -235,8 +235,6 @@
     <ClInclude Include="src\dma\io\dmacontrol.h" />
     <ClInclude Include="src\dma\io\dmacount.h" />
     <ClInclude Include="src\arm\io\haltcontrol.h" />
-    <ClInclude Include="src\interrupt\io\intrmaster.h" />
-    <ClInclude Include="src\interrupt\io\intrrequest.h" />
     <ClInclude Include="src\keypad\io\keycontrol.h" />
     <ClInclude Include="src\base\register.h" />
     <ClInclude Include="src\timer\io\timercontrol.h" />
@@ -254,7 +252,6 @@
     <ClInclude Include="src\mmu\mmu.h" />
     <ClInclude Include="src\ppu\io\bgcontrol.h" />
     <ClInclude Include="src\ppu\io\bgoffset.h" />
-    <ClInclude Include="src\interrupt\io\intrenable.h" />
     <ClInclude Include="src\keypad\io\keyinput.h" />
     <ClInclude Include="src\ppu\io\mosaic.h" />
     <ClInclude Include="src\ppu\io\vcount.h" />

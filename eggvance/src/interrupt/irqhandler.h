@@ -1,23 +1,23 @@
 #pragma once
 
-#include "io/intrio.h"
+#include "interrupt/io.h"
 
-enum class IRQ
+enum Irq
 {
-    VBlank = 1 << 0x0,
-    HBlank = 1 << 0x1,
-    VMatch = 1 << 0x2,
-    Timer  = 1 << 0x3,
-    Dma    = 1 << 0x8,
-    Keypad = 1 << 0xC
+    kIrqVBlank = 1 << 0x0,
+    kIrqHBlank = 1 << 0x1,
+    kIrqVMatch = 1 << 0x2,
+    kIrqTimer  = 1 << 0x3,
+    kIrqDma    = 1 << 0x8,
+    kIrqKeypad = 1 << 0xC
 };
 
-class IRQHandler
+class IrqHandler
 {
 public:
     friend class IO;
 
-    void request(IRQ irq);
+    void request(uint irq);
 
 private:
     void update();
@@ -25,7 +25,7 @@ private:
     u8 read(u32 addr) const;
     void write(u32 addr, u8 byte);
 
-    IntrIO io;
+    IrqIo io;
 };
 
-extern IRQHandler irqh;
+extern IrqHandler irqh;

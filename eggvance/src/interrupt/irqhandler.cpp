@@ -4,29 +4,29 @@
 #include "base/macros.h"
 #include "mmu/memmap.h"
 
-IRQHandler irqh;
+IrqHandler irqh;
 
-void IRQHandler::request(IRQ irq)
+void IrqHandler::request(uint irq)
 {
-    io.request |= static_cast<uint>(irq);
+    io.request.value |= irq;
 
     update();
 }
 
-void IRQHandler::update()
+void IrqHandler::update()
 {
-    bool interrupt = io.enable & io.request;
+    bool interrupt = io.enable.value & io.request.value;
 
     if (interrupt)
         arm.state &= ~ARM::kStateHalt;
 
-    if (interrupt && io.master)
+    if (interrupt && io.master.value)
         arm.state |= ARM::kStateIrq;
     else
         arm.state &= ~ARM::kStateIrq;
 }
 
-u8 IRQHandler::read(u32 addr) const
+u8 IrqHandler::read(u32 addr) const
 {
     switch (addr)
     {
@@ -40,13 +40,13 @@ u8 IRQHandler::read(u32 addr) const
     }
 }
 
-void IRQHandler::write(u32 addr, u8 byte)
+void IrqHandler::write(u32 addr, u8 byte)
 {
     switch (addr)
     {
-    WRITE_HALF_REG(REG_IE , io.enable , 0x0000'3FFF);
-    WRITE_HALF_REG(REG_IF , io.request, 0x0000'3FFF);
-    WRITE_HALF_REG(REG_IME, io.master , 0x0000'0001);
+    WRITE_HALF_REGX(REG_IE , io.enable );
+    WRITE_HALF_REGX(REG_IF , io.request);
+    WRITE_HALF_REGX(REG_IME, io.master );
 
     default:
         UNREACHABLE;

@@ -33,9 +33,7 @@ void Timer::run(int cycles)
             next->run(counter / overflow);
 
         if (io.ctrl.irq)
-            irqh.request(
-                static_cast<IRQ>(
-                    static_cast<uint>(IRQ::Timer) << id));
+            irqh.request(kIrqTimer << id);
 
         counter %= overflow;
         initial  = io.data.initial;

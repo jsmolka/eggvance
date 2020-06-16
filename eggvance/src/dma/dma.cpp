@@ -68,9 +68,7 @@ void DMA::run(int& cycles)
     io.control.enable = io.control.repeat;
 
     if (io.control.irq)
-        irqh.request(
-            static_cast<IRQ>(
-                static_cast<uint>(IRQ::Dma) << id));
+        irqh.request(kIrqDma << id);
 
     running = false;
 }

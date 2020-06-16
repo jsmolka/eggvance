@@ -107,7 +107,7 @@ void PPU::hblank()
 
     if (io.dispstat.hblank_irq)
     {
-        irqh.request(IRQ::HBlank);
+        irqh.request(kIrqHBlank);
     }
     dmac.broadcast(DMA::Timing::HBlank);
 }
@@ -124,7 +124,7 @@ void PPU::vblank()
 
     if (io.dispstat.vblank_irq)
     {
-        irqh.request(IRQ::VBlank);
+        irqh.request(kIrqVBlank);
     }
     dmac.broadcast(DMA::Timing::VBlank);
 }
@@ -134,7 +134,7 @@ void PPU::next()
     io.dispstat.vmatch = io.vcount == io.dispstat.vcompare;
     if (io.dispstat.vmatch && io.dispstat.vmatch_irq)
     {
-        irqh.request(IRQ::VMatch);
+        irqh.request(kIrqVMatch);
     }
     io.vcount.next();
 }
