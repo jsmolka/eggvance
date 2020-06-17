@@ -9,7 +9,7 @@
 class TimerController
 {
 public:
-    friend class IO;
+    friend class Io;
 
     TimerController();
 

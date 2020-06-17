@@ -122,10 +122,10 @@ enum
     REG_JOY_RECV    = 0x150,
     REG_JOY_TRANS   = 0x154,
     REG_JOYSTAT     = 0x158,
-    REG_IE          = 0x200,
-    REG_IF          = 0x202,
+    kRegIrqEnable   = 0x200,
+    kRegIrqRequest  = 0x202,
     REG_WAITCNT     = 0x204,
-    REG_IME         = 0x208,
+    kRegIrqMaster   = 0x208,
     REG_POSTFLG     = 0x300,
     REG_HALTCNT     = 0x301
 };

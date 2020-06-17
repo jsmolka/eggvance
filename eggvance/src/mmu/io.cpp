@@ -10,7 +10,7 @@
 #include "ppu/ppu.h"
 #include "timer/timerc.h"
 
-u8 IO::readByte(u32 addr) const
+u8 Io::readByte(u32 addr) const
 {
     u32 unmasked = addr;
 
@@ -109,10 +109,9 @@ u8 IO::readByte(u32 addr) const
     CASE_HALF_REG(REG_TM3CNT_H):
         return timerc.read(addr);
 
-    CASE_HALF_REG(REG_IE ):
-    CASE_HALF_REG(REG_IF ):
-    CASE_HALF_REG(REG_IME):
-        return irqh.read(addr);
+    CASE2(kRegIrqEnable , return irqh.read<kLabel>())
+    CASE2(kRegIrqRequest, return irqh.read<kLabel>())
+    CASE4(kRegIrqMaster , return irqh.read<kLabel>())
 
     CASE_HALF_REG(0x066):
     CASE_HALF_REG(0x06E):
@@ -132,7 +131,7 @@ u8 IO::readByte(u32 addr) const
     }
 }
 
-u16 IO::readHalf(u32 addr) const
+u16 Io::readHalf(u32 addr) const
 {
     addr &= ~0x1;
 
@@ -143,7 +142,7 @@ u16 IO::readHalf(u32 addr) const
     return value;
 }
 
-u32 IO::readWord(u32 addr) const
+u32 Io::readWord(u32 addr) const
 {
     addr &= ~0x3;
 
@@ -156,7 +155,7 @@ u32 IO::readWord(u32 addr) const
     return value;
 }
 
-void IO::writeByte(u32 addr, u8 byte)
+void Io::writeByte(u32 addr, u8 byte)
 {
     if (addr > 0x0400'0400)
     {
@@ -288,15 +287,13 @@ void IO::writeByte(u32 addr, u8 byte)
         timerc.write(addr, byte);
         break;
 
-    CASE_HALF_REG(REG_IE ):
-    CASE_HALF_REG(REG_IF ):
-    CASE_HALF_REG(REG_IME):
-        irqh.write(addr, byte);
-        break;
+    CASE2(kRegIrqEnable , irqh.write<kLabel>(byte))
+    CASE2(kRegIrqRequest, irqh.write<kLabel>(byte))
+    CASE4(kRegIrqMaster , irqh.write<kLabel>(byte))
     }
 }
 
-void IO::writeHalf(u32 addr, u16 half)
+void Io::writeHalf(u32 addr, u16 half)
 {
     addr &= ~0x1;
 
@@ -304,7 +301,7 @@ void IO::writeHalf(u32 addr, u16 half)
     writeByte(addr + 1, bits::seq<8, 8>(half));
 }
 
-void IO::writeWord(u32 addr, u32 word)
+void Io::writeWord(u32 addr, u32 word)
 {
     addr &= ~0x3;
 

@@ -10,7 +10,7 @@ class ARM : public Registers
 {
 public:
     friend class DMA;
-    friend class IO;
+    friend class Io;
     friend class MMU;
 
     enum State

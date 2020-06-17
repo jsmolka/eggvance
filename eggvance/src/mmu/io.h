@@ -2,7 +2,7 @@
 
 #include "unusedio.h"
 
-class IO
+class Io
 {
 public:
     u8  readByte(u32 addr) const;

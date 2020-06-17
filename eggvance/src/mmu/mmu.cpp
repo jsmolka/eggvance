@@ -12,7 +12,7 @@ void MMU::reset()
     palette.reset();
     vram.reset();
     oam.reset();
-    io = IO();
+    io = Io();
 
     ewram = decltype(ewram)();
     iwram = decltype(iwram)();

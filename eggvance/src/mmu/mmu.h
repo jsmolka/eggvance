@@ -27,7 +27,7 @@ public:
     Palette palette;
     VRAM vram;
     OAM oam;
-    IO io;
+    Io io;
 
 private:
     u8 readSave(u32 addr);

@@ -65,3 +65,16 @@
     case label + 1: reg.write<1>(byte); break;                          \
     case label + 2: reg.write<2>(byte); break;                          \
     case label + 3: reg.write<3>(byte); break
+
+#define CASE1(label, expr)                                                                                  \
+    case label + 0: { constexpr uint kIndex = 0; constexpr uint kLabel = label + kIndex; expr; break; }
+
+#define CASE2(label, expr)                                                                                  \
+    case label + 0: { constexpr uint kIndex = 0; constexpr uint kLabel = label + kIndex; expr; break; }     \
+    case label + 1: { constexpr uint kIndex = 1; constexpr uint kLabel = label + kIndex; expr; break; }
+
+#define CASE4(label, expr)                                                                                  \
+    case label + 0: { constexpr uint kIndex = 0; constexpr uint kLabel = label + kIndex; expr; break; }     \
+    case label + 1: { constexpr uint kIndex = 1; constexpr uint kLabel = label + kIndex; expr; break; }     \
+    case label + 2: { constexpr uint kIndex = 2; constexpr uint kLabel = label + kIndex; expr; break; }     \
+    case label + 3: { constexpr uint kIndex = 3; constexpr uint kLabel = label + kIndex; expr; break; }

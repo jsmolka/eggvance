@@ -5,7 +5,7 @@
 class Keypad
 {
 public:
-    friend class IO;
+    friend class Io;
 
     void process();
 

@@ -5,7 +5,7 @@
 class DMAController
 {
 public:
-    friend class IO;
+    friend class Io;
 
     void run(int& cycles);
     void broadcast(DMA::Timing timing);
