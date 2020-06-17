@@ -1,8 +1,8 @@
 #pragma once
 
+#include "base/constants.h"
 #include "base/macros.h"
 #include "interrupt/io.h"
-#include "mmu/memmap.h"
 
 enum Irq
 {

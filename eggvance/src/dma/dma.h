@@ -2,7 +2,7 @@
 
 #include <functional>
 
-#include "io/dmaio.h"
+#include "dma/io.h"
 
 class DMA
 {
@@ -22,7 +22,7 @@ public:
 
     uint id      = 0;
     bool running = false;
-    DMAIO io;
+    DmaIo io;
 
 private:
     static bool inEEPROM(u32 addr);

@@ -26,13 +26,13 @@ void DMA::start()
 
     if (io.control.reload)
     {
-        sad = io.sad;
-        dad = io.dad;
+        sad = io.sad.value;
+        dad = io.dad.value;
         io.control.reload = false;
     }
     else if (io.control.repeat && io.control.dadcnt == kAddressControlReload)
     {
-        dad = io.dad;
+        dad = io.dad.value;
     }
 
     uint size = 2 << io.control.word;

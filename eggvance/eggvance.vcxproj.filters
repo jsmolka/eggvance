@@ -173,9 +173,6 @@
     <ClInclude Include="src\arm\arm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\memmap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\mmu\bios.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -245,15 +242,6 @@
     <ClInclude Include="src\dma\dmac.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\dma\io\dmaaddress.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\dma\io\dmacontrol.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\dma\io\dmacount.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\timer\timer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -321,9 +309,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\mmu\unusedio.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\dma\io\dmaio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\keypad\io\keypadio.h">
@@ -414,6 +399,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\interrupt\io.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dma\io.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
