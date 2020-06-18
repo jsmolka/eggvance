@@ -1,5 +1,6 @@
 #pragma once
 
+#include "base/bits.h"
 #include "base/register.h"
 
 struct DmaIo
