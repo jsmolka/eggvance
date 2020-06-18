@@ -1,8 +1,8 @@
 #include "mmu.h"
 
-#include "memmap.h"
 #include "arm/arm.h"
 #include "base/bits.h"
+#include "base/constants.h"
 
 MMU mmu;
 
