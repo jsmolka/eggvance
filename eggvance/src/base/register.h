@@ -64,6 +64,10 @@ namespace detail
     class RegisterBase
     {
     public:
+        static constexpr uint kSize = Size;
+        static constexpr uint kMask = Mask;
+        static constexpr uint kType = Type;
+
         virtual ~RegisterBase() = default;
 
         template<uint Index>
@@ -79,27 +83,14 @@ namespace detail
         void write(u8 byte)
         {
             if constexpr (static_cast<bool>(Type & kRegisterTypeW))
-                data[Index] = byte & (mask<Index, Mask>() & mask<Index, WriteMask>());
+                data[Index] = byte & ((Mask & WriteMask) >> (CHAR_BIT * Index));
         }
-
-        static constexpr uint kSize = Size;
-        static constexpr uint kMask = Mask;
-        static constexpr uint kType = Type;
 
         union
         {
             u8 data[Size] = { 0 };
             typename ValueType<Size>::type value;
         };
-
-    protected:
-        template<uint Index, uint Mask>
-        static constexpr u8 mask()
-        {
-            static_assert(Index < Size);
-
-            return static_cast<u8>(Mask >> (CHAR_BIT * Index));
-        }
     };
 }
 

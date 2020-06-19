@@ -13,7 +13,7 @@ struct IrqIo
         template<uint Index>
         void write(u8 byte)
         {
-            data[Index] &= ~(byte & mask<Index, kMask>());
+            data[Index] &= ~(byte & (kMask >> (CHAR_BIT * Index)));
         }
     } request;
 };
