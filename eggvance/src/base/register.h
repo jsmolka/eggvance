@@ -56,9 +56,9 @@ namespace detail
     };
 
     template<uint Size> struct ValueType;
-    template<> struct ValueType<1> { using type =  u8; };
-    template<> struct ValueType<2> { using type = u16; };
-    template<> struct ValueType<4> { using type = u32; };
+    template<> struct ValueType<1> { using Type =  u8; };
+    template<> struct ValueType<2> { using Type = u16; };
+    template<> struct ValueType<4> { using Type = u32; };
 
     template<uint Size, uint Mask, uint Type>
     class RegisterBase
@@ -89,7 +89,7 @@ namespace detail
         union
         {
             u8 data[Size] = { 0 };
-            typename ValueType<Size>::type value;
+            typename ValueType<Size>::Type value;
         };
     };
 }
