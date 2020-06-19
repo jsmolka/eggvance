@@ -25,13 +25,12 @@ public:
     DmaIo io;
 
 private:
-    static bool inEEPROM(u32 addr);
-    static bool inGamePak(u32 addr);
+    static bool isEeprom(u32 addr);
+    static bool isGamePak(u32 addr);
 
-    void updateCycles();
-    void updateTransfer();
-
-    void initEEPROM();
+    void initCycles();
+    void initTransfer();
+    void initEeprom();
 
     int remaining = 0;
     int cycles_s  = 0;

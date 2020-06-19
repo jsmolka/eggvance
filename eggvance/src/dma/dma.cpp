@@ -43,8 +43,8 @@ void Dma::start()
     sad_delta = size * deltas[io.control.sadcnt];
     dad_delta = size * deltas[io.control.dadcnt];
 
-    updateCycles();
-    updateTransfer();
+    initCycles();
+    initTransfer();
 }
 
 void Dma::run(int& cycles)
@@ -73,19 +73,21 @@ void Dma::run(int& cycles)
     running = false;
 }
 
-bool Dma::inEEPROM(u32 addr)
+bool Dma::isEeprom(u32 addr)
 {
-    return addr >= 0xD00'0000 && addr < 0xE00'0000;
+    return mmu.gamepak.size() <= 0x100'0000
+        ? addr >= 0xD00'0000 && addr < 0xE00'0000
+        : addr >= 0xDFF'FF00 && addr < 0xE00'0000;
 }
 
-bool Dma::inGamePak(u32 addr)
+bool Dma::isGamePak(u32 addr)
 {
     return addr >= 0x800'0000 && addr < 0xE00'0000;
 }
 
-void Dma::updateCycles()
+void Dma::initCycles()
 {
-    if (inGamePak(sad) && inGamePak(dad))
+    if (isGamePak(sad) && isGamePak(dad))
     {
         cycles_s = 4;
         cycles_n = 4;
@@ -112,14 +114,14 @@ void Dma::updateCycles()
     }
 }
 
-void Dma::updateTransfer()
+void Dma::initTransfer()
 {
-    bool eeprom_w = id == 3 && inEEPROM(dad);
-    bool eeprom_r = id == 3 && inEEPROM(sad);
+    bool eeprom_w = id == 3 && isEeprom(dad);
+    bool eeprom_r = id == 3 && isEeprom(sad);
 
     if ((eeprom_r || eeprom_w) && mmu.gamepak.save->type == Save::Type::Eeprom)
     {
-        initEEPROM();
+        initEeprom();
 
         if (eeprom_w)
         {
@@ -156,24 +158,24 @@ void Dma::updateTransfer()
     }
 }
 
-void Dma::initEEPROM()
+void Dma::initEeprom()
 {
-    // Guessing EEPROM size in advance seems to be pretty much impossible.
-    // That's why we base the size on the first write (which should happen
-    // before the first read).
+    constexpr uint kBus6Write = 73;
+    constexpr uint kBus6ReadSetAddress = 9;
+    constexpr uint kBus14Write = 81;
+    constexpr uint kBus14ReadSetAddress = 17;
+
     if (mmu.gamepak.save->data.empty())
     {
         switch (remaining)
         {
-        // Bus width 6
-        case  9:  // Set address for reading
-        case 73:  // Write data to address
+        case kBus6Write:
+        case kBus6ReadSetAddress:
             mmu.gamepak.save->data.resize(0x0200, 0xFF);
             break;
 
-        // Bus width 14
-        case 17:  // Set address for reading
-        case 81:  // Write data to address
+        case kBus14Write:
+        case kBus14ReadSetAddress:
             mmu.gamepak.save->data.resize(0x2000, 0xFF);
             break;
         }
