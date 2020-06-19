@@ -4,18 +4,18 @@
 
 #include "dma/io.h"
 
-class DMA
+class Dma
 {
 public:
-    enum class Timing
+    enum Timing
     {
-        Immediate = 0,
-        VBlank    = 1,
-        HBlank    = 2,
-        Special   = 3
+        kTimingImmediate = 0,
+        kTimingVBlank    = 1,
+        kTimingHBlank    = 2,
+        kTimingSpecial   = 3
     };
 
-    DMA(uint id);
+    Dma(uint id);
 
     void start();
     void run(int& cycles);

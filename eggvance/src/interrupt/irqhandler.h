@@ -40,9 +40,9 @@ u8 IrqHandler::read() const
 {
     switch (addr)
     {
-    CASE2(kRegIrqEnable , return io.enable.read<kIndex>())
-    CASE2(kRegIrqRequest, return io.request.read<kIndex>())
-    CASE4(kRegIrqMaster , return io.master.read<kIndex>())
+    INDEXED_CASE2(kRegIrqEnable , return io.enable.read<kIndex>())
+    INDEXED_CASE2(kRegIrqRequest, return io.request.read<kIndex>())
+    INDEXED_CASE4(kRegIrqMaster , return io.master.read<kIndex>())
 
     default:
         UNREACHABLE;
@@ -55,9 +55,9 @@ void IrqHandler::write(u8 byte)
 {
     switch (addr)
     {
-    CASE2(kRegIrqEnable , io.enable.write<kIndex>(byte))
-    CASE2(kRegIrqRequest, io.request.write<kIndex>(byte))
-    CASE4(kRegIrqMaster , io.master.write<kIndex>(byte))
+    INDEXED_CASE2(kRegIrqEnable , io.enable.write<kIndex>(byte))
+    INDEXED_CASE2(kRegIrqRequest, io.request.write<kIndex>(byte))
+    INDEXED_CASE4(kRegIrqMaster , io.master.write<kIndex>(byte))
 
     default:
         UNREACHABLE;

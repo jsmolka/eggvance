@@ -2,31 +2,33 @@
 
 #include "arm/arm.h"
 
-DMAController dmac;
+DmaController dmac;
 
-void DMAController::run(int& cycles)
+void DmaController::run(int& cycles)
 {
-    active->run(cycles);
-
-    if (!active->running)
+    while (active && cycles > 0)
     {
-        active = nullptr;
+        active->run(cycles);
 
-        for (auto& dma : dmas)
+        if (!active->running)
         {
-            if (dma.running)
+            active = nullptr;
+            arm.state &= ~ARM::kStateDma;
+
+            for (auto& dma : dmas)
             {
-                active = &dma;
-                break;
+                if (dma.running)
+                {
+                    active = &dma;
+                    arm.state |= ARM::kStateDma;
+                    break;
+                }
             }
         }
-        
-        if (!active)
-            arm.state &= ~ARM::kStateDma;
     }
 }
 
-void DMAController::broadcast(DMA::Timing timing)
+void DmaController::broadcast(Dma::Timing timing)
 {
     for (auto& dma : dmas)
     {
@@ -34,9 +36,11 @@ void DMAController::broadcast(DMA::Timing timing)
     }
 }
 
-void DMAController::emit(DMA& dma, DMA::Timing timing)
+void DmaController::emit(Dma& dma, Dma::Timing timing)
 {
-    if (!dma.running && dma.io.control.enable && dma.io.control.timing == int(timing))
+    if (!dma.running
+        && dma.io.control.enable
+        && dma.io.control.timing == timing)
     {
         dma.start();
 

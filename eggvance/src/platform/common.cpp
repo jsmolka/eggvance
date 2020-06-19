@@ -39,7 +39,7 @@ void common::reset()
     arm = ARM();
     mmu.reset();
     ppu.reset();
-    dmac = DMAController();
+    dmac = DmaController();
     irqh = IrqHandler();
     keypad = Keypad();
     timerc.reset();

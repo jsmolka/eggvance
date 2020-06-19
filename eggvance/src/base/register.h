@@ -55,55 +55,54 @@ namespace detail
         kRegisterTypeW = 1 << 1,
     };
 
-    template<uint size> struct ValueType;
+    template<uint Size> struct ValueType;
     template<> struct ValueType<1> { using type =  u8; };
     template<> struct ValueType<2> { using type = u16; };
     template<> struct ValueType<4> { using type = u32; };
 
-    template<uint size, uint mask, uint type>
+    template<uint Size, uint Mask, uint Type>
     class RegisterBase
     {
     public:
         virtual ~RegisterBase() = default;
 
-        template<uint index>
+        template<uint Index>
         u8 read() const
         {
-            if constexpr (static_cast<bool>(type & kRegisterTypeR))
-                return data[index] & byteMask<index>();
+            if constexpr (static_cast<bool>(Type & kRegisterTypeR))
+                return data[Index];
             else
                 return 0;
         }
 
-        template<uint index>
+        template<uint Index, uint WriteMask = 0xFFFF'FFFF>
         void write(u8 byte)
         {
-            if constexpr (static_cast<bool>(type & kRegisterTypeW))
-                data[index] = byte & byteMask<index>();
+            if constexpr (static_cast<bool>(Type & kRegisterTypeW))
+                data[Index] = byte & (mask<Index, Mask>() & mask<Index, WriteMask>());
         }
 
-        static constexpr uint kSize = size;
-        static constexpr uint kMask = mask;
-        static constexpr uint kType = type;
+        static constexpr uint kSize = Size;
+        static constexpr uint kMask = Mask;
+        static constexpr uint kType = Type;
 
         union
         {
-            u8 data[size] = { 0 };
-            typename ValueType<size>::type value;
+            u8 data[Size] = { 0 };
+            typename ValueType<Size>::type value;
         };
 
     protected:
-        template<uint index>
-        static constexpr u8 byteMask()
+        template<uint Index, uint Mask>
+        static constexpr u8 mask()
         {
-            static_assert(index < size);
+            static_assert(Index < Size);
 
-            return static_cast<u8>(mask >> (CHAR_BIT * index));
+            return static_cast<u8>(Mask >> (CHAR_BIT * Index));
         }
     };
-
 }
 
-template<uint size, uint mask = 0xFFFF'FFFF> using XRegister  = detail::RegisterBase<size, mask, detail::kRegisterTypeR | detail::kRegisterTypeW>;
-template<uint size, uint mask = 0xFFFF'FFFF> using XRegisterR = detail::RegisterBase<size, mask, detail::kRegisterTypeR>;
-template<uint size, uint mask = 0xFFFF'FFFF> using XRegisterW = detail::RegisterBase<size, mask, detail::kRegisterTypeW>;
+template<uint Size, uint Mask = 0xFFFF'FFFF> using XRegister  = detail::RegisterBase<Size, Mask, detail::kRegisterTypeR | detail::kRegisterTypeW>;
+template<uint Size, uint Mask = 0xFFFF'FFFF> using XRegisterR = detail::RegisterBase<Size, Mask, detail::kRegisterTypeR>;
+template<uint Size, uint Mask = 0xFFFF'FFFF> using XRegisterW = detail::RegisterBase<Size, Mask, detail::kRegisterTypeW>;

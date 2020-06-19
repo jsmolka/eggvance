@@ -10,10 +10,10 @@ struct IrqIo
     class IrqRequest : public XRegister<2, 0x3FFF>
     {
     public:
-        template<uint index>
+        template<uint Index>
         void write(u8 byte)
         {
-            data[index] &= ~(byte & byteMask<index>());
+            data[Index] &= ~(byte & mask<Index, kMask>());
         }
     } request;
 };

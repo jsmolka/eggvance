@@ -20,28 +20,28 @@ struct DmaIo
         }
     } count;
 
-    class DmaControl : public RegisterRW<2>
+    class DmaControl : public XRegister<2>
     {
     public:
-        template<uint index>
-        inline u8 read() const
-        {
-            static_assert(index < 2);
+        static constexpr uint kEnable = 1 << 7;
 
-            if (index == 0)
+        template<uint Index>
+        u8 read() const
+        {
+            static_assert(Index < 2);
+
+            if (Index == 0)
                 return data[0];
             else
                 return (data[1] & ~(1 << 7)) | (enable << 7);
         }
 
-        template<uint index>
-        inline void write(u8 byte)
+        template<uint Index, uint Mask>
+        void write(u8 byte)
         {
-            static_assert(index < 2);
+            data[Index] = byte & mask<Index, Mask>();
 
-            data[index] = byte;
-
-            if (index == 0)
+            if (Index == 0)
             {
                 dadcnt = bits::seq<5, 2>(byte);
                 sadcnt = bits::seq<7, 1>(byte) << 0 | (sadcnt & ~0x1);

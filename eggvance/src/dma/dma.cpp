@@ -14,12 +14,12 @@ enum AddressControl
     kAddressControlReload
 };
 
-DMA::DMA(uint id)
+Dma::Dma(uint id)
 {
     this->id = id;
 }
 
-void DMA::start()
+void Dma::start()
 {
     running   = true;
     remaining = io.count.count(id);
@@ -47,7 +47,7 @@ void DMA::start()
     updateTransfer();
 }
 
-void DMA::run(int& cycles)
+void Dma::run(int& cycles)
 {
     while (remaining-- > 0)
     {
@@ -73,17 +73,17 @@ void DMA::run(int& cycles)
     running = false;
 }
 
-bool DMA::inEEPROM(u32 addr)
+bool Dma::inEEPROM(u32 addr)
 {
     return addr >= 0xD00'0000 && addr < 0xE00'0000;
 }
 
-bool DMA::inGamePak(u32 addr)
+bool Dma::inGamePak(u32 addr)
 {
     return addr >= 0x800'0000 && addr < 0xE00'0000;
 }
 
-void DMA::updateCycles()
+void Dma::updateCycles()
 {
     if (inGamePak(sad) && inGamePak(dad))
     {
@@ -112,7 +112,7 @@ void DMA::updateCycles()
     }
 }
 
-void DMA::updateTransfer()
+void Dma::updateTransfer()
 {
     bool eeprom_w = id == 3 && inEEPROM(dad);
     bool eeprom_r = id == 3 && inEEPROM(sad);
@@ -156,7 +156,7 @@ void DMA::updateTransfer()
     }
 }
 
-void DMA::initEEPROM()
+void Dma::initEEPROM()
 {
     // Guessing EEPROM size in advance seems to be pretty much impossible.
     // That's why we base the size on the first write (which should happen

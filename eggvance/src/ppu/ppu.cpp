@@ -109,7 +109,7 @@ void PPU::hblank()
     {
         irqh.request(kIrqHBlank);
     }
-    dmac.broadcast(DMA::Timing::HBlank);
+    dmac.broadcast(Dma::kTimingHBlank);
 }
 
 void PPU::vblank()
@@ -126,7 +126,7 @@ void PPU::vblank()
     {
         irqh.request(kIrqVBlank);
     }
-    dmac.broadcast(DMA::Timing::VBlank);
+    dmac.broadcast(Dma::kTimingVBlank);
 }
 
 void PPU::next()
