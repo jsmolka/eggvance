@@ -93,6 +93,7 @@
         constexpr uint kIndex = index;          \
         constexpr uint kLabel = label + index;  \
         __VA_ARGS__;                            \
+        break;                                  \
     }
 
 #define INDEXED_CASE1(label, ...)               \
