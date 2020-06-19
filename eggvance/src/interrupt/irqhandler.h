@@ -55,9 +55,9 @@ u8 IrqHandler::read() const
 template<uint Addr>
 void IrqHandler::write(u8 byte)
 {
-    INDEXED_IF2(kRegIrqEnable , io.enable.write<kIndex>(byte))
-    INDEXED_IF2(kRegIrqRequest, io.request.write<kIndex>(byte))
-    INDEXED_IF4(kRegIrqMaster , io.master.write<kIndex>(byte))
+    INDEXED_IF2(Addr, kRegIrqEnable , io.enable.write<kIndex>(byte))
+    INDEXED_IF2(Addr, kRegIrqRequest, io.request.write<kIndex>(byte))
+    INDEXED_IF4(Addr, kRegIrqMaster , io.master.write<kIndex>(byte))
 
     update();
 }
