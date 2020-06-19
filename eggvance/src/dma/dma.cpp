@@ -68,7 +68,7 @@ void Dma::run(int& cycles)
     io.control.enable = io.control.repeat;
 
     if (io.control.irq)
-        irqh.request(kIrqDma << id);
+        irqh.request(kIrqDma0 << id);
 
     running = false;
 }
