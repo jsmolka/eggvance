@@ -23,7 +23,7 @@ struct DmaIo
     class Control : public XRegister<2>
     {
     public:
-        static constexpr uint kEnable = 1 << 7;
+        static constexpr uint kEnable = 1 << 15;
 
         template<uint Index, uint Mask>
         void write(u8 byte)
