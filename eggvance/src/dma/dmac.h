@@ -19,8 +19,8 @@ public:
 private:
     void emit(Dma& dma, Dma::Timing timing);
 
-    Dma* active = nullptr;
-    Dma dmas[4] = { 0, 1, 2, 3 };
+    Dma* active{};
+    Dma dmas[4]{ 0, 1, 2, 3 };
 };
 
 extern DmaController dmac;

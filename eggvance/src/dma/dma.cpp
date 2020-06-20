@@ -4,8 +4,6 @@
 #include "interrupt/irqhandler.h"
 #include "mmu/mmu.h"
 
-static constexpr int deltas[4] = { 1, -1, 0, 1 };
-
 enum AddressControl
 {
     kAddressControlIncrement,
@@ -15,33 +13,30 @@ enum AddressControl
 };
 
 Dma::Dma(uint id)
+    : id(id)
 {
-    this->id = id;
+
 }
 
-void Dma::start()
+void Dma::activate()
 {
-    running   = true;
-    remaining = io.count.count(id);
+    running = true;
+    pending = io.count.count(id);
 
     if (io.control.reload)
     {
+        io.control.reload = false;
+
         sad = io.sad.value;
         dad = io.dad.value;
-        io.control.reload = false;
     }
     else if (io.control.repeat && io.control.dadcnt == kAddressControlReload)
     {
         dad = io.dad.value;
     }
 
-    uint size = 2 << io.control.word;
-
-    sad &= ~(size - 1);
-    dad &= ~(size - 1);
-
-    sad_delta = size * deltas[io.control.sadcnt];
-    dad_delta = size * deltas[io.control.dadcnt];
+    sad &= ~((2 << io.control.word) - 1);
+    dad &= ~((2 << io.control.word) - 1);
 
     initCycles();
     initTransfer();
@@ -49,14 +44,20 @@ void Dma::start()
 
 void Dma::run(int& cycles)
 {
-    while (remaining-- > 0)
+    static constexpr int kDeltas[2][4] =
+    {
+        { 2, -2, 0, 2 },
+        { 4, -4, 0, 4 }
+    };
+
+    while (pending-- > 0)
     {
         transfer();
 
-        sad += sad_delta;
-        dad += dad_delta;
+        sad += kDeltas[io.control.word][io.control.sadcnt];
+        dad += kDeltas[io.control.word][io.control.dadcnt];
 
-        if (remaining == 0)
+        if (pending == 0)
             cycles -= cycles_n;
         else
             cycles -= cycles_s;
@@ -65,12 +66,13 @@ void Dma::run(int& cycles)
             return;
     }
 
-    io.control.enable = io.control.repeat;
+    running = false;
+
+    if (!(io.control.enable = io.control.repeat))
+        io.control.value &= ~DmaIo::Control::kEnable;
 
     if (io.control.irq)
         irqh.request(kIrqDma0 << id);
-
-    running = false;
 }
 
 bool Dma::isEeprom(u32 addr)
@@ -167,7 +169,7 @@ void Dma::initEeprom()
 
     if (mmu.gamepak.save->data.empty())
     {
-        switch (remaining)
+        switch (pending)
         {
         case kBus6Write:
         case kBus6ReadSetAddress:

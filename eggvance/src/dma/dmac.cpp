@@ -42,7 +42,7 @@ void DmaController::emit(Dma& dma, Dma::Timing timing)
         && dma.io.control.enable
         && dma.io.control.timing == timing)
     {
-        dma.start();
+        dma.activate();
 
         if (!active || dma.id < active->id)
         {

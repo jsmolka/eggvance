@@ -88,8 +88,8 @@ namespace detail
 
         union
         {
-            u8 data[Size] = { 0 };
-            typename ValueType<Size>::Type value;
+            u8 data[Size];
+            typename ValueType<Size>::Type value{};
         };
     };
 }

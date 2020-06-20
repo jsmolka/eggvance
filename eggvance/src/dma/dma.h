@@ -9,19 +9,19 @@ class Dma
 public:
     enum Timing
     {
-        kTimingImmediate = 0,
-        kTimingVBlank    = 1,
-        kTimingHBlank    = 2,
-        kTimingSpecial   = 3
+        kTimingImmediate,
+        kTimingVBlank,
+        kTimingHBlank,
+        kTimingSpecial
     };
 
     Dma(uint id);
 
-    void start();
+    void activate();
     void run(int& cycles);
 
-    uint id      = 0;
-    bool running = false;
+    uint id{};
+    bool running{};
     DmaIo io;
 
 private:
@@ -32,13 +32,13 @@ private:
     void initTransfer();
     void initEeprom();
 
-    int remaining = 0;
-    int cycles_s  = 0;
-    int cycles_n  = 0;
-    u32 sad       = 0;
-    u32 dad       = 0;
-    int sad_delta = 0;
-    int dad_delta = 0;
+    int pending{};
+    int cycles_s{};
+    int cycles_n{};
+    u32 sad{};
+    u32 dad{};
+    int sad_delta{};
+    int dad_delta{};
 
     std::function<void(void)> transfer;
 };
