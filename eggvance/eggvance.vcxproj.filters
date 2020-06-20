@@ -96,9 +96,6 @@
     <ClCompile Include="src\arm\io\haltcontrol.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\interrupt\irqhandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\platform\common.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -160,6 +157,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\gamepak\flash.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\irq\irqh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -320,9 +320,6 @@
     <ClInclude Include="src\timer\io\timerio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\interrupt\irqhandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\platform\common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -398,10 +395,13 @@
     <ClInclude Include="src\gamepak\rtc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\interrupt\io.h">
+    <ClInclude Include="src\dma\io.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\dma\io.h">
+    <ClInclude Include="src\irq\io.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\irq\irqh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

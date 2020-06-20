@@ -3,7 +3,7 @@
 #include "mmu.h"
 #include "arm/arm.h"
 #include "dma/dmac.h"
-#include "interrupt/irqhandler.h"
+#include "irq/irqh.h"
 #include "keypad/keypad.h"
 #include "ppu/ppu.h"
 #include "timer/timerc.h"

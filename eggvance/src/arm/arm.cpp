@@ -5,7 +5,7 @@
 #include "arm/decode.h"
 #include "arm/disassemble.h"
 #include "dma/dmac.h"
-#include "interrupt/irqhandler.h"
+#include "irq/irqh.h"
 #include "mmu/mmu.h"
 #include "timer/timerc.h"
 

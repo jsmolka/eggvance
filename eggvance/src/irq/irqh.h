@@ -2,7 +2,7 @@
 
 #include "base/constants.h"
 #include "base/macros.h"
-#include "interrupt/io.h"
+#include "irq/io.h"
 
 enum Irq
 {

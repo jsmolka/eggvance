@@ -4,8 +4,8 @@
 
 #include "arm/arm.h"
 #include "dma/dmac.h"
+#include "irq/irqh.h"
 #include "keypad/keypad.h"
-#include "interrupt/irqhandler.h"
 #include "mmu/mmu.h"
 #include "ppu/ppu.h"
 #include "timer/timerc.h"

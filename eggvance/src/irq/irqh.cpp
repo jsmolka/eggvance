@@ -1,4 +1,4 @@
-#include "irqhandler.h"
+#include "irqh.h"
 
 #include "arm/arm.h"
 

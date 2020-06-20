@@ -1,6 +1,6 @@
 #include "keypad.h"
 
-#include "interrupt/irqhandler.h"
+#include "irq/irqh.h"
 #include "platform/inputdevice.h"
 
 Keypad keypad;

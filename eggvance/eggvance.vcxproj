@@ -168,7 +168,7 @@
     <ClCompile Include="src\ppu\mapentry.cpp" />
     <ClCompile Include="src\arm\io\haltcontrol.cpp" />
     <ClCompile Include="src\dma\dmac.cpp" />
-    <ClCompile Include="src\interrupt\irqhandler.cpp" />
+    <ClCompile Include="src\irq\irqh.cpp" />
     <ClCompile Include="src\keypad\keypad.cpp" />
     <ClCompile Include="src\mmu\bios.cpp" />
     <ClCompile Include="src\mmu\mmu.cpp" />
@@ -206,7 +206,7 @@
     <ClInclude Include="src\gamepak\rtc.h" />
     <ClInclude Include="src\gamepak\save.h" />
     <ClInclude Include="src\gamepak\sram.h" />
-    <ClInclude Include="src\interrupt\io.h" />
+    <ClInclude Include="src\irq\io.h" />
     <ClInclude Include="src\keypad\io\keypadio.h" />
     <ClInclude Include="src\mmu\unusedio.h" />
     <ClInclude Include="src\platform\audiodevice.h" />
@@ -242,7 +242,7 @@
     <ClInclude Include="src\dma\dmac.h" />
     <ClInclude Include="src\mmu\bios.h" />
     <ClInclude Include="src\mmu\ram.h" />
-    <ClInclude Include="src\interrupt\irqhandler.h" />
+    <ClInclude Include="src\irq\irqh.h" />
     <ClInclude Include="src\keypad\keypad.h" />
     <ClInclude Include="src\base\integer.h" />
     <ClInclude Include="src\mmu\mmu.h" />

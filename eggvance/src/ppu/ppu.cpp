@@ -6,7 +6,7 @@
 #include "base/constants.h"
 #include "base/macros.h"
 #include "dma/dmac.h"
-#include "interrupt/irqhandler.h"
+#include "irq/irqh.h"
 #include "mmu/mmu.h"
 #include "platform/videodevice.h"
 

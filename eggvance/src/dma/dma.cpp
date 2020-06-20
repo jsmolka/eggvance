@@ -1,7 +1,7 @@
 #include "dma.h"
 
 #include "arm/arm.h"
-#include "interrupt/irqhandler.h"
+#include "irq/irqh.h"
 #include "mmu/mmu.h"
 
 enum AddressControl

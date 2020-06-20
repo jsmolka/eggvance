@@ -1,6 +1,6 @@
 #include "timer.h"
 
-#include "interrupt/irqhandler.h"
+#include "irq/irqh.h"
 
 constexpr auto kTimerOverflow = 0x1'0000;
 
