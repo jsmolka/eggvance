@@ -142,7 +142,7 @@ void emulate()
         synchronizer.synchronize([]()
         {
             processEvents();
-            keypad.process();
+            keypad.update();
             common::frame();
         });
 

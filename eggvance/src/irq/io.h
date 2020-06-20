@@ -13,6 +13,8 @@ struct IrqIo
         template<uint Index>
         void write(u8 byte)
         {
+            static_assert(Index < kSize);
+
             data[Index] &= ~(byte & (kMask >> (CHAR_BIT * Index)));
         }
     } request;

@@ -5,16 +5,16 @@
 
 Keypad keypad;
 
-void Keypad::process()
+void Keypad::update()
 {
-    u16 prev = io.input;
-    io.input = input_device->state();
+    u16 previous = io.input.value;
+    io.input.value = input_device->state() & KeypadIo::Input::kMask;
 
-    if (prev != io.input && io.control.irq)
+    if (previous != io.input.value && io.control.irq)
     {
         bool interrupt = io.control.logic
-            ? (~io.input == io.control.mask)
-            : (~io.input &  io.control.mask);
+            ? (~io.input.value == io.control.mask)
+            : (~io.input.value &  io.control.mask);
 
         if (interrupt)
             irqh.request(kIrqKeypad);

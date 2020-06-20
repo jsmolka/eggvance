@@ -117,7 +117,7 @@ void idle()
 void emulate()
 {
     processEvents();
-    keypad.process();
+    keypad.update();
     common::frame();
 
     double fps = 0;

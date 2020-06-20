@@ -257,12 +257,6 @@
     <ClInclude Include="src\keypad\keypad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\keypad\io\keyinput.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\keypad\io\keycontrol.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\arm\io\haltcontrol.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -309,9 +303,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\mmu\unusedio.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\keypad\io\keypadio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ppu\io\ppuio.h">
@@ -402,6 +393,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\irq\irqh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\keypad\io.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

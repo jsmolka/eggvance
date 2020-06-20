@@ -73,6 +73,8 @@ namespace detail
         template<uint Index>
         u8 read() const
         {
+            static_assert(Index < Size);
+
             if constexpr (static_cast<bool>(Type & kRegisterTypeR))
                 return data[Index];
             else
@@ -82,6 +84,8 @@ namespace detail
         template<uint Index, uint WriteMask = 0xFFFF'FFFF>
         void write(u8 byte)
         {
+            static_assert(Index < Size);
+
             if constexpr (static_cast<bool>(Type & kRegisterTypeW))
                 data[Index] = byte & ((Mask & WriteMask) >> (CHAR_BIT * Index));
         }

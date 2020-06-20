@@ -1,16 +1,13 @@
 #pragma once
 
-#include "io/keypadio.h"
+#include "keypad/io.h"
 
 class Keypad
 {
 public:
-    friend class Io;
+    void update();
 
-    void process();
-
-private:
-    KeypadIO io;
+    KeypadIo io;
 };
 
 extern Keypad keypad;

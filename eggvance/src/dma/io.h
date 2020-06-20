@@ -28,7 +28,7 @@ struct DmaIo
         template<uint Index, uint Mask>
         void write(u8 byte)
         {
-            data[Index] = byte & (Mask >> (CHAR_BIT * Index));
+            XRegister<kSize, kMask>::write<Index, Mask>(byte);
 
             if (Index == 0)
             {

@@ -72,8 +72,6 @@ u8 Io::readByte(u32 addr) const
     READ_HALF_REG(REG_SIOMULTI3  , io.siomulti[3]   );
     READ_HALF_REG(REG_SIOCNT     , io.siocnt        );
     READ_HALF_REG(REG_SIOSEND    , io.siosend       );
-    READ_HALF_REG(REG_KEYINPUT   , keypad.io.input  );
-    READ_HALF_REG(REG_KEYCNT     , keypad.io.control);
     READ_HALF_REG(REG_RCNT       , io.rcnt          );
     READ_HALF_REG(REG_JOYCNT     , io.joycnt        );
     READ_WORD_REG(REG_JOY_RECV   , io.joyrecv       );
@@ -82,22 +80,24 @@ u8 Io::readByte(u32 addr) const
     READ_HALF_REG(REG_WAITCNT    , arm.io.waitcnt   );
     READ_BYTE_REG(REG_POSTFLG    , io.postflag      );
 
-    INDEXED_CASE4(kRegDma0Sad    , return mmu.readUnused(unmasked))
-    INDEXED_CASE4(kRegDma0Dad    , return mmu.readUnused(unmasked))
-    INDEXED_CASE2(kRegDma0Count  , return dmac.read<kLabel>())
-    INDEXED_CASE2(kRegDma0Control, return dmac.read<kLabel>())
-    INDEXED_CASE4(kRegDma1Sad    , return mmu.readUnused(unmasked))
-    INDEXED_CASE4(kRegDma1Dad    , return mmu.readUnused(unmasked))
-    INDEXED_CASE2(kRegDma1Count  , return dmac.read<kLabel>())
-    INDEXED_CASE2(kRegDma1Control, return dmac.read<kLabel>())
-    INDEXED_CASE4(kRegDma2Sad    , return mmu.readUnused(unmasked))
-    INDEXED_CASE4(kRegDma2Dad    , return mmu.readUnused(unmasked))
-    INDEXED_CASE2(kRegDma2Count  , return dmac.read<kLabel>())
-    INDEXED_CASE2(kRegDma2Control, return dmac.read<kLabel>())
-    INDEXED_CASE4(kRegDma3Sad    , return mmu.readUnused(unmasked))
-    INDEXED_CASE4(kRegDma3Dad    , return mmu.readUnused(unmasked))
-    INDEXED_CASE2(kRegDma3Count  , return dmac.read<kLabel>())
-    INDEXED_CASE2(kRegDma3Control, return dmac.read<kLabel>())
+    INDEXED_CASE2(kRegKeyInput   , return keypad.io.input.read<kIndex>());
+    INDEXED_CASE2(kRegKeyControl , return keypad.io.control.read<kIndex>());
+    INDEXED_CASE4(kRegDma0Sad    , return mmu.readUnused(unmasked));
+    INDEXED_CASE4(kRegDma0Dad    , return mmu.readUnused(unmasked));
+    INDEXED_CASE2(kRegDma0Count  , return dmac.read<kLabel>());
+    INDEXED_CASE2(kRegDma0Control, return dmac.read<kLabel>());
+    INDEXED_CASE4(kRegDma1Sad    , return mmu.readUnused(unmasked));
+    INDEXED_CASE4(kRegDma1Dad    , return mmu.readUnused(unmasked));
+    INDEXED_CASE2(kRegDma1Count  , return dmac.read<kLabel>());
+    INDEXED_CASE2(kRegDma1Control, return dmac.read<kLabel>());
+    INDEXED_CASE4(kRegDma2Sad    , return mmu.readUnused(unmasked));
+    INDEXED_CASE4(kRegDma2Dad    , return mmu.readUnused(unmasked));
+    INDEXED_CASE2(kRegDma2Count  , return dmac.read<kLabel>());
+    INDEXED_CASE2(kRegDma2Control, return dmac.read<kLabel>());
+    INDEXED_CASE4(kRegDma3Sad    , return mmu.readUnused(unmasked));
+    INDEXED_CASE4(kRegDma3Dad    , return mmu.readUnused(unmasked));
+    INDEXED_CASE2(kRegDma3Count  , return dmac.read<kLabel>());
+    INDEXED_CASE2(kRegDma3Control, return dmac.read<kLabel>());
 
     CASE_HALF_REG(REG_TM0CNT_L):
     CASE_HALF_REG(REG_TM0CNT_H):
@@ -109,9 +109,9 @@ u8 Io::readByte(u32 addr) const
     CASE_HALF_REG(REG_TM3CNT_H):
         return timerc.read(addr);
 
-    INDEXED_CASE2(kRegIrqEnable , return irqh.read<kLabel>())
-    INDEXED_CASE2(kRegIrqRequest, return irqh.read<kLabel>())
-    INDEXED_CASE4(kRegIrqMaster , return irqh.read<kLabel>())
+    INDEXED_CASE2(kRegIrqEnable , return irqh.read<kLabel>());
+    INDEXED_CASE2(kRegIrqRequest, return irqh.read<kLabel>());
+    INDEXED_CASE4(kRegIrqMaster , return irqh.read<kLabel>());
 
     CASE_HALF_REG(0x066):
     CASE_HALF_REG(0x06E):
@@ -247,7 +247,6 @@ void Io::writeByte(u32 addr, u8 byte)
     WRITE_HALF_REG(REG_SIOMULTI3  , io.siomulti[3]   , 0x0000'FFFF);
     WRITE_HALF_REG(REG_SIOCNT     , io.siocnt        , 0x0000'FFFF);
     WRITE_HALF_REG(REG_SIOSEND    , io.siosend       , 0x0000'FFFF);
-    WRITE_HALF_REG(REG_KEYCNT     , keypad.io.control, 0x0000'FFFF);
     WRITE_HALF_REG(REG_RCNT       , io.rcnt          , 0x0000'FFFF);
     WRITE_HALF_REG(REG_JOYCNT     , io.joycnt        , 0x0000'FFFF);
     WRITE_WORD_REG(REG_JOY_RECV   , io.joyrecv       , 0xFFFF'FFFF);
@@ -257,22 +256,24 @@ void Io::writeByte(u32 addr, u8 byte)
     WRITE_BYTE_REG(REG_POSTFLG    , io.postflag      , 0x0000'00FF);
     WRITE_BYTE_REG(REG_HALTCNT    , arm.io.haltcnt   , 0x0000'00FF);
 
-    INDEXED_CASE4(kRegDma0Sad    , dmac.write<kLabel>(byte))
-    INDEXED_CASE4(kRegDma0Dad    , dmac.write<kLabel>(byte))
-    INDEXED_CASE2(kRegDma0Count  , dmac.write<kLabel>(byte))
-    INDEXED_CASE2(kRegDma0Control, dmac.write<kLabel>(byte))
-    INDEXED_CASE4(kRegDma1Sad    , dmac.write<kLabel>(byte))
-    INDEXED_CASE4(kRegDma1Dad    , dmac.write<kLabel>(byte))
-    INDEXED_CASE2(kRegDma1Count  , dmac.write<kLabel>(byte))
-    INDEXED_CASE2(kRegDma1Control, dmac.write<kLabel>(byte))
-    INDEXED_CASE4(kRegDma2Sad    , dmac.write<kLabel>(byte))
-    INDEXED_CASE4(kRegDma2Dad    , dmac.write<kLabel>(byte))
-    INDEXED_CASE2(kRegDma2Count  , dmac.write<kLabel>(byte))
-    INDEXED_CASE2(kRegDma2Control, dmac.write<kLabel>(byte))
-    INDEXED_CASE4(kRegDma3Sad    , dmac.write<kLabel>(byte))
-    INDEXED_CASE4(kRegDma3Dad    , dmac.write<kLabel>(byte))
-    INDEXED_CASE2(kRegDma3Count  , dmac.write<kLabel>(byte))
-    INDEXED_CASE2(kRegDma3Control, dmac.write<kLabel>(byte))
+    INDEXED_CASE2(kRegKeyInput   , keypad.io.input.write<kIndex>(byte));
+    INDEXED_CASE2(kRegKeyControl , keypad.io.control.write<kIndex>(byte));
+    INDEXED_CASE4(kRegDma0Sad    , dmac.write<kLabel>(byte));
+    INDEXED_CASE4(kRegDma0Dad    , dmac.write<kLabel>(byte));
+    INDEXED_CASE2(kRegDma0Count  , dmac.write<kLabel>(byte));
+    INDEXED_CASE2(kRegDma0Control, dmac.write<kLabel>(byte));
+    INDEXED_CASE4(kRegDma1Sad    , dmac.write<kLabel>(byte));
+    INDEXED_CASE4(kRegDma1Dad    , dmac.write<kLabel>(byte));
+    INDEXED_CASE2(kRegDma1Count  , dmac.write<kLabel>(byte));
+    INDEXED_CASE2(kRegDma1Control, dmac.write<kLabel>(byte));
+    INDEXED_CASE4(kRegDma2Sad    , dmac.write<kLabel>(byte));
+    INDEXED_CASE4(kRegDma2Dad    , dmac.write<kLabel>(byte));
+    INDEXED_CASE2(kRegDma2Count  , dmac.write<kLabel>(byte));
+    INDEXED_CASE2(kRegDma2Control, dmac.write<kLabel>(byte));
+    INDEXED_CASE4(kRegDma3Sad    , dmac.write<kLabel>(byte));
+    INDEXED_CASE4(kRegDma3Dad    , dmac.write<kLabel>(byte));
+    INDEXED_CASE2(kRegDma3Count  , dmac.write<kLabel>(byte));
+    INDEXED_CASE2(kRegDma3Control, dmac.write<kLabel>(byte));
 
     CASE_HALF_REG(REG_TM0CNT_L):
     CASE_BYTE_REG(REG_TM0CNT_H):
@@ -285,9 +286,9 @@ void Io::writeByte(u32 addr, u8 byte)
         timerc.write(addr, byte);
         break;
 
-    INDEXED_CASE2(kRegIrqEnable , irqh.write<kLabel>(byte))
-    INDEXED_CASE2(kRegIrqRequest, irqh.write<kLabel>(byte))
-    INDEXED_CASE4(kRegIrqMaster , irqh.write<kLabel>(byte))
+    INDEXED_CASE2(kRegIrqEnable , irqh.write<kLabel>(byte));
+    INDEXED_CASE2(kRegIrqRequest, irqh.write<kLabel>(byte));
+    INDEXED_CASE4(kRegIrqMaster , irqh.write<kLabel>(byte));
     }
 }
 
