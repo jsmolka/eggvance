@@ -1,24 +1,24 @@
 #pragma once
 
-#include "io/timerio.h"
+#include "timer/io.h"
 
 class Timer
 {
 public:
-    Timer(int id);
+    Timer(uint id);
 
     void init();
     void update();
     void run(int cycles);
 
-    int nextOverflow() const;
+    uint nextOverflow() const;
 
-    int id;
-    Timer* next = nullptr;
-    TimerIO io;
+    uint id{};
+    Timer* next{};
+    TimerIo io;
 
 private:
-    int counter  = 0;
-    int initial  = 0;
-    int overflow = 0;
+    uint counter{};
+    uint initial{};
+    uint overflow{};
 };

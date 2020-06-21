@@ -27,11 +27,8 @@ class IrqHandler
 public:
     void request(uint irq);
 
-    template<uint Addr>
-    u8 read() const;
-
-    template<uint Addr>
-    void write(u8 byte);
+    template<uint Addr> u8 read() const;
+    template<uint Addr> void write(u8 byte);
 
 private:
     void update();

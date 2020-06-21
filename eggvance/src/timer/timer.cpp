@@ -2,9 +2,9 @@
 
 #include "irq/irqh.h"
 
-constexpr auto kTimerOverflow = 0x1'0000;
+static constexpr uint kOverflow = 0x1'0000;
 
-Timer::Timer(int id)
+Timer::Timer(uint id)
     : id(id)
 {
 
@@ -13,14 +13,14 @@ Timer::Timer(int id)
 void Timer::init()
 {
     counter  = 0;
-    initial  = io.data.initial;
-    overflow = io.ctrl.prescale * (kTimerOverflow - initial);
+    initial  = io.count.initial;
+    overflow = io.control.prescaler * (kOverflow - initial);
 }
 
 void Timer::update()
 {
-    counter  = io.ctrl.prescale * (io.data.counter - initial);
-    overflow = io.ctrl.prescale * (kTimerOverflow - initial);
+    counter  = io.control.prescaler * (io.count.value - initial);
+    overflow = io.control.prescaler * (kOverflow - initial);
 }
 
 void Timer::run(int cycles)
@@ -29,20 +29,20 @@ void Timer::run(int cycles)
     
     if (counter >= overflow)
     {
-        if (next && next->io.ctrl.cascade)
+        if (next && next->io.control.cascade)
             next->run(counter / overflow);
 
-        if (io.ctrl.irq)
+        if (io.control.irq)
             irqh.request(kIrqTimer0 << id);
 
         counter %= overflow;
-        initial  = io.data.initial;
-        overflow = io.ctrl.prescale * (kTimerOverflow - initial);
+        initial  = io.count.initial;
+        overflow = io.control.prescaler * (kOverflow - initial);
     }
-    io.data.counter = counter / io.ctrl.prescale + initial;
+    io.count.value = counter / io.control.prescaler + initial;
 }
 
-int Timer::nextOverflow() const
+uint Timer::nextOverflow() const
 {
     return overflow - counter;
 }

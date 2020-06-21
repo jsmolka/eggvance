@@ -42,7 +42,8 @@ void common::reset()
     dmac = DmaController();
     irqh = IrqHandler();
     keypad = Keypad();
-    timerc.reset();
+    timerc.~TimerController();
+    new(&timerc)TimerController();
 }
 
 void common::frame()

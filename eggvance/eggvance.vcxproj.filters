@@ -248,12 +248,6 @@
     <ClInclude Include="src\timer\timerc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\timer\io\timercontrol.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\timer\io\timerdata.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\keypad\keypad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -306,9 +300,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ppu\io\ppuio.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\timer\io\timerio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\platform\common.h">
@@ -396,6 +387,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\keypad\io.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\timer\io.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

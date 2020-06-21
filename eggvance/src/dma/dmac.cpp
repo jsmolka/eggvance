@@ -31,9 +31,7 @@ void DmaController::run(int& cycles)
 void DmaController::broadcast(Dma::Timing timing)
 {
     for (auto& dma : dmas)
-    {
         emit(dma, timing);
-    }
 }
 
 void DmaController::emit(Dma& dma, Dma::Timing timing)

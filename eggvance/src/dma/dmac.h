@@ -10,11 +10,8 @@ public:
     void run(int& cycles);
     void broadcast(Dma::Timing timing);
 
-    template<uint Addr>
-    u8 read() const;
-
-    template<uint Addr>
-    void write(u8 byte);
+    template<uint Addr> u8 read() const;
+    template<uint Addr> void write(u8 byte);
 
 private:
     void emit(Dma& dma, Dma::Timing timing);
