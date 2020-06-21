@@ -242,37 +242,38 @@ void PPU::renderObjects()
             if (addr < 0x1'4000 && io.dispcnt.isBitmap())
                 continue;
 
-            int index = mmu.vram.index(addr, pixel, ColorMode(entry.color_mode));
-            if (index == 0)
-                continue;
-
             auto& object = objects[x];
 
-            switch (ObjectMode(entry.mode))
+            int index = mmu.vram.index(addr, pixel, ColorMode(entry.color_mode));
+            if (index != 0)
             {
-            case ObjectMode::Alpha:
-            case ObjectMode::Normal:
-                if (entry.prio < object.prio)
+                switch (ObjectMode(entry.mode))
                 {
-                    object.color = mmu.palette.colorFGOpaque(index, bank);
-                    object.prio  = entry.prio;
-                    object.alpha = entry.mode == int(ObjectMode::Alpha);
+                case ObjectMode::Alpha:
+                case ObjectMode::Normal:
+                    if (entry.prio < object.prio || !object.opaque())
+                    {
+                        object.color = mmu.palette.colorFGOpaque(index, bank);
+                        object.alpha = entry.mode == int(ObjectMode::Alpha);
+                    }
+                    break;
+
+                case ObjectMode::Window:
+                    object.window = true;
+                    break;
+
+                case ObjectMode::Invalid:
+                    break;
+
+                default:
+                    UNREACHABLE;
+                    break;
                 }
-                break;
-
-            case ObjectMode::Window:
-                object.window = true;
-                break;
-
-            case ObjectMode::Invalid:
-                break;
-
-            default:
-                UNREACHABLE;
-                break;
+                objects_exist = true;
+                objects_alpha |= object.alpha;
             }
-            objects_exist = true;
-            objects_alpha |= object.alpha;
+
+            object.prio = std::min(object.prio, entry.prio);
         }
     }
 }
