@@ -19,7 +19,7 @@ namespace util
     void reconstruct(T* instance, Args&&... args)
     {
         static_assert(std::is_constructible_v<T, Args...>,
-            "reconstructible<T, Args>: T must be constructible from Args");
+            "reconstruct<T, Args>: T must be constructible from Args");
 
         instance->~T();
         new(instance)T(std::forward<Args>(args)...);
