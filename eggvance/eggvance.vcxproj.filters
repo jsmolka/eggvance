@@ -392,6 +392,9 @@
     <ClInclude Include="src\timer\io.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\base\util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="eggvance.rc">

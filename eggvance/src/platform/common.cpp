@@ -3,6 +3,7 @@
 #include <fmt/format.h>
 
 #include "arm/arm.h"
+#include "base/util.h"
 #include "dma/dmac.h"
 #include "irq/irqh.h"
 #include "keypad/keypad.h"
@@ -36,14 +37,14 @@ void common::init(
 
 void common::reset()
 {
-    arm = ARM();
     mmu.reset();
     ppu.reset();
-    dmac = DmaController();
-    irqh = IrqHandler();
-    keypad = Keypad();
-    timerc.~TimerController();
-    new(&timerc)TimerController();
+
+    util::reconstruct(&arm);
+    util::reconstruct(&dmac);
+    util::reconstruct(&irqh);
+    util::reconstruct(&keypad);
+    util::reconstruct(&timerc);
 }
 
 void common::frame()

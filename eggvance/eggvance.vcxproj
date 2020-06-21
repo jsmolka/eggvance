@@ -193,6 +193,7 @@
     <ClInclude Include="src\base\enums.h" />
     <ClInclude Include="src\base\config.h" />
     <ClInclude Include="src\base\constants.h" />
+    <ClInclude Include="src\base\util.h" />
     <ClInclude Include="src\common\critical.h" />
     <ClInclude Include="src\base\fs.h" />
     <ClInclude Include="src\base\iterator.h" />
