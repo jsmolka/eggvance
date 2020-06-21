@@ -42,7 +42,24 @@ void Timer::run(int cycles)
     io.count.value = counter / io.control.prescaler + initial;
 }
 
-uint Timer::nextOverflow() const
+uint Timer::nextEvent() const
 {
-    return overflow - counter;
+    if (!io.control.irq)
+        return 1 << 30;
+
+    if (!io.control.cascade)
+        return overflow - counter;
+
+    if (!prev)
+        return 1 << 30;
+
+    uint count = 0;
+    uint event = overflow - counter;
+
+    for (auto timer = prev; timer; timer = timer->prev)
+    {
+        event *= timer->io.control.prescaler * (kOverflow - timer->initial);
+        count += timer->counter;
+    }
+    return event - count;
 }

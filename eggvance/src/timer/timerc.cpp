@@ -8,18 +8,22 @@ TimerController timerc;
 
 TimerController::TimerController()
 {
+    timers[1].prev = &timers[0];
+    timers[2].prev = &timers[1];
+    timers[3].prev = &timers[2];
+
     timers[0].next = &timers[1];
     timers[1].next = &timers[2];
     timers[2].next = &timers[3];
 
-    overflow = 1 << 30;
+    event = 1 << 30;
 }
 
 void TimerController::run(int cycles)
 {
-    counter += cycles;
+    count += cycles;
 
-    if (counter >= overflow)
+    if (count >= event)
     {
         runTimers();
         reschedule();
@@ -28,7 +32,7 @@ void TimerController::run(int cycles)
 
 void TimerController::runUntilIrq(int& cycles)
 {
-    int remaining = overflow - counter;
+    int remaining = event - count;
     if (remaining < cycles)
     {
         run(remaining);
@@ -44,10 +48,10 @@ void TimerController::runUntilIrq(int& cycles)
 void TimerController::runTimers()
 {
     for (Timer& timer : active)
-        timer.run(counter);
+        timer.run(count);
 
-    overflow -= counter;
-    counter = 0;
+    event -= count;
+    count = 0;
 }
 
 void TimerController::schedule()
@@ -55,7 +59,7 @@ void TimerController::schedule()
     active.clear();
     arm.state &= ~ARM::kStateTimer;
 
-    overflow = 1 << 30;
+    event = 1 << 30;
     for (auto& timer : timers)
     {
         if (timer.io.control.enable && !timer.io.control.cascade)
@@ -63,14 +67,14 @@ void TimerController::schedule()
             active.push_back(std::ref(timer));
             arm.state |= ARM::kStateTimer;
 
-            overflow = std::min(overflow, timer.nextOverflow());
+            event = std::min(event, timer.nextEvent());
         }
     }
 }
 
 void TimerController::reschedule()
 {
-    overflow = 1 << 30;
+    event = 1 << 30;
     for (Timer& timer : active)
-        overflow = std::min(overflow, timer.nextOverflow());
+        event = std::min(event, timer.nextEvent());
 }

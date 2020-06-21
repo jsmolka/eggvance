@@ -24,8 +24,8 @@ private:
     void schedule();
     void reschedule();
 
-    uint counter{};
-    uint overflow{};
+    uint count{};
+    uint event{};
 
     std::array<Timer, 4> timers{ 0, 1, 2, 3 };
     std::vector<std::reference_wrapper<Timer>> active;

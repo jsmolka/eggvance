@@ -11,9 +11,10 @@ public:
     void update();
     void run(int cycles);
 
-    uint nextOverflow() const;
+    uint nextEvent() const;
 
     uint id{};
+    Timer* prev{};
     Timer* next{};
     TimerIo io;
 
