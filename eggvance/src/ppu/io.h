@@ -145,7 +145,7 @@ struct PpuIo
             }
         }
 
-        Dimensions dimsReg() const
+        Dimensions dimsReg() const 
         {
             return Dimensions(
                 256 << bits::seq<0, 1>(dimensions),

@@ -107,6 +107,6 @@ namespace detail
     };
 }
 
-template<uint Size, uint Mask = 0xFFFF'FFFF, uint Init = 0, typename T = StorageType<Size>> using XRegister  = detail::RegisterBase<Size, Mask, Init, detail::kRegisterTypeR | detail::kRegisterTypeW, typename T>;
-template<uint Size, uint Mask = 0xFFFF'FFFF, uint Init = 0, typename T = StorageType<Size>> using XRegisterR = detail::RegisterBase<Size, Mask, Init, detail::kRegisterTypeR, typename T>;
-template<uint Size, uint Mask = 0xFFFF'FFFF, uint Init = 0, typename T = StorageType<Size>> using XRegisterW = detail::RegisterBase<Size, Mask, Init, detail::kRegisterTypeW, typename T>;
+template<uint Size, uint Mask = 0xFFFF'FFFF, uint Init = 0, typename T = StorageType<Size>> using XRegister  = detail::RegisterBase<Size, Mask, Init, detail::kRegisterTypeR | detail::kRegisterTypeW, T>;
+template<uint Size, uint Mask = 0xFFFF'FFFF, uint Init = 0, typename T = StorageType<Size>> using XRegisterR = detail::RegisterBase<Size, Mask, Init, detail::kRegisterTypeR, T>;
+template<uint Size, uint Mask = 0xFFFF'FFFF, uint Init = 0, typename T = StorageType<Size>> using XRegisterW = detail::RegisterBase<Size, Mask, Init, detail::kRegisterTypeW, T>;
