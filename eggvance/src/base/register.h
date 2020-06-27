@@ -1,9 +1,9 @@
 #pragma once
 
 #include <climits>
-#include <type_traits>
 
 #include "base/integer.h"
+#include "base/types.h"
 
 template<uint size>
 class RegisterRW
@@ -55,20 +55,29 @@ namespace detail
         kRegisterTypeW = 1 << 1,
     };
 
-    template<uint Size> struct ValueType;
-    template<> struct ValueType<1> { using Type =  u8; };
-    template<> struct ValueType<2> { using Type = u16; };
-    template<> struct ValueType<4> { using Type = u32; };
-
-    template<uint Size, uint Mask, uint Type>
-    class RegisterBase
+    template<uint Size, uint Mask, uint Init, uint Type, typename T>
+    struct RegisterBase
     {
-    public:
+        static_assert(Size == sizeof(T), "RegisterBase<uint, uint, uint, T>: Invalid T");
+
+        using ValueType = T;
+
         static constexpr uint kSize = Size;
         static constexpr uint kMask = Mask;
+        static constexpr uint kInit = Init;
         static constexpr uint kType = Type;
 
         virtual ~RegisterBase() = default;
+
+        //RegisterBase& operator=(ValueType value)
+        //{
+        //    this->value = value;
+        //}
+
+        //operator ValueType() const
+        //{
+        //    return value;
+        //}
 
         template<uint Index>
         u8 read() const
@@ -93,11 +102,11 @@ namespace detail
         union
         {
             u8 data[Size];
-            typename ValueType<Size>::Type value{};
+            ValueType value{ Init };
         };
     };
 }
 
-template<uint Size, uint Mask = 0xFFFF'FFFF> using XRegister  = detail::RegisterBase<Size, Mask, detail::kRegisterTypeR | detail::kRegisterTypeW>;
-template<uint Size, uint Mask = 0xFFFF'FFFF> using XRegisterR = detail::RegisterBase<Size, Mask, detail::kRegisterTypeR>;
-template<uint Size, uint Mask = 0xFFFF'FFFF> using XRegisterW = detail::RegisterBase<Size, Mask, detail::kRegisterTypeW>;
+template<uint Size, uint Mask = 0xFFFF'FFFF, uint Init = 0, typename T = StorageType<Size>> using XRegister  = detail::RegisterBase<Size, Mask, Init, detail::kRegisterTypeR | detail::kRegisterTypeW, typename T>;
+template<uint Size, uint Mask = 0xFFFF'FFFF, uint Init = 0, typename T = StorageType<Size>> using XRegisterR = detail::RegisterBase<Size, Mask, Init, detail::kRegisterTypeR, typename T>;
+template<uint Size, uint Mask = 0xFFFF'FFFF, uint Init = 0, typename T = StorageType<Size>> using XRegisterW = detail::RegisterBase<Size, Mask, Init, detail::kRegisterTypeW, typename T>;

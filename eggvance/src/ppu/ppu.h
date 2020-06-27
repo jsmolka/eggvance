@@ -2,10 +2,10 @@
 
 #include <vector>
 
-#include "buffer.h"
-#include "dimensions.h"
-#include "layer.h"
-#include "io/ppuio.h"
+#include "ppu/buffer.h"
+#include "ppu/dimensions.h"
+#include "ppu/io.h"
+#include "ppu/layer.h"
 
 class PPU
 {
@@ -19,7 +19,7 @@ public:
 
     void present();
 
-    PPUIO io;
+    PpuIo io;
 
 private:
     enum WindowFlag
@@ -68,7 +68,7 @@ private:
     template<int obj_master>
     int possibleWindows() const;
     template<int win_master>
-    const Window& activeWindow(int x) const;
+    const PpuIo::Window& activeWindow(int x) const;
 
     template<int obj_master>
     u16 upperLayer(const std::vector<BGLayer>& layers, int x);

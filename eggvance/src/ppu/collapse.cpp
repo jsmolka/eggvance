@@ -38,7 +38,7 @@ template<int obj_master>
 void PPU::collapse(const std::vector<BGLayer>& layers)
 {
     int windows = io.dispcnt.win0 || io.dispcnt.win1 || io.dispcnt.winobj;
-    int effects = io.bldcnt.mode != BlendControl::Mode::DISABLED || objects_alpha;
+    int effects = io.bldcnt.mode != PpuIo::BlendControl::kModeDisabled || objects_alpha;
 
     switch ((effects << 1) | (windows << 0))
     {
@@ -135,22 +135,22 @@ void PPU::collapseBN(const std::vector<BGLayer>& layers)
         {
             switch (blend_mode)
             {
-            case BlendControl::Mode::ALPHA:
+            case PpuIo::BlendControl::kModeAlpha:
                 if (findBlendLayers<obj_master>(layers, x, flags, upper, lower))
                     upper = io.bldalpha.blendAlpha(upper, lower);
                 break;
 
-            case BlendControl::Mode::WHITE:
+            case PpuIo::BlendControl::kModeWhite:
                 if (findBlendLayers<obj_master>(layers, x, flags, upper))
-                    upper = io.bldy.blendWhite(upper);
+                    upper = io.bldfade.blendWhite(upper);
                 break;
 
-            case BlendControl::Mode::BLACK:
+            case PpuIo::BlendControl::kModeBlack:
                 if (findBlendLayers<obj_master>(layers, x, flags, upper))
-                    upper = io.bldy.blendBlack(upper);
+                    upper = io.bldfade.blendBlack(upper);
                 break;
 
-            case BlendControl::Mode::DISABLED:
+            case PpuIo::BlendControl::kModeDisabled:
                 upper = upperLayer<obj_master>(layers, x);
                 break;
 
@@ -220,22 +220,22 @@ void PPU::collapseBW(const std::vector<BGLayer>& layers)
         {
             switch (blend_mode)
             {
-            case BlendControl::Mode::ALPHA:
+            case PpuIo::BlendControl::kModeAlpha:
                 if (findBlendLayers<obj_master>(layers, x, window.flags, upper, lower))
                     upper = io.bldalpha.blendAlpha(upper, lower);
                 break;
 
-            case BlendControl::Mode::WHITE:
+            case PpuIo::BlendControl::kModeWhite:
                 if (findBlendLayers<obj_master>(layers, x, window.flags, upper))
-                    upper = io.bldy.blendWhite(upper);
+                    upper = io.bldfade.blendWhite(upper);
                 break;
 
-            case BlendControl::Mode::BLACK:
+            case PpuIo::BlendControl::kModeBlack:
                 if (findBlendLayers<obj_master>(layers, x, window.flags, upper))
-                    upper = io.bldy.blendBlack(upper);
+                    upper = io.bldfade.blendBlack(upper);
                 break;
 
-            case BlendControl::Mode::DISABLED:
+            case PpuIo::BlendControl::kModeDisabled:
                 upper = upperLayer<obj_master>(layers, x, window.flags);
                 break;
 
@@ -268,7 +268,7 @@ int PPU::possibleWindows() const
 }
 
 template<int win_master>
-const Window& PPU::activeWindow(int x) const
+const PpuIo::Window& PPU::activeWindow(int x) const
 {
     if (win_master & WF_WIN0 && io.winh[0].contains(x))
         return io.winin.win0;

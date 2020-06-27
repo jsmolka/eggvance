@@ -14,7 +14,7 @@ PPU ppu;
 
 void PPU::reset()
 {
-    io = PPUIO();
+    io = PpuIo();
 
     for (auto& background : backgrounds)
     {

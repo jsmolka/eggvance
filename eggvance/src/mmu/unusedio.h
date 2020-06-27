@@ -22,7 +22,6 @@ struct UnusedIO
     }
 
     RegisterRW<1> postflag;
-    RegisterRW<2> greenswap;
     RegisterRW<4> memcontrol;
 
     RegisterRW<2> rcnt;
