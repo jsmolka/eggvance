@@ -2,15 +2,13 @@
 
 #include <array>
 
+#include "arm/io.h"
 #include "arm/registers.h"
-#include "arm/io/haltcontrol.h"
-#include "arm/io/waitcontrol.h"
 
 class ARM : public Registers
 {
 public:
     friend class Dma;
-    friend class Io;
     friend class MMU;
 
     enum State
@@ -27,6 +25,8 @@ public:
     void run(int cycles);
 
     uint state = 0;
+
+    ArmIo io;
 
 private:
     enum Shift
@@ -148,12 +148,6 @@ private:
     int cycles    = 0;
     u32 prev_addr = 0;
     u32 pipe[2]   = { 0 };
-
-    struct IO
-    {
-        HaltControl haltcnt;
-        WaitControl waitcnt;
-    } io;
 
     static std::array<void(ARM::*)(u32), 4096> instr_arm;
     static std::array<void(ARM::*)(u16), 1024> instr_thumb;

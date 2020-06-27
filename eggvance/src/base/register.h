@@ -1,51 +1,10 @@
 #pragma once
 
 #include <climits>
+#include <type_traits>
 
 #include "base/integer.h"
 #include "base/types.h"
-
-template<uint size>
-class RegisterRW
-{
-public:
-    virtual ~RegisterRW() = default;
-
-    template<uint index>
-    inline u8 read() const
-    {
-        static_assert(index < size);
-
-        return data[index];
-    }
-
-    template<uint index>
-    inline void write(u8 byte)
-    {
-        static_assert(index < size);
-
-        data[index] = byte;
-    }
-
-protected:
-    u8 data[size] = { 0 };
-};
-
-template<uint size>
-class RegisterR : public RegisterRW<size>
-{
-public:
-    template<uint index>
-    inline void write(u8) = delete;
-};
-
-template<uint size>
-class RegisterW : public RegisterRW<size>
-{
-public:
-    template<uint index>
-    inline u8 read() const = delete;
-};
 
 namespace detail
 {
@@ -64,7 +23,7 @@ namespace detail
         template<uint Index>
         u8 read() const
         {
-            static_assert(Type & 0b01);
+            static_assert(Type & 0x1);
             static_assert(Index < Size);
 
             return data[Index];
@@ -73,7 +32,7 @@ namespace detail
         template<uint Index, uint WriteMask = 0xFFFF'FFFF>
         void write(u8 byte)
         {
-            static_assert(Type & 0b10);
+            static_assert(Type & 0x2);
             static_assert(Index < Size);
 
             constexpr uint mask = (Mask & WriteMask) >> (CHAR_BIT * Index); 
@@ -89,6 +48,6 @@ namespace detail
     };
 }
 
-template<uint Size, uint Mask = 0xFFFF'FFFF, uint Init = 0, typename T = StorageType<Size>> using XRegister  = detail::RegisterBase<Size, Mask, Init, 0b11, T>;
-template<uint Size, uint Mask = 0xFFFF'FFFF, uint Init = 0, typename T = StorageType<Size>> using XRegisterR = detail::RegisterBase<Size, Mask, Init, 0b01, T>;
-template<uint Size, uint Mask = 0xFFFF'FFFF, uint Init = 0, typename T = StorageType<Size>> using XRegisterW = detail::RegisterBase<Size, Mask, Init, 0b10, T>;
+template<uint Size, uint Mask = 0xFFFF'FFFF, uint Init = 0, typename T = StorageType<Size>> using RegisterR = detail::RegisterBase<Size, Mask, Init, 0x1, T>;
+template<uint Size, uint Mask = 0xFFFF'FFFF, uint Init = 0, typename T = StorageType<Size>> using RegisterW = detail::RegisterBase<Size, Mask, Init, 0x2, T>;
+template<uint Size, uint Mask = 0xFFFF'FFFF, uint Init = 0, typename T = StorageType<Size>> using Register  = detail::RegisterBase<Size, Mask, Init, 0x3, T>;

@@ -22,46 +22,46 @@ u8 MMU::readByte(u32 addr)
 {
     switch (addr >> 24)
     {
-    case REGION_BIOS:
+    case kRegionBios:
         if (addr < 0x4000)
             return bios.readByte(addr);
         else
             return readUnused(addr);
 
-    case REGION_EWRAM:
+    case kRegionEwram:
         return ewram.readByte(addr);
 
-    case REGION_IWRAM:
+    case kRegionIwram:
         return iwram.readByte(addr);
 
-    case REGION_IO:
+    case kRegionIo:
         return io.readByte(addr);
 
-    case REGION_PALETTE:
+    case kRegionPalette:
         return palette.readByte(addr);
 
-    case REGION_VRAM:
+    case kRegionVram:
         return vram.readByte(addr);
 
-    case REGION_OAM:
+    case kRegionOam:
         return oam.readByte(addr);
 
-    case REGION_GAMEPAK0:
-    case REGION_GAMEPAK0_EX:
-    case REGION_GAMEPAK1:
-    case REGION_GAMEPAK1_EX:
-    case REGION_GAMEPAK2:
+    case kRegionGamePak0L:
+    case kRegionGamePak0H:
+    case kRegionGamePak1L:
+    case kRegionGamePak1H:
+    case kRegionGamePak2L:
         return gamepak.readByte(addr);
 
-    case REGION_GAMEPAK2_EX:
+    case kRegionGamePak2H:
         if (gamepak.save->type == Save::Type::Eeprom
                 && (gamepak.size() <= 0x100'0000 || addr >= 0xDFF'FF00))
             return 1;
 
         return gamepak.readByte(addr);
     
-    case REGION_SRAM:
-    case REGION_SRAM_MIRROR:
+    case kRegionSramL:
+    case kRegionSramH:
         return readSave(addr);
 
     default:
@@ -73,46 +73,46 @@ u16 MMU::readHalf(u32 addr)
 {
     switch (addr >> 24)
     {
-    case REGION_BIOS:
+    case kRegionBios:
         if (addr < 0x4000)
             return bios.readHalf(addr);
         else
             return readUnused(addr);
 
-    case REGION_EWRAM:
+    case kRegionEwram:
         return ewram.readHalf(addr);
 
-    case REGION_IWRAM:
+    case kRegionIwram:
         return iwram.readHalf(addr);
 
-    case REGION_IO:
+    case kRegionIo:
         return io.readHalf(addr);
 
-    case REGION_PALETTE:
+    case kRegionPalette:
         return palette.readHalf(addr);
 
-    case REGION_VRAM:
+    case kRegionVram:
         return vram.readHalf(addr);
 
-    case REGION_OAM:
+    case kRegionOam:
         return oam.readHalf(addr);
 
-    case REGION_GAMEPAK0:
-    case REGION_GAMEPAK0_EX:
-    case REGION_GAMEPAK1:
-    case REGION_GAMEPAK1_EX:
-    case REGION_GAMEPAK2:
+    case kRegionGamePak0L:
+    case kRegionGamePak0H:
+    case kRegionGamePak1L:
+    case kRegionGamePak1H:
+    case kRegionGamePak2L:
         return gamepak.readHalf(addr);
 
-    case REGION_GAMEPAK2_EX:
+    case kRegionGamePak2H:
         if (gamepak.save->type == Save::Type::Eeprom
                 && (gamepak.size() <= 0x100'0000 || addr >= 0xDFF'FF00))
             return 1;
 
         return gamepak.readHalf(addr);
 
-    case REGION_SRAM:
-    case REGION_SRAM_MIRROR:
+    case kRegionSramL:
+    case kRegionSramH:
         return readSave(addr) * 0x0101;
 
     default:
@@ -124,46 +124,46 @@ u32 MMU::readWord(u32 addr)
 {
     switch (addr >> 24)
     {
-    case REGION_BIOS:
+    case kRegionBios:
         if (addr < 0x4000)
             return bios.readWord(addr);
         else
             return readUnused(addr);
 
-    case REGION_EWRAM:
+    case kRegionEwram:
         return ewram.readWord(addr);
 
-    case REGION_IWRAM:
+    case kRegionIwram:
         return iwram.readWord(addr);
 
-    case REGION_IO:
+    case kRegionIo:
         return io.readWord(addr);
 
-    case REGION_PALETTE:
+    case kRegionPalette:
         return palette.readWord(addr);
 
-    case REGION_VRAM:
+    case kRegionVram:
         return vram.readWord(addr);
 
-    case REGION_OAM:
+    case kRegionOam:
         return oam.readWord(addr);
 
-    case REGION_GAMEPAK0:
-    case REGION_GAMEPAK0_EX:
-    case REGION_GAMEPAK1:
-    case REGION_GAMEPAK1_EX:
-    case REGION_GAMEPAK2:
+    case kRegionGamePak0L:
+    case kRegionGamePak0H:
+    case kRegionGamePak1L:
+    case kRegionGamePak1H:
+    case kRegionGamePak2L:
         return gamepak.readWord(addr);
 
-    case REGION_GAMEPAK2_EX:
+    case kRegionGamePak2H:
         if (gamepak.save->type == Save::Type::Eeprom
                 && (gamepak.size() <= 0x100'0000 || addr >= 0xDFF'FF00))
             return 1;
 
         return gamepak.readWord(addr);
 
-    case REGION_SRAM:
-    case REGION_SRAM_MIRROR:
+    case kRegionSramL:
+    case kRegionSramH:
         return readSave(addr) * 0x01010101;
 
     default:
@@ -175,42 +175,42 @@ void MMU::writeByte(u32 addr, u8 byte)
 {
     switch (addr >> 24)
     {
-    case REGION_BIOS:
+    case kRegionBios:
         break;
 
-    case REGION_EWRAM:
+    case kRegionEwram:
         ewram.writeByte(addr, byte);
         break;
 
-    case REGION_IWRAM:
+    case kRegionIwram:
         iwram.writeByte(addr, byte);
         break;
 
-    case REGION_IO:
+    case kRegionIo:
         io.writeByte(addr, byte);
         break;
 
-    case REGION_PALETTE:
+    case kRegionPalette:
         palette.writeByte(addr, byte);
         break;
 
-    case REGION_VRAM:
+    case kRegionVram:
         vram.writeByte(addr, byte);
         break;
 
-    case REGION_OAM:
+    case kRegionOam:
         break;
 
-    case REGION_GAMEPAK0:
-    case REGION_GAMEPAK0_EX:
-    case REGION_GAMEPAK1:
-    case REGION_GAMEPAK1_EX:
-    case REGION_GAMEPAK2:
-    case REGION_GAMEPAK2_EX:
+    case kRegionGamePak0L:
+    case kRegionGamePak0H:
+    case kRegionGamePak1L:
+    case kRegionGamePak1H:
+    case kRegionGamePak2L:
+    case kRegionGamePak2H:
         break;
 
-    case REGION_SRAM:
-    case REGION_SRAM_MIRROR:
+    case kRegionSramL:
+    case kRegionSramH:
         writeSave(addr, byte);
         break;
     }
@@ -220,43 +220,43 @@ void MMU::writeHalf(u32 addr, u16 half)
 {
     switch (addr >> 24)
     {
-    case REGION_BIOS:
+    case kRegionBios:
         break;
 
-    case REGION_EWRAM:
+    case kRegionEwram:
         ewram.writeHalf(addr, half);
         break;
 
-    case REGION_IWRAM:
+    case kRegionIwram:
         iwram.writeHalf(addr, half);
         break;
 
-    case REGION_IO:
+    case kRegionIo:
         io.writeHalf(addr, half);
         break;
 
-    case REGION_PALETTE:
+    case kRegionPalette:
         palette.writeHalf(addr, half);
         break;
 
-    case REGION_VRAM:
+    case kRegionVram:
         vram.writeHalf(addr, half);
         break;
 
-    case REGION_OAM:
+    case kRegionOam:
         oam.writeHalf(addr, half);
         break;
 
-    case REGION_GAMEPAK0:
-    case REGION_GAMEPAK0_EX:
-    case REGION_GAMEPAK1:
-    case REGION_GAMEPAK1_EX:
-    case REGION_GAMEPAK2:
-    case REGION_GAMEPAK2_EX:
+    case kRegionGamePak0L:
+    case kRegionGamePak0H:
+    case kRegionGamePak1L:
+    case kRegionGamePak1H:
+    case kRegionGamePak2L:
+    case kRegionGamePak2H:
         break;
 
-    case REGION_SRAM:
-    case REGION_SRAM_MIRROR:
+    case kRegionSramL:
+    case kRegionSramH:
         writeSave(addr, half >> ((addr & 0x1) << 3));
         break;
     }
@@ -266,43 +266,43 @@ void MMU::writeWord(u32 addr, u32 word)
 {
     switch (addr >> 24)
     {
-    case REGION_BIOS:
+    case kRegionBios:
         break;
 
-    case REGION_EWRAM:
+    case kRegionEwram:
         ewram.writeWord(addr, word);
         break;
 
-    case REGION_IWRAM:
+    case kRegionIwram:
         iwram.writeWord(addr, word);
         break;
 
-    case REGION_IO:
+    case kRegionIo:
         io.writeWord(addr, word);
         break;
 
-    case REGION_PALETTE:
+    case kRegionPalette:
         palette.writeWord(addr, word);
         break;
 
-    case REGION_VRAM:
+    case kRegionVram:
         vram.writeWord(addr, word);
         break;
 
-    case REGION_OAM:
+    case kRegionOam:
         oam.writeWord(addr, word);
         break;
 
-    case REGION_GAMEPAK0:
-    case REGION_GAMEPAK0_EX:
-    case REGION_GAMEPAK1:
-    case REGION_GAMEPAK1_EX:
-    case REGION_GAMEPAK2:
-    case REGION_GAMEPAK2_EX:
+    case kRegionGamePak0L:
+    case kRegionGamePak0H:
+    case kRegionGamePak1L:
+    case kRegionGamePak1H:
+    case kRegionGamePak2L:
+    case kRegionGamePak2H:
         break;
 
-    case REGION_SRAM:
-    case REGION_SRAM_MIRROR:
+    case kRegionSramL:
+    case kRegionSramH:
         writeSave(addr, word >> ((addr & 0x3) << 3));
         break;
     }
@@ -318,12 +318,12 @@ u32 MMU::readUnused(u32 addr)
 
         switch (addr >> 24)
         {
-        case REGION_BIOS:
-        case REGION_OAM:
+        case kRegionBios:
+        case kRegionOam:
             lsw = arm.pipe[0];
             break;
 
-        case REGION_IWRAM:
+        case kRegionIwram:
             if (addr & 0x3)
                 lsw = arm.pipe[0];
             else

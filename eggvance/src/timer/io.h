@@ -5,7 +5,7 @@
 
 struct TimerIo
 {
-    class Count : public XRegister<2>
+    class Count : public Register<2>
     {
     public:
         template<uint Index>
@@ -19,7 +19,7 @@ struct TimerIo
         u16 initial{};
     } count;
 
-    class Control : public XRegister<2, 0x00C7>
+    class Control : public Register<2, 0x00C7>
     {
     public:
         template<uint Index>
@@ -27,7 +27,7 @@ struct TimerIo
         {
             static constexpr uint kPrescalers[4] = { 1, 64, 256, 1024 };
 
-            XRegister<kSize, kMask>::write<Index>(byte);
+            Register<kSize, kMask>::write<Index>(byte);
 
             if (Index == 0)
             {

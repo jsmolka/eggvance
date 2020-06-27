@@ -5,10 +5,10 @@
 
 struct DmaIo
 {
-    XRegisterW<4> sad;
-    XRegisterW<4> dad;
+    RegisterW<4> sad;
+    RegisterW<4> dad;
 
-    class Count : public XRegisterW<2>
+    class Count : public RegisterW<2>
     {
     public:
         uint count(uint id) const
@@ -20,7 +20,7 @@ struct DmaIo
         }
     } count;
 
-    class Control : public XRegister<2>
+    class Control : public Register<2>
     {
     public:
         static constexpr uint kEnable = 1 << 15;
@@ -28,7 +28,7 @@ struct DmaIo
         template<uint Index, uint Mask>
         void write(u8 byte)
         {
-            XRegister<kSize, kMask>::write<Index, Mask>(byte);
+            Register<kSize, kMask>::write<Index, Mask>(byte);
 
             if (Index == 0)
             {
