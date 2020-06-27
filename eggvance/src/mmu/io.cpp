@@ -83,13 +83,9 @@ u8 Io::readByte(u32 addr) const
 
     INDEXED_CASE2(kRegKeyInput     , return keypad.io.input.read<kIndex>());
     INDEXED_CASE2(kRegKeyControl   , return keypad.io.control.read<kIndex>());
-    INDEXED_CASE2(kRegDma0Count    , return dmac.read<kLabel>());
     INDEXED_CASE2(kRegDma0Control  , return dmac.read<kLabel>());
-    INDEXED_CASE2(kRegDma1Count    , return dmac.read<kLabel>());
     INDEXED_CASE2(kRegDma1Control  , return dmac.read<kLabel>());
-    INDEXED_CASE2(kRegDma2Count    , return dmac.read<kLabel>());
     INDEXED_CASE2(kRegDma2Control  , return dmac.read<kLabel>());
-    INDEXED_CASE2(kRegDma3Count    , return dmac.read<kLabel>());
     INDEXED_CASE2(kRegDma3Control  , return dmac.read<kLabel>());
     INDEXED_CASE2(kRegTimer0Count  , return timerc.read<kLabel>());
     INDEXED_CASE2(kRegTimer0Control, return timerc.read<kLabel>());
