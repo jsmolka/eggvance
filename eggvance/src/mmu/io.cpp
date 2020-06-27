@@ -83,20 +83,12 @@ u8 Io::readByte(u32 addr) const
 
     INDEXED_CASE2(kRegKeyInput     , return keypad.io.input.read<kIndex>());
     INDEXED_CASE2(kRegKeyControl   , return keypad.io.control.read<kIndex>());
-    INDEXED_CASE4(kRegDma0Sad      , return mmu.readUnused(unmasked));
-    INDEXED_CASE4(kRegDma0Dad      , return mmu.readUnused(unmasked));
     INDEXED_CASE2(kRegDma0Count    , return dmac.read<kLabel>());
     INDEXED_CASE2(kRegDma0Control  , return dmac.read<kLabel>());
-    INDEXED_CASE4(kRegDma1Sad      , return mmu.readUnused(unmasked));
-    INDEXED_CASE4(kRegDma1Dad      , return mmu.readUnused(unmasked));
     INDEXED_CASE2(kRegDma1Count    , return dmac.read<kLabel>());
     INDEXED_CASE2(kRegDma1Control  , return dmac.read<kLabel>());
-    INDEXED_CASE4(kRegDma2Sad      , return mmu.readUnused(unmasked));
-    INDEXED_CASE4(kRegDma2Dad      , return mmu.readUnused(unmasked));
     INDEXED_CASE2(kRegDma2Count    , return dmac.read<kLabel>());
     INDEXED_CASE2(kRegDma2Control  , return dmac.read<kLabel>());
-    INDEXED_CASE4(kRegDma3Sad      , return mmu.readUnused(unmasked));
-    INDEXED_CASE4(kRegDma3Dad      , return mmu.readUnused(unmasked));
     INDEXED_CASE2(kRegDma3Count    , return dmac.read<kLabel>());
     INDEXED_CASE2(kRegDma3Control  , return dmac.read<kLabel>());
     INDEXED_CASE2(kRegTimer0Count  , return timerc.read<kLabel>());
@@ -180,7 +172,6 @@ void Io::writeByte(u32 addr, u8 byte)
     INDEXED_CASE2(kRegDispayControl, ppu.io.dispcnt.write<kIndex>(byte));
     INDEXED_CASE2(kRegGreenSwap    , ppu.io.greenswap.write<kIndex>(byte));
     INDEXED_CASE2(kRegDisplayStatus, ppu.io.dispstat.write<kIndex>(byte));
-    INDEXED_CASE2(kRegVerticalCount, ppu.io.vcount.write<kIndex>(byte));
     INDEXED_CASE2(kRegBg0Control   , ppu.io.bgcnt[0].write<kIndex, 0xDFFF>(byte));
     INDEXED_CASE2(kRegBg1Control   , ppu.io.bgcnt[1].write<kIndex, 0xDFFF>(byte));
     INDEXED_CASE2(kRegBg2Control   , ppu.io.bgcnt[2].write<kIndex, 0xFFFF>(byte));
@@ -255,7 +246,6 @@ void Io::writeByte(u32 addr, u8 byte)
     WRITE_BYTE_REG(REG_POSTFLG    , io.postflag      , 0x0000'00FF);
     WRITE_BYTE_REG(REG_HALTCNT    , arm.io.haltcnt   , 0x0000'00FF);
 
-    INDEXED_CASE2(kRegKeyInput     , keypad.io.input.write<kIndex>(byte));
     INDEXED_CASE2(kRegKeyControl   , keypad.io.control.write<kIndex>(byte));
     INDEXED_CASE4(kRegDma0Sad      , dmac.write<kLabel>(byte));
     INDEXED_CASE4(kRegDma0Dad      , dmac.write<kLabel>(byte));

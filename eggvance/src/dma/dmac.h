@@ -27,19 +27,15 @@ u8 DmaController::read() const
 {    
     INDEXED_IF4(Addr, kRegDma0Sad    , return dmas[0].io.sad.read<kIndex>());
     INDEXED_IF4(Addr, kRegDma0Dad    , return dmas[0].io.dad.read<kIndex>());
-    INDEXED_IF2(Addr, kRegDma0Count  , return dmas[0].io.count.read<kIndex>());
     INDEXED_IF2(Addr, kRegDma0Control, return dmas[0].io.control.read<kIndex>());
     INDEXED_IF4(Addr, kRegDma1Sad    , return dmas[1].io.sad.read<kIndex>());
     INDEXED_IF4(Addr, kRegDma1Dad    , return dmas[1].io.dad.read<kIndex>());
-    INDEXED_IF2(Addr, kRegDma1Count  , return dmas[1].io.count.read<kIndex>());
     INDEXED_IF2(Addr, kRegDma1Control, return dmas[1].io.control.read<kIndex>());
     INDEXED_IF4(Addr, kRegDma2Sad    , return dmas[2].io.sad.read<kIndex>());
     INDEXED_IF4(Addr, kRegDma2Dad    , return dmas[2].io.dad.read<kIndex>());
-    INDEXED_IF2(Addr, kRegDma2Count  , return dmas[2].io.count.read<kIndex>());
     INDEXED_IF2(Addr, kRegDma2Control, return dmas[2].io.control.read<kIndex>());
     INDEXED_IF4(Addr, kRegDma3Sad    , return dmas[3].io.sad.read<kIndex>());
     INDEXED_IF4(Addr, kRegDma3Dad    , return dmas[3].io.dad.read<kIndex>());
-    INDEXED_IF2(Addr, kRegDma3Count  , return dmas[3].io.count.read<kIndex>());
     INDEXED_IF2(Addr, kRegDma3Control, return dmas[3].io.control.read<kIndex>());
 
     UNREACHABLE;

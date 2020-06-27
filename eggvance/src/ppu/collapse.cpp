@@ -56,7 +56,7 @@ void PPU::collapse(const std::vector<BGLayer>& layers)
 template<int obj_master>
 void PPU::collapseNN(const std::vector<BGLayer>& layers)
 {
-    u32* scanline = &video_device->buffer[kScreenW * io.vcount];
+    u32* scanline = &video_device->buffer[kScreenW * io.vcount.value];
 
     for (int x = 0; x < kScreenW; ++x)
     {
@@ -87,7 +87,7 @@ void PPU::collapseNW(const std::vector<BGLayer>& layers)
 template<int obj_master, int win_master>
 void PPU::collapseNW(const std::vector<BGLayer>& layers)
 {
-    u32* scanline = &video_device->buffer[kScreenW * io.vcount];
+    u32* scanline = &video_device->buffer[kScreenW * io.vcount.value];
 
     for (int x = 0; x < kScreenW; ++x)
     {
@@ -118,7 +118,7 @@ void PPU::collapseBN(const std::vector<BGLayer>& layers)
 {
     constexpr int flags = 0xFFFF;
 
-    u32* scanline = &video_device->buffer[kScreenW * io.vcount];
+    u32* scanline = &video_device->buffer[kScreenW * io.vcount.value];
 
     for (int x = 0; x < kScreenW; ++x)
     {
@@ -202,7 +202,7 @@ void PPU::collapseBW(const std::vector<BGLayer>& layers)
 template<int obj_master, int blend_mode, int win_master>
 void PPU::collapseBW(const std::vector<BGLayer>& layers)
 {
-    u32* scanline = &video_device->buffer[kScreenW * io.vcount];
+    u32* scanline = &video_device->buffer[kScreenW * io.vcount.value];
 
     for (int x = 0; x < kScreenW; ++x)
     {
@@ -257,9 +257,9 @@ template<int obj_master>
 int PPU::possibleWindows() const
 {
     int windows = 0;
-    if (io.dispcnt.win0 && io.winv[0].contains(io.vcount))
+    if (io.dispcnt.win0 && io.winv[0].contains(io.vcount.value))
         windows |= WF_WIN0;
-    if (io.dispcnt.win1 && io.winv[1].contains(io.vcount))
+    if (io.dispcnt.win1 && io.winv[1].contains(io.vcount.value))
         windows |= WF_WIN1;
     if (io.dispcnt.winobj && obj_master)
         windows |= WF_WINOBJ;

@@ -77,12 +77,11 @@ struct PpuIo
         template<uint Index>
         u8 read() const
         {
-            static_assert(Index < kSize);
+            u8 value = XRegister<kSize, kMask>::read<Index>();
 
-            if (Index == 0)
-                return data[0] | (vblank << 0) | (hblank << 1) | (vmatch << 2);
-            else
-                return data[1];
+            if (Index == 0) value |= (vblank << 0) | (hblank << 1) | (vmatch << 2);
+
+            return value;
         }
 
         template<uint Index>
@@ -114,8 +113,6 @@ struct PpuIo
 
     struct VCount : XRegisterR<2>
     {
-        operator uint() const { return value; }
-
         void next()
         {
             value = (value + 1) % 228;
@@ -171,24 +168,12 @@ struct PpuIo
     }
     bgcnt[4];
 
-    struct BGOffset : XRegisterW<2, 0x01FF>
-    {
-        operator u16() const { return value; }
-    };
-
-    BGOffset bghofs[4];
-    BGOffset bgvofs[4];
-
-    template<uint Init>
-    struct BGParameter : XRegisterW<2, 0xFFFF, Init>
-    {
-        operator s16() const { return value; }
-    };
-
-    BGParameter<0x0100> bgpa[2];
-    BGParameter<0x0000> bgpb[2];
-    BGParameter<0x0000> bgpc[2];
-    BGParameter<0x0100> bgpd[2];
+    XRegisterW<2, 0x01FF> bghofs[4];
+    XRegisterW<2, 0x01FF> bgvofs[4];
+    XRegisterW<2, 0xFFFF, 0x0100, s16> bgpa[2];
+    XRegisterW<2, 0xFFFF, 0x0000, s16> bgpb[2];
+    XRegisterW<2, 0xFFFF, 0x0000, s16> bgpc[2];
+    XRegisterW<2, 0xFFFF, 0x0100, s16> bgpd[2];
 
     struct BGReference : XRegisterW<4, 0x0FFF'FFFF>
     {

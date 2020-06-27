@@ -10,8 +10,8 @@ Point PPU::transform(int x, int bg)
     bg -= 2;
 
     return Point(
-        io.bgx[bg] + io.bgpa[bg] * x,
-        io.bgy[bg] + io.bgpc[bg] * x
+        io.bgx[bg] + io.bgpa[bg].value * x,
+        io.bgy[bg] + io.bgpc[bg].value * x
     );
 }
 
@@ -44,8 +44,8 @@ void PPU::renderBgMode0(int bg)
     const auto& dims  = io.bgcnt[bg].dimsReg();
 
     Point origin(
-        io.bghofs[bg],
-        io.bgvofs[bg] + io.vcount
+        io.bghofs[bg].value,
+        io.bgvofs[bg].value + io.vcount.value
     );
 
     origin.x %= dims.w;
@@ -198,7 +198,7 @@ void PPU::renderObjects()
 {
     for (const auto& entry : mmu.oam.entries)
     {
-        if (entry.isDisabled() || !entry.isVisible(io.vcount))
+        if (entry.isDisabled() || !entry.isVisible(io.vcount.value))
             continue;
 
         const auto& origin = entry.origin;
@@ -215,7 +215,7 @@ void PPU::renderObjects()
 
         Point offset(
             -center.x + origin.x - std::min(origin.x, 0),
-            -center.y + io.vcount
+            -center.y + io.vcount.value
         );
 
         int end = std::min(origin.x + bounds.w, kScreenW);

@@ -34,7 +34,7 @@ void PPU::scanline()
 
     if (io.dispcnt.blank)
     {
-        u32* scanline = &video_device->buffer[kScreenW * io.vcount];
+        u32* scanline = &video_device->buffer[kScreenW * io.vcount.value];
         std::fill_n(scanline, kScreenW, 0xFFFFFFFF);
         return;
     }
@@ -100,10 +100,10 @@ void PPU::hblank()
     io.dispstat.hblank = true;
     io.dispstat.vblank = false;
 
-    io.bgx[0].hblank(io.bgpb[0]);
-    io.bgx[1].hblank(io.bgpb[1]);
-    io.bgy[0].hblank(io.bgpd[0]);
-    io.bgy[1].hblank(io.bgpd[1]);
+    io.bgx[0].hblank(io.bgpb[0].value);
+    io.bgx[1].hblank(io.bgpb[1].value);
+    io.bgy[0].hblank(io.bgpd[0].value);
+    io.bgy[1].hblank(io.bgpd[1].value);
 
     if (io.dispstat.hblank_irq)
     {
@@ -131,7 +131,7 @@ void PPU::vblank()
 
 void PPU::next()
 {
-    io.dispstat.vmatch = io.vcount == io.dispstat.vcompare;
+    io.dispstat.vmatch = io.vcount.value == io.dispstat.vcompare;
     if (io.dispstat.vmatch && io.dispstat.vmatch_irq)
     {
         irqh.request(kIrqVMatch);
@@ -171,7 +171,7 @@ bool PPU::mosaicAffected(int bg) const
 
 bool PPU::mosaicDominant() const
 {
-    return io.vcount % io.mosaic.bgs.y == 0;
+    return io.vcount.value % io.mosaic.bgs.y == 0;
 }
 
 u32 PPU::argb(u16 color)
