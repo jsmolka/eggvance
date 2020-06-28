@@ -5,8 +5,8 @@
 template<uint Instr>
 void ARM::Thumb_MoveShiftedRegister(u16 instr)
 {
-    constexpr uint kAmount = bits::seq< 6, 5>(Instr);
-    constexpr uint kOpcode = bits::seq<11, 2>(Instr);
+    static constexpr uint kAmount = bits::seq< 6, 5>(Instr);
+    static constexpr uint kOpcode = bits::seq<11, 2>(Instr);
 
     uint rd = bits::seq<0, 3>(instr);
     uint rs = bits::seq<3, 3>(instr);
@@ -39,8 +39,8 @@ void ARM::Thumb_AddSubtract(u16 instr)
         kOpcodeSubImm
     };
 
-    constexpr uint kRn     = bits::seq<6, 3>(Instr);
-    constexpr uint kOpcode = bits::seq<9, 2>(Instr);
+    static constexpr uint kRn     = bits::seq<6, 3>(Instr);
+    static constexpr uint kOpcode = bits::seq<9, 2>(Instr);
 
     uint rd = bits::seq<0, 3>(instr);
     uint rs = bits::seq<3, 3>(instr);
@@ -72,8 +72,8 @@ void ARM::Thumb_ImmediateOperations(u16 instr)
         kOpcodeSub
     };
 
-    constexpr uint kRd     = bits::seq< 8, 3>(Instr);
-    constexpr uint kOpcode = bits::seq<11, 2>(Instr);
+    static constexpr uint kRd     = bits::seq< 8, 3>(Instr);
+    static constexpr uint kOpcode = bits::seq<11, 2>(Instr);
 
     uint offset = bits::seq<0, 8>(instr);
 
@@ -116,7 +116,7 @@ void ARM::Thumb_AluOperations(u16 instr)
         kOpcodeMvn
     };
 
-    constexpr uint kOpcode = bits::seq<6, 4>(Instr);
+    static constexpr uint kOpcode = bits::seq<6, 4>(Instr);
 
     uint rd = bits::seq<0, 3>(instr);
     uint rs = bits::seq<3, 3>(instr);
@@ -163,9 +163,9 @@ void ARM::Thumb_HighRegisterOperations(u16 instr)
         kOpcodeBx
     };
 
-    constexpr uint kHs     = bits::seq<6, 1>(Instr);
-    constexpr uint kHd     = bits::seq<7, 1>(Instr);
-    constexpr uint kOpcode = bits::seq<8, 2>(Instr);
+    static constexpr uint kHs     = bits::seq<6, 1>(Instr);
+    static constexpr uint kHd     = bits::seq<7, 1>(Instr);
+    static constexpr uint kOpcode = bits::seq<8, 2>(Instr);
 
     uint rd = bits::seq<0, 3>(instr);
     uint rs = bits::seq<3, 3>(instr);
@@ -216,7 +216,7 @@ void ARM::Thumb_HighRegisterOperations(u16 instr)
 template<uint Instr>
 void ARM::Thumb_LoadPcRelative(u16 instr)
 {
-    constexpr uint kRd = bits::seq<8, 3>(Instr);
+    static constexpr uint kRd = bits::seq<8, 3>(Instr);
 
     uint offset = bits::seq<0, 8>(instr);
 
@@ -236,8 +236,8 @@ void ARM::Thumb_LoadStoreRegisterOffset(u16 instr)
         kOpcodeLdrb
     };
 
-    constexpr uint kRo     = bits::seq< 6, 3>(Instr);
-    constexpr uint kOpcode = bits::seq<10, 2>(Instr);
+    static constexpr uint kRo     = bits::seq< 6, 3>(Instr);
+    static constexpr uint kOpcode = bits::seq<10, 2>(Instr);
 
     uint rd = bits::seq<0, 3>(instr);
     uint rb = bits::seq<3, 3>(instr);
@@ -282,8 +282,8 @@ void ARM::Thumb_LoadStoreByteHalf(u16 instr)
         kOpcodeLdrsh
     };
 
-    constexpr uint kRo     = bits::seq< 6, 3>(Instr);
-    constexpr uint kOpcode = bits::seq<10, 2>(Instr);
+    static constexpr uint kRo     = bits::seq< 6, 3>(Instr);
+    static constexpr uint kOpcode = bits::seq<10, 2>(Instr);
 
     uint rd = bits::seq<0, 3>(instr);
     uint rb = bits::seq<3, 3>(instr);
@@ -330,8 +330,8 @@ void ARM::Thumb_LoadStoreImmediateOffset(u16 instr)
         kOpcodeLdrb
     };
 
-    constexpr uint kAmount = bits::seq< 6, 5>(Instr);
-    constexpr uint kOpcode = bits::seq<11, 2>(Instr);
+    static constexpr uint kAmount = bits::seq< 6, 5>(Instr);
+    static constexpr uint kOpcode = bits::seq<11, 2>(Instr);
 
     uint rd = bits::seq<0, 3>(instr);
     uint rb = bits::seq<3, 3>(instr);
@@ -368,8 +368,8 @@ void ARM::Thumb_LoadStoreImmediateOffset(u16 instr)
 template<uint Instr>
 void ARM::Thumb_LoadStoreHalf(u16 instr)
 {
-    constexpr uint kAmount = bits::seq< 6, 5>(Instr);
-    constexpr uint kLoad   = bits::seq<11, 1>(Instr);
+    static constexpr uint kAmount = bits::seq< 6, 5>(Instr);
+    static constexpr uint kLoad   = bits::seq<11, 1>(Instr);
 
     uint rd = bits::seq<0, 3>(instr);
     uint rb = bits::seq<3, 3>(instr);
@@ -391,8 +391,8 @@ void ARM::Thumb_LoadStoreHalf(u16 instr)
 template<uint Instr>
 void ARM::Thumb_LoadStoreSpRelative(u16 instr)
 {
-    constexpr uint kRd   = bits::seq< 8, 3>(Instr);
-    constexpr uint kLoad = bits::seq<11, 1>(Instr);
+    static constexpr uint kRd   = bits::seq< 8, 3>(Instr);
+    static constexpr uint kLoad = bits::seq<11, 1>(Instr);
 
     uint offset = bits::seq<0, 8>(instr);
 
@@ -413,8 +413,8 @@ void ARM::Thumb_LoadStoreSpRelative(u16 instr)
 template<uint Instr>
 void ARM::Thumb_LoadRelativeAddress(u16 instr)
 {
-    constexpr uint kRd = bits::seq< 8, 3>(Instr);
-    constexpr uint kSp = bits::seq<11, 1>(Instr);
+    static constexpr uint kRd = bits::seq< 8, 3>(Instr);
+    static constexpr uint kSp = bits::seq<11, 1>(Instr);
 
     uint offset = bits::seq<0, 8>(instr);
 
@@ -426,7 +426,7 @@ void ARM::Thumb_LoadRelativeAddress(u16 instr)
 template<uint Instr>
 void ARM::Thumb_AddOffsetSp(u16 instr)
 {
-    constexpr uint kSign = bits::seq<7, 1>(Instr);
+    static constexpr uint kSign = bits::seq<7, 1>(Instr);
 
     uint offset = bits::seq<0, 7>(instr);
 
@@ -441,8 +441,8 @@ void ARM::Thumb_AddOffsetSp(u16 instr)
 template<uint Instr>
 void ARM::Thumb_PushPopRegisters(u16 instr)
 {
-    constexpr uint kRbit = bits::seq< 8, 1>(Instr);
-    constexpr uint kPop  = bits::seq<11, 1>(Instr);
+    static constexpr uint kRbit = bits::seq< 8, 1>(Instr);
+    static constexpr uint kPop  = bits::seq<11, 1>(Instr);
 
     uint rlist = bits::seq<0, 8>(instr);
 
@@ -478,8 +478,8 @@ void ARM::Thumb_PushPopRegisters(u16 instr)
 template<uint Instr>
 void ARM::Thumb_LoadStoreMultiple(u16 instr)
 {
-    constexpr uint kRb   = bits::seq< 8, 3>(Instr);
-    constexpr uint kLoad = bits::seq<11, 1>(Instr);
+    static constexpr uint kRb   = bits::seq< 8, 3>(Instr);
+    static constexpr uint kLoad = bits::seq<11, 1>(Instr);
 
     uint rlist = bits::seq<0, 8>(instr);
 
@@ -538,7 +538,7 @@ void ARM::Thumb_LoadStoreMultiple(u16 instr)
 template<uint Instr>
 void ARM::Thumb_ConditionalBranch(u16 instr)
 {
-    constexpr uint kCondition = bits::seq<8, 4>(Instr);
+    static constexpr uint kCondition = bits::seq<8, 4>(Instr);
 
     if (cpsr.check(kCondition))
     {
@@ -573,7 +573,7 @@ void ARM::Thumb_UnconditionalBranch(u16 instr)
 template<uint Instr>
 void ARM::Thumb_LongBranchLink(u16 instr)
 {
-    constexpr uint kSecond = bits::seq<11, 1>(Instr);
+    static constexpr uint kSecond = bits::seq<11, 1>(Instr);
 
     uint offset = bits::seq<0, 11>(instr);
 

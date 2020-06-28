@@ -23,7 +23,7 @@ void ARM::Arm_BranchExchange(u32 instr)
 template<uint Instr>
 void ARM::Arm_BranchLink(u32 instr)
 {
-    constexpr uint kLink = bits::seq<24, 1>(Instr);
+    static constexpr uint kLink = bits::seq<24, 1>(Instr);
 
     uint offset = bits::seq<0, 24>(instr);
 
@@ -59,9 +59,9 @@ void ARM::Arm_DataProcessing(u32 instr)
         kOpcodeMvn
     };
 
-    constexpr uint kFlags  = bits::seq<20, 1>(Instr);
-    constexpr uint kOpcode = bits::seq<21, 4>(Instr);
-    constexpr uint kImmOp  = bits::seq<25, 1>(Instr);
+    static constexpr uint kFlags  = bits::seq<20, 1>(Instr);
+    static constexpr uint kOpcode = bits::seq<21, 4>(Instr);
+    static constexpr uint kImmOp  = bits::seq<25, 1>(Instr);
 
     uint rd    = bits::seq<12, 4>(instr);
     uint rn    = bits::seq<16, 4>(instr);
@@ -71,7 +71,7 @@ void ARM::Arm_DataProcessing(u32 instr)
     u32  op1 = regs[rn];
     u32  op2;
 
-    constexpr bool kLogical = [&]() {
+    static constexpr bool kLogical = [&]() {
         switch (kOpcode)
         {
         case kOpcodeAnd:
@@ -189,9 +189,9 @@ void ARM::Arm_DataProcessing(u32 instr)
 template<uint Instr>
 void ARM::Arm_StatusTransfer(u32 instr)
 {
-    constexpr uint kWrite = bits::seq<21, 1>(Instr);
-    constexpr uint kSpsr  = bits::seq<22, 1>(Instr);
-    constexpr uint kImmOp = bits::seq<25, 1>(Instr);
+    static constexpr uint kWrite = bits::seq<21, 1>(Instr);
+    static constexpr uint kSpsr  = bits::seq<22, 1>(Instr);
+    static constexpr uint kImmOp = bits::seq<25, 1>(Instr);
 
     if (kWrite)
     {
@@ -236,8 +236,8 @@ void ARM::Arm_StatusTransfer(u32 instr)
 template<uint Instr>
 void ARM::Arm_Multiply(u32 instr)
 {
-    constexpr uint kFlags      = bits::seq<20, 1>(Instr);
-    constexpr uint kAccumulate = bits::seq<21, 1>(Instr);
+    static constexpr uint kFlags      = bits::seq<20, 1>(Instr);
+    static constexpr uint kAccumulate = bits::seq<21, 1>(Instr);
 
     uint rm = bits::seq< 0, 4>(instr);
     uint rs = bits::seq< 8, 4>(instr);
@@ -264,9 +264,9 @@ void ARM::Arm_Multiply(u32 instr)
 template<uint Instr>
 void ARM::Arm_MultiplyLong(u32 instr)
 {
-    constexpr uint kFlags      = bits::seq<20, 1>(Instr);
-    constexpr uint kAccumulate = bits::seq<21, 1>(Instr);
-    constexpr uint kSign       = bits::seq<22, 1>(Instr);
+    static constexpr uint kFlags      = bits::seq<20, 1>(Instr);
+    static constexpr uint kAccumulate = bits::seq<21, 1>(Instr);
+    static constexpr uint kSign       = bits::seq<22, 1>(Instr);
 
     uint rm  = bits::seq< 0, 4>(instr);
     uint rs  = bits::seq< 8, 4>(instr);
@@ -302,12 +302,12 @@ void ARM::Arm_MultiplyLong(u32 instr)
 template<uint Instr>
 void ARM::Arm_SingleDataTransfer(u32 instr)
 {
-    constexpr uint kLoad      = bits::seq<20, 1>(Instr);
-    constexpr uint kWriteback = bits::seq<21, 1>(Instr);
-    constexpr uint kByte      = bits::seq<22, 1>(Instr);
-    constexpr uint kIncrement = bits::seq<23, 1>(Instr);
-    constexpr uint kPreIndex  = bits::seq<24, 1>(Instr);
-    constexpr uint kRegOp     = bits::seq<25, 1>(Instr);
+    static constexpr uint kLoad      = bits::seq<20, 1>(Instr);
+    static constexpr uint kWriteback = bits::seq<21, 1>(Instr);
+    static constexpr uint kByte      = bits::seq<22, 1>(Instr);
+    static constexpr uint kIncrement = bits::seq<23, 1>(Instr);
+    static constexpr uint kPreIndex  = bits::seq<24, 1>(Instr);
+    static constexpr uint kRegOp     = bits::seq<25, 1>(Instr);
 
     uint rd = bits::seq<12, 4>(instr);
     uint rn = bits::seq<16, 4>(instr);
@@ -399,12 +399,12 @@ void ARM::Arm_HalfSignedDataTransfer(u32 instr)
         kOpcodeLdrsh
     };
 
-    constexpr uint kOpcode    = bits::seq< 5, 2>(Instr);
-    constexpr uint kLoad      = bits::seq<20, 1>(Instr);
-    constexpr uint kWriteback = bits::seq<21, 1>(Instr);
-    constexpr uint kImmOp     = bits::seq<22, 1>(Instr);
-    constexpr uint kIncrement = bits::seq<23, 1>(Instr);
-    constexpr uint kPreIndex  = bits::seq<24, 1>(Instr);
+    static constexpr uint kOpcode    = bits::seq< 5, 2>(Instr);
+    static constexpr uint kLoad      = bits::seq<20, 1>(Instr);
+    static constexpr uint kWriteback = bits::seq<21, 1>(Instr);
+    static constexpr uint kImmOp     = bits::seq<22, 1>(Instr);
+    static constexpr uint kIncrement = bits::seq<23, 1>(Instr);
+    static constexpr uint kPreIndex  = bits::seq<24, 1>(Instr);
 
     uint rd = bits::seq<12, 4>(instr);
     uint rn = bits::seq<16, 4>(instr);
@@ -481,9 +481,9 @@ void ARM::Arm_HalfSignedDataTransfer(u32 instr)
 template<uint Instr>
 void ARM::Arm_BlockDataTransfer(u32 instr)
 {
-    constexpr uint kLoad      = bits::seq<20, 1>(Instr);
-    constexpr uint kUserMode  = bits::seq<22, 1>(Instr);
-    constexpr uint kIncrement = bits::seq<23, 1>(Instr);
+    static constexpr uint kLoad      = bits::seq<20, 1>(Instr);
+    static constexpr uint kUserMode  = bits::seq<22, 1>(Instr);
+    static constexpr uint kIncrement = bits::seq<23, 1>(Instr);
 
     uint rlist     = bits::seq< 0, 16>(instr);
     uint rn        = bits::seq<16,  4>(instr);
@@ -591,7 +591,7 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
 template<uint Instr>
 void ARM::Arm_SingleDataSwap(u32 instr)
 {
-    constexpr uint kByte = bits::seq<22, 1>(Instr);
+    static constexpr uint kByte = bits::seq<22, 1>(Instr);
 
     uint rm = bits::seq< 0, 4>(instr);
     uint rd = bits::seq<12, 4>(instr);
