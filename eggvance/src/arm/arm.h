@@ -82,30 +82,21 @@ private:
     void interruptHW();
     void interruptSW();
 
-    void Arm_BranchExchange(u32 instr);
-    template<uint link>
-    void Arm_BranchLink(u32 instr);
-    template<uint flags, uint opcode, uint imm_op>
-    void Arm_DataProcessing(u32 instr);
-    template<uint write, uint use_spsr, uint imm_op>
-    void Arm_StatusTransfer(u32 instr);
-    template<uint flags, uint accumulate>
-    void Arm_Multiply(u32 instr);
-    template<uint flags, uint accumulate, uint sign>
-    void Arm_MultiplyLong(u32 instr);
-    template<uint load, uint writeback, uint byte, uint increment, uint pre_index, uint imm_op>
-    void Arm_SingleDataTransfer(u32 instr);
-    template<uint opcode, uint load, uint writeback, uint imm_op, uint increment, uint pre_index>
-    void Arm_HalfSignedDataTransfer(u32 instr);
-    template<uint load, uint writeback, uint user_mode, uint increment, uint pre_index>
-    void Arm_BlockDataTransfer(u32 instr);
-    template<uint byte>
-    void Arm_SingleDataSwap(u32 instr);
-    void Arm_SoftwareInterrupt(u32 instr);
-    void Arm_CoprocessorDataOperations(u32 instr);
-    void Arm_CoprocessorDataTransfers(u32 instr);
-    void Arm_CoprocessorRegisterTransfers(u32 instr);
-    void Arm_Undefined(u32 instr);
+    template<uint Instr> void Arm_BranchExchange(u32 instr);
+    template<uint Instr> void Arm_BranchLink(u32 instr);
+    template<uint Instr> void Arm_DataProcessing(u32 instr);
+    template<uint Instr> void Arm_StatusTransfer(u32 instr);
+    template<uint Instr> void Arm_Multiply(u32 instr);
+    template<uint Instr> void Arm_MultiplyLong(u32 instr);
+    template<uint Instr> void Arm_SingleDataTransfer(u32 instr);
+    template<uint Instr> void Arm_HalfSignedDataTransfer(u32 instr);
+    template<uint Instr> void Arm_BlockDataTransfer(u32 instr);
+    template<uint Instr> void Arm_SingleDataSwap(u32 instr);
+    template<uint Instr> void Arm_SoftwareInterrupt(u32 instr);
+    template<uint Instr> void Arm_CoprocessorDataOperations(u32 instr);
+    template<uint Instr> void Arm_CoprocessorDataTransfers(u32 instr);
+    template<uint Instr> void Arm_CoprocessorRegisterTransfers(u32 instr);
+    template<uint Instr> void Arm_Undefined(u32 instr);
 
     template<uint Instr> void Thumb_MoveShiftedRegister(u16 instr);
     template<uint Instr> void Thumb_AddSubtract(u16 instr);
@@ -128,10 +119,11 @@ private:
     template<uint Instr> void Thumb_LongBranchLink(u16 instr);
     template<uint Instr> void Thumb_Undefined(u16 instr);
 
+    using Handler32 = void(ARM::*)(u32);
     using Handler16 = void(ARM::*)(u16);
 
-    template<uint Hash>
-    static constexpr Handler16 Thumb_Decode();
+    template<uint Hash> static constexpr Handler32 Arm_Decode();
+    template<uint Hash> static constexpr Handler16 Thumb_Decode();
 
     int cycles    = 0;
     u32 prev_addr = 0;
