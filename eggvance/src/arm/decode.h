@@ -21,12 +21,12 @@ enum class InstructionArm
     CoprocessorRegisterTransfers
 };
 
-inline uint armHash(u32 instr)
+constexpr uint armHash(u32 instr)
 {
     return ((instr >> 16) & 0xFF0) | ((instr >> 4) & 0xF);
 }
 
-inline InstructionArm decodeArmHash(uint hash)
+constexpr InstructionArm decodeArmHash(uint hash)
 {
     if ((hash & 0b1111'0000'0000) == 0b1111'0000'0000) return InstructionArm::SoftwareInterrupt;
     if ((hash & 0b1110'0000'0000) == 0b1100'0000'0000) return InstructionArm::CoprocessorDataTransfers;
@@ -63,7 +63,7 @@ inline InstructionArm decodeArmHash(uint hash)
     return InstructionArm::Undefined;
 }
 
-inline InstructionArm decodeArm(u32 instr)
+constexpr InstructionArm decodeArm(u32 instr)
 {
     return decodeArmHash(armHash(instr));
 }
@@ -92,12 +92,12 @@ enum class InstructionThumb
     LongBranchLink
 };
 
-inline uint thumbHash(u16 instr)
+constexpr uint thumbHash(u16 instr)
 {
     return instr >> 6;
 }
 
-inline InstructionThumb decodeThumbHash(uint hash)
+constexpr InstructionThumb decodeThumbHash(uint hash)
 {
     if ((hash & 0b11'1110'0000) == 0b00'0110'0000) return InstructionThumb::AddSubtract;
     if ((hash & 0b11'1000'0000) == 0b00'0000'0000) return InstructionThumb::MoveShiftedRegister;
@@ -144,7 +144,7 @@ inline InstructionThumb decodeThumbHash(uint hash)
     return InstructionThumb::Undefined;
 }
 
-inline InstructionThumb decodeThumb(u16 instr)
+constexpr InstructionThumb decodeThumb(u16 instr)
 {
     return decodeThumbHash(thumbHash(instr));
 }

@@ -1,9 +1,12 @@
 #include "arm.h"
 
-template<uint amount, uint opcode>
+#include "arm/decode.h"
+
+template<uint Instr>
 void ARM::Thumb_MoveShiftedRegister(u16 instr)
 {
-    static_assert(opcode != kShiftRor);
+    constexpr uint kAmount = bits::seq< 6, 5>(Instr);
+    constexpr uint kOpcode = bits::seq<11, 2>(Instr);
 
     uint rd = bits::seq<0, 3>(instr);
     uint rs = bits::seq<3, 3>(instr);
@@ -11,11 +14,13 @@ void ARM::Thumb_MoveShiftedRegister(u16 instr)
     u32& dst = regs[rd];
     u32  src = regs[rs];
 
-    switch (opcode)
+    static_assert(kOpcode != kShiftRor);
+
+    switch (kOpcode)
     {
-    case kShiftLsl: dst = log(lsl      (src, amount)); break;
-    case kShiftLsr: dst = log(lsr<true>(src, amount)); break;
-    case kShiftAsr: dst = log(asr<true>(src, amount)); break;
+    case kShiftLsl: dst = log(lsl      (src, kAmount)); break;
+    case kShiftLsr: dst = log(lsr<true>(src, kAmount)); break;
+    case kShiftAsr: dst = log(asr<true>(src, kAmount)); break;
 
     default:
         UNREACHABLE;
@@ -23,16 +28,19 @@ void ARM::Thumb_MoveShiftedRegister(u16 instr)
     }
 }
 
-template<uint rn, uint opcode>
+template<uint Instr>
 void ARM::Thumb_AddSubtract(u16 instr)
 {
     enum Opcode
     {
-        kOpcodeAddReg = 0b00,
-        kOpcodeSubReg = 0b01,
-        kOpcodeAddImm = 0b10,
-        kOpcodeSubImm = 0b11
+        kOpcodeAddReg,
+        kOpcodeSubReg,
+        kOpcodeAddImm,
+        kOpcodeSubImm
     };
+
+    constexpr uint kRn     = bits::seq<6, 3>(Instr);
+    constexpr uint kOpcode = bits::seq<9, 2>(Instr);
 
     uint rd = bits::seq<0, 3>(instr);
     uint rs = bits::seq<3, 3>(instr);
@@ -40,12 +48,12 @@ void ARM::Thumb_AddSubtract(u16 instr)
     u32& dst = regs[rd];
     u32  src = regs[rs];
 
-    switch (opcode)
+    switch (kOpcode)
     {
-    case kOpcodeAddImm: dst = add(src,       rn); break;
-    case kOpcodeSubImm: dst = sub(src,       rn); break;
-    case kOpcodeAddReg: dst = add(src, regs[rn]); break;
-    case kOpcodeSubReg: dst = sub(src, regs[rn]); break;
+    case kOpcodeAddImm: dst = add(src,       kRn); break;
+    case kOpcodeSubImm: dst = sub(src,       kRn); break;
+    case kOpcodeAddReg: dst = add(src, regs[kRn]); break;
+    case kOpcodeSubReg: dst = sub(src, regs[kRn]); break;
 
     default:
         UNREACHABLE;
@@ -53,23 +61,26 @@ void ARM::Thumb_AddSubtract(u16 instr)
     }
 }
 
-template<uint rd, uint opcode>
+template<uint Instr>
 void ARM::Thumb_ImmediateOperations(u16 instr)
 {
     enum Opcode
     {
-        kOpcodeMov = 0b00,
-        kOpcodeCmp = 0b01,
-        kOpcodeAdd = 0b10,
-        kOpcodeSub = 0b11
+        kOpcodeMov,
+        kOpcodeCmp,
+        kOpcodeAdd,
+        kOpcodeSub
     };
+
+    constexpr uint kRd     = bits::seq< 8, 3>(Instr);
+    constexpr uint kOpcode = bits::seq<11, 2>(Instr);
 
     uint offset = bits::seq<0, 8>(instr);
 
-    u32& dst = regs[rd];
-    u32  src = regs[rd];
+    u32& dst = regs[kRd];
+    u32  src = regs[kRd];
 
-    switch (opcode)
+    switch (kOpcode)
     {
     case kOpcodeMov: dst = log(     offset); break;
     case kOpcodeCmp:       sub(src, offset); break;
@@ -82,28 +93,30 @@ void ARM::Thumb_ImmediateOperations(u16 instr)
     }
 }
 
-template<uint opcode>
+template<uint Instr>
 void ARM::Thumb_AluOperations(u16 instr)
 {
     enum Opcode
     {
-        kOpcodeAnd = 0b0000,
-        kOpcodeEor = 0b0001,
-        kOpcodeLsl = 0b0010,
-        kOpcodeLsr = 0b0011,
-        kOpcodeAsr = 0b0100,
-        kOpcodeAdc = 0b0101,
-        kOpcodeSbc = 0b0110,
-        kOpcodeRor = 0b0111,
-        kOpcodeTst = 0b1000,
-        kOpcodeNeg = 0b1001,
-        kOpcodeCmp = 0b1010,
-        kOpcodeCmn = 0b1011,
-        kOpcodeOrr = 0b1100,
-        kOpcodeMul = 0b1101,
-        kOpcodeBic = 0b1110,
-        kOpcodeMvn = 0b1111
+        kOpcodeAnd,
+        kOpcodeEor,
+        kOpcodeLsl,
+        kOpcodeLsr,
+        kOpcodeAsr,
+        kOpcodeAdc,
+        kOpcodeSbc,
+        kOpcodeRor,
+        kOpcodeTst,
+        kOpcodeNeg,
+        kOpcodeCmp,
+        kOpcodeCmn,
+        kOpcodeOrr,
+        kOpcodeMul,
+        kOpcodeBic,
+        kOpcodeMvn
     };
+
+    constexpr uint kOpcode = bits::seq<6, 4>(Instr);
 
     uint rd = bits::seq<0, 3>(instr);
     uint rs = bits::seq<3, 3>(instr);
@@ -111,7 +124,7 @@ void ARM::Thumb_AluOperations(u16 instr)
     u32& dst = regs[rd];
     u32  src = regs[rs];
 
-    switch (opcode)
+    switch (kOpcode)
     {
     case kOpcodeLsl: dst = log(lsl       (dst, src)); idle(); break;
     case kOpcodeLsr: dst = log(lsr<false>(dst, src)); idle(); break;
@@ -139,37 +152,41 @@ void ARM::Thumb_AluOperations(u16 instr)
     }
 }
 
-template<uint hs, uint hd, uint opcode>
+template<uint Instr>
 void ARM::Thumb_HighRegisterOperations(u16 instr)
 {
     enum Opcode
     {
-        kOpcodeAdd = 0b00,
-        kOpcodeCmp = 0b01,
-        kOpcodeMov = 0b10,
-        kOpcodeBx  = 0b11
+        kOpcodeAdd,
+        kOpcodeCmp,
+        kOpcodeMov,
+        kOpcodeBx
     };
+
+    constexpr uint kHs     = bits::seq<6, 1>(Instr);
+    constexpr uint kHd     = bits::seq<7, 1>(Instr);
+    constexpr uint kOpcode = bits::seq<8, 2>(Instr);
 
     uint rd = bits::seq<0, 3>(instr);
     uint rs = bits::seq<3, 3>(instr);
 
-    rs |= hs << 3;
-    rd |= hd << 3;
+    rs |= kHs << 3;
+    rd |= kHd << 3;
 
     u32& dst = regs[rd];
     u32  src = regs[rs];
 
-    switch (opcode)
+    switch (kOpcode)
     {
     case kOpcodeAdd:
         dst += src;
-        if (rd == 15 && hd)
+        if (rd == 15 && kHd)
             flushHalf();
         break;
 
     case kOpcodeMov:
         dst = src;
-        if (rd == 15 && hd)
+        if (rd == 15 && kHd)
             flushHalf();
         break;
 
@@ -196,34 +213,39 @@ void ARM::Thumb_HighRegisterOperations(u16 instr)
     }
 }
 
-template<uint rd>
+template<uint Instr>
 void ARM::Thumb_LoadPcRelative(u16 instr)
 {
+    constexpr uint kRd = bits::seq<8, 3>(Instr);
+
     uint offset = bits::seq<0, 8>(instr);
 
-    regs[rd] = readWord((pc & ~0x3) + (offset << 2));
+    regs[kRd] = readWord((pc & ~0x3) + (offset << 2));
 
     idle();
 }
 
-template<uint ro, uint opcode>
+template<uint Instr>
 void ARM::Thumb_LoadStoreRegisterOffset(u16 instr)
 {
     enum Opcode
     {
-        kOpcodeStr  = 0b00,
-        kOpcodeStrb = 0b01,
-        kOpcodeLdr  = 0b10,
-        kOpcodeLdrb = 0b11
+        kOpcodeStr,
+        kOpcodeStrb,
+        kOpcodeLdr,
+        kOpcodeLdrb
     };
+
+    constexpr uint kRo     = bits::seq< 6, 3>(Instr);
+    constexpr uint kOpcode = bits::seq<10, 2>(Instr);
 
     uint rd = bits::seq<0, 3>(instr);
     uint rb = bits::seq<3, 3>(instr);
 
     u32& dst = regs[rd];
-    u32 addr = regs[rb] + regs[ro];
+    u32 addr = regs[rb] + regs[kRo];
 
-    switch (opcode)
+    switch (kOpcode)
     {
     case kOpcodeStr:
         writeWord(addr, dst);
@@ -249,24 +271,27 @@ void ARM::Thumb_LoadStoreRegisterOffset(u16 instr)
     }
 }
 
-template<uint ro, uint opcode>
+template<uint Instr>
 void ARM::Thumb_LoadStoreByteHalf(u16 instr)
 {
     enum Opcode
     {
-        kOpcodeStrh  = 0b00,
-        kOpcodeLdrsb = 0b01,
-        kOpcodeLdrh  = 0b10,
-        kOpcodeLdrsh = 0b11
+        kOpcodeStrh,
+        kOpcodeLdrsb,
+        kOpcodeLdrh,
+        kOpcodeLdrsh
     };
+
+    constexpr uint kRo     = bits::seq< 6, 3>(Instr);
+    constexpr uint kOpcode = bits::seq<10, 2>(Instr);
 
     uint rd = bits::seq<0, 3>(instr);
     uint rb = bits::seq<3, 3>(instr);
 
     u32& dst = regs[rd];
-    u32 addr = regs[rb] + regs[ro];
+    u32 addr = regs[rb] + regs[kRo];
 
-    switch (opcode)
+    switch (kOpcode)
     {
     case kOpcodeStrh:
         writeHalf(addr, dst);
@@ -294,24 +319,27 @@ void ARM::Thumb_LoadStoreByteHalf(u16 instr)
     }
 }
 
-template<uint amount, uint opcode>
+template<uint Instr>
 void ARM::Thumb_LoadStoreImmediateOffset(u16 instr)
 {
     enum Opcode
     {
-        kOpcodeStr  = 0b00,
-        kOpcodeLdr  = 0b01,
-        kOpcodeStrb = 0b10,
-        kOpcodeLdrb = 0b11
+        kOpcodeStr,
+        kOpcodeLdr,
+        kOpcodeStrb,
+        kOpcodeLdrb
     };
+
+    constexpr uint kAmount = bits::seq< 6, 5>(Instr);
+    constexpr uint kOpcode = bits::seq<11, 2>(Instr);
 
     uint rd = bits::seq<0, 3>(instr);
     uint rb = bits::seq<3, 3>(instr);
 
     u32& dst = regs[rd];
-    u32 addr = regs[rb] + (amount << (~opcode & 0x2));
+    u32 addr = regs[rb] + (kAmount << (~kOpcode & 0x2));
 
-    switch (opcode)
+    switch (kOpcode)
     {
     case kOpcodeStr:
         writeWord(addr, dst);
@@ -337,16 +365,19 @@ void ARM::Thumb_LoadStoreImmediateOffset(u16 instr)
     }
 }
 
-template<uint amount, uint load>
+template<uint Instr>
 void ARM::Thumb_LoadStoreHalf(u16 instr)
 {
+    constexpr uint kAmount = bits::seq< 6, 5>(Instr);
+    constexpr uint kLoad   = bits::seq<11, 1>(Instr);
+
     uint rd = bits::seq<0, 3>(instr);
     uint rb = bits::seq<3, 3>(instr);
 
     u32& dst = regs[rd];
-    u32 addr = regs[rb] + (amount << 1);
+    u32 addr = regs[rb] + (kAmount << 1);
 
-    if (load)
+    if (kLoad)
     {
         dst = readHalfRotated(addr);
         idle();
@@ -357,15 +388,18 @@ void ARM::Thumb_LoadStoreHalf(u16 instr)
     }
 }
 
-template<uint rd, uint load>
+template<uint Instr>
 void ARM::Thumb_LoadStoreSpRelative(u16 instr)
 {
+    constexpr uint kRd   = bits::seq< 8, 3>(Instr);
+    constexpr uint kLoad = bits::seq<11, 1>(Instr);
+
     uint offset = bits::seq<0, 8>(instr);
 
-    u32& dst = regs[rd];
+    u32& dst = regs[kRd];
     u32 addr = sp + (offset << 2);
 
-    if (load)
+    if (kLoad)
     {
         dst = readWordRotated(addr);
         idle();
@@ -376,42 +410,45 @@ void ARM::Thumb_LoadStoreSpRelative(u16 instr)
     }
 }
 
-template<uint rd, uint use_sp>
+template<uint Instr>
 void ARM::Thumb_LoadRelativeAddress(u16 instr)
 {
+    constexpr uint kRd = bits::seq< 8, 3>(Instr);
+    constexpr uint kSp = bits::seq<11, 1>(Instr);
+
     uint offset = bits::seq<0, 8>(instr);
 
     offset <<= 2;
 
-    u32& dst = regs[rd];
-
-    if (use_sp)
-        dst = (sp & ~0x0) + offset;
-    else
-        dst = (pc & ~0x2) + offset;
+    regs[kRd] = (kSp ? (sp & ~0x0) : (pc & ~0x2)) + offset;
 }
 
-template<uint sign>
+template<uint Instr>
 void ARM::Thumb_AddOffsetSp(u16 instr)
 {
+    constexpr uint kSign = bits::seq<7, 1>(Instr);
+
     uint offset = bits::seq<0, 7>(instr);
 
     offset <<= 2;
 
-    if (sign)
+    if (kSign)
         sp -= offset;
     else
         sp += offset; 
 }
 
-template<uint rbit, uint pop>
+template<uint Instr>
 void ARM::Thumb_PushPopRegisters(u16 instr)
 {
+    constexpr uint kRbit = bits::seq< 8, 1>(Instr);
+    constexpr uint kPop  = bits::seq<11, 1>(Instr);
+
     uint rlist = bits::seq<0, 8>(instr);
 
-    rlist |= rbit << (pop ? 15 : 14);
+    rlist |= kRbit << (kPop ? 15 : 14);
 
-    if (pop)
+    if (kPop)
     {
         for (uint x : bits::iter(rlist))
         {
@@ -419,7 +456,7 @@ void ARM::Thumb_PushPopRegisters(u16 instr)
             sp += 4;
         }
 
-        if (rbit)
+        if (kRbit)
             flushHalf();
 
         idle();
@@ -438,21 +475,24 @@ void ARM::Thumb_PushPopRegisters(u16 instr)
     }
 }
 
-template<uint rb, uint load>
+template<uint Instr>
 void ARM::Thumb_LoadStoreMultiple(u16 instr)
 {
+    constexpr uint kRb   = bits::seq< 8, 3>(Instr);
+    constexpr uint kLoad = bits::seq<11, 1>(Instr);
+
     uint rlist = bits::seq<0, 8>(instr);
 
-    u32 addr = regs[rb];
-    u32 base = regs[rb];
+    u32 addr = regs[kRb];
+    u32 base = regs[kRb];
 
     bool writeback = true;
 
     if (rlist != 0)
     {
-        if (load)
+        if (kLoad)
         {
-            if (rlist & (1 << rb))
+            if (rlist & (1 << kRb))
                 writeback = false;
 
             for (uint x : bits::iter(rlist))
@@ -466,7 +506,7 @@ void ARM::Thumb_LoadStoreMultiple(u16 instr)
         {
             for (uint x : bits::iter(rlist))
             {
-                u32 value = x != rb
+                u32 value = x != kRb
                     ? regs[x]
                     : x == bits::ctz(rlist)
                         ? base
@@ -479,7 +519,7 @@ void ARM::Thumb_LoadStoreMultiple(u16 instr)
     }
     else
     {
-        if (load)
+        if (kLoad)
         {
             pc = readWord(addr);
             flushHalf();
@@ -492,13 +532,15 @@ void ARM::Thumb_LoadStoreMultiple(u16 instr)
     }
 
     if (writeback)
-        regs[rb] = addr;
+        regs[kRb] = addr;
 }
 
-template<uint condition>
+template<uint Instr>
 void ARM::Thumb_ConditionalBranch(u16 instr)
 {
-    if (cpsr.check(condition))
+    constexpr uint kCondition = bits::seq<8, 4>(Instr);
+
+    if (cpsr.check(kCondition))
     {
         uint offset = bits::seq<0, 8>(instr);
 
@@ -510,11 +552,13 @@ void ARM::Thumb_ConditionalBranch(u16 instr)
     }
 }
 
+template<uint Instr>
 void ARM::Thumb_SoftwareInterrupt(u16 instr)
 {
     interruptSW();
 }
 
+template<uint Instr>
 void ARM::Thumb_UnconditionalBranch(u16 instr)
 {
     uint offset = bits::seq<0, 11>(instr);
@@ -526,12 +570,14 @@ void ARM::Thumb_UnconditionalBranch(u16 instr)
     flushHalf();
 }
 
-template<uint second>
+template<uint Instr>
 void ARM::Thumb_LongBranchLink(u16 instr)
 {
+    constexpr uint kSecond = bits::seq<11, 1>(Instr);
+
     uint offset = bits::seq<0, 11>(instr);
 
-    if (second)
+    if (kSecond)
     {
         offset <<= 1;
 
@@ -550,1035 +596,52 @@ void ARM::Thumb_LongBranchLink(u16 instr)
     }
 }
 
+template<uint Instr>
 void ARM::Thumb_Undefined(u16 instr)
 {
     ASSERT(false, __FUNCTION__);
 }
 
-std::array<void(ARM::*)(u16), 1024> ARM::instr_thumb =
+template<uint Hash>
+constexpr ARM::Handler16 ARM::Thumb_Decode()
 {
-    &ARM::Thumb_MoveShiftedRegister<0, 0>,
-    &ARM::Thumb_MoveShiftedRegister<1, 0>,
-    &ARM::Thumb_MoveShiftedRegister<2, 0>,
-    &ARM::Thumb_MoveShiftedRegister<3, 0>,
-    &ARM::Thumb_MoveShiftedRegister<4, 0>,
-    &ARM::Thumb_MoveShiftedRegister<5, 0>,
-    &ARM::Thumb_MoveShiftedRegister<6, 0>,
-    &ARM::Thumb_MoveShiftedRegister<7, 0>,
-    &ARM::Thumb_MoveShiftedRegister<8, 0>,
-    &ARM::Thumb_MoveShiftedRegister<9, 0>,
-    &ARM::Thumb_MoveShiftedRegister<10, 0>,
-    &ARM::Thumb_MoveShiftedRegister<11, 0>,
-    &ARM::Thumb_MoveShiftedRegister<12, 0>,
-    &ARM::Thumb_MoveShiftedRegister<13, 0>,
-    &ARM::Thumb_MoveShiftedRegister<14, 0>,
-    &ARM::Thumb_MoveShiftedRegister<15, 0>,
-    &ARM::Thumb_MoveShiftedRegister<16, 0>,
-    &ARM::Thumb_MoveShiftedRegister<17, 0>,
-    &ARM::Thumb_MoveShiftedRegister<18, 0>,
-    &ARM::Thumb_MoveShiftedRegister<19, 0>,
-    &ARM::Thumb_MoveShiftedRegister<20, 0>,
-    &ARM::Thumb_MoveShiftedRegister<21, 0>,
-    &ARM::Thumb_MoveShiftedRegister<22, 0>,
-    &ARM::Thumb_MoveShiftedRegister<23, 0>,
-    &ARM::Thumb_MoveShiftedRegister<24, 0>,
-    &ARM::Thumb_MoveShiftedRegister<25, 0>,
-    &ARM::Thumb_MoveShiftedRegister<26, 0>,
-    &ARM::Thumb_MoveShiftedRegister<27, 0>,
-    &ARM::Thumb_MoveShiftedRegister<28, 0>,
-    &ARM::Thumb_MoveShiftedRegister<29, 0>,
-    &ARM::Thumb_MoveShiftedRegister<30, 0>,
-    &ARM::Thumb_MoveShiftedRegister<31, 0>,
-    &ARM::Thumb_MoveShiftedRegister<0, 1>,
-    &ARM::Thumb_MoveShiftedRegister<1, 1>,
-    &ARM::Thumb_MoveShiftedRegister<2, 1>,
-    &ARM::Thumb_MoveShiftedRegister<3, 1>,
-    &ARM::Thumb_MoveShiftedRegister<4, 1>,
-    &ARM::Thumb_MoveShiftedRegister<5, 1>,
-    &ARM::Thumb_MoveShiftedRegister<6, 1>,
-    &ARM::Thumb_MoveShiftedRegister<7, 1>,
-    &ARM::Thumb_MoveShiftedRegister<8, 1>,
-    &ARM::Thumb_MoveShiftedRegister<9, 1>,
-    &ARM::Thumb_MoveShiftedRegister<10, 1>,
-    &ARM::Thumb_MoveShiftedRegister<11, 1>,
-    &ARM::Thumb_MoveShiftedRegister<12, 1>,
-    &ARM::Thumb_MoveShiftedRegister<13, 1>,
-    &ARM::Thumb_MoveShiftedRegister<14, 1>,
-    &ARM::Thumb_MoveShiftedRegister<15, 1>,
-    &ARM::Thumb_MoveShiftedRegister<16, 1>,
-    &ARM::Thumb_MoveShiftedRegister<17, 1>,
-    &ARM::Thumb_MoveShiftedRegister<18, 1>,
-    &ARM::Thumb_MoveShiftedRegister<19, 1>,
-    &ARM::Thumb_MoveShiftedRegister<20, 1>,
-    &ARM::Thumb_MoveShiftedRegister<21, 1>,
-    &ARM::Thumb_MoveShiftedRegister<22, 1>,
-    &ARM::Thumb_MoveShiftedRegister<23, 1>,
-    &ARM::Thumb_MoveShiftedRegister<24, 1>,
-    &ARM::Thumb_MoveShiftedRegister<25, 1>,
-    &ARM::Thumb_MoveShiftedRegister<26, 1>,
-    &ARM::Thumb_MoveShiftedRegister<27, 1>,
-    &ARM::Thumb_MoveShiftedRegister<28, 1>,
-    &ARM::Thumb_MoveShiftedRegister<29, 1>,
-    &ARM::Thumb_MoveShiftedRegister<30, 1>,
-    &ARM::Thumb_MoveShiftedRegister<31, 1>,
-    &ARM::Thumb_MoveShiftedRegister<0, 2>,
-    &ARM::Thumb_MoveShiftedRegister<1, 2>,
-    &ARM::Thumb_MoveShiftedRegister<2, 2>,
-    &ARM::Thumb_MoveShiftedRegister<3, 2>,
-    &ARM::Thumb_MoveShiftedRegister<4, 2>,
-    &ARM::Thumb_MoveShiftedRegister<5, 2>,
-    &ARM::Thumb_MoveShiftedRegister<6, 2>,
-    &ARM::Thumb_MoveShiftedRegister<7, 2>,
-    &ARM::Thumb_MoveShiftedRegister<8, 2>,
-    &ARM::Thumb_MoveShiftedRegister<9, 2>,
-    &ARM::Thumb_MoveShiftedRegister<10, 2>,
-    &ARM::Thumb_MoveShiftedRegister<11, 2>,
-    &ARM::Thumb_MoveShiftedRegister<12, 2>,
-    &ARM::Thumb_MoveShiftedRegister<13, 2>,
-    &ARM::Thumb_MoveShiftedRegister<14, 2>,
-    &ARM::Thumb_MoveShiftedRegister<15, 2>,
-    &ARM::Thumb_MoveShiftedRegister<16, 2>,
-    &ARM::Thumb_MoveShiftedRegister<17, 2>,
-    &ARM::Thumb_MoveShiftedRegister<18, 2>,
-    &ARM::Thumb_MoveShiftedRegister<19, 2>,
-    &ARM::Thumb_MoveShiftedRegister<20, 2>,
-    &ARM::Thumb_MoveShiftedRegister<21, 2>,
-    &ARM::Thumb_MoveShiftedRegister<22, 2>,
-    &ARM::Thumb_MoveShiftedRegister<23, 2>,
-    &ARM::Thumb_MoveShiftedRegister<24, 2>,
-    &ARM::Thumb_MoveShiftedRegister<25, 2>,
-    &ARM::Thumb_MoveShiftedRegister<26, 2>,
-    &ARM::Thumb_MoveShiftedRegister<27, 2>,
-    &ARM::Thumb_MoveShiftedRegister<28, 2>,
-    &ARM::Thumb_MoveShiftedRegister<29, 2>,
-    &ARM::Thumb_MoveShiftedRegister<30, 2>,
-    &ARM::Thumb_MoveShiftedRegister<31, 2>,
-    &ARM::Thumb_AddSubtract<0, 0>,
-    &ARM::Thumb_AddSubtract<1, 0>,
-    &ARM::Thumb_AddSubtract<2, 0>,
-    &ARM::Thumb_AddSubtract<3, 0>,
-    &ARM::Thumb_AddSubtract<4, 0>,
-    &ARM::Thumb_AddSubtract<5, 0>,
-    &ARM::Thumb_AddSubtract<6, 0>,
-    &ARM::Thumb_AddSubtract<7, 0>,
-    &ARM::Thumb_AddSubtract<0, 1>,
-    &ARM::Thumb_AddSubtract<1, 1>,
-    &ARM::Thumb_AddSubtract<2, 1>,
-    &ARM::Thumb_AddSubtract<3, 1>,
-    &ARM::Thumb_AddSubtract<4, 1>,
-    &ARM::Thumb_AddSubtract<5, 1>,
-    &ARM::Thumb_AddSubtract<6, 1>,
-    &ARM::Thumb_AddSubtract<7, 1>,
-    &ARM::Thumb_AddSubtract<0, 2>,
-    &ARM::Thumb_AddSubtract<1, 2>,
-    &ARM::Thumb_AddSubtract<2, 2>,
-    &ARM::Thumb_AddSubtract<3, 2>,
-    &ARM::Thumb_AddSubtract<4, 2>,
-    &ARM::Thumb_AddSubtract<5, 2>,
-    &ARM::Thumb_AddSubtract<6, 2>,
-    &ARM::Thumb_AddSubtract<7, 2>,
-    &ARM::Thumb_AddSubtract<0, 3>,
-    &ARM::Thumb_AddSubtract<1, 3>,
-    &ARM::Thumb_AddSubtract<2, 3>,
-    &ARM::Thumb_AddSubtract<3, 3>,
-    &ARM::Thumb_AddSubtract<4, 3>,
-    &ARM::Thumb_AddSubtract<5, 3>,
-    &ARM::Thumb_AddSubtract<6, 3>,
-    &ARM::Thumb_AddSubtract<7, 3>,
-    &ARM::Thumb_ImmediateOperations<0, 0>,
-    &ARM::Thumb_ImmediateOperations<0, 0>,
-    &ARM::Thumb_ImmediateOperations<0, 0>,
-    &ARM::Thumb_ImmediateOperations<0, 0>,
-    &ARM::Thumb_ImmediateOperations<1, 0>,
-    &ARM::Thumb_ImmediateOperations<1, 0>,
-    &ARM::Thumb_ImmediateOperations<1, 0>,
-    &ARM::Thumb_ImmediateOperations<1, 0>,
-    &ARM::Thumb_ImmediateOperations<2, 0>,
-    &ARM::Thumb_ImmediateOperations<2, 0>,
-    &ARM::Thumb_ImmediateOperations<2, 0>,
-    &ARM::Thumb_ImmediateOperations<2, 0>,
-    &ARM::Thumb_ImmediateOperations<3, 0>,
-    &ARM::Thumb_ImmediateOperations<3, 0>,
-    &ARM::Thumb_ImmediateOperations<3, 0>,
-    &ARM::Thumb_ImmediateOperations<3, 0>,
-    &ARM::Thumb_ImmediateOperations<4, 0>,
-    &ARM::Thumb_ImmediateOperations<4, 0>,
-    &ARM::Thumb_ImmediateOperations<4, 0>,
-    &ARM::Thumb_ImmediateOperations<4, 0>,
-    &ARM::Thumb_ImmediateOperations<5, 0>,
-    &ARM::Thumb_ImmediateOperations<5, 0>,
-    &ARM::Thumb_ImmediateOperations<5, 0>,
-    &ARM::Thumb_ImmediateOperations<5, 0>,
-    &ARM::Thumb_ImmediateOperations<6, 0>,
-    &ARM::Thumb_ImmediateOperations<6, 0>,
-    &ARM::Thumb_ImmediateOperations<6, 0>,
-    &ARM::Thumb_ImmediateOperations<6, 0>,
-    &ARM::Thumb_ImmediateOperations<7, 0>,
-    &ARM::Thumb_ImmediateOperations<7, 0>,
-    &ARM::Thumb_ImmediateOperations<7, 0>,
-    &ARM::Thumb_ImmediateOperations<7, 0>,
-    &ARM::Thumb_ImmediateOperations<0, 1>,
-    &ARM::Thumb_ImmediateOperations<0, 1>,
-    &ARM::Thumb_ImmediateOperations<0, 1>,
-    &ARM::Thumb_ImmediateOperations<0, 1>,
-    &ARM::Thumb_ImmediateOperations<1, 1>,
-    &ARM::Thumb_ImmediateOperations<1, 1>,
-    &ARM::Thumb_ImmediateOperations<1, 1>,
-    &ARM::Thumb_ImmediateOperations<1, 1>,
-    &ARM::Thumb_ImmediateOperations<2, 1>,
-    &ARM::Thumb_ImmediateOperations<2, 1>,
-    &ARM::Thumb_ImmediateOperations<2, 1>,
-    &ARM::Thumb_ImmediateOperations<2, 1>,
-    &ARM::Thumb_ImmediateOperations<3, 1>,
-    &ARM::Thumb_ImmediateOperations<3, 1>,
-    &ARM::Thumb_ImmediateOperations<3, 1>,
-    &ARM::Thumb_ImmediateOperations<3, 1>,
-    &ARM::Thumb_ImmediateOperations<4, 1>,
-    &ARM::Thumb_ImmediateOperations<4, 1>,
-    &ARM::Thumb_ImmediateOperations<4, 1>,
-    &ARM::Thumb_ImmediateOperations<4, 1>,
-    &ARM::Thumb_ImmediateOperations<5, 1>,
-    &ARM::Thumb_ImmediateOperations<5, 1>,
-    &ARM::Thumb_ImmediateOperations<5, 1>,
-    &ARM::Thumb_ImmediateOperations<5, 1>,
-    &ARM::Thumb_ImmediateOperations<6, 1>,
-    &ARM::Thumb_ImmediateOperations<6, 1>,
-    &ARM::Thumb_ImmediateOperations<6, 1>,
-    &ARM::Thumb_ImmediateOperations<6, 1>,
-    &ARM::Thumb_ImmediateOperations<7, 1>,
-    &ARM::Thumb_ImmediateOperations<7, 1>,
-    &ARM::Thumb_ImmediateOperations<7, 1>,
-    &ARM::Thumb_ImmediateOperations<7, 1>,
-    &ARM::Thumb_ImmediateOperations<0, 2>,
-    &ARM::Thumb_ImmediateOperations<0, 2>,
-    &ARM::Thumb_ImmediateOperations<0, 2>,
-    &ARM::Thumb_ImmediateOperations<0, 2>,
-    &ARM::Thumb_ImmediateOperations<1, 2>,
-    &ARM::Thumb_ImmediateOperations<1, 2>,
-    &ARM::Thumb_ImmediateOperations<1, 2>,
-    &ARM::Thumb_ImmediateOperations<1, 2>,
-    &ARM::Thumb_ImmediateOperations<2, 2>,
-    &ARM::Thumb_ImmediateOperations<2, 2>,
-    &ARM::Thumb_ImmediateOperations<2, 2>,
-    &ARM::Thumb_ImmediateOperations<2, 2>,
-    &ARM::Thumb_ImmediateOperations<3, 2>,
-    &ARM::Thumb_ImmediateOperations<3, 2>,
-    &ARM::Thumb_ImmediateOperations<3, 2>,
-    &ARM::Thumb_ImmediateOperations<3, 2>,
-    &ARM::Thumb_ImmediateOperations<4, 2>,
-    &ARM::Thumb_ImmediateOperations<4, 2>,
-    &ARM::Thumb_ImmediateOperations<4, 2>,
-    &ARM::Thumb_ImmediateOperations<4, 2>,
-    &ARM::Thumb_ImmediateOperations<5, 2>,
-    &ARM::Thumb_ImmediateOperations<5, 2>,
-    &ARM::Thumb_ImmediateOperations<5, 2>,
-    &ARM::Thumb_ImmediateOperations<5, 2>,
-    &ARM::Thumb_ImmediateOperations<6, 2>,
-    &ARM::Thumb_ImmediateOperations<6, 2>,
-    &ARM::Thumb_ImmediateOperations<6, 2>,
-    &ARM::Thumb_ImmediateOperations<6, 2>,
-    &ARM::Thumb_ImmediateOperations<7, 2>,
-    &ARM::Thumb_ImmediateOperations<7, 2>,
-    &ARM::Thumb_ImmediateOperations<7, 2>,
-    &ARM::Thumb_ImmediateOperations<7, 2>,
-    &ARM::Thumb_ImmediateOperations<0, 3>,
-    &ARM::Thumb_ImmediateOperations<0, 3>,
-    &ARM::Thumb_ImmediateOperations<0, 3>,
-    &ARM::Thumb_ImmediateOperations<0, 3>,
-    &ARM::Thumb_ImmediateOperations<1, 3>,
-    &ARM::Thumb_ImmediateOperations<1, 3>,
-    &ARM::Thumb_ImmediateOperations<1, 3>,
-    &ARM::Thumb_ImmediateOperations<1, 3>,
-    &ARM::Thumb_ImmediateOperations<2, 3>,
-    &ARM::Thumb_ImmediateOperations<2, 3>,
-    &ARM::Thumb_ImmediateOperations<2, 3>,
-    &ARM::Thumb_ImmediateOperations<2, 3>,
-    &ARM::Thumb_ImmediateOperations<3, 3>,
-    &ARM::Thumb_ImmediateOperations<3, 3>,
-    &ARM::Thumb_ImmediateOperations<3, 3>,
-    &ARM::Thumb_ImmediateOperations<3, 3>,
-    &ARM::Thumb_ImmediateOperations<4, 3>,
-    &ARM::Thumb_ImmediateOperations<4, 3>,
-    &ARM::Thumb_ImmediateOperations<4, 3>,
-    &ARM::Thumb_ImmediateOperations<4, 3>,
-    &ARM::Thumb_ImmediateOperations<5, 3>,
-    &ARM::Thumb_ImmediateOperations<5, 3>,
-    &ARM::Thumb_ImmediateOperations<5, 3>,
-    &ARM::Thumb_ImmediateOperations<5, 3>,
-    &ARM::Thumb_ImmediateOperations<6, 3>,
-    &ARM::Thumb_ImmediateOperations<6, 3>,
-    &ARM::Thumb_ImmediateOperations<6, 3>,
-    &ARM::Thumb_ImmediateOperations<6, 3>,
-    &ARM::Thumb_ImmediateOperations<7, 3>,
-    &ARM::Thumb_ImmediateOperations<7, 3>,
-    &ARM::Thumb_ImmediateOperations<7, 3>,
-    &ARM::Thumb_ImmediateOperations<7, 3>,
-    &ARM::Thumb_AluOperations<0>,
-    &ARM::Thumb_AluOperations<1>,
-    &ARM::Thumb_AluOperations<2>,
-    &ARM::Thumb_AluOperations<3>,
-    &ARM::Thumb_AluOperations<4>,
-    &ARM::Thumb_AluOperations<5>,
-    &ARM::Thumb_AluOperations<6>,
-    &ARM::Thumb_AluOperations<7>,
-    &ARM::Thumb_AluOperations<8>,
-    &ARM::Thumb_AluOperations<9>,
-    &ARM::Thumb_AluOperations<10>,
-    &ARM::Thumb_AluOperations<11>,
-    &ARM::Thumb_AluOperations<12>,
-    &ARM::Thumb_AluOperations<13>,
-    &ARM::Thumb_AluOperations<14>,
-    &ARM::Thumb_AluOperations<15>,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_HighRegisterOperations<1, 0, 0>,
-    &ARM::Thumb_HighRegisterOperations<0, 1, 0>,
-    &ARM::Thumb_HighRegisterOperations<1, 1, 0>,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_HighRegisterOperations<1, 0, 1>,
-    &ARM::Thumb_HighRegisterOperations<0, 1, 1>,
-    &ARM::Thumb_HighRegisterOperations<1, 1, 1>,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_HighRegisterOperations<1, 0, 2>,
-    &ARM::Thumb_HighRegisterOperations<0, 1, 2>,
-    &ARM::Thumb_HighRegisterOperations<1, 1, 2>,
-    &ARM::Thumb_HighRegisterOperations<0, 0, 3>,
-    &ARM::Thumb_HighRegisterOperations<1, 0, 3>,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_LoadPcRelative<0>,
-    &ARM::Thumb_LoadPcRelative<0>,
-    &ARM::Thumb_LoadPcRelative<0>,
-    &ARM::Thumb_LoadPcRelative<0>,
-    &ARM::Thumb_LoadPcRelative<1>,
-    &ARM::Thumb_LoadPcRelative<1>,
-    &ARM::Thumb_LoadPcRelative<1>,
-    &ARM::Thumb_LoadPcRelative<1>,
-    &ARM::Thumb_LoadPcRelative<2>,
-    &ARM::Thumb_LoadPcRelative<2>,
-    &ARM::Thumb_LoadPcRelative<2>,
-    &ARM::Thumb_LoadPcRelative<2>,
-    &ARM::Thumb_LoadPcRelative<3>,
-    &ARM::Thumb_LoadPcRelative<3>,
-    &ARM::Thumb_LoadPcRelative<3>,
-    &ARM::Thumb_LoadPcRelative<3>,
-    &ARM::Thumb_LoadPcRelative<4>,
-    &ARM::Thumb_LoadPcRelative<4>,
-    &ARM::Thumb_LoadPcRelative<4>,
-    &ARM::Thumb_LoadPcRelative<4>,
-    &ARM::Thumb_LoadPcRelative<5>,
-    &ARM::Thumb_LoadPcRelative<5>,
-    &ARM::Thumb_LoadPcRelative<5>,
-    &ARM::Thumb_LoadPcRelative<5>,
-    &ARM::Thumb_LoadPcRelative<6>,
-    &ARM::Thumb_LoadPcRelative<6>,
-    &ARM::Thumb_LoadPcRelative<6>,
-    &ARM::Thumb_LoadPcRelative<6>,
-    &ARM::Thumb_LoadPcRelative<7>,
-    &ARM::Thumb_LoadPcRelative<7>,
-    &ARM::Thumb_LoadPcRelative<7>,
-    &ARM::Thumb_LoadPcRelative<7>,
-    &ARM::Thumb_LoadStoreRegisterOffset<0, 0>,
-    &ARM::Thumb_LoadStoreRegisterOffset<1, 0>,
-    &ARM::Thumb_LoadStoreRegisterOffset<2, 0>,
-    &ARM::Thumb_LoadStoreRegisterOffset<3, 0>,
-    &ARM::Thumb_LoadStoreRegisterOffset<4, 0>,
-    &ARM::Thumb_LoadStoreRegisterOffset<5, 0>,
-    &ARM::Thumb_LoadStoreRegisterOffset<6, 0>,
-    &ARM::Thumb_LoadStoreRegisterOffset<7, 0>,
-    &ARM::Thumb_LoadStoreByteHalf<0, 0>,
-    &ARM::Thumb_LoadStoreByteHalf<1, 0>,
-    &ARM::Thumb_LoadStoreByteHalf<2, 0>,
-    &ARM::Thumb_LoadStoreByteHalf<3, 0>,
-    &ARM::Thumb_LoadStoreByteHalf<4, 0>,
-    &ARM::Thumb_LoadStoreByteHalf<5, 0>,
-    &ARM::Thumb_LoadStoreByteHalf<6, 0>,
-    &ARM::Thumb_LoadStoreByteHalf<7, 0>,
-    &ARM::Thumb_LoadStoreRegisterOffset<0, 1>,
-    &ARM::Thumb_LoadStoreRegisterOffset<1, 1>,
-    &ARM::Thumb_LoadStoreRegisterOffset<2, 1>,
-    &ARM::Thumb_LoadStoreRegisterOffset<3, 1>,
-    &ARM::Thumb_LoadStoreRegisterOffset<4, 1>,
-    &ARM::Thumb_LoadStoreRegisterOffset<5, 1>,
-    &ARM::Thumb_LoadStoreRegisterOffset<6, 1>,
-    &ARM::Thumb_LoadStoreRegisterOffset<7, 1>,
-    &ARM::Thumb_LoadStoreByteHalf<0, 1>,
-    &ARM::Thumb_LoadStoreByteHalf<1, 1>,
-    &ARM::Thumb_LoadStoreByteHalf<2, 1>,
-    &ARM::Thumb_LoadStoreByteHalf<3, 1>,
-    &ARM::Thumb_LoadStoreByteHalf<4, 1>,
-    &ARM::Thumb_LoadStoreByteHalf<5, 1>,
-    &ARM::Thumb_LoadStoreByteHalf<6, 1>,
-    &ARM::Thumb_LoadStoreByteHalf<7, 1>,
-    &ARM::Thumb_LoadStoreRegisterOffset<0, 2>,
-    &ARM::Thumb_LoadStoreRegisterOffset<1, 2>,
-    &ARM::Thumb_LoadStoreRegisterOffset<2, 2>,
-    &ARM::Thumb_LoadStoreRegisterOffset<3, 2>,
-    &ARM::Thumb_LoadStoreRegisterOffset<4, 2>,
-    &ARM::Thumb_LoadStoreRegisterOffset<5, 2>,
-    &ARM::Thumb_LoadStoreRegisterOffset<6, 2>,
-    &ARM::Thumb_LoadStoreRegisterOffset<7, 2>,
-    &ARM::Thumb_LoadStoreByteHalf<0, 2>,
-    &ARM::Thumb_LoadStoreByteHalf<1, 2>,
-    &ARM::Thumb_LoadStoreByteHalf<2, 2>,
-    &ARM::Thumb_LoadStoreByteHalf<3, 2>,
-    &ARM::Thumb_LoadStoreByteHalf<4, 2>,
-    &ARM::Thumb_LoadStoreByteHalf<5, 2>,
-    &ARM::Thumb_LoadStoreByteHalf<6, 2>,
-    &ARM::Thumb_LoadStoreByteHalf<7, 2>,
-    &ARM::Thumb_LoadStoreRegisterOffset<0, 3>,
-    &ARM::Thumb_LoadStoreRegisterOffset<1, 3>,
-    &ARM::Thumb_LoadStoreRegisterOffset<2, 3>,
-    &ARM::Thumb_LoadStoreRegisterOffset<3, 3>,
-    &ARM::Thumb_LoadStoreRegisterOffset<4, 3>,
-    &ARM::Thumb_LoadStoreRegisterOffset<5, 3>,
-    &ARM::Thumb_LoadStoreRegisterOffset<6, 3>,
-    &ARM::Thumb_LoadStoreRegisterOffset<7, 3>,
-    &ARM::Thumb_LoadStoreByteHalf<0, 3>,
-    &ARM::Thumb_LoadStoreByteHalf<1, 3>,
-    &ARM::Thumb_LoadStoreByteHalf<2, 3>,
-    &ARM::Thumb_LoadStoreByteHalf<3, 3>,
-    &ARM::Thumb_LoadStoreByteHalf<4, 3>,
-    &ARM::Thumb_LoadStoreByteHalf<5, 3>,
-    &ARM::Thumb_LoadStoreByteHalf<6, 3>,
-    &ARM::Thumb_LoadStoreByteHalf<7, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<0, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<1, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<2, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<3, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<4, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<5, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<6, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<7, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<8, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<9, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<10, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<11, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<12, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<13, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<14, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<15, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<16, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<17, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<18, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<19, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<20, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<21, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<22, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<23, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<24, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<25, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<26, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<27, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<28, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<29, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<30, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<31, 0>,
-    &ARM::Thumb_LoadStoreImmediateOffset<0, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<1, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<2, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<3, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<4, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<5, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<6, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<7, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<8, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<9, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<10, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<11, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<12, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<13, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<14, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<15, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<16, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<17, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<18, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<19, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<20, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<21, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<22, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<23, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<24, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<25, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<26, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<27, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<28, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<29, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<30, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<31, 1>,
-    &ARM::Thumb_LoadStoreImmediateOffset<0, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<1, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<2, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<3, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<4, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<5, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<6, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<7, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<8, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<9, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<10, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<11, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<12, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<13, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<14, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<15, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<16, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<17, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<18, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<19, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<20, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<21, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<22, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<23, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<24, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<25, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<26, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<27, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<28, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<29, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<30, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<31, 2>,
-    &ARM::Thumb_LoadStoreImmediateOffset<0, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<1, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<2, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<3, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<4, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<5, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<6, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<7, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<8, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<9, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<10, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<11, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<12, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<13, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<14, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<15, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<16, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<17, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<18, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<19, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<20, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<21, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<22, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<23, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<24, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<25, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<26, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<27, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<28, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<29, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<30, 3>,
-    &ARM::Thumb_LoadStoreImmediateOffset<31, 3>,
-    &ARM::Thumb_LoadStoreHalf<0, 0>,
-    &ARM::Thumb_LoadStoreHalf<1, 0>,
-    &ARM::Thumb_LoadStoreHalf<2, 0>,
-    &ARM::Thumb_LoadStoreHalf<3, 0>,
-    &ARM::Thumb_LoadStoreHalf<4, 0>,
-    &ARM::Thumb_LoadStoreHalf<5, 0>,
-    &ARM::Thumb_LoadStoreHalf<6, 0>,
-    &ARM::Thumb_LoadStoreHalf<7, 0>,
-    &ARM::Thumb_LoadStoreHalf<8, 0>,
-    &ARM::Thumb_LoadStoreHalf<9, 0>,
-    &ARM::Thumb_LoadStoreHalf<10, 0>,
-    &ARM::Thumb_LoadStoreHalf<11, 0>,
-    &ARM::Thumb_LoadStoreHalf<12, 0>,
-    &ARM::Thumb_LoadStoreHalf<13, 0>,
-    &ARM::Thumb_LoadStoreHalf<14, 0>,
-    &ARM::Thumb_LoadStoreHalf<15, 0>,
-    &ARM::Thumb_LoadStoreHalf<16, 0>,
-    &ARM::Thumb_LoadStoreHalf<17, 0>,
-    &ARM::Thumb_LoadStoreHalf<18, 0>,
-    &ARM::Thumb_LoadStoreHalf<19, 0>,
-    &ARM::Thumb_LoadStoreHalf<20, 0>,
-    &ARM::Thumb_LoadStoreHalf<21, 0>,
-    &ARM::Thumb_LoadStoreHalf<22, 0>,
-    &ARM::Thumb_LoadStoreHalf<23, 0>,
-    &ARM::Thumb_LoadStoreHalf<24, 0>,
-    &ARM::Thumb_LoadStoreHalf<25, 0>,
-    &ARM::Thumb_LoadStoreHalf<26, 0>,
-    &ARM::Thumb_LoadStoreHalf<27, 0>,
-    &ARM::Thumb_LoadStoreHalf<28, 0>,
-    &ARM::Thumb_LoadStoreHalf<29, 0>,
-    &ARM::Thumb_LoadStoreHalf<30, 0>,
-    &ARM::Thumb_LoadStoreHalf<31, 0>,
-    &ARM::Thumb_LoadStoreHalf<0, 1>,
-    &ARM::Thumb_LoadStoreHalf<1, 1>,
-    &ARM::Thumb_LoadStoreHalf<2, 1>,
-    &ARM::Thumb_LoadStoreHalf<3, 1>,
-    &ARM::Thumb_LoadStoreHalf<4, 1>,
-    &ARM::Thumb_LoadStoreHalf<5, 1>,
-    &ARM::Thumb_LoadStoreHalf<6, 1>,
-    &ARM::Thumb_LoadStoreHalf<7, 1>,
-    &ARM::Thumb_LoadStoreHalf<8, 1>,
-    &ARM::Thumb_LoadStoreHalf<9, 1>,
-    &ARM::Thumb_LoadStoreHalf<10, 1>,
-    &ARM::Thumb_LoadStoreHalf<11, 1>,
-    &ARM::Thumb_LoadStoreHalf<12, 1>,
-    &ARM::Thumb_LoadStoreHalf<13, 1>,
-    &ARM::Thumb_LoadStoreHalf<14, 1>,
-    &ARM::Thumb_LoadStoreHalf<15, 1>,
-    &ARM::Thumb_LoadStoreHalf<16, 1>,
-    &ARM::Thumb_LoadStoreHalf<17, 1>,
-    &ARM::Thumb_LoadStoreHalf<18, 1>,
-    &ARM::Thumb_LoadStoreHalf<19, 1>,
-    &ARM::Thumb_LoadStoreHalf<20, 1>,
-    &ARM::Thumb_LoadStoreHalf<21, 1>,
-    &ARM::Thumb_LoadStoreHalf<22, 1>,
-    &ARM::Thumb_LoadStoreHalf<23, 1>,
-    &ARM::Thumb_LoadStoreHalf<24, 1>,
-    &ARM::Thumb_LoadStoreHalf<25, 1>,
-    &ARM::Thumb_LoadStoreHalf<26, 1>,
-    &ARM::Thumb_LoadStoreHalf<27, 1>,
-    &ARM::Thumb_LoadStoreHalf<28, 1>,
-    &ARM::Thumb_LoadStoreHalf<29, 1>,
-    &ARM::Thumb_LoadStoreHalf<30, 1>,
-    &ARM::Thumb_LoadStoreHalf<31, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<0, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<0, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<0, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<0, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<1, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<1, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<1, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<1, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<2, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<2, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<2, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<2, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<3, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<3, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<3, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<3, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<4, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<4, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<4, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<4, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<5, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<5, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<5, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<5, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<6, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<6, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<6, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<6, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<7, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<7, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<7, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<7, 0>,
-    &ARM::Thumb_LoadStoreSpRelative<0, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<0, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<0, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<0, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<1, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<1, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<1, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<1, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<2, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<2, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<2, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<2, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<3, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<3, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<3, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<3, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<4, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<4, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<4, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<4, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<5, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<5, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<5, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<5, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<6, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<6, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<6, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<6, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<7, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<7, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<7, 1>,
-    &ARM::Thumb_LoadStoreSpRelative<7, 1>,
-    &ARM::Thumb_LoadRelativeAddress<0, 0>,
-    &ARM::Thumb_LoadRelativeAddress<0, 0>,
-    &ARM::Thumb_LoadRelativeAddress<0, 0>,
-    &ARM::Thumb_LoadRelativeAddress<0, 0>,
-    &ARM::Thumb_LoadRelativeAddress<1, 0>,
-    &ARM::Thumb_LoadRelativeAddress<1, 0>,
-    &ARM::Thumb_LoadRelativeAddress<1, 0>,
-    &ARM::Thumb_LoadRelativeAddress<1, 0>,
-    &ARM::Thumb_LoadRelativeAddress<2, 0>,
-    &ARM::Thumb_LoadRelativeAddress<2, 0>,
-    &ARM::Thumb_LoadRelativeAddress<2, 0>,
-    &ARM::Thumb_LoadRelativeAddress<2, 0>,
-    &ARM::Thumb_LoadRelativeAddress<3, 0>,
-    &ARM::Thumb_LoadRelativeAddress<3, 0>,
-    &ARM::Thumb_LoadRelativeAddress<3, 0>,
-    &ARM::Thumb_LoadRelativeAddress<3, 0>,
-    &ARM::Thumb_LoadRelativeAddress<4, 0>,
-    &ARM::Thumb_LoadRelativeAddress<4, 0>,
-    &ARM::Thumb_LoadRelativeAddress<4, 0>,
-    &ARM::Thumb_LoadRelativeAddress<4, 0>,
-    &ARM::Thumb_LoadRelativeAddress<5, 0>,
-    &ARM::Thumb_LoadRelativeAddress<5, 0>,
-    &ARM::Thumb_LoadRelativeAddress<5, 0>,
-    &ARM::Thumb_LoadRelativeAddress<5, 0>,
-    &ARM::Thumb_LoadRelativeAddress<6, 0>,
-    &ARM::Thumb_LoadRelativeAddress<6, 0>,
-    &ARM::Thumb_LoadRelativeAddress<6, 0>,
-    &ARM::Thumb_LoadRelativeAddress<6, 0>,
-    &ARM::Thumb_LoadRelativeAddress<7, 0>,
-    &ARM::Thumb_LoadRelativeAddress<7, 0>,
-    &ARM::Thumb_LoadRelativeAddress<7, 0>,
-    &ARM::Thumb_LoadRelativeAddress<7, 0>,
-    &ARM::Thumb_LoadRelativeAddress<0, 1>,
-    &ARM::Thumb_LoadRelativeAddress<0, 1>,
-    &ARM::Thumb_LoadRelativeAddress<0, 1>,
-    &ARM::Thumb_LoadRelativeAddress<0, 1>,
-    &ARM::Thumb_LoadRelativeAddress<1, 1>,
-    &ARM::Thumb_LoadRelativeAddress<1, 1>,
-    &ARM::Thumb_LoadRelativeAddress<1, 1>,
-    &ARM::Thumb_LoadRelativeAddress<1, 1>,
-    &ARM::Thumb_LoadRelativeAddress<2, 1>,
-    &ARM::Thumb_LoadRelativeAddress<2, 1>,
-    &ARM::Thumb_LoadRelativeAddress<2, 1>,
-    &ARM::Thumb_LoadRelativeAddress<2, 1>,
-    &ARM::Thumb_LoadRelativeAddress<3, 1>,
-    &ARM::Thumb_LoadRelativeAddress<3, 1>,
-    &ARM::Thumb_LoadRelativeAddress<3, 1>,
-    &ARM::Thumb_LoadRelativeAddress<3, 1>,
-    &ARM::Thumb_LoadRelativeAddress<4, 1>,
-    &ARM::Thumb_LoadRelativeAddress<4, 1>,
-    &ARM::Thumb_LoadRelativeAddress<4, 1>,
-    &ARM::Thumb_LoadRelativeAddress<4, 1>,
-    &ARM::Thumb_LoadRelativeAddress<5, 1>,
-    &ARM::Thumb_LoadRelativeAddress<5, 1>,
-    &ARM::Thumb_LoadRelativeAddress<5, 1>,
-    &ARM::Thumb_LoadRelativeAddress<5, 1>,
-    &ARM::Thumb_LoadRelativeAddress<6, 1>,
-    &ARM::Thumb_LoadRelativeAddress<6, 1>,
-    &ARM::Thumb_LoadRelativeAddress<6, 1>,
-    &ARM::Thumb_LoadRelativeAddress<6, 1>,
-    &ARM::Thumb_LoadRelativeAddress<7, 1>,
-    &ARM::Thumb_LoadRelativeAddress<7, 1>,
-    &ARM::Thumb_LoadRelativeAddress<7, 1>,
-    &ARM::Thumb_LoadRelativeAddress<7, 1>,
-    &ARM::Thumb_AddOffsetSp<0>,
-    &ARM::Thumb_AddOffsetSp<0>,
-    &ARM::Thumb_AddOffsetSp<1>,
-    &ARM::Thumb_AddOffsetSp<1>,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_PushPopRegisters<0, 0>,
-    &ARM::Thumb_PushPopRegisters<0, 0>,
-    &ARM::Thumb_PushPopRegisters<0, 0>,
-    &ARM::Thumb_PushPopRegisters<0, 0>,
-    &ARM::Thumb_PushPopRegisters<1, 0>,
-    &ARM::Thumb_PushPopRegisters<1, 0>,
-    &ARM::Thumb_PushPopRegisters<1, 0>,
-    &ARM::Thumb_PushPopRegisters<1, 0>,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_PushPopRegisters<0, 1>,
-    &ARM::Thumb_PushPopRegisters<0, 1>,
-    &ARM::Thumb_PushPopRegisters<0, 1>,
-    &ARM::Thumb_PushPopRegisters<0, 1>,
-    &ARM::Thumb_PushPopRegisters<1, 1>,
-    &ARM::Thumb_PushPopRegisters<1, 1>,
-    &ARM::Thumb_PushPopRegisters<1, 1>,
-    &ARM::Thumb_PushPopRegisters<1, 1>,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_LoadStoreMultiple<0, 0>,
-    &ARM::Thumb_LoadStoreMultiple<0, 0>,
-    &ARM::Thumb_LoadStoreMultiple<0, 0>,
-    &ARM::Thumb_LoadStoreMultiple<0, 0>,
-    &ARM::Thumb_LoadStoreMultiple<1, 0>,
-    &ARM::Thumb_LoadStoreMultiple<1, 0>,
-    &ARM::Thumb_LoadStoreMultiple<1, 0>,
-    &ARM::Thumb_LoadStoreMultiple<1, 0>,
-    &ARM::Thumb_LoadStoreMultiple<2, 0>,
-    &ARM::Thumb_LoadStoreMultiple<2, 0>,
-    &ARM::Thumb_LoadStoreMultiple<2, 0>,
-    &ARM::Thumb_LoadStoreMultiple<2, 0>,
-    &ARM::Thumb_LoadStoreMultiple<3, 0>,
-    &ARM::Thumb_LoadStoreMultiple<3, 0>,
-    &ARM::Thumb_LoadStoreMultiple<3, 0>,
-    &ARM::Thumb_LoadStoreMultiple<3, 0>,
-    &ARM::Thumb_LoadStoreMultiple<4, 0>,
-    &ARM::Thumb_LoadStoreMultiple<4, 0>,
-    &ARM::Thumb_LoadStoreMultiple<4, 0>,
-    &ARM::Thumb_LoadStoreMultiple<4, 0>,
-    &ARM::Thumb_LoadStoreMultiple<5, 0>,
-    &ARM::Thumb_LoadStoreMultiple<5, 0>,
-    &ARM::Thumb_LoadStoreMultiple<5, 0>,
-    &ARM::Thumb_LoadStoreMultiple<5, 0>,
-    &ARM::Thumb_LoadStoreMultiple<6, 0>,
-    &ARM::Thumb_LoadStoreMultiple<6, 0>,
-    &ARM::Thumb_LoadStoreMultiple<6, 0>,
-    &ARM::Thumb_LoadStoreMultiple<6, 0>,
-    &ARM::Thumb_LoadStoreMultiple<7, 0>,
-    &ARM::Thumb_LoadStoreMultiple<7, 0>,
-    &ARM::Thumb_LoadStoreMultiple<7, 0>,
-    &ARM::Thumb_LoadStoreMultiple<7, 0>,
-    &ARM::Thumb_LoadStoreMultiple<0, 1>,
-    &ARM::Thumb_LoadStoreMultiple<0, 1>,
-    &ARM::Thumb_LoadStoreMultiple<0, 1>,
-    &ARM::Thumb_LoadStoreMultiple<0, 1>,
-    &ARM::Thumb_LoadStoreMultiple<1, 1>,
-    &ARM::Thumb_LoadStoreMultiple<1, 1>,
-    &ARM::Thumb_LoadStoreMultiple<1, 1>,
-    &ARM::Thumb_LoadStoreMultiple<1, 1>,
-    &ARM::Thumb_LoadStoreMultiple<2, 1>,
-    &ARM::Thumb_LoadStoreMultiple<2, 1>,
-    &ARM::Thumb_LoadStoreMultiple<2, 1>,
-    &ARM::Thumb_LoadStoreMultiple<2, 1>,
-    &ARM::Thumb_LoadStoreMultiple<3, 1>,
-    &ARM::Thumb_LoadStoreMultiple<3, 1>,
-    &ARM::Thumb_LoadStoreMultiple<3, 1>,
-    &ARM::Thumb_LoadStoreMultiple<3, 1>,
-    &ARM::Thumb_LoadStoreMultiple<4, 1>,
-    &ARM::Thumb_LoadStoreMultiple<4, 1>,
-    &ARM::Thumb_LoadStoreMultiple<4, 1>,
-    &ARM::Thumb_LoadStoreMultiple<4, 1>,
-    &ARM::Thumb_LoadStoreMultiple<5, 1>,
-    &ARM::Thumb_LoadStoreMultiple<5, 1>,
-    &ARM::Thumb_LoadStoreMultiple<5, 1>,
-    &ARM::Thumb_LoadStoreMultiple<5, 1>,
-    &ARM::Thumb_LoadStoreMultiple<6, 1>,
-    &ARM::Thumb_LoadStoreMultiple<6, 1>,
-    &ARM::Thumb_LoadStoreMultiple<6, 1>,
-    &ARM::Thumb_LoadStoreMultiple<6, 1>,
-    &ARM::Thumb_LoadStoreMultiple<7, 1>,
-    &ARM::Thumb_LoadStoreMultiple<7, 1>,
-    &ARM::Thumb_LoadStoreMultiple<7, 1>,
-    &ARM::Thumb_LoadStoreMultiple<7, 1>,
-    &ARM::Thumb_ConditionalBranch<0>,
-    &ARM::Thumb_ConditionalBranch<0>,
-    &ARM::Thumb_ConditionalBranch<0>,
-    &ARM::Thumb_ConditionalBranch<0>,
-    &ARM::Thumb_ConditionalBranch<1>,
-    &ARM::Thumb_ConditionalBranch<1>,
-    &ARM::Thumb_ConditionalBranch<1>,
-    &ARM::Thumb_ConditionalBranch<1>,
-    &ARM::Thumb_ConditionalBranch<2>,
-    &ARM::Thumb_ConditionalBranch<2>,
-    &ARM::Thumb_ConditionalBranch<2>,
-    &ARM::Thumb_ConditionalBranch<2>,
-    &ARM::Thumb_ConditionalBranch<3>,
-    &ARM::Thumb_ConditionalBranch<3>,
-    &ARM::Thumb_ConditionalBranch<3>,
-    &ARM::Thumb_ConditionalBranch<3>,
-    &ARM::Thumb_ConditionalBranch<4>,
-    &ARM::Thumb_ConditionalBranch<4>,
-    &ARM::Thumb_ConditionalBranch<4>,
-    &ARM::Thumb_ConditionalBranch<4>,
-    &ARM::Thumb_ConditionalBranch<5>,
-    &ARM::Thumb_ConditionalBranch<5>,
-    &ARM::Thumb_ConditionalBranch<5>,
-    &ARM::Thumb_ConditionalBranch<5>,
-    &ARM::Thumb_ConditionalBranch<6>,
-    &ARM::Thumb_ConditionalBranch<6>,
-    &ARM::Thumb_ConditionalBranch<6>,
-    &ARM::Thumb_ConditionalBranch<6>,
-    &ARM::Thumb_ConditionalBranch<7>,
-    &ARM::Thumb_ConditionalBranch<7>,
-    &ARM::Thumb_ConditionalBranch<7>,
-    &ARM::Thumb_ConditionalBranch<7>,
-    &ARM::Thumb_ConditionalBranch<8>,
-    &ARM::Thumb_ConditionalBranch<8>,
-    &ARM::Thumb_ConditionalBranch<8>,
-    &ARM::Thumb_ConditionalBranch<8>,
-    &ARM::Thumb_ConditionalBranch<9>,
-    &ARM::Thumb_ConditionalBranch<9>,
-    &ARM::Thumb_ConditionalBranch<9>,
-    &ARM::Thumb_ConditionalBranch<9>,
-    &ARM::Thumb_ConditionalBranch<10>,
-    &ARM::Thumb_ConditionalBranch<10>,
-    &ARM::Thumb_ConditionalBranch<10>,
-    &ARM::Thumb_ConditionalBranch<10>,
-    &ARM::Thumb_ConditionalBranch<11>,
-    &ARM::Thumb_ConditionalBranch<11>,
-    &ARM::Thumb_ConditionalBranch<11>,
-    &ARM::Thumb_ConditionalBranch<11>,
-    &ARM::Thumb_ConditionalBranch<12>,
-    &ARM::Thumb_ConditionalBranch<12>,
-    &ARM::Thumb_ConditionalBranch<12>,
-    &ARM::Thumb_ConditionalBranch<12>,
-    &ARM::Thumb_ConditionalBranch<13>,
-    &ARM::Thumb_ConditionalBranch<13>,
-    &ARM::Thumb_ConditionalBranch<13>,
-    &ARM::Thumb_ConditionalBranch<13>,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_SoftwareInterrupt,
-    &ARM::Thumb_SoftwareInterrupt,
-    &ARM::Thumb_SoftwareInterrupt,
-    &ARM::Thumb_SoftwareInterrupt,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_UnconditionalBranch,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_Undefined,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<0>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>,
-    &ARM::Thumb_LongBranchLink<1>
-};
+    constexpr auto kUnhash = Hash << 6;
+    constexpr auto kOpcode = decodeThumbHash(Hash);
+
+    if constexpr (kOpcode == InstructionThumb::MoveShiftedRegister)      return &ARM::Thumb_MoveShiftedRegister<kUnhash>;
+    if constexpr (kOpcode == InstructionThumb::AddSubtract)              return &ARM::Thumb_AddSubtract<kUnhash>;
+    if constexpr (kOpcode == InstructionThumb::ImmediateOperations)      return &ARM::Thumb_ImmediateOperations<kUnhash>;
+    if constexpr (kOpcode == InstructionThumb::AluOperations)            return &ARM::Thumb_AluOperations<kUnhash>;
+    if constexpr (kOpcode == InstructionThumb::HighRegisterOperations)   return &ARM::Thumb_HighRegisterOperations<kUnhash>;
+    if constexpr (kOpcode == InstructionThumb::LoadPcRelative)           return &ARM::Thumb_LoadPcRelative<kUnhash>;
+    if constexpr (kOpcode == InstructionThumb::LoadStoreRegisterOffset)  return &ARM::Thumb_LoadStoreRegisterOffset<kUnhash>;
+    if constexpr (kOpcode == InstructionThumb::LoadStoreByteHalf)        return &ARM::Thumb_LoadStoreByteHalf<kUnhash>;
+    if constexpr (kOpcode == InstructionThumb::LoadStoreImmediateOffset) return &ARM::Thumb_LoadStoreImmediateOffset<kUnhash>;
+    if constexpr (kOpcode == InstructionThumb::LoadStoreHalf)            return &ARM::Thumb_LoadStoreHalf<kUnhash>;
+    if constexpr (kOpcode == InstructionThumb::LoadStoreSpRelative)      return &ARM::Thumb_LoadStoreSpRelative<kUnhash>;
+    if constexpr (kOpcode == InstructionThumb::LoadRelativeAddress)      return &ARM::Thumb_LoadRelativeAddress<kUnhash>;
+    if constexpr (kOpcode == InstructionThumb::AddOffsetSp)              return &ARM::Thumb_AddOffsetSp<kUnhash>;
+    if constexpr (kOpcode == InstructionThumb::PushPopRegisters)         return &ARM::Thumb_PushPopRegisters<kUnhash>;
+    if constexpr (kOpcode == InstructionThumb::LoadStoreMultiple)        return &ARM::Thumb_LoadStoreMultiple<kUnhash>;
+    if constexpr (kOpcode == InstructionThumb::ConditionalBranch)        return &ARM::Thumb_ConditionalBranch<kUnhash>;
+    if constexpr (kOpcode == InstructionThumb::SoftwareInterrupt)        return &ARM::Thumb_SoftwareInterrupt<kUnhash>;
+    if constexpr (kOpcode == InstructionThumb::UnconditionalBranch)      return &ARM::Thumb_UnconditionalBranch<kUnhash>;
+    if constexpr (kOpcode == InstructionThumb::LongBranchLink)           return &ARM::Thumb_LongBranchLink<kUnhash>;
+    if constexpr (kOpcode == InstructionThumb::Undefined)                return &ARM::Thumb_Undefined<kUnhash>;
+}
+
+#define DECODE0001(hash) Thumb_Decode<hash>(),
+#define DECODE0004(hash) DECODE0001(hash + 0 *   1) DECODE0001(hash + 1 *   1) DECODE0001(hash + 2 *   1) DECODE0001(hash + 3 *   1)
+#define DECODE0016(hash) DECODE0004(hash + 0 *   4) DECODE0004(hash + 1 *   4) DECODE0004(hash + 2 *   4) DECODE0004(hash + 3 *   4)
+#define DECODE0064(hash) DECODE0016(hash + 0 *  16) DECODE0016(hash + 1 *  16) DECODE0016(hash + 2 *  16) DECODE0016(hash + 3 *  16)
+#define DECODE0256(hash) DECODE0064(hash + 0 *  64) DECODE0064(hash + 1 *  64) DECODE0064(hash + 2 *  64) DECODE0064(hash + 3 *  64)
+#define DECODE1024(hash) DECODE0256(hash + 0 * 256) DECODE0256(hash + 1 * 256) DECODE0256(hash + 2 * 256) DECODE0256(hash + 3 * 256)
+
+std::array<void(ARM::*)(u16), 1024> ARM::instr_thumb = { DECODE1024(0) };
+
+#undef DECODE0001
+#undef DECODE0004
+#undef DECODE0016
+#undef DECODE0064
+#undef DECODE0256
+#undef DECODE1024

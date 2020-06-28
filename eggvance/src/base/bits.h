@@ -16,7 +16,7 @@
 namespace bits
 {
     template<uint index, uint size, typename T>
-    T seq(T value)
+    constexpr T seq(T value)
     {
         static_assert(std::is_integral_v<T>);
         static_assert(index + size <= CHAR_BIT * sizeof(T));
