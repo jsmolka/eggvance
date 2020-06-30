@@ -104,7 +104,7 @@ void ARM::dispatch()
                         pipe[0] = pipe[1];
                         pipe[1] = readHalf(pc);
 
-                        (this->*instr_thumb[thumbHash(instr)])(instr);
+                        (this->*instr_thumb[hashThumb(instr)])(instr);
                     }
                     else
                     {
@@ -115,7 +115,7 @@ void ARM::dispatch()
 
                         if (cpsr.check(instr >> 28))
                         {
-                            (this->*instr_arm[armHash(instr)])(instr);
+                            (this->*instr_arm[hashArm(instr)])(instr);
                         }
                     }
                 }

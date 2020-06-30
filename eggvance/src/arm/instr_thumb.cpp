@@ -605,29 +605,29 @@ void ARM::Thumb_Undefined(u16 instr)
 template<uint Hash>
 constexpr ARM::Handler16 ARM::Thumb_Decode()
 {
-    constexpr auto kDehash = Hash << 6;
-    constexpr auto kOpcode = decodeThumbHash(Hash);
+    constexpr auto kDehash = dehashThumb(Hash);
+    constexpr auto kDecode = decodeThumb(Hash);
 
-    if constexpr (kOpcode == InstructionThumb::MoveShiftedRegister)      return &ARM::Thumb_MoveShiftedRegister<kDehash>;
-    if constexpr (kOpcode == InstructionThumb::AddSubtract)              return &ARM::Thumb_AddSubtract<kDehash>;
-    if constexpr (kOpcode == InstructionThumb::ImmediateOperations)      return &ARM::Thumb_ImmediateOperations<kDehash>;
-    if constexpr (kOpcode == InstructionThumb::AluOperations)            return &ARM::Thumb_AluOperations<kDehash>;
-    if constexpr (kOpcode == InstructionThumb::HighRegisterOperations)   return &ARM::Thumb_HighRegisterOperations<kDehash>;
-    if constexpr (kOpcode == InstructionThumb::LoadPcRelative)           return &ARM::Thumb_LoadPcRelative<kDehash>;
-    if constexpr (kOpcode == InstructionThumb::LoadStoreRegisterOffset)  return &ARM::Thumb_LoadStoreRegisterOffset<kDehash>;
-    if constexpr (kOpcode == InstructionThumb::LoadStoreByteHalf)        return &ARM::Thumb_LoadStoreByteHalf<kDehash>;
-    if constexpr (kOpcode == InstructionThumb::LoadStoreImmediateOffset) return &ARM::Thumb_LoadStoreImmediateOffset<kDehash>;
-    if constexpr (kOpcode == InstructionThumb::LoadStoreHalf)            return &ARM::Thumb_LoadStoreHalf<kDehash>;
-    if constexpr (kOpcode == InstructionThumb::LoadStoreSpRelative)      return &ARM::Thumb_LoadStoreSpRelative<kDehash>;
-    if constexpr (kOpcode == InstructionThumb::LoadRelativeAddress)      return &ARM::Thumb_LoadRelativeAddress<kDehash>;
-    if constexpr (kOpcode == InstructionThumb::AddOffsetSp)              return &ARM::Thumb_AddOffsetSp<kDehash>;
-    if constexpr (kOpcode == InstructionThumb::PushPopRegisters)         return &ARM::Thumb_PushPopRegisters<kDehash>;
-    if constexpr (kOpcode == InstructionThumb::LoadStoreMultiple)        return &ARM::Thumb_LoadStoreMultiple<kDehash>;
-    if constexpr (kOpcode == InstructionThumb::ConditionalBranch)        return &ARM::Thumb_ConditionalBranch<kDehash>;
-    if constexpr (kOpcode == InstructionThumb::SoftwareInterrupt)        return &ARM::Thumb_SoftwareInterrupt<kDehash>;
-    if constexpr (kOpcode == InstructionThumb::UnconditionalBranch)      return &ARM::Thumb_UnconditionalBranch<kDehash>;
-    if constexpr (kOpcode == InstructionThumb::LongBranchLink)           return &ARM::Thumb_LongBranchLink<kDehash>;
-    if constexpr (kOpcode == InstructionThumb::Undefined)                return &ARM::Thumb_Undefined<kDehash>;
+    if constexpr (kDecode == InstructionThumb::MoveShiftedRegister)      return &ARM::Thumb_MoveShiftedRegister<kDehash>;
+    if constexpr (kDecode == InstructionThumb::AddSubtract)              return &ARM::Thumb_AddSubtract<kDehash>;
+    if constexpr (kDecode == InstructionThumb::ImmediateOperations)      return &ARM::Thumb_ImmediateOperations<kDehash>;
+    if constexpr (kDecode == InstructionThumb::AluOperations)            return &ARM::Thumb_AluOperations<kDehash>;
+    if constexpr (kDecode == InstructionThumb::HighRegisterOperations)   return &ARM::Thumb_HighRegisterOperations<kDehash>;
+    if constexpr (kDecode == InstructionThumb::LoadPcRelative)           return &ARM::Thumb_LoadPcRelative<kDehash>;
+    if constexpr (kDecode == InstructionThumb::LoadStoreRegisterOffset)  return &ARM::Thumb_LoadStoreRegisterOffset<kDehash>;
+    if constexpr (kDecode == InstructionThumb::LoadStoreByteHalf)        return &ARM::Thumb_LoadStoreByteHalf<kDehash>;
+    if constexpr (kDecode == InstructionThumb::LoadStoreImmediateOffset) return &ARM::Thumb_LoadStoreImmediateOffset<kDehash>;
+    if constexpr (kDecode == InstructionThumb::LoadStoreHalf)            return &ARM::Thumb_LoadStoreHalf<kDehash>;
+    if constexpr (kDecode == InstructionThumb::LoadStoreSpRelative)      return &ARM::Thumb_LoadStoreSpRelative<kDehash>;
+    if constexpr (kDecode == InstructionThumb::LoadRelativeAddress)      return &ARM::Thumb_LoadRelativeAddress<kDehash>;
+    if constexpr (kDecode == InstructionThumb::AddOffsetSp)              return &ARM::Thumb_AddOffsetSp<kDehash>;
+    if constexpr (kDecode == InstructionThumb::PushPopRegisters)         return &ARM::Thumb_PushPopRegisters<kDehash>;
+    if constexpr (kDecode == InstructionThumb::LoadStoreMultiple)        return &ARM::Thumb_LoadStoreMultiple<kDehash>;
+    if constexpr (kDecode == InstructionThumb::ConditionalBranch)        return &ARM::Thumb_ConditionalBranch<kDehash>;
+    if constexpr (kDecode == InstructionThumb::SoftwareInterrupt)        return &ARM::Thumb_SoftwareInterrupt<kDehash>;
+    if constexpr (kDecode == InstructionThumb::UnconditionalBranch)      return &ARM::Thumb_UnconditionalBranch<kDehash>;
+    if constexpr (kDecode == InstructionThumb::LongBranchLink)           return &ARM::Thumb_LongBranchLink<kDehash>;
+    if constexpr (kDecode == InstructionThumb::Undefined)                return &ARM::Thumb_Undefined<kDehash>;
 }
 
 #define DECODE0001(hash) Thumb_Decode<hash>(),

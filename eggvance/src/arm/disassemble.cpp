@@ -65,7 +65,7 @@ static const char* reg(uint n)
 
 static const char* condition(u32 instr)
 {
-    static constexpr const char*  conditions[16] = {
+    static constexpr const char* conditions[16] = {
         "eq", "ne", "cs", "cc",
         "mi", "pl", "vs", "vc",
         "hi", "ls", "ge", "lt",
@@ -899,7 +899,7 @@ std::string disassemble(u32 instr, u32 pc, u32 lr, bool thumb)
 {
     if (thumb)
     {
-        switch (decodeThumb(instr))
+        switch (decodeThumb(hashThumb(instr)))
         {
         case InstructionThumb::MoveShiftedRegister:      return Thumb_MoveShiftedRegister(instr);
         case InstructionThumb::AddSubtract:              return Thumb_AddSubtract(instr);
@@ -924,7 +924,7 @@ std::string disassemble(u32 instr, u32 pc, u32 lr, bool thumb)
     }
     else
     {
-        switch (decodeArm(instr))
+        switch (decodeArm(hashArm(instr)))
         {
         case InstructionArm::BranchExchange:         return Arm_BranchExchange(instr);
         case InstructionArm::BranchLink:             return Arm_BranchLink(instr, pc);

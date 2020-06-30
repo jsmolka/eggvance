@@ -647,24 +647,24 @@ void ARM::Arm_Undefined(u32 instr)
 template<uint Hash>
 constexpr ARM::Handler32 ARM::Arm_Decode()
 {
-    constexpr auto kDehash = ((Hash & 0xFF0) << 16) | ((Hash & 0xF) << 4);
-    constexpr auto kOpcode = decodeArmHash(Hash);
+    constexpr auto kDehash = dehashArm(Hash);
+    constexpr auto kDecode = decodeArm(Hash);
 
-    if constexpr (kOpcode == InstructionArm::BranchExchange)               return &ARM::Arm_BranchExchange<kDehash>;
-    if constexpr (kOpcode == InstructionArm::BranchLink)                   return &ARM::Arm_BranchLink<kDehash>;
-    if constexpr (kOpcode == InstructionArm::DataProcessing)               return &ARM::Arm_DataProcessing<kDehash>;
-    if constexpr (kOpcode == InstructionArm::StatusTransfer)               return &ARM::Arm_StatusTransfer<kDehash>;
-    if constexpr (kOpcode == InstructionArm::Multiply)                     return &ARM::Arm_Multiply<kDehash>;
-    if constexpr (kOpcode == InstructionArm::MultiplyLong)                 return &ARM::Arm_MultiplyLong<kDehash>;
-    if constexpr (kOpcode == InstructionArm::SingleDataTransfer)           return &ARM::Arm_SingleDataTransfer<kDehash>;
-    if constexpr (kOpcode == InstructionArm::HalfSignedDataTransfer)       return &ARM::Arm_HalfSignedDataTransfer<kDehash>;
-    if constexpr (kOpcode == InstructionArm::BlockDataTransfer)            return &ARM::Arm_BlockDataTransfer<kDehash>;
-    if constexpr (kOpcode == InstructionArm::SingleDataSwap)               return &ARM::Arm_SingleDataSwap<kDehash>;
-    if constexpr (kOpcode == InstructionArm::SoftwareInterrupt)            return &ARM::Arm_SoftwareInterrupt<kDehash>;
-    if constexpr (kOpcode == InstructionArm::CoprocessorDataOperations)    return &ARM::Arm_CoprocessorDataOperations<kDehash>;
-    if constexpr (kOpcode == InstructionArm::CoprocessorDataTransfers)     return &ARM::Arm_CoprocessorDataTransfers<kDehash>;
-    if constexpr (kOpcode == InstructionArm::CoprocessorRegisterTransfers) return &ARM::Arm_CoprocessorRegisterTransfers<kDehash>;
-    if constexpr (kOpcode == InstructionArm::Undefined)                    return &ARM::Arm_Undefined<kDehash>;
+    if constexpr (kDecode == InstructionArm::BranchExchange)               return &ARM::Arm_BranchExchange<kDehash>;
+    if constexpr (kDecode == InstructionArm::BranchLink)                   return &ARM::Arm_BranchLink<kDehash>;
+    if constexpr (kDecode == InstructionArm::DataProcessing)               return &ARM::Arm_DataProcessing<kDehash>;
+    if constexpr (kDecode == InstructionArm::StatusTransfer)               return &ARM::Arm_StatusTransfer<kDehash>;
+    if constexpr (kDecode == InstructionArm::Multiply)                     return &ARM::Arm_Multiply<kDehash>;
+    if constexpr (kDecode == InstructionArm::MultiplyLong)                 return &ARM::Arm_MultiplyLong<kDehash>;
+    if constexpr (kDecode == InstructionArm::SingleDataTransfer)           return &ARM::Arm_SingleDataTransfer<kDehash>;
+    if constexpr (kDecode == InstructionArm::HalfSignedDataTransfer)       return &ARM::Arm_HalfSignedDataTransfer<kDehash>;
+    if constexpr (kDecode == InstructionArm::BlockDataTransfer)            return &ARM::Arm_BlockDataTransfer<kDehash>;
+    if constexpr (kDecode == InstructionArm::SingleDataSwap)               return &ARM::Arm_SingleDataSwap<kDehash>;
+    if constexpr (kDecode == InstructionArm::SoftwareInterrupt)            return &ARM::Arm_SoftwareInterrupt<kDehash>;
+    if constexpr (kDecode == InstructionArm::CoprocessorDataOperations)    return &ARM::Arm_CoprocessorDataOperations<kDehash>;
+    if constexpr (kDecode == InstructionArm::CoprocessorDataTransfers)     return &ARM::Arm_CoprocessorDataTransfers<kDehash>;
+    if constexpr (kDecode == InstructionArm::CoprocessorRegisterTransfers) return &ARM::Arm_CoprocessorRegisterTransfers<kDehash>;
+    if constexpr (kDecode == InstructionArm::Undefined)                    return &ARM::Arm_Undefined<kDehash>;
 }
 
 #define DECODE0001(hash) Arm_Decode<hash>(),
