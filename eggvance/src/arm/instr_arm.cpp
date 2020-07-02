@@ -675,7 +675,7 @@ constexpr ARM::Handler32 ARM::Arm_Decode()
 #define DECODE1024(hash) DECODE0256(hash + 0 *  256) DECODE0256(hash + 1 *  256) DECODE0256(hash + 2 *  256) DECODE0256(hash + 3 *  256)
 #define DECODE4096(hash) DECODE1024(hash + 0 * 1024) DECODE1024(hash + 1 * 1024) DECODE1024(hash + 2 * 1024) DECODE1024(hash + 3 * 1024)
 
-std::array<void(ARM::*)(u32), 4096> ARM::instr_arm = { DECODE4096(0) };
+std::array<ARM::Handler32, 4096> ARM::instr_arm = { DECODE4096(0) };
 
 #undef DECODE0001
 #undef DECODE0004

@@ -21,32 +21,20 @@ void ARM::run(int cycles)
 {
     this->cycles += cycles;
 
-    #define DISPATCH_CASE(state)                                \
-        case state + 0b000: dispatch<state + 0b000>(); break;   \
-        case state + 0b001: dispatch<state + 0b001>(); break;   \
-        case state + 0b010: dispatch<state + 0b010>(); break;   \
-        case state + 0b011: dispatch<state + 0b011>(); break;   \
-        case state + 0b100: dispatch<state + 0b100>(); break;   \
-        case state + 0b101: dispatch<state + 0b101>(); break;   \
-        case state + 0b110: dispatch<state + 0b110>(); break;   \
-        case state + 0b111: dispatch<state + 0b111>(); break
-
     while (this->cycles > 0)
     {
         switch (state)
         {
-        DISPATCH_CASE(0b00000);
-        DISPATCH_CASE(0b01000);
-        DISPATCH_CASE(0b10000);
-        DISPATCH_CASE(0b11000);
+        INDEXED_CASE8( 0, dispatch<kLabel>());
+        INDEXED_CASE8( 8, dispatch<kLabel>());
+        INDEXED_CASE8(16, dispatch<kLabel>());
+        INDEXED_CASE8(24, dispatch<kLabel>());
 
         default:
             UNREACHABLE;
             break;
         }
     }
-
-    #undef DISPATCH_CASE
 }
 
 void ARM::flushHalf()
@@ -95,8 +83,6 @@ void ARM::dispatch()
                 }
                 else
                 {
-                    //disasm();
-
                     if (state & kStateThumb)
                     {
                         u16 instr = pipe[0];
@@ -126,19 +112,6 @@ void ARM::dispatch()
         if (state & kStateTimer)
             timerc.run(previous - cycles);
     }
-}
-
-void ARM::disasm() const
-{
-    static u32 operation = 0;
-    operation++;
-
-    fmt::printf("%08X  %08X  %08X  %s\n", 
-        operation,
-        pc - 2 * cpsr.size(),
-        pipe[0], 
-        disassemble(pipe[0], pc, lr, cpsr.t)
-    );
 }
 
 void ARM::idle()

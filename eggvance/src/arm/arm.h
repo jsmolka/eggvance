@@ -29,12 +29,15 @@ public:
     ArmIo io;
 
 private:
-    enum Shift
+    using Handler32 = void(ARM::*)(u32);
+    using Handler16 = void(ARM::*)(u16);
+
+    enum
     {
-        kShiftLsl = 0b00,
-        kShiftLsr = 0b01,
-        kShiftAsr = 0b10,
-        kShiftRor = 0b11
+        kShiftLsl,
+        kShiftLsr,
+        kShiftAsr,
+        kShiftRor
     };
 
     u32 lsl(u32 value, u32 amount, bool flags = true);
@@ -72,8 +75,6 @@ private:
 
     template<uint state>
     void dispatch();
-
-    void disasm() const;
 
     void idle();
     void booth(u32 multiplier, bool ones);
@@ -119,18 +120,15 @@ private:
     template<uint Instr> void Thumb_LongBranchLink(u16 instr);
     template<uint Instr> void Thumb_Undefined(u16 instr);
 
-    using Handler32 = void(ARM::*)(u32);
-    using Handler16 = void(ARM::*)(u16);
-
     template<uint Hash> static constexpr Handler32 Arm_Decode();
     template<uint Hash> static constexpr Handler16 Thumb_Decode();
+
+    static std::array<Handler32, 4096> instr_arm;
+    static std::array<Handler16, 1024> instr_thumb;
 
     int cycles    = 0;
     u32 prev_addr = 0;
     u32 pipe[2]   = { 0 };
-
-    static std::array<void(ARM::*)(u32), 4096> instr_arm;
-    static std::array<void(ARM::*)(u16), 1024> instr_thumb;
 };
 
 extern ARM arm;

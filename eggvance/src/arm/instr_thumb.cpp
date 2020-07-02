@@ -637,7 +637,7 @@ constexpr ARM::Handler16 ARM::Thumb_Decode()
 #define DECODE0256(hash) DECODE0064(hash + 0 *  64) DECODE0064(hash + 1 *  64) DECODE0064(hash + 2 *  64) DECODE0064(hash + 3 *  64)
 #define DECODE1024(hash) DECODE0256(hash + 0 * 256) DECODE0256(hash + 1 * 256) DECODE0256(hash + 2 * 256) DECODE0256(hash + 3 * 256)
 
-std::array<void(ARM::*)(u16), 1024> ARM::instr_thumb = { DECODE1024(0) };
+std::array<ARM::Handler16, 1024> ARM::instr_thumb = { DECODE1024(0) };
 
 #undef DECODE0001
 #undef DECODE0004
