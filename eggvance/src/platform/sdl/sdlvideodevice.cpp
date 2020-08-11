@@ -59,7 +59,7 @@ void SDLVideoDevice::renderIcon()
     SDL_RenderGetLogicalSize(renderer, &w, &h);
     SDL_RenderSetLogicalSize(renderer, 18, 18);
 
-    for (const auto& pixel : eggcpt::icon::pixels)
+    for (const auto& pixel : eggcpt::icon::pixels())
     {
         SDL_SetRenderDrawColor(
             renderer,

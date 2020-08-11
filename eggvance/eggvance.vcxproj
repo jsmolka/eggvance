@@ -61,7 +61,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)external\fmt\include;$(ProjectDir)external\icon\themes\default\cpp;$(ProjectDir)external\tinytoml\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)external\fmt\include;$(ProjectDir)external\icon\themes\default\include;$(ProjectDir)external\tinytoml\include</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -87,7 +87,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release with console|x64'">
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)external\fmt\include;$(ProjectDir)external\icon\include;$(ProjectDir)external\tinytoml\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)external\fmt\include;$(ProjectDir)external\icon\themes\default\include;$(ProjectDir)external\tinytoml\include</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -113,7 +113,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release with symbols|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)external\fmt\include;$(ProjectDir)external\icon\include;$(ProjectDir)external\tinytoml\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)external\fmt\include;$(ProjectDir)external\icon\themes\default\include;$(ProjectDir)external\tinytoml\include</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -132,7 +132,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="external\icon\themes\default\cpp\eggcpt\icon.cpp" />
     <ClCompile Include="src\arm\arm.cpp" />
     <ClCompile Include="src\arm\bus.cpp" />
     <ClCompile Include="src\arm\disassemble.cpp" />
