@@ -79,7 +79,7 @@ emmake cmake -DPLATFORM=EMSCRIPTEN ..
 emmake make
 ```
 
-A demo can be found [here](https://eggcpt.de/eggvance/wasm/).
+A demo can be found [here](https://smolka.dev/eggvance/wasm).
 
 ## Credits
 The following projects were invaluable resources while creating the emulator.
