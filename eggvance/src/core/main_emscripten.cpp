@@ -89,7 +89,7 @@ void idle()
 {
     processEvents();
 
-    core.context.video.clear(background);
+    core.context.video.renderClear(background);
     core.context.video.renderIcon();
     core.context.video.renderPresent();
 }
