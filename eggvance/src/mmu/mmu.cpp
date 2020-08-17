@@ -1,10 +1,18 @@
 #include "mmu.h"
 
-#include "arm/arm.h"
 #include "base/bits.h"
 #include "base/constants.h"
+#include "base/util.h"
+#include "core/core.h"
 
-MMU mmu;
+MMU::MMU(Core& core)
+    : core(core)
+    , vram(core)
+    , bios(core)
+    , io(core)
+{
+
+}
 
 void MMU::reset()
 {
@@ -12,7 +20,8 @@ void MMU::reset()
     palette.reset();
     vram.reset();
     oam.reset();
-    io = Io();
+
+    util::reconstruct(&io, core);
 
     ewram = decltype(ewram)();
     iwram = decltype(iwram)();
@@ -311,30 +320,30 @@ void MMU::writeWord(u32 addr, u32 word)
 u32 MMU::readUnused(u32 addr)
 {
     u32 value = 0;
-    if (arm.cpsr.t)
+    if (core.arm.cpsr.t)
     {
-        u32 lsw = arm.pipe[1];
-        u32 msw = arm.pipe[1];
+        u32 lsw = core.arm.pipe[1];
+        u32 msw = core.arm.pipe[1];
 
         switch (addr >> 24)
         {
         case kRegionBios:
         case kRegionOam:
-            lsw = arm.pipe[0];
+            lsw = core.arm.pipe[0];
             break;
 
         case kRegionIwram:
             if (addr & 0x3)
-                lsw = arm.pipe[0];
+                lsw = core.arm.pipe[0];
             else
-                msw = arm.pipe[0];
+                msw = core.arm.pipe[0];
             break;
         }
         value = (msw << 16) | lsw;
     }
     else
     {
-        value = arm.pipe[1];
+        value = core.arm.pipe[1];
     }
     return value >> ((addr & 0x3) << 3);
 }

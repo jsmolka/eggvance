@@ -5,9 +5,13 @@
 #include "ram.h"
 #include "base/fs.h"
 
+class Core;
+
 class BIOS
 {
 public:
+    BIOS(Core& core);
+
     void reset();
 
     void init(const fs::path& path);
@@ -17,6 +21,8 @@ public:
     u32 readWord(u32 addr);
 
 private:
+    Core& core;
+
     u32 readProtected(u32 addr) const;
 
     bool read(const fs::path& path);

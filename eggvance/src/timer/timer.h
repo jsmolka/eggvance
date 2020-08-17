@@ -2,10 +2,12 @@
 
 #include "timer/io.h"
 
+class Core;
+
 class Timer
 {
 public:
-    Timer(uint id);
+    Timer(Core& core, uint id);
 
     void init();
     void update();
@@ -19,6 +21,8 @@ public:
     TimerIo io;
 
 private:
+    Core& core;
+
     uint counter{};
     uint initial{};
     uint overflow{};

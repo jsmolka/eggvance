@@ -6,16 +6,13 @@
 #include <emscripten/bind.h>
 
 #include "base/config.h"
-#include "keypad/keypad.h"
-#include "mmu/mmu.h"
 #include "core/core.h"
-#include "core/common.h"
 #include "core/framecounter.h"
 
 using namespace emscripten;
 
+Core core;
 FrameCounter counter;
-
 u32 background = 0xFFFFFF;
 
 void idle();
@@ -34,17 +31,17 @@ void emulateMain(uint fps)
 
 void init(int argc, char* argv[])
 {
-    common::init(argc, argv);
+    core.init(argc, argv);
 }
 
 template<typename T>
 void processInputEvent(const Shortcuts<T>& shortcuts, T input)
 {
     if (input == shortcuts.reset)
-        common::reset();
+        core.reset();
 
     if (input == shortcuts.fullscreen)
-        g_core.context.video.fullscreen();
+        core.context.video.fullscreen();
 
     if (input == shortcuts.fr_hardware)
         emulateMain(kRefreshRate);
@@ -82,7 +79,7 @@ void processEvents()
 
         case SDL_CONTROLLERDEVICEADDED:
         case SDL_CONTROLLERDEVICEREMOVED:
-            g_core.context.input.processDeviceEvent(event.cdevice);
+            core.context.input.processDeviceEvent(event.cdevice);
             break;
         }
     }
@@ -91,35 +88,35 @@ void processEvents()
 void idle()
 {
     processEvents();
-    g_core.context.video.clear(background);
-    g_core.context.video.renderIcon();
-    SDL_RenderPresent(g_core.context.video.renderer);
+    core.context.video.clear(background);
+    core.context.video.renderIcon();
+    SDL_RenderPresent(core.context.video.renderer);
 }
 
 void emulate()
 {
     processEvents();
-    keypad.update();
-    common::frame();
+    core.keypad.update();
+    core.frame();
 
     double fps = 0;
     if ((++counter).queryFps(fps))
-        common::updateWindowTitle(fps);
+        core.updateWindowTitle(fps);
 }
 
 void eggvanceLoadRom(const std::string& filename)
 {
-    mmu.gamepak.load(filename);
-    common::reset();
-    common::updateWindowTitle();
+    core.mmu.gamepak.load(filename);
+    core.reset();
+    core.updateWindowTitle();
     counter = FrameCounter();
     emulateMain(kRefreshRate);
 }
 
 void eggvanceLoadSave(const std::string& filename)
 {
-    mmu.gamepak.loadSave(filename);
-    common::reset();
+    core.mmu.gamepak.loadSave(filename);
+    core.reset();
     emulateMain(kRefreshRate);
 }
 

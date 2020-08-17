@@ -1,8 +1,12 @@
 #include "irqh.h"
 
-#include "arm/arm.h"
+#include "core/core.h"
 
-IrqHandler irqh;
+IrqHandler::IrqHandler(Core& core)
+    : core(core)
+{
+
+}
 
 void IrqHandler::request(uint irq)
 {
@@ -16,10 +20,10 @@ void IrqHandler::update()
     bool interrupt = io.enable.value & io.request.value;
 
     if (interrupt)
-        arm.state &= ~ARM::kStateHalt;
+        core.arm.state &= ~ARM::kStateHalt;
 
     if (interrupt && io.master.value)
-        arm.state |= ARM::kStateIrq;
+        core.arm.state |= ARM::kStateIrq;
     else
-        arm.state &= ~ARM::kStateIrq;
+        core.arm.state &= ~ARM::kStateIrq;
 }

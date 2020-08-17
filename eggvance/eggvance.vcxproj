@@ -158,7 +158,6 @@
     <ClCompile Include="src\gamepak\rtc.cpp" />
     <ClCompile Include="src\gamepak\save.cpp" />
     <ClCompile Include="src\gamepak\sram.cpp" />
-    <ClCompile Include="src\core\common.cpp" />
     <ClCompile Include="src\core\framecounter.cpp" />
     <ClCompile Include="src\core\synchronizer.cpp" />
     <ClCompile Include="src\mmu\bios_data.cpp" />
@@ -216,7 +215,6 @@
     <ClInclude Include="src\gamepak\sram.h" />
     <ClInclude Include="src\irq\io.h" />
     <ClInclude Include="src\keypad\io.h" />
-    <ClInclude Include="src\core\common.h" />
     <ClInclude Include="src\core\framecounter.h" />
     <ClInclude Include="src\core\synchronizer.h" />
     <ClInclude Include="src\mmu\io.h" />

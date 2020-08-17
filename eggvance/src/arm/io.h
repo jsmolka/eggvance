@@ -3,12 +3,22 @@
 #include "base/bits.h"
 #include "base/register.h"
 
+class Core;
+
 struct ArmIo
 {
+    ArmIo(Core& core)
+        : haltcnt(core) {}
+
     struct HaltControl : RegisterW<1>
     {
+        HaltControl(Core& core)
+            : core(core) {}
+
         template<uint Index>
         void write(u8 byte);
+
+        Core& core;
     }
     haltcnt;
 

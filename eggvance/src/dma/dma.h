@@ -4,6 +4,8 @@
 
 #include "dma/io.h"
 
+class Core;
+
 class Dma
 {
 public:
@@ -15,7 +17,7 @@ public:
         kTimingSpecial
     };
 
-    Dma(uint id);
+    Dma(Core& core, uint id);
 
     void activate();
     void run(int& cycles);
@@ -25,12 +27,14 @@ public:
     DmaIo io;
 
 private:
-    static bool isEeprom(u32 addr);
-    static bool isGamePak(u32 addr);
+    bool isEeprom(u32 addr);
+    bool isGamePak(u32 addr);
 
     void initCycles();
     void initTransfer();
     void initEeprom();
+
+    Core& core;
 
     int pending{};
     int cycles_s{};

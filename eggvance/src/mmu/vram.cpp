@@ -1,18 +1,25 @@
 #include "vram.h"
 
 #include "base/bits.h"
-#include "ppu/ppu.h"
+#include "base/util.h"
+#include "core/core.h"
+
+VRAM::VRAM(Core& core)
+    : core(core)
+{
+
+}
 
 void VRAM::reset()
 {
-    *this = VRAM();
+    util::reconstruct(this, core);
 }
 
 void VRAM::writeByte(u32 addr, u8 byte)
 {
     addr = mirror(addr);
 
-    if (addr < (ppu.io.dispcnt.isBitmap() ? 0x1'4000u : 0x1'0000u))
+    if (addr < (core.ppu.io.dispcnt.isBitmap() ? 0x1'4000u : 0x1'0000u))
     {
         addr = align<u16>(addr);
 

@@ -6,12 +6,10 @@
 
 #include "base/config.h"
 #include "core/core.h"
-#include "core/common.h"
 #include "core/framecounter.h"
 #include "core/synchronizer.h"
-#include "keypad/keypad.h"
-#include "mmu/mmu.h"
 
+Core core;
 bool running = true;
 FrameCounter counter;
 Synchronizer synchronizer;
@@ -20,7 +18,7 @@ void init(int argc, char* argv[])
 {
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 
-    common::init(argc, argv);
+    core.init(argc, argv);
 }
 
 void processDropEvent(const SDL_DropEvent& event)
@@ -28,19 +26,19 @@ void processDropEvent(const SDL_DropEvent& event)
     auto file = fs::u8path(event.file);
 
     SDL_free(event.file);
-    SDL_RaiseWindow(g_core.context.video.window);
+    SDL_RaiseWindow(core.context.video.window);
 
     if (file.extension() == ".gba")
     {
-        mmu.gamepak.load(file);
-        common::reset();
-        common::updateWindowTitle();
+        core.mmu.gamepak.load(file);
+        core.reset();
+        core.updateWindowTitle();
         counter = FrameCounter();
     }
     else
     {
-        mmu.gamepak.loadSave(file);
-        common::reset();
+        core.mmu.gamepak.loadSave(file);
+        core.reset();
     }
 }
 
@@ -48,10 +46,10 @@ template<typename T>
 void processInputEvent(const Shortcuts<T>& shortcuts, T input)
 {
     if (input == shortcuts.reset)
-        common::reset();
+        core.reset();
 
     if (input == shortcuts.fullscreen)
-        g_core.context.video.fullscreen();
+        core.context.video.fullscreen();
 
     if (input == shortcuts.fr_hardware)
         synchronizer.setFps(kRefreshRate);
@@ -93,7 +91,7 @@ void processEvents()
 
         case SDL_CONTROLLERDEVICEADDED:
         case SDL_CONTROLLERDEVICEREMOVED:
-            g_core.context.input.processDeviceEvent(event.cdevice);
+            core.context.input.processDeviceEvent(event.cdevice);
             break;
 
         case SDL_DROPFILE:
@@ -105,17 +103,17 @@ void processEvents()
 
 void emulate()
 {
-    while (running && mmu.gamepak.size() == 0)
+    while (running && core.mmu.gamepak.size() == 0)
     {
         processEvents();
-        g_core.context.video.clear(0x2B3137);
-        g_core.context.video.renderIcon();
-        SDL_RenderPresent(g_core.context.video.renderer);
+        core.context.video.clear(0x2B3137);
+        core.context.video.renderIcon();
+        SDL_RenderPresent(core.context.video.renderer);
         SDL_Delay(16);
     }
 
-    common::reset();
-    common::updateWindowTitle();
+    core.reset();
+    core.updateWindowTitle();
 
     counter = FrameCounter();
 
@@ -124,13 +122,13 @@ void emulate()
         synchronizer.synchronize([]()
         {
             processEvents();
-            keypad.update();
-            common::frame();
+            core.keypad.update();
+            core.frame();
         });
 
         double fps = 0;
         if ((++counter).queryFps(fps))
-            common::updateWindowTitle(fps);
+            core.updateWindowTitle(fps);
     }
 }
 

@@ -1,8 +1,6 @@
 #include "dma.h"
 
-#include "arm/arm.h"
-#include "irq/irqh.h"
-#include "mmu/mmu.h"
+#include "core/core.h"
 
 enum AddressControl
 {
@@ -12,8 +10,9 @@ enum AddressControl
     kAddressControlReload
 };
 
-Dma::Dma(uint id)
-    : id(id)
+Dma::Dma(Core& core, uint id)
+    : core(core)
+    , id(id)
 {
 
 }
@@ -72,12 +71,12 @@ void Dma::run(int& cycles)
         io.control.value &= ~DmaIo::Control::kEnable;
 
     if (io.control.irq)
-        irqh.request(kIrqDma0 << id);
+        core.irqh.request(kIrqDma0 << id);
 }
 
 bool Dma::isEeprom(u32 addr)
 {
-    return mmu.gamepak.size() <= 0x100'0000
+    return core.mmu.gamepak.size() <= 0x100'0000
         ? addr >= 0xD00'0000 && addr < 0xE00'0000
         : addr >= 0xDFF'FF00 && addr < 0xE00'0000;
 }
@@ -102,17 +101,17 @@ void Dma::initCycles()
 
     if (io.control.word)
     {
-        cycles_s += arm.io.waitcnt.cyclesWord(sad, true);
-        cycles_s += arm.io.waitcnt.cyclesWord(dad, true);
-        cycles_n += arm.io.waitcnt.cyclesWord(sad, false);
-        cycles_n += arm.io.waitcnt.cyclesWord(dad, false);
+        cycles_s += core.arm.io.waitcnt.cyclesWord(sad, true);
+        cycles_s += core.arm.io.waitcnt.cyclesWord(dad, true);
+        cycles_n += core.arm.io.waitcnt.cyclesWord(sad, false);
+        cycles_n += core.arm.io.waitcnt.cyclesWord(dad, false);
     }
     else
     {
-        cycles_s += arm.io.waitcnt.cyclesHalf(sad, true);
-        cycles_s += arm.io.waitcnt.cyclesHalf(dad, true);
-        cycles_n += arm.io.waitcnt.cyclesHalf(sad, false);
-        cycles_n += arm.io.waitcnt.cyclesHalf(dad, false);
+        cycles_s += core.arm.io.waitcnt.cyclesHalf(sad, true);
+        cycles_s += core.arm.io.waitcnt.cyclesHalf(dad, true);
+        cycles_n += core.arm.io.waitcnt.cyclesHalf(sad, false);
+        cycles_n += core.arm.io.waitcnt.cyclesHalf(dad, false);
     }
 }
 
@@ -121,22 +120,22 @@ void Dma::initTransfer()
     bool eeprom_w = id == 3 && isEeprom(dad);
     bool eeprom_r = id == 3 && isEeprom(sad);
 
-    if ((eeprom_r || eeprom_w) && mmu.gamepak.save->type == Save::Type::Eeprom)
+    if ((eeprom_r || eeprom_w) && core.mmu.gamepak.save->type == Save::Type::Eeprom)
     {
         initEeprom();
 
         if (eeprom_w)
         {
             transfer = [&]() {
-                u8 byte = static_cast<u8>(mmu.readHalf(sad));
-                mmu.gamepak.save->write(dad, byte);
+                u8 byte = static_cast<u8>(core.mmu.readHalf(sad));
+                core.mmu.gamepak.save->write(dad, byte);
             };
         }
         else
         {
             transfer = [&]() {
-                u8 byte = mmu.gamepak.save->read(sad);
-                mmu.writeHalf(dad, byte);
+                u8 byte = core.mmu.gamepak.save->read(sad);
+                core.mmu.writeHalf(dad, byte);
             };
 
         }
@@ -146,15 +145,15 @@ void Dma::initTransfer()
         if (io.control.word)
         {
             transfer = [&]() {
-                u32 word = mmu.readWord(sad);
-                mmu.writeWord(dad, word);
+                u32 word = core.mmu.readWord(sad);
+                core.mmu.writeWord(dad, word);
             };
         }
         else
         {
             transfer = [&]() {
-                u16 half = mmu.readHalf(sad);
-                mmu.writeHalf(dad, half);
+                u16 half = core.mmu.readHalf(sad);
+                core.mmu.writeHalf(dad, half);
             };
         }
     }
@@ -167,18 +166,18 @@ void Dma::initEeprom()
     constexpr uint kBus14Write = 81;
     constexpr uint kBus14ReadSetAddress = 17;
 
-    if (mmu.gamepak.save->data.empty())
+    if (core.mmu.gamepak.save->data.empty())
     {
         switch (pending)
         {
         case kBus6Write:
         case kBus6ReadSetAddress:
-            mmu.gamepak.save->data.resize(0x0200, 0xFF);
+            core.mmu.gamepak.save->data.resize(0x0200, 0xFF);
             break;
 
         case kBus14Write:
         case kBus14ReadSetAddress:
-            mmu.gamepak.save->data.resize(0x2000, 0xFF);
+            core.mmu.gamepak.save->data.resize(0x2000, 0xFF);
             break;
         }
     }

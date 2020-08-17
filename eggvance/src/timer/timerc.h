@@ -8,10 +8,12 @@
 #include "base/macros.h"
 #include "timer/timer.h"
 
+class Core;
+
 class TimerController
 {
 public:
-    TimerController();
+    TimerController(Core& core);
 
     void run(int cycles);
     void runUntilIrq(int& cycles);
@@ -24,14 +26,14 @@ private:
     void schedule();
     void reschedule();
 
+    Core& core;
+
     uint count{};
     uint event{};
 
-    std::array<Timer, 4> timers{ 0, 1, 2, 3 };
+    std::array<Timer, 4> timers;
     std::vector<std::reference_wrapper<Timer>> active;
 };
-
-extern TimerController timerc;
 
 template<uint Addr>
 u8 TimerController::read()

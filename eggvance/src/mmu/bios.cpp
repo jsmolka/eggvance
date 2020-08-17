@@ -4,8 +4,14 @@
 #include <fstream>
 #include <stdexcept>
 
-#include "arm/arm.h"
+#include "core/core.h"
 #include "base/config.h"
+
+BIOS::BIOS(Core& core)
+    : core(core)
+{
+    
+}
 
 void BIOS::reset()
 {
@@ -35,7 +41,7 @@ void BIOS::init(const fs::path& path)
 
 u8 BIOS::readByte(u32 addr)
 {
-    if (arm.pc < data.size())
+    if (core.arm.pc < data.size())
         return data.readByte(addr);
     else
         return readProtected(addr);
@@ -43,7 +49,7 @@ u8 BIOS::readByte(u32 addr)
 
 u16 BIOS::readHalf(u32 addr)
 {
-    if (arm.pc < data.size())
+    if (core.arm.pc < data.size())
         return data.readHalf(addr);
     else
         return readProtected(addr);
@@ -51,7 +57,7 @@ u16 BIOS::readHalf(u32 addr)
 
 u32 BIOS::readWord(u32 addr)
 {
-    if (arm.pc < data.size())
+    if (core.arm.pc < data.size())
         return last_fetched = data.readWord(addr);
     else
         return readProtected(addr);

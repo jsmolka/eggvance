@@ -4,9 +4,13 @@
 #include "base/enums.h"
 #include "ppu/point.h"
 
+class Core;
+
 class VRAM : public RAM<VRAM, 0x1'8000>
 {
 public:
+    VRAM(Core& core);
+
     void reset();
 
     void writeByte(u32 addr, u8 byte);
@@ -24,4 +28,7 @@ public:
 
         return addr;
     }
+
+private:
+    Core& core;
 };

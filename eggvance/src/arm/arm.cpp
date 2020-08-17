@@ -4,14 +4,11 @@
 
 #include "arm/decode.h"
 #include "arm/disassemble.h"
-#include "dma/dmac.h"
-#include "irq/irqh.h"
-#include "mmu/mmu.h"
-#include "timer/timerc.h"
+#include "core/core.h"
 
-ARM arm;
-
-ARM::ARM()
+ARM::ARM(Core& core)
+    : core(core)
+    , io(core)
 {
     flushWord();
     pc += 4;
@@ -62,14 +59,14 @@ void ARM::dispatch()
 
         if (state & kStateDma)
         {
-            dmac.run(cycles);
+            core.dmac.run(cycles);
         }
         else
         {
             if (state & kStateHalt)
             {
                 if (state & kStateTimer)
-                    timerc.runUntilIrq(cycles);
+                    core.timerc.runUntilIrq(cycles);
                 else
                     cycles = 0;
 
@@ -110,7 +107,7 @@ void ARM::dispatch()
         }
 
         if (state & kStateTimer)
-            timerc.run(previous - cycles);
+            core.timerc.run(previous - cycles);
     }
 }
 

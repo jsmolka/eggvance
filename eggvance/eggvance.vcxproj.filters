@@ -153,9 +153,6 @@
     <ClCompile Include="src\core\synchronizer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\common.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\arm\psr.h">
@@ -338,16 +335,13 @@
     <ClInclude Include="src\core\videocontext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\base\sdl2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\framecounter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\core\synchronizer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\common.h">
+    <ClInclude Include="src\base\sdl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
