@@ -70,12 +70,12 @@ git clone https://github.com/emscripten-core/emsdk.git
 source ./emsdk/emsdk_env.sh
 ```
 
-Build with CMake and `emmake`.
+Build with CMake and `emcmake`.
 
 ```
 mkdir eggvance/build
 cd eggvance/build/
-emmake cmake ..
+emcmake cmake ..
 emmake make
 ```
 

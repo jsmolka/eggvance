@@ -60,7 +60,7 @@ jobs:
           mkdir eggvance/build
           cd eggvance/build
           cmake -DCMAKE_BUILD_TYPE=Release ..
-          make
+          make -j 4
 
       - name: Collect files
         run: |
@@ -91,7 +91,7 @@ jobs:
           mkdir eggvance/build
           cd eggvance/build
           cmake -DCMAKE_BUILD_TYPE=Release ..
-          make
+          make -j 4
 
       - name: Collect files
         run: |
@@ -125,15 +125,15 @@ jobs:
           source ./emsdk/emsdk_env.sh
           mkdir eggvance/build
           cd eggvance/build
-          emmake cmake -DCMAKE_BUILD_TYPE=Release ..
-          emmake make
+          emcmake cmake -DCMAKE_BUILD_TYPE=Release ..
+          emmake make -j 4
 
       - name: Collect files
         run: |
           mkdir upload
-          mv eggvance/build/eggvance.html upload
           mv eggvance/build/eggvance.wasm upload
           mv eggvance/build/eggvance.js upload
+          mv eggvance/eggvance.html upload
 
       - name: Upload files
         uses: actions/upload-artifact@master
