@@ -3,22 +3,26 @@
 #include <stdexcept>
 #include <eggcpt/icon.h>
 
-void VideoContext::present()
-{
-    SDL_UpdateTexture(texture, nullptr, buffer, sizeof(u32) * kScreenW);
-    SDL_RenderCopy(renderer, texture, nullptr, nullptr);
-    SDL_RenderPresent(renderer);
-}
-
 void VideoContext::fullscreen()
 {
     SDL_ShowCursor(SDL_ShowCursor(SDL_QUERY) ^ 0x1);
     SDL_SetWindowFullscreen(window, SDL_GetWindowFlags(window) ^ SDL_WINDOW_FULLSCREEN_DESKTOP);
 }
 
-void VideoContext::setWindowTitle(const std::string& title)
+void VideoContext::setTitle(const std::string& title)
 {
     SDL_SetWindowTitle(window, title.c_str());
+}
+
+void VideoContext::renderCopyBuffer()
+{
+    SDL_UpdateTexture(texture, nullptr, buffer, sizeof(u32) * kScreenW);
+    SDL_RenderCopy(renderer, texture, nullptr, nullptr);
+}
+
+void VideoContext::renderPresent()
+{
+    SDL_RenderPresent(renderer);
 }
 
 void VideoContext::renderIcon()
@@ -47,7 +51,7 @@ void VideoContext::renderIcon()
     SDL_RenderSetLogicalSize(renderer, w, h);
 }
 
-void VideoContext::clear(uint color)
+void VideoContext::renderClear(u32 color)
 {
     SDL_SetRenderDrawColor(
         renderer,

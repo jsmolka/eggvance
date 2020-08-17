@@ -5,25 +5,25 @@
 #include "base/constants.h"
 #include "base/sdl2.h"
 
-// Todo: renderCopyBuffer
-// Todo: renderPresent
-
 class VideoContext
 {
 public:
     friend class Context;
 
-    void present();
     void fullscreen();
-    void setWindowTitle(const std::string& title);
+    void setTitle(const std::string& title);
 
+    void renderClear(u32 color);
+    void renderCopyBuffer();
+    void renderPresent();
     void renderIcon();
-    void clear(uint color);  // Todo: renderClear, u32
 
     SDL_Window* window;
     SDL_Texture* texture;
     SDL_Renderer* renderer;
-
+    
+    // Todo: use LockTexture and UnlockTexture, remove entirely
+    // https://wiki.libsdl.org/SDL_UpdateTexture
     u32 buffer[kScreenH * kScreenW];
 
 private:

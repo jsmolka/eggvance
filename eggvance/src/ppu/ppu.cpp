@@ -144,7 +144,8 @@ void PPU::present()
 {
     if (io.dispcnt.isActive())
     {
-        core.context.video.present();
+        core.context.video.renderCopyBuffer();
+        core.context.video.renderPresent();
     }
 }
 

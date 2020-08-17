@@ -88,9 +88,10 @@ void processEvents()
 void idle()
 {
     processEvents();
+
     core.context.video.clear(background);
     core.context.video.renderIcon();
-    SDL_RenderPresent(core.context.video.renderer);
+    core.context.video.renderPresent();
 }
 
 void emulate()
@@ -101,14 +102,14 @@ void emulate()
 
     double fps = 0;
     if ((++counter).queryFps(fps))
-        core.updateWindowTitle(fps);
+        core.updateTitle(fps);
 }
 
 void eggvanceLoadRom(const std::string& filename)
 {
     core.mmu.gamepak.load(filename);
     core.reset();
-    core.updateWindowTitle();
+    core.updateTitle();
     counter = FrameCounter();
     emulateMain(kRefreshRate);
 }

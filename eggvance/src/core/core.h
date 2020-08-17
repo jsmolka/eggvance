@@ -19,8 +19,8 @@ public:
     void reset();
     void frame();
 
-    void updateWindowTitle();
-    void updateWindowTitle(double fps);
+    void updateTitle();
+    void updateTitle(double fps);
 
     MMU mmu;
     ARM arm;

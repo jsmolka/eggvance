@@ -66,7 +66,7 @@ void Core::frame()
     ppu.present();
 }
 
-void Core::updateWindowTitle()
+void Core::updateTitle()
 {
     const auto title = fmt::format(
         mmu.gamepak.header.title.empty()
@@ -74,10 +74,10 @@ void Core::updateWindowTitle()
             : "eggvance - {0}",
         mmu.gamepak.header.title);
 
-    context.video.setWindowTitle(title);
+    context.video.setTitle(title);
 }
 
-void Core::updateWindowTitle(double fps)
+void Core::updateTitle(double fps)
 {
     const auto title = fmt::format(
         mmu.gamepak.header.title.empty()
@@ -85,5 +85,5 @@ void Core::updateWindowTitle(double fps)
             : "eggvance - {0} - {1:.1f} fps",
         mmu.gamepak.header.title, fps);
 
-    context.video.setWindowTitle(title);
+    context.video.setTitle(title);
 }

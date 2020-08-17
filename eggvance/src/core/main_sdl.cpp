@@ -32,7 +32,7 @@ void processDropEvent(const SDL_DropEvent& event)
     {
         core.mmu.gamepak.load(file);
         core.reset();
-        core.updateWindowTitle();
+        core.updateTitle();
         counter = FrameCounter();
     }
     else
@@ -106,14 +106,16 @@ void emulate()
     while (running && core.mmu.gamepak.size() == 0)
     {
         processEvents();
-        core.context.video.clear(0x2B3137);
+
+        core.context.video.renderClear(0x2B3137);
         core.context.video.renderIcon();
-        SDL_RenderPresent(core.context.video.renderer);
+        core.context.video.renderPresent();
+
         SDL_Delay(16);
     }
 
     core.reset();
-    core.updateWindowTitle();
+    core.updateTitle();
 
     counter = FrameCounter();
 
@@ -128,7 +130,7 @@ void emulate()
 
         double fps = 0;
         if ((++counter).queryFps(fps))
-            core.updateWindowTitle(fps);
+            core.updateTitle(fps);
     }
 }
 
