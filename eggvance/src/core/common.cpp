@@ -10,23 +10,14 @@
 #include "mmu/mmu.h"
 #include "ppu/ppu.h"
 #include "timer/timerc.h"
+#include "core/core.h"
 
-void common::init(
-    int argc, char* argv[], 
-    const std::shared_ptr<AudioDevice>& audio_device, 
-    const std::shared_ptr<InputDevice>& input_device, 
-    const std::shared_ptr<VideoDevice>& video_device)
+void common::init(int argc, char* argv[])
 {
     config.init(argc, argv);
     mmu.bios.init(config.bios_file);
 
-    audio_device->init();
-    input_device->init();
-    video_device->init();
-
-    ::audio_device = audio_device;
-    ::input_device = input_device;
-    ::video_device = video_device;
+    g_core.context.init();
 
     switch (argc)
     {
@@ -82,7 +73,7 @@ void common::updateWindowTitle()
         mmu.gamepak.header.title
     );
 
-    video_device->setWindowTitle(title);
+    g_core.context.video.setWindowTitle(title);
 }
 
 void common::updateWindowTitle(double fps)
@@ -94,5 +85,5 @@ void common::updateWindowTitle(double fps)
         mmu.gamepak.header.title, fps
     );
 
-    video_device->setWindowTitle(title);
+    g_core.context.video.setWindowTitle(title);
 }

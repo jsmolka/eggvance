@@ -4,23 +4,15 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -flto")
 
-set(PLATFORM "SDL" CACHE STRING "Platform <SDL|EMSCRIPTEN>")
-
-if(PLATFORM STREQUAL "SDL")
+if (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
   project(eggvance)
-
-  add_definitions(-DPLATFORM_SDL)
 
   find_package(SDL2 REQUIRED)
   include_directories(${SDL2_INCLUDE_DIRS})
-elseif(PLATFORM STREQUAL "EMSCRIPTEN")
+else()
   project(eggvance.html)
 
-  add_definitions(-DPLATFORM_EMSCRIPTEN)
-
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s USE_SDL=2 -s ALLOW_MEMORY_GROWTH=1 -s FORCE_FILESYSTEM=1 -s DISABLE_EXCEPTION_CATCHING=0 -DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0 --bind --shell-file ../eggvance.html")
-else()
-  message(FATAL_ERROR "Invalid platform")
 endif()
 
 add_definitions(-DFMT_HEADER_ONLY)
@@ -37,7 +29,7 @@ file(GLOB_RECURSE SOURCE_FILES
 
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILES})
 
-if (PLATFORM STREQUAL "SDL")
+if (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
   target_link_libraries(${CMAKE_PROJECT_NAME} ${SDL2_LIBRARIES})
 endif()
 

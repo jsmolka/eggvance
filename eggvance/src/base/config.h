@@ -1,7 +1,10 @@
 #pragma once
 
+// Todo: move to core
+
 #include "base/fs.h"
 #include "base/input.h"
+#include "base/sdl2.h"
 
 class Config
 {
@@ -10,14 +13,14 @@ public:
 
     struct
     {
-        Controls<Key> keyboard;
-        Controls<Button> controller;
+        Controls<SDL_Scancode> keyboard;
+        Controls<SDL_GameControllerButton> controller;
     } controls;
 
     struct
     {
-        Shortcuts<Key> keyboard;
-        Shortcuts<Button> controller;
+        Shortcuts<SDL_Scancode> keyboard;
+        Shortcuts<SDL_GameControllerButton> controller;
     } shortcuts;
 
     double framerate[4];

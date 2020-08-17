@@ -125,7 +125,7 @@ jobs:
           source ./emsdk/emsdk_env.sh
           mkdir eggvance/build
           cd eggvance/build
-          emmake cmake -DCMAKE_BUILD_TYPE=Release -DPLATFORM=EMSCRIPTEN ..
+          emmake cmake -DCMAKE_BUILD_TYPE=Release ..
           emmake make
 
       - name: Collect files

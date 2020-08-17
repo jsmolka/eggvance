@@ -1,58 +1,27 @@
-#include "sdlvideodevice.h"
+#include "videocontext.h"
 
 #include <stdexcept>
 #include <eggcpt/icon.h>
 
-SDLVideoDevice::~SDLVideoDevice()
-{
-    deinit();
-}
-
-void SDLVideoDevice::init()
-{
-    if (SDL_InitSubSystem(SDL_INIT_VIDEO))
-        throw std::runtime_error("Cannot init video device");
-
-    if (!createWindow())
-        throw std::runtime_error("Cannot create window");
-
-    if (!createRenderer())
-        throw std::runtime_error("Cannot create renderer");
-
-    if (!createTexture())
-        throw std::runtime_error("Cannot create texture");
-}
-
-void SDLVideoDevice::deinit()
-{
-    if (SDL_WasInit(SDL_INIT_VIDEO))
-    {
-        SDL_DestroyTexture(texture);
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        SDL_QuitSubSystem(SDL_INIT_VIDEO);
-    }
-}
-
-void SDLVideoDevice::present()
+void VideoContext::present()
 {
     SDL_UpdateTexture(texture, nullptr, buffer, sizeof(u32) * kScreenW);
     SDL_RenderCopy(renderer, texture, nullptr, nullptr);
     SDL_RenderPresent(renderer);
 }
 
-void SDLVideoDevice::fullscreen()
+void VideoContext::fullscreen()
 {
     SDL_ShowCursor(SDL_ShowCursor(SDL_QUERY) ^ 0x1);
     SDL_SetWindowFullscreen(window, SDL_GetWindowFlags(window) ^ SDL_WINDOW_FULLSCREEN_DESKTOP);
 }
 
-void SDLVideoDevice::setWindowTitle(const std::string& title)
+void VideoContext::setWindowTitle(const std::string& title)
 {
     SDL_SetWindowTitle(window, title.c_str());
 }
 
-void SDLVideoDevice::renderIcon()
+void VideoContext::renderIcon()
 {
     int w;
     int h;
@@ -78,19 +47,40 @@ void SDLVideoDevice::renderIcon()
     SDL_RenderSetLogicalSize(renderer, w, h);
 }
 
-void SDLVideoDevice::clear(uint color)
+void VideoContext::clear(uint color)
 {
     SDL_SetRenderDrawColor(
         renderer,
-        (color >> 16) & 0xFF,
-        (color >>  8) & 0xFF,
-        (color >>  0) & 0xFF,
+        bit::seq<16, 8>(color),
+        bit::seq< 8, 8>(color),
+        bit::seq< 0, 8>(color),
         SDL_ALPHA_OPAQUE
     );
     SDL_RenderClear(renderer);
 }
 
-bool SDLVideoDevice::createWindow()
+void VideoContext::init()
+{
+    if (SDL_InitSubSystem(SDL_INIT_VIDEO))
+        throw std::runtime_error("Cannot init video context");
+
+    if (!initWindow())   throw std::runtime_error("Cannot init window");
+    if (!initRenderer()) throw std::runtime_error("Cannot init renderer");
+    if (!initTexture())  throw std::runtime_error("Cannot init texture");
+}
+
+void VideoContext::deinit()
+{
+    if (SDL_WasInit(SDL_INIT_VIDEO))
+    {
+        SDL_DestroyTexture(texture);
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_QuitSubSystem(SDL_INIT_VIDEO);
+    }
+}
+
+bool VideoContext::initWindow()
 {
     return window = SDL_CreateWindow(
         "eggvance",
@@ -101,7 +91,7 @@ bool SDLVideoDevice::createWindow()
     );
 }
 
-bool SDLVideoDevice::createRenderer()
+bool VideoContext::initRenderer()
 {
     renderer = SDL_CreateRenderer(
         window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE
@@ -111,7 +101,7 @@ bool SDLVideoDevice::createRenderer()
     return renderer;
 }
 
-bool SDLVideoDevice::createTexture()
+bool VideoContext::initTexture()
 {
     return texture = SDL_CreateTexture(
         renderer,

@@ -1,44 +1,26 @@
-#ifdef PLATFORM_SDL
+#include "base/eggcpt.h"
+
+#if !EGGCPT_CC_EMSCRIPTEN
 
 #include <stdexcept>
 
-#include "sdlaudiodevice.h"
-#include "sdlinputdevice.h"
-#include "sdlvideodevice.h"
 #include "base/config.h"
+#include "core/core.h"
+#include "core/common.h"
+#include "core/framecounter.h"
+#include "core/synchronizer.h"
 #include "keypad/keypad.h"
 #include "mmu/mmu.h"
-#include "platform/common.h"
-#include "platform/framecounter.h"
-#include "platform/synchronizer.h"
 
 bool running = true;
 FrameCounter counter;
 Synchronizer synchronizer;
 
-auto sdl_audio_device = std::make_shared<SDLAudioDevice>();
-auto sdl_input_device = std::make_shared<SDLInputDevice>();
-auto sdl_video_device = std::make_shared<SDLVideoDevice>();
-
-struct
-{
-    Shortcuts<SDL_Scancode> keyboard;
-    Shortcuts<SDL_GameControllerButton> controller;
-} shortcuts;
-
 void init(int argc, char* argv[])
 {
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 
-    common::init(
-        argc, argv,
-        sdl_audio_device,
-        sdl_input_device,
-        sdl_video_device
-    );
-
-    shortcuts.keyboard = config.shortcuts.keyboard.convert<SDL_Scancode>(SDLInputDevice::convertKey);
-    shortcuts.controller = config.shortcuts.controller.convert<SDL_GameControllerButton>(SDLInputDevice::convertButton);
+    common::init(argc, argv);
 }
 
 void processDropEvent(const SDL_DropEvent& event)
@@ -46,7 +28,7 @@ void processDropEvent(const SDL_DropEvent& event)
     auto file = fs::u8path(event.file);
 
     SDL_free(event.file);
-    SDL_RaiseWindow(sdl_video_device->window);
+    SDL_RaiseWindow(g_core.context.video.window);
 
     if (file.extension() == ".gba")
     {
@@ -69,7 +51,7 @@ void processInputEvent(const Shortcuts<T>& shortcuts, T input)
         common::reset();
 
     if (input == shortcuts.fullscreen)
-        sdl_video_device->fullscreen();
+        g_core.context.video.fullscreen();
 
     if (input == shortcuts.fr_hardware)
         synchronizer.setFps(kRefreshRate);
@@ -102,16 +84,16 @@ void processEvents()
             break;
 
         case SDL_KEYDOWN:
-            processInputEvent(shortcuts.keyboard, event.key.keysym.scancode);
+            processInputEvent(config.shortcuts.keyboard, event.key.keysym.scancode);
             break;
 
         case SDL_CONTROLLERBUTTONDOWN:
-            processInputEvent(shortcuts.controller, SDL_GameControllerButton(event.cbutton.button));
+            processInputEvent(config.shortcuts.controller, SDL_GameControllerButton(event.cbutton.button));
             break;
 
         case SDL_CONTROLLERDEVICEADDED:
         case SDL_CONTROLLERDEVICEREMOVED:
-            sdl_input_device->processDeviceEvent(event.cdevice);
+            g_core.context.input.processDeviceEvent(event.cdevice);
             break;
 
         case SDL_DROPFILE:
@@ -126,9 +108,9 @@ void emulate()
     while (running && mmu.gamepak.size() == 0)
     {
         processEvents();
-        sdl_video_device->clear(0x2B3137);
-        sdl_video_device->renderIcon();
-        SDL_RenderPresent(sdl_video_device->renderer);
+        g_core.context.video.clear(0x2B3137);
+        g_core.context.video.renderIcon();
+        SDL_RenderPresent(g_core.context.video.renderer);
         SDL_Delay(16);
     }
 

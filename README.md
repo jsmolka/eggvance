@@ -75,7 +75,7 @@ Build with CMake and `emmake`.
 ```
 mkdir eggvance/build
 cd eggvance/build/
-emmake cmake -DPLATFORM=EMSCRIPTEN ..
+emmake cmake ..
 emmake make
 ```
 

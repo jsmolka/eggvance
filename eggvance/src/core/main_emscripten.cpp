@@ -1,4 +1,6 @@
-#ifdef PLATFORM_EMSCRIPTEN
+#include "base/eggcpt.h"
+
+#if EGGCPT_CC_EMSCRIPTEN
 
 #include <emscripten.h>
 #include <emscripten/bind.h>
@@ -6,27 +8,15 @@
 #include "base/config.h"
 #include "keypad/keypad.h"
 #include "mmu/mmu.h"
-#include "platform/common.h"
-#include "platform/framecounter.h"
-#include "platform/sdl/sdlaudiodevice.h"
-#include "platform/sdl/sdlinputdevice.h"
-#include "platform/sdl/sdlvideodevice.h"
+#include "core/core.h"
+#include "core/common.h"
+#include "core/framecounter.h"
 
 using namespace emscripten;
 
 FrameCounter counter;
 
 u32 background = 0xFFFFFF;
-
-auto sdl_audio_device = std::make_shared<SDLAudioDevice>();
-auto sdl_input_device = std::make_shared<SDLInputDevice>();
-auto sdl_video_device = std::make_shared<SDLVideoDevice>();
-
-struct
-{
-    Shortcuts<SDL_Scancode> keyboard;
-    Shortcuts<SDL_GameControllerButton> controller;
-} shortcuts;
 
 void idle();
 void idleMain()
@@ -44,15 +34,7 @@ void emulateMain(uint fps)
 
 void init(int argc, char* argv[])
 {
-    common::init(
-        argc, argv,
-        sdl_audio_device,
-        sdl_input_device,
-        sdl_video_device
-    );
-
-    shortcuts.keyboard = config.shortcuts.keyboard.convert<SDL_Scancode>(SDLInputDevice::convertKey);
-    shortcuts.controller = config.shortcuts.controller.convert<SDL_GameControllerButton>(SDLInputDevice::convertButton);
+    common::init(argc, argv);
 }
 
 template<typename T>
@@ -62,7 +44,7 @@ void processInputEvent(const Shortcuts<T>& shortcuts, T input)
         common::reset();
 
     if (input == shortcuts.fullscreen)
-        sdl_video_device->fullscreen();
+        g_core.context.video.fullscreen();
 
     if (input == shortcuts.fr_hardware)
         emulateMain(kRefreshRate);
@@ -91,16 +73,16 @@ void processEvents()
         switch (event.type)
         {
         case SDL_KEYDOWN:
-            processInputEvent(shortcuts.keyboard, event.key.keysym.scancode);
+            processInputEvent(config.shortcuts.keyboard, event.key.keysym.scancode);
             break;
 
         case SDL_CONTROLLERBUTTONDOWN:
-            processInputEvent(shortcuts.controller, SDL_GameControllerButton(event.cbutton.button));
+            processInputEvent(config.shortcuts.controller, SDL_GameControllerButton(event.cbutton.button));
             break;
 
         case SDL_CONTROLLERDEVICEADDED:
         case SDL_CONTROLLERDEVICEREMOVED:
-            sdl_input_device->processDeviceEvent(event.cdevice);
+            g_core.context.input.processDeviceEvent(event.cdevice);
             break;
         }
     }
@@ -109,9 +91,9 @@ void processEvents()
 void idle()
 {
     processEvents();
-    sdl_video_device->clear(background);
-    sdl_video_device->renderIcon();
-    SDL_RenderPresent(sdl_video_device->renderer);
+    g_core.context.video.clear(background);
+    g_core.context.video.renderIcon();
+    SDL_RenderPresent(g_core.context.video.renderer);
 }
 
 void emulate()

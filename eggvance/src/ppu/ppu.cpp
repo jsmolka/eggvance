@@ -5,10 +5,10 @@
 #include "base/bits.h"
 #include "base/constants.h"
 #include "base/macros.h"
+#include "core/core.h"
 #include "dma/dmac.h"
 #include "irq/irqh.h"
 #include "mmu/mmu.h"
-#include "platform/videodevice.h"
 
 PPU ppu;
 
@@ -34,7 +34,7 @@ void PPU::scanline()
 
     if (io.dispcnt.blank)
     {
-        u32* scanline = &video_device->buffer[kScreenW * io.vcount.value];
+        u32* scanline = &g_core.context.video.buffer[kScreenW * io.vcount.value];
         std::fill_n(scanline, kScreenW, 0xFFFFFFFF);
         return;
     }
@@ -143,7 +143,7 @@ void PPU::present()
 {
     if (io.dispcnt.isActive())
     {
-        video_device->present();
+        g_core.context.video.present();
     }
 }
 
