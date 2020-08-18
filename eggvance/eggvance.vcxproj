@@ -33,7 +33,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release with symbols|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v142</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -66,7 +66,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/Ob3 %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>NOMINMAX;PLATFORM_SDL;FMT_HEADER_ONLY;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;FMT_HEADER_ONLY;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <WarningLevel>Level2</WarningLevel>
@@ -92,7 +92,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/Ob3 %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>NOMINMAX;PLATFORM_SDL;FMT_HEADER_ONLY;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;FMT_HEADER_ONLY;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <WarningLevel>Level2</WarningLevel>
@@ -117,7 +117,7 @@
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>NOMINMAX;PLATFORM_SDL;FMT_HEADER_ONLY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;FMT_HEADER_ONLY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SupportJustMyCode>true</SupportJustMyCode>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -141,13 +141,14 @@
     <ClCompile Include="src\arm\util.cpp" />
     <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\base\config.cpp" />
-    <ClCompile Include="src\base\input.cpp" />
     <ClCompile Include="src\core\audiocontext.cpp" />
     <ClCompile Include="src\core\context.cpp" />
     <ClCompile Include="src\core\core.cpp" />
+    <ClCompile Include="src\core\framecounter.cpp" />
     <ClCompile Include="src\core\inputcontext.cpp" />
     <ClCompile Include="src\core\main_emscripten.cpp" />
     <ClCompile Include="src\core\main_sdl.cpp" />
+    <ClCompile Include="src\core\synchronizer.cpp" />
     <ClCompile Include="src\core\videocontext.cpp" />
     <ClCompile Include="src\gamepak\eeprom.cpp" />
     <ClCompile Include="src\gamepak\flash.cpp" />
@@ -158,8 +159,6 @@
     <ClCompile Include="src\gamepak\rtc.cpp" />
     <ClCompile Include="src\gamepak\save.cpp" />
     <ClCompile Include="src\gamepak\sram.cpp" />
-    <ClCompile Include="src\core\framecounter.cpp" />
-    <ClCompile Include="src\core\synchronizer.cpp" />
     <ClCompile Include="src\mmu\bios_data.cpp" />
     <ClCompile Include="src\mmu\io.cpp" />
     <ClCompile Include="src\ppu\collapse.cpp" />

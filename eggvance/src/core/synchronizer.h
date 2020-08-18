@@ -6,14 +6,14 @@
 class Synchronizer
 {
 public:
-    using Frame = std::function<void(void)>;
+    Synchronizer(double fps);
 
-    Synchronizer();
-
-    void setFps(double fps);
-    void synchronize(const Frame& frame);
+    void sync(const std::function<void(void)>& frame);
 
 private:
-    std::chrono::nanoseconds delta;
-    std::chrono::nanoseconds duration;
+    using Clock    = std::chrono::high_resolution_clock;
+    using Duration = std::chrono::high_resolution_clock::duration;
+
+    Duration delta_have;
+    Duration delta_want;
 };

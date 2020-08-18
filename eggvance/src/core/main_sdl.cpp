@@ -12,7 +12,7 @@
 Core core;
 bool running = true;
 FrameCounter counter;
-Synchronizer synchronizer;
+Synchronizer synchronizer(kRefreshRate);
 
 void init(int argc, char* argv[])
 {
@@ -26,7 +26,8 @@ void processDropEvent(const SDL_DropEvent& event)
     auto file = fs::u8path(event.file);
 
     SDL_free(event.file);
-    SDL_RaiseWindow(core.context.video.window);
+
+    core.context.video.raise();
 
     if (file.extension() == ".gba")
     {
@@ -52,22 +53,22 @@ void processInputEvent(const Shortcuts<T>& shortcuts, T input)
         core.context.video.fullscreen();
 
     if (input == shortcuts.fr_hardware)
-        synchronizer.setFps(kRefreshRate);
+        synchronizer = Synchronizer(kRefreshRate);
 
     if (input == shortcuts.fr_custom_1)
-        synchronizer.setFps(config.framerate[0]);
+        synchronizer = Synchronizer(config.framerate[0]);
 
     if (input == shortcuts.fr_custom_2)
-        synchronizer.setFps(config.framerate[1]);
+        synchronizer = Synchronizer(config.framerate[1]);
 
     if (input == shortcuts.fr_custom_3)
-        synchronizer.setFps(config.framerate[2]);
+        synchronizer = Synchronizer(config.framerate[2]);
 
     if (input == shortcuts.fr_custom_4)
-        synchronizer.setFps(config.framerate[3]);
+        synchronizer = Synchronizer(config.framerate[3]);
 
     if (input == shortcuts.fr_unbound)
-        synchronizer.setFps(6000);
+        synchronizer = Synchronizer(6000);
 }
 
 void processEvents()
@@ -121,16 +122,15 @@ void emulate()
 
     while (running)
     {
-        synchronizer.synchronize([]()
+        synchronizer.sync([]()
         {
             processEvents();
             core.keypad.update();
             core.frame();
         });
 
-        double fps = 0;
-        if ((++counter).queryFps(fps))
-            core.updateTitle(fps);
+        if (auto fps = (++counter).fps())
+            core.updateTitle(*fps);
     }
 }
 

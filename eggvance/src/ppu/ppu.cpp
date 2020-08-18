@@ -35,7 +35,7 @@ void PPU::scanline()
 
     if (io.dispcnt.blank)
     {
-        u32* scanline = &core.context.video.buffer[kScreenW * io.vcount.value];
+        u32* scanline = core.context.video.scanline(io.vcount.value);
         std::fill_n(scanline, kScreenW, 0xFFFFFFFF);
         return;
     }
@@ -144,7 +144,7 @@ void PPU::present()
 {
     if (io.dispcnt.isActive())
     {
-        core.context.video.renderCopyBuffer();
+        core.context.video.renderCopyTexture();
         core.context.video.renderPresent();
     }
 }
@@ -179,8 +179,8 @@ bool PPU::mosaicDominant() const
 u32 PPU::argb(u16 color)
 {
     return 0xFF000000
-        | (color & 0x001F) << 19
-        | (color & 0x03E0) <<  6
-        | (color & 0x7C00) >>  7;
+        | (color & (0x1F <<  0)) << 19
+        | (color & (0x1F <<  5)) <<  6
+        | (color & (0x1F << 10)) >>  7;
 }
 

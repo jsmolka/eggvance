@@ -1,11 +1,9 @@
 #include "framecounter.h"
 
-using namespace std::chrono;
-
 FrameCounter::FrameCounter()
 {
-    begin = high_resolution_clock::now();
     count = 0;
+    begin = Clock::now();
 }
 
 FrameCounter& FrameCounter::operator++()
@@ -14,16 +12,14 @@ FrameCounter& FrameCounter::operator++()
     return *this;
 }
 
-bool FrameCounter::queryFps(double& value)
+std::optional<double> FrameCounter::fps()
 {
-    auto delta = high_resolution_clock::now() - begin;
-    if (delta >= seconds(1))
+    auto delta = Clock::now() - begin;
+    if (delta >= std::chrono::seconds(1))
     {
-        value = count / duration<double>(delta).count();
-        begin = high_resolution_clock::now();
-        count = 0;
-
-        return true;
+        double fps = count / std::chrono::duration<double>(delta).count();
+        *this = FrameCounter();
+        return fps;
     }
-    return false;
+    return std::nullopt;
 }

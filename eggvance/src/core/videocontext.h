@@ -1,8 +1,10 @@
 #pragma once
 
+#include <array>
 #include <string>
 
 #include "base/constants.h"
+#include "base/eggcpt.h"
 #include "base/sdl2.h"
 
 class VideoContext
@@ -10,21 +12,16 @@ class VideoContext
 public:
     friend class Context;
 
+    void raise();
     void fullscreen();
-    void setTitle(const std::string& title);
+    void title(const std::string& title);
 
     void renderClear(u32 color);
-    void renderCopyBuffer();
+    void renderCopyTexture();
     void renderPresent();
     void renderIcon();
 
-    SDL_Window* window;
-    SDL_Texture* texture;
-    SDL_Renderer* renderer;
-    
-    // Todo: use LockTexture and UnlockTexture, remove entirely
-    // https://wiki.libsdl.org/SDL_UpdateTexture
-    u32 buffer[kScreenH * kScreenW];
+    u32* scanline(uint line);
 
 private:
     void init();
@@ -33,4 +30,10 @@ private:
     bool initWindow();
     bool initRenderer();
     bool initTexture();
+
+    SDL_Window* window = nullptr;
+    SDL_Texture* texture = nullptr;
+    SDL_Renderer* renderer = nullptr;
+
+    std::array<u32, kScreenW * kScreenH> buffer = { 0 };
 };

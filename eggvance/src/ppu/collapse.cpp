@@ -55,7 +55,7 @@ void PPU::collapse(const std::vector<BGLayer>& layers)
 template<int obj_master>
 void PPU::collapseNN(const std::vector<BGLayer>& layers)
 {
-    u32* scanline = &core.context.video.buffer[kScreenW * io.vcount.value];
+    u32* scanline = core.context.video.scanline(io.vcount.value);
 
     for (int x = 0; x < kScreenW; ++x)
     {
@@ -86,7 +86,7 @@ void PPU::collapseNW(const std::vector<BGLayer>& layers)
 template<int obj_master, int win_master>
 void PPU::collapseNW(const std::vector<BGLayer>& layers)
 {
-    u32* scanline = &core.context.video.buffer[kScreenW * io.vcount.value];
+    u32* scanline = core.context.video.scanline(io.vcount.value);
 
     for (int x = 0; x < kScreenW; ++x)
     {
@@ -117,7 +117,7 @@ void PPU::collapseBN(const std::vector<BGLayer>& layers)
 {
     constexpr int flags = 0xFFFF;
 
-    u32* scanline = &core.context.video.buffer[kScreenW * io.vcount.value];
+    u32* scanline = core.context.video.scanline(io.vcount.value);
 
     for (int x = 0; x < kScreenW; ++x)
     {
@@ -201,7 +201,7 @@ void PPU::collapseBW(const std::vector<BGLayer>& layers)
 template<int obj_master, int blend_mode, int win_master>
 void PPU::collapseBW(const std::vector<BGLayer>& layers)
 {
-    u32* scanline = &core.context.video.buffer[kScreenW * io.vcount.value];
+    u32* scanline = core.context.video.scanline(io.vcount.value);
 
     for (int x = 0; x < kScreenW; ++x)
     {

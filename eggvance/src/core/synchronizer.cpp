@@ -2,32 +2,23 @@
 
 #include <thread>
 
-#include "base/constants.h"
-
-using namespace std::chrono;
-
-Synchronizer::Synchronizer()
+Synchronizer::Synchronizer(double fps)
 {
-    setFps(kRefreshRate);
+    delta_have = Duration(0);
+    delta_want = Duration(Duration::rep(Duration::period::den / fps));
 }
 
-void Synchronizer::setFps(double fps)
+void Synchronizer::sync(const std::function<void(void)>& frame)
 {
-    delta = nanoseconds(0);
-    duration = nanoseconds(nanoseconds::rep(nanoseconds::period::den / fps));
-}
-
-void Synchronizer::synchronize(const Frame& frame)
-{
-    auto beg = high_resolution_clock::now();
+    auto beg = Clock::now();
     frame();
-    auto end = high_resolution_clock::now();
-    
-    delta += end - beg;
-    if (delta < duration)
+    auto end = Clock::now();
+
+    delta_have += end - beg;
+    if (delta_have < delta_want)
     {
-        std::this_thread::sleep_for(duration - delta);
-        delta += high_resolution_clock::now() - end;
+        std::this_thread::sleep_for(delta_want - delta_have);
+        delta_have += Clock::now() - end;
     }
-    delta -= duration;
+    delta_have -= delta_want;
 }

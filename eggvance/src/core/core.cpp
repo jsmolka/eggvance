@@ -74,7 +74,7 @@ void Core::updateTitle()
             : "eggvance - {0}",
         mmu.gamepak.header.title);
 
-    context.video.setTitle(title);
+    context.video.title(title);
 }
 
 void Core::updateTitle(double fps)
@@ -85,5 +85,5 @@ void Core::updateTitle(double fps)
             : "eggvance - {0} - {1:.1f} fps",
         mmu.gamepak.header.title, fps);
 
-    context.video.setTitle(title);
+    context.video.title(title);
 }

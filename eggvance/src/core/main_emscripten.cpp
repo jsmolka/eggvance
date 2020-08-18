@@ -100,9 +100,8 @@ void emulate()
     core.keypad.update();
     core.frame();
 
-    double fps = 0;
-    if ((++counter).queryFps(fps))
-        core.updateTitle(fps);
+    if (auto fps = (++counter).fps())
+        core.updateTitle(*fps);
 }
 
 void eggvanceLoadRom(const std::string& filename)

@@ -1,8 +1,9 @@
 #pragma once
 
 #include <chrono>
+#include <optional>
 
-#include "base/integer.h"
+#include "base/eggcpt.h"
 
 class FrameCounter
 {
@@ -11,9 +12,12 @@ public:
 
     FrameCounter& operator++();
 
-    bool queryFps(double& value);
+    std::optional<double> fps();
 
 private:
-    std::chrono::time_point<std::chrono::high_resolution_clock> begin;
+    using Clock = std::chrono::high_resolution_clock;
+    using Time  = std::chrono::high_resolution_clock::time_point;
+
+    Time begin;
     uint count;
 };

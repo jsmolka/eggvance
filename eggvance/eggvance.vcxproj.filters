@@ -87,9 +87,6 @@
     <ClCompile Include="src\base\config.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\base\input.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\arm\util.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -147,10 +144,10 @@
     <ClCompile Include="src\core\core.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\framecounter.cpp">
+    <ClCompile Include="src\core\synchronizer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\synchronizer.cpp">
+    <ClCompile Include="src\core\framecounter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -341,7 +338,7 @@
     <ClInclude Include="src\core\synchronizer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\base\sdl.h">
+    <ClInclude Include="src\base\sdl2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
