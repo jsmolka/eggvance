@@ -242,12 +242,6 @@
     <ClInclude Include="src\base\enums.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\base\input.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\base\iterator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\base\macros.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -299,13 +293,7 @@
     <ClInclude Include="src\timer\io.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\base\util.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\ppu\io.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\base\types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\arm\io.h">
@@ -341,6 +329,9 @@
     <ClInclude Include="src\base\sdl2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\base\iterator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="eggvance.rc">
@@ -352,5 +343,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="eggvance.html" />
+    <None Include="eggvance.toml" />
   </ItemGroup>
 </Project>

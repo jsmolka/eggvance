@@ -14,13 +14,6 @@ bool running = true;
 FrameCounter counter;
 Synchronizer synchronizer(kRefreshRate);
 
-void init(int argc, char* argv[])
-{
-    SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
-
-    core.init(argc, argv);
-}
-
 void processDropEvent(const SDL_DropEvent& event)
 {
     auto file = fs::u8path(event.file);
@@ -125,7 +118,6 @@ void emulate()
         synchronizer.sync([]()
         {
             processEvents();
-            core.keypad.update();
             core.frame();
         });
 
@@ -138,13 +130,13 @@ int main(int argc, char* argv[])
 {
     try
     {
-        init(argc, argv);
+        core.init(argc, argv);
         emulate();
         return 0;
     }
     catch (const std::exception& ex)
     {
-        SDL_ShowSimpleMessageBox(0, "Exception", ex.what(), nullptr);
+        SDL_ShowSimpleMessageBox(0, "Exception", ex.what(), NULL);
         return 1;
     }
 }

@@ -97,7 +97,6 @@ void idle()
 void emulate()
 {
     processEvents();
-    core.keypad.update();
     core.frame();
 
     if (auto fps = (++counter).fps())

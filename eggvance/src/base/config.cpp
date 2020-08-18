@@ -129,43 +129,8 @@ void Config::initDefault()
     framerate[2] = 6.0 * kRefreshRate;
     framerate[3] = 8.0 * kRefreshRate;
 
-    controls.keyboard.a      = SDL_SCANCODE_U;
-    controls.keyboard.b      = SDL_SCANCODE_H;
-    controls.keyboard.up     = SDL_SCANCODE_W;
-    controls.keyboard.down   = SDL_SCANCODE_S;
-    controls.keyboard.left   = SDL_SCANCODE_A;
-    controls.keyboard.right  = SDL_SCANCODE_D;
-    controls.keyboard.start  = SDL_SCANCODE_G;
-    controls.keyboard.select = SDL_SCANCODE_F;
-    controls.keyboard.l      = SDL_SCANCODE_Q;
-    controls.keyboard.r      = SDL_SCANCODE_I;
-
-    controls.controller.a      = SDL_CONTROLLER_BUTTON_B;
-    controls.controller.b      = SDL_CONTROLLER_BUTTON_A;
-    controls.controller.up     = SDL_CONTROLLER_BUTTON_DPAD_UP;
-    controls.controller.down   = SDL_CONTROLLER_BUTTON_DPAD_DOWN;
-    controls.controller.left   = SDL_CONTROLLER_BUTTON_DPAD_LEFT;
-    controls.controller.right  = SDL_CONTROLLER_BUTTON_DPAD_RIGHT;
-    controls.controller.start  = SDL_CONTROLLER_BUTTON_START;
-    controls.controller.select = SDL_CONTROLLER_BUTTON_BACK;
-    controls.controller.l      = SDL_CONTROLLER_BUTTON_LEFTSHOULDER;
-    controls.controller.r      = SDL_CONTROLLER_BUTTON_RIGHTSHOULDER;
-
-    shortcuts.keyboard.reset       = SDL_SCANCODE_R;
-    shortcuts.keyboard.fullscreen  = SDL_SCANCODE_F11;
-    shortcuts.keyboard.fr_hardware = SDL_SCANCODE_1;
-    shortcuts.keyboard.fr_custom_1 = SDL_SCANCODE_2;
-    shortcuts.keyboard.fr_custom_2 = SDL_SCANCODE_3;
-    shortcuts.keyboard.fr_custom_3 = SDL_SCANCODE_4;
-    shortcuts.keyboard.fr_custom_4 = SDL_SCANCODE_5;
-    shortcuts.keyboard.fr_unbound  = SDL_SCANCODE_6;
-
-    shortcuts.controller.reset       = SDL_CONTROLLER_BUTTON_INVALID;
-    shortcuts.controller.fullscreen  = SDL_CONTROLLER_BUTTON_INVALID;
-    shortcuts.controller.fr_hardware = SDL_CONTROLLER_BUTTON_INVALID;
-    shortcuts.controller.fr_custom_1 = SDL_CONTROLLER_BUTTON_INVALID;
-    shortcuts.controller.fr_custom_2 = SDL_CONTROLLER_BUTTON_INVALID;
-    shortcuts.controller.fr_custom_3 = SDL_CONTROLLER_BUTTON_INVALID;
-    shortcuts.controller.fr_custom_4 = SDL_CONTROLLER_BUTTON_INVALID;
-    shortcuts.controller.fr_unbound  = SDL_CONTROLLER_BUTTON_INVALID;
+    controls.keyboard    = decltype(controls.keyboard)();
+    controls.controller  = decltype(controls.controller)();
+    shortcuts.keyboard   = decltype(shortcuts.keyboard)();
+    shortcuts.controller = decltype(shortcuts.controller)();
 }

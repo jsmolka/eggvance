@@ -1,7 +1,6 @@
 #include "vram.h"
 
-#include "base/bits.h"
-#include "base/util.h"
+#include "base/eggcpt.h"
 #include "core/core.h"
 
 VRAM::VRAM(Core& core)
@@ -12,7 +11,7 @@ VRAM::VRAM(Core& core)
 
 void VRAM::reset()
 {
-    util::reconstruct(this, core);
+    eggcpt::reconstruct(*this, core);
 }
 
 void VRAM::writeByte(u32 addr, u8 byte)

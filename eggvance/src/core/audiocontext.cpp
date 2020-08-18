@@ -1,5 +1,7 @@
 #include "audiocontext.h"
 
+#include "base/sdl2.h"
+
 void AudioContext::init()
 {
     if (SDL_InitSubSystem(SDL_INIT_AUDIO))

@@ -4,19 +4,18 @@
 #include "core/inputcontext.h"
 #include "core/videocontext.h"
 
-// Todo: friend core for init
-
 class Context
 {
 public:
-    virtual ~Context();
+    friend class Core;
 
-    void init();
+    ~Context();
 
     AudioContext audio;
     InputContext input;
     VideoContext video;
 
 private:
+    void init();
     void deinit();
 };

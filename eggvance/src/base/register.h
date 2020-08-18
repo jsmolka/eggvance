@@ -3,8 +3,7 @@
 #include <climits>
 #include <type_traits>
 
-#include "base/integer.h"
-#include "base/types.h"
+#include "base/eggcpt.h"
 
 namespace detail
 {
@@ -48,6 +47,6 @@ namespace detail
     };
 }
 
-template<uint Size, uint Mask = 0xFFFF'FFFF, uint Init = 0, typename T = StorageType<Size>> using RegisterR = detail::RegisterBase<Size, Mask, Init, 0x1, T>;
-template<uint Size, uint Mask = 0xFFFF'FFFF, uint Init = 0, typename T = StorageType<Size>> using RegisterW = detail::RegisterBase<Size, Mask, Init, 0x2, T>;
-template<uint Size, uint Mask = 0xFFFF'FFFF, uint Init = 0, typename T = StorageType<Size>> using Register  = detail::RegisterBase<Size, Mask, Init, 0x3, T>;
+template<uint Size, uint Mask = 0xFFFF'FFFF, uint Init = 0, typename T = eggcpt::stdint_t<Size, 1>> using RegisterR = detail::RegisterBase<Size, Mask, Init, 0x1, T>;
+template<uint Size, uint Mask = 0xFFFF'FFFF, uint Init = 0, typename T = eggcpt::stdint_t<Size, 1>> using RegisterW = detail::RegisterBase<Size, Mask, Init, 0x2, T>;
+template<uint Size, uint Mask = 0xFFFF'FFFF, uint Init = 0, typename T = eggcpt::stdint_t<Size, 1>> using Register  = detail::RegisterBase<Size, Mask, Init, 0x3, T>;

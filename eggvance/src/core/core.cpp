@@ -1,6 +1,6 @@
 #include "core.h"
 
-#include "base/util.h"
+#include "base/eggcpt.h"
 
 Core::Core()
     : arm(*this)
@@ -33,15 +33,17 @@ void Core::reset()
     mmu.reset();
     ppu.reset();
 
-    util::reconstruct(&arm, *this);
-    util::reconstruct(&dmac, *this);
-    util::reconstruct(&irqh, *this);
-    util::reconstruct(&keypad, *this);
-    util::reconstruct(&timerc, *this);
+    eggcpt::reconstruct(arm, *this);
+    eggcpt::reconstruct(dmac, *this);
+    eggcpt::reconstruct(irqh, *this);
+    eggcpt::reconstruct(keypad, *this);
+    eggcpt::reconstruct(timerc, *this);
 }
 
 void Core::frame()
 {
+    keypad.update();
+
     uint visible = 160;
     while (visible--)
     {

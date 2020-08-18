@@ -1,8 +1,7 @@
 #include "mmu.h"
 
-#include "base/bits.h"
 #include "base/constants.h"
-#include "base/util.h"
+#include "base/eggcpt.h"
 #include "core/core.h"
 
 MMU::MMU(Core& core)
@@ -21,7 +20,7 @@ void MMU::reset()
     vram.reset();
     oam.reset();
 
-    util::reconstruct(&io, core);
+    eggcpt::reconstruct(io, core);
 
     ewram = decltype(ewram)();
     iwram = decltype(iwram)();

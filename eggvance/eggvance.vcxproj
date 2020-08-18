@@ -191,12 +191,10 @@
     <ClInclude Include="src\base\enums.h" />
     <ClInclude Include="src\base\config.h" />
     <ClInclude Include="src\base\constants.h" />
+    <ClInclude Include="src\base\iterator.h" />
     <ClInclude Include="src\base\sdl2.h" />
-    <ClInclude Include="src\base\types.h" />
-    <ClInclude Include="src\base\util.h" />
     <ClInclude Include="src\common\critical.h" />
     <ClInclude Include="src\base\fs.h" />
-    <ClInclude Include="src\base\iterator.h" />
     <ClInclude Include="src\base\macros.h" />
     <ClInclude Include="src\core\audiocontext.h" />
     <ClInclude Include="src\core\context.h" />
@@ -217,7 +215,6 @@
     <ClInclude Include="src\core\framecounter.h" />
     <ClInclude Include="src\core\synchronizer.h" />
     <ClInclude Include="src\mmu\io.h" />
-    <ClInclude Include="src\base\input.h" />
     <ClInclude Include="src\ppu\dimensions.h" />
     <ClInclude Include="src\ppu\io.h" />
     <ClInclude Include="src\ppu\mapentry.h" />
@@ -251,6 +248,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="eggvance.html" />
+    <None Include="eggvance.toml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

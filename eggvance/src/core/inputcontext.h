@@ -1,6 +1,6 @@
 #pragma once
 
-#include "base/input.h"
+#include "base/eggcpt.h"
 #include "base/sdl2.h"
 
 class InputContext
@@ -15,16 +15,16 @@ public:
 private:
     enum
     {
-        kBitA      = 0,
-        kBitB      = 1,
-        kBitSelect = 2,
-        kBitStart  = 3,
-        kBitRight  = 4,
-        kBitLeft   = 5,
-        kBitUp     = 6,
-        kBitDown   = 7,
-        kBitR      = 8,
-        kBitL      = 9
+        kA      = 0,
+        kB      = 1,
+        kSelect = 2,
+        kStart  = 3,
+        kRight  = 4,
+        kLeft   = 5,
+        kUp     = 6,
+        kDown   = 7,
+        kR      = 8,
+        kL      = 9
     };
 
     void init();
