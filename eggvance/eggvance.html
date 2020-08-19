@@ -1,4 +1,4 @@
-﻿<!doctype html>
+﻿<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -6,13 +6,13 @@
   </head>
   <body>
     <canvas id="canvas" style="background: white"></canvas>
-    <input id="rom-input" type="file" style="display: none" onchange="Module.loadRom()">
-    <input id="save-input" type="file" style="display: none" onchange="Module.loadSave()">
+    <input id="rom-input" type="file" accept=".gba" style="display: none" onchange="Module.loadRom()">
+    <input id="save-input" type="file" accept=".sav" style="display: none" onchange="Module.loadSave()">
     <div style="display: flex; margin-top: 8px">
-      <button onclick="inputRom.click()" style="margin-right: 8px">Load rom</button>
-      <button onclick="inputSave.click()">Load save</button>
+      <button onclick="inputRom.click()">Load rom</button>
+      <button onclick="inputSave.click()" style="margin-left: 8px">Load save</button>
     </div>
-    <script type='text/javascript'>
+    <script type="text/javascript">
       const inputRom  = document.getElementById('rom-input');
       const inputSave = document.getElementById('save-input');
 
@@ -50,26 +50,26 @@
             custom_4 = 477.896
 
             [controls]
-            a      = ["U", "B"    ]
-            b      = ["H", "A"    ]
-            up     = ["W", "Up"   ]
-            down   = ["S", "Down" ]
-            left   = ["A", "Left" ]
-            right  = ["D", "Right"]
-            start  = ["G", "Start"]
-            select = ["F", "Back" ]
-            l      = ["Q", "L"    ]
-            r      = ["I", "R"    ]
+            a      = ["U", "B"            ]
+            b      = ["H", "A"            ]
+            up     = ["W", "DPUP"         ]
+            down   = ["S", "DPDOWN"       ]
+            left   = ["A", "DPLEFT"       ]
+            right  = ["D", "DPRIGHT"      ]
+            start  = ["G", "START"        ]
+            select = ["F", "BACK"         ]
+            l      = ["Q", "LEFTSHOULDER" ]
+            r      = ["I", "RIGHTSHOULDER"]
 
             [shortcuts]
-            reset       = ["R", ""]
-            fullscreen  = ["T", ""]
-            fr_hardware = ["1", ""]
-            fr_custom_1 = ["2", ""]
-            fr_custom_2 = ["3", ""]
-            fr_custom_3 = ["4", ""]
-            fr_custom_4 = ["5", ""]
-            fr_unbound  = ["6", ""]
+            reset       = ["R"  , ""]
+            fullscreen  = ["F11", ""]
+            fr_hardware = ["1"  , ""]
+            fr_custom_1 = ["2"  , ""]
+            fr_custom_2 = ["3"  , ""]
+            fr_custom_3 = ["4"  , ""]
+            fr_custom_4 = ["5"  , ""]
+            fr_unbound  = ["6"  , ""]
           `);
         },
         async readUrl(url) {
@@ -119,6 +119,6 @@
         }
       }
     </script>
-    <script async src=eggvance.js></script>
+    <script src="eggvance.js" async></script>
   </body>
 </html>
