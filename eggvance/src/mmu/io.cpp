@@ -236,18 +236,18 @@ void Io::writeHalf(u32 addr, u16 half)
 {
     addr &= ~0x1;
 
-    writeByte(addr + 0, bits::seq<0, 8>(half));
-    writeByte(addr + 1, bits::seq<8, 8>(half));
+    writeByte(addr + 0, bit::seq<0, 8>(half));
+    writeByte(addr + 1, bit::seq<8, 8>(half));
 }
 
 void Io::writeWord(u32 addr, u32 word)
 {
     addr &= ~0x3;
 
-    writeByte(addr + 0, bits::seq< 0, 8>(word));
-    writeByte(addr + 1, bits::seq< 8, 8>(word));
-    writeByte(addr + 2, bits::seq<16, 8>(word));
-    writeByte(addr + 3, bits::seq<24, 8>(word));
+    writeByte(addr + 0, bit::seq< 0, 8>(word));
+    writeByte(addr + 1, bit::seq< 8, 8>(word));
+    writeByte(addr + 2, bit::seq<16, 8>(word));
+    writeByte(addr + 3, bit::seq<24, 8>(word));
 }
 
 Io::UnusedIo::UnusedIo()

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "base/bits.h"
+#include "base/eggcpt.h"
 #include "base/register.h"
 
 struct TimerIo
@@ -31,14 +31,14 @@ struct TimerIo
 
             if (Index == 0)
             {
-                cascade = bits::seq<2, 1>(byte);
-                irq     = bits::seq<6, 1>(byte);
-                enable  = bits::seq<7, 1>(byte);
+                cascade = bit::seq<2, 1>(byte);
+                irq     = bit::seq<6, 1>(byte);
+                enable  = bit::seq<7, 1>(byte);
 
                 if (cascade)
                     prescaler = 1;
                 else
-                    prescaler = kPrescalers[bits::seq<0, 2>(byte)];
+                    prescaler = kPrescalers[bit::seq<0, 2>(byte)];
             }
         }
 

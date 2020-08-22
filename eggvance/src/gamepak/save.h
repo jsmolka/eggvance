@@ -2,8 +2,7 @@
 
 #include <vector>
 
-#include "base/fs.h"
-#include "base/integer.h"
+#include "base/eggcpt.h"
 
 class Save
 {

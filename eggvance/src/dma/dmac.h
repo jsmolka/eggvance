@@ -33,7 +33,7 @@ u8 DmaController::read() const
     INDEXED_IF2(Addr, kRegDma2Control, return dmas[2].io.control.read<kIndex>());
     INDEXED_IF2(Addr, kRegDma3Control, return dmas[3].io.control.read<kIndex>());
 
-    UNREACHABLE;
+    EGGCPT_UNREACHABLE;
     return 0;
 }
 

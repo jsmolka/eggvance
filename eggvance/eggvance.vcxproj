@@ -61,12 +61,12 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)external\fmt\include;$(ProjectDir)external\icon\themes\default\include;$(ProjectDir)external\tinytoml\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)external\eggcpt\include;$(ProjectDir)external\icon\themes\default\include;$(ProjectDir)external\tinytoml\include</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/Ob3 %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>NOMINMAX;FMT_HEADER_ONLY;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <WarningLevel>Level2</WarningLevel>
@@ -87,12 +87,12 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release with console|x64'">
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)external\fmt\include;$(ProjectDir)external\icon\themes\default\include;$(ProjectDir)external\tinytoml\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)external\eggcpt\include;$(ProjectDir)external\icon\themes\default\include;$(ProjectDir)external\tinytoml\include</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/Ob3 %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>NOMINMAX;FMT_HEADER_ONLY;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <WarningLevel>Level2</WarningLevel>
@@ -113,11 +113,11 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release with symbols|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)external\fmt\include;$(ProjectDir)external\icon\themes\default\include;$(ProjectDir)external\tinytoml\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)external\eggcpt\include;$(ProjectDir)external\icon\themes\default\include;$(ProjectDir)external\tinytoml\include</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>NOMINMAX;FMT_HEADER_ONLY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SupportJustMyCode>true</SupportJustMyCode>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -186,15 +186,12 @@
     <ClInclude Include="src\arm\io.h" />
     <ClInclude Include="src\arm\psr.h" />
     <ClInclude Include="src\arm\registers.h" />
-    <ClInclude Include="src\base\bits.h" />
     <ClInclude Include="src\base\eggcpt.h" />
     <ClInclude Include="src\base\enums.h" />
     <ClInclude Include="src\base\config.h" />
     <ClInclude Include="src\base\constants.h" />
-    <ClInclude Include="src\base\iterator.h" />
     <ClInclude Include="src\base\sdl2.h" />
     <ClInclude Include="src\common\critical.h" />
-    <ClInclude Include="src\base\fs.h" />
     <ClInclude Include="src\base\macros.h" />
     <ClInclude Include="src\core\audiocontext.h" />
     <ClInclude Include="src\core\context.h" />
@@ -228,7 +225,6 @@
     <ClInclude Include="src\mmu\ram.h" />
     <ClInclude Include="src\irq\irqh.h" />
     <ClInclude Include="src\keypad\keypad.h" />
-    <ClInclude Include="src\base\integer.h" />
     <ClInclude Include="src\mmu\mmu.h" />
     <ClInclude Include="src\ppu\buffer.h" />
     <ClInclude Include="src\ppu\layer.h" />

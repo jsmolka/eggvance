@@ -43,6 +43,6 @@ int VRAM::index16x16(u32 addr, const Point& pixel)
     int data = readFast<u8>(addr + pixel.offset(8) / 2);
 
     return (pixel.x & 0x1)
-        ? bits::seq<4, 4>(data)
-        : bits::seq<0, 4>(data);
+        ? bit::seq<4, 4>(data)
+        : bit::seq<0, 4>(data);
 }

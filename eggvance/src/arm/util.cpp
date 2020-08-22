@@ -65,17 +65,17 @@ u32 ARM::asr(u32 value, u32 amount, bool flags)
         if (amount < 32)
         {
             if (flags) cpsr.c = (value >> (amount - 1)) & 0x1;
-            value = bits::sar(value, amount);
+            value = bit::sar(value, amount);
         }
         else
         {
-            value = bits::sar(value, 31);
+            value = bit::sar(value, 31);
             if (flags) cpsr.c = value & 0x1;
         }
     }
     else if (immediate)
     {
-        value = bits::sar(value, 31);
+        value = bit::sar(value, 31);
         if (flags) cpsr.c = value & 0x1;
     }
     return value;
@@ -89,7 +89,7 @@ u32 ARM::ror(u32 value, u32 amount, bool flags)
 {
     if (amount != 0)
     {
-        value = bits::ror(value, amount);
+        value = bit::ror(value, amount);
         if (flags) cpsr.c = value >> 31;
     }
     else if (immediate)

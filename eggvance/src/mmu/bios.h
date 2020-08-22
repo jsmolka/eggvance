@@ -3,7 +3,7 @@
 #include <array>
 
 #include "ram.h"
-#include "base/fs.h"
+#include "base/eggcpt.h"
 
 class Core;
 

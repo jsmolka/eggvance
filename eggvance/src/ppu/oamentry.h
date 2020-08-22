@@ -2,7 +2,7 @@
 
 #include "dimensions.h"
 #include "base/enums.h"
-#include "base/integer.h"
+#include "base/eggcpt.h"
 
 enum class ObjectMode
 {

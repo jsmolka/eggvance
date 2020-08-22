@@ -10,7 +10,7 @@ jobs:
       - uses: actions/checkout@master
 
       - name: Setup submodules
-        run: git submodule update --init
+        run: git submodule update --init --recursive
         shell: cmd
 
       - name: Setup vcpkg
@@ -48,7 +48,7 @@ jobs:
       - uses: actions/checkout@master
 
       - name: Setup submodules
-        run: git submodule update --init
+        run: git submodule update --init --recursive
 
       - name: Setup SDL2
         run: |
@@ -81,7 +81,7 @@ jobs:
       - uses: actions/checkout@master
 
       - name: Setup submodules
-        run: git submodule update --init
+        run: git submodule update --init --recursive
 
       - name: Setup SDL2
         run: brew install sdl2
@@ -112,7 +112,7 @@ jobs:
       - uses: actions/checkout@master
 
       - name: Setup submodules
-        run: git submodule update --init
+        run: git submodule update --init --recursive
 
       - name: Setup emscripten
         run: |

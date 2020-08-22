@@ -1,6 +1,6 @@
 #pragma once
 
-#include "base/bits.h"
+#include "base/eggcpt.h"
 #include "base/register.h"
 
 struct KeypadIo
@@ -21,10 +21,10 @@ struct KeypadIo
 
             if (Index == 1)
             {
-                irq   = bits::seq<6, 1>(byte);
-                logic = bits::seq<7, 1>(byte);
+                irq   = bit::seq<6, 1>(byte);
+                logic = bit::seq<7, 1>(byte);
             }
-            mask = bits::seq<0, 10>(value);
+            mask = bit::seq<0, 10>(value);
         }
 
         uint mask{};

@@ -48,7 +48,7 @@ u8 IrqHandler::read() const
     INDEXED_IF2(Addr, kRegIrqRequest, return io.request.read<kIndex>())
     INDEXED_IF4(Addr, kRegIrqMaster , return io.master.read<kIndex>())
 
-    UNREACHABLE;
+    EGGCPT_UNREACHABLE;
     return 0;
 }
 

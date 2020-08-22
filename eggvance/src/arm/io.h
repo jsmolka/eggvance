@@ -1,6 +1,6 @@
 #pragma once
 
-#include "base/bits.h"
+#include "base/eggcpt.h"
 #include "base/register.h"
 
 class Core;
@@ -37,17 +37,17 @@ struct ArmIo
 
             if (Index == 0)
             {
-                sram  = bits::seq<0, 2>(data[Index]);
-                ws0_n = bits::seq<2, 2>(data[Index]);
-                ws0_s = bits::seq<4, 1>(data[Index]);
-                ws1_n = bits::seq<5, 2>(data[Index]);
-                ws1_s = bits::seq<7, 1>(data[Index]);
+                sram  = bit::seq<0, 2>(data[Index]);
+                ws0_n = bit::seq<2, 2>(data[Index]);
+                ws0_s = bit::seq<4, 1>(data[Index]);
+                ws1_n = bit::seq<5, 2>(data[Index]);
+                ws1_s = bit::seq<7, 1>(data[Index]);
             }
             else
             {
-                ws2_n    = bits::seq<0, 2>(data[Index]);
-                ws2_s    = bits::seq<2, 1>(data[Index]);
-                prefetch = bits::seq<6, 1>(data[Index]);
+                ws2_n    = bit::seq<0, 2>(data[Index]);
+                ws2_s    = bit::seq<2, 1>(data[Index]);
+                prefetch = bit::seq<6, 1>(data[Index]);
             }
             updateCycles();
         }

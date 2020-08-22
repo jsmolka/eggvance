@@ -1,6 +1,6 @@
 #pragma once
 
-#include "base/integer.h"
+#include "base/eggcpt.h"
 
 class Gpio
 {

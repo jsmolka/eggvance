@@ -22,7 +22,7 @@ Building requires a C++17 compiler.
 Clone the submodules.
 
 ```
-git submodule update --init
+git submodule update --init --recursive
 ```
 
 ### Windows

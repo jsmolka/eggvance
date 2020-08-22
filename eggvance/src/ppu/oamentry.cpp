@@ -1,7 +1,7 @@
 #include "oamentry.h"
 
-#include "base/bits.h"
 #include "base/constants.h"
+#include "base/eggcpt.h"
 #include "base/macros.h"
 
 static constexpr Dimensions sizes[4][4] =
@@ -41,37 +41,37 @@ void OAMEntry::reset()
 
 void OAMEntry::writeHalf(int attr, u16 half)
 {
-    ASSERT((attr & 0x6) < 0x6, "Invalid attribute");
+    EGGCPT_ASSERT((attr & 0x6) < 0x6, "Invalid attribute");
 
     switch (attr)
     {
     case 0:
-        origin.y    = bits::seq< 0, 8>(half);
-        affine      = bits::seq< 8, 1>(half);
-        double_size = bits::seq< 9, 1>(half);
-        disabled    = bits::seq< 9, 1>(half);
-        mode        = bits::seq<10, 2>(half);
-        mosaic      = bits::seq<12, 1>(half);
-        color_mode  = bits::seq<13, 1>(half);
-        shape       = bits::seq<14, 2>(half);
+        origin.y    = bit::seq< 0, 8>(half);
+        affine      = bit::seq< 8, 1>(half);
+        double_size = bit::seq< 9, 1>(half);
+        disabled    = bit::seq< 9, 1>(half);
+        mode        = bit::seq<10, 2>(half);
+        mosaic      = bit::seq<12, 1>(half);
+        color_mode  = bit::seq<13, 1>(half);
+        shape       = bit::seq<14, 2>(half);
         break;
 
     case 2:
-        origin.x = bits::seq< 0, 9>(half);
-        matrix   = bits::seq< 9, 5>(half);
-        flip_x   = bits::seq<12, 1>(half);
-        flip_y   = bits::seq<13, 1>(half);
-        size     = bits::seq<14, 2>(half);
+        origin.x = bit::seq< 0, 9>(half);
+        matrix   = bit::seq< 9, 5>(half);
+        flip_x   = bit::seq<12, 1>(half);
+        flip_y   = bit::seq<13, 1>(half);
+        size     = bit::seq<14, 2>(half);
         break;
 
     case 4:
-        tile  = bits::seq< 0, 10>(half);
-        prio  = bits::seq<10,  2>(half);
-        bank  = bits::seq<12,  4>(half);
+        tile  = bit::seq< 0, 10>(half);
+        prio  = bit::seq<10,  2>(half);
+        bank  = bit::seq<12,  4>(half);
         break;
 
     default:
-        UNREACHABLE;
+        EGGCPT_UNREACHABLE;
         break;
     }
 

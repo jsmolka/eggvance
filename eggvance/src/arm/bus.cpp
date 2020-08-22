@@ -53,14 +53,14 @@ u32 ARM::readWordRotated(u32 addr)
 {
     u32 value = readWord(addr);
 
-    return bits::ror(value, (addr & 0x3) << 3);
+    return bit::ror(value, (addr & 0x3) << 3);
 }
 
 u32 ARM::readHalfRotated(u32 addr)
 {
     u32 value = readHalf(addr);
 
-    return bits::ror(value, (addr & 0x1) << 3);
+    return bit::ror(value, (addr & 0x1) << 3);
 }
 
 u32 ARM::readHalfSigned(u32 addr)
@@ -68,11 +68,11 @@ u32 ARM::readHalfSigned(u32 addr)
     if (addr & 0x1)
     {
         u32 value = readByte(addr);
-        return bits::sx<8>(value);
+        return bit::signEx<8>(value);
     }
     else
     {
         u32 value = readHalf(addr);
-        return bits::sx<16>(value);
+        return bit::signEx<16>(value);
     }
 }

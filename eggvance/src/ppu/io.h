@@ -2,9 +2,9 @@
 
 #include <algorithm>
 
-#include "base/bits.h"
 #include "base/config.h"
 #include "base/constants.h"
+#include "base/eggcpt.h"
 #include "base/register.h"
 #include "ppu/dimensions.h"
 #include "ppu/layer.h"
@@ -21,18 +21,18 @@ struct PpuIo
 
             if (Index == 0)
             {
-                mode     = bits::seq<0, 3>(data[Index]);
-                frame    = bits::seq<4, 1>(data[Index]) * 0xA000;
-                oam_free = bits::seq<5, 1>(data[Index]);
-                mapping  = bits::seq<6, 1>(data[Index]);
-                blank    = bits::seq<7, 1>(data[Index]);
+                mode     = bit::seq<0, 3>(data[Index]);
+                frame    = bit::seq<4, 1>(data[Index]) * 0xA000;
+                oam_free = bit::seq<5, 1>(data[Index]);
+                mapping  = bit::seq<6, 1>(data[Index]);
+                blank    = bit::seq<7, 1>(data[Index]);
             }
             else
             {
-                layers = bits::seq<0, 5>(data[Index]);
-                win0   = bits::seq<5, 1>(data[Index]);
-                win1   = bits::seq<6, 1>(data[Index]);
-                winobj = bits::seq<7, 1>(data[Index]);
+                layers = bit::seq<0, 5>(data[Index]);
+                win0   = bit::seq<5, 1>(data[Index]);
+                win1   = bit::seq<6, 1>(data[Index]);
+                winobj = bit::seq<7, 1>(data[Index]);
             }
         }
 
@@ -91,9 +91,9 @@ struct PpuIo
 
             if (Index == 0)
             {
-                vblank_irq = bits::seq<3, 1>(data[Index]);
-                hblank_irq = bits::seq<4, 1>(data[Index]);
-                vmatch_irq = bits::seq<5, 1>(data[Index]);
+                vblank_irq = bit::seq<3, 1>(data[Index]);
+                hblank_irq = bit::seq<4, 1>(data[Index]);
+                vmatch_irq = bit::seq<5, 1>(data[Index]);
             }
             else
             {
@@ -129,24 +129,24 @@ struct PpuIo
 
             if (Index == 0)
             {
-                priority   = bits::seq<0, 2>(data[Index]);
-                tile_block = bits::seq<2, 2>(data[Index]) * 0x4000;
-                mosaic     = bits::seq<6, 1>(data[Index]);
-                color_mode = bits::seq<7, 1>(data[Index]);
+                priority   = bit::seq<0, 2>(data[Index]);
+                tile_block = bit::seq<2, 2>(data[Index]) * 0x4000;
+                mosaic     = bit::seq<6, 1>(data[Index]);
+                color_mode = bit::seq<7, 1>(data[Index]);
             }
             else
             {
-                map_block  = bits::seq<0, 5>(data[Index]) * 0x0800;
-                wraparound = bits::seq<5, 1>(data[Index]);
-                dimensions = bits::seq<6, 2>(data[Index]);
+                map_block  = bit::seq<0, 5>(data[Index]) * 0x0800;
+                wraparound = bit::seq<5, 1>(data[Index]);
+                dimensions = bit::seq<6, 2>(data[Index]);
             }
         }
 
         Dimensions dimsReg() const 
         {
             return Dimensions(
-                256 << bits::seq<0, 1>(dimensions),
-                256 << bits::seq<1, 1>(dimensions)
+                256 << bit::seq<0, 1>(dimensions),
+                256 << bit::seq<1, 1>(dimensions)
             );
         }
 
@@ -187,7 +187,7 @@ struct PpuIo
         {
             RegisterW<kSize, kMask>::write<Index>(byte);
 
-            current = bits::sx<28>(value);
+            current = bit::signEx<28>(value);
         }
 
         void hblank(s16 value)
@@ -197,7 +197,7 @@ struct PpuIo
 
         void vblank()
         {
-            current = bits::sx<28>(value);
+            current = bit::signEx<28>(value);
         }
 
         s32 current{};
@@ -210,8 +210,8 @@ struct PpuIo
     {
         void write(u8 byte)
         {
-            flags = bits::seq<0, 5>(byte) | LF_BDP;
-            blend = bits::seq<5, 1>(byte);
+            flags = bit::seq<0, 5>(byte) | LF_BDP;
+            blend = bit::seq<5, 1>(byte);
         }
 
         uint flags{};
@@ -285,8 +285,8 @@ struct PpuIo
         {
             void write(u8 byte)
             {
-                x = bits::seq<0, 4>(byte) + 1;
-                y = bits::seq<4, 4>(byte) + 1;
+                x = bit::seq<0, 4>(byte) + 1;
+                y = bit::seq<4, 4>(byte) + 1;
             }
 
             uint mosaicX(uint value) const { return x * (value / x); }
@@ -327,12 +327,12 @@ struct PpuIo
 
             if (Index == 0)
             {
-                upper = bits::seq<0, 6>(data[Index]);
-                mode  = bits::seq<6, 2>(data[Index]);
+                upper = bit::seq<0, 6>(data[Index]);
+                mode  = bit::seq<6, 2>(data[Index]);
             }
             else
             {
-                lower = bits::seq<0, 6>(data[Index]);
+                lower = bit::seq<0, 6>(data[Index]);
             }
         }
 
@@ -353,7 +353,7 @@ struct PpuIo
         {
             Register<kSize, kMask>::write<Index>(byte);
 
-            coeff[Index] = std::min<uint>(16u, bits::seq<0, 5>(data[Index]));
+            coeff[Index] = std::min<uint>(16u, bit::seq<0, 5>(data[Index]));
         }
 
         u16 blendAlpha(u16 a, u16 b) const
@@ -380,7 +380,7 @@ struct PpuIo
         {
             RegisterW<kSize, kMask>::write<Index>(byte);
 
-            coeff = std::min<uint>(16u, bits::seq<0, 5>(data[0]));
+            coeff = std::min<uint>(16u, bit::seq<0, 5>(data[0]));
         }
 
         u16 blendWhite(u16 a) const

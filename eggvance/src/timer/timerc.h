@@ -49,7 +49,7 @@ u8 TimerController::read()
     INDEXED_IF2(Addr, kRegTimer3Count  , PROLOGUE; return timers[3].io.count.read<kIndex>());
     INDEXED_IF2(Addr, kRegTimer3Control, return timers[3].io.control.read<kIndex>());
 
-    UNREACHABLE;
+    EGGCPT_UNREACHABLE;
     return 0;
 
     #undef PROLOGUE

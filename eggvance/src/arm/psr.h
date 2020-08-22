@@ -1,6 +1,6 @@
 #pragma once
 
-#include "base/bits.h"
+#include "base/eggcpt.h"
 
 class PSR
 {
@@ -18,14 +18,14 @@ public:
 
     PSR& operator=(u32 value)
     {
-        m = bits::seq< 0, 5>(value);
-        t = bits::seq< 5, 1>(value);
-        f = bits::seq< 6, 1>(value);
-        i = bits::seq< 7, 1>(value);
-        v = bits::seq<28, 1>(value);
-        c = bits::seq<29, 1>(value);
-        z = bits::seq<30, 1>(value);
-        n = bits::seq<31, 1>(value);
+        m = bit::seq< 0, 5>(value);
+        t = bit::seq< 5, 1>(value);
+        f = bit::seq< 6, 1>(value);
+        i = bit::seq< 7, 1>(value);
+        v = bit::seq<28, 1>(value);
+        c = bit::seq<29, 1>(value);
+        z = bit::seq<30, 1>(value);
+        n = bit::seq<31, 1>(value);
 
         return *this;
     }
@@ -48,7 +48,7 @@ public:
     {
         static_assert(std::is_integral_v<T>);
 
-        n = bits::msb(value);
+        n = bit::shr(value, CHAR_BIT * sizeof(T) - 1);
     }
 
     void setCAdd(u64 op1, u64 op2)
@@ -98,7 +98,7 @@ public:
         case kConditionNV: return false;
 
         default:
-            UNREACHABLE;
+            EGGCPT_UNREACHABLE;
             return false;
         }
     }

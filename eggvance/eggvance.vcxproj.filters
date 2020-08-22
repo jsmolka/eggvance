@@ -230,9 +230,6 @@
     <ClInclude Include="src\keypad\keypad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\base\bits.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\base\config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -246,12 +243,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\base\register.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\base\integer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\base\fs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\gamepak\gamepak.h">
@@ -327,9 +318,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\base\sdl2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\base\iterator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

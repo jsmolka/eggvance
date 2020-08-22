@@ -1,6 +1,6 @@
 #include "oam.h"
 
-#include "base/bits.h"
+#include "base/eggcpt.h"
 
 void OAM::reset()
 {
@@ -23,8 +23,8 @@ void OAM::writeWord(u32 addr, u32 word)
 {
     addr = align<u32>(addr);
 
-    writeHalf(addr + 0, bits::seq< 0, 16>(word));
-    writeHalf(addr + 2, bits::seq<16, 16>(word));
+    writeHalf(addr + 0, bit::seq< 0, 16>(word));
+    writeHalf(addr + 2, bit::seq<16, 16>(word));
 }
 
 Matrix OAM::matrix(int index)

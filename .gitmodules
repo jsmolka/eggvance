@@ -1,7 +1,7 @@
-[submodule "eggvance/external/fmt"]
-    path = eggvance/external/fmt
-    url = https://github.com/fmtlib/fmt
-
+[submodule "eggvance/external/eggcpt"]
+    path = eggvance/external/eggcpt
+    url = https://github.com/jsmolka/eggcpt
+	
 [submodule "eggvance/external/icon"]
     path = eggvance/external/icon
     url = https://github.com/jsmolka/icon

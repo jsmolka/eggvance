@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "base/integer.h"
+#include "base/eggcpt.h"
 
 class Header
 {

@@ -2,7 +2,7 @@
 
 #include <array>
 
-#include "base/integer.h"
+#include "base/eggcpt.h"
 
 template<typename T, std::size_t N>
 class RAM

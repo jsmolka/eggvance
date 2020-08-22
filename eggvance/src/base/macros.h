@@ -1,19 +1,5 @@
 #pragma once
 
-#include <cassert>
-
-#define ASSERT(cond, msg) assert((cond) && msg)
-
-#ifdef NDEBUG
-#  ifdef _MSC_VER
-#  define UNREACHABLE __assume(0)
-#  else
-#  define UNREACHABLE __builtin_unreachable()
-#  endif
-#else
-#  define UNREACHABLE ASSERT(false, "Unreachable")
-#endif
-
 #define INDEXED_IF(value, label, index, ...)    \
     if constexpr (value == (label + index))     \
     {                                           \

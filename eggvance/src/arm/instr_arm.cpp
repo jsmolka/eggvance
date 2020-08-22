@@ -5,7 +5,7 @@
 template<uint Instr>
 void ARM::Arm_BranchExchange(u32 instr)
 {
-    uint rn = bits::seq<0, 4>(instr);
+    uint rn = bit::seq<0, 4>(instr);
 
     pc = regs[rn];
 
@@ -23,11 +23,11 @@ void ARM::Arm_BranchExchange(u32 instr)
 template<uint Instr>
 void ARM::Arm_BranchLink(u32 instr)
 {
-    static constexpr uint kLink = bits::seq<24, 1>(Instr);
+    static constexpr uint kLink = bit::seq<24, 1>(Instr);
 
-    uint offset = bits::seq<0, 24>(instr);
+    uint offset = bit::seq<0, 24>(instr);
 
-    offset = bits::sx<24>(offset);
+    offset = bit::signEx<24>(offset);
     offset <<= 2;
 
     if (kLink) lr = pc - 4;
@@ -59,12 +59,12 @@ void ARM::Arm_DataProcessing(u32 instr)
         kOpcodeMvn
     };
 
-    static constexpr uint kFlags  = bits::seq<20, 1>(Instr);
-    static constexpr uint kOpcode = bits::seq<21, 4>(Instr);
-    static constexpr uint kImmOp  = bits::seq<25, 1>(Instr);
+    static constexpr uint kFlags  = bit::seq<20, 1>(Instr);
+    static constexpr uint kOpcode = bit::seq<21, 4>(Instr);
+    static constexpr uint kImmOp  = bit::seq<25, 1>(Instr);
 
-    uint rd    = bits::seq<12, 4>(instr);
-    uint rn    = bits::seq<16, 4>(instr);
+    uint rd    = bit::seq<12, 4>(instr);
+    uint rn    = bit::seq<16, 4>(instr);
     uint flags = kFlags && rd != 15;
 
     u32& dst = regs[rd];
@@ -89,21 +89,21 @@ void ARM::Arm_DataProcessing(u32 instr)
 
     if (kImmOp)
     {
-        uint value  = bits::seq<0, 8>(instr);
-        uint amount = bits::seq<8, 4>(instr);
+        uint value  = bit::seq<0, 8>(instr);
+        uint amount = bit::seq<8, 4>(instr);
         op2 = ror<false>(value, amount << 1, flags && kLogical);
     }
     else
     {
-        uint rm     = bits::seq<0, 4>(instr);
-        uint reg_op = bits::seq<4, 1>(instr);
-        uint shift  = bits::seq<5, 2>(instr);
+        uint rm     = bit::seq<0, 4>(instr);
+        uint reg_op = bit::seq<4, 1>(instr);
+        uint shift  = bit::seq<5, 2>(instr);
 
         op2 = regs[rm];
 
         if (reg_op)
         {
-            uint rs = bits::seq<8, 4>(instr);
+            uint rs = bit::seq<8, 4>(instr);
 
             if (rn == 15) op1 += 4;
             if (rm == 15) op2 += 4;
@@ -118,14 +118,14 @@ void ARM::Arm_DataProcessing(u32 instr)
             case kShiftRor: op2 = ror<false>(op2, amount, flags && kLogical); break;
 
             default:
-                UNREACHABLE;
+                EGGCPT_UNREACHABLE;
                 break;
             }
             idle();
         }
         else
         {
-            uint amount = bits::seq<7, 5>(instr);
+            uint amount = bit::seq<7, 5>(instr);
 
             switch (shift)
             {
@@ -135,7 +135,7 @@ void ARM::Arm_DataProcessing(u32 instr)
             case kShiftRor: op2 = ror<true>(op2, amount, flags && kLogical); break;
 
             default:
-                UNREACHABLE;
+                EGGCPT_UNREACHABLE;
                 break;
             }
         }
@@ -161,7 +161,7 @@ void ARM::Arm_DataProcessing(u32 instr)
     case kOpcodeRsc: dst = sbc(op2,   op1, flags); break;
 
     default:
-        UNREACHABLE;
+        EGGCPT_UNREACHABLE;
         break;
     }
 
@@ -189,22 +189,22 @@ void ARM::Arm_DataProcessing(u32 instr)
 template<uint Instr>
 void ARM::Arm_StatusTransfer(u32 instr)
 {
-    static constexpr uint kWrite = bits::seq<21, 1>(Instr);
-    static constexpr uint kSpsr  = bits::seq<22, 1>(Instr);
-    static constexpr uint kImmOp = bits::seq<25, 1>(Instr);
+    static constexpr uint kWrite = bit::seq<21, 1>(Instr);
+    static constexpr uint kSpsr  = bit::seq<22, 1>(Instr);
+    static constexpr uint kImmOp = bit::seq<25, 1>(Instr);
 
     if (kWrite)
     {
         u32 op;
         if (kImmOp)
         {
-            uint value  = bits::seq<0, 8>(instr);
-            uint amount = bits::seq<8, 4>(instr);
-            op = bits::ror(value, amount << 1);
+            uint value  = bit::seq<0, 8>(instr);
+            uint amount = bit::seq<8, 4>(instr);
+            op = bit::ror(value, amount << 1);
         }
         else
         {
-            uint rm = bits::seq<0, 4>(instr);
+            uint rm = bit::seq<0, 4>(instr);
             op = regs[rm];
         }
 
@@ -228,7 +228,7 @@ void ARM::Arm_StatusTransfer(u32 instr)
     }
     else
     {
-        uint rd = bits::seq<12, 4>(instr);
+        uint rd = bit::seq<12, 4>(instr);
         regs[rd] = kSpsr ? spsr : cpsr;
     }
 }
@@ -236,13 +236,13 @@ void ARM::Arm_StatusTransfer(u32 instr)
 template<uint Instr>
 void ARM::Arm_Multiply(u32 instr)
 {
-    static constexpr uint kFlags      = bits::seq<20, 1>(Instr);
-    static constexpr uint kAccumulate = bits::seq<21, 1>(Instr);
+    static constexpr uint kFlags      = bit::seq<20, 1>(Instr);
+    static constexpr uint kAccumulate = bit::seq<21, 1>(Instr);
 
-    uint rm = bits::seq< 0, 4>(instr);
-    uint rs = bits::seq< 8, 4>(instr);
-    uint rn = bits::seq<12, 4>(instr);
-    uint rd = bits::seq<16, 4>(instr);
+    uint rm = bit::seq< 0, 4>(instr);
+    uint rs = bit::seq< 8, 4>(instr);
+    uint rn = bit::seq<12, 4>(instr);
+    uint rd = bit::seq<16, 4>(instr);
 
     u32  op1 = regs[rm];
     u32  op2 = regs[rs];
@@ -264,14 +264,14 @@ void ARM::Arm_Multiply(u32 instr)
 template<uint Instr>
 void ARM::Arm_MultiplyLong(u32 instr)
 {
-    static constexpr uint kFlags      = bits::seq<20, 1>(Instr);
-    static constexpr uint kAccumulate = bits::seq<21, 1>(Instr);
-    static constexpr uint kSign       = bits::seq<22, 1>(Instr);
+    static constexpr uint kFlags      = bit::seq<20, 1>(Instr);
+    static constexpr uint kAccumulate = bit::seq<21, 1>(Instr);
+    static constexpr uint kSign       = bit::seq<22, 1>(Instr);
 
-    uint rm  = bits::seq< 0, 4>(instr);
-    uint rs  = bits::seq< 8, 4>(instr);
-    uint rdl = bits::seq<12, 4>(instr);
-    uint rdh = bits::seq<16, 4>(instr);
+    uint rm  = bit::seq< 0, 4>(instr);
+    uint rs  = bit::seq< 8, 4>(instr);
+    uint rdl = bit::seq<12, 4>(instr);
+    uint rdh = bit::seq<16, 4>(instr);
 
     u64  op1  = regs[rm];
     u64  op2  = regs[rs];
@@ -280,8 +280,8 @@ void ARM::Arm_MultiplyLong(u32 instr)
 
     if (kSign)
     {
-        op1 = bits::sx<32>(op1);
-        op2 = bits::sx<32>(op2);
+        op1 = bit::signEx<32>(op1);
+        op2 = bit::signEx<32>(op2);
     }
 
     u64 res = op1 * op2;
@@ -302,15 +302,15 @@ void ARM::Arm_MultiplyLong(u32 instr)
 template<uint Instr>
 void ARM::Arm_SingleDataTransfer(u32 instr)
 {
-    static constexpr uint kLoad      = bits::seq<20, 1>(Instr);
-    static constexpr uint kWriteback = bits::seq<21, 1>(Instr);
-    static constexpr uint kByte      = bits::seq<22, 1>(Instr);
-    static constexpr uint kIncrement = bits::seq<23, 1>(Instr);
-    static constexpr uint kPreIndex  = bits::seq<24, 1>(Instr);
-    static constexpr uint kRegOp     = bits::seq<25, 1>(Instr);
+    static constexpr uint kLoad      = bit::seq<20, 1>(Instr);
+    static constexpr uint kWriteback = bit::seq<21, 1>(Instr);
+    static constexpr uint kByte      = bit::seq<22, 1>(Instr);
+    static constexpr uint kIncrement = bit::seq<23, 1>(Instr);
+    static constexpr uint kPreIndex  = bit::seq<24, 1>(Instr);
+    static constexpr uint kRegOp     = bit::seq<25, 1>(Instr);
 
-    uint rd = bits::seq<12, 4>(instr);
-    uint rn = bits::seq<16, 4>(instr);
+    uint rd = bit::seq<12, 4>(instr);
+    uint rn = bit::seq<16, 4>(instr);
 
     u32& dst = regs[rd];
     u32 addr = regs[rn];
@@ -318,19 +318,19 @@ void ARM::Arm_SingleDataTransfer(u32 instr)
     u32 offset;
     if (kRegOp)
     {
-        uint rm     = bits::seq<0, 4>(instr);
-        uint reg_op = bits::seq<4, 1>(instr);
-        uint shift  = bits::seq<5, 2>(instr);
+        uint rm     = bit::seq<0, 4>(instr);
+        uint reg_op = bit::seq<4, 1>(instr);
+        uint shift  = bit::seq<5, 2>(instr);
 
         uint amount;
         if (reg_op)
         {
-            uint rs = bits::seq<8, 4>(instr);
+            uint rs = bit::seq<8, 4>(instr);
             amount = regs[rs] & 0xFF;
         }
         else
         {
-            amount = bits::seq<7, 5>(instr);
+            amount = bit::seq<7, 5>(instr);
         }
 
         switch (shift)
@@ -341,13 +341,13 @@ void ARM::Arm_SingleDataTransfer(u32 instr)
         case kShiftRor: offset = ror<true>(regs[rm], amount, false); break;
 
         default:
-            UNREACHABLE;
+            EGGCPT_UNREACHABLE;
             break;
         }
     }
     else
     {
-        offset = bits::seq<0, 12>(instr);
+        offset = bit::seq<0, 12>(instr);
     }
 
     if (!kIncrement)
@@ -399,15 +399,15 @@ void ARM::Arm_HalfSignedDataTransfer(u32 instr)
         kOpcodeLdrsh
     };
 
-    static constexpr uint kOpcode    = bits::seq< 5, 2>(Instr);
-    static constexpr uint kLoad      = bits::seq<20, 1>(Instr);
-    static constexpr uint kWriteback = bits::seq<21, 1>(Instr);
-    static constexpr uint kImmOp     = bits::seq<22, 1>(Instr);
-    static constexpr uint kIncrement = bits::seq<23, 1>(Instr);
-    static constexpr uint kPreIndex  = bits::seq<24, 1>(Instr);
+    static constexpr uint kOpcode    = bit::seq< 5, 2>(Instr);
+    static constexpr uint kLoad      = bit::seq<20, 1>(Instr);
+    static constexpr uint kWriteback = bit::seq<21, 1>(Instr);
+    static constexpr uint kImmOp     = bit::seq<22, 1>(Instr);
+    static constexpr uint kIncrement = bit::seq<23, 1>(Instr);
+    static constexpr uint kPreIndex  = bit::seq<24, 1>(Instr);
 
-    uint rd = bits::seq<12, 4>(instr);
-    uint rn = bits::seq<16, 4>(instr);
+    uint rd = bit::seq<12, 4>(instr);
+    uint rn = bit::seq<16, 4>(instr);
 
     u32& dst = regs[rd];
     u32 addr = regs[rn];
@@ -415,13 +415,13 @@ void ARM::Arm_HalfSignedDataTransfer(u32 instr)
     u32 offset;
     if (kImmOp)
     {
-        uint lower = bits::seq<0, 4>(instr);
-        uint upper = bits::seq<8, 4>(instr);
+        uint lower = bit::seq<0, 4>(instr);
+        uint upper = bit::seq<8, 4>(instr);
         offset = (upper << 4) | lower;
     }
     else
     {
-        uint rm = bits::seq<0, 4>(instr);
+        uint rm = bit::seq<0, 4>(instr);
         offset = regs[rm];
     }
 
@@ -443,7 +443,7 @@ void ARM::Arm_HalfSignedDataTransfer(u32 instr)
 
         case kOpcodeLdrsb:
             dst = readByte(addr);
-            dst = bits::sx<8>(dst);
+            dst = bit::signEx<8>(dst);
             break;
 
         case kOpcodeLdrsh:
@@ -451,7 +451,7 @@ void ARM::Arm_HalfSignedDataTransfer(u32 instr)
             break;
 
         default:
-            UNREACHABLE;
+            EGGCPT_UNREACHABLE;
             break;
         }
 
@@ -481,14 +481,14 @@ void ARM::Arm_HalfSignedDataTransfer(u32 instr)
 template<uint Instr>
 void ARM::Arm_BlockDataTransfer(u32 instr)
 {
-    static constexpr uint kLoad      = bits::seq<20, 1>(Instr);
-    static constexpr uint kUserMode  = bits::seq<22, 1>(Instr);
-    static constexpr uint kIncrement = bits::seq<23, 1>(Instr);
+    static constexpr uint kLoad      = bit::seq<20, 1>(Instr);
+    static constexpr uint kUserMode  = bit::seq<22, 1>(Instr);
+    static constexpr uint kIncrement = bit::seq<23, 1>(Instr);
 
-    uint rlist     = bits::seq< 0, 16>(instr);
-    uint rn        = bits::seq<16,  4>(instr);
-    uint writeback = bits::seq<21,  1>(Instr);
-    uint pre_index = bits::seq<24,  1>(Instr);
+    uint rlist     = bit::seq< 0, 16>(instr);
+    uint rn        = bit::seq<16,  4>(instr);
+    uint writeback = bit::seq<21,  1>(Instr);
+    uint pre_index = bit::seq<24,  1>(Instr);
 
     u32 addr = regs[rn];
     u32 base = regs[rn];
@@ -501,7 +501,7 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
     {
         if (!kIncrement)
         {
-            addr -= 4 * bits::popcnt(rlist);
+            addr -= 4 * bit::popcnt(rlist);
             pre_index ^= 0x1;
 
             if (writeback)
@@ -516,7 +516,7 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
             if (rlist & (1 << rn))
                 writeback = false;
 
-            for (uint x : bits::iter(rlist))
+            for (uint x : bit::iterate(rlist))
             {
                 addr += 4 * pre_index;
                 regs[x] = readWord(addr);
@@ -530,15 +530,15 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
         }
         else
         {
-            for (uint x : bits::iter(rlist))
+            for (uint x : bit::iterate(rlist))
             {
                 u32 value = x != rn
                     ? x != 15
                         ? regs[x] + 0
                         : regs[x] + 4
-                    : x == bits::ctz(rlist)
+                    : x == bit::ctz(rlist)
                         ? base
-                        : base + (kIncrement ? 4 : -4) * bits::popcnt(rlist);
+                        : base + (kIncrement ? 4 : -4) * bit::popcnt(rlist);
 
                 addr += 4 * pre_index;
                 writeWord(addr, value);
@@ -571,7 +571,7 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
             case kSuffixIB: writeWord(addr + 0x04, pc + 4); break;
 
             default:
-                UNREACHABLE;
+                EGGCPT_UNREACHABLE;
                 break;
             }
         }
@@ -591,11 +591,11 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
 template<uint Instr>
 void ARM::Arm_SingleDataSwap(u32 instr)
 {
-    static constexpr uint kByte = bits::seq<22, 1>(Instr);
+    static constexpr uint kByte = bit::seq<22, 1>(Instr);
 
-    uint rm = bits::seq< 0, 4>(instr);
-    uint rd = bits::seq<12, 4>(instr);
-    uint rn = bits::seq<16, 4>(instr);
+    uint rm = bit::seq< 0, 4>(instr);
+    uint rd = bit::seq<12, 4>(instr);
+    uint rn = bit::seq<16, 4>(instr);
 
     u32  src = regs[rm];
     u32& dst = regs[rd];
@@ -623,25 +623,25 @@ void ARM::Arm_SoftwareInterrupt(u32 instr)
 template<uint Instr>
 void ARM::Arm_CoprocessorDataOperations(u32 instr)
 {
-    ASSERT(false, __FUNCTION__);
+    EGGCPT_ASSERT(false, EGGCPT_FUNCTION);
 }
 
 template<uint Instr>
 void ARM::Arm_CoprocessorDataTransfers(u32 instr)
 {
-    ASSERT(false, __FUNCTION__);
+    EGGCPT_ASSERT(false, EGGCPT_FUNCTION);
 }
 
 template<uint Instr>
 void ARM::Arm_CoprocessorRegisterTransfers(u32 instr)
 {
-    ASSERT(false, __FUNCTION__);
+    EGGCPT_ASSERT(false, EGGCPT_FUNCTION);
 }
 
 template<uint Instr>
 void ARM::Arm_Undefined(u32 instr)
 {
-    ASSERT(false, __FUNCTION__);
+    EGGCPT_ASSERT(false, EGGCPT_FUNCTION);
 }
 
 template<uint Hash>

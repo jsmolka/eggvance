@@ -1,6 +1,6 @@
 #pragma once
 
-#include "base/bits.h"
+#include "base/eggcpt.h"
 #include "base/register.h"
 
 struct DmaIo
@@ -32,19 +32,19 @@ struct DmaIo
 
             if (Index == 0)
             {
-                dadcnt = bits::seq<5, 2>(byte);
-                sadcnt = bits::seq<7, 1>(byte) << 0 | (sadcnt & ~0x1);
+                dadcnt = bit::seq<5, 2>(byte);
+                sadcnt = bit::seq<7, 1>(byte) << 0 | (sadcnt & ~0x1);
             }
             else
             {
-                sadcnt = bits::seq<0, 1>(byte) << 1 | (sadcnt & ~0x2);
-                repeat = bits::seq<1, 1>(byte);
-                word   = bits::seq<2, 1>(byte);
-                drq    = bits::seq<3, 1>(byte);
-                timing = bits::seq<4, 2>(byte);
-                irq    = bits::seq<6, 1>(byte);
-                reload = bits::seq<7, 1>(byte) ^ enable;
-                enable = bits::seq<7, 1>(byte);
+                sadcnt = bit::seq<0, 1>(byte) << 1 | (sadcnt & ~0x2);
+                repeat = bit::seq<1, 1>(byte);
+                word   = bit::seq<2, 1>(byte);
+                drq    = bit::seq<3, 1>(byte);
+                timing = bit::seq<4, 2>(byte);
+                irq    = bit::seq<6, 1>(byte);
+                reload = bit::seq<7, 1>(byte) ^ enable;
+                enable = bit::seq<7, 1>(byte);
             }
         }
 

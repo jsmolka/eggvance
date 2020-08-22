@@ -1,9 +1,6 @@
 #include "arm.h"
 
-#include <fmt/printf.h>
-
 #include "arm/decode.h"
-#include "arm/disassemble.h"
 #include "core/core.h"
 
 ARM::ARM(Core& core)
@@ -28,7 +25,7 @@ void ARM::run(int cycles)
         INDEXED_CASE8(24, dispatch<kLabel>());
 
         default:
-            UNREACHABLE;
+            EGGCPT_UNREACHABLE;
             break;
         }
     }
