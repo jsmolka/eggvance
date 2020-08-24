@@ -1,5 +1,7 @@
 #pragma once
 
+#include <eggcpt/macros.h>
+
 #define INDEXED_IF(value, label, index, ...)    \
     if constexpr (value == (label + index))     \
     {                                           \

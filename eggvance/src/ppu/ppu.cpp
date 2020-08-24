@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include "base/eggcpt.h"
+#include "base/bit.h"
 #include "base/constants.h"
 #include "base/macros.h"
 #include "core/core.h"

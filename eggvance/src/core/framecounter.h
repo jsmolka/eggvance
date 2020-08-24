@@ -3,7 +3,7 @@
 #include <chrono>
 #include <optional>
 
-#include "base/eggcpt.h"
+#include "base/int.h"
 
 class FrameCounter
 {

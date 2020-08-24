@@ -1,6 +1,6 @@
 #pragma once
 
-#include "base/eggcpt.h"
+#include "base/int.h"
 #include "base/constants.h"
 
 enum LayerFlag

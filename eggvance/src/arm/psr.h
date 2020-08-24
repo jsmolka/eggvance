@@ -1,6 +1,7 @@
 #pragma once
 
-#include "base/eggcpt.h"
+#include "base/bit.h"
+#include "base/int.h"
 
 class PSR
 {

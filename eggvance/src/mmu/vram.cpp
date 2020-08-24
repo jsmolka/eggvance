@@ -1,6 +1,9 @@
 #include "vram.h"
 
-#include "base/eggcpt.h"
+#include <eggcpt/utility.h>
+
+#include "base/bit.h"
+#include "base/int.h"
 #include "core/core.h"
 
 VRAM::VRAM(Core& core)

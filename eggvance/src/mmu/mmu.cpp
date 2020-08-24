@@ -1,7 +1,8 @@
 #include "mmu.h"
 
+#include <eggcpt/utility.h>
+
 #include "base/constants.h"
-#include "base/eggcpt.h"
 #include "core/core.h"
 
 MMU::MMU(Core& core)

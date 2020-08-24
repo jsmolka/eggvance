@@ -186,11 +186,12 @@
     <ClInclude Include="src\arm\io.h" />
     <ClInclude Include="src\arm\psr.h" />
     <ClInclude Include="src\arm\registers.h" />
-    <ClInclude Include="src\base\eggcpt.h" />
-    <ClInclude Include="src\base\enums.h" />
+    <ClInclude Include="src\base\bit.h" />
     <ClInclude Include="src\base\config.h" />
     <ClInclude Include="src\base\constants.h" />
-    <ClInclude Include="src\base\sdl2.h" />
+    <ClInclude Include="src\base\filesystem.h" />
+    <ClInclude Include="src\base\int.h" />
+    <ClInclude Include="src\base\sdl.h" />
     <ClInclude Include="src\common\critical.h" />
     <ClInclude Include="src\base\macros.h" />
     <ClInclude Include="src\core\audiocontext.h" />

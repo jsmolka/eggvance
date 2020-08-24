@@ -1,8 +1,8 @@
 #pragma once
 
 #include "dimensions.h"
-#include "base/enums.h"
-#include "base/eggcpt.h"
+#include "base/constants.h"
+#include "base/int.h"
 
 enum class ObjectMode
 {

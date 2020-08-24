@@ -2,9 +2,9 @@
 
 #include <algorithm>
 
+#include "base/bit.h"
 #include "base/config.h"
 #include "base/constants.h"
-#include "base/eggcpt.h"
 #include "base/register.h"
 #include "ppu/dimensions.h"
 #include "ppu/layer.h"

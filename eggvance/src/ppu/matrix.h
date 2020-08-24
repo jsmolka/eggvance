@@ -1,7 +1,7 @@
 #pragma once
 
 #include "point.h"
-#include "base/eggcpt.h"
+#include "base/int.h"
 
 class Matrix
 {

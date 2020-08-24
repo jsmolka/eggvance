@@ -3,6 +3,8 @@
 #include <stdexcept>
 #include <eggcpt/icon.h>
 
+#include "base/bit.h"
+
 void VideoContext::raise()
 {
     SDL_RaiseWindow(window);

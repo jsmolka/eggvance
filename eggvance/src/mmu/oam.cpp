@@ -1,6 +1,7 @@
 #include "oam.h"
 
-#include "base/eggcpt.h"
+#include "base/bit.h"
+#include "base/int.h"
 
 void OAM::reset()
 {

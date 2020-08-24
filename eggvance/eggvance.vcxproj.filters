@@ -236,9 +236,6 @@
     <ClInclude Include="src\base\constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\base\enums.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\base\macros.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -299,9 +296,6 @@
     <ClInclude Include="src\core\context.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\base\eggcpt.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\audiocontext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -317,7 +311,16 @@
     <ClInclude Include="src\core\synchronizer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\base\sdl2.h">
+    <ClInclude Include="src\base\int.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\bit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\filesystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\sdl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

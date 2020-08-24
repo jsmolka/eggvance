@@ -1,4 +1,4 @@
-#include "base/eggcpt.h"
+#include "base/macros.h"
 
 #if !EGGCPT_CC_EMSCRIPTEN
 

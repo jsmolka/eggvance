@@ -1,6 +1,8 @@
 #include "core.h"
 
-#include "base/eggcpt.h"
+#include <eggcpt/filesystem.h>
+#include <eggcpt/fmt.h>
+#include <eggcpt/utility.h>
 
 Core::Core()
     : arm(*this)

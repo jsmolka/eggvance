@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ram.h"
-#include "base/enums.h"
+#include "base/constants.h"
 #include "ppu/point.h"
 
 class Core;

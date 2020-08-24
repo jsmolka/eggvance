@@ -1,7 +1,9 @@
 #include "disassemble.h"
 
+#include <eggcpt/fmt.h>
+
 #include "arm/decode.h"
-#include "base/eggcpt.h"
+#include "base/bit.h"
 
 #define MNEMONIC "{:<8}"
 

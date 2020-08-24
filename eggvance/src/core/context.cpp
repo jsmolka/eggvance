@@ -1,6 +1,6 @@
 #include "context.h"
 
-#include "base/sdl2.h"
+#include "base/sdl.h"
 
 Context::~Context()
 {

@@ -1,6 +1,6 @@
 #include "mapentry.h"
 
-#include "base/eggcpt.h"
+#include "base/bit.h"
 
 MapEntry::MapEntry(u16 data)
 {

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "base/eggcpt.h"
 #include "base/register.h"
 
 class Core;

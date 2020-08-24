@@ -1,6 +1,8 @@
 #include "audiocontext.h"
 
-#include "base/sdl2.h"
+#include <stdexcept>
+
+#include "base/sdl.h"
 
 void AudioContext::init()
 {
