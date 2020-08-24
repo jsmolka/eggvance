@@ -320,7 +320,7 @@
     <ClInclude Include="src\base\filesystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\base\sdl.h">
+    <ClInclude Include="src\base\sdl2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

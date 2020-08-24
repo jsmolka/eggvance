@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-#include "base/sdl.h"
+#include "base/sdl2.h"
 
 void AudioContext::init()
 {

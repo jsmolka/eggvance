@@ -1,7 +1,7 @@
 #pragma once
 
 #include "base/int.h"
-#include "base/sdl.h"
+#include "base/sdl2.h"
 
 class InputContext
 {

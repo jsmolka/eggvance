@@ -3,7 +3,7 @@
 #include "base/bit.h"
 #include "base/filesystem.h"
 #include "base/int.h"
-#include "base/sdl.h"
+#include "base/sdl2.h"
 
 template<typename T>
 struct Controls {};

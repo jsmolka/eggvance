@@ -170,10 +170,10 @@ struct PpuIo
 
     RegisterW<2, 0x01FF> bghofs[4];
     RegisterW<2, 0x01FF> bgvofs[4];
-    RegisterW<2, 0xFFFF, 0x0100, s16> bgpa[2];
-    RegisterW<2, 0xFFFF, 0x0000, s16> bgpb[2];
-    RegisterW<2, 0xFFFF, 0x0000, s16> bgpc[2];
-    RegisterW<2, 0xFFFF, 0x0100, s16> bgpd[2];
+    RegisterW<2, 0xFFFF, 0x0100, 0> bgpa[2];
+    RegisterW<2, 0xFFFF, 0x0000, 0> bgpb[2];
+    RegisterW<2, 0xFFFF, 0x0000, 0> bgpc[2];
+    RegisterW<2, 0xFFFF, 0x0100, 0> bgpd[2];
 
     struct BGReference : RegisterW<4, 0x0FFF'FFFF>
     {
