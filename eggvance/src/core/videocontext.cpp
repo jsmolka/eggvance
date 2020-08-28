@@ -1,9 +1,24 @@
 #include "videocontext.h"
 
-#include <stdexcept>
 #include <eggcpt/icon.h>
 
 #include "base/bit.h"
+#include "base/exit.h"
+
+VideoContext::~VideoContext()
+{
+    deinit();
+}
+
+void VideoContext::init()
+{
+    if (SDL_InitSubSystem(SDL_INIT_VIDEO))
+        exitWithMessage("Cannot init video context");
+
+    if (!initWindow())   exitWithMessage("Cannot init window");
+    if (!initRenderer()) exitWithMessage("Cannot init renderer");
+    if (!initTexture())  exitWithMessage("Cannot init texture");
+}
 
 void VideoContext::raise()
 {
@@ -39,7 +54,7 @@ void VideoContext::renderIcon()
     SDL_RenderGetLogicalSize(renderer, &w, &h);
     SDL_RenderSetLogicalSize(renderer, 18, 18);
 
-    for (const auto& pixel : eggcpt::icon::pixels())
+    for (const auto& pixel : eggcpt::icon::pixels)
     {
         SDL_SetRenderDrawColor(
             renderer,
@@ -74,16 +89,6 @@ void VideoContext::renderClear(u32 color)
         SDL_ALPHA_OPAQUE);
 
     SDL_RenderClear(renderer);
-}
-
-void VideoContext::init()
-{
-    if (SDL_InitSubSystem(SDL_INIT_VIDEO))
-        throw std::runtime_error("Cannot init video context");
-
-    if (!initWindow())   throw std::runtime_error("Cannot init window");
-    if (!initRenderer()) throw std::runtime_error("Cannot init renderer");
-    if (!initTexture())  throw std::runtime_error("Cannot init texture");
 }
 
 void VideoContext::deinit()

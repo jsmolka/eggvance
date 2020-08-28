@@ -22,13 +22,9 @@ enum Irq
     kIrqGamePak = 1 << 13
 };
 
-class Core;
-
 class IrqHandler
 {
 public:
-    IrqHandler(Core& core);
-
     void request(uint irq);
 
     template<uint Addr> u8 read() const;
@@ -37,9 +33,10 @@ public:
 private:
     void update();
 
-    Core& core;
     IrqIo io;
 };
+
+inline IrqHandler irqh;
 
 template<uint Addr>
 u8 IrqHandler::read() const

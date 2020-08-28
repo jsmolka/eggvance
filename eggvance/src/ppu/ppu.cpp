@@ -5,13 +5,9 @@
 #include "base/bit.h"
 #include "base/constants.h"
 #include "base/macros.h"
-#include "core/core.h"
-
-PPU::PPU(Core& core)
-    : core(core)
-{
-
-}
+#include "core/videocontext.h"
+#include "dma/dmac.h"
+#include "irq/irqh.h"
 
 void PPU::reset()
 {
@@ -35,7 +31,7 @@ void PPU::scanline()
 
     if (io.dispcnt.blank)
     {
-        u32* scanline = core.context.video.scanline(io.vcount.value);
+        u32* scanline = video_ctx.scanline(io.vcount.value);
         std::fill_n(scanline, kScreenW, 0xFFFFFFFF);
         return;
     }
@@ -108,9 +104,9 @@ void PPU::hblank()
 
     if (io.dispstat.hblank_irq)
     {
-        core.irqh.request(kIrqHBlank);
+        irqh.request(kIrqHBlank);
     }
-    core.dmac.broadcast(Dma::kTimingHBlank);
+    dmac.broadcast(Dma::kTimingHBlank);
 }
 
 void PPU::vblank()
@@ -125,9 +121,9 @@ void PPU::vblank()
 
     if (io.dispstat.vblank_irq)
     {
-        core.irqh.request(kIrqVBlank);
+        irqh.request(kIrqVBlank);
     }
-    core.dmac.broadcast(Dma::kTimingVBlank);
+    dmac.broadcast(Dma::kTimingVBlank);
 }
 
 void PPU::next()
@@ -135,7 +131,7 @@ void PPU::next()
     io.dispstat.vmatch = io.vcount.value == io.dispstat.vcompare;
     if (io.dispstat.vmatch && io.dispstat.vmatch_irq)
     {
-        core.irqh.request(kIrqVMatch);
+        irqh.request(kIrqVMatch);
     }
     io.vcount.next();
 }
@@ -144,8 +140,8 @@ void PPU::present()
 {
     if (io.dispcnt.isActive())
     {
-        core.context.video.renderCopyTexture();
-        core.context.video.renderPresent();
+        video_ctx.renderCopyTexture();
+        video_ctx.renderPresent();
     }
 }
 

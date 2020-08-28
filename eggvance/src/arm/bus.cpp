@@ -1,6 +1,6 @@
 #include "arm.h"
 
-#include "core/core.h"
+#include "mmu/mmu.h"
 
 bool ARM::isSequential(u32 addr) const
 {
@@ -11,42 +11,42 @@ u8 ARM::readByte(u32 addr)
 {
     cycles -= io.waitcnt.cyclesHalf(addr, isSequential(addr));
     prev_addr = addr;
-    return core.mmu.readByte(addr);
+    return mmu.readByte(addr);
 }
 
 u16 ARM::readHalf(u32 addr)
 {
     cycles -= io.waitcnt.cyclesHalf(addr, isSequential(addr));
     prev_addr = addr;
-    return core.mmu.readHalf(addr);
+    return mmu.readHalf(addr);
 }
 
 u32 ARM::readWord(u32 addr)
 {
     cycles -= io.waitcnt.cyclesWord(addr, isSequential(addr));
     prev_addr = addr;
-    return core.mmu.readWord(addr);
+    return mmu.readWord(addr);
 }
 
 void ARM::writeByte(u32 addr, u8 byte)
 {
     cycles -= io.waitcnt.cyclesHalf(addr, isSequential(addr));
     prev_addr = addr;
-    core.mmu.writeByte(addr, byte);
+    mmu.writeByte(addr, byte);
 }
 
 void ARM::writeHalf(u32 addr, u16 half)
 {
     cycles -= io.waitcnt.cyclesHalf(addr, isSequential(addr));
     prev_addr = addr;
-    core.mmu.writeHalf(addr, half);
+    mmu.writeHalf(addr, half);
 }
 
 void ARM::writeWord(u32 addr, u32 word)
 {
     cycles -= io.waitcnt.cyclesWord(addr, isSequential(addr));
     prev_addr = addr;
-    core.mmu.writeWord(addr, word);
+    mmu.writeWord(addr, word);
 }
 
 u32 ARM::readWordRotated(u32 addr)

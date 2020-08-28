@@ -4,24 +4,25 @@
 #include <eggcpt/fmt.h>
 #include <eggcpt/utility.h>
 
-Core::Core()
-    : arm(*this)
-    , mmu(*this)
-    , ppu(*this)
-    , keypad(*this)
-    , irqh(*this)
-    , dmac(*this)
-    , timerc(*this)
-{
+#include "arm/arm.h"
+#include "core/audiocontext.h"
+#include "core/inputcontext.h"
+#include "core/videocontext.h"
+#include "dma/dmac.h"
+#include "irq/irqh.h"
+#include "keypad/keypad.h"
+#include "mmu/mmu.h"
+#include "ppu/ppu.h"
+#include "timer/timerc.h"
 
-}
-
-void Core::init(int argc, char* argv[])
+void core::init(int argc, char* argv[])
 {
     config.init(argc, argv);
     mmu.bios.init(config.bios_file);
 
-    context.init();
+    audio_ctx.init();
+    input_ctx.init();
+    video_ctx.init();
 
     switch (argc)
     {
@@ -30,19 +31,19 @@ void Core::init(int argc, char* argv[])
     }
 }
 
-void Core::reset()
+void core::reset()
 {
     mmu.reset();
     ppu.reset();
 
-    eggcpt::reconstruct(arm, *this);
-    eggcpt::reconstruct(dmac, *this);
-    eggcpt::reconstruct(irqh, *this);
-    eggcpt::reconstruct(keypad, *this);
-    eggcpt::reconstruct(timerc, *this);
+    eggcpt::reconstruct(arm);
+    eggcpt::reconstruct(dmac);
+    eggcpt::reconstruct(irqh);
+    eggcpt::reconstruct(keypad);
+    eggcpt::reconstruct(timerc);
 }
 
-void Core::frame()
+void core::frame()
 {
     keypad.update();
 
@@ -70,7 +71,7 @@ void Core::frame()
     ppu.present();
 }
 
-void Core::updateTitle()
+void core::updateTitle()
 {
     const auto title = fmt::format(
         mmu.gamepak.header.title.empty()
@@ -78,10 +79,10 @@ void Core::updateTitle()
             : "eggvance - {0}",
         mmu.gamepak.header.title);
 
-    context.video.title(title);
+    video_ctx.title(title);
 }
 
-void Core::updateTitle(double fps)
+void core::updateTitle(double fps)
 {
     const auto title = fmt::format(
         mmu.gamepak.header.title.empty()
@@ -89,5 +90,5 @@ void Core::updateTitle(double fps)
             : "eggvance - {0} - {1:.1f} fps",
         mmu.gamepak.header.title, fps);
 
-    context.video.title(title);
+    video_ctx.title(title);
 }

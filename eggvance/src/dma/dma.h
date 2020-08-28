@@ -4,8 +4,6 @@
 
 #include "dma/io.h"
 
-class Core;
-
 class Dma
 {
 public:
@@ -17,7 +15,7 @@ public:
         kTimingSpecial
     };
 
-    Dma(Core& core, uint id);
+    Dma(uint id);
 
     void activate();
     void run(int& cycles);
@@ -33,8 +31,6 @@ private:
     void initCycles();
     void initTransfer();
     void initEeprom();
-
-    Core& core;
 
     int pending{};
     int cycles_s{};

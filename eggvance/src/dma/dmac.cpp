@@ -1,13 +1,6 @@
 #include "dmac.h"
 
-#include "core/core.h"
-
-DmaController::DmaController(Core& core)
-    : core(core)
-    , dmas{ { core, 1 }, { core, 2 }, { core, 3 }, { core, 4} }
-{
-
-}
+#include "arm/arm.h"
 
 void DmaController::run(int& cycles)
 {
@@ -18,14 +11,14 @@ void DmaController::run(int& cycles)
         if (!active->running)
         {
             active = nullptr;
-            core.arm.state &= ~ARM::kStateDma;
+            arm.state &= ~ARM::kStateDma;
 
             for (auto& dma : dmas)
             {
                 if (dma.running)
                 {
                     active = &dma;
-                    core.arm.state |= ARM::kStateDma;
+                    arm.state |= ARM::kStateDma;
                     break;
                 }
             }
@@ -50,7 +43,7 @@ void DmaController::emit(Dma& dma, Dma::Timing timing)
         if (!active || dma.id < active->id)
         {
             active = &dma;
-            core.arm.state |= ARM::kStateDma;
+            arm.state |= ARM::kStateDma;
         }
     }
 }

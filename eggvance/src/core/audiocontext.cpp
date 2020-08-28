@@ -1,13 +1,17 @@
 #include "audiocontext.h"
 
-#include <stdexcept>
-
 #include "base/sdl2.h"
+#include "base/exit.h"
+
+AudioContext::~AudioContext()
+{
+    deinit();
+}
 
 void AudioContext::init()
 {
     if (SDL_InitSubSystem(SDL_INIT_AUDIO))
-        throw std::runtime_error("Cannot init audio context");
+        exitWithMessage("Cannot init audio context");
 }
 
 void AudioContext::deinit()

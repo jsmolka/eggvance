@@ -1,5 +1,6 @@
 #pragma once
 
+#include "base/bit.h"
 #include "base/register.h"
 
 struct TimerIo

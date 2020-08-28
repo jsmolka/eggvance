@@ -1,29 +1,29 @@
 #include "io.h"
 
-#include "core/core.h"
-
-Io::Io(Core& core)
-    : core(core)
-{
-
-}
+#include "arm/arm.h"
+#include "dma/dmac.h"
+#include "irq/irqh.h"
+#include "keypad/keypad.h"
+#include "mmu/mmu.h"
+#include "ppu/ppu.h"
+#include "timer/timerc.h"
 
 u8 Io::readByte(u32 addr) const
 {
     switch (addr & 0x3FF'FFFF)
     {
-    INDEXED_CASE2(kRegDispayControl , return core.ppu.io.dispcnt.read<kIndex>());
-    INDEXED_CASE2(kRegGreenSwap     , return core.ppu.io.greenswap.read<kIndex>());
-    INDEXED_CASE2(kRegDisplayStatus , return core.ppu.io.dispstat.read<kIndex>());
-    INDEXED_CASE2(kRegVerticalCount , return core.ppu.io.vcount.read<kIndex>());
-    INDEXED_CASE2(kRegBg0Control    , return core.ppu.io.bgcnt[0].read<kIndex>());
-    INDEXED_CASE2(kRegBg1Control    , return core.ppu.io.bgcnt[1].read<kIndex>());
-    INDEXED_CASE2(kRegBg2Control    , return core.ppu.io.bgcnt[2].read<kIndex>());
-    INDEXED_CASE2(kRegBg3Control    , return core.ppu.io.bgcnt[3].read<kIndex>());
-    INDEXED_CASE2(kRegWindowInside  , return core.ppu.io.winin.read<kIndex>());
-    INDEXED_CASE2(kRegWindowOutside , return core.ppu.io.winout.read<kIndex>());
-    INDEXED_CASE2(kRegBlendControl  , return core.ppu.io.bldcnt.read<kIndex>());
-    INDEXED_CASE2(kRegBlendAlpha    , return core.ppu.io.bldalpha.read<kIndex>());
+    INDEXED_CASE2(kRegDispayControl , return ppu.io.dispcnt.read<kIndex>());
+    INDEXED_CASE2(kRegGreenSwap     , return ppu.io.greenswap.read<kIndex>());
+    INDEXED_CASE2(kRegDisplayStatus , return ppu.io.dispstat.read<kIndex>());
+    INDEXED_CASE2(kRegVerticalCount , return ppu.io.vcount.read<kIndex>());
+    INDEXED_CASE2(kRegBg0Control    , return ppu.io.bgcnt[0].read<kIndex>());
+    INDEXED_CASE2(kRegBg1Control    , return ppu.io.bgcnt[1].read<kIndex>());
+    INDEXED_CASE2(kRegBg2Control    , return ppu.io.bgcnt[2].read<kIndex>());
+    INDEXED_CASE2(kRegBg3Control    , return ppu.io.bgcnt[3].read<kIndex>());
+    INDEXED_CASE2(kRegWindowInside  , return ppu.io.winin.read<kIndex>());
+    INDEXED_CASE2(kRegWindowOutside , return ppu.io.winout.read<kIndex>());
+    INDEXED_CASE2(kRegBlendControl  , return ppu.io.bldcnt.read<kIndex>());
+    INDEXED_CASE2(kRegBlendAlpha    , return ppu.io.bldalpha.read<kIndex>());
     INDEXED_CASE2(kRegSound1ControlL, return unused.soundcnt1_l.read<kIndex>());
     INDEXED_CASE2(kRegSound1ControlH, return unused.soundcnt1_h.read<kIndex>());
     INDEXED_CASE2(kRegSound1ControlX, return unused.soundcnt1_x.read<kIndex>());
@@ -57,29 +57,29 @@ u8 Io::readByte(u32 addr) const
     INDEXED_CASE4(kRegJoyReceive    , return unused.joyrecv.read<kIndex>());
     INDEXED_CASE4(kRegJoyTransmit   , return unused.joytrans.read<kIndex>());
     INDEXED_CASE2(kRegJoyStatus     , return unused.joystat.read<kIndex>());
-    INDEXED_CASE2(kRegWaitControl   , return core.arm.io.waitcnt.read<kIndex>());
+    INDEXED_CASE2(kRegWaitControl   , return arm.io.waitcnt.read<kIndex>());
     INDEXED_CASE1(kRegPostFlag      , return unused.postflag.read<kIndex>());
-    INDEXED_CASE2(kRegKeyInput      , return core.keypad.io.input.read<kIndex>());
-    INDEXED_CASE2(kRegKeyControl    , return core.keypad.io.control.read<kIndex>());
+    INDEXED_CASE2(kRegKeyInput      , return keypad.io.input.read<kIndex>());
+    INDEXED_CASE2(kRegKeyControl    , return keypad.io.control.read<kIndex>());
     INDEXED_CASE2(kRegDma0Count     , return 0);
-    INDEXED_CASE2(kRegDma0Control   , return core.dmac.read<kLabel>());
+    INDEXED_CASE2(kRegDma0Control   , return dmac.read<kLabel>());
     INDEXED_CASE2(kRegDma1Count     , return 0);
-    INDEXED_CASE2(kRegDma1Control   , return core.dmac.read<kLabel>());
+    INDEXED_CASE2(kRegDma1Control   , return dmac.read<kLabel>());
     INDEXED_CASE2(kRegDma2Count     , return 0);
-    INDEXED_CASE2(kRegDma2Control   , return core.dmac.read<kLabel>());
+    INDEXED_CASE2(kRegDma2Control   , return dmac.read<kLabel>());
     INDEXED_CASE2(kRegDma3Count     , return 0);
-    INDEXED_CASE2(kRegDma3Control   , return core.dmac.read<kLabel>());
-    INDEXED_CASE2(kRegTimer0Count   , return core.timerc.read<kLabel>());
-    INDEXED_CASE2(kRegTimer0Control , return core.timerc.read<kLabel>());
-    INDEXED_CASE2(kRegTimer1Count   , return core.timerc.read<kLabel>());
-    INDEXED_CASE2(kRegTimer1Control , return core.timerc.read<kLabel>());
-    INDEXED_CASE2(kRegTimer2Count   , return core.timerc.read<kLabel>());
-    INDEXED_CASE2(kRegTimer2Control , return core.timerc.read<kLabel>());
-    INDEXED_CASE2(kRegTimer3Count   , return core.timerc.read<kLabel>());
-    INDEXED_CASE2(kRegTimer3Control , return core.timerc.read<kLabel>());
-    INDEXED_CASE2(kRegIrqEnable     , return core.irqh.read<kLabel>());
-    INDEXED_CASE2(kRegIrqRequest    , return core.irqh.read<kLabel>());
-    INDEXED_CASE4(kRegIrqMaster     , return core.irqh.read<kLabel>());
+    INDEXED_CASE2(kRegDma3Control   , return dmac.read<kLabel>());
+    INDEXED_CASE2(kRegTimer0Count   , return timerc.read<kLabel>());
+    INDEXED_CASE2(kRegTimer0Control , return timerc.read<kLabel>());
+    INDEXED_CASE2(kRegTimer1Count   , return timerc.read<kLabel>());
+    INDEXED_CASE2(kRegTimer1Control , return timerc.read<kLabel>());
+    INDEXED_CASE2(kRegTimer2Count   , return timerc.read<kLabel>());
+    INDEXED_CASE2(kRegTimer2Control , return timerc.read<kLabel>());
+    INDEXED_CASE2(kRegTimer3Count   , return timerc.read<kLabel>());
+    INDEXED_CASE2(kRegTimer3Control , return timerc.read<kLabel>());
+    INDEXED_CASE2(kRegIrqEnable     , return irqh.read<kLabel>());
+    INDEXED_CASE2(kRegIrqRequest    , return irqh.read<kLabel>());
+    INDEXED_CASE4(kRegIrqMaster     , return irqh.read<kLabel>());
 
     INDEXED_CASE2(kRegUnused066, return 0);
     INDEXED_CASE2(kRegUnused06E, return 0);
@@ -94,7 +94,7 @@ u8 Io::readByte(u32 addr) const
     INDEXED_CASE2(kRegUnused206, return 0);
 
     default:
-        return core.mmu.readUnused(addr);
+        return mmu.readUnused(addr);
     }
 }
 
@@ -126,43 +126,43 @@ void Io::writeByte(u32 addr, u8 byte)
 {
     switch (addr & 0x3FF'FFFF)
     {
-    INDEXED_CASE2(kRegDispayControl , core.ppu.io.dispcnt.write<kIndex>(byte));
-    INDEXED_CASE2(kRegGreenSwap     , core.ppu.io.greenswap.write<kIndex>(byte));
-    INDEXED_CASE2(kRegDisplayStatus , core.ppu.io.dispstat.write<kIndex>(byte));
-    INDEXED_CASE2(kRegBg0Control    , core.ppu.io.bgcnt[0].write<kIndex, 0xDFFF>(byte));
-    INDEXED_CASE2(kRegBg1Control    , core.ppu.io.bgcnt[1].write<kIndex, 0xDFFF>(byte));
-    INDEXED_CASE2(kRegBg2Control    , core.ppu.io.bgcnt[2].write<kIndex, 0xFFFF>(byte));
-    INDEXED_CASE2(kRegBg3Control    , core.ppu.io.bgcnt[3].write<kIndex, 0xFFFF>(byte));
-    INDEXED_CASE2(kRegBg0HorOffset  , core.ppu.io.bghofs[0].write<kIndex>(byte));
-    INDEXED_CASE2(kRegBg0VerOffset  , core.ppu.io.bgvofs[0].write<kIndex>(byte));
-    INDEXED_CASE2(kRegBg1HorOffset  , core.ppu.io.bghofs[1].write<kIndex>(byte));
-    INDEXED_CASE2(kRegBg1VerOffset  , core.ppu.io.bgvofs[1].write<kIndex>(byte));
-    INDEXED_CASE2(kRegBg2HorOffset  , core.ppu.io.bghofs[2].write<kIndex>(byte));
-    INDEXED_CASE2(kRegBg2VerOffset  , core.ppu.io.bgvofs[2].write<kIndex>(byte));
-    INDEXED_CASE2(kRegBg3HorOffset  , core.ppu.io.bghofs[3].write<kIndex>(byte));
-    INDEXED_CASE2(kRegBg3VerOffset  , core.ppu.io.bgvofs[3].write<kIndex>(byte));
-    INDEXED_CASE2(kRegBg2ParameterA , core.ppu.io.bgpa[0].write<kIndex>(byte));
-    INDEXED_CASE2(kRegBg2ParameterB , core.ppu.io.bgpb[0].write<kIndex>(byte));
-    INDEXED_CASE2(kRegBg2ParameterC , core.ppu.io.bgpc[0].write<kIndex>(byte));
-    INDEXED_CASE2(kRegBg2ParameterD , core.ppu.io.bgpd[0].write<kIndex>(byte));
-    INDEXED_CASE4(kRegBg2ReferenceX , core.ppu.io.bgx[0].write<kIndex>(byte));
-    INDEXED_CASE4(kRegBg2ReferenceY , core.ppu.io.bgy[0].write<kIndex>(byte));
-    INDEXED_CASE2(kRegBg3ParameterA , core.ppu.io.bgpa[1].write<kIndex>(byte));
-    INDEXED_CASE2(kRegBg3ParameterB , core.ppu.io.bgpb[1].write<kIndex>(byte));
-    INDEXED_CASE2(kRegBg3ParameterC , core.ppu.io.bgpc[1].write<kIndex>(byte));
-    INDEXED_CASE2(kRegBg3ParameterD , core.ppu.io.bgpd[1].write<kIndex>(byte));
-    INDEXED_CASE4(kRegBg3ReferenceX , core.ppu.io.bgx[1].write<kIndex>(byte));
-    INDEXED_CASE4(kRegBg3ReferenceY , core.ppu.io.bgy[1].write<kIndex>(byte));
-    INDEXED_CASE2(kRegWindow0Hor    , core.ppu.io.winh[0].write<kIndex>(byte));
-    INDEXED_CASE2(kRegWindow1Hor    , core.ppu.io.winh[1].write<kIndex>(byte));
-    INDEXED_CASE2(kRegWindow0Ver    , core.ppu.io.winv[0].write<kIndex>(byte));
-    INDEXED_CASE2(kRegWindow1Ver    , core.ppu.io.winv[1].write<kIndex>(byte));
-    INDEXED_CASE2(kRegWindowInside  , core.ppu.io.winin.write<kIndex>(byte));
-    INDEXED_CASE2(kRegWindowOutside , core.ppu.io.winout.write<kIndex>(byte));
-    INDEXED_CASE2(kRegMosaic        , core.ppu.io.mosaic.write<kIndex>(byte));
-    INDEXED_CASE2(kRegBlendControl  , core.ppu.io.bldcnt.write<kIndex>(byte));
-    INDEXED_CASE2(kRegBlendAlpha    , core.ppu.io.bldalpha.write<kIndex>(byte));
-    INDEXED_CASE2(kRegBlendFade     , core.ppu.io.bldfade.write<kIndex>(byte));
+    INDEXED_CASE2(kRegDispayControl , ppu.io.dispcnt.write<kIndex>(byte));
+    INDEXED_CASE2(kRegGreenSwap     , ppu.io.greenswap.write<kIndex>(byte));
+    INDEXED_CASE2(kRegDisplayStatus , ppu.io.dispstat.write<kIndex>(byte));
+    INDEXED_CASE2(kRegBg0Control    , ppu.io.bgcnt[0].write<kIndex, 0xDFFF>(byte));
+    INDEXED_CASE2(kRegBg1Control    , ppu.io.bgcnt[1].write<kIndex, 0xDFFF>(byte));
+    INDEXED_CASE2(kRegBg2Control    , ppu.io.bgcnt[2].write<kIndex, 0xFFFF>(byte));
+    INDEXED_CASE2(kRegBg3Control    , ppu.io.bgcnt[3].write<kIndex, 0xFFFF>(byte));
+    INDEXED_CASE2(kRegBg0HorOffset  , ppu.io.bghofs[0].write<kIndex>(byte));
+    INDEXED_CASE2(kRegBg0VerOffset  , ppu.io.bgvofs[0].write<kIndex>(byte));
+    INDEXED_CASE2(kRegBg1HorOffset  , ppu.io.bghofs[1].write<kIndex>(byte));
+    INDEXED_CASE2(kRegBg1VerOffset  , ppu.io.bgvofs[1].write<kIndex>(byte));
+    INDEXED_CASE2(kRegBg2HorOffset  , ppu.io.bghofs[2].write<kIndex>(byte));
+    INDEXED_CASE2(kRegBg2VerOffset  , ppu.io.bgvofs[2].write<kIndex>(byte));
+    INDEXED_CASE2(kRegBg3HorOffset  , ppu.io.bghofs[3].write<kIndex>(byte));
+    INDEXED_CASE2(kRegBg3VerOffset  , ppu.io.bgvofs[3].write<kIndex>(byte));
+    INDEXED_CASE2(kRegBg2ParameterA , ppu.io.bgpa[0].write<kIndex>(byte));
+    INDEXED_CASE2(kRegBg2ParameterB , ppu.io.bgpb[0].write<kIndex>(byte));
+    INDEXED_CASE2(kRegBg2ParameterC , ppu.io.bgpc[0].write<kIndex>(byte));
+    INDEXED_CASE2(kRegBg2ParameterD , ppu.io.bgpd[0].write<kIndex>(byte));
+    INDEXED_CASE4(kRegBg2ReferenceX , ppu.io.bgx[0].write<kIndex>(byte));
+    INDEXED_CASE4(kRegBg2ReferenceY , ppu.io.bgy[0].write<kIndex>(byte));
+    INDEXED_CASE2(kRegBg3ParameterA , ppu.io.bgpa[1].write<kIndex>(byte));
+    INDEXED_CASE2(kRegBg3ParameterB , ppu.io.bgpb[1].write<kIndex>(byte));
+    INDEXED_CASE2(kRegBg3ParameterC , ppu.io.bgpc[1].write<kIndex>(byte));
+    INDEXED_CASE2(kRegBg3ParameterD , ppu.io.bgpd[1].write<kIndex>(byte));
+    INDEXED_CASE4(kRegBg3ReferenceX , ppu.io.bgx[1].write<kIndex>(byte));
+    INDEXED_CASE4(kRegBg3ReferenceY , ppu.io.bgy[1].write<kIndex>(byte));
+    INDEXED_CASE2(kRegWindow0Hor    , ppu.io.winh[0].write<kIndex>(byte));
+    INDEXED_CASE2(kRegWindow1Hor    , ppu.io.winh[1].write<kIndex>(byte));
+    INDEXED_CASE2(kRegWindow0Ver    , ppu.io.winv[0].write<kIndex>(byte));
+    INDEXED_CASE2(kRegWindow1Ver    , ppu.io.winv[1].write<kIndex>(byte));
+    INDEXED_CASE2(kRegWindowInside  , ppu.io.winin.write<kIndex>(byte));
+    INDEXED_CASE2(kRegWindowOutside , ppu.io.winout.write<kIndex>(byte));
+    INDEXED_CASE2(kRegMosaic        , ppu.io.mosaic.write<kIndex>(byte));
+    INDEXED_CASE2(kRegBlendControl  , ppu.io.bldcnt.write<kIndex>(byte));
+    INDEXED_CASE2(kRegBlendAlpha    , ppu.io.bldalpha.write<kIndex>(byte));
+    INDEXED_CASE2(kRegBlendFade     , ppu.io.bldfade.write<kIndex>(byte));
     INDEXED_CASE2(kRegSound1ControlL, unused.soundcnt1_l.write<kIndex>(byte));
     INDEXED_CASE2(kRegSound1ControlH, unused.soundcnt1_h.write<kIndex>(byte));
     INDEXED_CASE2(kRegSound1ControlX, unused.soundcnt1_x.write<kIndex>(byte));
@@ -198,37 +198,37 @@ void Io::writeByte(u32 addr, u8 byte)
     INDEXED_CASE4(kRegJoyReceive    , unused.joyrecv.write<kIndex>(byte));
     INDEXED_CASE4(kRegJoyTransmit   , unused.joytrans.write<kIndex>(byte));
     INDEXED_CASE2(kRegJoyStatus     , unused.joystat.write<kIndex>(byte));
-    INDEXED_CASE2(kRegWaitControl   , core.arm.io.waitcnt.write<kIndex>(byte));
+    INDEXED_CASE2(kRegWaitControl   , arm.io.waitcnt.write<kIndex>(byte));
     INDEXED_CASE1(kRegPostFlag      , unused.postflag.write<kIndex>(byte));
-    INDEXED_CASE1(kRegHaltControl   , core.arm.io.haltcnt.write<kIndex>(byte));
-    INDEXED_CASE2(kRegKeyControl    , core.keypad.io.control.write<kIndex>(byte));
-    INDEXED_CASE4(kRegDma0Sad       , core.dmac.write<kLabel>(byte));
-    INDEXED_CASE4(kRegDma0Dad       , core.dmac.write<kLabel>(byte));
-    INDEXED_CASE2(kRegDma0Count     , core.dmac.write<kLabel>(byte));
-    INDEXED_CASE2(kRegDma0Control   , core.dmac.write<kLabel>(byte));
-    INDEXED_CASE4(kRegDma1Sad       , core.dmac.write<kLabel>(byte));
-    INDEXED_CASE4(kRegDma1Dad       , core.dmac.write<kLabel>(byte));
-    INDEXED_CASE2(kRegDma1Count     , core.dmac.write<kLabel>(byte));
-    INDEXED_CASE2(kRegDma1Control   , core.dmac.write<kLabel>(byte));
-    INDEXED_CASE4(kRegDma2Sad       , core.dmac.write<kLabel>(byte));
-    INDEXED_CASE4(kRegDma2Dad       , core.dmac.write<kLabel>(byte));
-    INDEXED_CASE2(kRegDma2Count     , core.dmac.write<kLabel>(byte));
-    INDEXED_CASE2(kRegDma2Control   , core.dmac.write<kLabel>(byte));
-    INDEXED_CASE4(kRegDma3Sad       , core.dmac.write<kLabel>(byte));
-    INDEXED_CASE4(kRegDma3Dad       , core.dmac.write<kLabel>(byte));
-    INDEXED_CASE2(kRegDma3Count     , core.dmac.write<kLabel>(byte));
-    INDEXED_CASE2(kRegDma3Control   , core.dmac.write<kLabel>(byte));
-    INDEXED_CASE2(kRegTimer0Count   , core.timerc.write<kLabel>(byte));
-    INDEXED_CASE2(kRegTimer0Control , core.timerc.write<kLabel>(byte));
-    INDEXED_CASE2(kRegTimer1Count   , core.timerc.write<kLabel>(byte));
-    INDEXED_CASE2(kRegTimer1Control , core.timerc.write<kLabel>(byte));
-    INDEXED_CASE2(kRegTimer2Count   , core.timerc.write<kLabel>(byte));
-    INDEXED_CASE2(kRegTimer2Control , core.timerc.write<kLabel>(byte));
-    INDEXED_CASE2(kRegTimer3Count   , core.timerc.write<kLabel>(byte));
-    INDEXED_CASE2(kRegTimer3Control , core.timerc.write<kLabel>(byte));
-    INDEXED_CASE2(kRegIrqEnable     , core.irqh.write<kLabel>(byte));
-    INDEXED_CASE2(kRegIrqRequest    , core.irqh.write<kLabel>(byte));
-    INDEXED_CASE4(kRegIrqMaster     , core.irqh.write<kLabel>(byte));
+    INDEXED_CASE1(kRegHaltControl   , arm.io.haltcnt.write<kIndex>(byte));
+    INDEXED_CASE2(kRegKeyControl    , keypad.io.control.write<kIndex>(byte));
+    INDEXED_CASE4(kRegDma0Sad       , dmac.write<kLabel>(byte));
+    INDEXED_CASE4(kRegDma0Dad       , dmac.write<kLabel>(byte));
+    INDEXED_CASE2(kRegDma0Count     , dmac.write<kLabel>(byte));
+    INDEXED_CASE2(kRegDma0Control   , dmac.write<kLabel>(byte));
+    INDEXED_CASE4(kRegDma1Sad       , dmac.write<kLabel>(byte));
+    INDEXED_CASE4(kRegDma1Dad       , dmac.write<kLabel>(byte));
+    INDEXED_CASE2(kRegDma1Count     , dmac.write<kLabel>(byte));
+    INDEXED_CASE2(kRegDma1Control   , dmac.write<kLabel>(byte));
+    INDEXED_CASE4(kRegDma2Sad       , dmac.write<kLabel>(byte));
+    INDEXED_CASE4(kRegDma2Dad       , dmac.write<kLabel>(byte));
+    INDEXED_CASE2(kRegDma2Count     , dmac.write<kLabel>(byte));
+    INDEXED_CASE2(kRegDma2Control   , dmac.write<kLabel>(byte));
+    INDEXED_CASE4(kRegDma3Sad       , dmac.write<kLabel>(byte));
+    INDEXED_CASE4(kRegDma3Dad       , dmac.write<kLabel>(byte));
+    INDEXED_CASE2(kRegDma3Count     , dmac.write<kLabel>(byte));
+    INDEXED_CASE2(kRegDma3Control   , dmac.write<kLabel>(byte));
+    INDEXED_CASE2(kRegTimer0Count   , timerc.write<kLabel>(byte));
+    INDEXED_CASE2(kRegTimer0Control , timerc.write<kLabel>(byte));
+    INDEXED_CASE2(kRegTimer1Count   , timerc.write<kLabel>(byte));
+    INDEXED_CASE2(kRegTimer1Control , timerc.write<kLabel>(byte));
+    INDEXED_CASE2(kRegTimer2Count   , timerc.write<kLabel>(byte));
+    INDEXED_CASE2(kRegTimer2Control , timerc.write<kLabel>(byte));
+    INDEXED_CASE2(kRegTimer3Count   , timerc.write<kLabel>(byte));
+    INDEXED_CASE2(kRegTimer3Control , timerc.write<kLabel>(byte));
+    INDEXED_CASE2(kRegIrqEnable     , irqh.write<kLabel>(byte));
+    INDEXED_CASE2(kRegIrqRequest    , irqh.write<kLabel>(byte));
+    INDEXED_CASE4(kRegIrqMaster     , irqh.write<kLabel>(byte));
     }
 }
 

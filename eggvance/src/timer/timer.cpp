@@ -1,12 +1,11 @@
 #include "timer.h"
 
-#include "core/core.h"
+constexpr uint kOverflow = 0x1'0000;
 
-static constexpr uint kOverflow = 0x1'0000;
+#include "irq/irqh.h"
 
-Timer::Timer(Core& core, uint id)
-    : core(core)
-    , id(id)
+Timer::Timer(uint id)
+    : id(id)
 {
 
 }
@@ -34,7 +33,7 @@ void Timer::run(int cycles)
             next->run(counter / overflow);
 
         if (io.control.irq)
-            core.irqh.request(kIrqTimer0 << id);
+            irqh.request(kIrqTimer0 << id);
 
         counter %= overflow;
         initial  = io.count.initial;

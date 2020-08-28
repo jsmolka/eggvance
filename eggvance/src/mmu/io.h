@@ -2,13 +2,9 @@
 
 #include "base/register.h"
 
-class Core;
-
 class Io
 {
 public:
-    Io(Core& core);
-
     u8  readByte(u32 addr) const;
     u16 readHalf(u32 addr) const;
     u32 readWord(u32 addr) const;
@@ -18,8 +14,6 @@ public:
     void writeWord(u32 addr, u32 word);
 
 private:
-    Core& core;
-
     struct UnusedIo
     {
         UnusedIo();

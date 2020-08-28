@@ -4,24 +4,18 @@
 
 #include "base/bit.h"
 #include "base/int.h"
-#include "core/core.h"
-
-VRAM::VRAM(Core& core)
-    : core(core)
-{
-
-}
+#include "ppu/ppu.h"
 
 void VRAM::reset()
 {
-    eggcpt::reconstruct(*this, core);
+    eggcpt::reconstruct(*this);
 }
 
 void VRAM::writeByte(u32 addr, u8 byte)
 {
     addr = mirror(addr);
 
-    if (addr < (core.ppu.io.dispcnt.isBitmap() ? 0x1'4000u : 0x1'0000u))
+    if (addr < (ppu.io.dispcnt.isBitmap() ? 0x1'4000u : 0x1'0000u))
     {
         addr = align<u16>(addr);
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <eggcpt/macros.h>
+#include <eggcpt/env.h>
 
 #if EGGCPT_CC_MSVC || EGGCPT_CC_EMSCRIPTEN
 #include <SDL2/SDL.h>

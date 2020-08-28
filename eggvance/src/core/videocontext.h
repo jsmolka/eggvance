@@ -10,7 +10,9 @@
 class VideoContext
 {
 public:
-    friend class Context;
+    ~VideoContext();
+
+    void init();
 
     void raise();
     void fullscreen();
@@ -24,7 +26,6 @@ public:
     u32* scanline(uint line);
 
 private:
-    void init();
     void deinit();
 
     bool initWindow();
@@ -37,3 +38,5 @@ private:
 
     std::array<u32, kScreenW * kScreenH> buffer = { 0 };
 };
+
+inline VideoContext video_ctx;

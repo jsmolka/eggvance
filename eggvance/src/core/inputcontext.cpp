@@ -1,6 +1,21 @@
 #include "inputcontext.h"
 
 #include "base/config.h"
+#include "base/exit.h"
+
+InputContext::~InputContext()
+{
+    deinit();
+}
+
+void InputContext::init()
+{
+    if (SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER))
+        exitWithMessage("Cannot init input context");
+
+    if (SDL_NumJoysticks() > 0)
+        controller = SDL_GameControllerOpen(0);
+}
 
 uint InputContext::state() const
 {
@@ -23,15 +38,6 @@ void InputContext::processDeviceEvent(const SDL_ControllerDeviceEvent& event)
         controller = nullptr;
 }
 
-void InputContext::init()
-{
-    if (SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER))
-        throw std::runtime_error("Cannot init input context");
-
-    if (SDL_NumJoysticks() > 0)
-        controller = SDL_GameControllerOpen(0);
-}
-
 void InputContext::deinit()
 {
     if (SDL_WasInit(SDL_INIT_GAMECONTROLLER))
@@ -45,7 +51,7 @@ void InputContext::deinit()
 
 uint InputContext::keyboardState() const
 {
-    auto* keyboard = SDL_GetKeyboardState(nullptr);
+    auto* keyboard = SDL_GetKeyboardState(NULL);
 
     uint state = 0;
     state |= keyboard[config.controls.keyboard.a     ] << kA;
@@ -67,8 +73,6 @@ uint InputContext::controllerState() const
     uint state = 0;
     if (controller)
     {
-        static constexpr int deadzone = 16000;
-
         state |= SDL_GameControllerGetButton(controller, config.controls.controller.a     ) << kA;
         state |= SDL_GameControllerGetButton(controller, config.controls.controller.b     ) << kB;
         state |= SDL_GameControllerGetButton(controller, config.controls.controller.up    ) << kUp;
@@ -84,6 +88,8 @@ uint InputContext::controllerState() const
         int axis_ly = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTY);
         int axis_tl = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_TRIGGERLEFT);
         int axis_tr = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_TRIGGERRIGHT);
+
+        constexpr int deadzone = 16000;
 
         state |= (axis_lx < 0 && std::abs(axis_lx) > deadzone) << kLeft;
         state |= (axis_lx > 0 && std::abs(axis_lx) > deadzone) << kRight;

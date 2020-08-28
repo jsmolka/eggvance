@@ -6,28 +6,17 @@
 class InputContext
 {
 public:
-    friend class Context;
+    ~InputContext();
+
+    void init();
 
     uint state() const;
 
     void processDeviceEvent(const SDL_ControllerDeviceEvent& event);
 
 private:
-    enum
-    {
-        kA      = 0,
-        kB      = 1,
-        kSelect = 2,
-        kStart  = 3,
-        kRight  = 4,
-        kLeft   = 5,
-        kUp     = 6,
-        kDown   = 7,
-        kR      = 8,
-        kL      = 9
-    };
+    enum { kA, kB, kSelect, kStart, kRight, kLeft, kUp, kDown, kR, kL };
 
-    void init();
     void deinit();
 
     uint keyboardState() const;
@@ -35,3 +24,5 @@ private:
 
     SDL_GameController* controller = nullptr;
 };
+
+inline InputContext input_ctx;

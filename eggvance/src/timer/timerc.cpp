@@ -2,11 +2,9 @@
 
 #include <algorithm>
 
-#include "core/core.h"
+#include "arm/arm.h"
 
-TimerController::TimerController(Core& core)
-    : core(core)
-    , timers{ Timer{ core, 1 }, { core, 2 }, { core, 3 }, { core, 4 } }
+TimerController::TimerController()
 {
     timers[1].prev = &timers[0];
     timers[2].prev = &timers[1];
@@ -57,7 +55,7 @@ void TimerController::runTimers()
 void TimerController::schedule()
 {
     active.clear();
-    core.arm.state &= ~ARM::kStateTimer;
+    arm.state &= ~ARM::kStateTimer;
 
     event = 1 << 30;
     for (auto& timer : timers)
@@ -65,7 +63,7 @@ void TimerController::schedule()
         if (timer.io.control.enable && !timer.io.control.cascade)
         {
             active.push_back(std::ref(timer));
-            core.arm.state |= ARM::kStateTimer;
+            arm.state |= ARM::kStateTimer;
 
             event = std::min(event, timer.nextEvent());
         }

@@ -7,13 +7,9 @@
 #include "ppu/io.h"
 #include "ppu/layer.h"
 
-class Core;
-
 class PPU
 {
 public:
-    PPU(Core& core);
-
     void reset();
 
     void scanline();
@@ -86,9 +82,10 @@ private:
 
     static u32 argb(u16 color);
 
-    Core& core;
     DoubleBuffer<u16> backgrounds[4];
     Buffer<ObjectLayer> objects;
     bool objects_exist;
     bool objects_alpha;
 };
+
+inline PPU ppu;

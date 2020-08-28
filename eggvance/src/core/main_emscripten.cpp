@@ -1,4 +1,4 @@
-#include "base/macros.h"
+#include <eggcpt/env.h>
 
 #if EGGCPT_CC_EMSCRIPTEN
 
@@ -8,10 +8,12 @@
 #include "base/config.h"
 #include "core/core.h"
 #include "core/framecounter.h"
+#include "core/inputcontext.h"
+#include "core/videocontext.h"
+#include "mmu/mmu.h"
 
 using namespace emscripten;
 
-Core core;
 FrameCounter counter;
 u32 background = 0xFFFFFF;
 
@@ -29,19 +31,14 @@ void emulateMain(uint fps)
     emscripten_set_main_loop(emulate, fps, 1);
 }
 
-void init(int argc, char* argv[])
-{
-    core.init(argc, argv);
-}
-
 template<typename T>
 void processInputEvent(const Shortcuts<T>& shortcuts, T input)
 {
     if (input == shortcuts.reset)
-        core.reset();
+        core::reset();
 
     if (input == shortcuts.fullscreen)
-        core.context.video.fullscreen();
+        video_ctx.fullscreen();
 
     if (input == shortcuts.fr_hardware)
         emulateMain(kRefreshRate);
@@ -79,7 +76,7 @@ void processEvents()
 
         case SDL_CONTROLLERDEVICEADDED:
         case SDL_CONTROLLERDEVICEREMOVED:
-            core.context.input.processDeviceEvent(event.cdevice);
+            input_ctx.processDeviceEvent(event.cdevice);
             break;
         }
     }
@@ -89,33 +86,33 @@ void idle()
 {
     processEvents();
 
-    core.context.video.renderClear(background);
-    core.context.video.renderIcon();
-    core.context.video.renderPresent();
+    video_ctx.renderClear(background);
+    video_ctx.renderIcon();
+    video_ctx.renderPresent();
 }
 
 void emulate()
 {
     processEvents();
-    core.frame();
+    core::frame();
 
     if (auto fps = (++counter).fps())
-        core.updateTitle(*fps);
+        core::updateTitle(*fps);
 }
 
 void eggvanceLoadRom(const std::string& filename)
 {
-    core.mmu.gamepak.load(filename);
-    core.reset();
-    core.updateTitle();
+    mmu.gamepak.load(filename);
+    core::reset();
+    core::updateTitle();
     counter = FrameCounter();
     emulateMain(kRefreshRate);
 }
 
 void eggvanceLoadSave(const std::string& filename)
 {
-    core.mmu.gamepak.loadSave(filename);
-    core.reset();
+    mmu.gamepak.loadSave(filename);
+    core::reset();
     emulateMain(kRefreshRate);
 }
 
@@ -135,7 +132,7 @@ int main(int argc, char* argv[])
 {
     try
     {
-        init(argc, argv);
+        core::init(argc, argv);
         idleMain();
         return 0;
     }

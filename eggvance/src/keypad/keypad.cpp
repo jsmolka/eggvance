@@ -1,17 +1,12 @@
 #include "keypad.h"
 
-#include "core/core.h"
-
-Keypad::Keypad(Core& core)
-    : core(core)
-{
-
-}
+#include "core/inputcontext.h"
+#include "irq/irqh.h"
 
 void Keypad::update()
 {
     u16 previous = io.input.value;
-    io.input.value = core.context.input.state() & KeypadIo::Input::kMask;
+    io.input.value = input_ctx.state() & KeypadIo::Input::kMask;
 
     if (previous != io.input.value && io.control.irq)
     {
@@ -20,6 +15,6 @@ void Keypad::update()
             : (~io.input.value &  io.control.mask);
 
         if (interrupt)
-            core.irqh.request(kIrqKeypad);
+            irqh.request(kIrqKeypad);
     }
 }

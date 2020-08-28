@@ -4,13 +4,9 @@
 #include "base/macros.h"
 #include "dma/dma.h"
 
-class Core;
-
 class DmaController
 {
 public:
-    DmaController(Core& core);
-
     void run(int& cycles);
     void broadcast(Dma::Timing timing);
 
@@ -20,10 +16,11 @@ public:
 private:
     void emit(Dma& dma, Dma::Timing timing);
 
-    Core& core;
     Dma* active{};
-    Dma dmas[4];
+    Dma dmas[4] = { 1, 2, 3, 4 };
 };
+
+inline DmaController dmac;
 
 template<uint Addr>
 u8 DmaController::read() const

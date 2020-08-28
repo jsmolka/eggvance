@@ -1,15 +1,18 @@
-#include "base/macros.h"
+#include <eggcpt/env.h>
 
 #if !EGGCPT_CC_EMSCRIPTEN
 
 #include <stdexcept>
 
+#include "base/constants.h"
 #include "base/config.h"
 #include "core/core.h"
 #include "core/framecounter.h"
 #include "core/synchronizer.h"
+#include "core/inputcontext.h"
+#include "core/videocontext.h"
+#include "mmu/mmu.h"
 
-Core core;
 bool running = true;
 FrameCounter counter;
 Synchronizer synchronizer(kRefreshRate);
@@ -20,19 +23,19 @@ void processDropEvent(const SDL_DropEvent& event)
 
     SDL_free(event.file);
 
-    core.context.video.raise();
+    video_ctx.raise();
 
     if (file.extension() == ".gba")
     {
-        core.mmu.gamepak.load(file);
-        core.reset();
-        core.updateTitle();
+        mmu.gamepak.load(file);
+        core::reset();
+        core::updateTitle();
         counter = FrameCounter();
     }
     else
     {
-        core.mmu.gamepak.loadSave(file);
-        core.reset();
+        mmu.gamepak.loadSave(file);
+        core::reset();
     }
 }
 
@@ -40,10 +43,10 @@ template<typename T>
 void processInputEvent(const Shortcuts<T>& shortcuts, T input)
 {
     if (input == shortcuts.reset)
-        core.reset();
+        core::reset();
 
     if (input == shortcuts.fullscreen)
-        core.context.video.fullscreen();
+        video_ctx.fullscreen();
 
     if (input == shortcuts.fr_hardware)
         synchronizer = Synchronizer(kRefreshRate);
@@ -85,7 +88,7 @@ void processEvents()
 
         case SDL_CONTROLLERDEVICEADDED:
         case SDL_CONTROLLERDEVICEREMOVED:
-            core.context.input.processDeviceEvent(event.cdevice);
+            input_ctx.processDeviceEvent(event.cdevice);
             break;
 
         case SDL_DROPFILE:
@@ -97,19 +100,19 @@ void processEvents()
 
 void emulate()
 {
-    while (running && core.mmu.gamepak.size() == 0)
+    while (running && mmu.gamepak.size() == 0)
     {
         processEvents();
 
-        core.context.video.renderClear(0x2B3137);
-        core.context.video.renderIcon();
-        core.context.video.renderPresent();
+        video_ctx.renderClear(0x2B3137);
+        video_ctx.renderIcon();
+        video_ctx.renderPresent();
 
         SDL_Delay(16);
     }
 
-    core.reset();
-    core.updateTitle();
+    core::reset();
+    core::updateTitle();
 
     counter = FrameCounter();
 
@@ -118,11 +121,11 @@ void emulate()
         synchronizer.sync([]()
         {
             processEvents();
-            core.frame();
+            core::frame();
         });
 
         if (auto fps = (++counter).fps())
-            core.updateTitle(*fps);
+            core::updateTitle(*fps);
     }
 }
 
@@ -130,7 +133,7 @@ int main(int argc, char* argv[])
 {
     try
     {
-        core.init(argc, argv);
+        core::init(argc, argv);
         emulate();
         return 0;
     }

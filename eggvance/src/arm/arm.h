@@ -5,8 +5,6 @@
 #include "arm/io.h"
 #include "arm/registers.h"
 
-class Core;
-
 class ARM : public Registers
 {
 public:
@@ -22,7 +20,7 @@ public:
         kStateTimer = 1 << 4
     };
 
-    ARM(Core& core);
+    ARM();
 
     void run(int cycles);
 
@@ -31,8 +29,6 @@ public:
     ArmIo io;
 
 private:
-    Core& core;
-
     using Handler32 = void(ARM::*)(u32);
     using Handler16 = void(ARM::*)(u16);
 
@@ -134,3 +130,5 @@ private:
     u32 prev_addr = 0;
     u32 pipe[2]   = { 0 };
 };
+
+inline ARM arm;

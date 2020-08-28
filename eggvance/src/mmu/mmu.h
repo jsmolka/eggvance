@@ -7,13 +7,9 @@
 #include "io.h"
 #include "gamepak/gamepak.h"
 
-class Core;
-
 class MMU
 {
 public:
-    MMU(Core& core);
-
     void reset();
 
     u8  readByte(u32 addr);
@@ -37,7 +33,8 @@ private:
     u8 readSave(u32 addr);
     void writeSave(u32 addr, u8 byte);
 
-    Core& core;
     MirroredRAM<0x40000> ewram;
     MirroredRAM<0x08000> iwram;
 };
+
+inline MMU mmu;

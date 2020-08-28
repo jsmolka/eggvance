@@ -1,11 +1,11 @@
 #include "arm.h"
 
 #include "arm/decode.h"
-#include "core/core.h"
+#include "base/macros.h"
+#include "dma/dmac.h"
+#include "timer/timerc.h"
 
-ARM::ARM(Core& core)
-    : core(core)
-    , io(core)
+ARM::ARM()
 {
     flushWord();
     pc += 4;
@@ -56,14 +56,14 @@ void ARM::dispatch()
 
         if (state & kStateDma)
         {
-            core.dmac.run(cycles);
+            dmac.run(cycles);
         }
         else
         {
             if (state & kStateHalt)
             {
                 if (state & kStateTimer)
-                    core.timerc.runUntilIrq(cycles);
+                    timerc.runUntilIrq(cycles);
                 else
                     cycles = 0;
 
@@ -104,7 +104,7 @@ void ARM::dispatch()
         }
 
         if (state & kStateTimer)
-            core.timerc.run(previous - cycles);
+            timerc.run(previous - cycles);
     }
 }
 

@@ -3,9 +3,12 @@
 class AudioContext
 {
 public:
-    friend class Context;
+    ~AudioContext();
+
+    void init();
 
 private:
-    void init();
     void deinit();
 };
+
+inline AudioContext audio_ctx;
