@@ -14,10 +14,10 @@ void IrqHandler::update()
     bool interrupt = io.enable.value & io.request.value;
 
     if (interrupt)
-        arm.state &= ~ARM::kStateHalt;
+        arm.state &= ~Arm::kStateHalt;
 
     if (interrupt && io.master.value)
-        arm.state |= ARM::kStateIrq;
+        arm.state |= Arm::kStateIrq;
     else
-        arm.state &= ~ARM::kStateIrq;
+        arm.state &= ~Arm::kStateIrq;
 }

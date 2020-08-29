@@ -5,7 +5,7 @@
 #include "arm/io.h"
 #include "arm/registers.h"
 
-class ARM : public Registers
+class Arm : public Registers
 {
 public:
     friend class Dma;
@@ -20,7 +20,7 @@ public:
         kStateTimer = 1 << 4
     };
 
-    ARM();
+    Arm();
 
     void run(int cycles);
 
@@ -29,10 +29,10 @@ public:
     ArmIo io;
 
 private:
-    using Handler32 = void(ARM::*)(u32);
-    using Handler16 = void(ARM::*)(u16);
+    using Instruction32 = void(Arm::*)(u32);
+    using Instruction16 = void(Arm::*)(u16);
 
-    enum
+    enum Shift
     {
         kShiftLsl,
         kShiftLsr,
@@ -120,15 +120,15 @@ private:
     template<uint Instr> void Thumb_LongBranchLink(u16 instr);
     template<uint Instr> void Thumb_Undefined(u16 instr);
 
-    template<uint Hash> static constexpr Handler32 Arm_Decode();
-    template<uint Hash> static constexpr Handler16 Thumb_Decode();
+    template<uint Hash> static constexpr Instruction32 Arm_Decode();
+    template<uint Hash> static constexpr Instruction16 Thumb_Decode();
 
-    static std::array<Handler32, 4096> instr_arm;
-    static std::array<Handler16, 1024> instr_thumb;
+    static const std::array<Instruction32, 4096> instr_arm;
+    static const std::array<Instruction16, 1024> instr_thumb;
 
     int cycles    = 0;
     u32 prev_addr = 0;
     u32 pipe[2]   = { 0 };
 };
 
-inline ARM arm;
+inline Arm arm;

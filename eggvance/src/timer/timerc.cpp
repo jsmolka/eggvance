@@ -55,7 +55,7 @@ void TimerController::runTimers()
 void TimerController::schedule()
 {
     active.clear();
-    arm.state &= ~ARM::kStateTimer;
+    arm.state &= ~Arm::kStateTimer;
 
     event = 1 << 30;
     for (auto& timer : timers)
@@ -63,7 +63,7 @@ void TimerController::schedule()
         if (timer.io.control.enable && !timer.io.control.cascade)
         {
             active.push_back(std::ref(timer));
-            arm.state |= ARM::kStateTimer;
+            arm.state |= Arm::kStateTimer;
 
             event = std::min(event, timer.nextEvent());
         }

@@ -15,7 +15,19 @@ public:
     void processDeviceEvent(const SDL_ControllerDeviceEvent& event);
 
 private:
-    enum { kA, kB, kSelect, kStart, kRight, kLeft, kUp, kDown, kR, kL };
+    enum Bit
+    { 
+        kBitA, 
+        kBitB, 
+        kBitSelect, 
+        kBitStart, 
+        kBitRight,
+        kBitLeft,
+        kBitUp,
+        kBitDown,
+        kBitR,
+        kBitL
+    };
 
     void deinit();
 

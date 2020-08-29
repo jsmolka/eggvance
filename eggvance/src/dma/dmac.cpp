@@ -11,14 +11,14 @@ void DmaController::run(int& cycles)
         if (!active->running)
         {
             active = nullptr;
-            arm.state &= ~ARM::kStateDma;
+            arm.state &= ~Arm::kStateDma;
 
             for (auto& dma : dmas)
             {
                 if (dma.running)
                 {
                     active = &dma;
-                    arm.state |= ARM::kStateDma;
+                    arm.state |= Arm::kStateDma;
                     break;
                 }
             }
@@ -43,7 +43,7 @@ void DmaController::emit(Dma& dma, Dma::Timing timing)
         if (!active || dma.id < active->id)
         {
             active = &dma;
-            arm.state |= ARM::kStateDma;
+            arm.state |= Arm::kStateDma;
         }
     }
 }

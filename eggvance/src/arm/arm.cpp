@@ -5,13 +5,13 @@
 #include "dma/dmac.h"
 #include "timer/timerc.h"
 
-ARM::ARM()
+Arm::Arm()
 {
     flushWord();
     pc += 4;
 }
 
-void ARM::run(int cycles)
+void Arm::run(int cycles)
 {
     this->cycles += cycles;
 
@@ -31,7 +31,7 @@ void ARM::run(int cycles)
     }
 }
 
-void ARM::flushHalf()
+void Arm::flushHalf()
 {
     pc &= ~0x1;
     pipe[0] = readHalf(pc + 0);
@@ -39,7 +39,7 @@ void ARM::flushHalf()
     pc += 2;
 }
 
-void ARM::flushWord()
+void Arm::flushWord()
 {
     pc &= ~0x3;
     pipe[0] = readWord(pc + 0);
@@ -48,7 +48,7 @@ void ARM::flushWord()
 }
 
 template<uint state>
-void ARM::dispatch()
+void Arm::dispatch()
 {
     while (cycles > 0 && this->state == state)
     {
@@ -108,12 +108,12 @@ void ARM::dispatch()
     }
 }
 
-void ARM::idle()
+void Arm::idle()
 {
     cycles--;
 }
 
-void ARM::booth(u32 multiplier, bool sign)
+void Arm::booth(u32 multiplier, bool sign)
 {
     static constexpr u32 masks[3] = {
         0xFF00'0000,
@@ -132,7 +132,7 @@ void ARM::booth(u32 multiplier, bool sign)
     cycles -= 4;
 }
 
-void ARM::interrupt(u32 pc, u32 lr, PSR::Mode mode)
+void Arm::interrupt(u32 pc, u32 lr, PSR::Mode mode)
 {
     PSR cpsr = this->cpsr;
     switchMode(mode);
@@ -148,14 +148,14 @@ void ARM::interrupt(u32 pc, u32 lr, PSR::Mode mode)
     state &= ~kStateThumb;
 }
 
-void ARM::interruptHW()
+void Arm::interruptHW()
 {
     u32 lr = pc - 2 * cpsr.size() + 4;
 
     interrupt(0x18, lr, PSR::Mode::kModeIrq);
 }
 
-void ARM::interruptSW()
+void Arm::interruptSW()
 {
     u32 lr = pc - cpsr.size();
 

@@ -3,7 +3,7 @@
 #include "arm/decode.h"
 
 template<uint Instr>
-void ARM::Arm_BranchExchange(u32 instr)
+void Arm::Arm_BranchExchange(u32 instr)
 {
     uint rn = bit::seq<0, 4>(instr);
 
@@ -21,7 +21,7 @@ void ARM::Arm_BranchExchange(u32 instr)
 }
 
 template<uint Instr>
-void ARM::Arm_BranchLink(u32 instr)
+void Arm::Arm_BranchLink(u32 instr)
 {
     constexpr uint kLink = bit::seq<24, 1>(Instr);
 
@@ -37,7 +37,7 @@ void ARM::Arm_BranchLink(u32 instr)
 }
 
 template<uint Instr>
-void ARM::Arm_DataProcessing(u32 instr)
+void Arm::Arm_DataProcessing(u32 instr)
 {
     enum Opcode
     {
@@ -181,7 +181,7 @@ void ARM::Arm_DataProcessing(u32 instr)
 }
 
 template<uint Instr>
-void ARM::Arm_StatusTransfer(u32 instr)
+void Arm::Arm_StatusTransfer(u32 instr)
 {
     constexpr uint kWrite = bit::seq<21, 1>(Instr);
     constexpr uint kSpsr  = bit::seq<22, 1>(Instr);
@@ -228,7 +228,7 @@ void ARM::Arm_StatusTransfer(u32 instr)
 }
 
 template<uint Instr>
-void ARM::Arm_Multiply(u32 instr)
+void Arm::Arm_Multiply(u32 instr)
 {
     constexpr uint kFlags      = bit::seq<20, 1>(Instr);
     constexpr uint kAccumulate = bit::seq<21, 1>(Instr);
@@ -256,7 +256,7 @@ void ARM::Arm_Multiply(u32 instr)
 }
 
 template<uint Instr>
-void ARM::Arm_MultiplyLong(u32 instr)
+void Arm::Arm_MultiplyLong(u32 instr)
 {
     constexpr uint kFlags      = bit::seq<20, 1>(Instr);
     constexpr uint kAccumulate = bit::seq<21, 1>(Instr);
@@ -294,7 +294,7 @@ void ARM::Arm_MultiplyLong(u32 instr)
 }
 
 template<uint Instr>
-void ARM::Arm_SingleDataTransfer(u32 instr)
+void Arm::Arm_SingleDataTransfer(u32 instr)
 {
     constexpr uint kLoad      = bit::seq<20, 1>(Instr);
     constexpr uint kWriteback = bit::seq<21, 1>(Instr);
@@ -383,7 +383,7 @@ void ARM::Arm_SingleDataTransfer(u32 instr)
 }
 
 template<uint Instr>
-void ARM::Arm_HalfSignedDataTransfer(u32 instr)
+void Arm::Arm_HalfSignedDataTransfer(u32 instr)
 {
     enum Opcode
     {
@@ -473,7 +473,7 @@ void ARM::Arm_HalfSignedDataTransfer(u32 instr)
 }
 
 template<uint Instr>
-void ARM::Arm_BlockDataTransfer(u32 instr)
+void Arm::Arm_BlockDataTransfer(u32 instr)
 {
     constexpr uint kLoad      = bit::seq<20, 1>(Instr);
     constexpr uint kUserMode  = bit::seq<22, 1>(Instr);
@@ -583,7 +583,7 @@ void ARM::Arm_BlockDataTransfer(u32 instr)
 }
 
 template<uint Instr>
-void ARM::Arm_SingleDataSwap(u32 instr)
+void Arm::Arm_SingleDataSwap(u32 instr)
 {
     constexpr uint kByte = bit::seq<22, 1>(Instr);
 
@@ -609,56 +609,56 @@ void ARM::Arm_SingleDataSwap(u32 instr)
 }
 
 template<uint Instr>
-void ARM::Arm_SoftwareInterrupt(u32 instr)
+void Arm::Arm_SoftwareInterrupt(u32 instr)
 {
     interruptSW();
 }
 
 template<uint Instr>
-void ARM::Arm_CoprocessorDataOperations(u32 instr)
+void Arm::Arm_CoprocessorDataOperations(u32 instr)
 {
     EGGCPT_ASSERT(false, EGGCPT_FUNCTION);
 }
 
 template<uint Instr>
-void ARM::Arm_CoprocessorDataTransfers(u32 instr)
+void Arm::Arm_CoprocessorDataTransfers(u32 instr)
 {
     EGGCPT_ASSERT(false, EGGCPT_FUNCTION);
 }
 
 template<uint Instr>
-void ARM::Arm_CoprocessorRegisterTransfers(u32 instr)
+void Arm::Arm_CoprocessorRegisterTransfers(u32 instr)
 {
     EGGCPT_ASSERT(false, EGGCPT_FUNCTION);
 }
 
 template<uint Instr>
-void ARM::Arm_Undefined(u32 instr)
+void Arm::Arm_Undefined(u32 instr)
 {
     EGGCPT_ASSERT(false, EGGCPT_FUNCTION);
 }
 
 template<uint Hash>
-constexpr ARM::Handler32 ARM::Arm_Decode()
+constexpr Arm::Instruction32 Arm::Arm_Decode()
 {
     constexpr auto kDehash = dehashArm(Hash);
     constexpr auto kDecode = decodeArm(Hash);
 
-    if constexpr (kDecode == InstructionArm::BranchExchange)               return &ARM::Arm_BranchExchange<kDehash>;
-    if constexpr (kDecode == InstructionArm::BranchLink)                   return &ARM::Arm_BranchLink<kDehash>;
-    if constexpr (kDecode == InstructionArm::DataProcessing)               return &ARM::Arm_DataProcessing<kDehash>;
-    if constexpr (kDecode == InstructionArm::StatusTransfer)               return &ARM::Arm_StatusTransfer<kDehash>;
-    if constexpr (kDecode == InstructionArm::Multiply)                     return &ARM::Arm_Multiply<kDehash>;
-    if constexpr (kDecode == InstructionArm::MultiplyLong)                 return &ARM::Arm_MultiplyLong<kDehash>;
-    if constexpr (kDecode == InstructionArm::SingleDataTransfer)           return &ARM::Arm_SingleDataTransfer<kDehash>;
-    if constexpr (kDecode == InstructionArm::HalfSignedDataTransfer)       return &ARM::Arm_HalfSignedDataTransfer<kDehash>;
-    if constexpr (kDecode == InstructionArm::BlockDataTransfer)            return &ARM::Arm_BlockDataTransfer<kDehash>;
-    if constexpr (kDecode == InstructionArm::SingleDataSwap)               return &ARM::Arm_SingleDataSwap<kDehash>;
-    if constexpr (kDecode == InstructionArm::SoftwareInterrupt)            return &ARM::Arm_SoftwareInterrupt<kDehash>;
-    if constexpr (kDecode == InstructionArm::CoprocessorDataOperations)    return &ARM::Arm_CoprocessorDataOperations<kDehash>;
-    if constexpr (kDecode == InstructionArm::CoprocessorDataTransfers)     return &ARM::Arm_CoprocessorDataTransfers<kDehash>;
-    if constexpr (kDecode == InstructionArm::CoprocessorRegisterTransfers) return &ARM::Arm_CoprocessorRegisterTransfers<kDehash>;
-    if constexpr (kDecode == InstructionArm::Undefined)                    return &ARM::Arm_Undefined<kDehash>;
+    if constexpr (kDecode == InstructionArm::BranchExchange)               return &Arm::Arm_BranchExchange<kDehash>;
+    if constexpr (kDecode == InstructionArm::BranchLink)                   return &Arm::Arm_BranchLink<kDehash>;
+    if constexpr (kDecode == InstructionArm::DataProcessing)               return &Arm::Arm_DataProcessing<kDehash>;
+    if constexpr (kDecode == InstructionArm::StatusTransfer)               return &Arm::Arm_StatusTransfer<kDehash>;
+    if constexpr (kDecode == InstructionArm::Multiply)                     return &Arm::Arm_Multiply<kDehash>;
+    if constexpr (kDecode == InstructionArm::MultiplyLong)                 return &Arm::Arm_MultiplyLong<kDehash>;
+    if constexpr (kDecode == InstructionArm::SingleDataTransfer)           return &Arm::Arm_SingleDataTransfer<kDehash>;
+    if constexpr (kDecode == InstructionArm::HalfSignedDataTransfer)       return &Arm::Arm_HalfSignedDataTransfer<kDehash>;
+    if constexpr (kDecode == InstructionArm::BlockDataTransfer)            return &Arm::Arm_BlockDataTransfer<kDehash>;
+    if constexpr (kDecode == InstructionArm::SingleDataSwap)               return &Arm::Arm_SingleDataSwap<kDehash>;
+    if constexpr (kDecode == InstructionArm::SoftwareInterrupt)            return &Arm::Arm_SoftwareInterrupt<kDehash>;
+    if constexpr (kDecode == InstructionArm::CoprocessorDataOperations)    return &Arm::Arm_CoprocessorDataOperations<kDehash>;
+    if constexpr (kDecode == InstructionArm::CoprocessorDataTransfers)     return &Arm::Arm_CoprocessorDataTransfers<kDehash>;
+    if constexpr (kDecode == InstructionArm::CoprocessorRegisterTransfers) return &Arm::Arm_CoprocessorRegisterTransfers<kDehash>;
+    if constexpr (kDecode == InstructionArm::Undefined)                    return &Arm::Arm_Undefined<kDehash>;
 }
 
 #define DECODE0001(hash) Arm_Decode<hash>(),
@@ -669,7 +669,7 @@ constexpr ARM::Handler32 ARM::Arm_Decode()
 #define DECODE1024(hash) DECODE0256(hash + 0 *  256) DECODE0256(hash + 1 *  256) DECODE0256(hash + 2 *  256) DECODE0256(hash + 3 *  256)
 #define DECODE4096(hash) DECODE1024(hash + 0 * 1024) DECODE1024(hash + 1 * 1024) DECODE1024(hash + 2 * 1024) DECODE1024(hash + 3 * 1024)
 
-std::array<ARM::Handler32, 4096> ARM::instr_arm = { DECODE4096(0) };
+const std::array<Arm::Instruction32, 4096> Arm::instr_arm = { DECODE4096(0) };
 
 #undef DECODE0001
 #undef DECODE0004

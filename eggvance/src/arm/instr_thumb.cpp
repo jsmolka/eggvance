@@ -3,7 +3,7 @@
 #include "arm/decode.h"
 
 template<uint Instr>
-void ARM::Thumb_MoveShiftedRegister(u16 instr)
+void Arm::Thumb_MoveShiftedRegister(u16 instr)
 {
     constexpr uint kAmount = bit::seq< 6, 5>(Instr);
     constexpr uint kOpcode = bit::seq<11, 2>(Instr);
@@ -29,7 +29,7 @@ void ARM::Thumb_MoveShiftedRegister(u16 instr)
 }
 
 template<uint Instr>
-void ARM::Thumb_AddSubtract(u16 instr)
+void Arm::Thumb_AddSubtract(u16 instr)
 {
     enum Opcode
     {
@@ -62,7 +62,7 @@ void ARM::Thumb_AddSubtract(u16 instr)
 }
 
 template<uint Instr>
-void ARM::Thumb_ImmediateOperations(u16 instr)
+void Arm::Thumb_ImmediateOperations(u16 instr)
 {
     enum Opcode
     {
@@ -94,7 +94,7 @@ void ARM::Thumb_ImmediateOperations(u16 instr)
 }
 
 template<uint Instr>
-void ARM::Thumb_AluOperations(u16 instr)
+void Arm::Thumb_AluOperations(u16 instr)
 {
     enum Opcode
     {
@@ -153,7 +153,7 @@ void ARM::Thumb_AluOperations(u16 instr)
 }
 
 template<uint Instr>
-void ARM::Thumb_HighRegisterOperations(u16 instr)
+void Arm::Thumb_HighRegisterOperations(u16 instr)
 {
     enum Opcode
     {
@@ -214,7 +214,7 @@ void ARM::Thumb_HighRegisterOperations(u16 instr)
 }
 
 template<uint Instr>
-void ARM::Thumb_LoadPcRelative(u16 instr)
+void Arm::Thumb_LoadPcRelative(u16 instr)
 {
     constexpr uint kRd = bit::seq<8, 3>(Instr);
 
@@ -226,7 +226,7 @@ void ARM::Thumb_LoadPcRelative(u16 instr)
 }
 
 template<uint Instr>
-void ARM::Thumb_LoadStoreRegisterOffset(u16 instr)
+void Arm::Thumb_LoadStoreRegisterOffset(u16 instr)
 {
     enum Opcode
     {
@@ -272,7 +272,7 @@ void ARM::Thumb_LoadStoreRegisterOffset(u16 instr)
 }
 
 template<uint Instr>
-void ARM::Thumb_LoadStoreByteHalf(u16 instr)
+void Arm::Thumb_LoadStoreByteHalf(u16 instr)
 {
     enum Opcode
     {
@@ -320,7 +320,7 @@ void ARM::Thumb_LoadStoreByteHalf(u16 instr)
 }
 
 template<uint Instr>
-void ARM::Thumb_LoadStoreImmediateOffset(u16 instr)
+void Arm::Thumb_LoadStoreImmediateOffset(u16 instr)
 {
     enum Opcode
     {
@@ -366,7 +366,7 @@ void ARM::Thumb_LoadStoreImmediateOffset(u16 instr)
 }
 
 template<uint Instr>
-void ARM::Thumb_LoadStoreHalf(u16 instr)
+void Arm::Thumb_LoadStoreHalf(u16 instr)
 {
     constexpr uint kOffset = bit::seq< 6, 5>(Instr);
     constexpr uint kLoad   = bit::seq<11, 1>(Instr);
@@ -389,7 +389,7 @@ void ARM::Thumb_LoadStoreHalf(u16 instr)
 }
 
 template<uint Instr>
-void ARM::Thumb_LoadStoreSpRelative(u16 instr)
+void Arm::Thumb_LoadStoreSpRelative(u16 instr)
 {
     constexpr uint kRd   = bit::seq< 8, 3>(Instr);
     constexpr uint kLoad = bit::seq<11, 1>(Instr);
@@ -411,7 +411,7 @@ void ARM::Thumb_LoadStoreSpRelative(u16 instr)
 }
 
 template<uint Instr>
-void ARM::Thumb_LoadRelativeAddress(u16 instr)
+void Arm::Thumb_LoadRelativeAddress(u16 instr)
 {
     constexpr uint kRd = bit::seq< 8, 3>(Instr);
     constexpr uint kSp = bit::seq<11, 1>(Instr);
@@ -424,7 +424,7 @@ void ARM::Thumb_LoadRelativeAddress(u16 instr)
 }
 
 template<uint Instr>
-void ARM::Thumb_AddOffsetSp(u16 instr)
+void Arm::Thumb_AddOffsetSp(u16 instr)
 {
     constexpr uint kSign = bit::seq<7, 1>(Instr);
 
@@ -439,7 +439,7 @@ void ARM::Thumb_AddOffsetSp(u16 instr)
 }
 
 template<uint Instr>
-void ARM::Thumb_PushPopRegisters(u16 instr)
+void Arm::Thumb_PushPopRegisters(u16 instr)
 {
     constexpr uint kRbit = bit::seq< 8, 1>(Instr);
     constexpr uint kPop  = bit::seq<11, 1>(Instr);
@@ -476,7 +476,7 @@ void ARM::Thumb_PushPopRegisters(u16 instr)
 }
 
 template<uint Instr>
-void ARM::Thumb_LoadStoreMultiple(u16 instr)
+void Arm::Thumb_LoadStoreMultiple(u16 instr)
 {
     constexpr uint kRb   = bit::seq< 8, 3>(Instr);
     constexpr uint kLoad = bit::seq<11, 1>(Instr);
@@ -536,7 +536,7 @@ void ARM::Thumb_LoadStoreMultiple(u16 instr)
 }
 
 template<uint Instr>
-void ARM::Thumb_ConditionalBranch(u16 instr)
+void Arm::Thumb_ConditionalBranch(u16 instr)
 {
     constexpr uint kCondition = bit::seq<8, 4>(Instr);
 
@@ -553,13 +553,13 @@ void ARM::Thumb_ConditionalBranch(u16 instr)
 }
 
 template<uint Instr>
-void ARM::Thumb_SoftwareInterrupt(u16 instr)
+void Arm::Thumb_SoftwareInterrupt(u16 instr)
 {
     interruptSW();
 }
 
 template<uint Instr>
-void ARM::Thumb_UnconditionalBranch(u16 instr)
+void Arm::Thumb_UnconditionalBranch(u16 instr)
 {
     uint offset = bit::seq<0, 11>(instr);
 
@@ -571,7 +571,7 @@ void ARM::Thumb_UnconditionalBranch(u16 instr)
 }
 
 template<uint Instr>
-void ARM::Thumb_LongBranchLink(u16 instr)
+void Arm::Thumb_LongBranchLink(u16 instr)
 {
     constexpr uint kSecond = bit::seq<11, 1>(Instr);
 
@@ -597,37 +597,37 @@ void ARM::Thumb_LongBranchLink(u16 instr)
 }
 
 template<uint Instr>
-void ARM::Thumb_Undefined(u16 instr)
+void Arm::Thumb_Undefined(u16 instr)
 {
     EGGCPT_ASSERT(false, EGGCPT_FUNCTION);
 }
 
 template<uint Hash>
-constexpr ARM::Handler16 ARM::Thumb_Decode()
+constexpr Arm::Instruction16 Arm::Thumb_Decode()
 {
     constexpr auto kDehash = dehashThumb(Hash);
     constexpr auto kDecode = decodeThumb(Hash);
 
-    if constexpr (kDecode == InstructionThumb::MoveShiftedRegister)      return &ARM::Thumb_MoveShiftedRegister<kDehash>;
-    if constexpr (kDecode == InstructionThumb::AddSubtract)              return &ARM::Thumb_AddSubtract<kDehash>;
-    if constexpr (kDecode == InstructionThumb::ImmediateOperations)      return &ARM::Thumb_ImmediateOperations<kDehash>;
-    if constexpr (kDecode == InstructionThumb::AluOperations)            return &ARM::Thumb_AluOperations<kDehash>;
-    if constexpr (kDecode == InstructionThumb::HighRegisterOperations)   return &ARM::Thumb_HighRegisterOperations<kDehash>;
-    if constexpr (kDecode == InstructionThumb::LoadPcRelative)           return &ARM::Thumb_LoadPcRelative<kDehash>;
-    if constexpr (kDecode == InstructionThumb::LoadStoreRegisterOffset)  return &ARM::Thumb_LoadStoreRegisterOffset<kDehash>;
-    if constexpr (kDecode == InstructionThumb::LoadStoreByteHalf)        return &ARM::Thumb_LoadStoreByteHalf<kDehash>;
-    if constexpr (kDecode == InstructionThumb::LoadStoreImmediateOffset) return &ARM::Thumb_LoadStoreImmediateOffset<kDehash>;
-    if constexpr (kDecode == InstructionThumb::LoadStoreHalf)            return &ARM::Thumb_LoadStoreHalf<kDehash>;
-    if constexpr (kDecode == InstructionThumb::LoadStoreSpRelative)      return &ARM::Thumb_LoadStoreSpRelative<kDehash>;
-    if constexpr (kDecode == InstructionThumb::LoadRelativeAddress)      return &ARM::Thumb_LoadRelativeAddress<kDehash>;
-    if constexpr (kDecode == InstructionThumb::AddOffsetSp)              return &ARM::Thumb_AddOffsetSp<kDehash>;
-    if constexpr (kDecode == InstructionThumb::PushPopRegisters)         return &ARM::Thumb_PushPopRegisters<kDehash>;
-    if constexpr (kDecode == InstructionThumb::LoadStoreMultiple)        return &ARM::Thumb_LoadStoreMultiple<kDehash>;
-    if constexpr (kDecode == InstructionThumb::ConditionalBranch)        return &ARM::Thumb_ConditionalBranch<kDehash>;
-    if constexpr (kDecode == InstructionThumb::SoftwareInterrupt)        return &ARM::Thumb_SoftwareInterrupt<kDehash>;
-    if constexpr (kDecode == InstructionThumb::UnconditionalBranch)      return &ARM::Thumb_UnconditionalBranch<kDehash>;
-    if constexpr (kDecode == InstructionThumb::LongBranchLink)           return &ARM::Thumb_LongBranchLink<kDehash>;
-    if constexpr (kDecode == InstructionThumb::Undefined)                return &ARM::Thumb_Undefined<kDehash>;
+    if constexpr (kDecode == InstructionThumb::MoveShiftedRegister)      return &Arm::Thumb_MoveShiftedRegister<kDehash>;
+    if constexpr (kDecode == InstructionThumb::AddSubtract)              return &Arm::Thumb_AddSubtract<kDehash>;
+    if constexpr (kDecode == InstructionThumb::ImmediateOperations)      return &Arm::Thumb_ImmediateOperations<kDehash>;
+    if constexpr (kDecode == InstructionThumb::AluOperations)            return &Arm::Thumb_AluOperations<kDehash>;
+    if constexpr (kDecode == InstructionThumb::HighRegisterOperations)   return &Arm::Thumb_HighRegisterOperations<kDehash>;
+    if constexpr (kDecode == InstructionThumb::LoadPcRelative)           return &Arm::Thumb_LoadPcRelative<kDehash>;
+    if constexpr (kDecode == InstructionThumb::LoadStoreRegisterOffset)  return &Arm::Thumb_LoadStoreRegisterOffset<kDehash>;
+    if constexpr (kDecode == InstructionThumb::LoadStoreByteHalf)        return &Arm::Thumb_LoadStoreByteHalf<kDehash>;
+    if constexpr (kDecode == InstructionThumb::LoadStoreImmediateOffset) return &Arm::Thumb_LoadStoreImmediateOffset<kDehash>;
+    if constexpr (kDecode == InstructionThumb::LoadStoreHalf)            return &Arm::Thumb_LoadStoreHalf<kDehash>;
+    if constexpr (kDecode == InstructionThumb::LoadStoreSpRelative)      return &Arm::Thumb_LoadStoreSpRelative<kDehash>;
+    if constexpr (kDecode == InstructionThumb::LoadRelativeAddress)      return &Arm::Thumb_LoadRelativeAddress<kDehash>;
+    if constexpr (kDecode == InstructionThumb::AddOffsetSp)              return &Arm::Thumb_AddOffsetSp<kDehash>;
+    if constexpr (kDecode == InstructionThumb::PushPopRegisters)         return &Arm::Thumb_PushPopRegisters<kDehash>;
+    if constexpr (kDecode == InstructionThumb::LoadStoreMultiple)        return &Arm::Thumb_LoadStoreMultiple<kDehash>;
+    if constexpr (kDecode == InstructionThumb::ConditionalBranch)        return &Arm::Thumb_ConditionalBranch<kDehash>;
+    if constexpr (kDecode == InstructionThumb::SoftwareInterrupt)        return &Arm::Thumb_SoftwareInterrupt<kDehash>;
+    if constexpr (kDecode == InstructionThumb::UnconditionalBranch)      return &Arm::Thumb_UnconditionalBranch<kDehash>;
+    if constexpr (kDecode == InstructionThumb::LongBranchLink)           return &Arm::Thumb_LongBranchLink<kDehash>;
+    if constexpr (kDecode == InstructionThumb::Undefined)                return &Arm::Thumb_Undefined<kDehash>;
 }
 
 #define DECODE0001(hash) Thumb_Decode<hash>(),
@@ -637,7 +637,7 @@ constexpr ARM::Handler16 ARM::Thumb_Decode()
 #define DECODE0256(hash) DECODE0064(hash + 0 *  64) DECODE0064(hash + 1 *  64) DECODE0064(hash + 2 *  64) DECODE0064(hash + 3 *  64)
 #define DECODE1024(hash) DECODE0256(hash + 0 * 256) DECODE0256(hash + 1 * 256) DECODE0256(hash + 2 * 256) DECODE0256(hash + 3 * 256)
 
-std::array<ARM::Handler16, 1024> ARM::instr_thumb = { DECODE1024(0) };
+const std::array<Arm::Instruction16, 1024> Arm::instr_thumb = { DECODE1024(0) };
 
 #undef DECODE0001
 #undef DECODE0004
