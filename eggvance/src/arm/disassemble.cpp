@@ -529,7 +529,7 @@ std::string Thumb_MoveShiftedRegister(u16 instr)
 
     uint rd     = bit::seq< 0, 3>(instr);
     uint rs     = bit::seq< 3, 3>(instr);
-    uint offset = bit::seq< 6, 5>(instr);
+    uint amount = bit::seq< 6, 5>(instr);
     uint opcode = bit::seq<11, 2>(instr);
 
     return fmt::format(
@@ -537,18 +537,18 @@ std::string Thumb_MoveShiftedRegister(u16 instr)
         kMnemonics[opcode],
         reg(rd),
         reg(rs),
-        hex(offset));
+        hex(amount));
 }
 
 std::string Thumb_AddSubtract(u16 instr)
 {
-    uint rd       = bit::seq< 0, 3>(instr);
-    uint rs       = bit::seq< 3, 3>(instr);
-    uint rn       = bit::seq< 6, 3>(instr);
-    uint subtract = bit::seq< 9, 1>(instr);
-    uint use_imm  = bit::seq<10, 1>(instr);
+    uint rd     = bit::seq< 0, 3>(instr);
+    uint rs     = bit::seq< 3, 3>(instr);
+    uint rn     = bit::seq< 6, 3>(instr);
+    uint sub    = bit::seq< 9, 1>(instr);
+    uint imm_op = bit::seq<10, 1>(instr);
 
-    if (use_imm && rn == 0)
+    if (imm_op && rn == 0)
     {
         return fmt::format(
             MNEMONIC"{},{}",
@@ -560,10 +560,10 @@ std::string Thumb_AddSubtract(u16 instr)
     {
         return fmt::format(
             MNEMONIC"{},{},{}",
-            subtract ? "sub" : "add",
+            sub ? "sub" : "add",
             reg(rd),
             reg(rs),
-            use_imm ? hex(rn) : reg(rn));
+            imm_op ? hex(rn) : reg(rn));
     }
 }
 
@@ -573,7 +573,7 @@ std::string Thumb_ImmediateOperations(u16 instr)
         "mov", "cmp", "add", "sub"
     };
 
-    uint offset = bit::seq< 0, 8>(instr);
+    uint amount = bit::seq< 0, 8>(instr);
     uint rd     = bit::seq< 8, 3>(instr);
     uint opcode = bit::seq<11, 2>(instr);
 
@@ -581,7 +581,7 @@ std::string Thumb_ImmediateOperations(u16 instr)
         MNEMONIC"{},{}",
         kMnemonics[opcode],
         reg(rd),
-        hex(offset));
+        hex(amount));
 }
 
 std::string Thumb_AluOperations(u16 instr)
@@ -629,13 +629,11 @@ std::string Thumb_LoadPcRelative(u16 instr, u32 pc)
     uint offset = bit::seq<0, 8>(instr);
     uint rd     = bit::seq<8, 3>(instr);
 
-    offset <<= 2;
-
     return fmt::format(
         MNEMONIC"{},[{}]",
         "ldr",
         reg(rd),
-        hex((pc & ~0x3) + offset));
+        hex((pc & ~0x3) + (offset<< 2)));
 }
 
 std::string Thumb_LoadStoreRegisterOffset(u16 instr)
@@ -733,11 +731,11 @@ std::string Thumb_LoadRelativeAddress(u16 instr, u32 pc)
 {
     uint offset = bit::seq< 0, 8>(instr);
     uint rd     = bit::seq< 8, 3>(instr);
-    uint use_sp = bit::seq<11, 1>(instr);
+    uint sp     = bit::seq<11, 1>(instr);
 
     offset <<= 2;
 
-    if (use_sp)
+    if (sp)
     {
         return fmt::format(
             MNEMONIC"{},sp,{}",
