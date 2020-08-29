@@ -3,11 +3,10 @@
 #include <eggcpt/fmt.h>
 
 #include "arm/decode.h"
-#include "base/bit.h"
 
 #define MNEMONIC "{:<8}"
 
-static constexpr const char* bios_funcs[43] = {
+static constexpr const char* kBiosFunctions[43] = {
     "SoftReset",
     "RegisterRamReset",
     "Halt",
@@ -53,34 +52,34 @@ static constexpr const char* bios_funcs[43] = {
     "SoundGetJumpList"
 };
 
-static const char* reg(uint n)
+const char* reg(uint n)
 {
-    static constexpr const char* regs[16] = {
+    static constexpr const char* kRegs[16] = {
          "r0", "r1",  "r2",  "r3",
          "r4", "r5",  "r6",  "r7",
          "r8", "r9", "r10", "r11",
         "r12", "sp",  "lr",  "pc"
     };
-    return regs[n];
+    return kRegs[n];
 }
 
-static const char* condition(u32 instr)
+const char* condition(u32 instr)
 {
-    static constexpr const char* conditions[16] = {
+    static constexpr const char* kConditions[16] = {
         "eq", "ne", "cs", "cc",
         "mi", "pl", "vs", "vc",
         "hi", "ls", "ge", "lt",
         "gt", "le",   "", "nv"
     };
-    return conditions[instr >> 28];
+    return kConditions[instr >> 28];
 }
 
-static std::string hex(u32 value)
+std::string hex(u32 value)
 {
     return fmt::format("{:X}h", value);
 }
 
-static std::string rlist(u16 rlist)
+std::string rlist(u16 rlist)
 {
     if (rlist == 0)
         return "{}";
@@ -101,9 +100,9 @@ static std::string rlist(u16 rlist)
     return list;
 }
 
-static std::string shiftedRegister(uint data)
+std::string shiftedRegister(uint data)
 {
-    static constexpr const char* mnemonic[4] = {
+    static constexpr const char* kMnemonics[4] = {
         "lsl", "lsr", "asr", "ror"
     };
 
@@ -120,14 +119,15 @@ static std::string shiftedRegister(uint data)
     else
     {
         uint amount = bit::seq<7, 5>(data);
-        if (!amount) return std::string(reg(rm));
+        if (!amount)
+            return reg(rm);
 
         offset = hex(amount);
     }
-    return fmt::format("{},{} {}", reg(rm), mnemonic[shift], offset);
+    return fmt::format("{},{} {}", reg(rm), kMnemonics[shift], offset);
 }
 
-static u32 rotatedImmediate(uint data)
+u32 rotatedImmediate(uint data)
 {
     uint value  = bit::seq<0, 8>(data);
     uint amount = bit::seq<8, 4>(data);
@@ -135,7 +135,7 @@ static u32 rotatedImmediate(uint data)
     return bit::ror(value, amount << 1);
 }
 
-static std::string Arm_BranchExchange(u32 instr)
+std::string Arm_BranchExchange(u32 instr)
 {
     uint rn = bit::seq<0, 4>(instr);
 
@@ -144,7 +144,7 @@ static std::string Arm_BranchExchange(u32 instr)
     return fmt::format(MNEMONIC"{}", mnemonic, reg(rn));
 }
 
-static std::string Arm_BranchLink(u32 instr, u32 pc)
+std::string Arm_BranchLink(u32 instr, u32 pc)
 {
     uint offset = bit::seq< 0, 24>(instr);
     uint link   = bit::seq<24,  1>(instr);
@@ -157,9 +157,9 @@ static std::string Arm_BranchLink(u32 instr, u32 pc)
     return fmt::format(MNEMONIC"{}", mnemonic, hex(pc + offset));
 }
 
-static std::string Arm_DataProcessing(u32 instr, u32 pc)
+std::string Arm_DataProcessing(u32 instr, u32 pc)
 {
-    static constexpr const char* mnemonics[16] = {
+    static constexpr const char* kMnemonics[16] = {
         "and", "eor", "sub", "rsb",
         "add", "adc", "sbc", "rsc",
         "tst", "teq", "cmp", "cmn",
@@ -190,10 +190,9 @@ static std::string Arm_DataProcessing(u32 instr, u32 pc)
 
     const auto mnemonic = fmt::format(
         "{}{}{}",
-        mnemonics[opcode],
+        kMnemonics[opcode],
         condition(instr),
-        (flags && (opcode >> 2) != 0b10) ? "s" : ""
-    );
+        (flags && (opcode >> 2) != 0b10) ? "s" : "");
 
     switch (opcode)
     {
@@ -205,8 +204,7 @@ static std::string Arm_DataProcessing(u32 instr, u32 pc)
                 MNEMONIC"{},={}",
                 mnemonic,
                 reg(rd),
-                operand
-            );
+                operand);
         }
         else
         {
@@ -215,8 +213,7 @@ static std::string Arm_DataProcessing(u32 instr, u32 pc)
                 mnemonic,
                 reg(rd),
                 reg(rn),
-                operand
-            );
+                operand);
         }
 
     case 0b1000:
@@ -227,8 +224,7 @@ static std::string Arm_DataProcessing(u32 instr, u32 pc)
             MNEMONIC"{},{}",
             mnemonic,
             reg(rn),
-            operand
-        );
+            operand);
 
     case 0b1101:
     case 0b1111:
@@ -236,8 +232,7 @@ static std::string Arm_DataProcessing(u32 instr, u32 pc)
             MNEMONIC"{},{}",
             mnemonic,
             reg(rd),
-            operand
-        );
+            operand);
 
     default:
         return fmt::format(
@@ -245,12 +240,11 @@ static std::string Arm_DataProcessing(u32 instr, u32 pc)
             mnemonic,
             reg(rd),
             reg(rn),
-            operand
-        );
+            operand);
     }
 }
 
-static std::string Arm_StatusTransfer(u32 instr)
+std::string Arm_StatusTransfer(u32 instr)
 {
     uint write = bit::seq<21, 1>(instr);
     uint spsr  = bit::seq<22, 1>(instr);
@@ -287,8 +281,7 @@ static std::string Arm_StatusTransfer(u32 instr)
             mnemonic,
             psr,
             fsxc,
-            operand
-        );
+            operand);
     }
     else
     {
@@ -300,12 +293,11 @@ static std::string Arm_StatusTransfer(u32 instr)
             MNEMONIC"{},{}",
             mnemonic,
             reg(rd),
-            psr
-        );
+            psr);
     }
 }
 
-static std::string Arm_Multiply(u32 instr)
+std::string Arm_Multiply(u32 instr)
 {
     uint rm         = bit::seq< 0, 4>(instr);
     uint rs         = bit::seq< 8, 4>(instr);
@@ -318,8 +310,7 @@ static std::string Arm_Multiply(u32 instr)
         "{}{}{}",
         accumulate ? "mla" : "mul",
         condition(instr),
-        flags ? "s" : ""
-    );
+        flags ? "s" : "");
 
     if (accumulate)
     {
@@ -329,8 +320,7 @@ static std::string Arm_Multiply(u32 instr)
             reg(rd),
             reg(rn),
             reg(rs),
-            reg(rm)
-        );
+            reg(rm));
     }
     else
     {
@@ -339,14 +329,13 @@ static std::string Arm_Multiply(u32 instr)
             mnemonic,
             reg(rd),
             reg(rn),
-            reg(rs)
-        );
+            reg(rs));
     }
 }
 
-static std::string Arm_MultiplyLong(u32 instr)
+std::string Arm_MultiplyLong(u32 instr)
 {
-    static constexpr const char* mnemonics[4] = {
+    static constexpr const char* kMnemonics[4] = {
         "umull", "umlal", "smull", "smlal"
     };
 
@@ -359,10 +348,9 @@ static std::string Arm_MultiplyLong(u32 instr)
 
     const auto mnemonic = fmt::format(
         "{}{}{}", 
-        mnemonics[opcode],
+        kMnemonics[opcode],
         condition(instr),
-        flags ? "s" : ""
-    );
+        flags ? "s" : "");
 
     return fmt::format(
         MNEMONIC"{},{},{},{}",
@@ -370,11 +358,10 @@ static std::string Arm_MultiplyLong(u32 instr)
         reg(rdl),
         reg(rdh),
         reg(rs),
-        reg(rm)
-    );
+        reg(rm));
 }
 
-static std::string Arm_SingleDataTransfer(u32 instr)
+std::string Arm_SingleDataTransfer(u32 instr)
 {
     uint data      = bit::seq< 0, 12>(instr);
     uint rd        = bit::seq<12,  4>(instr);
@@ -386,18 +373,15 @@ static std::string Arm_SingleDataTransfer(u32 instr)
     uint pre_index = bit::seq<24,  1>(instr);
     uint imm_op    = bit::seq<25,  1>(instr);
 
-    std::string offset;
-    if (imm_op)
-        offset = shiftedRegister(data);
-    else
-        offset = hex(data);
+    std::string offset = imm_op
+        ? shiftedRegister(data)
+        : hex(data);
 
     const auto mnemonic = fmt::format(
         "{}{}{}",
         load ? "ldr" : "str",
         condition(instr),
-        byte ? "b" : ""
-    );
+        byte ? "b" : "");
 
     if (pre_index)
     {
@@ -408,8 +392,7 @@ static std::string Arm_SingleDataTransfer(u32 instr)
             reg(rn),
             increment ? "" : "-",
             offset,
-            writeback ? "!" : ""
-        );
+            writeback ? "!" : "");
     }
     else
     {
@@ -419,12 +402,11 @@ static std::string Arm_SingleDataTransfer(u32 instr)
             reg(rd),
             reg(rn),
             increment ? "" : "-",
-            offset
-        );
+            offset);
     }
 }
 
-static std::string Arm_HalfSignedDataTransfer(u32 instr)
+std::string Arm_HalfSignedDataTransfer(u32 instr)
 {
     uint half      = bit::seq< 5, 1>(instr);
     uint sign      = bit::seq< 6, 1>(instr);
@@ -454,8 +436,7 @@ static std::string Arm_HalfSignedDataTransfer(u32 instr)
         load ? "ldr" : "str",
         condition(instr),
         sign ? "s" : "",
-        half ? "h" : "b"
-    );
+        half ? "h" : "b");
 
     if (pre_index)
     {
@@ -466,8 +447,7 @@ static std::string Arm_HalfSignedDataTransfer(u32 instr)
             reg(rn),
             increment ? "" : "-",
             offset,
-            writeback ? "!" : ""
-        );
+            writeback ? "!" : "");
     }
     else
     {
@@ -477,14 +457,13 @@ static std::string Arm_HalfSignedDataTransfer(u32 instr)
             reg(rd),
             reg(rn),
             increment ? "" : "-",
-            offset
-        );
+            offset);
     }
 }
 
-static std::string Arm_BlockDataTransfer(u32 instr)
+std::string Arm_BlockDataTransfer(u32 instr)
 {
-    static constexpr const char* suffixes[2][4] = {
+    static constexpr const char* kSuffixes[2][4] = {
         { "ed", "ea", "fd", "fa" },
         { "fa", "fd", "ea", "ed" }
     };
@@ -500,8 +479,7 @@ static std::string Arm_BlockDataTransfer(u32 instr)
         "{}{}{}",
         load ? "ldm" : "stm",
         condition(instr),
-        suffixes[load][opcode]
-    );
+        kSuffixes[load][opcode]);
 
     return fmt::format(
         MNEMONIC"{}{},{}{}",
@@ -509,11 +487,10 @@ static std::string Arm_BlockDataTransfer(u32 instr)
         reg(rn),
         writeback ? "!" : "",
         ::rlist(rlist),
-        user_mode ? "^" : ""
-    );
+        user_mode ? "^" : "");
 }
 
-static std::string Arm_SingleDataSwap(u32 instr)
+std::string Arm_SingleDataSwap(u32 instr)
 {
     uint rm   = bit::seq< 0, 4>(instr);
     uint rd   = bit::seq<12, 4>(instr);
@@ -523,32 +500,30 @@ static std::string Arm_SingleDataSwap(u32 instr)
     const auto mnemonic = fmt::format(
         "swp{}{}",
         condition(instr),
-        byte ? "b" : ""
-    );
+        byte ? "b" : "");
 
     return fmt::format(
         MNEMONIC"{},{},[{}]",
         mnemonic,
         reg(rd),
         reg(rm),
-        reg(rn)
-    );
+        reg(rn));
 }
 
-static std::string Arm_SoftwareInterrupt(u32 instr)
+std::string Arm_SoftwareInterrupt(u32 instr)
 {
     uint comment = bit::seq<16, 8>(instr);
 
     const char* func = comment < 43
-        ? bios_funcs[comment]
+        ? kBiosFunctions[comment]
         : "unknown";
 
     return fmt::format(MNEMONIC"{:X} - {}", "swi", comment, func);
 }
 
-static std::string Thumb_MoveShiftedRegister(u16 instr)
+std::string Thumb_MoveShiftedRegister(u16 instr)
 {
-    static constexpr const char* mnemonics[4] = {
+    static constexpr const char* kMnemonics[4] = {
         "lsl", "lsr", "asr", "???"
     };
 
@@ -559,14 +534,13 @@ static std::string Thumb_MoveShiftedRegister(u16 instr)
 
     return fmt::format(
         MNEMONIC"{},{},{}",
-        mnemonics[opcode],
+        kMnemonics[opcode],
         reg(rd),
         reg(rs),
-        hex(offset)
-    );
+        hex(offset));
 }
 
-static std::string Thumb_AddSubtract(u16 instr)
+std::string Thumb_AddSubtract(u16 instr)
 {
     uint rd       = bit::seq< 0, 3>(instr);
     uint rs       = bit::seq< 3, 3>(instr);
@@ -580,8 +554,7 @@ static std::string Thumb_AddSubtract(u16 instr)
             MNEMONIC"{},{}",
             "mov",
             reg(rd),
-            reg(rs)
-        );
+            reg(rs));
     }
     else
     {
@@ -590,14 +563,13 @@ static std::string Thumb_AddSubtract(u16 instr)
             subtract ? "sub" : "add",
             reg(rd),
             reg(rs),
-            use_imm ? hex(rn) : reg(rn)
-        );
+            use_imm ? hex(rn) : reg(rn));
     }
 }
 
-static std::string Thumb_ImmediateOperations(u16 instr)
+std::string Thumb_ImmediateOperations(u16 instr)
 {
-    static constexpr const char* mnemonics[4] = {
+    static constexpr const char* kMnemonics[4] = {
         "mov", "cmp", "add", "sub"
     };
 
@@ -607,15 +579,14 @@ static std::string Thumb_ImmediateOperations(u16 instr)
 
     return fmt::format(
         MNEMONIC"{},{}",
-        mnemonics[opcode],
+        kMnemonics[opcode],
         reg(rd),
-        hex(offset)
-    );
+        hex(offset));
 }
 
-static std::string Thumb_AluOperations(u16 instr)
+std::string Thumb_AluOperations(u16 instr)
 {
-    static constexpr const char* mnemonics[16] = {
+    static constexpr const char* kMnemonics[16] = {
         "and", "eor", "lsl", "lsr",
         "asr", "adc", "sbc", "ror",
         "tst", "neg", "cmp", "cmn",
@@ -628,15 +599,14 @@ static std::string Thumb_AluOperations(u16 instr)
 
     return fmt::format(
         MNEMONIC"{},{}",
-        mnemonics[opcode],
+        kMnemonics[opcode],
         reg(rd),
-        reg(rs)
-    );
+        reg(rs));
 }
 
-static std::string Thumb_HighRegisterOperations(u16 instr)
+std::string Thumb_HighRegisterOperations(u16 instr)
 {
-    static constexpr const char* mnemonics[4] = {
+    static constexpr const char* kMnemonics[4] = {
         "add", "cmp", "mov", "bx"
     };
 
@@ -649,13 +619,12 @@ static std::string Thumb_HighRegisterOperations(u16 instr)
     rs |= hs << 3;
     rd |= hd << 3;
 
-    if (opcode == 0b11)
-        return fmt::format(MNEMONIC"{}", mnemonics[opcode], reg(rs));
-    else
-        return fmt::format(MNEMONIC"{},{}", mnemonics[opcode], reg(rd), reg(rs));
+    return opcode == 0b11
+        ? fmt::format(MNEMONIC"{}", kMnemonics[opcode], reg(rs))
+        : fmt::format(MNEMONIC"{},{}", kMnemonics[opcode], reg(rd), reg(rs));
 }
 
-static std::string Thumb_LoadPcRelative(u16 instr, u32 pc)
+std::string Thumb_LoadPcRelative(u16 instr, u32 pc)
 {
     uint offset = bit::seq<0, 8>(instr);
     uint rd     = bit::seq<8, 3>(instr);
@@ -666,13 +635,12 @@ static std::string Thumb_LoadPcRelative(u16 instr, u32 pc)
         MNEMONIC"{},[{}]",
         "ldr",
         reg(rd),
-        hex((pc & ~0x3) + offset)
-    );
+        hex((pc & ~0x3) + offset));
 }
 
-static std::string Thumb_LoadStoreRegisterOffset(u16 instr)
+std::string Thumb_LoadStoreRegisterOffset(u16 instr)
 {
-    static constexpr const char* mnemonics[4] = {
+    static constexpr const char* kMnemonics[4] = {
         "str", "strb", "ldr", "ldrb"
     };
 
@@ -683,16 +651,15 @@ static std::string Thumb_LoadStoreRegisterOffset(u16 instr)
 
     return fmt::format(
         MNEMONIC"{},[{},{}]",
-        mnemonics[opcode],
+        kMnemonics[opcode],
         reg(rd),
         reg(rb),
-        reg(ro)
-    );
+        reg(ro));
 }
 
-static std::string Thumb_LoadStoreByteHalf(u16 instr)
+std::string Thumb_LoadStoreByteHalf(u16 instr)
 {
-    static constexpr const char* mnemonics[4] = {
+    static constexpr const char* kMnemonics[4] = {
         "strh", "ldrsb", "ldrh", "ldrsh"
     };
 
@@ -703,16 +670,15 @@ static std::string Thumb_LoadStoreByteHalf(u16 instr)
 
     return fmt::format(
         MNEMONIC"{},[{},{}]",
-        mnemonics[opcode],
+        kMnemonics[opcode],
         reg(rd),
         reg(rb),
-        reg(ro)
-    );
+        reg(ro));
 }
 
-static std::string Thumb_LoadStoreImmediateOffset(u16 instr)
+std::string Thumb_LoadStoreImmediateOffset(u16 instr)
 {
-    static constexpr const char* mnemonics[4] = {
+    static constexpr const char* kMnemonics[4] = {
         "str", "ldr", "strb", "ldrb"
     };
 
@@ -725,14 +691,13 @@ static std::string Thumb_LoadStoreImmediateOffset(u16 instr)
 
     return fmt::format(
         MNEMONIC"{},[{},{}]",
-        mnemonics[opcode],
+        kMnemonics[opcode],
         reg(rd),
         reg(rb),
-        hex(offset)
-    );
+        hex(offset));
 }
 
-static std::string Thumb_LoadStoreHalf(u16 instr)
+std::string Thumb_LoadStoreHalf(u16 instr)
 {
     uint rd     = bit::seq< 0, 3>(instr);
     uint rb     = bit::seq< 3, 3>(instr);
@@ -746,11 +711,10 @@ static std::string Thumb_LoadStoreHalf(u16 instr)
         load ? "ldrh" : "strh",
         reg(rd),
         reg(rb),
-        hex(offset)
-    );
+        hex(offset));
 }
 
-static std::string Thumb_LoadStoreSpRelative(u16 instr)
+std::string Thumb_LoadStoreSpRelative(u16 instr)
 {
     uint offset = bit::seq< 0, 8>(instr);
     uint rd     = bit::seq< 8, 3>(instr);
@@ -762,11 +726,10 @@ static std::string Thumb_LoadStoreSpRelative(u16 instr)
         MNEMONIC"{},[sp,{}]",
         load ? "ldr" : "str",
         reg(rd),
-        hex(offset)
-    );
+        hex(offset));
 }
 
-static std::string Thumb_LoadRelativeAddress(u16 instr, u32 pc)
+std::string Thumb_LoadRelativeAddress(u16 instr, u32 pc)
 {
     uint offset = bit::seq< 0, 8>(instr);
     uint rd     = bit::seq< 8, 3>(instr);
@@ -780,8 +743,7 @@ static std::string Thumb_LoadRelativeAddress(u16 instr, u32 pc)
             MNEMONIC"{},sp,{}",
             "add",
             reg(rd), 
-            hex(offset)
-        );
+            hex(offset));
     }
     else
     {
@@ -789,12 +751,11 @@ static std::string Thumb_LoadRelativeAddress(u16 instr, u32 pc)
             MNEMONIC"{},={}",
             "add",
             reg(rd),
-            hex((pc & ~0x3) + offset)
-        );
+            hex((pc & ~0x3) + offset));
     }
 }
 
-static std::string Thumb_AddOffsetSp(u16 instr)
+std::string Thumb_AddOffsetSp(u16 instr)
 {
     uint offset = bit::seq<0, 7>(instr);
     uint sign   = bit::seq<7, 1>(instr);
@@ -805,11 +766,10 @@ static std::string Thumb_AddOffsetSp(u16 instr)
         MNEMONIC"sp,{}{}",
         "add",
         sign ? "-" : "",
-        hex(offset)
-    );
+        hex(offset));
 }
 
-static std::string Thumb_PushPopRegisters(u16 instr)
+std::string Thumb_PushPopRegisters(u16 instr)
 {
     uint rlist = bit::seq< 0, 8>(instr);
     uint rbit  = bit::seq< 8, 1>(instr);
@@ -820,11 +780,10 @@ static std::string Thumb_PushPopRegisters(u16 instr)
     return fmt::format(
         MNEMONIC"{}",
         pop ? "pop" : "push",
-        ::rlist(rlist)
-    );
+        ::rlist(rlist));
 }
 
-static std::string Thumb_LoadStoreMultiple(u16 instr)
+std::string Thumb_LoadStoreMultiple(u16 instr)
 {
     uint rlist = bit::seq< 0, 8>(instr);
     uint rb    = bit::seq< 8, 3>(instr);
@@ -834,13 +793,12 @@ static std::string Thumb_LoadStoreMultiple(u16 instr)
         MNEMONIC"{}!,{}",
         load ? "ldmia" : "stmia",
         reg(rb),
-        ::rlist(rlist)
-    );
+        ::rlist(rlist));
 }
 
-static std::string Thumb_ConditionalBranch(u16 instr, u32 pc)
+std::string Thumb_ConditionalBranch(u16 instr, u32 pc)
 {
-    static constexpr const char* mnemonics[16] = {
+    static constexpr const char* kMnemonics[16] = {
         "beq", "bne", "bcs", "bcc",
         "bmi", "bpl", "bvs", "bvc",
         "bhi", "bls", "bge", "blt",
@@ -855,24 +813,23 @@ static std::string Thumb_ConditionalBranch(u16 instr, u32 pc)
 
     return fmt::format(
         MNEMONIC"{}",
-        mnemonics[condition],
-        hex(pc + offset)
-    );
+        kMnemonics[condition],
+        hex(pc + offset));
 }
 
-static std::string Thumb_SoftwareInterrupt(u16 instr)
+std::string Thumb_SoftwareInterrupt(u16 instr)
 {
     uint comment = bit::seq<0, 8>(instr);
 
     const char* func = comment < 43
-        ? bios_funcs[comment]
+        ? kBiosFunctions[comment]
         : "unknown";
 
     return fmt::format(MNEMONIC"{:X} - {}", "swi", comment, func);
 
 }
 
-static std::string Thumb_UnconditionalBranch(u16 instr, u32 pc)
+std::string Thumb_UnconditionalBranch(u16 instr, u32 pc)
 {
     uint offset = bit::seq<0, 11>(instr);
 
@@ -882,7 +839,7 @@ static std::string Thumb_UnconditionalBranch(u16 instr, u32 pc)
     return fmt::format(MNEMONIC"{}", "b", hex(pc + offset));
 }
 
-static std::string Thumb_LongBranchLink(u16 instr, u32 lr)
+std::string Thumb_LongBranchLink(u16 instr, u32 lr)
 {
     uint offset = bit::seq< 0, 11>(instr);
     uint second = bit::seq<11,  1>(instr);
@@ -892,8 +849,7 @@ static std::string Thumb_LongBranchLink(u16 instr, u32 lr)
     return fmt::format(
         MNEMONIC"{}",
         "bl",
-        second ? hex(lr + offset) : "<setup>"
-    );
+        second ? hex(lr + offset) : "<setup>");
 }
 
 std::string disassemble(u32 instr, u32 pc, u32 lr, bool thumb)
