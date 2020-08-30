@@ -11,7 +11,7 @@ public:
     template<uint Index>
     u8 read() const
     {
-        update_count();
+        run_channels();
 
         return Register<kSize>::read<Index>();
     }
@@ -26,7 +26,7 @@ public:
 
     u16 initial = 0;
 
-    std::function<void(void)> update_count;
+    std::function<void(void)> run_channels;
 };
 
 class TimerControl : public Register<2, 0x00C7>
@@ -35,34 +35,30 @@ public:
     template<uint Index>
     void write(u8 byte)
     {
-        static constexpr uint kPrescalers[4] = { 1, 64, 256, 1024 };
+        static constexpr uint kPrescalers[8] = { 1, 64, 256, 1024, 1, 1, 1, 1 };
 
         if (Index > 0)
             return;
 
         Register<kSize, kMask>::write<Index>(byte);
 
-        uint was_enabled = enable;
+        run_channels();
 
-        update_count();
+        uint was_enabled = enabled;
 
-        cascade = bit::seq<2, 1>(byte);
-        irq     = bit::seq<6, 1>(byte);
-        enable  = bit::seq<7, 1>(byte);
+        prescaler = kPrescalers[bit::seq<0, 3>(byte)];
+        cascade   = bit::seq<2, 1>(byte);
+        irq       = bit::seq<6, 1>(byte);
+        enabled   = bit::seq<7, 1>(byte);
 
-        if (cascade)
-            prescaler = 1;
-        else
-            prescaler = kPrescalers[bit::seq<0, 2>(byte)];
-
-        update_timer(!was_enabled && enable);
+        update_channel(!was_enabled && enabled);
     }
 
     uint prescaler = 1;
     uint cascade   = 0;
     uint irq       = 0;
-    uint enable    = 0;
+    uint enabled   = 0;
 
-    std::function<void(void)> update_count;
-    std::function<void(bool)> update_timer;
+    std::function<void(void)> run_channels;
+    std::function<void(bool)> update_channel;
 };

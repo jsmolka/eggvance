@@ -13,7 +13,7 @@
 #include "keypad/keypad.h"
 #include "mmu/mmu.h"
 #include "ppu/ppu.h"
-#include "timer/timerc.h"
+#include "timer/timer.h"
 
 void core::init(int argc, char* argv[])
 {
@@ -40,7 +40,7 @@ void core::reset()
     eggcpt::reconstruct(dmac);
     eggcpt::reconstruct(irqh);
     eggcpt::reconstruct(keypad);
-    eggcpt::reconstruct(timerc);
+    eggcpt::reconstruct(timer);
 }
 
 void core::frame()

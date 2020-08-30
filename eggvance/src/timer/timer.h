@@ -1,27 +1,31 @@
 #pragma once
 
-#include "timer/io.h"
+#include <array>
+#include <vector>
+
+#include "timer/constants.h"
+#include "timer/timerchannel.h"
 
 class Timer
 {
 public:
-    Timer(uint id)
-        : id(id) {}
+    friend class Io;
 
-    void init();
-    void update();
+    Timer();
+
     void run(int cycles);
-
-    uint nextEvent() const;
-
-    uint id;
-    Timer* prev = nullptr;
-    Timer* next = nullptr;
-    TimerCount count;
-    TimerControl control;
+    void runUntilIrq(int& cycles);
 
 private:
-    uint counter  = 0;
-    uint initial  = 0;
-    uint overflow = 0;
+    void schedule();
+    void reschedule();
+    void runChannels();
+
+    uint count = 0;
+    uint event = kEventMax;
+
+    std::array<TimerChannel, 4> channels = { 1, 2, 3, 4 };
+    std::vector<std::reference_wrapper<TimerChannel>> active;
 };
+
+inline Timer timer;

@@ -1,60 +1,91 @@
 #include "timer.h"
 
-#include "irq/irqh.h"
-#include "timer/constants.h"
+#include <algorithm>
 
-constexpr uint kOverflow = 0x1'0000;
+#include "arm/arm.h"
 
-void Timer::init()
+Timer::Timer()
 {
-    counter  = 0;
-    initial  = count.initial;
-    overflow = control.prescaler * (kOverflow - initial);
-}
+    channels[1].prev = &channels[0];
+    channels[2].prev = &channels[1];
+    channels[3].prev = &channels[2];
 
-void Timer::update()
-{
-    counter  = control.prescaler * (count.value - initial);
-    overflow = control.prescaler * (kOverflow - initial);
+    channels[0].next = &channels[1];
+    channels[1].next = &channels[2];
+    channels[2].next = &channels[3];
+
+    for (auto& channel : channels)
+    {
+        channel.count.run_channels = std::bind(&Timer::runChannels, this);
+        channel.control.run_channels = std::bind(&Timer::runChannels, this);
+        channel.control.update_channel = [&](bool started)
+        {
+            if (started)
+                channel.start();
+            else
+                channel.update();
+            
+            schedule();
+        };
+    }
 }
 
 void Timer::run(int cycles)
 {
-    counter += cycles;
-    
-    if (counter >= overflow)
+    count += cycles;
+
+    if (count >= event)
     {
-        if (next && next->control.cascade)
-            next->run(counter / overflow);
-
-        if (control.irq)
-            irqh.request(kIrqTimer0 << id);
-
-        counter %= overflow;
-        initial  = count.initial;
-        overflow = control.prescaler * (kOverflow - initial);
+        runChannels();
+        reschedule();
     }
-    count.value = counter / control.prescaler + initial;
 }
 
-uint Timer::nextEvent() const
+void Timer::runUntilIrq(int& cycles)
 {
-    if (!control.irq)
-        return kEventMax;
-
-    if (!control.cascade)
-        return overflow - counter;
-
-    if (!prev)
-        return kEventMax;
-
-    uint count = 0;
-    uint event = overflow - counter;
-
-    for (Timer* timer = prev; timer; timer = timer->prev)
+    int rem = event - count;
+    if (rem < cycles)
     {
-        event *= timer->control.prescaler * (kOverflow - timer->initial);
-        count += timer->counter;
+        run(rem);
+        cycles -= rem;
     }
-    return event - count;
+    else
+    {
+        run(cycles);
+        cycles = 0;
+    }
+}
+
+void Timer::schedule()
+{
+    active.clear();
+    arm.state &= ~Arm::kStateTimer;
+
+    event = kEventMax;
+    for (auto& channel : channels)
+    {
+        if (channel.control.enabled && !channel.control.cascade)
+        {
+            active.push_back(std::ref(channel));
+            arm.state |= Arm::kStateTimer;
+
+            event = std::min(event, channel.nextEvent());
+        }
+    }
+}
+
+void Timer::reschedule()
+{
+    event = kEventMax;
+    for (TimerChannel& channel : active)
+        event = std::min(event, channel.nextEvent());
+}
+
+void Timer::runChannels()
+{
+    for (TimerChannel& channel : active)
+        channel.run(count);
+
+    event -= count;
+    count = 0;
 }

@@ -75,12 +75,6 @@
     <ClCompile Include="src\dma\dmac.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\timer\timer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\timer\timerc.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\keypad\keypad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -145,6 +139,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\core\framecounter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\timer\timerchannel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\timer\timer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -216,12 +216,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\dma\dmac.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\timer\timer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\timer\timerc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\keypad\keypad.h">
@@ -318,6 +312,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\base\exit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\timer\constants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\timer\timerchannel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\timer\timer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

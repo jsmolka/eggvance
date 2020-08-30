@@ -3,7 +3,7 @@
 #include "arm/decode.h"
 #include "base/macros.h"
 #include "dma/dmac.h"
-#include "timer/timerc.h"
+#include "timer/timer.h"
 
 Arm::Arm()
 {
@@ -63,7 +63,7 @@ void Arm::dispatch()
             if (state & kStateHalt)
             {
                 if (state & kStateTimer)
-                    timerc.runUntilIrq(cycles);
+                    timer.runUntilIrq(cycles);
                 else
                     cycles = 0;
 
@@ -104,7 +104,7 @@ void Arm::dispatch()
         }
 
         if (state & kStateTimer)
-            timerc.run(previous - cycles);
+            timer.run(previous - cycles);
     }
 }
 

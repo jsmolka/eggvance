@@ -6,7 +6,7 @@
 #include "keypad/keypad.h"
 #include "mmu/mmu.h"
 #include "ppu/ppu.h"
-#include "timer/timerc.h"
+#include "timer/timer.h"
 
 u8 Io::readByte(u32 addr) const
 {
@@ -69,14 +69,14 @@ u8 Io::readByte(u32 addr) const
     INDEXED_CASE2(kRegDma2Control   , return dmac.read<kLabel>());
     INDEXED_CASE2(kRegDma3Count     , return 0);
     INDEXED_CASE2(kRegDma3Control   , return dmac.read<kLabel>());
-    INDEXED_CASE2(kRegTimer0Count   , return timerc.timers[0].count.read<kIndex>());
-    INDEXED_CASE2(kRegTimer0Control , return timerc.timers[0].control.read<kIndex>());
-    INDEXED_CASE2(kRegTimer1Count   , return timerc.timers[1].count.read<kIndex>());
-    INDEXED_CASE2(kRegTimer1Control , return timerc.timers[1].control.read<kIndex>());
-    INDEXED_CASE2(kRegTimer2Count   , return timerc.timers[2].count.read<kIndex>());
-    INDEXED_CASE2(kRegTimer2Control , return timerc.timers[2].control.read<kIndex>());
-    INDEXED_CASE2(kRegTimer3Count   , return timerc.timers[3].count.read<kIndex>());
-    INDEXED_CASE2(kRegTimer3Control , return timerc.timers[3].control.read<kIndex>());
+    INDEXED_CASE2(kRegTimer0Count   , return timer.channels[0].count.read<kIndex>());
+    INDEXED_CASE2(kRegTimer0Control , return timer.channels[0].control.read<kIndex>());
+    INDEXED_CASE2(kRegTimer1Count   , return timer.channels[1].count.read<kIndex>());
+    INDEXED_CASE2(kRegTimer1Control , return timer.channels[1].control.read<kIndex>());
+    INDEXED_CASE2(kRegTimer2Count   , return timer.channels[2].count.read<kIndex>());
+    INDEXED_CASE2(kRegTimer2Control , return timer.channels[2].control.read<kIndex>());
+    INDEXED_CASE2(kRegTimer3Count   , return timer.channels[3].count.read<kIndex>());
+    INDEXED_CASE2(kRegTimer3Control , return timer.channels[3].control.read<kIndex>());
     INDEXED_CASE2(kRegIrqEnable     , return irqh.read<kLabel>());
     INDEXED_CASE2(kRegIrqRequest    , return irqh.read<kLabel>());
     INDEXED_CASE4(kRegIrqMaster     , return irqh.read<kLabel>());
@@ -218,14 +218,14 @@ void Io::writeByte(u32 addr, u8 byte)
     INDEXED_CASE4(kRegDma3Dad       , dmac.write<kLabel>(byte));
     INDEXED_CASE2(kRegDma3Count     , dmac.write<kLabel>(byte));
     INDEXED_CASE2(kRegDma3Control   , dmac.write<kLabel>(byte));
-    INDEXED_CASE2(kRegTimer0Count   , timerc.timers[0].count.write<kIndex>(byte));
-    INDEXED_CASE1(kRegTimer0Control , timerc.timers[0].control.write<kIndex>(byte));
-    INDEXED_CASE2(kRegTimer1Count   , timerc.timers[1].count.write<kIndex>(byte));
-    INDEXED_CASE1(kRegTimer1Control , timerc.timers[1].control.write<kIndex>(byte));
-    INDEXED_CASE2(kRegTimer2Count   , timerc.timers[2].count.write<kIndex>(byte));
-    INDEXED_CASE1(kRegTimer2Control , timerc.timers[2].control.write<kIndex>(byte));
-    INDEXED_CASE2(kRegTimer3Count   , timerc.timers[3].count.write<kIndex>(byte));
-    INDEXED_CASE1(kRegTimer3Control , timerc.timers[3].control.write<kIndex>(byte));
+    INDEXED_CASE2(kRegTimer0Count   , timer.channels[0].count.write<kIndex>(byte));
+    INDEXED_CASE1(kRegTimer0Control , timer.channels[0].control.write<kIndex>(byte));
+    INDEXED_CASE2(kRegTimer1Count   , timer.channels[1].count.write<kIndex>(byte));
+    INDEXED_CASE1(kRegTimer1Control , timer.channels[1].control.write<kIndex>(byte));
+    INDEXED_CASE2(kRegTimer2Count   , timer.channels[2].count.write<kIndex>(byte));
+    INDEXED_CASE1(kRegTimer2Control , timer.channels[2].control.write<kIndex>(byte));
+    INDEXED_CASE2(kRegTimer3Count   , timer.channels[3].count.write<kIndex>(byte));
+    INDEXED_CASE1(kRegTimer3Control , timer.channels[3].control.write<kIndex>(byte));
     INDEXED_CASE2(kRegIrqEnable     , irqh.write<kLabel>(byte));
     INDEXED_CASE2(kRegIrqRequest    , irqh.write<kLabel>(byte));
     INDEXED_CASE4(kRegIrqMaster     , irqh.write<kLabel>(byte));
