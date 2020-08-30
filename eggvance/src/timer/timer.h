@@ -5,7 +5,8 @@
 class Timer
 {
 public:
-    Timer(uint id);
+    Timer(uint id)
+        : id(id) {}
 
     void init();
     void update();
@@ -13,13 +14,14 @@ public:
 
     uint nextEvent() const;
 
-    uint id{};
-    Timer* prev{};
-    Timer* next{};
-    TimerIo io;
+    uint id;
+    Timer* prev = nullptr;
+    Timer* next = nullptr;
+    TimerCount count;
+    TimerControl control;
 
 private:
-    uint counter{};
-    uint initial{};
-    uint overflow{};
+    uint counter  = 0;
+    uint initial  = 0;
+    uint overflow = 0;
 };

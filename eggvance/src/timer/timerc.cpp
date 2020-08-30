@@ -14,7 +14,21 @@ TimerController::TimerController()
     timers[1].next = &timers[2];
     timers[2].next = &timers[3];
 
-    event = 1 << 30;
+    for (auto& timer : timers)
+    {
+        timer.count.update_count = std::bind(&TimerController::runTimers, this);;
+        timer.control.update_count = std::bind(&TimerController::runTimers, this);;
+
+        timer.control.update_timer = [&](bool enabled)
+        {
+            if (enabled)
+                timer.init();
+            else
+                timer.update();
+
+            schedule();
+        };
+    }
 }
 
 void TimerController::run(int cycles)
@@ -57,10 +71,10 @@ void TimerController::schedule()
     active.clear();
     arm.state &= ~Arm::kStateTimer;
 
-    event = 1 << 30;
+    event = kEventMax;
     for (auto& timer : timers)
     {
-        if (timer.io.control.enable && !timer.io.control.cascade)
+        if (timer.control.enable && !timer.control.cascade)
         {
             active.push_back(std::ref(timer));
             arm.state |= Arm::kStateTimer;
@@ -72,7 +86,7 @@ void TimerController::schedule()
 
 void TimerController::reschedule()
 {
-    event = 1 << 30;
+    event = kEventMax;
     for (Timer& timer : active)
         event = std::min(event, timer.nextEvent());
 }

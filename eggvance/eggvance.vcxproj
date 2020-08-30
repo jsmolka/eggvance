@@ -218,6 +218,7 @@
     <ClInclude Include="src\ppu\matrix.h" />
     <ClInclude Include="src\ppu\point.h" />
     <ClInclude Include="src\base\register.h" />
+    <ClInclude Include="src\timer\constants.h" />
     <ClInclude Include="src\timer\io.h" />
     <ClInclude Include="src\dma\dma.h" />
     <ClInclude Include="src\dma\dmac.h" />

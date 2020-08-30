@@ -1,26 +1,21 @@
 #include "timer.h"
 
-constexpr uint kOverflow = 0x1'0000;
-
 #include "irq/irqh.h"
+#include "timer/constants.h"
 
-Timer::Timer(uint id)
-    : id(id)
-{
-
-}
+constexpr uint kOverflow = 0x1'0000;
 
 void Timer::init()
 {
     counter  = 0;
-    initial  = io.count.initial;
-    overflow = io.control.prescaler * (kOverflow - initial);
+    initial  = count.initial;
+    overflow = control.prescaler * (kOverflow - initial);
 }
 
 void Timer::update()
 {
-    counter  = io.control.prescaler * (io.count.value - initial);
-    overflow = io.control.prescaler * (kOverflow - initial);
+    counter  = control.prescaler * (count.value - initial);
+    overflow = control.prescaler * (kOverflow - initial);
 }
 
 void Timer::run(int cycles)
@@ -29,36 +24,36 @@ void Timer::run(int cycles)
     
     if (counter >= overflow)
     {
-        if (next && next->io.control.cascade)
+        if (next && next->control.cascade)
             next->run(counter / overflow);
 
-        if (io.control.irq)
+        if (control.irq)
             irqh.request(kIrqTimer0 << id);
 
         counter %= overflow;
-        initial  = io.count.initial;
-        overflow = io.control.prescaler * (kOverflow - initial);
+        initial  = count.initial;
+        overflow = control.prescaler * (kOverflow - initial);
     }
-    io.count.value = counter / io.control.prescaler + initial;
+    count.value = counter / control.prescaler + initial;
 }
 
 uint Timer::nextEvent() const
 {
-    if (!io.control.irq)
-        return 1 << 30;
+    if (!control.irq)
+        return kEventMax;
 
-    if (!io.control.cascade)
+    if (!control.cascade)
         return overflow - counter;
 
     if (!prev)
-        return 1 << 30;
+        return kEventMax;
 
     uint count = 0;
     uint event = overflow - counter;
 
-    for (auto timer = prev; timer; timer = timer->prev)
+    for (Timer* timer = prev; timer; timer = timer->prev)
     {
-        event *= timer->io.control.prescaler * (kOverflow - timer->initial);
+        event *= timer->control.prescaler * (kOverflow - timer->initial);
         count += timer->counter;
     }
     return event - count;
