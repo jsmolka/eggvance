@@ -24,11 +24,11 @@ void TimerChannel::run(int cycles)
     
     if (counter >= overflow)
     {
-        if (next && next->control.cascade)
-            next->run(counter / overflow);
-
         if (control.irq)
             irqh.request(kIrqTimer0 << id);
+
+        if (next && next->control.cascade)
+            next->run(counter / overflow);
 
         counter %= overflow;
         initial  = count.initial;
@@ -51,10 +51,10 @@ uint TimerChannel::nextEvent() const
     uint count = 0;
     uint event = overflow - counter;
 
-    for (TimerChannel* timer = prev; timer; timer = timer->prev)
+    for (auto* channel = prev; channel; channel = channel->prev)
     {
-        event *= timer->control.prescaler * (kOverflow - timer->initial);
-        count += timer->counter;
+        event *= channel->control.prescaler * (kOverflow - channel->initial);
+        count += channel->counter;
     }
     return event - count;
 }
