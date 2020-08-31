@@ -24,7 +24,7 @@ private:
     uint count = 0;
     uint event = kEventMax;
 
-    std::array<TimerChannel, 4> channels = { 1, 2, 3, 4 };
+    std::array<TimerChannel, 4> channels = { 0, 1, 2, 3 };
     std::vector<std::reference_wrapper<TimerChannel>> active;
 };
 

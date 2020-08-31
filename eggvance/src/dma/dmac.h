@@ -17,7 +17,7 @@ private:
     void emit(Dma& dma, Dma::Timing timing);
 
     Dma* active{};
-    Dma dmas[4] = { 1, 2, 3, 4 };
+    Dma dmas[4] = { 0, 1, 2, 3 };
 };
 
 inline DmaController dmac;
