@@ -57,7 +57,7 @@ public:
     uint prescaler = 1;
     uint cascade   = 0;
     uint irq       = 0;
-    uint enable   = 0;
+    uint enable    = 0;
 
     std::function<void(void)> run_channels;
     std::function<void(bool)> update_channel;

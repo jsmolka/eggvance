@@ -21,16 +21,16 @@ void DmaChannel::start()
     {
         control.reload = false;
 
-        sad_value = sad.value;
-        dad_value = dad.value;
+        src_addr = sad.value;
+        dst_addr = dad.value;
     }
     else if (control.repeat && control.dadcnt == kAddressControlReload)
     {
-        dad_value = dad.value;
+        dst_addr = dad.value;
     }
 
-    sad_value &= ~((2 << control.word) - 1);
-    dad_value &= ~((2 << control.word) - 1);
+    src_addr &= ~((2 << control.word) - 1);
+    dst_addr &= ~((2 << control.word) - 1);
 
     initCycles();
     initTransfer();
@@ -38,8 +38,7 @@ void DmaChannel::start()
 
 void DmaChannel::run(int& cycles)
 {
-    static constexpr int kDeltas[2][4] =
-    {
+    static constexpr int kDeltas[2][4] = {
         { 2, -2, 0, 2 },
         { 4, -4, 0, 4 }
     };
@@ -48,8 +47,8 @@ void DmaChannel::run(int& cycles)
     {
         transfer();
 
-        sad_value += kDeltas[control.word][control.sadcnt];
-        dad_value += kDeltas[control.word][control.dadcnt];
+        src_addr += kDeltas[control.word][control.sadcnt];
+        dst_addr += kDeltas[control.word][control.dadcnt];
 
         if (pending == 0)
             cycles -= cycles_n;
@@ -62,11 +61,11 @@ void DmaChannel::run(int& cycles)
 
     running = false;
 
-    if (!(control.enable = control.repeat))
-        control.value &= ~DmaControl::kEnable;
-
     if (control.irq)
         irqh.request(kIrqDma0 << id);
+
+    if (!(control.enable = control.repeat))
+        control.value &= ~DmaControl::kEnable;
 }
 
 bool DmaChannel::isEeprom(u32 addr)
@@ -83,7 +82,7 @@ bool DmaChannel::isGamePak(u32 addr)
 
 void DmaChannel::initCycles()
 {
-    if (isGamePak(sad_value) && isGamePak(dad_value))
+    if (isGamePak(src_addr) && isGamePak(dst_addr))
     {
         cycles_s = 4;
         cycles_n = 4;
@@ -96,24 +95,24 @@ void DmaChannel::initCycles()
 
     if (control.word)
     {
-        cycles_s += arm.io.waitcnt.cyclesWord(sad_value, true);
-        cycles_s += arm.io.waitcnt.cyclesWord(dad_value, true);
-        cycles_n += arm.io.waitcnt.cyclesWord(sad_value, false);
-        cycles_n += arm.io.waitcnt.cyclesWord(dad_value, false);
+        cycles_s += arm.io.waitcnt.cyclesWord(src_addr, true);
+        cycles_s += arm.io.waitcnt.cyclesWord(dst_addr, true);
+        cycles_n += arm.io.waitcnt.cyclesWord(src_addr, false);
+        cycles_n += arm.io.waitcnt.cyclesWord(dst_addr, false);
     }
     else
     {
-        cycles_s += arm.io.waitcnt.cyclesHalf(sad_value, true);
-        cycles_s += arm.io.waitcnt.cyclesHalf(dad_value, true);
-        cycles_n += arm.io.waitcnt.cyclesHalf(sad_value, false);
-        cycles_n += arm.io.waitcnt.cyclesHalf(dad_value, false);
+        cycles_s += arm.io.waitcnt.cyclesHalf(src_addr, true);
+        cycles_s += arm.io.waitcnt.cyclesHalf(dst_addr, true);
+        cycles_n += arm.io.waitcnt.cyclesHalf(src_addr, false);
+        cycles_n += arm.io.waitcnt.cyclesHalf(dst_addr, false);
     }
 }
 
 void DmaChannel::initTransfer()
 {
-    bool eeprom_w = id == 3 && isEeprom(dad_value);
-    bool eeprom_r = id == 3 && isEeprom(sad_value);
+    bool eeprom_w = id == 3 && isEeprom(dst_addr);
+    bool eeprom_r = id == 3 && isEeprom(src_addr);
 
     if ((eeprom_r || eeprom_w) && mmu.gamepak.save->type == Save::Type::Eeprom)
     {
@@ -122,15 +121,15 @@ void DmaChannel::initTransfer()
         if (eeprom_w)
         {
             transfer = [&]() {
-                u8 byte = static_cast<u8>(mmu.readHalf(sad_value));
-                mmu.gamepak.save->write(dad_value, byte);
+                u8 byte = static_cast<u8>(mmu.readHalf(src_addr));
+                mmu.gamepak.save->write(dst_addr, byte);
             };
         }
         else
         {
             transfer = [&]() {
-                u8 byte = mmu.gamepak.save->read(sad_value);
-                mmu.writeHalf(dad_value, byte);
+                u8 byte = mmu.gamepak.save->read(src_addr);
+                mmu.writeHalf(dst_addr, byte);
             };
         }
     }
@@ -139,15 +138,15 @@ void DmaChannel::initTransfer()
         if (control.word)
         {
             transfer = [&]() {
-                u32 word = mmu.readWord(sad_value);
-                mmu.writeWord(dad_value, word);
+                u32 word = mmu.readWord(src_addr);
+                mmu.writeWord(dst_addr, word);
             };
         }
         else
         {
             transfer = [&]() {
-                u16 half = mmu.readHalf(sad_value);
-                mmu.writeHalf(dad_value, half);
+                u16 half = mmu.readHalf(src_addr);
+                mmu.writeHalf(dst_addr, half);
             };
         }
     }

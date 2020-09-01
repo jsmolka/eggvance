@@ -11,8 +11,8 @@ public:
     void start();
     void run(int& cycles);
 
-    uint id{};
-    bool running{};
+    uint id;
+    bool running = false;
 
     DmaCount count;
     DmaControl control;
@@ -27,11 +27,11 @@ private:
     void initTransfer();
     void initEeprom();
 
-    int pending{};
-    int cycles_s{};
-    int cycles_n{};
-    u32 sad_value{};
-    u32 dad_value{};
+    int pending  = 0;
+    int cycles_s = 0;
+    int cycles_n = 0;
+    u32 src_addr = 0;
+    u32 dst_addr = 0;
 
     std::function<void(void)> transfer;
 };
