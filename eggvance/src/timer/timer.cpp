@@ -18,8 +18,7 @@ Timer::Timer()
     {
         channel.count.run_channels = std::bind(&Timer::runChannels, this);
         channel.control.run_channels = std::bind(&Timer::runChannels, this);
-        channel.control.update_channel = [&](bool start)
-        {
+        channel.control.update_channel = [&](bool start) {
             if (start)
                 channel.start();
             else
@@ -64,7 +63,7 @@ void Timer::schedule()
     event = kEventMax;
     for (auto& channel : channels)
     {
-        if (channel.control.enabled && !channel.control.cascade)
+        if (channel.control.enable && !channel.control.cascade)
         {
             active.push_back(std::ref(channel));
             arm.state |= Arm::kStateTimer;

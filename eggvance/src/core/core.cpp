@@ -8,7 +8,7 @@
 #include "core/audiocontext.h"
 #include "core/inputcontext.h"
 #include "core/videocontext.h"
-#include "dma/dmac.h"
+#include "dma/dma.h"
 #include "irq/irqh.h"
 #include "keypad/keypad.h"
 #include "mmu/mmu.h"
@@ -37,7 +37,7 @@ void core::reset()
     ppu.reset();
 
     eggcpt::reconstruct(arm);
-    eggcpt::reconstruct(dmac);
+    eggcpt::reconstruct(dma);
     eggcpt::reconstruct(irqh);
     eggcpt::reconstruct(keypad);
     eggcpt::reconstruct(timer);

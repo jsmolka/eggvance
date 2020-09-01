@@ -1,7 +1,7 @@
 #include "io.h"
 
 #include "arm/arm.h"
-#include "dma/dmac.h"
+#include "dma/dma.h"
 #include "irq/irqh.h"
 #include "keypad/keypad.h"
 #include "mmu/mmu.h"
@@ -62,13 +62,13 @@ u8 Io::readByte(u32 addr) const
     INDEXED_CASE2(kRegKeyInput      , return keypad.io.input.read<kIndex>());
     INDEXED_CASE2(kRegKeyControl    , return keypad.io.control.read<kIndex>());
     INDEXED_CASE2(kRegDma0Count     , return 0);
-    INDEXED_CASE2(kRegDma0Control   , return dmac.read<kLabel>());
+    INDEXED_CASE2(kRegDma0Control   , return dma.channels[0].control.read<kIndex>());
     INDEXED_CASE2(kRegDma1Count     , return 0);
-    INDEXED_CASE2(kRegDma1Control   , return dmac.read<kLabel>());
+    INDEXED_CASE2(kRegDma1Control   , return dma.channels[1].control.read<kIndex>());
     INDEXED_CASE2(kRegDma2Count     , return 0);
-    INDEXED_CASE2(kRegDma2Control   , return dmac.read<kLabel>());
+    INDEXED_CASE2(kRegDma2Control   , return dma.channels[2].control.read<kIndex>());
     INDEXED_CASE2(kRegDma3Count     , return 0);
-    INDEXED_CASE2(kRegDma3Control   , return dmac.read<kLabel>());
+    INDEXED_CASE2(kRegDma3Control   , return dma.channels[3].control.read<kIndex>());
     INDEXED_CASE2(kRegTimer0Count   , return timer.channels[0].count.read<kIndex>());
     INDEXED_CASE2(kRegTimer0Control , return timer.channels[0].control.read<kIndex>());
     INDEXED_CASE2(kRegTimer1Count   , return timer.channels[1].count.read<kIndex>());
@@ -202,22 +202,22 @@ void Io::writeByte(u32 addr, u8 byte)
     INDEXED_CASE1(kRegPostFlag      , unused.postflag.write<kIndex>(byte));
     INDEXED_CASE1(kRegHaltControl   , arm.io.haltcnt.write<kIndex>(byte));
     INDEXED_CASE2(kRegKeyControl    , keypad.io.control.write<kIndex>(byte));
-    INDEXED_CASE4(kRegDma0Sad       , dmac.write<kLabel>(byte));
-    INDEXED_CASE4(kRegDma0Dad       , dmac.write<kLabel>(byte));
-    INDEXED_CASE2(kRegDma0Count     , dmac.write<kLabel>(byte));
-    INDEXED_CASE2(kRegDma0Control   , dmac.write<kLabel>(byte));
-    INDEXED_CASE4(kRegDma1Sad       , dmac.write<kLabel>(byte));
-    INDEXED_CASE4(kRegDma1Dad       , dmac.write<kLabel>(byte));
-    INDEXED_CASE2(kRegDma1Count     , dmac.write<kLabel>(byte));
-    INDEXED_CASE2(kRegDma1Control   , dmac.write<kLabel>(byte));
-    INDEXED_CASE4(kRegDma2Sad       , dmac.write<kLabel>(byte));
-    INDEXED_CASE4(kRegDma2Dad       , dmac.write<kLabel>(byte));
-    INDEXED_CASE2(kRegDma2Count     , dmac.write<kLabel>(byte));
-    INDEXED_CASE2(kRegDma2Control   , dmac.write<kLabel>(byte));
-    INDEXED_CASE4(kRegDma3Sad       , dmac.write<kLabel>(byte));
-    INDEXED_CASE4(kRegDma3Dad       , dmac.write<kLabel>(byte));
-    INDEXED_CASE2(kRegDma3Count     , dmac.write<kLabel>(byte));
-    INDEXED_CASE2(kRegDma3Control   , dmac.write<kLabel>(byte));
+    INDEXED_CASE4(kRegDma0Sad       , dma.channels[0].sad.write<kIndex, 0x07FF'FFFF>(byte));
+    INDEXED_CASE4(kRegDma0Dad       , dma.channels[0].dad.write<kIndex, 0x07FF'FFFF>(byte));
+    INDEXED_CASE2(kRegDma0Count     , dma.channels[0].count.write<kIndex, 0x3FFF>(byte));
+    INDEXED_CASE2(kRegDma0Control   , dma.channels[0].control.write<kIndex, 0xF7E0>(byte));
+    INDEXED_CASE4(kRegDma1Sad       , dma.channels[1].sad.write<kIndex, 0x0FFF'FFFF>(byte));
+    INDEXED_CASE4(kRegDma1Dad       , dma.channels[1].dad.write<kIndex, 0x07FF'FFFF>(byte));
+    INDEXED_CASE2(kRegDma1Count     , dma.channels[1].count.write<kIndex, 0x3FFF>(byte));
+    INDEXED_CASE2(kRegDma1Control   , dma.channels[1].control.write<kIndex, 0xF7E0>(byte));
+    INDEXED_CASE4(kRegDma2Sad       , dma.channels[2].sad.write<kIndex, 0x0FFF'FFFF>(byte));
+    INDEXED_CASE4(kRegDma2Dad       , dma.channels[2].dad.write<kIndex, 0x07FF'FFFF>(byte));
+    INDEXED_CASE2(kRegDma2Count     , dma.channels[2].count.write<kIndex, 0x3FFF>(byte));
+    INDEXED_CASE2(kRegDma2Control   , dma.channels[2].control.write<kIndex, 0xF7E0>(byte));
+    INDEXED_CASE4(kRegDma3Sad       , dma.channels[3].sad.write<kIndex, 0x0FFF'FFFF>(byte));
+    INDEXED_CASE4(kRegDma3Dad       , dma.channels[3].dad.write<kIndex, 0x0FFF'FFFF>(byte));
+    INDEXED_CASE2(kRegDma3Count     , dma.channels[3].count.write<kIndex, 0xFFFF>(byte));
+    INDEXED_CASE2(kRegDma3Control   , dma.channels[3].control.write<kIndex, 0xFFE0>(byte));
     INDEXED_CASE2(kRegTimer0Count   , timer.channels[0].count.write<kIndex>(byte));
     INDEXED_CASE1(kRegTimer0Control , timer.channels[0].control.write<kIndex>(byte));
     INDEXED_CASE2(kRegTimer1Count   , timer.channels[1].count.write<kIndex>(byte));

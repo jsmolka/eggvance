@@ -8,7 +8,7 @@
 class Arm : public Registers
 {
 public:
-    friend class Dma;
+    friend class DmaChannel;
     friend class MMU;
 
     enum State

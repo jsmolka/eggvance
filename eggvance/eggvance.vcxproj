@@ -162,12 +162,12 @@
     <ClCompile Include="src\mmu\io.cpp" />
     <ClCompile Include="src\ppu\collapse.cpp" />
     <ClCompile Include="src\ppu\mapentry.cpp" />
-    <ClCompile Include="src\dma\dmac.cpp" />
+    <ClCompile Include="src\dma\dma.cpp" />
     <ClCompile Include="src\irq\irqh.cpp" />
     <ClCompile Include="src\keypad\keypad.cpp" />
     <ClCompile Include="src\mmu\bios.cpp" />
     <ClCompile Include="src\mmu\mmu.cpp" />
-    <ClCompile Include="src\dma\dma.cpp" />
+    <ClCompile Include="src\dma\dmachannel.cpp" />
     <ClCompile Include="src\mmu\oam.cpp" />
     <ClCompile Include="src\ppu\oamentry.cpp" />
     <ClCompile Include="src\mmu\palette.cpp" />
@@ -220,8 +220,8 @@
     <ClInclude Include="src\base\register.h" />
     <ClInclude Include="src\timer\constants.h" />
     <ClInclude Include="src\timer\io.h" />
+    <ClInclude Include="src\dma\dmachannel.h" />
     <ClInclude Include="src\dma\dma.h" />
-    <ClInclude Include="src\dma\dmac.h" />
     <ClInclude Include="src\mmu\bios.h" />
     <ClInclude Include="src\mmu\ram.h" />
     <ClInclude Include="src\irq\irqh.h" />

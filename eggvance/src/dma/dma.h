@@ -1,12 +1,14 @@
 #pragma once
 
-#include <functional>
+#include <array>
 
-#include "dma/io.h"
+#include "dma/dmachannel.h"
 
 class Dma
 {
 public:
+    friend class Io;
+
     enum Timing
     {
         kTimingImmediate,
@@ -15,30 +17,16 @@ public:
         kTimingSpecial
     };
 
-    Dma(uint id);
+    Dma();
 
-    void activate();
     void run(int& cycles);
-
-    uint id{};
-    bool running{};
-    DmaIo io;
+    void broadcast(Dma::Timing timing);
 
 private:
-    bool isEeprom(u32 addr);
-    bool isGamePak(u32 addr);
+    void emit(DmaChannel& channel, Dma::Timing timing);
 
-    void initCycles();
-    void initTransfer();
-    void initEeprom();
-
-    int pending{};
-    int cycles_s{};
-    int cycles_n{};
-    u32 sad{};
-    u32 dad{};
-    int sad_delta{};
-    int dad_delta{};
-
-    std::function<void(void)> transfer;
+    DmaChannel* active = nullptr;
+    std::array<DmaChannel, 4> channels = { 0, 1, 2, 3 };
 };
+
+inline Dma dma;

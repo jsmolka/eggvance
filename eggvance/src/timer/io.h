@@ -44,20 +44,20 @@ public:
 
         run_channels();
 
-        uint was_enabled = enabled;
+        uint was_enabled = enable;
 
         prescaler = kPrescalers[bit::seq<0, 3>(byte)];
         cascade   = bit::seq<2, 1>(byte);
         irq       = bit::seq<6, 1>(byte);
-        enabled   = bit::seq<7, 1>(byte);
+        enable    = bit::seq<7, 1>(byte);
 
-        update_channel(!was_enabled && enabled);
+        update_channel(!was_enabled && enable);
     }
 
     uint prescaler = 1;
     uint cascade   = 0;
     uint irq       = 0;
-    uint enabled   = 0;
+    uint enable   = 0;
 
     std::function<void(void)> run_channels;
     std::function<void(bool)> update_channel;

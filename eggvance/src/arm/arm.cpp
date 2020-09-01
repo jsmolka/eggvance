@@ -2,7 +2,7 @@
 
 #include "arm/decode.h"
 #include "base/macros.h"
-#include "dma/dmac.h"
+#include "dma/dma.h"
 #include "timer/timer.h"
 
 Arm::Arm()
@@ -56,7 +56,7 @@ void Arm::dispatch()
 
         if (state & kStateDma)
         {
-            dmac.run(cycles);
+            dma.run(cycles);
         }
         else
         {

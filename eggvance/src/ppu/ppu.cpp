@@ -6,7 +6,7 @@
 #include "base/constants.h"
 #include "base/macros.h"
 #include "core/videocontext.h"
-#include "dma/dmac.h"
+#include "dma/dma.h"
 #include "irq/irqh.h"
 
 void PPU::reset()
@@ -106,7 +106,7 @@ void PPU::hblank()
     {
         irqh.request(kIrqHBlank);
     }
-    dmac.broadcast(Dma::kTimingHBlank);
+    dma.broadcast(Dma::kTimingHBlank);
 }
 
 void PPU::vblank()
@@ -123,7 +123,7 @@ void PPU::vblank()
     {
         irqh.request(kIrqVBlank);
     }
-    dmac.broadcast(Dma::kTimingVBlank);
+    dma.broadcast(Dma::kTimingVBlank);
 }
 
 void PPU::next()
