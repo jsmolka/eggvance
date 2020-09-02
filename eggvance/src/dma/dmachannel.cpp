@@ -55,7 +55,7 @@ void DmaChannel::run(int& cycles)
         else
             cycles -= cycles_s;
 
-        if (cycles <= 0)
+        if (cycles <= 0 && pending > 0)
             return;
     }
 
