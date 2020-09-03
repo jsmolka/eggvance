@@ -7,6 +7,10 @@
 
 Arm::Arm()
 {
+    irq.master.process  = std::bind(&Arm::processIrq, this);
+    irq.enable.process  = std::bind(&Arm::processIrq, this);
+    irq.request.process = std::bind(&Arm::processIrq, this);
+
     flushWord();
     pc += 4;
 }
@@ -73,7 +77,7 @@ void Arm::dispatch()
             {
                 if (state & kStateIrq && !cpsr.i)
                 {
-                    interruptHW();
+                    interruptHw();
                 }
                 else
                 {
@@ -130,34 +134,4 @@ void Arm::booth(u32 multiplier, bool sign)
             break;
     }
     cycles -= 4;
-}
-
-void Arm::interrupt(u32 pc, u32 lr, PSR::Mode mode)
-{
-    PSR cpsr = this->cpsr;
-    switchMode(mode);
-    spsr = cpsr;
-
-    this->cpsr.t = 0;
-    this->cpsr.i = 1;
-
-    this->lr = lr;
-    this->pc = pc;
-
-    flushWord();
-    state &= ~kStateThumb;
-}
-
-void Arm::interruptHW()
-{
-    u32 lr = pc - 2 * cpsr.size() + 4;
-
-    interrupt(0x18, lr, PSR::Mode::kModeIrq);
-}
-
-void Arm::interruptSW()
-{
-    u32 lr = pc - cpsr.size();
-
-    interrupt(0x08, lr, PSR::Mode::kModeSvc);
 }

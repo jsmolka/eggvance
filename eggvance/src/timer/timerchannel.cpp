@@ -1,6 +1,6 @@
 #include "timerchannel.h"
 
-#include "irq/irqh.h"
+#include "arm/arm.h"
 #include "timer/constants.h"
 
 constexpr uint kOverflow = 0x1'0000;
@@ -25,7 +25,7 @@ void TimerChannel::run(int cycles)
     if (counter >= overflow)
     {
         if (control.irq)
-            irqh.request(kIrqTimer0 << id);
+            arm.raise(kIrqTimer0 << id);
 
         if (next && next->control.cascade)
             next->run(counter / overflow);

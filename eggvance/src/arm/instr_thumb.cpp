@@ -555,7 +555,7 @@ void Arm::Thumb_ConditionalBranch(u16 instr)
 template<uint Instr>
 void Arm::Thumb_SoftwareInterrupt(u16 instr)
 {
-    interruptSW();
+    interruptSw();
 }
 
 template<uint Instr>

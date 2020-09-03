@@ -5,9 +5,28 @@
 #include "arm/io.h"
 #include "arm/registers.h"
 
+enum Irq
+{
+    kIrqVBlank  = 1 << 0,
+    kIrqHBlank  = 1 << 1,
+    kIrqVMatch  = 1 << 2,
+    kIrqTimer0  = 1 << 3,
+    kIrqTimer1  = 1 << 4,
+    kIrqTimer2  = 1 << 5,
+    kIrqTimer3  = 1 << 6,
+    kIrqSerial  = 1 << 7,
+    kIrqDma0    = 1 << 8,
+    kIrqDma1    = 1 << 9,
+    kIrqDma2    = 1 << 10,
+    kIrqDma3    = 1 << 11,
+    kIrqKeypad  = 1 << 12,
+    kIrqGamePak = 1 << 13
+};
+
 class Arm : public Registers
 {
 public:
+    friend class Io;
     friend class DmaChannel;
     friend class MMU;
 
@@ -23,6 +42,7 @@ public:
     Arm();
 
     void run(int cycles);
+    void raise(uint irq);
 
     uint state = 0;
 
@@ -80,8 +100,9 @@ private:
     void booth(u32 multiplier, bool ones);
 
     void interrupt(u32 pc, u32 lr, PSR::Mode mode);
-    void interruptHW();
-    void interruptSW();
+    void interruptHw();
+    void interruptSw();
+    void processIrq();
 
     template<uint Instr> void Arm_BranchExchange(u32 instr);
     template<uint Instr> void Arm_BranchLink(u32 instr);
@@ -129,6 +150,13 @@ private:
     int cycles    = 0;
     u32 prev_addr = 0;
     u32 pipe[2]   = { 0 };
+
+    struct
+    {
+        IrqMaster  master;
+        IrqEnable  enable;
+        IrqRequest request;
+    } irq;
 };
 
 inline Arm arm;

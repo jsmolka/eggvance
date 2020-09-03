@@ -137,6 +137,7 @@
     <ClCompile Include="src\arm\disassemble.cpp" />
     <ClCompile Include="src\arm\instr_arm.cpp" />
     <ClCompile Include="src\arm\instr_thumb.cpp" />
+    <ClCompile Include="src\arm\interrupt.cpp" />
     <ClCompile Include="src\arm\io.cpp" />
     <ClCompile Include="src\arm\util.cpp" />
     <ClCompile Include="src\arm\registers.cpp" />
@@ -163,7 +164,6 @@
     <ClCompile Include="src\ppu\collapse.cpp" />
     <ClCompile Include="src\ppu\mapentry.cpp" />
     <ClCompile Include="src\dma\dma.cpp" />
-    <ClCompile Include="src\irq\irqh.cpp" />
     <ClCompile Include="src\keypad\keypad.cpp" />
     <ClCompile Include="src\mmu\bios.cpp" />
     <ClCompile Include="src\mmu\mmu.cpp" />
@@ -207,7 +207,6 @@
     <ClInclude Include="src\gamepak\rtc.h" />
     <ClInclude Include="src\gamepak\save.h" />
     <ClInclude Include="src\gamepak\sram.h" />
-    <ClInclude Include="src\irq\io.h" />
     <ClInclude Include="src\keypad\io.h" />
     <ClInclude Include="src\core\framecounter.h" />
     <ClInclude Include="src\core\synchronizer.h" />
@@ -224,7 +223,6 @@
     <ClInclude Include="src\dma\dma.h" />
     <ClInclude Include="src\mmu\bios.h" />
     <ClInclude Include="src\mmu\ram.h" />
-    <ClInclude Include="src\irq\irqh.h" />
     <ClInclude Include="src\keypad\keypad.h" />
     <ClInclude Include="src\mmu\mmu.h" />
     <ClInclude Include="src\ppu\buffer.h" />

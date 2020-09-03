@@ -1,8 +1,8 @@
 #include "io.h"
 
 #include "arm/arm.h"
+#include "base/macros.h"
 #include "dma/dma.h"
-#include "irq/irqh.h"
 #include "keypad/keypad.h"
 #include "mmu/mmu.h"
 #include "ppu/ppu.h"
@@ -77,9 +77,9 @@ u8 Io::readByte(u32 addr) const
     INDEXED_CASE2(kRegTimer2Control , return timer.channels[2].control.read<kIndex>());
     INDEXED_CASE2(kRegTimer3Count   , return timer.channels[3].count.read<kIndex>());
     INDEXED_CASE2(kRegTimer3Control , return timer.channels[3].control.read<kIndex>());
-    INDEXED_CASE2(kRegIrqEnable     , return irqh.read<kLabel>());
-    INDEXED_CASE2(kRegIrqRequest    , return irqh.read<kLabel>());
-    INDEXED_CASE4(kRegIrqMaster     , return irqh.read<kLabel>());
+    INDEXED_CASE2(kRegIrqEnable     , return arm.irq.enable.read<kIndex>());
+    INDEXED_CASE2(kRegIrqRequest    , return arm.irq.request.read<kIndex>());
+    INDEXED_CASE4(kRegIrqMaster     , return arm.irq.master.read<kIndex>());
 
     INDEXED_CASE2(kRegUnused066, return 0);
     INDEXED_CASE2(kRegUnused06E, return 0);
@@ -226,9 +226,9 @@ void Io::writeByte(u32 addr, u8 byte)
     INDEXED_CASE1(kRegTimer2Control , timer.channels[2].control.write<kIndex>(byte));
     INDEXED_CASE2(kRegTimer3Count   , timer.channels[3].count.write<kIndex>(byte));
     INDEXED_CASE1(kRegTimer3Control , timer.channels[3].control.write<kIndex>(byte));
-    INDEXED_CASE2(kRegIrqEnable     , irqh.write<kLabel>(byte));
-    INDEXED_CASE2(kRegIrqRequest    , irqh.write<kLabel>(byte));
-    INDEXED_CASE4(kRegIrqMaster     , irqh.write<kLabel>(byte));
+    INDEXED_CASE2(kRegIrqEnable     , arm.irq.enable.write<kIndex>(byte));
+    INDEXED_CASE2(kRegIrqRequest    , arm.irq.request.write<kIndex>(byte));
+    INDEXED_CASE4(kRegIrqMaster     , arm.irq.master.write<kIndex>(byte));
     }
 }
 

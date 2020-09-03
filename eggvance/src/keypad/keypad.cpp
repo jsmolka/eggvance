@@ -1,7 +1,7 @@
 #include "keypad.h"
 
+#include "arm/arm.h"
 #include "core/inputcontext.h"
-#include "irq/irqh.h"
 
 void Keypad::update()
 {
@@ -15,6 +15,6 @@ void Keypad::update()
             : (~io.input.value &  io.control.mask);
 
         if (interrupt)
-            irqh.request(kIrqKeypad);
+            arm.raise(kIrqKeypad);
     }
 }

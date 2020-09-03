@@ -2,12 +2,12 @@
 
 #include <algorithm>
 
+#include "arm/arm.h"
 #include "base/bit.h"
 #include "base/constants.h"
 #include "base/macros.h"
 #include "core/videocontext.h"
 #include "dma/dma.h"
-#include "irq/irqh.h"
 
 void PPU::reset()
 {
@@ -104,7 +104,7 @@ void PPU::hblank()
 
     if (io.dispstat.hblank_irq)
     {
-        irqh.request(kIrqHBlank);
+        arm.raise(kIrqHBlank);
     }
     dma.broadcast(Dma::kTimingHBlank);
 }
@@ -121,7 +121,7 @@ void PPU::vblank()
 
     if (io.dispstat.vblank_irq)
     {
-        irqh.request(kIrqVBlank);
+        arm.raise(kIrqVBlank);
     }
     dma.broadcast(Dma::kTimingVBlank);
 }
@@ -131,7 +131,7 @@ void PPU::next()
     io.dispstat.vmatch = io.vcount.value == io.dispstat.vcompare;
     if (io.dispstat.vmatch && io.dispstat.vmatch_irq)
     {
-        irqh.request(kIrqVMatch);
+        arm.raise(kIrqVMatch);
     }
     io.vcount.next();
 }

@@ -1,7 +1,6 @@
 #include "dmachannel.h"
 
 #include "arm/arm.h"
-#include "irq/irqh.h"
 #include "mmu/mmu.h"
 
 enum AddressControl
@@ -62,7 +61,7 @@ void DmaChannel::run(int& cycles)
     running = false;
 
     if (control.irq)
-        irqh.request(kIrqDma0 << id);
+        arm.raise(kIrqDma0 << id);
 
     if (!(control.enable = control.repeat))
         control.value &= ~DmaControl::kEnable;

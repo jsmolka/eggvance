@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 #include "base/bit.h"
 #include "base/register.h"
 
@@ -102,4 +104,48 @@ struct ArmIo
         };
     }
     waitcnt;
+};
+
+class IrqMaster : public Register<4, 0x0001>
+{
+public:
+    template<uint Index>
+    void write(u8 byte)
+    {
+        Register<kSize, kMask>::write<Index>(byte);
+
+        process();
+    }
+
+    std::function<void(void)> process;
+};
+
+class IrqEnable : public Register<2, 0x3FFF>
+{
+public:
+    template<uint Index>
+    void write(u8 byte)
+    {
+        Register<kSize, kMask>::write<Index>(byte);
+
+        process();
+    }
+
+    std::function<void(void)> process;
+};
+
+class IrqRequest : public Register<2, 0x3FFF>
+{
+public:
+    template<uint Index>
+    void write(u8 byte)
+    {
+        static_assert(Index < kSize);
+
+        data[Index] &= ~(byte & (kMask >> (CHAR_BIT * Index)));
+
+        process();
+    }
+
+    std::function<void(void)> process;
 };

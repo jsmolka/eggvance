@@ -611,7 +611,7 @@ void Arm::Arm_SingleDataSwap(u32 instr)
 template<uint Instr>
 void Arm::Arm_SoftwareInterrupt(u32 instr)
 {
-    interruptSW();
+    interruptSw();
 }
 
 template<uint Instr>
