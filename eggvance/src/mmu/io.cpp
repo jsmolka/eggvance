@@ -3,7 +3,7 @@
 #include "arm/arm.h"
 #include "base/macros.h"
 #include "dma/dma.h"
-#include "keypad/keypad.h"
+#include "gamepad/gamepad.h"
 #include "mmu/mmu.h"
 #include "ppu/ppu.h"
 #include "timer/timer.h"
@@ -59,8 +59,8 @@ u8 Io::readByte(u32 addr) const
     INDEXED_CASE2(kRegJoyStatus     , return unused.joystat.read<kIndex>());
     INDEXED_CASE2(kRegWaitControl   , return arm.io.waitcnt.read<kIndex>());
     INDEXED_CASE1(kRegPostFlag      , return unused.postflag.read<kIndex>());
-    INDEXED_CASE2(kRegKeyInput      , return keypad.io.input.read<kIndex>());
-    INDEXED_CASE2(kRegKeyControl    , return keypad.io.control.read<kIndex>());
+    INDEXED_CASE2(kRegKeyInput      , return gamepad.input.read<kIndex>());
+    INDEXED_CASE2(kRegKeyControl    , return gamepad.control.read<kIndex>());
     INDEXED_CASE2(kRegDma0Count     , return 0);
     INDEXED_CASE2(kRegDma0Control   , return dma.channels[0].control.read<kIndex>());
     INDEXED_CASE2(kRegDma1Count     , return 0);
@@ -201,7 +201,7 @@ void Io::writeByte(u32 addr, u8 byte)
     INDEXED_CASE2(kRegWaitControl   , arm.io.waitcnt.write<kIndex>(byte));
     INDEXED_CASE1(kRegPostFlag      , unused.postflag.write<kIndex>(byte));
     INDEXED_CASE1(kRegHaltControl   , arm.io.haltcnt.write<kIndex>(byte));
-    INDEXED_CASE2(kRegKeyControl    , keypad.io.control.write<kIndex>(byte));
+    INDEXED_CASE2(kRegKeyControl    , gamepad.control.write<kIndex>(byte));
     INDEXED_CASE4(kRegDma0Sad       , dma.channels[0].sad.write<kIndex, 0x07FF'FFFF>(byte));
     INDEXED_CASE4(kRegDma0Dad       , dma.channels[0].dad.write<kIndex, 0x07FF'FFFF>(byte));
     INDEXED_CASE2(kRegDma0Count     , dma.channels[0].count.write<kIndex, 0x3FFF>(byte));

@@ -27,7 +27,7 @@ uint InputContext::state() const
     if ((state & ud_mask) == ud_mask) state &= ~ud_mask;
     if ((state & lr_mask) == lr_mask) state &= ~lr_mask;
 
-    return ~state;
+    return state;
 }
 
 void InputContext::processDeviceEvent(const SDL_ControllerDeviceEvent& event)
@@ -54,16 +54,16 @@ uint InputContext::keyboardState() const
     auto* keyboard = SDL_GetKeyboardState(NULL);
 
     uint state = 0;
-    state |= keyboard[config.controls.keyboard.a     ] << kBitA;
-    state |= keyboard[config.controls.keyboard.b     ] << kBitB;
-    state |= keyboard[config.controls.keyboard.up    ] << kBitUp;
-    state |= keyboard[config.controls.keyboard.down  ] << kBitDown;
-    state |= keyboard[config.controls.keyboard.left  ] << kBitLeft;
-    state |= keyboard[config.controls.keyboard.right ] << kBitRight;
-    state |= keyboard[config.controls.keyboard.start ] << kBitStart;
+    state |= keyboard[config.controls.keyboard.a]      << kBitA;
+    state |= keyboard[config.controls.keyboard.b]      << kBitB;
+    state |= keyboard[config.controls.keyboard.up]     << kBitUp;
+    state |= keyboard[config.controls.keyboard.down]   << kBitDown;
+    state |= keyboard[config.controls.keyboard.left]   << kBitLeft;
+    state |= keyboard[config.controls.keyboard.right]  << kBitRight;
+    state |= keyboard[config.controls.keyboard.start]  << kBitStart;
     state |= keyboard[config.controls.keyboard.select] << kBitSelect;
-    state |= keyboard[config.controls.keyboard.l     ] << kBitL;
-    state |= keyboard[config.controls.keyboard.r     ] << kBitR;
+    state |= keyboard[config.controls.keyboard.l]      << kBitL;
+    state |= keyboard[config.controls.keyboard.r]      << kBitR;
 
     return state;
 }
@@ -73,16 +73,16 @@ uint InputContext::controllerState() const
     uint state = 0;
     if (controller)
     {
-        state |= SDL_GameControllerGetButton(controller, config.controls.controller.a     ) << kBitA;
-        state |= SDL_GameControllerGetButton(controller, config.controls.controller.b     ) << kBitB;
-        state |= SDL_GameControllerGetButton(controller, config.controls.controller.up    ) << kBitUp;
-        state |= SDL_GameControllerGetButton(controller, config.controls.controller.down  ) << kBitDown;
-        state |= SDL_GameControllerGetButton(controller, config.controls.controller.left  ) << kBitLeft;
-        state |= SDL_GameControllerGetButton(controller, config.controls.controller.right ) << kBitRight;
-        state |= SDL_GameControllerGetButton(controller, config.controls.controller.start ) << kBitStart;
+        state |= SDL_GameControllerGetButton(controller, config.controls.controller.a)      << kBitA;
+        state |= SDL_GameControllerGetButton(controller, config.controls.controller.b)      << kBitB;
+        state |= SDL_GameControllerGetButton(controller, config.controls.controller.up)     << kBitUp;
+        state |= SDL_GameControllerGetButton(controller, config.controls.controller.down)   << kBitDown;
+        state |= SDL_GameControllerGetButton(controller, config.controls.controller.left)   << kBitLeft;
+        state |= SDL_GameControllerGetButton(controller, config.controls.controller.right)  << kBitRight;
+        state |= SDL_GameControllerGetButton(controller, config.controls.controller.start)  << kBitStart;
         state |= SDL_GameControllerGetButton(controller, config.controls.controller.select) << kBitSelect;
-        state |= SDL_GameControllerGetButton(controller, config.controls.controller.l     ) << kBitL;
-        state |= SDL_GameControllerGetButton(controller, config.controls.controller.r     ) << kBitR;
+        state |= SDL_GameControllerGetButton(controller, config.controls.controller.l)      << kBitL;
+        state |= SDL_GameControllerGetButton(controller, config.controls.controller.r)      << kBitR;
 
         int axis_lx = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTX);
         int axis_ly = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTY);

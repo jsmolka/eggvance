@@ -69,9 +69,6 @@
     <ClCompile Include="src\arm\instr_arm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\keypad\keypad.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\base\config.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -147,6 +144,9 @@
     <ClCompile Include="src\arm\interrupt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\gamepad\gamepad.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\arm\psr.h">
@@ -212,9 +212,6 @@
     <ClInclude Include="src\ppu\layer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\keypad\keypad.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\base\config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -252,9 +249,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\dma\io.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\keypad\io.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\timer\io.h">
@@ -315,6 +309,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\dma\dma.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gamepad\io.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gamepad\gamepad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

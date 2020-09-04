@@ -9,7 +9,7 @@
 #include "core/inputcontext.h"
 #include "core/videocontext.h"
 #include "dma/dma.h"
-#include "keypad/keypad.h"
+#include "gamepad/gamepad.h"
 #include "mmu/mmu.h"
 #include "ppu/ppu.h"
 #include "timer/timer.h"
@@ -37,13 +37,13 @@ void core::reset()
 
     eggcpt::reconstruct(arm);
     eggcpt::reconstruct(dma);
-    eggcpt::reconstruct(keypad);
+    eggcpt::reconstruct(gamepad);
     eggcpt::reconstruct(timer);
 }
 
 void core::frame()
 {
-    keypad.update();
+    gamepad.poll();
 
     uint visible = 160;
     while (visible--)
