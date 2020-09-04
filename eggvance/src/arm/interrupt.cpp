@@ -51,13 +51,13 @@ void Arm::interruptSw()
 
 void Arm::processIrq()
 {
-    if (irq.enable.value & irq.request.value)
-    {
+    bool interrupt = irq.enable.value & irq.request.value;
+
+    if (interrupt)
         state &= ~kStateHalt;
 
-        if (irq.master.value)
-            state |= kStateIrq;
-        else
-            state &= ~kStateIrq;
-    }
+    if (interrupt && irq.master.value)
+        state |= kStateIrq;
+    else
+        state &= ~kStateIrq;
 }
