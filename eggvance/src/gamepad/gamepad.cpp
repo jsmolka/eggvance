@@ -11,5 +11,5 @@ void Gamepad::poll()
     if (previous != input.value
             && control.irq
             && control.raisesIrq(input.value))
-        arm.raise(kIrqKeypad);
+        arm.raise(kIrqGamepad);
 }

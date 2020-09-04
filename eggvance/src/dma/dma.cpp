@@ -47,8 +47,8 @@ void Dma::broadcast(Dma::Timing timing)
 void Dma::emit(DmaChannel& channel, Dma::Timing timing)
 {
     if (!channel.running
-        && channel.control.enable
-        && channel.control.timing == timing)
+            && channel.control.enable
+            && channel.control.timing == timing)
     {
         channel.start();
 
