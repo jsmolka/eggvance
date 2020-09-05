@@ -106,7 +106,7 @@ void PPU::hblank()
     {
         arm.raise(kIrqHBlank);
     }
-    dma.broadcast(Dma::kTimingHBlank);
+    dma.broadcast(DmaControl::kTimingHBlank);
 }
 
 void PPU::vblank()
@@ -123,7 +123,7 @@ void PPU::vblank()
     {
         arm.raise(kIrqVBlank);
     }
-    dma.broadcast(Dma::kTimingVBlank);
+    dma.broadcast(DmaControl::kTimingVBlank);
 }
 
 void PPU::next()

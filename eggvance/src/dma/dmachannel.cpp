@@ -63,7 +63,10 @@ void DmaChannel::run(int& cycles)
     if (control.irq)
         arm.raise(kIrqDma0 << id);
 
-    if (!(control.enable = control.repeat))
+    control.enable = control.repeat
+        && control.timing != DmaControl::kTimingImmediate;
+
+    if (!control.enable)
         control.value &= ~DmaControl::kEnable;
 }
 

@@ -7,7 +7,7 @@ Dma::Dma()
     for (auto& channel : channels)
     {
         channel.control.emit_immediate = [&]() {
-            emit(channel, kTimingImmediate);
+            emit(channel, DmaControl::kTimingImmediate);
         };
     }
 }
@@ -36,7 +36,7 @@ void Dma::run(int& cycles)
     }
 }
 
-void Dma::broadcast(Dma::Timing timing)
+void Dma::broadcast(DmaControl::Timing timing)
 {
     for (auto& channel : channels)
     {
@@ -44,7 +44,7 @@ void Dma::broadcast(Dma::Timing timing)
     }
 }
 
-void Dma::emit(DmaChannel& channel, Dma::Timing timing)
+void Dma::emit(DmaChannel& channel, DmaControl::Timing timing)
 {
     if (!channel.running
             && channel.control.enable

@@ -20,6 +20,14 @@ public:
 class DmaControl : public Register<2>
 {
 public:
+    enum Timing
+    {
+        kTimingImmediate,
+        kTimingVBlank,
+        kTimingHBlank,
+        kTimingSpecial
+    };
+
     static constexpr uint kEnable = 1 << 15;
 
     template<uint Index, uint Mask>

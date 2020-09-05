@@ -9,21 +9,13 @@ class Dma
 public:
     friend class Io;
 
-    enum Timing
-    {
-        kTimingImmediate,
-        kTimingVBlank,
-        kTimingHBlank,
-        kTimingSpecial
-    };
-
     Dma();
 
     void run(int& cycles);
-    void broadcast(Dma::Timing timing);
+    void broadcast(DmaControl::Timing timing);
 
 private:
-    void emit(DmaChannel& channel, Dma::Timing timing);
+    void emit(DmaChannel& channel, DmaControl::Timing timing);
 
     DmaChannel* active = nullptr;
     std::array<DmaChannel, 4> channels = { 0, 1, 2, 3 };
