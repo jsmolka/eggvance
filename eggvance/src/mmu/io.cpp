@@ -57,7 +57,7 @@ u8 Io::readByte(u32 addr) const
     INDEXED_CASE4(kRegJoyReceive    , return unused.joyrecv.read<kIndex>());
     INDEXED_CASE4(kRegJoyTransmit   , return unused.joytrans.read<kIndex>());
     INDEXED_CASE2(kRegJoyStatus     , return unused.joystat.read<kIndex>());
-    INDEXED_CASE2(kRegWaitControl   , return arm.io.waitcnt.read<kIndex>());
+    INDEXED_CASE2(kRegWaitControl   , return arm.waitcnt.read<kIndex>());
     INDEXED_CASE1(kRegPostFlag      , return unused.postflag.read<kIndex>());
     INDEXED_CASE2(kRegKeyInput      , return gamepad.input.read<kIndex>());
     INDEXED_CASE2(kRegKeyControl    , return gamepad.control.read<kIndex>());
@@ -198,9 +198,9 @@ void Io::writeByte(u32 addr, u8 byte)
     INDEXED_CASE4(kRegJoyReceive    , unused.joyrecv.write<kIndex>(byte));
     INDEXED_CASE4(kRegJoyTransmit   , unused.joytrans.write<kIndex>(byte));
     INDEXED_CASE2(kRegJoyStatus     , unused.joystat.write<kIndex>(byte));
-    INDEXED_CASE2(kRegWaitControl   , arm.io.waitcnt.write<kIndex>(byte));
+    INDEXED_CASE2(kRegWaitControl   , arm.waitcnt.write<kIndex>(byte));
     INDEXED_CASE1(kRegPostFlag      , unused.postflag.write<kIndex>(byte));
-    INDEXED_CASE1(kRegHaltControl   , arm.io.haltcnt.write<kIndex>(byte));
+    INDEXED_CASE1(kRegHaltControl   , arm.haltcnt.write<kIndex>(byte));
     INDEXED_CASE2(kRegKeyControl    , gamepad.control.write<kIndex>(byte));
     INDEXED_CASE4(kRegDma0Sad       , dma.channels[0].sad.write<kIndex, 0x07FF'FFFF>(byte));
     INDEXED_CASE4(kRegDma0Dad       , dma.channels[0].dad.write<kIndex, 0x07FF'FFFF>(byte));

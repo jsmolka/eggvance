@@ -46,8 +46,6 @@ public:
 
     uint state = 0;
 
-    ArmIo io;
-
 private:
     using Instruction32 = void(Arm::*)(u32);
     using Instruction16 = void(Arm::*)(u16);
@@ -150,6 +148,9 @@ private:
     int cycles    = 0;
     u32 prev_addr = 0;
     u32 pipe[2]   = { 0 };
+
+    HaltControl haltcnt;
+    WaitControl waitcnt;
 
     struct
     {

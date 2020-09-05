@@ -3,11 +3,11 @@
 #include "arm/arm.h"
 
 template<uint Index>
-void ArmIo::HaltControl::write(u8 byte)
+void HaltControl::write(u8 byte)
 {
     RegisterW<kSize, kMask>::write<Index>(byte);
 
     arm.state |= Arm::kStateHalt;
 }
 
-template void ArmIo::HaltControl::write<0>(u8);
+template void HaltControl::write<0>(u8);
