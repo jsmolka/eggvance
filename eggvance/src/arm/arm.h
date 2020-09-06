@@ -12,7 +12,7 @@ public:
     friend class DmaChannel;
     friend class MMU;
 
-    enum State
+    enum
     {
         kStateThumb = 1 << 0,
         kStateHalt  = 1 << 1,
