@@ -106,7 +106,7 @@ void Arm::Arm_DataProcessing(u32 instr)
 
             switch (shift)
             {
-            case kShiftLsl: op2 = lsl       (op2, amount, flags && kLogical); break;
+            case kShiftLsl: op2 = lsl<false>(op2, amount, flags && kLogical); break;
             case kShiftLsr: op2 = lsr<false>(op2, amount, flags && kLogical); break;
             case kShiftAsr: op2 = asr<false>(op2, amount, flags && kLogical); break;
             case kShiftRor: op2 = ror<false>(op2, amount, flags && kLogical); break;
@@ -123,7 +123,7 @@ void Arm::Arm_DataProcessing(u32 instr)
 
             switch (shift)
             {
-            case kShiftLsl: op2 = lsl      (op2, amount, flags && kLogical); break;
+            case kShiftLsl: op2 = lsl<true>(op2, amount, flags && kLogical); break;
             case kShiftLsr: op2 = lsr<true>(op2, amount, flags && kLogical); break;
             case kShiftAsr: op2 = asr<true>(op2, amount, flags && kLogical); break;
             case kShiftRor: op2 = ror<true>(op2, amount, flags && kLogical); break;
@@ -329,7 +329,7 @@ void Arm::Arm_SingleDataTransfer(u32 instr)
 
         switch (shift)
         {
-        case kShiftLsl: offset = lsl      (regs[rm], amount, false); break;
+        case kShiftLsl: offset = lsl<true>(regs[rm], amount, false); break;
         case kShiftLsr: offset = lsr<true>(regs[rm], amount, false); break;
         case kShiftAsr: offset = asr<true>(regs[rm], amount, false); break;
         case kShiftRor: offset = ror<true>(regs[rm], amount, false); break;

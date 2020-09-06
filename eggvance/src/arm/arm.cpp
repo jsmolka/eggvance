@@ -51,22 +51,22 @@ void Arm::flushWord()
     pc += 4;
 }
 
-template<uint state>
+template<uint State>
 void Arm::dispatch()
 {
-    while (cycles > 0 && this->state == state)
+    while (cycles > 0 && state == State)
     {
         int previous = cycles;
 
-        if (state & kStateDma)
+        if (State & kStateDma)
         {
             dma.run(cycles);
         }
         else
         {
-            if (state & kStateHalt)
+            if (State & kStateHalt)
             {
-                if (state & kStateTimer)
+                if (State & kStateTimer)
                     timer.runUntilIrq(cycles);
                 else
                     cycles = 0;
@@ -75,13 +75,13 @@ void Arm::dispatch()
             }
             else
             {
-                if (state & kStateIrq && !cpsr.i)
+                if (State & kStateIrq && !cpsr.i)
                 {
                     interruptHw();
                 }
                 else
                 {
-                    if (state & kStateThumb)
+                    if (State & kStateThumb)
                     {
                         u16 instr = pipe[0];
 
@@ -107,7 +107,7 @@ void Arm::dispatch()
             }
         }
 
-        if (state & kStateTimer)
+        if (State & kStateTimer)
             timer.run(previous - cycles);
     }
 }

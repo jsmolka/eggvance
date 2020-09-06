@@ -72,9 +72,6 @@
     <ClCompile Include="src\base\config.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\arm\util.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\gamepak\gamepak.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -145,6 +142,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\gamepad\gamepad.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\arm\arithmetic.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -329,5 +329,8 @@
   <ItemGroup>
     <None Include="eggvance.html" />
     <None Include="eggvance.toml" />
+    <None Include="src\arm\barrelshifter.inl">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

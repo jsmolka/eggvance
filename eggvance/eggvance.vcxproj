@@ -71,6 +71,7 @@
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <WarningLevel>Level2</WarningLevel>
       <DisableSpecificWarnings>26451;26812</DisableSpecificWarnings>
+      <AssemblerOutput>NoListing</AssemblerOutput>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -97,6 +98,7 @@
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <WarningLevel>Level2</WarningLevel>
       <DisableSpecificWarnings>26451;26812</DisableSpecificWarnings>
+      <AssemblerOutput>NoListing</AssemblerOutput>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -124,6 +126,7 @@
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <WarningLevel>Level2</WarningLevel>
       <DisableSpecificWarnings>26451;26812</DisableSpecificWarnings>
+      <AssemblerOutput>NoListing</AssemblerOutput>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,7 +142,7 @@
     <ClCompile Include="src\arm\instr_thumb.cpp" />
     <ClCompile Include="src\arm\interrupt.cpp" />
     <ClCompile Include="src\arm\io.cpp" />
-    <ClCompile Include="src\arm\util.cpp" />
+    <ClCompile Include="src\arm\arithmetic.cpp" />
     <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\base\config.cpp" />
     <ClCompile Include="src\core\audiocontext.cpp" />
@@ -244,6 +247,7 @@
   <ItemGroup>
     <None Include="eggvance.html" />
     <None Include="eggvance.toml" />
+    <None Include="src\arm\barrelshifter.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

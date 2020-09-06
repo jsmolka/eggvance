@@ -5,24 +5,6 @@
 #include "arm/io.h"
 #include "arm/registers.h"
 
-enum Irq
-{
-    kIrqVBlank  = 1 << 0,
-    kIrqHBlank  = 1 << 1,
-    kIrqVMatch  = 1 << 2,
-    kIrqTimer0  = 1 << 3,
-    kIrqTimer1  = 1 << 4,
-    kIrqTimer2  = 1 << 5,
-    kIrqTimer3  = 1 << 6,
-    kIrqSerial  = 1 << 7,
-    kIrqDma0    = 1 << 8,
-    kIrqDma1    = 1 << 9,
-    kIrqDma2    = 1 << 10,
-    kIrqDma3    = 1 << 11,
-    kIrqGamepad = 1 << 12,
-    kIrqGamePak = 1 << 13
-};
-
 class Arm : public Registers
 {
 public:
@@ -58,16 +40,23 @@ private:
         kShiftRor
     };
 
-    u32 lsl(u32 value, u32 amount, bool flags = true);
-    template<bool immediate>
-    u32 lsr(u32 value, u32 amount, bool flags = true);
-    template<bool immediate>
-    u32 asr(u32 value, u32 amount, bool flags = true);
-    template<bool immediate>
-    u32 ror(u32 value, u32 amount, bool flags = true);
+    template<bool Immediate> u32 lsl(u32 value, u32 amount, bool flags = true);
+    template<bool Immediate> u32 lsr(u32 value, u32 amount, bool flags = true);
+    template<bool Immediate> u32 asr(u32 value, u32 amount, bool flags = true);
+    template<bool Immediate> u32 ror(u32 value, u32 amount, bool flags = true);
 
-    template<typename T>
-    T log(T value, bool flags = true);
+    template<typename Integral>
+    Integral log(Integral value, bool flags = true)
+    {
+        static_assert(eggcpt::is_any_of_v<Integral, u32, u64>);
+
+        if (flags)
+        {
+            cpsr.setZ(value);
+            cpsr.setN(value);
+        }
+        return value;
+    }
 
     u32 add(u32 op1, u32 op2, bool flags = true);
     u32 sub(u32 op1, u32 op2, bool flags = true);
@@ -91,7 +80,7 @@ private:
     void flushHalf();
     void flushWord();
 
-    template<uint state>
+    template<uint State>
     void dispatch();
 
     void idle();
@@ -147,7 +136,7 @@ private:
 
     int cycles    = 0;
     u32 prev_addr = 0;
-    u32 pipe[2]   = { 0 };
+    u32 pipe[2]   = {};
 
     HaltControl haltcnt;
     WaitControl waitcnt;
@@ -161,3 +150,5 @@ private:
 };
 
 inline Arm arm;
+
+#include "barrelshifter.inl"

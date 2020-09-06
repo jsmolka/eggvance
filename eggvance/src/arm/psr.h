@@ -36,25 +36,25 @@ public:
         return (m << 0) | (t << 5) | (f << 6) | (i << 7) | (v << 28) | (c << 29) | (z << 30) | (n << 31);
     }
 
-    template<typename T>
-    void setZ(T value)
+    template<typename Integral>
+    void setZ(Integral value)
     {
-        static_assert(std::is_integral_v<T>);
+        static_assert(eggcpt::is_any_of_v<Integral, u32, u64>);
 
         z = value == 0;
     }
 
-    template<typename T>
-    void setN(T value)
+    template<typename Integral>
+    void setN(Integral value)
     {
-        static_assert(std::is_integral_v<T>);
+        static_assert(eggcpt::is_any_of_v<Integral, u32, u64>);
 
-        n = bit::shr(value, CHAR_BIT * sizeof(T) - 1);
+        n = bit::msb(value);
     }
 
     void setCAdd(u64 op1, u64 op2)
     {
-        c = op1 + op2 > 0xFFFF'FFFFull;
+        c = op1 + op2 > 0xFFFF'FFFFULL;
     }
 
     void setCSub(u64 op1, u64 op2)
@@ -79,6 +79,26 @@ public:
 
     bool check(uint condition) const
     {
+        enum Condition
+        {
+            kConditionEQ,
+            kConditionNE,
+            kConditionCS,
+            kConditionCC,
+            kConditionMI,
+            kConditionPL,
+            kConditionVS,
+            kConditionVC,
+            kConditionHI,
+            kConditionLS,
+            kConditionGE,
+            kConditionLT,
+            kConditionGT,
+            kConditionLE,
+            kConditionAL,
+            kConditionNV
+        };
+
         switch (condition)
         {
         case kConditionEQ: return z;
@@ -112,25 +132,4 @@ public:
     uint c = 0;
     uint z = 0;
     uint n = 0;
-
-private:
-    enum Condition
-    {
-        kConditionEQ = 0x0,
-        kConditionNE = 0x1,
-        kConditionCS = 0x2,
-        kConditionCC = 0x3,
-        kConditionMI = 0x4,
-        kConditionPL = 0x5,
-        kConditionVS = 0x6,
-        kConditionVC = 0x7,
-        kConditionHI = 0x8,
-        kConditionLS = 0x9,
-        kConditionGE = 0xA,
-        kConditionLT = 0xB,
-        kConditionGT = 0xC,
-        kConditionLE = 0xD,
-        kConditionAL = 0xE,
-        kConditionNV = 0xF
-    };
 };

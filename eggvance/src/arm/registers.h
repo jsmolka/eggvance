@@ -16,7 +16,7 @@ public:
             u32 lr;
             u32 pc;
         };
-        u32 regs[16] = { 0 };
+        u32 regs[16] = {};
     };
 
     PSR cpsr;
@@ -28,16 +28,16 @@ protected:
 private:
     enum Bank
     {
-        kBankDef = 0,
-        kBankFiq = 1,
-        kBankIrq = 2,
-        kBankSvc = 3,
-        kBankAbt = 4,
-        kBankUnd = 5
+        kBankDef,
+        kBankFiq,
+        kBankIrq,
+        kBankSvc,
+        kBankAbt,
+        kBankUnd
     };
 
     static Bank modeToBank(uint mode);
 
-    u32 bank_all[6][3] = { 0 };
-    u32 bank_fiq[2][5] = { 0 };
+    u32 bank_all[6][3] = {};
+    u32 bank_fiq[2][5] = {};
 };

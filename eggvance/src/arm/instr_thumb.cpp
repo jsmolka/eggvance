@@ -18,7 +18,7 @@ void Arm::Thumb_MoveShiftedRegister(u16 instr)
 
     switch (kOpcode)
     {
-    case kShiftLsl: dst = log(lsl      (src, kAmount)); break;
+    case kShiftLsl: dst = log(lsl<true>(src, kAmount)); break;
     case kShiftLsr: dst = log(lsr<true>(src, kAmount)); break;
     case kShiftAsr: dst = log(asr<true>(src, kAmount)); break;
 
@@ -126,7 +126,7 @@ void Arm::Thumb_AluOperations(u16 instr)
 
     switch (kOpcode)
     {
-    case kOpcodeLsl: dst = log(lsl       (dst, src)); idle(); break;
+    case kOpcodeLsl: dst = log(lsl<false>(dst, src)); idle(); break;
     case kOpcodeLsr: dst = log(lsr<false>(dst, src)); idle(); break;
     case kOpcodeAsr: dst = log(asr<false>(dst, src)); idle(); break;
     case kOpcodeRor: dst = log(ror<false>(dst, src)); idle(); break;
