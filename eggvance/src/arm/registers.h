@@ -38,6 +38,6 @@ private:
 
     static Bank modeToBank(uint mode);
 
-    u32 bank_all[6][3] = {};
+    u32 bank_def[6][3] = {};
     u32 bank_fiq[2][5] = {};
 };

@@ -64,17 +64,17 @@ public:
 
     void setVAdd(u32 op1, u32 op2, u32 res)
     {
-        v = ((op1 ^ res) & (~op1 ^ op2)) >> 31;
+        v = bit::msb((op1 ^ res) & (~op1 ^ op2));
     }
 
     void setVSub(u32 op1, u32 op2, u32 res)
     {
-        v = ((op1 ^ op2) & (~op2 ^ res)) >> 31;
+        v = bit::msb((op1 ^ op2) & (~op2 ^ res));
     }
 
     uint size() const
     {
-        return 2 << (t ^ 0x1);
+        return 4 >> t;
     }
 
     bool check(uint condition) const

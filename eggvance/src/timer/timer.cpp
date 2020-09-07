@@ -58,7 +58,7 @@ void Timer::runUntilIrq(int& cycles)
 void Timer::schedule()
 {
     active.clear();
-    arm.state &= ~Arm::kStateTimer;
+    arm.state &= ~kStateTimer;
 
     event = kEventMax;
     for (auto& channel : channels)
@@ -66,7 +66,7 @@ void Timer::schedule()
         if (channel.control.enable && !channel.control.cascade)
         {
             active.push_back(std::ref(channel));
-            arm.state |= Arm::kStateTimer;
+            arm.state |= kStateTimer;
 
             event = std::min(event, channel.nextEvent());
         }

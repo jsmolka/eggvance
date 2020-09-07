@@ -1,5 +1,18 @@
 #pragma once
 
+template<typename Integral>
+Integral Arm::log(Integral value, bool flags)
+{
+    static_assert(eggcpt::is_any_of_v<Integral, u32, u64>);
+
+    if (flags)
+    {
+        cpsr.setZ(value);
+        cpsr.setN(value);
+    }
+    return value;
+}
+
 template<bool Immediate>
 u32 Arm::lsl(u32 value, u32 amount, bool flags)
 {
@@ -94,4 +107,18 @@ u32 Arm::ror(u32 value, u32 amount, bool flags)
         value = (c << 31) | (value >> 1);
     }
     return value;
+}
+
+template<bool Signed>
+void Arm::booth(u32 multiplier)
+{
+    for (s32 mask = 0xFF00'0000; mask != 0xFFFF'FF00; mask >>= 8)
+    {
+        u32 bits = multiplier & mask;
+        if (bits == 0 || (Signed && bits == mask))
+            cycles++;
+        else
+            break;
+    }
+    cycles -= 4;
 }

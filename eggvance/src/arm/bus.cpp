@@ -49,21 +49,21 @@ void Arm::writeWord(u32 addr, u32 word)
     mmu.writeWord(addr, word);
 }
 
-u32 Arm::readWordRotated(u32 addr)
+u32 Arm::readWordRotate(u32 addr)
 {
     u32 value = readWord(addr);
 
     return bit::ror(value, (addr & 0x3) << 3);
 }
 
-u32 Arm::readHalfRotated(u32 addr)
+u32 Arm::readHalfRotate(u32 addr)
 {
     u32 value = readHalf(addr);
 
     return bit::ror(value, (addr & 0x1) << 3);
 }
 
-u32 Arm::readHalfSigned(u32 addr)
+u32 Arm::readHalfSignEx(u32 addr)
 {
     if (addr & 0x1)
     {

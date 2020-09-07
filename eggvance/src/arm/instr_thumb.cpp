@@ -142,7 +142,7 @@ void Arm::Thumb_AluOperations(u16 instr)
     case kOpcodeSbc: dst = sbc(dst,   src); break;
     case kOpcodeNeg: dst = sub(  0,   src); break;
     case kOpcodeMul:
-        booth(dst, true);
+        booth<true>(dst);
         dst = log(dst * src);
         break;
 
@@ -256,7 +256,7 @@ void Arm::Thumb_LoadStoreRegisterOffset(u16 instr)
         break;
 
     case kOpcodeLdr:
-        dst = readWordRotated(addr);
+        dst = readWordRotate(addr);
         idle();
         break;
 
@@ -304,12 +304,12 @@ void Arm::Thumb_LoadStoreByteHalf(u16 instr)
         break;
 
     case kOpcodeLdrh:
-        dst = readHalfRotated(addr);
+        dst = readHalfRotate(addr);
         idle();
         break;
 
     case kOpcodeLdrsh:
-        dst = readHalfSigned(addr);
+        dst = readHalfSignEx(addr);
         idle();
         break;
 
@@ -350,7 +350,7 @@ void Arm::Thumb_LoadStoreImmediateOffset(u16 instr)
         break;
 
     case kOpcodeLdr:
-        dst = readWordRotated(addr);
+        dst = readWordRotate(addr);
         idle();
         break;
 
@@ -379,7 +379,7 @@ void Arm::Thumb_LoadStoreHalf(u16 instr)
 
     if (kLoad)
     {
-        dst = readHalfRotated(addr);
+        dst = readHalfRotate(addr);
         idle();
     }
     else
@@ -401,7 +401,7 @@ void Arm::Thumb_LoadStoreSpRelative(u16 instr)
 
     if (kLoad)
     {
-        dst = readWordRotated(addr);
+        dst = readWordRotate(addr);
         idle();
     }
     else

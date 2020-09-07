@@ -252,7 +252,7 @@ void Arm::Arm_Multiply(u32 instr)
     }
     log(dst, kFlags);
 
-    booth(op2, true);
+    booth<true>(op2);
 }
 
 template<uint Instr>
@@ -290,7 +290,7 @@ void Arm::Arm_MultiplyLong(u32 instr)
     dstl = static_cast<u32>(res);
     dsth = static_cast<u32>(res >> 32);
 
-    booth(static_cast<u32>(op2), kSign);
+    booth<kSign>(static_cast<u32>(op2));
 }
 
 template<uint Instr>
@@ -354,7 +354,7 @@ void Arm::Arm_SingleDataTransfer(u32 instr)
     {
         dst = kByte
             ? readByte(addr)
-            : readWordRotated(addr);
+            : readWordRotate(addr);
 
         if (rd == 15)
             flushWord();
@@ -432,7 +432,7 @@ void Arm::Arm_HalfSignedDataTransfer(u32 instr)
         switch (kOpcode)
         {
         case kOpcodeLdrh:
-            dst = readHalfRotated(addr);
+            dst = readHalfRotate(addr);
             break;
 
         case kOpcodeLdrsb:
@@ -441,7 +441,7 @@ void Arm::Arm_HalfSignedDataTransfer(u32 instr)
             break;
 
         case kOpcodeLdrsh:
-            dst = readHalfSigned(addr);
+            dst = readHalfSignEx(addr);
             break;
 
         default:
@@ -602,7 +602,7 @@ void Arm::Arm_SingleDataSwap(u32 instr)
     }
     else
     {
-        dst = readWordRotated(addr);
+        dst = readWordRotate(addr);
         writeWord(addr, src);
     }
     idle();

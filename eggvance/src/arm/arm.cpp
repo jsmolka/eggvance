@@ -1,5 +1,7 @@
 #include "arm.h"
 
+#include <utility>
+
 #include "arm/decode.h"
 #include "base/macros.h"
 #include "dma/dma.h"
@@ -88,7 +90,7 @@ void Arm::dispatch()
                         pipe[0] = pipe[1];
                         pipe[1] = readHalf(pc);
 
-                        (this->*instr_thumb[hashThumb(instr)])(instr);
+                        std::invoke(instr_thumb[hashThumb(instr)], this, instr);
                     }
                     else
                     {
@@ -99,7 +101,7 @@ void Arm::dispatch()
 
                         if (cpsr.check(instr >> 28))
                         {
-                            (this->*instr_arm[hashArm(instr)])(instr);
+                            std::invoke(instr_arm[hashArm(instr)], this, instr);
                         }
                     }
                 }
@@ -115,23 +117,4 @@ void Arm::dispatch()
 void Arm::idle()
 {
     cycles--;
-}
-
-void Arm::booth(u32 multiplier, bool sign)
-{
-    static constexpr u32 masks[3] = {
-        0xFF00'0000,
-        0xFFFF'0000,
-        0xFFFF'FF00
-    };
-
-    for (u32 mask : masks)
-    {
-        u32 bits = multiplier & mask;
-        if (bits == 0 || (sign && bits == mask))
-            cycles++;
-        else
-            break;
-    }
-    cycles -= 4;
 }

@@ -7,7 +7,7 @@ void HaltControl::write(u8 byte)
 {
     RegisterW<kSize, kMask>::write<Index>(byte);
 
-    arm.state |= Arm::kStateHalt;
+    arm.state |= kStateHalt;
 }
 
 template void HaltControl::write<0>(u8);

@@ -12,11 +12,11 @@ Registers::Registers()
         spsr = 0x0000'0000;
         cpsr = 0x0000'005F;
 
-        bank_all[kBankFiq][0] = 0x0300'7F00;
-        bank_all[kBankAbt][0] = 0x0300'7F00;
-        bank_all[kBankUnd][0] = 0x0300'7F00;
-        bank_all[kBankSvc][0] = 0x0300'7FE0;
-        bank_all[kBankIrq][0] = 0x0300'7FA0;
+        bank_def[kBankFiq][0] = 0x0300'7F00;
+        bank_def[kBankAbt][0] = 0x0300'7F00;
+        bank_def[kBankUnd][0] = 0x0300'7F00;
+        bank_def[kBankSvc][0] = 0x0300'7FE0;
+        bank_def[kBankIrq][0] = 0x0300'7FA0;
     }
     else 
     {
@@ -32,13 +32,13 @@ void Registers::switchMode(uint mode)
 
     if (bank_old != bank_new)
     {
-        bank_all[bank_old][0] = sp;
-        bank_all[bank_old][1] = lr;
-        bank_all[bank_old][2] = spsr;
+        bank_def[bank_old][0] = sp;
+        bank_def[bank_old][1] = lr;
+        bank_def[bank_old][2] = spsr;
 
-        sp   = bank_all[bank_new][0];
-        lr   = bank_all[bank_new][1];
-        spsr = bank_all[bank_new][2];
+        sp   = bank_def[bank_new][0];
+        lr   = bank_def[bank_new][1];
+        spsr = bank_def[bank_new][2];
 
         if (bank_old == kBankFiq || bank_new == kBankFiq)
         {

@@ -2,6 +2,8 @@
 
 #include <eggcpt/macros.h>
 
+#include "base/int.h"
+
 #define INDEXED_CASE(label, index, ...)         \
     case label + index:                         \
     {                                           \

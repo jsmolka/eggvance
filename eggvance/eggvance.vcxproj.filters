@@ -329,7 +329,7 @@
   <ItemGroup>
     <None Include="eggvance.html" />
     <None Include="eggvance.toml" />
-    <None Include="src\arm\barrelshifter.inl">
+    <None Include="src\arm\arm.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

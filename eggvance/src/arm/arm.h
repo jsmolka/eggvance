@@ -5,21 +5,21 @@
 #include "arm/io.h"
 #include "arm/registers.h"
 
+enum
+{
+    kStateThumb = 1 << 0,
+    kStateHalt  = 1 << 1,
+    kStateIrq   = 1 << 2,
+    kStateDma   = 1 << 3,
+    kStateTimer = 1 << 4
+};
+
 class Arm : public Registers
 {
 public:
     friend class Io;
     friend class DmaChannel;
     friend class MMU;
-
-    enum
-    {
-        kStateThumb = 1 << 0,
-        kStateHalt  = 1 << 1,
-        kStateIrq   = 1 << 2,
-        kStateDma   = 1 << 3,
-        kStateTimer = 1 << 4
-    };
 
     Arm();
 
@@ -46,17 +46,7 @@ private:
     template<bool Immediate> u32 ror(u32 value, u32 amount, bool flags = true);
 
     template<typename Integral>
-    Integral log(Integral value, bool flags = true)
-    {
-        static_assert(eggcpt::is_any_of_v<Integral, u32, u64>);
-
-        if (flags)
-        {
-            cpsr.setZ(value);
-            cpsr.setN(value);
-        }
-        return value;
-    }
+    Integral log(Integral value, bool flags = true);
 
     u32 add(u32 op1, u32 op2, bool flags = true);
     u32 sub(u32 op1, u32 op2, bool flags = true);
@@ -73,9 +63,9 @@ private:
     void writeHalf(u32 addr, u16 half);
     void writeWord(u32 addr, u32 word);
 
-    u32 readWordRotated(u32 addr);
-    u32 readHalfRotated(u32 addr);
-    u32 readHalfSigned(u32 addr);
+    u32 readWordRotate(u32 addr);
+    u32 readHalfRotate(u32 addr);
+    u32 readHalfSignEx(u32 addr);
 
     void flushHalf();
     void flushWord();
@@ -84,7 +74,9 @@ private:
     void dispatch();
 
     void idle();
-    void booth(u32 multiplier, bool ones);
+
+    template<bool Signed>
+    void booth(u32 multiplier);
 
     void interrupt(u32 pc, u32 lr, PSR::Mode mode);
     void interruptHw();
@@ -151,4 +143,4 @@ private:
 
 inline Arm arm;
 
-#include "barrelshifter.inl"
+#include "arm.inl"
