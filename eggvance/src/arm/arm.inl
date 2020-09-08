@@ -112,7 +112,7 @@ u32 Arm::ror(u32 value, u32 amount, bool flags)
 template<bool Signed>
 void Arm::booth(u32 multiplier)
 {
-    for (s32 mask = 0xFF00'0000; mask != 0xFFFF'FF00; mask >>= 8)
+    for (s32 mask = 0xFF00'0000; mask != 0xFFFF'FFFF; mask >>= 8)
     {
         u32 bits = multiplier & mask;
         if (bits == 0 || (Signed && bits == mask))
