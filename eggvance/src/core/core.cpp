@@ -16,7 +16,6 @@
 
 void core::init(int argc, char* argv[])
 {
-    config.init(argc, argv);
     mmu.bios.init(config.bios_file);
 
     audio_ctx.init();

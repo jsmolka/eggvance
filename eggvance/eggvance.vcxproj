@@ -70,7 +70,7 @@
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <WarningLevel>Level2</WarningLevel>
-      <DisableSpecificWarnings>26451;26812</DisableSpecificWarnings>
+      <DisableSpecificWarnings>26451;26495;26812;  </DisableSpecificWarnings>
       <AssemblerOutput>NoListing</AssemblerOutput>
     </ClCompile>
     <Link>
@@ -97,7 +97,7 @@
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <WarningLevel>Level2</WarningLevel>
-      <DisableSpecificWarnings>26451;26812</DisableSpecificWarnings>
+      <DisableSpecificWarnings>26451;26495;26812;  </DisableSpecificWarnings>
       <AssemblerOutput>NoListing</AssemblerOutput>
     </ClCompile>
     <Link>
@@ -125,7 +125,7 @@
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <WarningLevel>Level2</WarningLevel>
-      <DisableSpecificWarnings>26451;26812</DisableSpecificWarnings>
+      <DisableSpecificWarnings>26451;26495;26812;  </DisableSpecificWarnings>
       <AssemblerOutput>NoListing</AssemblerOutput>
     </ClCompile>
     <Link>

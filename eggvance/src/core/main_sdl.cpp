@@ -25,17 +25,17 @@ void processDropEvent(const SDL_DropEvent& event)
 
     video_ctx.raise();
 
-    if (file.extension() == ".gba")
+    if (file.extension() == ".sav")
+    {
+        mmu.gamepak.loadSave(file);
+        core::reset();
+    }
+    else
     {
         mmu.gamepak.load(file);
         core::reset();
         core::updateTitle();
         counter = FrameCounter();
-    }
-    else
-    {
-        mmu.gamepak.loadSave(file);
-        core::reset();
     }
 }
 
@@ -131,8 +131,11 @@ void emulate()
 
 int main(int argc, char* argv[])
 {
+    fs::setBasePath(SDL_GetBasePath());
     try
     {
+        config = Config(fs::makeAbsolute("eggvance.toml"));
+
         core::init(argc, argv);
         emulate();
         return 0;

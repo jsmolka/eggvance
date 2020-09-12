@@ -1,36 +1,70 @@
 [general]
+# Relative or absolute save path
+# An empty value stores save files next to the ROM
 save_path = ""
-bios_file = ""
+# Relative or absolute BIOS file path
+bios_file = "bios.bin"
+# Skip the BIOS intro sequence
 bios_skip = true
 
 [cartridge]
+# Force a cartridge save type
+# Possible values: auto, sram, flash64, flash128, eeprom
 save_type = "auto"
+# Force a cartridge GPIO type
+# Possible values: auto, rtc
 gpio_type = "auto"
 
+# Custom framerates which can be accessed with shortcuts
 [framerate]
 custom_1 = 119.474
 custom_2 = 238.948
 custom_3 = 358.442
 custom_4 = 477.896
 
-[controls]
-a      = ["U", "B"            ]
-b      = ["H", "A"            ]
-up     = ["W", "DPUP"         ]
-down   = ["S", "DPDOWN"       ]
-left   = ["A", "DPLEFT"       ]
-right  = ["D", "DPRIGHT"      ]
-start  = ["G", "START"        ]
-select = ["F", "BACK"         ]
-l      = ["Q", "LEFTSHOULDER" ]
-r      = ["I", "RIGHTSHOULDER"]
+# The following sections allow custom key bindings
+# Possible keyboard values: https://github.com/SDL-mirror/SDL/blob/release-2.0.12/src/events/SDL_keyboard.c#L282
+# Possible controller values: https://github.com/SDL-mirror/SDL/blob/release-2.0.12/src/joystick/SDL_gamecontroller.c#L494
+[controls.keyboard]
+a      = "U"
+b      = "H"
+up     = "W"
+down   = "S"
+left   = "A"
+right  = "D"
+start  = "G"
+select = "F"
+l      = "Q"
+r      = "I"
 
-[shortcuts]
-reset       = ["R"  , ""]
-fullscreen  = ["F11", ""]
-fr_hardware = ["1"  , ""]
-fr_custom_1 = ["2"  , ""]
-fr_custom_2 = ["3"  , ""]
-fr_custom_3 = ["4"  , ""]
-fr_custom_4 = ["5"  , ""]
-fr_unbound  = ["6"  , ""]
+[controls.controller]
+a      = "B"
+b      = "A"
+up     = "DpUp"
+down   = "DpDown"
+left   = "DpLeft"
+right  = "DpRight"
+start  = "Start"
+select = "Back"
+l      = "LeftShoulder"
+r      = "RightShoulder"
+
+[shortcuts.keyboard]
+reset       = "R"
+fullscreen  = "F11"
+fr_hardware = "1"
+fr_custom_1 = "2"
+fr_custom_2 = "3"
+fr_custom_3 = "4"
+fr_custom_4 = "5"
+fr_unbound  = "6"
+
+[shortcuts.controller]
+reset       = ""
+fullscreen  = ""
+fr_hardware = ""
+fr_custom_1 = ""
+fr_custom_2 = ""
+fr_custom_3 = ""
+fr_custom_4 = ""
+fr_unbound  = ""
