@@ -5,7 +5,3 @@
 [submodule "eggvance/external/icon"]
     path = eggvance/external/icon
     url = https://github.com/jsmolka/icon
-
-[submodule "eggvance/external/tinytoml"]
-    path = eggvance/external/tinytoml
-    url = https://github.com/mayah/tinytoml

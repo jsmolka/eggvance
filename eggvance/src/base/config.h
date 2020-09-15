@@ -1,6 +1,6 @@
 #pragma once
 
-#include <toml/toml.h>
+#include <eggcpt/ini.h>
 
 #include "base/filesystem.h"
 #include "base/sdl2.h"
@@ -63,12 +63,7 @@ private:
     static bool isValidSaveType(const std::string& type);
     static bool isValidGpioType(const std::string& type);
 
-    template<typename T>
-    T find(const std::string& key, const T& fallback) const;
-    SDL_Scancode findKey(const std::string& key, const std::string& fallback) const;
-    SDL_GameControllerButton findButton(const std::string& key, const std::string& fallback) const;
-
-    toml::Value data;
+    eggcpt::Ini ini;
 };
 
 inline Config config;

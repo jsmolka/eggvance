@@ -1,6 +1,7 @@
 #pragma once
 
 #include <climits>
+#include <type_traits>
 
 #include "base/int.h"
 
@@ -11,7 +12,10 @@ template<uint Size, uint Mask, uint Init, uint Type, uint Unsigned>
 class RegisterBase
 {
 public:
-    using Value = eggcpt::stdint_t<Size, Unsigned>;
+    using Value = std::conditional_t<
+        Unsigned == 1,
+        typename eggcpt::stduint_t<Size>,
+        typename eggcpt::stdint_t<Size>>;
 
     static constexpr uint kSize = Size;
     static constexpr uint kMask = Mask;

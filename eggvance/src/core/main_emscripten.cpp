@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
 {
     try
     {
-        config = Config("eggvance.toml");
+        config = Config("eggvance.ini");
 
         core::init(argc, argv);
         idleMain();

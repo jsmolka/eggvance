@@ -328,9 +328,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="eggvance.html" />
-    <None Include="eggvance.toml" />
     <None Include="src\arm\arm.inl">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="eggvance.ini" />
   </ItemGroup>
 </Project>

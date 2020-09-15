@@ -15,7 +15,6 @@ endif()
 
 include_directories(external/eggcpt/include)
 include_directories(external/icon/themes/default/include)
-include_directories(external/tinytoml/include)
 include_directories(src)
 
 file(GLOB_RECURSE SOURCE_FILES
