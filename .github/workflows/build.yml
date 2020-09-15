@@ -32,7 +32,7 @@ jobs:
           mkdir upload
           move bin\Release\eggvance.exe upload
           move bin\Release\SDL2.dll upload
-          move eggvance\eggvance.toml upload
+          move eggvance\eggvance.ini upload
         shell: cmd
 
       - name: Upload files
@@ -66,7 +66,7 @@ jobs:
         run: |
           mkdir upload
           mv eggvance/build/eggvance upload
-          mv eggvance/eggvance.toml upload
+          mv eggvance/eggvance.ini upload
 
       - name: Upload files
         uses: actions/upload-artifact@master
@@ -97,7 +97,7 @@ jobs:
         run: |
           mkdir upload
           mv eggvance/build/eggvance upload
-          mv eggvance/eggvance.toml upload
+          mv eggvance/eggvance.ini upload
 
       - name: Upload files
         uses: actions/upload-artifact@master
