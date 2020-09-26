@@ -3,7 +3,7 @@
 #include <eggcpt/icon.h>
 
 #include "base/bit.h"
-#include "base/exit.h"
+#include "base/logging.h"
 
 VideoContext::~VideoContext()
 {
@@ -13,11 +13,11 @@ VideoContext::~VideoContext()
 void VideoContext::init()
 {
     if (SDL_InitSubSystem(SDL_INIT_VIDEO))
-        exitWithMessage("Cannot init video context");
+        EGGCPT_LOG_FATAL("Cannot init video context");
 
-    if (!initWindow())   exitWithMessage("Cannot init window");
-    if (!initRenderer()) exitWithMessage("Cannot init renderer");
-    if (!initTexture())  exitWithMessage("Cannot init texture");
+    if (!initWindow())   EGGCPT_LOG_FATAL("Cannot init window");
+    if (!initRenderer()) EGGCPT_LOG_FATAL("Cannot init renderer");
+    if (!initTexture())  EGGCPT_LOG_FATAL("Cannot init texture");
 }
 
 void VideoContext::raise()

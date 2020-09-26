@@ -35,8 +35,8 @@ void GamePak::load(const fs::path& rom_file, const fs::path& save_file)
 
     header = Header(rom);
 
-    Save::Type save_type = Save::Type::None;
-    Gpio::Type gpio_type = Gpio::Type::None;
+    Save::Type save_type = config.save_type;
+    Gpio::Type gpio_type = config.gpio_type;
 
     if (const auto override = findOverride(header.code))
     {
@@ -45,12 +45,8 @@ void GamePak::load(const fs::path& rom_file, const fs::path& save_file)
     }
     else
     {
-        if (config.save_type == "auto")     save_type = Save::parse(rom);
-        if (config.save_type == "sram")     save_type = Save::Type::Sram;
-        if (config.save_type == "flash64")  save_type = Save::Type::Flash64;
-        if (config.save_type == "flash128") save_type = Save::Type::Flash128;
-        if (config.save_type == "eeprom")   save_type = Save::Type::Eeprom;
-        if (config.gpio_type == "rtc")      gpio_type = Gpio::Type::Rtc;
+        if (save_type == Save::Type::None) 
+            save_type = Save::parse(rom);
     }
 
     initGpio(gpio_type);

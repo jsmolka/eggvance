@@ -1,16 +1,14 @@
 #include "config.h"
 
+#include <eggcpt/ini.h>
+
 #include "base/constants.h"
-#include "base/exit.h"
+#include "base/logging.h"
 
 template<>
 std::optional<SDL_Scancode> eggcpt::parse(const std::string& data)
 {
-    if (data.empty())
-        return SDL_SCANCODE_UNKNOWN;
-
-    auto value = SDL_GetScancodeFromName(data.c_str());
-
+    const auto value = SDL_GetScancodeFromName(data.c_str());
     return value != SDL_SCANCODE_UNKNOWN
         ? std::optional(value)
         : std::nullopt;
@@ -19,45 +17,69 @@ std::optional<SDL_Scancode> eggcpt::parse(const std::string& data)
 template<>
 std::optional<SDL_GameControllerButton> eggcpt::parse(const std::string& data)
 {
-    if (data.empty())
-        return SDL_CONTROLLER_BUTTON_INVALID;
-
-    auto value = SDL_GameControllerGetButtonFromString(data.c_str());
-
+    const auto value = SDL_GameControllerGetButtonFromString(data.c_str());
     return value != SDL_CONTROLLER_BUTTON_INVALID
         ? std::optional(value)
         : std::nullopt;
 }
 
-Config::Config(const fs::path& file)
+template<>
+std::optional<Save::Type> eggcpt::parse(const std::string& data)
 {
+    const auto type = eggcpt::toLowerCopy(data);
+
+    if (type == "auto")     return Save::Type::None;
+    if (type == "sram")     return Save::Type::Sram;
+    if (type == "flash64")  return Save::Type::Flash64;
+    if (type == "flash128") return Save::Type::Flash128;
+    if (type == "eeprom")   return Save::Type::Eeprom;
+
+    return std::nullopt;
+}
+
+template<>
+std::optional<Gpio::Type> eggcpt::parse(const std::string& data)
+{
+    const auto type = eggcpt::toLowerCopy(data);
+
+    if (type == "auto") return Gpio::Type::None;
+    if (type == "rtc")  return Gpio::Type::Rtc;
+
+    return std::nullopt;
+}
+
+void Config::load(const fs::path& file)
+{
+    eggcpt::Ini ini;
     try
     {
         ini.load(file);
     }
     catch (const eggcpt::ParseError& error)
     {
-        // Todo: log here
-        eggcpt::reconstruct(ini);
+        EGGCPT_LOG_FATAL("Cannot parse '{}' because of error '{}'", file.string(), error.what());
     }
 
     save_path = ini.findOr("general", "save_path", fs::path());
     bios_file = ini.findOr("general", "bios_file", fs::path("bios.bin"));
     bios_skip = ini.findOr("general", "bios_skip", true);
+    bios_hash = ini.findOr("general", "bios_hash", true);
 
-    if (!save_path.empty()) save_path = fs::makeAbsolute(save_path);
-    if (!bios_file.empty()) bios_file = fs::makeAbsolute(bios_file);
+    if (!save_path.empty())
+    {
+        save_path = fs::makeAbsolute(save_path);
 
-    fs::create_directories(save_path);
+        if (!fs::is_directory(save_path))
+            fs::create_directories(save_path);
+    }
 
-    save_type = ini.findOr("cartridge", "save_type", std::string("auto"));
-    gpio_type = ini.findOr("cartridge", "gpio_type", std::string("auto"));
-
-    eggcpt::toLower(save_type);
-    eggcpt::toLower(gpio_type);
-
-    if (!isValidSaveType(save_type)) exitWithMessage("Invalid config save_type: {}", save_type);
-    if (!isValidGpioType(gpio_type)) exitWithMessage("Invalid config gpio_type: {}", gpio_type);
+    if (!bios_file.empty())
+    {
+        bios_file = fs::makeAbsolute(bios_file);
+    }
+    
+    save_type = ini.findOr("cartridge", "save_type", Save::Type::None);
+    gpio_type = ini.findOr("cartridge", "gpio_type", Gpio::Type::None);
 
     framerate[0] = ini.findOr("framerate", "custom_1", 2.0 * kRefreshRate);
     framerate[1] = ini.findOr("framerate", "custom_2", 4.0 * kRefreshRate);
@@ -103,19 +125,4 @@ Config::Config(const fs::path& file)
     shortcuts.controller.fr_custom_3 = ini.findOr("shortcuts_controller", "fr_custom_3", SDL_CONTROLLER_BUTTON_INVALID);
     shortcuts.controller.fr_custom_4 = ini.findOr("shortcuts_controller", "fr_custom_4", SDL_CONTROLLER_BUTTON_INVALID);
     shortcuts.controller.fr_unbound  = ini.findOr("shortcuts_controller", "fr_unbound",  SDL_CONTROLLER_BUTTON_INVALID);
-}
-
-bool Config::isValidSaveType(const std::string& type)
-{
-    return type == "auto"
-        || type == "sram"
-        || type == "flash64"
-        || type == "flash128"
-        || type == "eeprom";
-}
-
-bool Config::isValidGpioType(const std::string& type)
-{
-    return type == "auto"
-        || type == "rtc";
 }

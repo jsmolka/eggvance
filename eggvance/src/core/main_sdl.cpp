@@ -6,6 +6,7 @@
 
 #include "base/constants.h"
 #include "base/config.h"
+#include "base/logging.h"
 #include "core/core.h"
 #include "core/framecounter.h"
 #include "core/synchronizer.h"
@@ -131,10 +132,14 @@ void emulate()
 
 int main(int argc, char* argv[])
 {
+    using namespace eggcpt;
+
+    setSink(ColoredConsoleSink(), FatalExitSink());
+
     fs::setBasePath(SDL_GetBasePath());
     try
     {
-        config = Config(fs::makeAbsolute("eggvance.ini"));
+        config.load(fs::makeAbsolute("eggvance.ini"));
 
         core::init(argc, argv);
         emulate();

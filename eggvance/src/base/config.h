@@ -1,9 +1,9 @@
 #pragma once
 
-#include <eggcpt/ini.h>
-
 #include "base/filesystem.h"
 #include "base/sdl2.h"
+#include "gamepak/gpio.h"
+#include "gamepak/save.h"
 
 template<typename Input>
 struct Controls
@@ -36,16 +36,16 @@ struct Shortcuts
 class Config
 {
 public:
-    Config() = default;
-    Config(const fs::path& file);
+    void load(const fs::path& file);
 
-    bool bios_skip;
-    fs::path bios_file;
-    fs::path save_path;
     double framerate[4];
+    fs::path save_path;
+    fs::path bios_file;
+    bool bios_hash;
+    bool bios_skip;
 
-    std::string save_type;
-    std::string gpio_type;
+    Save::Type save_type;
+    Gpio::Type gpio_type;
 
     struct
     {
@@ -58,12 +58,6 @@ public:
         Shortcuts<SDL_Scancode> keyboard;
         Shortcuts<SDL_GameControllerButton> controller;
     } shortcuts;
-
-private:
-    static bool isValidSaveType(const std::string& type);
-    static bool isValidGpioType(const std::string& type);
-
-    eggcpt::Ini ini;
 };
 
 inline Config config;
