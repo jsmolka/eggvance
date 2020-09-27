@@ -2,10 +2,9 @@
 
 #include <functional>
 
-#include "base/bit.h"
 #include "base/register.h"
 
-class TimerCount : public Register<2>
+class TimerCount : public Register<u16>
 {
 public:
     template<uint Index>
@@ -13,7 +12,7 @@ public:
     {
         run_channels();
 
-        return Register<kSize>::read<Index>();
+        return Register::read<Index>();
     }
 
     template<uint Index>
@@ -29,7 +28,7 @@ public:
     std::function<void(void)> run_channels;
 };
 
-class TimerControl : public Register<2, 0x00C7>
+class TimerControl : public Register<u16, 0x00C7>
 {
 public:
     template<uint Index>
@@ -37,10 +36,9 @@ public:
     {
         static constexpr uint kPrescalers[8] = { 1, 64, 256, 1024, 1, 1, 1, 1 };
 
-        if (Index > 0)
-            return;
+        if (Index > 0) return;
 
-        Register<kSize, kMask>::write<Index>(byte);
+        Register::write<Index>(byte);
 
         run_channels();
 

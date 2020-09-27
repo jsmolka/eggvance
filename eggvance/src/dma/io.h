@@ -2,10 +2,9 @@
 
 #include <functional>
 
-#include "base/bit.h"
 #include "base/register.h"
 
-class DmaCount : public RegisterW<2>
+class DmaCount : public RegisterW<u16>
 {
 public:
     uint count(uint id) const
@@ -17,7 +16,7 @@ public:
     }
 };
 
-class DmaControl : public Register<2>
+class DmaControl : public Register<u16>
 {
 public:
     enum Timing
@@ -33,7 +32,7 @@ public:
     template<uint Index, uint Mask>
     void write(u8 byte)
     {
-        Register<kSize, kMask>::write<Index, Mask>(byte);
+        Register::write<Index, Mask>(byte);
 
         sadcnt = bit::seq<7, 2>(value);
 

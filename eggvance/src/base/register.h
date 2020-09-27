@@ -1,36 +1,32 @@
 #pragma once
 
-#include <climits>
-#include <type_traits>
-
+#include "base/bit.h"
 #include "base/int.h"
 
-namespace detail
-{
-
-template<uint Size, uint Mask, uint Init, uint Type, uint Unsigned>
+template<typename Integral, uint Mask>
 class RegisterBase
 {
 public:
-    using Value = std::conditional_t<
-        Unsigned == 1,
-        typename eggcpt::stduint_t<Size>,
-        typename eggcpt::stdint_t<Size>>;
+    static_assert(std::is_integral_v<Integral>);
 
-    static constexpr uint kSize = Size;
+    static constexpr uint kSize = sizeof(Integral);
     static constexpr uint kMask = Mask;
-    static constexpr uint kInit = Init;
-    static constexpr uint kType = Type;
 
     RegisterBase() = default;
-    RegisterBase(Value value)
+    RegisterBase(Integral value)
         : value(value) {}
 
+    union
+    {
+        u8 data[kSize];
+        Integral value = 0;
+    };
+
+protected:
     template<uint Index>
     u8 read() const
     {
-        static_assert(Index < Size);
-        static_assert(Type & 0x1);
+        static_assert(Index < kSize);
 
         return data[Index];
     }
@@ -38,23 +34,33 @@ public:
     template<uint Index, uint WriteMask = 0xFFFF'FFFF>
     void write(u8 byte)
     {
-        static_assert(Index < Size);
-        static_assert(Type & 0x2);
+        static_assert(Index < kSize);
 
-        constexpr auto kMask = static_cast<u8>((Mask & WriteMask) >> (CHAR_BIT * Index)); 
-
-        data[Index] = byte & kMask;
+        data[Index] = byte & bit::byte<Index>(Mask & WriteMask);
     }
-
-    union
-    {
-        u8 data[Size];
-        Value value = Init;
-    };
 };
 
-}  // namespace detail
+template<typename Integral, uint Mask = 0xFFFF'FFFF>
+class RegisterR : public RegisterBase<Integral, Mask>
+{
+public:
+    using RegisterBase<Integral, Mask>::RegisterBase;
+    using RegisterBase<Integral, Mask>::read;
+};
 
-template<uint Size, uint Mask = 0xFFFF'FFFF, uint Init = 0, uint Unsigned = 1> using RegisterR = detail::RegisterBase<Size, Mask, Init, 0x1, Unsigned>;
-template<uint Size, uint Mask = 0xFFFF'FFFF, uint Init = 0, uint Unsigned = 1> using RegisterW = detail::RegisterBase<Size, Mask, Init, 0x2, Unsigned>;
-template<uint Size, uint Mask = 0xFFFF'FFFF, uint Init = 0, uint Unsigned = 1> using Register  = detail::RegisterBase<Size, Mask, Init, 0x3, Unsigned>;
+template<typename Integral, uint Mask = 0xFFFF'FFFF>
+class RegisterW : public RegisterBase<Integral, Mask>
+{
+public:
+    using RegisterBase<Integral, Mask>::RegisterBase;
+    using RegisterBase<Integral, Mask>::write;
+};
+
+template<typename Integral, uint Mask = 0xFFFF'FFFF>
+class Register : public RegisterBase<Integral, Mask>
+{
+public:
+    using RegisterBase<Integral, Mask>::RegisterBase;
+    using RegisterBase<Integral, Mask>::read;
+    using RegisterBase<Integral, Mask>::write;
+};

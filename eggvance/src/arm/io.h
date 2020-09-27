@@ -2,17 +2,16 @@
 
 #include <functional>
 
-#include "base/bit.h"
 #include "base/register.h"
 
-class HaltControl : public RegisterW<1>
+class HaltControl : public RegisterW<u8>
 {
 public:
     template<uint Index>
     void write(u8 byte);
 };
 
-class WaitControl : public Register<2>
+class WaitControl : public Register<u16>
 {
 public:
     WaitControl()
@@ -23,7 +22,7 @@ public:
     template<uint Index>
     void write(u8 byte)
     {
-        Register<kSize>::write<Index>(byte);
+        Register::write<Index>(byte);
 
         if (Index == 0)
         {
@@ -100,13 +99,13 @@ private:
     };
 };
 
-class IrqMaster : public Register<4, 0x0001>
+class IrqMaster : public Register<u32, 0x0001>
 {
 public:
     template<uint Index>
     void write(u8 byte)
     {
-        Register<kSize, kMask>::write<Index>(byte);
+        Register::write<Index>(byte);
 
         process();
     }
@@ -114,13 +113,13 @@ public:
     std::function<void(void)> process;
 };
 
-class IrqEnable : public Register<2, 0x3FFF>
+class IrqEnable : public Register<u16, 0x3FFF>
 {
 public:
     template<uint Index>
     void write(u8 byte)
     {
-        Register<kSize, kMask>::write<Index>(byte);
+        Register::write<Index>(byte);
 
         process();
     }
@@ -128,7 +127,7 @@ public:
     std::function<void(void)> process;
 };
 
-class IrqRequest : public Register<2, 0x3FFF>
+class IrqRequest : public Register<u16, 0x3FFF>
 {
 public:
     template<uint Index>
@@ -136,7 +135,7 @@ public:
     {
         static_assert(Index < kSize);
 
-        data[Index] &= ~(byte & (kMask >> (CHAR_BIT * Index)));
+        data[Index] &= ~(byte & bit::byte<Index>(kMask));
 
         process();
     }

@@ -2,7 +2,6 @@
 
 #include <algorithm>
 
-#include "base/bit.h"
 #include "base/config.h"
 #include "base/constants.h"
 #include "base/register.h"
@@ -11,13 +10,13 @@
 
 struct PpuIo
 {
-    class DisplayControl : public Register<2, 0xFFF7>
+    class DisplayControl : public Register<u16, 0xFFF7>
     {
     public:
         template<uint Index>
         void write(u8 byte)
         {
-            Register<kSize, kMask>::write<Index>(byte);
+            Register::write<Index>(byte);
 
             if (Index == 0)
             {
@@ -69,15 +68,15 @@ struct PpuIo
     }
     dispcnt;
 
-    Register<2> greenswap;
+    Register<u16> greenswap;
 
-    class DisplayStatus : public Register<2, 0xFF38>
+    class DisplayStatus : public Register<u16, 0xFF38>
     {
     public:
         template<uint Index>
         u8 read() const
         {
-            u8 value = Register<kSize, kMask>::read<Index>();
+            u8 value = Register::read<Index>();
 
             if (Index == 0) value |= (vblank << 0) | (hblank << 1) | (vmatch << 2);
 
@@ -87,7 +86,7 @@ struct PpuIo
         template<uint Index>
         void write(u8 byte)
         {
-            Register<kSize, kMask>::write<Index>(byte);
+            Register::write<Index>(byte);
 
             if (Index == 0)
             {
@@ -111,7 +110,7 @@ struct PpuIo
     }
     dispstat;
 
-    struct VCount : RegisterR<2>
+    struct VCount : RegisterR<u16>
     {
         void next()
         {
@@ -120,12 +119,12 @@ struct PpuIo
     }
     vcount;
 
-    struct BGControl : Register<2>
+    struct BGControl : Register<u16>
     {
         template<uint Index, uint Mask>
         void write(u8 byte)
         {
-            Register<kSize, kMask>::write<Index, Mask>(byte);
+            Register::write<Index, Mask>(byte);
 
             if (Index == 0)
             {
@@ -168,14 +167,25 @@ struct PpuIo
     }
     bgcnt[4];
 
-    RegisterW<2, 0x01FF> bghofs[4];
-    RegisterW<2, 0x01FF> bgvofs[4];
-    RegisterW<2, 0xFFFF, 0x0100, 0> bgpa[2];
-    RegisterW<2, 0xFFFF, 0x0000, 0> bgpb[2];
-    RegisterW<2, 0xFFFF, 0x0000, 0> bgpc[2];
-    RegisterW<2, 0xFFFF, 0x0100, 0> bgpd[2];
+    RegisterW<u16, 0x01FF> bghofs[4];
+    RegisterW<u16, 0x01FF> bgvofs[4];
 
-    struct BGReference : RegisterW<4, 0x0FFF'FFFF>
+    template<uint Init>
+    class BgParameter : public RegisterW<s16>
+    {
+    public:
+        static constexpr uint kInit = Init;
+
+        BgParameter()
+            : RegisterW(Init) {}
+    };
+
+    BgParameter<0x0100> bgpa[2];
+    BgParameter<0x0000> bgpb[2];
+    BgParameter<0x0000> bgpc[2];
+    BgParameter<0x0100> bgpd[2];
+
+    struct BGReference : RegisterW<u32, 0x0FFF'FFFF>
     {
         operator s32() const
         {
@@ -185,7 +195,7 @@ struct PpuIo
         template<uint Index>
         void write(u8 byte)
         {
-            RegisterW<kSize, kMask>::write<Index>(byte);
+            RegisterW::write<Index>(byte);
 
             current = bit::signEx<28>(value);
         }
@@ -218,12 +228,12 @@ struct PpuIo
         uint blend{};
     };
 
-    struct WindowInside : Register<2, 0x3F3F>
+    struct WindowInside : Register<u16, 0x3F3F>
     {
         template<uint Index>
         void write(u8 byte)
         {
-            Register<kSize, kMask>::write<Index>(byte);
+            Register::write<Index>(byte);
 
             if (Index == 0) win0.write(data[Index]);
             if (Index == 1) win1.write(data[Index]);
@@ -234,12 +244,12 @@ struct PpuIo
     }
     winin;
 
-    struct WindowOutside : Register<2, 0x3F3F>
+    struct WindowOutside : Register<u16, 0x3F3F>
     {
         template<uint Index>
         void write(u8 byte)
         {
-            Register<kSize, kMask>::write<Index>(byte);
+            Register::write<Index>(byte);
 
             if (Index == 0) winout.write(data[Index]);
             if (Index == 1) winobj.write(data[Index]);
@@ -251,14 +261,14 @@ struct PpuIo
     winout;
 
     template<uint Max>
-    struct WindowRange : RegisterW<2>
+    struct WindowRange : RegisterW<u16>
     {
         static constexpr uint kMax = Max;
 
         template<uint Index>
         void write(u8 byte)
         {
-            RegisterW<kSize>::write<Index>(byte);
+            RegisterW::write<Index>(byte);
 
             max = data[0];
             min = data[1];
@@ -310,7 +320,7 @@ struct PpuIo
     }
     mosaic;
 
-    struct BlendControl : Register<2, 0x3FFF>
+    struct BlendControl : Register<u16, 0x3FFF>
     {
         enum Mode
         {
@@ -323,7 +333,7 @@ struct PpuIo
         template<uint Index>
         void write(u8 byte)
         {
-            Register<kSize, kMask>::write<Index>(byte);
+            Register::write<Index>(byte);
 
             if (Index == 0)
             {
@@ -342,7 +352,7 @@ struct PpuIo
     }
     bldcnt;
 
-    struct BlendAlpha : Register<2, 0x1F1F>
+    struct BlendAlpha : Register<u16, 0x1F1F>
     {
         static constexpr uint kMaskR = 0x1F <<  0;
         static constexpr uint kMaskG = 0x1F <<  5;
@@ -351,7 +361,7 @@ struct PpuIo
         template<uint Index>
         void write(u8 byte)
         {
-            Register<kSize, kMask>::write<Index>(byte);
+            Register::write<Index>(byte);
 
             coeff[Index] = std::min<uint>(16u, bit::seq<0, 5>(data[Index]));
         }
@@ -369,7 +379,7 @@ struct PpuIo
     }
     bldalpha;
 
-    struct BlendFade : RegisterW<2, 0x001F>
+    struct BlendFade : RegisterW<u16, 0x001F>
     {
         static constexpr uint kMaskR = 0x1F <<  0;
         static constexpr uint kMaskG = 0x1F <<  5;
@@ -378,7 +388,7 @@ struct PpuIo
         template<uint Index>
         void write(u8 byte)
         {
-            RegisterW<kSize, kMask>::write<Index>(byte);
+            RegisterW::write<Index>(byte);
 
             coeff = std::min<uint>(16u, bit::seq<0, 5>(data[0]));
         }

@@ -16,8 +16,8 @@ public:
 
     DmaCount count;
     DmaControl control;
-    RegisterW<4> sad;
-    RegisterW<4> dad;
+    RegisterW<u32> sad;
+    RegisterW<u32> dad;
 
 private:
     static bool isEeprom(u32 addr);

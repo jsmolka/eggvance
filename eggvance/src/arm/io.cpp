@@ -5,7 +5,7 @@
 template<uint Index>
 void HaltControl::write(u8 byte)
 {
-    RegisterW<kSize, kMask>::write<Index>(byte);
+    RegisterW::write<Index>(byte);
 
     arm.state |= kStateHalt;
 }

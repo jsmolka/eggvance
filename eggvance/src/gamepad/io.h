@@ -1,18 +1,15 @@
 #pragma once
 
-#include "base/bit.h"
 #include "base/register.h"
 
-class KeyInput : public RegisterR<2, 0x03FF>
+class KeyInput : public RegisterR<u16, 0x03FF>
 {
 public:
     KeyInput()
-    {
-        value = kMask;
-    }
+        : RegisterR(kMask) {}
 };
 
-class KeyControl : public Register<2, 0xC3FF>
+class KeyControl : public Register<u16, 0xC3FF>
 {
 public:
     enum Condition
@@ -24,7 +21,7 @@ public:
     template<uint Index>
     void write(u8 byte)
     {
-        Register<kSize, kMask>::write<Index>(byte);
+        Register::write<Index>(byte);
 
         mask = bit::seq<0, 10>(value);
 
@@ -35,9 +32,9 @@ public:
         }
     }
 
-    bool raisesIrq(u16 input)
+    bool raisesIrq(const KeyInput& input)
     {
-        u16 value = ~input & KeyInput::kMask;
+        u16 value = ~input.value & KeyInput::kMask;
 
         return cond == kConditionAll
             ? (value == mask)
