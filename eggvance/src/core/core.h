@@ -11,4 +11,4 @@ void frame();
 void updateTitle();
 void updateTitle(double fps);
 
-};
+};  // namespace core

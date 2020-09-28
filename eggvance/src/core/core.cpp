@@ -2,9 +2,12 @@
 
 #include <eggcpt/filesystem.h>
 #include <eggcpt/fmt.h>
+#include <eggcpt/options.h>
 #include <eggcpt/utility.h>
 
 #include "arm/arm.h"
+#include "base/config.h"
+#include "base/logging.h"
 #include "core/audiocontext.h"
 #include "core/inputcontext.h"
 #include "core/videocontext.h"
@@ -16,16 +19,47 @@
 
 void core::init(int argc, char* argv[])
 {
-    mmu.bios.init(config.bios_file);
+    using namespace eggcpt;
 
-    audio_ctx.init();
-    input_ctx.init();
-    video_ctx.init();
+    Options options("eggvance");
+    options.add({   "--help", "-h" }, "Show this help text"    , Options::value<bool>()->optional());
+    options.add({ "--config", "-c" }, "Path to the config file", Options::value<fs::path>("eggvance.ini"));
+    options.add({   "--save", "-s" }, "Path to the save file"  , Options::value<fs::path>()->optional());
+    options.add({            "rom" }, "Path to the ROM file"   , Options::value<fs::path>()->positional()->optional());
 
-    switch (argc)
+    try
     {
-    case 2: mmu.gamepak.load(fs::u8path(argv[1])); break;
-    case 3: mmu.gamepak.load(fs::u8path(argv[1]), fs::u8path(argv[2])); break;
+        OptionsResult result = options.parse(argc, argv);
+
+        if (result.has("--help"))
+        {
+            fmt::print(options.help());
+            std::exit(0);
+        }
+
+        auto rom = result.find<fs::path>("rom");
+        auto sav = result.find<fs::path>("--save");
+        auto cfg = result.find<fs::path>("--config");
+
+        config.load(fs::makeAbsolute(*cfg));
+
+        mmu.bios.init(config.bios_file);
+
+        audio_ctx.init();
+        input_ctx.init();
+        video_ctx.init();
+
+        if (rom.has_value())
+            mmu.gamepak.load(*rom);
+
+        if (sav.has_value())
+            mmu.gamepak.loadSave(*sav);
+    }
+    catch (const eggcpt::ParseError& error)
+    {
+        fmt::print(options.help());
+
+        EGGCPT_LOG_FATAL("Cannot parse command line because of error '{}'", error.what());
     }
 }
 

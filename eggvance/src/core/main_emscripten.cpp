@@ -132,8 +132,6 @@ int main(int argc, char* argv[])
 {
     try
     {
-        config.load("eggvance.ini");
-
         core::init(argc, argv);
         idleMain();
         return 0;

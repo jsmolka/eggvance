@@ -139,8 +139,6 @@ int main(int argc, char* argv[])
     fs::setBasePath(SDL_GetBasePath());
     try
     {
-        config.load(fs::makeAbsolute("eggvance.ini"));
-
         core::init(argc, argv);
         emulate();
         return 0;

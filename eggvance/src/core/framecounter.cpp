@@ -1,7 +1,5 @@
 #include "framecounter.h"
 
-#include <eggcpt/utility.h>
-
 FrameCounter::FrameCounter()
 {
     count = 0;
@@ -20,7 +18,7 @@ std::optional<double> FrameCounter::fps()
     if (delta >= std::chrono::seconds(1))
     {
         double fps = count / std::chrono::duration<double>(delta).count();
-        eggcpt::reconstruct(*this);
+        *this = FrameCounter();
         return fps;
     }
     return std::nullopt;

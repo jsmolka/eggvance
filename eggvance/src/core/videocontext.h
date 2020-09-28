@@ -36,7 +36,7 @@ private:
     SDL_Texture* texture = nullptr;
     SDL_Renderer* renderer = nullptr;
 
-    std::array<u32, kScreenW * kScreenH> buffer = { 0 };
+    std::array<u32, kScreenW * kScreenH> buffer = {};
 };
 
 inline VideoContext video_ctx;
