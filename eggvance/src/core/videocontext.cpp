@@ -1,6 +1,6 @@
 #include "videocontext.h"
 
-#include <eggcpt/icon.h>
+#include <shell/icon.h>
 
 #include "base/bit.h"
 #include "base/logging.h"
@@ -13,11 +13,11 @@ VideoContext::~VideoContext()
 void VideoContext::init()
 {
     if (SDL_InitSubSystem(SDL_INIT_VIDEO))
-        EGGCPT_LOG_FATAL("Cannot init video context");
+        SHELL_LOG_FATAL("Cannot init video context");
 
-    if (!initWindow())   EGGCPT_LOG_FATAL("Cannot init window");
-    if (!initRenderer()) EGGCPT_LOG_FATAL("Cannot init renderer");
-    if (!initTexture())  EGGCPT_LOG_FATAL("Cannot init texture");
+    if (!initWindow())   SHELL_LOG_FATAL("Cannot init window");
+    if (!initRenderer()) SHELL_LOG_FATAL("Cannot init renderer");
+    if (!initTexture())  SHELL_LOG_FATAL("Cannot init texture");
 }
 
 void VideoContext::raise()
@@ -54,7 +54,7 @@ void VideoContext::renderIcon()
     SDL_RenderGetLogicalSize(renderer, &w, &h);
     SDL_RenderSetLogicalSize(renderer, 18, 18);
 
-    for (const auto& pixel : eggcpt::icon::pixels)
+    for (const auto& pixel : shell::icon::pixels)
     {
         SDL_SetRenderDrawColor(
             renderer,
@@ -74,7 +74,7 @@ void VideoContext::renderIcon()
 
 u32* VideoContext::scanline(uint line)
 {
-    EGGCPT_ASSERT(line < kScreenH);
+    SHELL_ASSERT(line < kScreenH);
 
     return buffer.data() + (kScreenW * line);
 }

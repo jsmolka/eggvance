@@ -260,7 +260,7 @@
     <ClInclude Include="src\arm\io.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="external\icon\themes\default\cpp\eggcpt\icon.h">
+    <ClInclude Include="external\icon\themes\default\cpp\shell\icon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\core\core.h">

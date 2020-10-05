@@ -1,13 +1,13 @@
 #pragma once
 
-#include <eggcpt/int.h>
+#include <shell/int.h>
 
-using eggcpt::s8;
-using eggcpt::u8;
-using eggcpt::s16;
-using eggcpt::u16;
-using eggcpt::s32;
-using eggcpt::u32;
-using eggcpt::s64;
-using eggcpt::u64;
-using eggcpt::uint;
+using shell::s8;
+using shell::u8;
+using shell::s16;
+using shell::u16;
+using shell::s32;
+using shell::u32;
+using shell::s64;
+using shell::u64;
+using shell::uint;

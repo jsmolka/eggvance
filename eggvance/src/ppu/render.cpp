@@ -266,7 +266,7 @@ void PPU::renderObjects()
                     break;
 
                 default:
-                    EGGCPT_UNREACHABLE;
+                    SHELL_UNREACHABLE;
                     break;
                 }
                 objects_exist = true;

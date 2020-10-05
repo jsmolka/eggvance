@@ -11,7 +11,7 @@ AudioContext::~AudioContext()
 void AudioContext::init()
 {
     if (SDL_InitSubSystem(SDL_INIT_AUDIO))
-        EGGCPT_LOG_FATAL("Cannot init audio context");
+        SHELL_LOG_FATAL("Cannot init audio context");
 }
 
 void AudioContext::deinit()

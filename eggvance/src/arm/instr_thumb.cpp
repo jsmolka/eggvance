@@ -23,7 +23,7 @@ void Arm::Thumb_MoveShiftedRegister(u16 instr)
     case kShiftAsr: dst = log(asr<true>(src, kAmount)); break;
 
     default:
-        EGGCPT_UNREACHABLE;
+        SHELL_UNREACHABLE;
         break;
     }
 }
@@ -56,7 +56,7 @@ void Arm::Thumb_AddSubtract(u16 instr)
     case kOpcodeSubImm: dst = sub(src,      kRn ); break;
 
     default:
-        EGGCPT_UNREACHABLE;
+        SHELL_UNREACHABLE;
         break;
     }
 }
@@ -88,7 +88,7 @@ void Arm::Thumb_ImmediateOperations(u16 instr)
     case kOpcodeSub: dst = sub(src, amount); break;
 
     default:
-        EGGCPT_UNREACHABLE;
+        SHELL_UNREACHABLE;
         break;
     }
 }
@@ -147,7 +147,7 @@ void Arm::Thumb_AluOperations(u16 instr)
         break;
 
     default:
-        EGGCPT_UNREACHABLE;
+        SHELL_UNREACHABLE;
         break;
     }
 }
@@ -208,7 +208,7 @@ void Arm::Thumb_HighRegisterOperations(u16 instr)
         break;
 
     default:
-        EGGCPT_UNREACHABLE;
+        SHELL_UNREACHABLE;
         break;
     }
 }
@@ -266,7 +266,7 @@ void Arm::Thumb_LoadStoreRegisterOffset(u16 instr)
         break;
 
     default:
-        EGGCPT_UNREACHABLE;
+        SHELL_UNREACHABLE;
         break;
     }
 }
@@ -314,7 +314,7 @@ void Arm::Thumb_LoadStoreByteHalf(u16 instr)
         break;
 
     default:
-        EGGCPT_UNREACHABLE;
+        SHELL_UNREACHABLE;
         break;
     }
 }
@@ -360,7 +360,7 @@ void Arm::Thumb_LoadStoreImmediateOffset(u16 instr)
         break;
 
     default:
-        EGGCPT_UNREACHABLE;
+        SHELL_UNREACHABLE;
         break;
     }
 }
@@ -599,7 +599,7 @@ void Arm::Thumb_LongBranchLink(u16 instr)
 template<uint Instr>
 void Arm::Thumb_Undefined(u16 instr)
 {
-    EGGCPT_ASSERT(false, EGGCPT_FUNCTION);
+    SHELL_ASSERT(false, SHELL_FUNCTION);
 }
 
 template<uint Hash>

@@ -1,21 +1,21 @@
 #pragma once
 
-#include <eggcpt/env.h>
+#include <shell/env.h>
 
-#if EGGCPT_RELEASE
-#  include <eggcpt/log/fatal.h>
+#if SHELL_RELEASE
+#  include <shell/log/fatal.h>
 #else
-#  include <eggcpt/log/all.h>
+#  include <shell/log/all.h>
 #endif
 
 #include "base/sdl2.h"
 
-class FatalExitSink : public eggcpt::SinkInterface
+class FatalExitSink : public shell::SinkInterface
 {
 public:
-    void sink(const std::string&, const std::string& message, eggcpt::Level level) override
+    void sink(const std::string&, const std::string& message, shell::Level level) override
     {
-        if (level == eggcpt::Level::Fatal)
+        if (level == shell::Level::Fatal)
         {
             SDL_ShowSimpleMessageBox(0, "Error", message.c_str(), NULL);
             std::exit(1);

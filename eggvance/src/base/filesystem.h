@@ -1,5 +1,5 @@
 #pragma once
 
-#include <eggcpt/filesystem.h>
+#include <shell/filesystem.h>
 
-namespace fs = eggcpt::filesystem;
+namespace fs = shell::filesystem;

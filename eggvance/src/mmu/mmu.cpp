@@ -1,6 +1,6 @@
 #include "mmu.h"
 
-#include <eggcpt/utility.h>
+#include <shell/utility.h>
 
 #include "arm/arm.h"
 #include "base/constants.h"
@@ -12,9 +12,9 @@ void MMU::reset()
     vram.reset();
     oam.reset();
 
-    eggcpt::reconstruct(io);
-    eggcpt::reconstruct(ewram);
-    eggcpt::reconstruct(iwram);
+    shell::reconstruct(io);
+    shell::reconstruct(ewram);
+    shell::reconstruct(iwram);
 }
 
 u8 MMU::readByte(u32 addr)

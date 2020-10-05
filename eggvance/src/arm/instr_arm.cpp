@@ -112,7 +112,7 @@ void Arm::Arm_DataProcessing(u32 instr)
             case kShiftRor: op2 = ror<false>(op2, amount, flags && kLogical); break;
 
             default:
-                EGGCPT_UNREACHABLE;
+                SHELL_UNREACHABLE;
                 break;
             }
             idle();
@@ -129,7 +129,7 @@ void Arm::Arm_DataProcessing(u32 instr)
             case kShiftRor: op2 = ror<true>(op2, amount, flags && kLogical); break;
 
             default:
-                EGGCPT_UNREACHABLE;
+                SHELL_UNREACHABLE;
                 break;
             }
         }
@@ -155,7 +155,7 @@ void Arm::Arm_DataProcessing(u32 instr)
     case kOpcodeRsc: dst = sbc(op2,   op1, flags); break;
 
     default:
-        EGGCPT_UNREACHABLE;
+        SHELL_UNREACHABLE;
         break;
     }
 
@@ -335,7 +335,7 @@ void Arm::Arm_SingleDataTransfer(u32 instr)
         case kShiftRor: offset = ror<true>(regs[rm], amount, false); break;
 
         default:
-            EGGCPT_UNREACHABLE;
+            SHELL_UNREACHABLE;
             break;
         }
     }
@@ -445,7 +445,7 @@ void Arm::Arm_HalfSignedDataTransfer(u32 instr)
             break;
 
         default:
-            EGGCPT_UNREACHABLE;
+            SHELL_UNREACHABLE;
             break;
         }
 
@@ -565,7 +565,7 @@ void Arm::Arm_BlockDataTransfer(u32 instr)
             case kSuffixIB: writeWord(addr + 0x04, pc + 4); break;
 
             default:
-                EGGCPT_UNREACHABLE;
+                SHELL_UNREACHABLE;
                 break;
             }
         }
@@ -617,25 +617,25 @@ void Arm::Arm_SoftwareInterrupt(u32 instr)
 template<uint Instr>
 void Arm::Arm_CoprocessorDataOperations(u32 instr)
 {
-    EGGCPT_ASSERT(false, EGGCPT_FUNCTION);
+    SHELL_ASSERT(false, SHELL_FUNCTION);
 }
 
 template<uint Instr>
 void Arm::Arm_CoprocessorDataTransfers(u32 instr)
 {
-    EGGCPT_ASSERT(false, EGGCPT_FUNCTION);
+    SHELL_ASSERT(false, SHELL_FUNCTION);
 }
 
 template<uint Instr>
 void Arm::Arm_CoprocessorRegisterTransfers(u32 instr)
 {
-    EGGCPT_ASSERT(false, EGGCPT_FUNCTION);
+    SHELL_ASSERT(false, SHELL_FUNCTION);
 }
 
 template<uint Instr>
 void Arm::Arm_Undefined(u32 instr)
 {
-    EGGCPT_ASSERT(false, EGGCPT_FUNCTION);
+    SHELL_ASSERT(false, SHELL_FUNCTION);
 }
 
 template<uint Hash>

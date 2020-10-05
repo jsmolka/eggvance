@@ -1,7 +1,7 @@
-[submodule "eggvance/external/eggcpt"]
-    path = eggvance/external/eggcpt
-    url = https://github.com/jsmolka/eggcpt
-	
 [submodule "eggvance/external/icon"]
     path = eggvance/external/icon
     url = https://github.com/jsmolka/icon
+
+[submodule "eggvance/external/shell"]
+    path = eggvance/external/shell
+    url = https://github.com/jsmolka/shell

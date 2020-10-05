@@ -1,6 +1,6 @@
 #include "vram.h"
 
-#include <eggcpt/utility.h>
+#include <shell/utility.h>
 
 #include "base/bit.h"
 #include "base/int.h"
@@ -8,7 +8,7 @@
 
 void VRAM::reset()
 {
-    eggcpt::reconstruct(*this);
+    shell::reconstruct(*this);
 }
 
 void VRAM::writeByte(u32 addr, u8 byte)

@@ -39,7 +39,7 @@ public:
     template<typename Integral>
     void setZ(Integral value)
     {
-        static_assert(eggcpt::is_any_of_v<Integral, u32, u64>);
+        static_assert(shell::is_any_of_v<Integral, u32, u64>);
 
         z = value == 0;
     }
@@ -47,7 +47,7 @@ public:
     template<typename Integral>
     void setN(Integral value)
     {
-        static_assert(eggcpt::is_any_of_v<Integral, u32, u64>);
+        static_assert(shell::is_any_of_v<Integral, u32, u64>);
 
         n = bit::msb(value);
     }
@@ -119,7 +119,7 @@ public:
         case kConditionNV: return false;
 
         default:
-            EGGCPT_UNREACHABLE;
+            SHELL_UNREACHABLE;
             return false;
         }
     }

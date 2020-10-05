@@ -1,12 +1,12 @@
 #include "config.h"
 
-#include <eggcpt/ini.h>
+#include <shell/ini.h>
 
 #include "base/constants.h"
 #include "base/logging.h"
 
 template<>
-std::optional<SDL_Scancode> eggcpt::parse(const std::string& data)
+std::optional<SDL_Scancode> shell::parse(const std::string& data)
 {
     const auto value = SDL_GetScancodeFromName(data.c_str());
     return value != SDL_SCANCODE_UNKNOWN
@@ -15,7 +15,7 @@ std::optional<SDL_Scancode> eggcpt::parse(const std::string& data)
 }
 
 template<>
-std::optional<SDL_GameControllerButton> eggcpt::parse(const std::string& data)
+std::optional<SDL_GameControllerButton> shell::parse(const std::string& data)
 {
     const auto value = SDL_GameControllerGetButtonFromString(data.c_str());
     return value != SDL_CONTROLLER_BUTTON_INVALID
@@ -24,9 +24,9 @@ std::optional<SDL_GameControllerButton> eggcpt::parse(const std::string& data)
 }
 
 template<>
-std::optional<Save::Type> eggcpt::parse(const std::string& data)
+std::optional<Save::Type> shell::parse(const std::string& data)
 {
-    const auto type = eggcpt::toLowerCopy(data);
+    const auto type = shell::toLowerCopy(data);
 
     if (type == "auto")     return Save::Type::None;
     if (type == "sram")     return Save::Type::Sram;
@@ -38,9 +38,9 @@ std::optional<Save::Type> eggcpt::parse(const std::string& data)
 }
 
 template<>
-std::optional<Gpio::Type> eggcpt::parse(const std::string& data)
+std::optional<Gpio::Type> shell::parse(const std::string& data)
 {
-    const auto type = eggcpt::toLowerCopy(data);
+    const auto type = shell::toLowerCopy(data);
 
     if (type == "auto") return Gpio::Type::None;
     if (type == "rtc")  return Gpio::Type::Rtc;
@@ -50,14 +50,14 @@ std::optional<Gpio::Type> eggcpt::parse(const std::string& data)
 
 void Config::load(const fs::path& file)
 {
-    eggcpt::Ini ini;
+    shell::Ini ini;
     try
     {
         ini.load(file);
     }
-    catch (const eggcpt::ParseError& error)
+    catch (const shell::ParseError& error)
     {
-        EGGCPT_LOG_FATAL("Cannot parse '{}' because of error '{}'", file.string(), error.what());
+        SHELL_LOG_FATAL("Cannot parse '{}' because of error '{}'", file.string(), error.what());
     }
 
     save_path = ini.findOr("general", "save_path", fs::path());

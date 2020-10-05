@@ -31,7 +31,7 @@ void Arm::run(int cycles)
         INDEXED_CASE8(24, dispatch<kLabel>());
 
         default:
-            EGGCPT_UNREACHABLE;
+            SHELL_UNREACHABLE;
             break;
         }
     }

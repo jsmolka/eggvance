@@ -1,9 +1,9 @@
 #include "core.h"
 
-#include <eggcpt/filesystem.h>
-#include <eggcpt/fmt.h>
-#include <eggcpt/options.h>
-#include <eggcpt/utility.h>
+#include <shell/filesystem.h>
+#include <shell/fmt.h>
+#include <shell/options.h>
+#include <shell/utility.h>
 
 #include "arm/arm.h"
 #include "base/config.h"
@@ -19,7 +19,7 @@
 
 void core::init(int argc, char* argv[])
 {
-    using namespace eggcpt;
+    using namespace shell;
 
     Options options("eggvance");
     options.add({   "--help", "-h" }, "Show this help text"    , Options::value<bool>()->optional());
@@ -55,11 +55,11 @@ void core::init(int argc, char* argv[])
         if (sav.has_value())
             mmu.gamepak.loadSave(*sav);
     }
-    catch (const eggcpt::ParseError& error)
+    catch (const shell::ParseError& error)
     {
         fmt::print(options.help());
 
-        EGGCPT_LOG_FATAL("Cannot parse command line because of error '{}'", error.what());
+        SHELL_LOG_FATAL("Cannot parse command line because of error '{}'", error.what());
     }
 }
 
@@ -68,10 +68,10 @@ void core::reset()
     mmu.reset();
     ppu.reset();
 
-    eggcpt::reconstruct(arm);
-    eggcpt::reconstruct(dma);
-    eggcpt::reconstruct(gamepad);
-    eggcpt::reconstruct(timer);
+    shell::reconstruct(arm);
+    shell::reconstruct(dma);
+    shell::reconstruct(gamepad);
+    shell::reconstruct(timer);
 }
 
 void core::frame()

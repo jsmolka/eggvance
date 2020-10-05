@@ -3,7 +3,7 @@
 template<typename Integral>
 Integral Arm::log(Integral value, bool flags)
 {
-    static_assert(eggcpt::is_any_of_v<Integral, u32, u64>);
+    static_assert(shell::is_any_of_v<Integral, u32, u64>);
 
     if (flags)
     {

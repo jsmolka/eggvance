@@ -1,6 +1,6 @@
 #include "disassemble.h"
 
-#include <eggcpt/fmt.h>
+#include <shell/fmt.h>
 
 #include "arm/decode.h"
 

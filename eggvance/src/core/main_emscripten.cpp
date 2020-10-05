@@ -1,6 +1,6 @@
-#include <eggcpt/env.h>
+#include <shell/env.h>
 
-#if EGGCPT_CC_EMSCRIPTEN
+#if SHELL_CC_EMSCRIPTEN
 
 #include <emscripten.h>
 #include <emscripten/bind.h>
@@ -15,7 +15,6 @@
 using namespace emscripten;
 
 FrameCounter counter;
-u32 background = 0xFFFFFF;
 
 void idle();
 void idleMain()
@@ -86,7 +85,7 @@ void idle()
 {
     processEvents();
 
-    video_ctx.renderClear(background);
+    video_ctx.renderClear(0xFFFF'FFFF);
     video_ctx.renderIcon();
     video_ctx.renderPresent();
 }
@@ -116,16 +115,10 @@ void eggvanceLoadSave(const std::string& filename)
     emulateMain(kRefreshRate);
 }
 
-void eggvanceSetBackground(u32 color)
-{
-    background = color;
-}
-
 EMSCRIPTEN_BINDINGS(eggvance)
 {
     function("eggvanceLoadRom", &eggvanceLoadRom);
     function("eggvanceLoadSave", &eggvanceLoadSave);
-    function("eggvanceSetBackground", &eggvanceSetBackground);
 }
 
 int main(int argc, char* argv[])

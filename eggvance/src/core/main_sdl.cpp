@@ -1,6 +1,6 @@
-#include <eggcpt/env.h>
+#include <shell/env.h>
 
-#if !EGGCPT_CC_EMSCRIPTEN
+#if !SHELL_CC_EMSCRIPTEN
 
 #include <stdexcept>
 
@@ -105,7 +105,7 @@ void emulate()
     {
         processEvents();
 
-        video_ctx.renderClear(0x2B3137);
+        video_ctx.renderClear(0xFF3E'4750);
         video_ctx.renderIcon();
         video_ctx.renderPresent();
 
@@ -132,7 +132,7 @@ void emulate()
 
 int main(int argc, char* argv[])
 {
-    using namespace eggcpt;
+    using namespace shell;
 
     setSink(ColoredConsoleSink(), FatalExitSink());
 

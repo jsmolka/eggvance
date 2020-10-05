@@ -1,5 +1,5 @@
 #pragma once
 
-#include <eggcpt/bit.h>
+#include <shell/bit.h>
 
-namespace bit = eggcpt::bit;
+namespace bit = shell::bit;
