@@ -19,19 +19,22 @@ void BIOS::reset()
 
 void BIOS::init(const fs::path& path)
 {
-    if (fs::is_regular_file(path))
+    if (path.empty())
+    {
+        std::memcpy(data.data<u8>(0), kNormmattBios.data(), kNormmattBios.size());
+    }
+    else
     {
         static constexpr u64 expected_hash = 0xECCF5E4CEA50816E;
+
+        if (!fs::is_regular_file(path))
+            throw std::runtime_error("BIOS file does not exist");
 
         if (!read(path))
             throw std::runtime_error("Cannot read BIOS");
 
         if (hash(data.data<u32>(0), 0x1000) != expected_hash)
             throw std::runtime_error("Unexpected BIOS hash");
-    }
-    else
-    {
-        std::memcpy(data.data<u8>(0), kNormmattBios.data(), kNormmattBios.size());
     }
 }
 

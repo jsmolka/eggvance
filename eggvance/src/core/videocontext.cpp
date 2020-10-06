@@ -54,7 +54,7 @@ void VideoContext::renderIcon()
     SDL_RenderGetLogicalSize(renderer, &w, &h);
     SDL_RenderSetLogicalSize(renderer, 18, 18);
 
-    for (const auto& pixel : shell::icon::pixels)
+    for (const auto& pixel : shell::icon::kPixels)
     {
         SDL_SetRenderDrawColor(
             renderer,

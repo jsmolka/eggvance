@@ -61,7 +61,7 @@ void Config::load(const fs::path& file)
     }
 
     save_path = ini.findOr("general", "save_path", fs::path());
-    bios_file = ini.findOr("general", "bios_file", fs::path("bios.bin"));
+    bios_file = ini.findOr("general", "bios_file", fs::path());
     bios_skip = ini.findOr("general", "bios_skip", true);
     bios_hash = ini.findOr("general", "bios_hash", true);
 
