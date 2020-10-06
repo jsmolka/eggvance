@@ -1,7 +1,5 @@
 #pragma once
 
-#include <array>
-
 #include "ram.h"
 #include "base/int.h"
 #include "base/filesystem.h"
@@ -25,5 +23,4 @@ private:
 
     u32 last_fetched;
     MirroredRAM<0x4000> data;
-    static std::array<u8, 0x4000> replacement_bios;
 };

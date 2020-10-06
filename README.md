@@ -17,4 +17,4 @@ Binaries for Windows, Linux and macOS are built on each commit and can be found 
 ## Building
 Detailed build instructions can be found [here](BUILDING.md).
 
-![mew.png](media/mew.png)
+![mew](support/mew.png)

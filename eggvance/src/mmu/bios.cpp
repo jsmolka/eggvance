@@ -6,6 +6,7 @@
 
 #include "arm/arm.h"
 #include "base/config.h"
+#include "mmu/bios_normmatt.h"
 
 void BIOS::reset()
 {
@@ -30,7 +31,7 @@ void BIOS::init(const fs::path& path)
     }
     else
     {
-        std::memcpy(data.data<u8>(0), replacement_bios.data(), 0x4000);
+        std::memcpy(data.data<u8>(0), kNormmattBios.data(), kNormmattBios.size());
     }
 }
 
