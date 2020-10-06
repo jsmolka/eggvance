@@ -35,7 +35,7 @@ def main(fname):
 
         lines.append(", ".join(line))
 
-    with open("bios.h", "w") as f:
+    with open("bios_normmatt.h", "w") as f:
         f.write(HEADER.format(len(data), ",\n    ".join(lines)))
 
 
