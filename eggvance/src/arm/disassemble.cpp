@@ -850,49 +850,48 @@ std::string Thumb_LongBranchLink(u16 instr, u32 lr)
         second ? hex(lr + offset) : "<setup>");
 }
 
-std::string disassemble(u32 instr, u32 pc, u32 lr, bool thumb)
+std::string disassemble(u32 instr, u32 pc)
 {
-    if (thumb)
+    switch (decodeArm(hashArm(instr)))
     {
-        switch (decodeThumb(hashThumb(instr)))
-        {
-        case InstructionThumb::MoveShiftedRegister:      return Thumb_MoveShiftedRegister(instr);
-        case InstructionThumb::AddSubtract:              return Thumb_AddSubtract(instr);
-        case InstructionThumb::ImmediateOperations:      return Thumb_ImmediateOperations(instr);
-        case InstructionThumb::AluOperations:            return Thumb_AluOperations(instr);
-        case InstructionThumb::HighRegisterOperations:   return Thumb_HighRegisterOperations(instr);
-        case InstructionThumb::LoadPcRelative:           return Thumb_LoadPcRelative(instr, pc);
-        case InstructionThumb::LoadStoreRegisterOffset:  return Thumb_LoadStoreRegisterOffset(instr);
-        case InstructionThumb::LoadStoreByteHalf:        return Thumb_LoadStoreByteHalf(instr);
-        case InstructionThumb::LoadStoreImmediateOffset: return Thumb_LoadStoreImmediateOffset(instr);
-        case InstructionThumb::LoadStoreHalf:            return Thumb_LoadStoreHalf(instr);
-        case InstructionThumb::LoadStoreSpRelative:      return Thumb_LoadStoreSpRelative(instr);
-        case InstructionThumb::LoadRelativeAddress:      return Thumb_LoadRelativeAddress(instr, pc);
-        case InstructionThumb::AddOffsetSp:              return Thumb_AddOffsetSp(instr);
-        case InstructionThumb::PushPopRegisters:         return Thumb_PushPopRegisters(instr);
-        case InstructionThumb::LoadStoreMultiple:        return Thumb_LoadStoreMultiple(instr);
-        case InstructionThumb::ConditionalBranch:        return Thumb_ConditionalBranch(instr, pc);
-        case InstructionThumb::SoftwareInterrupt:        return Thumb_SoftwareInterrupt(instr);
-        case InstructionThumb::UnconditionalBranch:      return Thumb_UnconditionalBranch(instr, pc);
-        case InstructionThumb::LongBranchLink:           return Thumb_LongBranchLink(instr, lr);
-        }
+    case InstructionArm::BranchExchange:         return Arm_BranchExchange(instr);
+    case InstructionArm::BranchLink:             return Arm_BranchLink(instr, pc);
+    case InstructionArm::DataProcessing:         return Arm_DataProcessing(instr, pc);
+    case InstructionArm::StatusTransfer:         return Arm_StatusTransfer(instr);
+    case InstructionArm::Multiply:               return Arm_Multiply(instr);
+    case InstructionArm::MultiplyLong:           return Arm_MultiplyLong(instr);
+    case InstructionArm::SingleDataTransfer:     return Arm_SingleDataTransfer(instr);
+    case InstructionArm::HalfSignedDataTransfer: return Arm_HalfSignedDataTransfer(instr);
+    case InstructionArm::BlockDataTransfer:      return Arm_BlockDataTransfer(instr);
+    case InstructionArm::SingleDataSwap:         return Arm_SingleDataSwap(instr);
+    case InstructionArm::SoftwareInterrupt:      return Arm_SoftwareInterrupt(instr);
     }
-    else
+    return "undef";
+}
+
+std::string disassemble(u16 instr, u32 pc, u32 lr)
+{
+    switch (decodeThumb(hashThumb(instr)))
     {
-        switch (decodeArm(hashArm(instr)))
-        {
-        case InstructionArm::BranchExchange:         return Arm_BranchExchange(instr);
-        case InstructionArm::BranchLink:             return Arm_BranchLink(instr, pc);
-        case InstructionArm::DataProcessing:         return Arm_DataProcessing(instr, pc);
-        case InstructionArm::StatusTransfer:         return Arm_StatusTransfer(instr);
-        case InstructionArm::Multiply:               return Arm_Multiply(instr);
-        case InstructionArm::MultiplyLong:           return Arm_MultiplyLong(instr);
-        case InstructionArm::SingleDataTransfer:     return Arm_SingleDataTransfer(instr);
-        case InstructionArm::HalfSignedDataTransfer: return Arm_HalfSignedDataTransfer(instr);
-        case InstructionArm::BlockDataTransfer:      return Arm_BlockDataTransfer(instr);
-        case InstructionArm::SingleDataSwap:         return Arm_SingleDataSwap(instr);
-        case InstructionArm::SoftwareInterrupt:      return Arm_SoftwareInterrupt(instr);
-        }
+    case InstructionThumb::MoveShiftedRegister:      return Thumb_MoveShiftedRegister(instr);
+    case InstructionThumb::AddSubtract:              return Thumb_AddSubtract(instr);
+    case InstructionThumb::ImmediateOperations:      return Thumb_ImmediateOperations(instr);
+    case InstructionThumb::AluOperations:            return Thumb_AluOperations(instr);
+    case InstructionThumb::HighRegisterOperations:   return Thumb_HighRegisterOperations(instr);
+    case InstructionThumb::LoadPcRelative:           return Thumb_LoadPcRelative(instr, pc);
+    case InstructionThumb::LoadStoreRegisterOffset:  return Thumb_LoadStoreRegisterOffset(instr);
+    case InstructionThumb::LoadStoreByteHalf:        return Thumb_LoadStoreByteHalf(instr);
+    case InstructionThumb::LoadStoreImmediateOffset: return Thumb_LoadStoreImmediateOffset(instr);
+    case InstructionThumb::LoadStoreHalf:            return Thumb_LoadStoreHalf(instr);
+    case InstructionThumb::LoadStoreSpRelative:      return Thumb_LoadStoreSpRelative(instr);
+    case InstructionThumb::LoadRelativeAddress:      return Thumb_LoadRelativeAddress(instr, pc);
+    case InstructionThumb::AddOffsetSp:              return Thumb_AddOffsetSp(instr);
+    case InstructionThumb::PushPopRegisters:         return Thumb_PushPopRegisters(instr);
+    case InstructionThumb::LoadStoreMultiple:        return Thumb_LoadStoreMultiple(instr);
+    case InstructionThumb::ConditionalBranch:        return Thumb_ConditionalBranch(instr, pc);
+    case InstructionThumb::SoftwareInterrupt:        return Thumb_SoftwareInterrupt(instr);
+    case InstructionThumb::UnconditionalBranch:      return Thumb_UnconditionalBranch(instr, pc);
+    case InstructionThumb::LongBranchLink:           return Thumb_LongBranchLink(instr, lr);
     }
     return "undef";
 }
