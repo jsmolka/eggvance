@@ -6,7 +6,7 @@
 
 #include "base/constants.h"
 #include "base/config.h"
-#include "base/logging.h"
+#include "base/exit.h"
 #include "core/core.h"
 #include "core/framecounter.h"
 #include "core/synchronizer.h"
@@ -132,10 +132,6 @@ void emulate()
 
 int main(int argc, char* argv[])
 {
-    using namespace shell;
-
-    setSink(ColoredConsoleSink(), FatalExitSink());
-
     fs::setBasePath(SDL_GetBasePath());
     try
     {

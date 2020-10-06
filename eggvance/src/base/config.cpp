@@ -3,7 +3,7 @@
 #include <shell/ini.h>
 
 #include "base/constants.h"
-#include "base/logging.h"
+#include "base/exit.h"
 
 template<>
 std::optional<SDL_Scancode> shell::parse(const std::string& data)
@@ -57,7 +57,7 @@ void Config::load(const fs::path& file)
     }
     catch (const shell::ParseError& error)
     {
-        SHELL_LOG_FATAL("Cannot parse '{}' because of error '{}'", file.string(), error.what());
+        exit("Cannot parse '{}' because of error '{}'", file, error.what());
     }
 
     save_path = ini.findOr("general", "save_path", fs::path());

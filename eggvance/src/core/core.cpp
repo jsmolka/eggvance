@@ -7,7 +7,7 @@
 
 #include "arm/arm.h"
 #include "base/config.h"
-#include "base/logging.h"
+#include "base/exit.h"
 #include "core/audiocontext.h"
 #include "core/inputcontext.h"
 #include "core/videocontext.h"
@@ -59,7 +59,7 @@ void core::init(int argc, char* argv[])
     {
         fmt::print(options.help());
 
-        SHELL_LOG_FATAL("Cannot parse command line because of error '{}'", error.what());
+        exit("Cannot parse command line because of error '{}'", error.what());
     }
 }
 

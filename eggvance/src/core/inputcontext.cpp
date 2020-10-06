@@ -1,7 +1,7 @@
 #include "inputcontext.h"
 
 #include "base/config.h"
-#include "base/logging.h"
+#include "base/exit.h"
 
 InputContext::~InputContext()
 {
@@ -11,7 +11,7 @@ InputContext::~InputContext()
 void InputContext::init()
 {
     if (SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER))
-        SHELL_LOG_FATAL("Cannot init input context");
+        exit("Cannot init input context");
 
     if (SDL_NumJoysticks() > 0)
         controller = SDL_GameControllerOpen(0);

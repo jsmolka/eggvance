@@ -3,7 +3,7 @@
 #include <shell/icon.h>
 
 #include "base/bit.h"
-#include "base/logging.h"
+#include "base/exit.h"
 
 VideoContext::~VideoContext()
 {
@@ -13,11 +13,11 @@ VideoContext::~VideoContext()
 void VideoContext::init()
 {
     if (SDL_InitSubSystem(SDL_INIT_VIDEO))
-        SHELL_LOG_FATAL("Cannot init video context");
+        exit("Cannot init video context");
 
-    if (!initWindow())   SHELL_LOG_FATAL("Cannot init window");
-    if (!initRenderer()) SHELL_LOG_FATAL("Cannot init renderer");
-    if (!initTexture())  SHELL_LOG_FATAL("Cannot init texture");
+    if (!initWindow())   exit("Cannot init window");
+    if (!initRenderer()) exit("Cannot init renderer");
+    if (!initTexture())  exit("Cannot init texture");
 }
 
 void VideoContext::raise()

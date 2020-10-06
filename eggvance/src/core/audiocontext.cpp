@@ -1,6 +1,6 @@
 #include "audiocontext.h"
 
-#include "base/logging.h"
+#include "base/exit.h"
 #include "base/sdl2.h"
 
 AudioContext::~AudioContext()
@@ -11,7 +11,7 @@ AudioContext::~AudioContext()
 void AudioContext::init()
 {
     if (SDL_InitSubSystem(SDL_INIT_AUDIO))
-        SHELL_LOG_FATAL("Cannot init audio context");
+        exit("Cannot init audio context");
 }
 
 void AudioContext::deinit()

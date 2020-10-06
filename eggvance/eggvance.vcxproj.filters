@@ -60,9 +60,6 @@
     <ClCompile Include="src\ppu\oamentry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\mmu\bios_data.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\arm\instr_thumb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -314,10 +311,10 @@
     <ClInclude Include="src\gamepad\gamepad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\base\logging.h">
+    <ClInclude Include="src\mmu\bios_normmatt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\bios_normmatt.h">
+    <ClInclude Include="src\base\exit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
