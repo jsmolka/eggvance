@@ -1,6 +1,5 @@
 #include "core.h"
 
-#include <shell/filesystem.h>
 #include <shell/fmt.h>
 #include <shell/options.h>
 #include <shell/utility.h>
@@ -8,6 +7,7 @@
 #include "arm/arm.h"
 #include "base/config.h"
 #include "base/exit.h"
+#include "base/filesystem.h"
 #include "core/audiocontext.h"
 #include "core/inputcontext.h"
 #include "core/videocontext.h"
@@ -59,7 +59,7 @@ void core::init(int argc, char* argv[])
     {
         fmt::print(options.help());
 
-        exit("Cannot parse command line because of error '{}'", error.what());
+        exit("Cannot parse command line arguments\nError: {}", error.what());
     }
 }
 
@@ -97,8 +97,6 @@ void core::frame()
         ppu.next();
     }
 
-    ppu.io.dispstat.hblank = false;
-    ppu.io.dispstat.vblank = false;
     ppu.present();
 }
 

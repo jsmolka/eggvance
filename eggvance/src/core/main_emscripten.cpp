@@ -30,8 +30,8 @@ void emulateMain(uint fps)
     emscripten_set_main_loop(emulate, fps, 1);
 }
 
-template<typename T>
-void processInputEvent(const Shortcuts<T>& shortcuts, T input)
+template<typename Input>
+void processInputEvent(const Shortcuts<Input>& shortcuts, Input input)
 {
     if (input == shortcuts.reset)
         core::reset();
@@ -66,11 +66,15 @@ void processEvents()
         switch (event.type)
         {
         case SDL_KEYDOWN:
-            processInputEvent(config.shortcuts.keyboard, event.key.keysym.scancode);
+            processInputEvent(
+                config.shortcuts.keyboard,
+                event.key.keysym.scancode);
             break;
 
         case SDL_CONTROLLERBUTTONDOWN:
-            processInputEvent(config.shortcuts.controller, SDL_GameControllerButton(event.cbutton.button));
+            processInputEvent(
+                config.shortcuts.controller,
+                static_cast<SDL_GameControllerButton>(event.cbutton.button));
             break;
 
         case SDL_CONTROLLERDEVICEADDED:
@@ -85,7 +89,7 @@ void idle()
 {
     processEvents();
 
-    video_ctx.renderClear(0xFFFF'FFFF);
+    video_ctx.renderClear(0xFFFFFFFF);
     video_ctx.renderIcon();
     video_ctx.renderPresent();
 }
@@ -127,13 +131,12 @@ int main(int argc, char* argv[])
     {
         core::init(argc, argv);
         idleMain();
-        return 0;
     }
     catch (const std::exception& ex)
     {
         std::puts(ex.what());
-        return 1;
     }
+    return 0;
 }
 
 #endif

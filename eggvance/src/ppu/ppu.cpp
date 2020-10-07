@@ -138,6 +138,9 @@ void PPU::next()
 
 void PPU::present()
 {
+    io.dispstat.hblank = false;
+    io.dispstat.vblank = false;
+
     if (io.dispcnt.isActive())
     {
         video_ctx.renderCopyTexture();

@@ -20,11 +20,9 @@ Synchronizer synchronizer(kRefreshRate);
 
 void processDropEvent(const SDL_DropEvent& event)
 {
-    auto file = fs::u8path(event.file);
+    const auto file = fs::u8path(event.file);
 
     SDL_free(event.file);
-
-    video_ctx.raise();
 
     if (file.extension() == ".sav")
     {
@@ -38,10 +36,11 @@ void processDropEvent(const SDL_DropEvent& event)
         core::updateTitle();
         counter = FrameCounter();
     }
+    video_ctx.raise();
 }
 
-template<typename T>
-void processInputEvent(const Shortcuts<T>& shortcuts, T input)
+template<typename Input>
+void processInputEvent(const Shortcuts<Input>& shortcuts, Input input)
 {
     if (input == shortcuts.reset)
         core::reset();
@@ -80,11 +79,15 @@ void processEvents()
             break;
 
         case SDL_KEYDOWN:
-            processInputEvent(config.shortcuts.keyboard, event.key.keysym.scancode);
+            processInputEvent(
+                config.shortcuts.keyboard,
+                event.key.keysym.scancode);
             break;
 
         case SDL_CONTROLLERBUTTONDOWN:
-            processInputEvent(config.shortcuts.controller, SDL_GameControllerButton(event.cbutton.button));
+            processInputEvent(
+                config.shortcuts.controller,
+                static_cast<SDL_GameControllerButton>(event.cbutton.button));
             break;
 
         case SDL_CONTROLLERDEVICEADDED:
@@ -99,51 +102,45 @@ void processEvents()
     }
 }
 
-void emulate()
-{
-    while (running && mmu.gamepak.size() == 0)
-    {
-        processEvents();
-
-        video_ctx.renderClear(0xFF3E'4750);
-        video_ctx.renderIcon();
-        video_ctx.renderPresent();
-
-        SDL_Delay(16);
-    }
-
-    core::reset();
-    core::updateTitle();
-
-    counter = FrameCounter();
-
-    while (running)
-    {
-        synchronizer.sync([]()
-        {
-            processEvents();
-            core::frame();
-        });
-
-        if (auto fps = (++counter).fps())
-            core::updateTitle(*fps);
-    }
-}
-
 int main(int argc, char* argv[])
 {
     fs::setBasePath(SDL_GetBasePath());
     try
     {
         core::init(argc, argv);
-        emulate();
-        return 0;
+
+        while (running && mmu.gamepak.size() == 0)
+        {
+            processEvents();
+
+            video_ctx.renderClear(0xFF3E4750);
+            video_ctx.renderIcon();
+            video_ctx.renderPresent();
+
+            SDL_Delay(16);
+        }
+
+        core::reset();
+        core::updateTitle();
+
+        counter = FrameCounter();
+
+        while (running)
+        {
+            synchronizer.sync([]() {
+                processEvents();
+                core::frame();
+            });
+
+            if (const auto fps = (++counter).fps())
+                core::updateTitle(*fps);
+        }
     }
     catch (const std::exception& ex)
     {
-        SDL_ShowSimpleMessageBox(0, "Exception", ex.what(), NULL);
-        return 1;
+        exit(ex.what());
     }
+    return 0;
 }
 
 #endif
