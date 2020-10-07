@@ -10,18 +10,18 @@ class Header
 private:
     struct Data
     {
-        u32 entry_point;
-        u8  nintendo_logo[156];
-        u8  game_title[12];
-        u8  game_code[4];
-        u8  maker_code[2];
-        u8  fixed_96h;
-        u8  unit_code;
-        u8  device_type;
-        u8  reserved_area[7];
-        u8  game_version;
-        u8  complement;
-        u16 checksum;
+        u8 entry_point[4];
+        u8 nintendo_logo[156];
+        u8 game_title[12];
+        u8 game_code[4];
+        u8 maker_code[2];
+        u8 fixed_96h;
+        u8 unit_code;
+        u8 device_type;
+        u8 reserved[7];
+        u8 game_version;
+        u8 complement;
+        u8 checksum[2];
     };
 
 public:

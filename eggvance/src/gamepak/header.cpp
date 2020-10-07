@@ -1,28 +1,30 @@
 #include "header.h"
 
-#include <algorithm>
 #include <numeric>
 
-template<uint N>
-static std::string makePrintable(const u8 (&data)[N])
-{
-    std::string str(reinterpret_cast<const char*>(data), N);
-    str.erase(std::find(str.begin(), str.end(), '\0'), str.end());
+#include <shell/algorithm.h>
 
-    return str;
+template<uint N>
+static std::string makeAscii(const u8 (&data)[N])
+{
+    std::string ascii(reinterpret_cast<const char*>(data), N);
+
+    shell::trimIf(ascii, shell::IsCntrl<char>());
+
+    return ascii;
 }
 
 Header::Header(const std::vector<u8>& rom)
 {
-    if (rom.size() < sizeof(Data))
+    if (rom.size() < kSize)
         return;
 
     const Data& data = *reinterpret_cast<const Data*>(rom.data());
 
     if (data.fixed_96h == 0x96 && data.complement == complement(data))
     {
-        title = makePrintable(data.game_title);
-        code  = makePrintable(data.game_code);
+        title = makeAscii(data.game_title);
+        code  = makeAscii(data.game_code);
     }
 }
 
