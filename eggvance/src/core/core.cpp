@@ -41,7 +41,7 @@ void core::init(int argc, char* argv[])
         auto sav = result.find<fs::path>("--save");
         auto cfg = result.find<fs::path>("--config");
 
-        config.load(fs::makeAbsolute(*cfg));
+        config.init(fs::makeAbsolute(*cfg));
 
         mmu.bios.init(config.bios_file);
 

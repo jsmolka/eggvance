@@ -48,7 +48,7 @@ std::optional<Gpio::Type> shell::parse(const std::string& data)
     return std::nullopt;
 }
 
-void Config::load(const fs::path& file)
+void Config::init(const fs::path& file)
 {
     shell::Ini ini;
     try
@@ -57,7 +57,7 @@ void Config::load(const fs::path& file)
     }
     catch (const shell::ParseError& error)
     {
-        exit("Cannot parse '{}' because of error '{}'", file, error.what());
+        exit("Cannot parse config: {}\nError: {}", file, error.what());
     }
 
     save_path = ini.findOr("general", "save_path", fs::path());
@@ -70,12 +70,18 @@ void Config::load(const fs::path& file)
         save_path = fs::makeAbsolute(save_path);
 
         if (!fs::is_directory(save_path))
-            fs::create_directories(save_path);
+        {
+            if (!fs::create_directories(save_path))
+                exit("Cannot create save path: {}", save_path);
+        }
     }
 
     if (!bios_file.empty())
     {
         bios_file = fs::makeAbsolute(bios_file);
+
+        if (!fs::is_regular_file(bios_file))
+            exit("Cannot find BIOS file: {}", bios_file);
     }
     
     save_type = ini.findOr("cartridge", "save_type", Save::Type::None);

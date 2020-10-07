@@ -36,16 +36,16 @@ struct Shortcuts
 class Config
 {
 public:
-    void load(const fs::path& file);
+    void init(const fs::path& file);
 
-    double framerate[4];
     fs::path save_path;
     fs::path bios_file;
-    bool bios_hash;
     bool bios_skip;
+    bool bios_hash;
 
     Save::Type save_type;
     Gpio::Type gpio_type;
+    double framerate[4];
 
     struct
     {
