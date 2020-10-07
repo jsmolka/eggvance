@@ -76,16 +76,6 @@ u32 GamePak::readUnused(u32 addr)
     return (addr & 0xFFFF) | ((addr + 1) & 0xFFFF) << 16;
 }
 
-std::optional<GamePak::Override> GamePak::findOverride(const std::string& code)
-{
-    for (const auto& override : overrides)
-    {
-        if (override.code == code)
-            return override;
-    }
-    return std::nullopt;
-}
-
 void GamePak::initGpio(Gpio::Type type)
 {
     gpio = nullptr;

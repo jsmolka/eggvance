@@ -84,9 +84,6 @@
     <ClCompile Include="src\gamepak\sram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\gamepak\overrides.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\gamepak\rtc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -142,6 +139,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\arm\arithmetic.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gamepak\override.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -315,6 +315,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\base\exit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gamepak\override.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
