@@ -1,0 +1,135 @@
+name: Build
+
+on: push
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: cmd
+
+    steps:
+      - uses: actions/checkout@master
+        with:
+          submodules: recursive
+
+      - name: Dependencies
+        run: |
+          vcpkg integrate install
+          vcpkg install sdl2:x64-windows
+
+      - name: Build
+        run: |
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          msbuild /property:Configuration=Release eggvance.sln
+
+      - name: Collect
+        run: |
+          mkdir upload
+          move bin\Release\eggvance.exe upload
+          move bin\Release\SDL2.dll upload
+          move eggvance\eggvance.ini upload
+
+      - name: Upload
+        uses: actions/upload-artifact@master
+        with:
+          name: eggvance-windows
+          path: upload
+
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@master
+        with:
+          submodules: recursive
+
+      - name: Dependencies
+        run: sudo apt-get install libsdl2-dev
+
+      - name: Build
+        run: |
+          mkdir eggvance/build
+          cd eggvance/build
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+          make -j 4
+
+      - name: Collect
+        run: |
+          mkdir upload
+          mv eggvance/build/eggvance upload
+          mv eggvance/eggvance.ini upload
+
+      - name: Upload
+        uses: actions/upload-artifact@master
+        with:
+          name: eggvance-linux
+          path: upload
+
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@master
+        with:
+          submodules: recursive
+
+      - name: Dependencies
+        run: brew install sdl2
+
+      - name: Build
+        run: |
+          mkdir eggvance/build
+          cd eggvance/build
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+          make -j 4
+
+      - name: Collect
+        run: |
+          mkdir upload
+          mv eggvance/build/eggvance upload
+          mv eggvance/eggvance.ini upload
+
+      - name: Upload
+        uses: actions/upload-artifact@master
+        with:
+          name: eggvance-macos
+          path: upload
+
+  build-emscripten:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@master
+        with:
+          submodules: recursive
+
+      - name: Dependencies
+        run: |
+          git clone https://github.com/emscripten-core/emsdk.git
+          cd emsdk
+          ./emsdk install latest
+          ./emsdk activate latest
+
+      - name: Build
+        run: |
+          source ./emsdk/emsdk_env.sh
+          mkdir eggvance/build
+          cd eggvance/build
+          emcmake cmake -DCMAKE_BUILD_TYPE=Release ..
+          emmake make -j 4
+
+      - name: Collect
+        run: |
+          mkdir upload
+          mv eggvance/build/eggvance.js upload
+          mv eggvance/build/eggvance.wasm upload
+          mv eggvance/eggvance.html upload
+
+      - name: Upload
+        uses: actions/upload-artifact@master
+        with:
+          name: eggvance-emscripten
+          path: upload
