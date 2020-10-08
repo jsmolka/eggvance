@@ -141,7 +141,7 @@
     <ClCompile Include="src\arm\arithmetic.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\gamepak\override.cpp">
+    <ClCompile Include="src\gamepak\overwrites.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -317,7 +317,7 @@
     <ClInclude Include="src\base\exit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\gamepak\override.h">
+    <ClInclude Include="src\gamepak\overwrites.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -6,10 +6,10 @@
 #include "gamepak/gpio.h"
 #include "gamepak/save.h"
 
-struct Override
+struct Overwrite
 {
     Save::Type save_type;
     Gpio::Type gpio_type;
 };
 
-std::optional<Override> findOverride(const std::string& game_code);
+std::optional<Overwrite> findOverwrite(const std::string& game_code);

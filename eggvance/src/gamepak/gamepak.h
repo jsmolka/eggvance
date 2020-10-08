@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "gamepak/header.h"
-#include "gamepak/override.h"
+#include "gamepak/overwrites.h"
 
 class GamePak
 {

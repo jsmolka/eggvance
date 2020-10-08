@@ -1,10 +1,10 @@
-#include "override.h"
+#include "overwrites.h"
 
 #include <array>
 #include <string_view>
 #include <utility>
 
-static constexpr std::pair<std::string_view, Override> kOverrides[] =
+static constexpr std::pair<std::string_view, Overwrite> kOverwrites[] =
 {
     { "AWRE", { Save::Type::Flash64 , Gpio::Type::None } },  // Advance Wars
     { "AWRP", { Save::Type::Flash64 , Gpio::Type::None } },  // Advance Wars
@@ -142,12 +142,12 @@ static constexpr std::pair<std::string_view, Override> kOverrides[] =
     { "KYGP", { Save::Type::Eeprom  , Gpio::Type::None}  }   // Yoshi's Universal Gravitation
 };
 
-std::optional<Override> findOverride(const std::string& game_code)
+std::optional<Overwrite> findOverwrite(const std::string& game_code)
 {
-    for (const auto& [code, override] : kOverrides)
+    for (const auto& [code, overwrite] : kOverwrites)
     {
         if (code == game_code)
-            return override;
+            return overwrite;
     }
     return std::nullopt;
 }
