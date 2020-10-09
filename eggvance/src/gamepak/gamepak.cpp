@@ -38,7 +38,7 @@ void GamePak::load(const fs::path& rom_file, const fs::path& save_file)
     Save::Type save_type = config.save_type;
     Gpio::Type gpio_type = config.gpio_type;
 
-    if (const auto overwrite = findOverwrite(header.code))
+    if (const auto overwrite = Overwrite::find(header.code))
     {
         save_type = overwrite->save_type;
         gpio_type = overwrite->gpio_type;
