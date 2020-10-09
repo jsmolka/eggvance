@@ -1,6 +1,6 @@
 #include "save.h"
 
-#include <cstring>
+#include <algorithm>
 #include <string_view>
 #include <utility>
 
@@ -28,7 +28,7 @@ Save::~Save()
 
 Save::Type Save::parse(const std::vector<u8>& rom)
 {
-    static constexpr std::pair<std::string_view, Save::Type> kIdentifiers[] =
+    static constexpr std::pair<std::string_view, Save::Type> kSignatures[] =
     {
         { "SRAM_V"    , Save::Type::Sram     },
         { "SRAM_F_V"  , Save::Type::Sram     },
@@ -40,10 +40,12 @@ Save::Type Save::parse(const std::vector<u8>& rom)
 
     for (uint x = Header::kSize; x < rom.size(); x += 4)
     {
-        for (const auto& [id, type] : kIdentifiers)
+        for (const auto& [signature, type] : kSignatures)
         {
-            if (x + id.size() < rom.size()
-                    && std::memcmp(&rom[x], id.data(), id.size()) == 0)
+            if (x + signature.size() >= rom.size())
+                continue;
+
+            if (std::equal(signature.begin(), signature.end(), &rom[x]))
                 return type;
         }
     }

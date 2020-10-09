@@ -139,7 +139,7 @@ static constexpr std::pair<std::string_view, Overwrite> kOverwrites[] =
     { "RZWP", { Save::Type::Sram    , Gpio::Type::None } },  // Wario Ware Twisted
     { "KYGJ", { Save::Type::Eeprom  , Gpio::Type::None } },  // Yoshi's Universal Gravitation
     { "KYGE", { Save::Type::Eeprom  , Gpio::Type::None } },  // Yoshi's Universal Gravitation
-    { "KYGP", { Save::Type::Eeprom  , Gpio::Type::None}  }   // Yoshi's Universal Gravitation
+    { "KYGP", { Save::Type::Eeprom  , Gpio::Type::None } }   // Yoshi's Universal Gravitation
 };
 
 std::optional<Overwrite> findOverwrite(const std::string& game_code)
