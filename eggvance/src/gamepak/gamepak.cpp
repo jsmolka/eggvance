@@ -66,8 +66,9 @@ void GamePak::load(const fs::path& rom_file)
 
 void GamePak::loadSave(const fs::path& save_file)
 {
+    // Todo: check necessary things for save load
+
     initSave(save_file, save->type);
-    fs::read(save_file, save->data);
 }
 
 u32 GamePak::readUnused(u32 addr)
@@ -78,45 +79,35 @@ u32 GamePak::readUnused(u32 addr)
 
 void GamePak::initGpio(Gpio::Type type)
 {
-    gpio = nullptr;
-
-    switch (type)
+    gpio = std::invoke([&]() -> std::unique_ptr<Gpio>
     {
-    case Gpio::Type::Rtc:
-        gpio = std::make_unique<Rtc>();
-        break;
-
-    default:
-        gpio = std::make_unique<Gpio>();
-        break;
-    }
+        if (type == Gpio::Type::Rtc)
+            return std::make_unique<Rtc>();
+        
+        return std::make_unique<Gpio>();
+    });
 }
 
 void GamePak::initSave(const fs::path& file, Save::Type type)
 {
-    save = nullptr;
-
-    switch (type)
+    save = std::invoke([&]() -> std::unique_ptr<Save>
     {
-    case Save::Type::Sram:
-        save = std::make_unique<Sram>(file);
-        break;
+        switch (type)
+        {
+        case Save::Type::Sram:      return std::make_unique<Sram>();
+        case Save::Type::Eeprom:    return std::make_unique<Eeprom>();
+        case Save::Type::Flash512:  return std::make_unique<Flash>(Flash::kSize512);
+        case Save::Type::Flash1024: return std::make_unique<Flash>(Flash::kSize1024);
+        }
+        return std::make_unique<Save>();
+    });
 
-    case Save::Type::Eeprom:
-        save = std::make_unique<Eeprom>(file);
-        break;
-
-    case Save::Type::Flash64:
-        save = std::make_unique<Flash64>(file);
-        break;
-
-    case Save::Type::Flash128:
-        save = std::make_unique<Flash128>(file);
-        break;
-
-    default:
-        save = std::make_unique<Save>();
-        break;
+    if (!save->init(file))
+    {
+        if (const auto overwrite = Overwrite::find(header.code))
+            initSave(fs::path(), overwrite->save_type);
+        else
+            initSave(fs::path(), Save::parse(rom));
     }
 }
 

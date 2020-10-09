@@ -13,20 +13,28 @@ public:
         None,
         Sram,
         Eeprom,
-        Flash64,
-        Flash128
+        Flash512,
+        Flash1024
     };
 
     Save();
-    Save(const fs::path& file, Type type);
+    Save(Type type);
     virtual ~Save();
 
     static Type parse(const std::vector<u8>& rom);
+
+    bool init(const fs::path& file);
 
     virtual u8 read(u32 addr);
     virtual void write(u32 addr, u8 byte);
 
     const Type type;
-    const fs::path file;
     std::vector<u8> data;
+
+protected:
+    virtual bool hasValidSize() const;
+
+private:
+    fs::path file;
+    bool changed = false;
 };

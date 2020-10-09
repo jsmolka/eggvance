@@ -28,11 +28,11 @@ std::optional<Save::Type> shell::parse(const std::string& data)
 {
     const auto type = shell::toLowerCopy(data);
 
-    if (type == "auto")     return Save::Type::None;
-    if (type == "sram")     return Save::Type::Sram;
-    if (type == "flash64")  return Save::Type::Flash64;
-    if (type == "flash128") return Save::Type::Flash128;
-    if (type == "eeprom")   return Save::Type::Eeprom;
+    if (type == "auto")      return Save::Type::None;
+    if (type == "sram")      return Save::Type::Sram;
+    if (type == "flash512")  return Save::Type::Flash512;
+    if (type == "flash1024") return Save::Type::Flash1024;
+    if (type == "eeprom")    return Save::Type::Eeprom;
 
     return std::nullopt;
 }

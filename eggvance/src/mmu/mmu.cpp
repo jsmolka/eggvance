@@ -346,8 +346,8 @@ u8 MMU::readSave(u32 addr)
         addr &= 0x7FFF;
         return gamepak.save->read(addr);
 
-    case Save::Type::Flash64:
-    case Save::Type::Flash128:
+    case Save::Type::Flash512:
+    case Save::Type::Flash1024:
         addr &= 0xFFFF;
         return gamepak.save->read(addr);
 
@@ -365,8 +365,8 @@ void MMU::writeSave(u32 addr, u8 byte)
         gamepak.save->write(addr, byte);
         break;
 
-    case Save::Type::Flash64:
-    case Save::Type::Flash128:
+    case Save::Type::Flash512:
+    case Save::Type::Flash1024:
         addr &= 0xFFFF;
         gamepak.save->write(addr, byte);
         break;

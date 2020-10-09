@@ -1,7 +1,7 @@
 #include "eeprom.h"
 
-Eeprom::Eeprom(const fs::path& file)
-    : Save(file, Save::Type::Eeprom)
+Eeprom::Eeprom()
+    : Save(Type::Eeprom)
 {
     state = State::Receive;
 }
@@ -31,6 +31,8 @@ u8 Eeprom::read(u32 addr)
 
 void Eeprom::write(u32 addr, u8 byte)
 {
+    Save::write(addr, byte);
+
     if (state == State::Read || state == State::ReadUnused)
         return;
 
@@ -55,7 +57,7 @@ void Eeprom::write(u32 addr, u8 byte)
         break;
 
     case State::ReadSetAddress:
-        if (count == (data.size() == 0x2000 ? 14 : 6))
+        if (count == bus())
         {
             address = buffer << 3;
             setState(State::ReadSetAddressEnd);
@@ -67,7 +69,7 @@ void Eeprom::write(u32 addr, u8 byte)
         break;
 
     case State::WriteSetAddress:
-        if (count == (data.size() == 0x2000 ? 14 : 6))
+        if (count == bus())
         {
             address = buffer << 3;
             setState(State::Write);
@@ -91,10 +93,21 @@ void Eeprom::write(u32 addr, u8 byte)
     }
 }
 
+bool Eeprom::hasValidSize() const
+{
+    return data.size() == kSize4
+        || data.size() == kSize64;
+}
+
+uint Eeprom::bus() const
+{
+    return data.size() == kSize4 ? 6 : 14;
+}
+
 void Eeprom::setState(State state)
 {
     this->state = state;
 
-    count = 0;
+    count  = 0;
     buffer = 0;
 }

@@ -4,6 +4,7 @@
 #include <string_view>
 #include <utility>
 
+#include "base/utility.h"
 #include "gamepak/header.h"
 
 Save::Save()
@@ -12,30 +13,34 @@ Save::Save()
 
 }
 
-Save::Save(const fs::path& file, Type type)
-    : file(file)
-    , type(type)
+Save::Save(Type type)
+    : type(type)
 {
-    if (fs::is_regular_file(file))
-        fs::read(file, data);
+
 }
 
 Save::~Save()
 {
-    if (!data.empty())
-        fs::write(file, data);
+    if (changed
+        && !file.empty()
+        && !data.empty()
+        && type != Type::None)
+    {
+        if (!fs::write(file, data))
+            message("Cannot write save: {}", file);
+    }
 }
 
 Save::Type Save::parse(const std::vector<u8>& rom)
 {
     static constexpr std::pair<std::string_view, Save::Type> kSignatures[] =
     {
-        { "SRAM_V"    , Save::Type::Sram     },
-        { "SRAM_F_V"  , Save::Type::Sram     },
-        { "EEPROM_V"  , Save::Type::Eeprom   },
-        { "FLASH_V"   , Save::Type::Flash64  },
-        { "FLASH512_V", Save::Type::Flash64  },
-        { "FLASH1M_V" , Save::Type::Flash128 }
+        { "SRAM_V"    , Save::Type::Sram      },
+        { "SRAM_F_V"  , Save::Type::Sram      },
+        { "EEPROM_V"  , Save::Type::Eeprom    },
+        { "FLASH_V"   , Save::Type::Flash512  },
+        { "FLASH512_V", Save::Type::Flash512  },
+        { "FLASH1M_V" , Save::Type::Flash1024 }
     };
 
     for (uint x = Header::kSize; x < rom.size(); x += 4)
@@ -52,6 +57,28 @@ Save::Type Save::parse(const std::vector<u8>& rom)
     return Type::None;
 }
 
+bool Save::init(const fs::path& file)
+{
+    this->file = file;
+
+    if (!fs::is_regular_file(file))
+        return true;
+
+    if (!fs::read(file, data))
+    {
+        message("Cannot read save: {}", file);
+        return false;
+    }
+
+    if (!hasValidSize())
+    {
+        message("Invalid save size: {}", data.size());
+        return false;
+    }
+
+    return true;
+}
+
 u8 Save::read(u32 addr)
 {
     return 0;
@@ -59,5 +86,10 @@ u8 Save::read(u32 addr)
 
 void Save::write(u32 addr, u8 byte)
 {
+    changed = true;
+}
 
+bool Save::hasValidSize() const
+{
+    return true;
 }

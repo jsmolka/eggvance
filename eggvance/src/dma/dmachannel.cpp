@@ -1,6 +1,7 @@
 #include "dmachannel.h"
 
 #include "arm/arm.h"
+#include "gamepak/eeprom.h"
 #include "mmu/mmu.h"
 
 enum AddressControl
@@ -167,12 +168,12 @@ void DmaChannel::initEeprom()
         {
         case kBus6Write:
         case kBus6ReadSetAddress:
-            mmu.gamepak.save->data.resize(0x0200, 0xFF);
+            mmu.gamepak.save->data.resize(Eeprom::kSize4, 0xFF);
             break;
 
         case kBus14Write:
         case kBus14ReadSetAddress:
-            mmu.gamepak.save->data.resize(0x2000, 0xFF);
+            mmu.gamepak.save->data.resize(Eeprom::kSize64, 0xFF);
             break;
         }
     }

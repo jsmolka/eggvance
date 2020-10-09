@@ -2,18 +2,19 @@
 
 #include "gamepak/save.h"
 
-template<uint size>
 class Flash : public Save
 {
-    static_assert(size == 0x10'000 || size == 0x20'000);
-
 public:
-    explicit Flash(const fs::path& file);
+    Flash(uint size);
+
+    static constexpr uint kSize512  = 0x10'000;
+    static constexpr uint kSize1024 = 0x20'000;
 
     u8 read(u32 addr) final;
     void write(u32 addr, u8 byte) final;
 
-    static constexpr uint kSize = size;
+protected:
+    bool hasValidSize() const final;
 
 private:
     enum Command
@@ -29,15 +30,13 @@ private:
 
     enum Chip
     {
-        kChipMacronix64  = 0x1CC2,
-        kChipMacronix128 = 0x09C2
+        kChipMacronix512  = 0x1CC2,
+        kChipMacronix1024 = 0x09C2
     };
 
+    const uint size;
     bool chip = false;
     bool erase = false;
     uint command = 0;
     u8* bank = nullptr;
 };
-
-using Flash64  = Flash<0x10'000>;
-using Flash128 = Flash<0x20'000>;

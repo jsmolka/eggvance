@@ -1,32 +1,38 @@
 #include "flash.h"
 
 #include <algorithm>
+#include <climits>
 
-template<uint size>
-Flash<size>::Flash(const fs::path& file)
-    : Save(file, size == 0x10'000 ? Type::Flash64 : Type::Flash128)
+#include "base/macros.h"
+
+Flash::Flash(uint size)
+    : Save(size == kSize512 ? Type::Flash512 : Type::Flash1024)
+    , size(size)
 {
+    SHELL_ASSERT(size == kSize512 || size == kSize1024);
+
     data.resize(size, 0xFF);
 
     bank = data.data();
 }
 
-template<uint size>
-u8 Flash<size>::read(u32 addr)
+u8 Flash::read(u32 addr)
 {
-    constexpr uint macronix = size == 0x10'000
-        ? kChipMacronix64
-        : kChipMacronix128;
+    if (chip && addr <= 1)
+    {
+        uint macronix = size == kSize512
+            ? kChipMacronix512
+            : kChipMacronix1024;
 
-    if (chip && addr < 2)
-        return (macronix >> (8 * addr)) & 0xFF;
-
+        return static_cast<u8>(macronix >> (CHAR_BIT * addr));
+    }
     return bank[addr];
 }
 
-template<uint size>
-void Flash<size>::write(u32 addr, u8 byte)
+void Flash::write(u32 addr, u8 byte)
 {
+    Save::write(addr, byte);
+
     switch (command)
     {
     case kCommandWriteByte:
@@ -35,8 +41,8 @@ void Flash<size>::write(u32 addr, u8 byte)
         return;
 
     case kCommandSwitchBank:
-        if (size == 0x20'000)
-            bank = &data[0x10'000 * (byte & 0x1)];
+        if (size == kSize1024)
+            bank = &data[kSize512 * (byte & 0x1)];
         command = 0;
         return;
     }
@@ -60,7 +66,7 @@ void Flash<size>::write(u32 addr, u8 byte)
         case kCommandEraseChip:
             if (erase)
             {
-                std::fill_n(data.begin(), size, 0xFF);
+                std::fill(data.begin(), data.end(), 0xFF);
                 erase = false;
             }
             break;
@@ -88,5 +94,7 @@ void Flash<size>::write(u32 addr, u8 byte)
     }
 }
 
-template class Flash<0x10'000>;
-template class Flash<0x20'000>;
+bool Flash::hasValidSize() const
+{
+    return data.size() == size;
+}
