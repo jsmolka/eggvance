@@ -25,7 +25,7 @@ void BIOS::init(const fs::path& path)
 
         if (config.bios_hash)
         {
-            constexpr u64 kExpected = 0x860D'7AFF'82E9'94DC;
+            constexpr std::size_t kExpected = 0x860D'7AFF'82E9'94DC;
 
             if (shell::hashRange(data.begin(), data.end()) != kExpected)
                 exit("Invalid BIOS hash");

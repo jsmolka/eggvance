@@ -18,7 +18,7 @@ template<uint N, typename Mirror = Mirror<N>>
 class Ram : private std::array<u8, N>
 {
 public:
-    using std::array<u8, N>::value_type;
+    using typename std::array<u8, N>::value_type;
     using std::array<u8, N>::size;
     using std::array<u8, N>::data;
     using std::array<u8, N>::begin;
@@ -26,7 +26,7 @@ public:
 
     Ram()
     {
-        fill(0);
+        this->fill(0);
     }
 
     template<typename Integral>

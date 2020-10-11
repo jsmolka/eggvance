@@ -81,7 +81,7 @@ void Config::init(const fs::path& file)
         bios_file = fs::makeAbsolute(bios_file);
 
         if (!fs::is_regular_file(bios_file))
-            exit("Cannot find BIOS file: {}", bios_file);
+            exit("Cannot find BIOS: {}", bios_file);
     }
     
     save = ini.findOr("cartridge", "save_type", Save::Type::None);
