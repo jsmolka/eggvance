@@ -238,7 +238,7 @@ void PPU::renderObjects()
             const auto tile  = texture / 8;
             const auto pixel = texture % 8;
 
-            u32 addr = VRAM::mirror(entry.base_tile + size * tile.offset(tiles));
+            u32 addr = mmu.vram.mirror(entry.base_tile + size * tile.offset(tiles));
             if (addr < 0x1'4000 && io.dispcnt.isBitmap())
                 continue;
 

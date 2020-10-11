@@ -6,7 +6,7 @@
 #include "ppu/oamentry.h"
 #include "ppu/matrix.h"
 
-class OAM : public MirroredRAM<0x400>
+class OAM : public Ram<0x400>
 {
 public:
     void reset();

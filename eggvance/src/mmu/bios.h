@@ -22,5 +22,5 @@ private:
     static u64 hash(u32* data, int size);
 
     u32 last_fetched;
-    MirroredRAM<0x4000> data;
+    Ram<0x4000> data;
 };

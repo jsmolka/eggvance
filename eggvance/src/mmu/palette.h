@@ -2,7 +2,7 @@
 
 #include "ram.h"
 
-class Palette : public MirroredRAM<0x400>
+class Palette : public Ram<0x400>
 {
 public:
     void reset();

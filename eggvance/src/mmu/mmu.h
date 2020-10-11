@@ -33,8 +33,8 @@ private:
     u8 readSave(u32 addr);
     void writeSave(u32 addr, u8 byte);
 
-    MirroredRAM<0x40000> ewram;
-    MirroredRAM<0x08000> iwram;
+    Ram<0x40000> ewram;
+    Ram<0x08000> iwram;
 };
 
 inline MMU mmu;
