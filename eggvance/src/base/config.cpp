@@ -84,8 +84,8 @@ void Config::init(const fs::path& file)
             exit("Cannot find BIOS file: {}", bios_file);
     }
     
-    save_type = ini.findOr("cartridge", "save_type", Save::Type::None);
-    gpio_type = ini.findOr("cartridge", "gpio_type", Gpio::Type::None);
+    save = ini.findOr("cartridge", "save_type", Save::Type::None);
+    gpio = ini.findOr("cartridge", "gpio_type", Gpio::Type::None);
 
     framerate[0] = ini.findOr("framerate", "custom_1", 2.0 * kRefreshRate);
     framerate[1] = ini.findOr("framerate", "custom_2", 4.0 * kRefreshRate);

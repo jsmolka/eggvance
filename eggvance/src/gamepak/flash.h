@@ -5,7 +5,7 @@
 class Flash : public Save
 {
 public:
-    Flash(uint size);
+    explicit Flash(uint size);
 
     static constexpr uint kSize512  = 0x10'000;
     static constexpr uint kSize1024 = 0x20'000;
@@ -13,8 +13,10 @@ public:
     u8 read(u32 addr) final;
     void write(u32 addr, u8 byte) final;
 
+    const uint size;
+
 protected:
-    bool hasValidSize() const final;
+    bool isValidSize() const final;
 
 private:
     enum Command
@@ -34,7 +36,6 @@ private:
         kChipMacronix1024 = 0x09C2
     };
 
-    const uint size;
     bool chip = false;
     bool erase = false;
     uint command = 0;

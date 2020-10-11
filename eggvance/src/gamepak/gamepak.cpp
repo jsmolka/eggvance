@@ -1,8 +1,7 @@
 #include "gamepak.h"
 
-#include <stdexcept>
-
 #include "base/config.h"
+#include "base/utility.h"
 #include "gamepak/eeprom.h"
 #include "gamepak/flash.h"
 #include "gamepak/rtc.h"
@@ -28,53 +27,60 @@ u32 GamePak::readWord(u32 addr) const
     return read<u32>(addr);
 }
 
-void GamePak::load(const fs::path& rom_file, const fs::path& save_file)
+void GamePak::loadRom(const fs::path& file, bool load_save)
 {
-    if (!fs::read(rom_file, rom))
-        throw std::runtime_error("Cannot read file");
+    if (!fs::read(file, rom))
+    {
+        message("Cannot read rom: {}", file);
+        return;
+    }
 
     header = Header(rom);
 
-    Save::Type save_type = config.save_type;
-    Gpio::Type gpio_type = config.gpio_type;
+    const auto overwrite = Overwrite::find(header.code);
+
+    initGpio(overwrite ? overwrite->gpio : config.gpio);
+
+    if (load_save)
+    {
+        fs::path save(file);
+        save.replace_extension("sav");
+
+        if (!config.save_path.empty())
+            save = config.save_path / save.filename();
+
+        loadSave(save);
+    }
+}
+
+void GamePak::loadSave(const fs::path& file)
+{
+    if (rom.empty())
+        return;
+
+    Save::Type type = config.save;
 
     if (const auto overwrite = Overwrite::find(header.code))
-    {
-        save_type = overwrite->save_type;
-        gpio_type = overwrite->gpio_type;
-    }
-    else
-    {
-        if (save_type == Save::Type::None) 
-            save_type = Save::parse(rom);
-    }
+        type = overwrite->save;
 
-    initGpio(gpio_type);
-    initSave(save_file, save_type);
-}
-
-void GamePak::load(const fs::path& rom_file)
-{
-    auto save_file = rom_file;
-    save_file.replace_extension("sav");
-
-    if (!config.save_path.empty())
-        save_file = config.save_path / save_file.filename();
-
-    load(rom_file, save_file);
-}
-
-void GamePak::loadSave(const fs::path& save_file)
-{
-    // Todo: check necessary things for save load
-
-    initSave(save_file, save->type);
+    initSave(file, type == Save::Type::None ? Save::parse(rom) : type);
 }
 
 u32 GamePak::readUnused(u32 addr)
 {
     addr = (addr & ~0x3) >> 1;
     return (addr & 0xFFFF) | ((addr + 1) & 0xFFFF) << 16;
+}
+
+template<typename T>
+T GamePak::read(u32 addr) const
+{
+    addr &= 0x200'0000 - sizeof(T);
+
+    if (addr < rom.size())
+        return *reinterpret_cast<const T*>(&rom[addr]);
+    else
+        return readUnused(addr);
 }
 
 void GamePak::initGpio(Gpio::Type type)
@@ -104,20 +110,8 @@ void GamePak::initSave(const fs::path& file, Save::Type type)
 
     if (!save->init(file))
     {
-        if (const auto overwrite = Overwrite::find(header.code))
-            initSave(fs::path(), overwrite->save_type);
-        else
-            initSave(fs::path(), Save::parse(rom));
+        const auto overwrite = Overwrite::find(header.code);
+
+        initSave(fs::path(),overwrite ? overwrite->save : Save::parse(rom));
     }
-}
-
-template<typename T>
-T GamePak::read(u32 addr) const
-{
-    addr &= 0x200'0000 - sizeof(T);
-
-    if (addr < rom.size())
-        return *reinterpret_cast<const T*>(&rom[addr]);
-    else
-        return readUnused(addr);
 }

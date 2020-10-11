@@ -15,9 +15,8 @@ public:
     u16 readHalf(u32 addr) const;
     u32 readWord(u32 addr) const;
 
-    void load(const fs::path& rom_file, const fs::path& save_file);
-    void load(const fs::path& rom_file);
-    void loadSave(const fs::path& save_file);
+    void loadRom(const fs::path& file, bool load_save);
+    void loadSave(const fs::path& file);
 
     Header header;
     std::unique_ptr<Gpio> gpio;
@@ -26,11 +25,11 @@ public:
 private:
     static u32 readUnused(u32 addr);
 
-    void initGpio(Gpio::Type type);
-    void initSave(const fs::path& file, Save::Type type);
-
     template<typename T>
     T read(u32 addr) const;
+
+    void initGpio(Gpio::Type type);
+    void initSave(const fs::path& file, Save::Type type);
 
     fs::path file;
     std::vector<u8> rom;

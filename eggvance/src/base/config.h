@@ -43,8 +43,8 @@ public:
     bool bios_skip;
     bool bios_hash;
 
-    Save::Type save_type;
-    Gpio::Type gpio_type;
+    Save::Type save;
+    Gpio::Type gpio;
     double framerate[4];
 
     struct

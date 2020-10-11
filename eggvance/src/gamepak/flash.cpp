@@ -31,11 +31,10 @@ u8 Flash::read(u32 addr)
 
 void Flash::write(u32 addr, u8 byte)
 {
-    Save::write(addr, byte);
-
     switch (command)
     {
     case kCommandWriteByte:
+        changed = true;
         bank[addr] = byte;
         command = 0;
         return;
@@ -66,6 +65,7 @@ void Flash::write(u32 addr, u8 byte)
         case kCommandEraseChip:
             if (erase)
             {
+                changed = true;
                 std::fill(data.begin(), data.end(), 0xFF);
                 erase = false;
             }
@@ -85,6 +85,7 @@ void Flash::write(u32 addr, u8 byte)
 
             if (erase && command == kCommandEraseSector)
             {
+                changed = true;
                 u8* sector = bank + (addr & 0xF000);
                 std::fill_n(sector, 0x1000, 0xFF);
                 erase = false;
@@ -94,7 +95,7 @@ void Flash::write(u32 addr, u8 byte)
     }
 }
 
-bool Flash::hasValidSize() const
+bool Flash::isValidSize() const
 {
     return data.size() == size;
 }

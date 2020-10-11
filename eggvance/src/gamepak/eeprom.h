@@ -14,7 +14,7 @@ public:
     void write(u32 addr, u8 byte) final;
 
 protected:
-    bool hasValidSize() const final;
+    bool isValidSize() const final;
 
 private:
     enum class State

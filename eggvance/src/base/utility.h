@@ -13,8 +13,8 @@ void message(const std::string& format, Args&&... args)
     SDL_ShowSimpleMessageBox(0, "Attention", message.c_str(), NULL);
 }
 
-template<typename String, typename... Args>
-void exit(const String& format, Args&&... args)
+template<typename... Args>
+void exit(const std::string& format, Args&&... args)
 {
     message(format, std::forward<Args>(args)...);
 

@@ -50,10 +50,12 @@ void core::init(int argc, char* argv[])
         video_ctx.init();
 
         if (rom.has_value())
-            mmu.gamepak.load(*rom);
+        {
+            mmu.gamepak.loadRom(*rom, !sav);
 
-        if (sav.has_value())
-            mmu.gamepak.loadSave(*sav);
+            if (sav.has_value())
+                mmu.gamepak.loadSave(*sav);
+        }
     }
     catch (const shell::ParseError& error)
     {

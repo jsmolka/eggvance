@@ -31,8 +31,6 @@ u8 Eeprom::read(u32 addr)
 
 void Eeprom::write(u32 addr, u8 byte)
 {
-    Save::write(addr, byte);
-
     if (state == State::Read || state == State::ReadUnused)
         return;
 
@@ -79,6 +77,7 @@ void Eeprom::write(u32 addr, u8 byte)
     case State::Write:
         if (count % 8 == 0)
         {
+            changed = true;
             data[address++] = buffer;
             buffer = 0;
 
@@ -93,7 +92,7 @@ void Eeprom::write(u32 addr, u8 byte)
     }
 }
 
-bool Eeprom::hasValidSize() const
+bool Eeprom::isValidSize() const
 {
     return data.size() == kSize4
         || data.size() == kSize64;

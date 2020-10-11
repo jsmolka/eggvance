@@ -31,7 +31,7 @@ void processDropEvent(const SDL_DropEvent& event)
     }
     else
     {
-        mmu.gamepak.load(file);
+        mmu.gamepak.loadRom(file, true);
         core::reset();
         core::updateTitle();
         counter = FrameCounter();

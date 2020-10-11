@@ -18,7 +18,7 @@ public:
     };
 
     Save();
-    Save(Type type);
+    explicit Save(Type type);
     virtual ~Save();
 
     static Type parse(const std::vector<u8>& rom);
@@ -32,9 +32,10 @@ public:
     std::vector<u8> data;
 
 protected:
-    virtual bool hasValidSize() const;
+    virtual bool isValidSize() const;
+
+    bool changed = false;
 
 private:
     fs::path file;
-    bool changed = false;
 };
