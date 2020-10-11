@@ -2,21 +2,25 @@
 
 #if !SHELL_CC_EMSCRIPTEN
 
-#include <stdexcept>
-
-#include "base/constants.h"
 #include "base/config.h"
-#include "core/core.h"
 #include "base/utility.h"
+#include "core/core.h"
 #include "core/framecounter.h"
-#include "core/synchronizer.h"
 #include "core/inputcontext.h"
+#include "core/synchronizer.h"
 #include "core/videocontext.h"
 #include "mmu/mmu.h"
 
 bool running = true;
 FrameCounter counter;
 Synchronizer synchronizer(kRefreshRate);
+
+void reset()
+{
+    core::reset();
+    core::updateTitle();
+    counter = FrameCounter();
+}
 
 void processDropEvent(const SDL_DropEvent& event)
 {
@@ -25,17 +29,12 @@ void processDropEvent(const SDL_DropEvent& event)
     SDL_free(event.file);
 
     if (file.extension() == ".sav")
-    {
         mmu.gamepak.loadSave(file);
-        core::reset();
-    }
     else
-    {
         mmu.gamepak.loadRom(file, true);
-        core::reset();
-        core::updateTitle();
-        counter = FrameCounter();
-    }
+
+    reset();
+
     video_ctx.raise();
 }
 
@@ -48,23 +47,12 @@ void processInputEvent(const Shortcuts<Input>& shortcuts, Input input)
     if (input == shortcuts.fullscreen)
         video_ctx.fullscreen();
 
-    if (input == shortcuts.fr_hardware)
-        synchronizer = Synchronizer(kRefreshRate);
-
-    if (input == shortcuts.fr_custom_1)
-        synchronizer = Synchronizer(config.framerate[0]);
-
-    if (input == shortcuts.fr_custom_2)
-        synchronizer = Synchronizer(config.framerate[1]);
-
-    if (input == shortcuts.fr_custom_3)
-        synchronizer = Synchronizer(config.framerate[2]);
-
-    if (input == shortcuts.fr_custom_4)
-        synchronizer = Synchronizer(config.framerate[3]);
-
-    if (input == shortcuts.fr_unbound)
-        synchronizer = Synchronizer(6000);
+    if (input == shortcuts.fr_hardware) synchronizer = Synchronizer(kRefreshRate);
+    if (input == shortcuts.fr_custom_1) synchronizer = Synchronizer(config.framerate[0]);
+    if (input == shortcuts.fr_custom_2) synchronizer = Synchronizer(config.framerate[1]);
+    if (input == shortcuts.fr_custom_3) synchronizer = Synchronizer(config.framerate[2]);
+    if (input == shortcuts.fr_custom_4) synchronizer = Synchronizer(config.framerate[3]);
+    if (input == shortcuts.fr_unbound)  synchronizer = Synchronizer(6000);
 }
 
 void processEvents()
@@ -113,17 +101,14 @@ int main(int argc, char* argv[])
         {
             processEvents();
 
-            video_ctx.renderClear(0xFF3E4750);
+            video_ctx.renderClear(0xFF3E'4750);
             video_ctx.renderIcon();
             video_ctx.renderPresent();
 
             SDL_Delay(16);
         }
 
-        core::reset();
-        core::updateTitle();
-
-        counter = FrameCounter();
+        reset();
 
         while (running)
         {

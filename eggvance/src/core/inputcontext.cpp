@@ -19,10 +19,10 @@ void InputContext::init()
 
 uint InputContext::state() const
 {
-    uint state = keyboardState() | controllerState();
-
     constexpr uint ud_mask = (1 << kBitUp  ) | (1 << kBitDown );
     constexpr uint lr_mask = (1 << kBitLeft) | (1 << kBitRight);
+
+    uint state = keyboardState() | controllerState();
 
     if ((state & ud_mask) == ud_mask) state &= ~ud_mask;
     if ((state & lr_mask) == lr_mask) state &= ~lr_mask;

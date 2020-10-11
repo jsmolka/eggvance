@@ -6,7 +6,6 @@
 
 #include "arm/arm.h"
 #include "base/config.h"
-#include "base/filesystem.h"
 #include "base/utility.h"
 #include "core/audiocontext.h"
 #include "core/inputcontext.h"
@@ -37,9 +36,9 @@ void core::init(int argc, char* argv[])
             std::exit(0);
         }
 
-        auto rom = result.find<fs::path>("rom");
-        auto sav = result.find<fs::path>("--save");
-        auto cfg = result.find<fs::path>("--config");
+        const auto rom = result.find<fs::path>("rom");
+        const auto sav = result.find<fs::path>("--save");
+        const auto cfg = result.find<fs::path>("--config");
 
         config.init(fs::makeAbsolute(*cfg));
 
@@ -57,7 +56,7 @@ void core::init(int argc, char* argv[])
                 mmu.gamepak.loadSave(*sav);
         }
     }
-    catch (const shell::ParseError& error)
+    catch (const ParseError& error)
     {
         fmt::print(options.help());
 
@@ -80,8 +79,7 @@ void core::frame()
 {
     gamepad.poll();
 
-    uint visible = 160;
-    while (visible--)
+    for (uint visible = 0; visible < 160; ++visible)
     {
         arm.run(960);
         ppu.scanline();
@@ -92,8 +90,7 @@ void core::frame()
 
     ppu.vblank();
 
-    uint invisible = 68;
-    while (invisible--)
+    for (uint invisible = 0; invisible < 68; ++invisible)
     {
         arm.run(1232);
         ppu.next();

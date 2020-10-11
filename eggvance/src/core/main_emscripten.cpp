@@ -26,6 +26,10 @@ void idleMain()
 void emulate();
 void emulateMain(uint fps)
 {
+    core::reset();
+    core::updateTitle();
+    counter = FrameCounter();
+
     emscripten_cancel_main_loop();
     emscripten_set_main_loop(emulate, fps, 1);
 }
@@ -39,23 +43,12 @@ void processInputEvent(const Shortcuts<Input>& shortcuts, Input input)
     if (input == shortcuts.fullscreen)
         video_ctx.fullscreen();
 
-    if (input == shortcuts.fr_hardware)
-        emulateMain(kRefreshRate);
-
-    if (input == shortcuts.fr_custom_1)
-        emulateMain(config.framerate[0]);
-
-    if (input == shortcuts.fr_custom_2)
-        emulateMain(config.framerate[1]);
-
-    if (input == shortcuts.fr_custom_3)
-        emulateMain(config.framerate[2]);
-
-    if (input == shortcuts.fr_custom_4)
-        emulateMain(config.framerate[3]);
-
-    if (input == shortcuts.fr_unbound)
-        emulateMain(6000);
+    if (input == shortcuts.fr_hardware) emulateMain(kRefreshRate);
+    if (input == shortcuts.fr_custom_1) emulateMain(config.framerate[0]);
+    if (input == shortcuts.fr_custom_2) emulateMain(config.framerate[1]);
+    if (input == shortcuts.fr_custom_3) emulateMain(config.framerate[2]);
+    if (input == shortcuts.fr_custom_4) emulateMain(config.framerate[3]);
+    if (input == shortcuts.fr_unbound)  emulateMain(6000);
 }
 
 void processEvents()
@@ -89,7 +82,7 @@ void idle()
 {
     processEvents();
 
-    video_ctx.renderClear(0xFFFFFFFF);
+    video_ctx.renderClear(0xFFFF'FFFF);
     video_ctx.renderIcon();
     video_ctx.renderPresent();
 }
@@ -99,23 +92,19 @@ void emulate()
     processEvents();
     core::frame();
 
-    if (auto fps = (++counter).fps())
+    if (const auto fps = (++counter).fps())
         core::updateTitle(*fps);
 }
 
-void eggvanceLoadRom(const std::string& filename)
+void eggvanceLoadRom(const std::string& file)
 {
-    mmu.gamepak.load(filename);
-    core::reset();
-    core::updateTitle();
-    counter = FrameCounter();
+    mmu.gamepak.loadRom(file, true);
     emulateMain(kRefreshRate);
 }
 
-void eggvanceLoadSave(const std::string& filename)
+void eggvanceLoadSave(const std::string& file)
 {
-    mmu.gamepak.loadSave(filename);
-    core::reset();
+    mmu.gamepak.loadSave(file);
     emulateMain(kRefreshRate);
 }
 
@@ -130,6 +119,7 @@ int main(int argc, char* argv[])
     try
     {
         core::init(argc, argv);
+
         idleMain();
     }
     catch (const std::exception& ex)
