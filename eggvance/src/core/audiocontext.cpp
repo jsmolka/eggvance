@@ -1,7 +1,7 @@
 #include "audiocontext.h"
 
-#include "base/exit.h"
 #include "base/sdl2.h"
+#include "base/utility.h"
 
 AudioContext::~AudioContext()
 {

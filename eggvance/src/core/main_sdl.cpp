@@ -6,8 +6,8 @@
 
 #include "base/constants.h"
 #include "base/config.h"
-#include "base/exit.h"
 #include "core/core.h"
+#include "base/utility.h"
 #include "core/framecounter.h"
 #include "core/synchronizer.h"
 #include "core/inputcontext.h"

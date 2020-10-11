@@ -1,7 +1,7 @@
 #include "inputcontext.h"
 
 #include "base/config.h"
-#include "base/exit.h"
+#include "base/utility.h"
 
 InputContext::~InputContext()
 {

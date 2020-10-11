@@ -3,7 +3,7 @@
 #include <shell/ini.h>
 
 #include "base/constants.h"
-#include "base/exit.h"
+#include "base/utility.h"
 
 template<>
 std::optional<SDL_Scancode> shell::parse(const std::string& data)

@@ -6,8 +6,8 @@
 
 #include "arm/arm.h"
 #include "base/config.h"
-#include "base/exit.h"
 #include "base/filesystem.h"
+#include "base/utility.h"
 #include "core/audiocontext.h"
 #include "core/inputcontext.h"
 #include "core/videocontext.h"

@@ -3,7 +3,7 @@
 #include <shell/icon.h>
 
 #include "base/bit.h"
-#include "base/exit.h"
+#include "base/utility.h"
 
 VideoContext::~VideoContext()
 {
