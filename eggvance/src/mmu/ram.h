@@ -15,12 +15,18 @@ struct Mirror
 };
 
 template<uint N, typename Mirror = Mirror<N>>
-class Ram
+class Ram : private std::array<u8, N>
 {
 public:
-    constexpr std::size_t size() const
+    using std::array<u8, N>::value_type;
+    using std::array<u8, N>::size;
+    using std::array<u8, N>::data;
+    using std::array<u8, N>::begin;
+    using std::array<u8, N>::end;
+
+    Ram()
     {
-        return ram.size();
+        fill(0);
     }
 
     template<typename Integral>
@@ -28,7 +34,7 @@ public:
     {
         static_assert(std::is_integral_v<Integral>);
 
-        return reinterpret_cast<Integral*>(&ram[addr]);
+        return reinterpret_cast<Integral*>(data() + addr);
     }
 
     template<typename Integral>
@@ -36,7 +42,7 @@ public:
     {
         static_assert(std::is_integral_v<Integral>);
 
-        return reinterpret_cast<const Integral*>(&ram[addr]);
+        return reinterpret_cast<const Integral*>(data() + addr);
     }
 
     template<typename Integral>
@@ -96,6 +102,4 @@ private:
 
         writeFast<Integral>(addr, value);
     }
-
-    std::array<u8, N> ram = {};
 };

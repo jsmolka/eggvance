@@ -16,11 +16,6 @@ public:
     u32 readWord(u32 addr);
 
 private:
-    u32 readProtected(u32 addr) const;
-
-    bool read(const fs::path& path);
-    static u64 hash(u32* data, int size);
-
-    u32 last_fetched;
+    u32 previous;
     Ram<0x4000> data;
 };
