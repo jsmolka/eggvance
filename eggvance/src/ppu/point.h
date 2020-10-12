@@ -15,7 +15,7 @@ struct Point
     
     }
 
-    constexpr int offset(int width) const
+    constexpr int index2d(int width) const
     {
         return width * y + x;
     }

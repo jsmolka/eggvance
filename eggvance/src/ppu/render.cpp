@@ -57,7 +57,7 @@ void PPU::renderBgMode0(int bg)
 
     for (int x = 0; x < kScreenW; block.x ^= (dims.w / 256) == 2)
     {
-        int offset = 0x800 * block.offset(dims.w / 256) + 2 * tile.offset(0x20);
+        int offset = 0x800 * block.index2d(dims.w / 256) + 2 * tile.index2d(0x20);
 
         u16* map = mmu.vram.data<u16>(bgcnt.map_block + offset);
 
@@ -125,7 +125,7 @@ void PPU::renderBgMode2(int bg)
         const auto tile  = texture / 8;
         const auto pixel = texture % 8;
 
-        int offset = tile.offset(dims.w / 8);
+        int offset = tile.index2d(dims.w / 8);
         int entry  = mmu.vram.readFast<u8>(bgcnt.map_block + offset);
         int index  = mmu.vram.index256x1(bgcnt.tile_block + 0x40 * entry, pixel);
 
@@ -147,7 +147,7 @@ void PPU::renderBgMode3(int bg)
             continue;
         }
 
-        int offset = sizeof(u16) * texture.offset(dims.w);
+        int offset = sizeof(u16) * texture.index2d(dims.w);
 
         backgrounds[bg][x] = mmu.vram.readFast<u16>(offset) & kColorMask;
     }
@@ -167,7 +167,7 @@ void PPU::renderBgMode4(int bg)
             continue;
         }
 
-        int offset = texture.offset(dims.w);
+        int offset = texture.index2d(dims.w);
         int index  = mmu.vram.readFast<u8>(io.dispcnt.frame + offset);
 
         backgrounds[bg][x] = mmu.palette.colorBG(index);
@@ -188,7 +188,7 @@ void PPU::renderBgMode5(int bg)
             continue;
         }
 
-        int offset = sizeof(u16) * texture.offset(dims.w);
+        int offset = sizeof(u16) * texture.index2d(dims.w);
 
         backgrounds[bg][x] = mmu.vram.readFast<u16>(io.dispcnt.frame + offset) & kColorMask;
     }
@@ -238,7 +238,7 @@ void PPU::renderObjects()
             const auto tile  = texture / 8;
             const auto pixel = texture % 8;
 
-            u32 addr = mmu.vram.mirror(entry.base_tile + size * tile.offset(tiles));
+            u32 addr = mmu.vram.mirror(entry.base_tile + size * tile.index2d(tiles));
             if (addr < 0x1'4000 && io.dispcnt.isBitmap())
                 continue;
 

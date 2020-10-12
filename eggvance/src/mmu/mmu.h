@@ -22,10 +22,10 @@ public:
 
     u32 readUnused(u32 addr);
 
-    BIOS bios;
+    Bios bios;
     GamePak gamepak;
     Palette palette;
-    VRAM vram;
+    Vram vram;
     OAM oam;
     Io io;
 

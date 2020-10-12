@@ -4,6 +4,7 @@
 #include <type_traits>
 
 #include "base/int.h"
+#include "base/macros.h"
 
 template<uint N>
 struct Mirror
@@ -33,6 +34,7 @@ public:
     Integral* data(u32 addr)
     {
         static_assert(std::is_integral_v<Integral>);
+        SHELL_ASSERT(addr < N);
 
         return reinterpret_cast<Integral*>(data() + addr);
     }
@@ -41,6 +43,7 @@ public:
     const Integral* data(u32 addr) const
     {
         static_assert(std::is_integral_v<Integral>);
+        SHELL_ASSERT(addr < N);
 
         return reinterpret_cast<const Integral*>(data() + addr);
     }

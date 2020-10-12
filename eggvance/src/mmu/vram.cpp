@@ -6,12 +6,7 @@
 #include "base/int.h"
 #include "ppu/ppu.h"
 
-void VRAM::reset()
-{
-    shell::reconstruct(*this);
-}
-
-void VRAM::writeByte(u32 addr, u8 byte)
+void Vram::writeByte(u32 addr, u8 byte)
 {
     addr = mirror(addr);
 
@@ -23,23 +18,21 @@ void VRAM::writeByte(u32 addr, u8 byte)
     }
 }
 
-int VRAM::index(u32 addr, const Point& pixel, ColorMode mode)
+uint Vram::index(u32 addr, const Point& pixel, ColorMode mode) const
 {
     return mode == ColorMode::C256x1
         ? index256x1(addr, pixel)
         : index16x16(addr, pixel);
 }
 
-int VRAM::index256x1(u32 addr, const Point& pixel)
+uint Vram::index256x1(u32 addr, const Point& pixel) const
 {
-    return readFast<u8>(addr + pixel.offset(8));
+    return readFast<u8>(addr + pixel.index2d(8));
 }
 
-int VRAM::index16x16(u32 addr, const Point& pixel)
+uint Vram::index16x16(u32 addr, const Point& pixel) const
 {
-    int data = readFast<u8>(addr + pixel.offset(8) / 2);
+    u8 data = readFast<u8>(addr + pixel.index2d(8) / 2);
 
-    return (pixel.x & 0x1)
-        ? bit::seq<4, 4>(data)
-        : bit::seq<0, 4>(data);
+    return bit::nibble(data, pixel.x & 0x1);
 }

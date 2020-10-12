@@ -9,12 +9,12 @@ void MMU::reset()
 {
     bios.reset();
     palette.reset();
-    vram.reset();
     oam.reset();
 
     shell::reconstruct(io);
     shell::reconstruct(ewram);
     shell::reconstruct(iwram);
+    shell::reconstruct(vram);
 }
 
 u8 MMU::readByte(u32 addr)

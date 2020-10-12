@@ -17,14 +17,12 @@ struct VramMirror
     }
 };
 
-class VRAM : public Ram<0x1'8000, VramMirror>
+class Vram : public Ram<0x1'8000, VramMirror>
 {
 public:
-    void reset();
-
     void writeByte(u32 addr, u8 byte);
 
-    int index(u32 addr, const Point& pixel, ColorMode mode);
-    int index256x1(u32 addr, const Point& pixel);
-    int index16x16(u32 addr, const Point& pixel);
+    uint index(u32 addr, const Point& pixel, ColorMode mode) const;
+    uint index256x1(u32 addr, const Point& pixel) const;
+    uint index16x16(u32 addr, const Point& pixel) const;
 };

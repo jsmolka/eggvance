@@ -7,12 +7,12 @@
 #include "base/utility.h"
 #include "mmu/bios_normmatt.h"
 
-void BIOS::reset()
+void Bios::reset()
 {
     previous = 0xE129'F000;
 }
 
-void BIOS::init(const fs::path& path)
+void Bios::init(const fs::path& path)
 {
     if (path.empty())
     {
@@ -33,7 +33,7 @@ void BIOS::init(const fs::path& path)
     }
 }
 
-u8 BIOS::readByte(u32 addr)
+u8 Bios::readByte(u32 addr)
 {
     if (arm.pc < data.size())
         return data.readByte(addr);
@@ -41,7 +41,7 @@ u8 BIOS::readByte(u32 addr)
         return previous >> (addr & 0x3);
 }
 
-u16 BIOS::readHalf(u32 addr)
+u16 Bios::readHalf(u32 addr)
 {
     if (arm.pc < data.size())
         return data.readHalf(addr);
@@ -49,7 +49,7 @@ u16 BIOS::readHalf(u32 addr)
         return previous >> (addr & 0x2);
 }
 
-u32 BIOS::readWord(u32 addr)
+u32 Bios::readWord(u32 addr)
 {
     if (arm.pc < data.size())
         return previous = data.readWord(addr);

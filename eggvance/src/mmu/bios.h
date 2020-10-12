@@ -4,7 +4,7 @@
 #include "base/int.h"
 #include "base/filesystem.h"
 
-class BIOS
+class Bios
 {
 public:
     void reset();
