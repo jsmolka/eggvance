@@ -256,5 +256,7 @@ Io::UnusedIo::UnusedIo()
     {
         rcnt.value = 0x8000;
         postflag.value = 0x01;
+        soundcnt_h.value = 0x880E;
+        soundbias.value = 0x0200;
     }
 }
