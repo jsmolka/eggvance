@@ -1,6 +1,6 @@
 #include "core.h"
 
-#include <shell/fmt.h>
+#include <shell/fmt/format.h>
 #include <shell/options.h>
 #include <shell/utility.h>
 
