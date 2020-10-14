@@ -7,7 +7,7 @@ Install [git](https://git-scm.com/), clone the repository and initialize the sub
 ```
 > git clone https://github.com/jsmolka/eggvance
 > cd eggvance
-> git submodule update --init --recursive
+> git submodule update --init
 ```
 
 ## Dependencies

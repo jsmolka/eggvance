@@ -15,8 +15,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@master
-        with:
-          submodules: recursive
 
       - name: Dependencies
         run: |
@@ -46,8 +44,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@master
-        with:
-          submodules: recursive
 
       - name: Dependencies
         run: sudo apt-get install libsdl2-dev
@@ -76,8 +72,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@master
-        with:
-          submodules: recursive
 
       - name: Dependencies
         run: brew install sdl2
@@ -106,8 +100,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@master
-        with:
-          submodules: recursive
 
       - name: Dependencies
         run: |
