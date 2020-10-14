@@ -1,16 +1,19 @@
 #include "disassemble.h"
 
+#include <array>
+
+#include <shell/fmt/compile.h>
 #include <shell/fmt/format.h>
 
 #include "arm/decode.h"
 
 #define MNEMONIC "{:<8}"
 
-static constexpr const char* kBiosFunctions[43] = {
+static constexpr std::array<const char*, 43> kBiosFunctions = {
     "SoftReset",
     "RegisterRamReset",
     "Halt",
-    "Stop/Sleep",
+    "Stop",
     "IntrWait",
     "VBlankIntrWait",
     "Div",
@@ -24,13 +27,13 @@ static constexpr const char* kBiosFunctions[43] = {
     "BgAffineSet",
     "ObjAffineSet",
     "BitUnPack",
-    "LZ77UnCompReadNormalWrite8bit",
-    "LZ77UnCompReadNormalWrite16bit",
-    "HuffUnCompReadNormal",
-    "RLUnCompReadNormalWrite8bit",
-    "RLUnCompReadNormalWrite16bit",
-    "Diff8bitUnFilterWrite8bit",
-    "Diff8bitUnFilterWrite16bit",
+    "LZ77UnCompWram",
+    "LZ77UnCompVram",
+    "HuffUnComp",
+    "RLUnCompReadNormalWram",
+    "RLUnCompReadNormalVram",
+    "Diff8bitUnFilterWram",
+    "Diff8bitUnFilterVram",
     "Diff16bitUnFilter",
     "SoundBias",
     "SoundDriverInit",
@@ -39,11 +42,11 @@ static constexpr const char* kBiosFunctions[43] = {
     "SoundDriverVSync",
     "SoundChannelClear",
     "MidiKey2Freq",
-    "SoundWhatever0",
-    "SoundWhatever1",
-    "SoundWhatever2",
-    "SoundWhatever3",
-    "SoundWhatever4",
+    "MusicPlayerOpen",
+    "MusicPlayerStart",
+    "MusicPlayerStop",
+    "MusicPlayerContinue",
+    "MusicPlayerFadeOut",
     "MultiBoot",
     "HardReset",
     "CustomHalt",
@@ -76,7 +79,7 @@ const char* condition(u32 instr)
 
 std::string hex(u32 value)
 {
-    return fmt::format("{:X}h", value);
+    return fmt::format(FMT_COMPILE("0x{:X}"), value);
 }
 
 std::string rlist(u16 rlist)
@@ -84,20 +87,19 @@ std::string rlist(u16 rlist)
     if (rlist == 0)
         return "{}";
 
-    std::string list;
-
-    list.reserve(4 * bit::popcnt(rlist) + 4);
-    list.append("{");
+    fmt::memory_buffer buffer;
+    buffer.push_back('{');
 
     for (uint x : bit::iterate(rlist))
     {
-        list.append(reg(x));
-        list.append(",");
+        fmt::format_to(
+            std::back_inserter(buffer),
+            FMT_COMPILE("{},"),
+            reg(x));
     }
 
-    list.back() = '}';
-
-    return list;
+    *(buffer.end() - 1) = '}';
+    return std::string(buffer.begin(), buffer.end());
 }
 
 std::string shiftedRegister(uint data)
@@ -120,11 +122,16 @@ std::string shiftedRegister(uint data)
     {
         uint amount = bit::seq<7, 5>(data);
         if (!amount)
-            return reg(rm);
+            return std::string(reg(rm));
 
         offset = hex(amount);
     }
-    return fmt::format("{},{} {}", reg(rm), kMnemonics[shift], offset);
+
+    return fmt::format(
+        FMT_COMPILE("{},{} {}"),
+        reg(rm),
+        kMnemonics[shift],
+        offset);
 }
 
 u32 rotatedImmediate(uint data)
@@ -139,9 +146,14 @@ std::string Arm_BranchExchange(u32 instr)
 {
     uint rn = bit::seq<0, 4>(instr);
 
-    const auto mnemonic = fmt::format("bx{}", condition(instr));
+    const auto mnemonic = fmt::format(
+        FMT_COMPILE("bx{}"),
+        condition(instr));
 
-    return fmt::format(MNEMONIC"{}", mnemonic, reg(rn));
+    return fmt::format(
+        FMT_COMPILE(MNEMONIC"{}"),
+        mnemonic,
+        reg(rn));
 }
 
 std::string Arm_BranchLink(u32 instr, u32 pc)
@@ -152,13 +164,39 @@ std::string Arm_BranchLink(u32 instr, u32 pc)
     offset = bit::signEx<24>(offset);
     offset <<= 2;
 
-    const auto mnemonic = fmt::format("{}{}", link ? "bl" : "b", condition(instr));
+    const auto mnemonic = fmt::format(
+        FMT_COMPILE("{}{}"),
+        link ? "bl" : "b",
+        condition(instr));
 
-    return fmt::format(MNEMONIC"{}", mnemonic, hex(pc + offset));
+    return fmt::format(
+        FMT_COMPILE(MNEMONIC"{}"),
+        mnemonic,
+        hex(pc + offset));
 }
 
 std::string Arm_DataProcessing(u32 instr, u32 pc)
 {
+    enum Opcode
+    {
+        kOpcodeAnd,
+        kOpcodeEor,
+        kOpcodeSub,
+        kOpcodeRsb,
+        kOpcodeAdd,
+        kOpcodeAdc,
+        kOpcodeSbc,
+        kOpcodeRsc,
+        kOpcodeTst,
+        kOpcodeTeq,
+        kOpcodeCmp,
+        kOpcodeCmn,
+        kOpcodeOrr,
+        kOpcodeMov,
+        kOpcodeBic,
+        kOpcodeMvn
+    };
+
     static constexpr const char* kMnemonics[16] = {
         "and", "eor", "sub", "rsb",
         "add", "adc", "sbc", "rsc",
@@ -178,8 +216,8 @@ std::string Arm_DataProcessing(u32 instr, u32 pc)
         u32 value = rotatedImmediate(instr);
         if (rn == 15)
         {
-            if (opcode == 0b0010) value = pc - value;
-            if (opcode == 0b0100) value = pc + value;
+            if (opcode == kOpcodeSub) value = pc - value;
+            if (opcode == kOpcodeAdd) value = pc + value;
         }
         operand = hex(value);
     }
@@ -189,19 +227,19 @@ std::string Arm_DataProcessing(u32 instr, u32 pc)
     }
 
     const auto mnemonic = fmt::format(
-        "{}{}{}",
+        FMT_COMPILE("{}{}{}"),
         kMnemonics[opcode],
-        condition(instr),
-        (flags && (opcode >> 2) != 0b10) ? "s" : "");
+        flags && (opcode >> 2) != 0b10 ? "s" : "",
+        condition(instr));
 
     switch (opcode)
     {
-    case 0b0100:
-    case 0b0010:
+    case kOpcodeAdd:
+    case kOpcodeSub:
         if (rn == 15 && imm_op)
         {
             return fmt::format(
-                MNEMONIC"{},={}",
+                FMT_COMPILE(MNEMONIC"{},={}"),
                 mnemonic,
                 reg(rd),
                 operand);
@@ -209,39 +247,38 @@ std::string Arm_DataProcessing(u32 instr, u32 pc)
         else
         {
             return fmt::format(
-                MNEMONIC"{},{},{}",
+                FMT_COMPILE(MNEMONIC"{},{},{}"),
                 mnemonic,
                 reg(rd),
                 reg(rn),
                 operand);
         }
 
-    case 0b1000:
-    case 0b1001:
-    case 0b1010:
-    case 0b1011:
+    case kOpcodeTst:
+    case kOpcodeTeq:
+    case kOpcodeCmp:
+    case kOpcodeCmn:
         return fmt::format(
-            MNEMONIC"{},{}",
+            FMT_COMPILE(MNEMONIC"{},{}"),
             mnemonic,
             reg(rn),
             operand);
 
-    case 0b1101:
-    case 0b1111:
+    case kOpcodeMov:
+    case kOpcodeMvn:
         return fmt::format(
-            MNEMONIC"{},{}",
+            FMT_COMPILE(MNEMONIC"{},{}"),
             mnemonic,
             reg(rd),
-            operand);
-
-    default:
-        return fmt::format(
-            MNEMONIC"{},{},{}",
-            mnemonic,
-            reg(rd),
-            reg(rn),
             operand);
     }
+
+    return fmt::format(
+        FMT_COMPILE(MNEMONIC"{},{},{}"),
+        mnemonic,
+        reg(rd),
+        reg(rn),
+        operand);
 }
 
 std::string Arm_StatusTransfer(u32 instr)
@@ -274,10 +311,12 @@ std::string Arm_StatusTransfer(u32 instr)
         if (instr & (1 << 17)) fsxc.append("x");
         if (instr & (1 << 16)) fsxc.append("c");
 
-        const auto mnemonic = fmt::format("msr{}", condition(instr));
+        const auto mnemonic = fmt::format(
+            FMT_COMPILE("msr{}"),
+            condition(instr));
 
         return fmt::format(
-            MNEMONIC"{}_{},{}",
+            FMT_COMPILE(MNEMONIC"{}_{},{}"),
             mnemonic,
             psr,
             fsxc,
@@ -287,10 +326,12 @@ std::string Arm_StatusTransfer(u32 instr)
     {
         uint rd = bit::seq<12, 4>(instr);
 
-        const auto mnemonic = fmt::format("mrs{}", condition(instr));
+        const auto mnemonic = fmt::format(
+            FMT_COMPILE("mrs{}"),
+            condition(instr));
 
         return fmt::format(
-            MNEMONIC"{},{}",
+            FMT_COMPILE(MNEMONIC"{},{}"),
             mnemonic,
             reg(rd),
             psr);
@@ -307,15 +348,15 @@ std::string Arm_Multiply(u32 instr)
     uint accumulate = bit::seq<21, 1>(instr);
 
     const auto mnemonic = fmt::format(
-        "{}{}{}",
+        FMT_COMPILE("{}{}{}"),
         accumulate ? "mla" : "mul",
-        condition(instr),
-        flags ? "s" : "");
+        flags ? "s" : "",
+        condition(instr));
 
     if (accumulate)
     {
         return fmt::format(
-            MNEMONIC"{},{},{},{}",
+            FMT_COMPILE(MNEMONIC"{},{},{},{}"),
             mnemonic,
             reg(rd),
             reg(rn),
@@ -325,7 +366,7 @@ std::string Arm_Multiply(u32 instr)
     else
     {
         return fmt::format(
-            MNEMONIC"{},{},{}",
+            FMT_COMPILE(MNEMONIC"{},{},{}"),
             mnemonic,
             reg(rd),
             reg(rn),
@@ -347,13 +388,13 @@ std::string Arm_MultiplyLong(u32 instr)
     uint opcode = bit::seq<21, 2>(instr);
 
     const auto mnemonic = fmt::format(
-        "{}{}{}", 
+        FMT_COMPILE("{}{}{}"), 
         kMnemonics[opcode],
-        condition(instr),
-        flags ? "s" : "");
+        flags ? "s" : "",
+        condition(instr));
 
     return fmt::format(
-        MNEMONIC"{},{},{},{}",
+        FMT_COMPILE(MNEMONIC"{},{},{},{}"),
         mnemonic,
         reg(rdl),
         reg(rdh),
@@ -373,20 +414,20 @@ std::string Arm_SingleDataTransfer(u32 instr)
     uint pre_index = bit::seq<24,  1>(instr);
     uint imm_op    = bit::seq<25,  1>(instr);
 
-    std::string offset = imm_op
+    const auto offset = imm_op
         ? shiftedRegister(data)
         : hex(data);
 
     const auto mnemonic = fmt::format(
-        "{}{}{}",
+        FMT_COMPILE("{}{}{}"),
         load ? "ldr" : "str",
-        condition(instr),
-        byte ? "b" : "");
+        byte ? "b" : "",
+        condition(instr));
 
     if (pre_index)
     {
         return fmt::format(
-            MNEMONIC"{},[{},{}{}]{}",
+            FMT_COMPILE(MNEMONIC"{},[{},{}{}]{}"),
             mnemonic,
             reg(rd),
             reg(rn),
@@ -397,7 +438,7 @@ std::string Arm_SingleDataTransfer(u32 instr)
     else
     {
         return fmt::format(
-            MNEMONIC"{},[{}],{}{}",
+            FMT_COMPILE(MNEMONIC"{},[{}],{}{}"),
             mnemonic,
             reg(rd),
             reg(rn),
@@ -432,16 +473,16 @@ std::string Arm_HalfSignedDataTransfer(u32 instr)
     }
 
     const auto mnemonic = fmt::format(
-        "{}{}{}{}",
+        FMT_COMPILE("{}{}{}{}"),
         load ? "ldr" : "str",
-        condition(instr),
         sign ? "s" : "",
-        half ? "h" : "b");
+        half ? "h" : "b",
+        condition(instr));
 
     if (pre_index)
     {
         return fmt::format(
-            MNEMONIC"{},[{},{}{}]{}",
+            FMT_COMPILE(MNEMONIC"{},[{},{}{}]{}"),
             mnemonic,
             reg(rd),
             reg(rn),
@@ -452,7 +493,7 @@ std::string Arm_HalfSignedDataTransfer(u32 instr)
     else
     {
         return fmt::format(
-            MNEMONIC"{},[{}{}],{}",
+            FMT_COMPILE(MNEMONIC"{},[{}{}],{}"),
             mnemonic,
             reg(rd),
             reg(rn),
@@ -476,13 +517,13 @@ std::string Arm_BlockDataTransfer(u32 instr)
     uint opcode    = bit::seq<23,  2>(instr);
 
     const auto mnemonic = fmt::format(
-        "{}{}{}",
+        FMT_COMPILE("{}{}{}"),
         load ? "ldm" : "stm",
-        condition(instr),
-        kSuffixes[load][opcode]);
+        kSuffixes[load][opcode],
+        condition(instr));
 
     return fmt::format(
-        MNEMONIC"{}{},{}{}",
+        FMT_COMPILE(MNEMONIC"{}{},{}{}"),
         mnemonic,
         reg(rn),
         writeback ? "!" : "",
@@ -498,12 +539,12 @@ std::string Arm_SingleDataSwap(u32 instr)
     uint byte = bit::seq<22, 1>(instr);
 
     const auto mnemonic = fmt::format(
-        "swp{}{}",
-        condition(instr),
-        byte ? "b" : "");
+        FMT_COMPILE("swp{}{}"),
+        byte ? "b" : "",
+        condition(instr));
 
     return fmt::format(
-        MNEMONIC"{},{},[{}]",
+        FMT_COMPILE(MNEMONIC"{},{},[{}]"),
         mnemonic,
         reg(rd),
         reg(rm),
@@ -514,11 +555,14 @@ std::string Arm_SoftwareInterrupt(u32 instr)
 {
     uint comment = bit::seq<16, 8>(instr);
 
-    const char* func = comment < 43
+    const auto function = comment < kBiosFunctions.size()
         ? kBiosFunctions[comment]
-        : "unknown";
+        : "Unknown";
 
-    return fmt::format(MNEMONIC"{:X} - {}", "swi", comment, func);
+    return fmt::format(
+        FMT_COMPILE(MNEMONIC"{}"),
+        "swi",
+        function);
 }
 
 std::string Thumb_MoveShiftedRegister(u16 instr)
@@ -533,7 +577,7 @@ std::string Thumb_MoveShiftedRegister(u16 instr)
     uint opcode = bit::seq<11, 2>(instr);
 
     return fmt::format(
-        MNEMONIC"{},{},{}",
+        FMT_COMPILE(MNEMONIC"{},{},{}"),
         kMnemonics[opcode],
         reg(rd),
         reg(rs),
@@ -551,7 +595,7 @@ std::string Thumb_AddSubtract(u16 instr)
     if (imm_op && rn == 0)
     {
         return fmt::format(
-            MNEMONIC"{},{}",
+            FMT_COMPILE(MNEMONIC"{},{}"),
             "mov",
             reg(rd),
             reg(rs));
@@ -559,7 +603,7 @@ std::string Thumb_AddSubtract(u16 instr)
     else
     {
         return fmt::format(
-            MNEMONIC"{},{},{}",
+            FMT_COMPILE(MNEMONIC"{},{},{}"),
             sub ? "sub" : "add",
             reg(rd),
             reg(rs),
@@ -578,7 +622,7 @@ std::string Thumb_ImmediateOperations(u16 instr)
     uint opcode = bit::seq<11, 2>(instr);
 
     return fmt::format(
-        MNEMONIC"{},{}",
+        FMT_COMPILE(MNEMONIC"{},{}"),
         kMnemonics[opcode],
         reg(rd),
         hex(amount));
@@ -598,7 +642,7 @@ std::string Thumb_AluOperations(u16 instr)
     uint opcode = bit::seq<6, 4>(instr);
 
     return fmt::format(
-        MNEMONIC"{},{}",
+        FMT_COMPILE(MNEMONIC"{},{}"),
         kMnemonics[opcode],
         reg(rd),
         reg(rs));
@@ -606,6 +650,14 @@ std::string Thumb_AluOperations(u16 instr)
 
 std::string Thumb_HighRegisterOperations(u16 instr)
 {
+    enum Opcode
+    {
+        kOpcodeAdd,
+        kOpcodeCmp,
+        kOpcodeMov,
+        kOpcodeBx
+    };
+
     static constexpr const char* kMnemonics[4] = {
         "add", "cmp", "mov", "bx"
     };
@@ -619,9 +671,21 @@ std::string Thumb_HighRegisterOperations(u16 instr)
     rs |= hs << 3;
     rd |= hd << 3;
 
-    return opcode == 0b11
-        ? fmt::format(MNEMONIC"{}", kMnemonics[opcode], reg(rs))
-        : fmt::format(MNEMONIC"{},{}", kMnemonics[opcode], reg(rd), reg(rs));
+    if (opcode == kOpcodeBx)
+    {
+        return fmt::format(
+            FMT_COMPILE(MNEMONIC"{}"),
+            kMnemonics[opcode],
+            reg(rs));
+    }
+    else
+    {
+        return fmt::format(
+            FMT_COMPILE(MNEMONIC"{},{}"),
+            kMnemonics[opcode],
+            reg(rd),
+            reg(rs));
+    }
 }
 
 std::string Thumb_LoadPcRelative(u16 instr, u32 pc)
@@ -630,7 +694,7 @@ std::string Thumb_LoadPcRelative(u16 instr, u32 pc)
     uint rd     = bit::seq<8, 3>(instr);
 
     return fmt::format(
-        MNEMONIC"{},[{}]",
+        FMT_COMPILE(MNEMONIC"{},[{}]"),
         "ldr",
         reg(rd),
         hex((pc & ~0x3) + (offset<< 2)));
@@ -648,7 +712,7 @@ std::string Thumb_LoadStoreRegisterOffset(u16 instr)
     uint opcode = bit::seq<10, 2>(instr);
 
     return fmt::format(
-        MNEMONIC"{},[{},{}]",
+        FMT_COMPILE(MNEMONIC"{},[{},{}]"),
         kMnemonics[opcode],
         reg(rd),
         reg(rb),
@@ -667,7 +731,7 @@ std::string Thumb_LoadStoreByteHalf(u16 instr)
     uint opcode = bit::seq<10, 2>(instr);
 
     return fmt::format(
-        MNEMONIC"{},[{},{}]",
+        FMT_COMPILE(MNEMONIC"{},[{},{}]"),
         kMnemonics[opcode],
         reg(rd),
         reg(rb),
@@ -688,7 +752,7 @@ std::string Thumb_LoadStoreImmediateOffset(u16 instr)
     offset <<= ~opcode & 0x2;
 
     return fmt::format(
-        MNEMONIC"{},[{},{}]",
+        FMT_COMPILE(MNEMONIC"{},[{},{}]"),
         kMnemonics[opcode],
         reg(rd),
         reg(rb),
@@ -705,7 +769,7 @@ std::string Thumb_LoadStoreHalf(u16 instr)
     offset <<= 1;
 
     return fmt::format(
-        MNEMONIC"{},[{},{}]",
+        FMT_COMPILE(MNEMONIC"{},[{},{}]"),
         load ? "ldrh" : "strh",
         reg(rd),
         reg(rb),
@@ -721,7 +785,7 @@ std::string Thumb_LoadStoreSpRelative(u16 instr)
     offset <<= 2;
 
     return fmt::format(
-        MNEMONIC"{},[sp,{}]",
+        FMT_COMPILE(MNEMONIC"{},[sp,{}]"),
         load ? "ldr" : "str",
         reg(rd),
         hex(offset));
@@ -738,7 +802,7 @@ std::string Thumb_LoadRelativeAddress(u16 instr, u32 pc)
     if (sp)
     {
         return fmt::format(
-            MNEMONIC"{},sp,{}",
+            FMT_COMPILE(MNEMONIC"{},sp,{}"),
             "add",
             reg(rd), 
             hex(offset));
@@ -746,7 +810,7 @@ std::string Thumb_LoadRelativeAddress(u16 instr, u32 pc)
     else
     {
         return fmt::format(
-            MNEMONIC"{},={}",
+            FMT_COMPILE(MNEMONIC"{},={}"),
             "add",
             reg(rd),
             hex((pc & ~0x3) + offset));
@@ -761,7 +825,7 @@ std::string Thumb_AddOffsetSp(u16 instr)
     offset <<= 2;
 
     return fmt::format(
-        MNEMONIC"sp,{}{}",
+        FMT_COMPILE(MNEMONIC"sp,{}{}"),
         "add",
         sign ? "-" : "",
         hex(offset));
@@ -776,7 +840,7 @@ std::string Thumb_PushPopRegisters(u16 instr)
     rlist |= rbit << (pop ? 15 : 14);
 
     return fmt::format(
-        MNEMONIC"{}",
+        FMT_COMPILE(MNEMONIC"{}"),
         pop ? "pop" : "push",
         ::rlist(rlist));
 }
@@ -788,7 +852,7 @@ std::string Thumb_LoadStoreMultiple(u16 instr)
     uint load  = bit::seq<11, 1>(instr);
 
     return fmt::format(
-        MNEMONIC"{}!,{}",
+        FMT_COMPILE(MNEMONIC"{}!,{}"),
         load ? "ldmia" : "stmia",
         reg(rb),
         ::rlist(rlist));
@@ -810,7 +874,7 @@ std::string Thumb_ConditionalBranch(u16 instr, u32 pc)
     offset <<= 1;
 
     return fmt::format(
-        MNEMONIC"{}",
+        FMT_COMPILE(MNEMONIC"{}"),
         kMnemonics[condition],
         hex(pc + offset));
 }
@@ -819,12 +883,14 @@ std::string Thumb_SoftwareInterrupt(u16 instr)
 {
     uint comment = bit::seq<0, 8>(instr);
 
-    const char* func = comment < 43
+    const auto function = comment < kBiosFunctions.size()
         ? kBiosFunctions[comment]
-        : "unknown";
+        : "Unknown";
 
-    return fmt::format(MNEMONIC"{:X} - {}", "swi", comment, func);
-
+    return fmt::format(
+        FMT_COMPILE(MNEMONIC"{}"),
+        "swi",
+        function);
 }
 
 std::string Thumb_UnconditionalBranch(u16 instr, u32 pc)
@@ -834,7 +900,10 @@ std::string Thumb_UnconditionalBranch(u16 instr, u32 pc)
     offset = bit::signEx<11>(offset);
     offset <<= 1;
 
-    return fmt::format(MNEMONIC"{}", "b", hex(pc + offset));
+    return fmt::format(
+        FMT_COMPILE(MNEMONIC"{}"),
+        "b",
+        hex(pc + offset));
 }
 
 std::string Thumb_LongBranchLink(u16 instr, u32 lr)
@@ -845,7 +914,7 @@ std::string Thumb_LongBranchLink(u16 instr, u32 lr)
     offset <<= 1;
 
     return fmt::format(
-        MNEMONIC"{}",
+        FMT_COMPILE(MNEMONIC"{}"),
         "bl",
         second ? hex(lr + offset) : "<setup>");
 }
@@ -866,7 +935,7 @@ std::string disassemble(u32 instr, u32 pc)
     case InstructionArm::SingleDataSwap:         return Arm_SingleDataSwap(instr);
     case InstructionArm::SoftwareInterrupt:      return Arm_SoftwareInterrupt(instr);
     }
-    return "undef";
+    return "Undefined";
 }
 
 std::string disassemble(u16 instr, u32 pc, u32 lr)
@@ -893,5 +962,5 @@ std::string disassemble(u16 instr, u32 pc, u32 lr)
     case InstructionThumb::UnconditionalBranch:      return Thumb_UnconditionalBranch(instr, pc);
     case InstructionThumb::LongBranchLink:           return Thumb_LongBranchLink(instr, lr);
     }
-    return "undef";
+    return "Undefined";
 }
