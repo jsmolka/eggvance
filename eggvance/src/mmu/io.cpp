@@ -9,6 +9,17 @@
 #include "ppu/ppu.h"
 #include "timer/timer.h"
 
+Io::Io()
+{
+    if (config.bios_skip)
+    {
+        rcnt.value = 0x8000;
+        postflag.value = 0x01;
+        soundcnt_h.value = 0x880E;
+        soundbias.value = 0x0200;
+    }
+}
+
 u8 Io::readByte(u32 addr) const
 {
     switch (addr & 0x3FF'FFFF)
@@ -25,43 +36,35 @@ u8 Io::readByte(u32 addr) const
     INDEXED_CASE2(kMmioWindowOutside , return ppu.io.winout.read<kIndex>());
     INDEXED_CASE2(kMmioBlendControl  , return ppu.io.bldcnt.read<kIndex>());
     INDEXED_CASE2(kMmioBlendAlpha    , return ppu.io.bldalpha.read<kIndex>());
-    INDEXED_CASE2(kMmioSound1ControlL, return unused.soundcnt1_l.read<kIndex>());
-    INDEXED_CASE2(kMmioSound1ControlH, return unused.soundcnt1_h.read<kIndex>());
-    INDEXED_CASE2(kMmioSound1ControlX, return unused.soundcnt1_x.read<kIndex>());
-    INDEXED_CASE2(kMmioSound2ControlL, return unused.soundcnt2_l.read<kIndex>());
-    INDEXED_CASE2(kMmioSound2ControlH, return unused.soundcnt2_h.read<kIndex>());
-    INDEXED_CASE2(kMmioSound3ControlL, return unused.soundcnt3_l.read<kIndex>());
-    INDEXED_CASE2(kMmioSound3ControlH, return unused.soundcnt3_h.read<kIndex>());
-    INDEXED_CASE2(kMmioSound3ControlX, return unused.soundcnt3_x.read<kIndex>());
-    INDEXED_CASE2(kMmioSound4ControlL, return unused.soundcnt4_l.read<kIndex>());
-    INDEXED_CASE2(kMmioSound4ControlH, return unused.soundcnt4_h.read<kIndex>());
-    INDEXED_CASE2(kMmioSoundControlL , return unused.soundcnt_l.read<kIndex>());
-    INDEXED_CASE2(kMmioSoundControlH , return unused.soundcnt_h.read<kIndex>());
-    INDEXED_CASE2(kMmioSoundControlX , return unused.soundcnt_x.read<kIndex>());
-    INDEXED_CASE2(kMmioSoundBias     , return unused.soundbias.read<kIndex>());
-    INDEXED_CASE2(kMmioWaveRam0      , return unused.waveram[0].read<kIndex>());
-    INDEXED_CASE2(kMmioWaveRam1      , return unused.waveram[1].read<kIndex>());
-    INDEXED_CASE2(kMmioWaveRam2      , return unused.waveram[2].read<kIndex>());
-    INDEXED_CASE2(kMmioWaveRam3      , return unused.waveram[3].read<kIndex>());
-    INDEXED_CASE2(kMmioWaveRam4      , return unused.waveram[4].read<kIndex>());
-    INDEXED_CASE2(kMmioWaveRam5      , return unused.waveram[5].read<kIndex>());
-    INDEXED_CASE2(kMmioWaveRam6      , return unused.waveram[6].read<kIndex>());
-    INDEXED_CASE2(kMmioWaveRam7      , return unused.waveram[7].read<kIndex>());
-    INDEXED_CASE2(kMmioSioMulti0     , return unused.siomulti[0].read<kIndex>());
-    INDEXED_CASE2(kMmioSioMulti1     , return unused.siomulti[1].read<kIndex>());
-    INDEXED_CASE2(kMmioSioMulti2     , return unused.siomulti[2].read<kIndex>());
-    INDEXED_CASE2(kMmioSioMulti3     , return unused.siomulti[3].read<kIndex>());
-    INDEXED_CASE2(kMmioSioControl    , return unused.siocnt.read<kIndex>());
-    INDEXED_CASE2(kMmioSioSend       , return unused.siosend.read<kIndex>());
-    INDEXED_CASE2(kMmioRemoteControl , return unused.rcnt.read<kIndex>());
-    INDEXED_CASE2(kMmioJoyControl    , return unused.joycnt.read<kIndex>());
-    INDEXED_CASE4(kMmioJoyReceive    , return unused.joyrecv.read<kIndex>());
-    INDEXED_CASE4(kMmioJoyTransmit   , return unused.joytrans.read<kIndex>());
-    INDEXED_CASE2(kMmioJoyStatus     , return unused.joystat.read<kIndex>());
-    INDEXED_CASE2(kMmioWaitControl   , return arm.waitcnt.read<kIndex>());
-    INDEXED_CASE1(kMmioPostFlag      , return unused.postflag.read<kIndex>());
-    INDEXED_CASE2(kMmioKeyInput      , return gamepad.input.read<kIndex>());
-    INDEXED_CASE2(kMmioKeyControl    , return gamepad.control.read<kIndex>());
+    INDEXED_CASE2(kMmioSound1ControlL, return soundcnt1_l.read<kIndex>());
+    INDEXED_CASE2(kMmioSound1ControlH, return soundcnt1_h.read<kIndex>());
+    INDEXED_CASE2(kMmioSound1ControlX, return soundcnt1_x.read<kIndex>());
+    INDEXED_CASE2(kMmioUnused066     , return 0);
+    INDEXED_CASE2(kMmioSound2ControlL, return soundcnt2_l.read<kIndex>());
+    INDEXED_CASE2(kMmioSound2ControlH, return soundcnt2_h.read<kIndex>());
+    INDEXED_CASE2(kMmioUnused06E     , return 0);
+    INDEXED_CASE2(kMmioSound3ControlL, return soundcnt3_l.read<kIndex>());
+    INDEXED_CASE2(kMmioSound3ControlH, return soundcnt3_h.read<kIndex>());
+    INDEXED_CASE2(kMmioSound3ControlX, return soundcnt3_x.read<kIndex>());
+    INDEXED_CASE2(kMmioUnused076     , return 0);
+    INDEXED_CASE2(kMmioSound4ControlL, return soundcnt4_l.read<kIndex>());
+    INDEXED_CASE2(kMmioUnused07A     , return 0);
+    INDEXED_CASE2(kMmioSound4ControlH, return soundcnt4_h.read<kIndex>());
+    INDEXED_CASE2(kMmioUnused07E     , return 0);
+    INDEXED_CASE2(kMmioSoundControlL , return soundcnt_l.read<kIndex>());
+    INDEXED_CASE2(kMmioSoundControlH , return soundcnt_h.read<kIndex>());
+    INDEXED_CASE2(kMmioSoundControlX , return soundcnt_x.read<kIndex>());
+    INDEXED_CASE2(kMmioUnused086     , return 0);
+    INDEXED_CASE2(kMmioSoundBias     , return soundbias.read<kIndex>());
+    INDEXED_CASE2(kMmioUnused08A     , return 0);
+    INDEXED_CASE2(kMmioWaveRam0      , return waveram[0].read<kIndex>());
+    INDEXED_CASE2(kMmioWaveRam1      , return waveram[1].read<kIndex>());
+    INDEXED_CASE2(kMmioWaveRam2      , return waveram[2].read<kIndex>());
+    INDEXED_CASE2(kMmioWaveRam3      , return waveram[3].read<kIndex>());
+    INDEXED_CASE2(kMmioWaveRam4      , return waveram[4].read<kIndex>());
+    INDEXED_CASE2(kMmioWaveRam5      , return waveram[5].read<kIndex>());
+    INDEXED_CASE2(kMmioWaveRam6      , return waveram[6].read<kIndex>());
+    INDEXED_CASE2(kMmioWaveRam7      , return waveram[7].read<kIndex>());
     INDEXED_CASE2(kMmioDma0Count     , return 0);
     INDEXED_CASE2(kMmioDma0Control   , return dma.channels[0].control.read<kIndex>());
     INDEXED_CASE2(kMmioDma1Count     , return 0);
@@ -78,25 +81,30 @@ u8 Io::readByte(u32 addr) const
     INDEXED_CASE2(kMmioTimer2Control , return timer.channels[2].control.read<kIndex>());
     INDEXED_CASE2(kMmioTimer3Count   , return timer.channels[3].count.read<kIndex>());
     INDEXED_CASE2(kMmioTimer3Control , return timer.channels[3].control.read<kIndex>());
+    INDEXED_CASE2(kMmioSioMulti0     , return siomulti[0].read<kIndex>());
+    INDEXED_CASE2(kMmioSioMulti1     , return siomulti[1].read<kIndex>());
+    INDEXED_CASE2(kMmioSioMulti2     , return siomulti[2].read<kIndex>());
+    INDEXED_CASE2(kMmioSioMulti3     , return siomulti[3].read<kIndex>());
+    INDEXED_CASE2(kMmioSioControl    , return siocnt.read<kIndex>());
+    INDEXED_CASE2(kMmioSioSend       , return siosend.read<kIndex>());
+    INDEXED_CASE2(kMmioKeyInput      , return gamepad.input.read<kIndex>());
+    INDEXED_CASE2(kMmioKeyControl    , return gamepad.control.read<kIndex>());
+    INDEXED_CASE2(kMmioRemoteControl , return rcnt.read<kIndex>());
+    INDEXED_CASE2(kMmioUnused136     , return 0);
+    INDEXED_CASE2(kMmioJoyControl    , return joycnt.read<kIndex>());
+    INDEXED_CASE2(kMmioUnused142     , return 0);
+    INDEXED_CASE4(kMmioJoyReceive    , return joyrecv.read<kIndex>());
+    INDEXED_CASE4(kMmioJoyTransmit   , return joytrans.read<kIndex>());
+    INDEXED_CASE2(kMmioJoyStatus     , return joystat.read<kIndex>());
+    INDEXED_CASE2(kMmioUnused15A     , return 0);
     INDEXED_CASE2(kMmioIrqEnable     , return arm.irq.enable.read<kIndex>());
     INDEXED_CASE2(kMmioIrqRequest    , return arm.irq.request.read<kIndex>());
+    INDEXED_CASE2(kMmioWaitControl   , return arm.waitcnt.read<kIndex>());
+    INDEXED_CASE2(kMmioUnused206     , return 0);
     INDEXED_CASE4(kMmioIrqMaster     , return arm.irq.master.read<kIndex>());
-
-    INDEXED_CASE2(kMmioUnused066, return 0);
-    INDEXED_CASE2(kMmioUnused06E, return 0);
-    INDEXED_CASE2(kMmioUnused076, return 0);
-    INDEXED_CASE2(kMmioUnused07A, return 0);
-    INDEXED_CASE2(kMmioUnused07E, return 0);
-    INDEXED_CASE2(kMmioUnused086, return 0);
-    INDEXED_CASE2(kMmioUnused08A, return 0);
-    INDEXED_CASE2(kMmioUnused136, return 0);
-    INDEXED_CASE2(kMmioUnused142, return 0);
-    INDEXED_CASE2(kMmioUnused15A, return 0);
-    INDEXED_CASE2(kMmioUnused206, return 0);
-
-    default:
-        return mmu.readUnused(addr);
+    INDEXED_CASE1(kMmioPostFlag      , return postflag.read<kIndex>());
     }
+    return mmu.readUnused(addr);
 }
 
 u16 Io::readHalf(u32 addr) const
@@ -164,45 +172,30 @@ void Io::writeByte(u32 addr, u8 byte)
     INDEXED_CASE2(kMmioBlendControl  , ppu.io.bldcnt.write<kIndex>(byte));
     INDEXED_CASE2(kMmioBlendAlpha    , ppu.io.bldalpha.write<kIndex>(byte));
     INDEXED_CASE2(kMmioBlendFade     , ppu.io.bldfade.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioSound1ControlL, unused.soundcnt1_l.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioSound1ControlH, unused.soundcnt1_h.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioSound1ControlX, unused.soundcnt1_x.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioSound2ControlL, unused.soundcnt2_l.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioSound2ControlH, unused.soundcnt2_h.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioSound3ControlL, unused.soundcnt3_l.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioSound3ControlH, unused.soundcnt3_h.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioSound3ControlX, unused.soundcnt3_x.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioSound4ControlL, unused.soundcnt4_l.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioSound4ControlH, unused.soundcnt4_h.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioSoundControlL , unused.soundcnt_l.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioSoundControlH , unused.soundcnt_h.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioSoundControlX , unused.soundcnt_x.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioSoundBias     , unused.soundbias.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioWaveRam0      , unused.waveram[0].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioWaveRam1      , unused.waveram[1].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioWaveRam2      , unused.waveram[2].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioWaveRam3      , unused.waveram[3].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioWaveRam4      , unused.waveram[4].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioWaveRam5      , unused.waveram[5].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioWaveRam6      , unused.waveram[6].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioWaveRam7      , unused.waveram[7].write<kIndex>(byte));
-    INDEXED_CASE4(kMmioFifoA         , unused.fifo[0].write<kIndex>(byte));
-    INDEXED_CASE4(kMmioFifoB         , unused.fifo[1].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioSioMulti0     , unused.siomulti[0].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioSioMulti1     , unused.siomulti[1].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioSioMulti2     , unused.siomulti[2].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioSioMulti3     , unused.siomulti[3].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioSioControl    , unused.siocnt.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioSioSend       , unused.siosend.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioRemoteControl , unused.rcnt.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioJoyControl    , unused.joycnt.write<kIndex>(byte));
-    INDEXED_CASE4(kMmioJoyReceive    , unused.joyrecv.write<kIndex>(byte));
-    INDEXED_CASE4(kMmioJoyTransmit   , unused.joytrans.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioJoyStatus     , unused.joystat.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioWaitControl   , arm.waitcnt.write<kIndex>(byte));
-    INDEXED_CASE1(kMmioPostFlag      , unused.postflag.write<kIndex>(byte));
-    INDEXED_CASE1(kMmioHaltControl   , arm.haltcnt.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioKeyControl    , gamepad.control.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioSound1ControlL, soundcnt1_l.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioSound1ControlH, soundcnt1_h.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioSound1ControlX, soundcnt1_x.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioSound2ControlL, soundcnt2_l.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioSound2ControlH, soundcnt2_h.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioSound3ControlL, soundcnt3_l.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioSound3ControlH, soundcnt3_h.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioSound3ControlX, soundcnt3_x.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioSound4ControlL, soundcnt4_l.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioSound4ControlH, soundcnt4_h.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioSoundControlL , soundcnt_l.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioSoundControlH , soundcnt_h.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioSoundControlX , soundcnt_x.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioSoundBias     , soundbias.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioWaveRam0      , waveram[0].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioWaveRam1      , waveram[1].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioWaveRam2      , waveram[2].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioWaveRam3      , waveram[3].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioWaveRam4      , waveram[4].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioWaveRam5      , waveram[5].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioWaveRam6      , waveram[6].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioWaveRam7      , waveram[7].write<kIndex>(byte));
+    INDEXED_CASE4(kMmioFifoA         , fifo[0].write<kIndex>(byte));
+    INDEXED_CASE4(kMmioFifoB         , fifo[1].write<kIndex>(byte));
     INDEXED_CASE4(kMmioDma0Sad       , dma.channels[0].sad.write<kIndex, 0x07FF'FFFF>(byte));
     INDEXED_CASE4(kMmioDma0Dad       , dma.channels[0].dad.write<kIndex, 0x07FF'FFFF>(byte));
     INDEXED_CASE2(kMmioDma0Count     , dma.channels[0].count.write<kIndex, 0x3FFF>(byte));
@@ -227,9 +220,24 @@ void Io::writeByte(u32 addr, u8 byte)
     INDEXED_CASE1(kMmioTimer2Control , timer.channels[2].control.write<kIndex>(byte));
     INDEXED_CASE2(kMmioTimer3Count   , timer.channels[3].count.write<kIndex>(byte));
     INDEXED_CASE1(kMmioTimer3Control , timer.channels[3].control.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioSioMulti0     , siomulti[0].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioSioMulti1     , siomulti[1].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioSioMulti2     , siomulti[2].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioSioMulti3     , siomulti[3].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioSioControl    , siocnt.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioSioSend       , siosend.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioKeyControl    , gamepad.control.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioRemoteControl , rcnt.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioJoyControl    , joycnt.write<kIndex>(byte));
+    INDEXED_CASE4(kMmioJoyReceive    , joyrecv.write<kIndex>(byte));
+    INDEXED_CASE4(kMmioJoyTransmit   , joytrans.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioJoyStatus     , joystat.write<kIndex>(byte));
     INDEXED_CASE2(kMmioIrqEnable     , arm.irq.enable.write<kIndex>(byte));
     INDEXED_CASE2(kMmioIrqRequest    , arm.irq.request.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioWaitControl   , arm.waitcnt.write<kIndex>(byte));
     INDEXED_CASE4(kMmioIrqMaster     , arm.irq.master.write<kIndex>(byte));
+    INDEXED_CASE1(kMmioPostFlag      , postflag.write<kIndex>(byte));
+    INDEXED_CASE1(kMmioHaltControl   , arm.haltcnt.write<kIndex>(byte));
     }
 }
 
@@ -249,15 +257,4 @@ void Io::writeWord(u32 addr, u32 word)
     writeByte(addr + 1, bit::seq< 8, 8>(word));
     writeByte(addr + 2, bit::seq<16, 8>(word));
     writeByte(addr + 3, bit::seq<24, 8>(word));
-}
-
-Io::UnusedIo::UnusedIo()
-{
-    if (config.bios_skip)
-    {
-        rcnt.value = 0x8000;
-        postflag.value = 0x01;
-        soundcnt_h.value = 0x880E;
-        soundbias.value = 0x0200;
-    }
 }

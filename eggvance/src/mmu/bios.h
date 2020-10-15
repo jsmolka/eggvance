@@ -7,6 +7,8 @@
 class Bios
 {
 public:
+    static constexpr uint kSize = 0x4000;
+
     void reset();
 
     void init(const fs::path& path);
@@ -17,5 +19,5 @@ public:
 
 private:
     u32 previous;
-    Ram<0x4000> data;
+    Ram<kSize> data;
 };

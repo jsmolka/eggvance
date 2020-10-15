@@ -1,11 +1,11 @@
 #pragma once
 
-#include "bios.h"
-#include "palette.h"
-#include "vram.h"
-#include "oam.h"
-#include "io.h"
 #include "gamepak/gamepak.h"
+#include "mmu/bios.h"
+#include "mmu/io.h"
+#include "mmu/oam.h"
+#include "mmu/pram.h"
+#include "mmu/vram.h"
 
 class MMU
 {
@@ -20,16 +20,18 @@ public:
     void writeHalf(u32 addr, u16 half);
     void writeWord(u32 addr, u32 word);
 
-    u32 readUnused(u32 addr);
+    u32 readUnused(u32 addr) const;
 
     Bios bios;
     GamePak gamepak;
-    Palette palette;
+    Pram pram;
     Vram vram;
-    OAM oam;
+    Oam oam;
     Io io;
 
 private:
+    bool isEepromAccess(u32 addr) const;
+
     u8 readSave(u32 addr);
     void writeSave(u32 addr, u8 byte);
 

@@ -3,24 +3,19 @@
 #include "base/bit.h"
 #include "base/int.h"
 
-void OAM::reset()
-{
-    *this = OAM();
-}
-
-void OAM::writeHalf(u32 addr, u16 half)
+void Oam::writeHalf(u32 addr, u16 half)
 {
     addr = mirror(addr);
     addr = align<u16>(addr);
 
-    int attr = addr & 0x6;
-    if (attr < 0x6)
+    uint attr = addr & 0x6;
+    if ( attr < 0x6)
         entries[addr >> 3].writeHalf(attr, half);
 
     writeFast<u16>(addr, half);
 }
 
-void OAM::writeWord(u32 addr, u32 word)
+void Oam::writeWord(u32 addr, u32 word)
 {
     addr = align<u32>(addr);
 
@@ -28,12 +23,13 @@ void OAM::writeWord(u32 addr, u32 word)
     writeHalf(addr + 2, bit::seq<16, 16>(word));
 }
 
-Matrix OAM::matrix(int index)
+Matrix Oam::matrix(uint index) const
 {
+    u32 base = 0x20 * index;
+
     return Matrix(
-        readFast<u16>(0x20 * index + 0x06),
-        readFast<u16>(0x20 * index + 0x0E),
-        readFast<u16>(0x20 * index + 0x16),
-        readFast<u16>(0x20 * index + 0x1E)
-    );
+        readFast<u16>(base + 0x06),
+        readFast<u16>(base + 0x0E),
+        readFast<u16>(base + 0x16),
+        readFast<u16>(base + 0x1E));
 }

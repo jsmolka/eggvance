@@ -1,7 +1,5 @@
 #include "vram.h"
 
-#include <shell/utility.h>
-
 #include "base/bit.h"
 #include "base/int.h"
 #include "ppu/ppu.h"
@@ -18,13 +16,6 @@ void Vram::writeByte(u32 addr, u8 byte)
     }
 }
 
-uint Vram::index(u32 addr, const Point& pixel, ColorMode mode) const
-{
-    return mode == ColorMode::C256x1
-        ? index256x1(addr, pixel)
-        : index16x16(addr, pixel);
-}
-
 uint Vram::index256x1(u32 addr, const Point& pixel) const
 {
     return readFast<u8>(addr + pixel.index2d(8));
@@ -35,4 +26,11 @@ uint Vram::index16x16(u32 addr, const Point& pixel) const
     u8 data = readFast<u8>(addr + pixel.index2d(8) / 2);
 
     return bit::nibble(data, pixel.x & 0x1);
+}
+
+uint Vram::index(u32 addr, const Point& pixel, ColorMode mode) const
+{
+    return mode == ColorMode::C256x1
+        ? index256x1(addr, pixel)
+        : index16x16(addr, pixel);
 }

@@ -80,7 +80,7 @@ void PPU::renderBgMode0(int bg)
                         { pixel.x ^ (0x7 * entry.flip_x), pixel.y ^ (0x7 * entry.flip_y), },
                         ColorMode(bgcnt.color_mode)
                     );
-                    backgrounds[bg][x] = mmu.palette.colorBG(index, entry.bank);
+                    backgrounds[bg][x] = mmu.pram.colorBG(index, entry.bank);
                 }
             }
             else
@@ -129,7 +129,7 @@ void PPU::renderBgMode2(int bg)
         int entry  = mmu.vram.readFast<u8>(bgcnt.map_block + offset);
         int index  = mmu.vram.index256x1(bgcnt.tile_block + 0x40 * entry, pixel);
 
-        backgrounds[bg][x] = mmu.palette.colorBG(index);
+        backgrounds[bg][x] = mmu.pram.colorBG(index);
     }
 }
 
@@ -170,7 +170,7 @@ void PPU::renderBgMode4(int bg)
         int offset = texture.index2d(dims.w);
         int index  = mmu.vram.readFast<u8>(io.dispcnt.frame + offset);
 
-        backgrounds[bg][x] = mmu.palette.colorBG(index);
+        backgrounds[bg][x] = mmu.pram.colorBG(index);
     }
 }
 
@@ -253,7 +253,7 @@ void PPU::renderObjects()
                 case ObjectMode::Normal:
                     if (entry.prio < object.prio || !object.opaque())
                     {
-                        object.color = mmu.palette.colorFGOpaque(index, bank);
+                        object.color = mmu.pram.colorFGOpaque(index, bank);
                         object.alpha = entry.mode == int(ObjectMode::Alpha);
                     }
                     break;

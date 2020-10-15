@@ -8,12 +8,12 @@
 void MMU::reset()
 {
     bios.reset();
-    palette.reset();
-    oam.reset();
 
     shell::reconstruct(io);
     shell::reconstruct(ewram);
     shell::reconstruct(iwram);
+    shell::reconstruct(oam);
+    shell::reconstruct(pram);
     shell::reconstruct(vram);
 }
 
@@ -22,7 +22,7 @@ u8 MMU::readByte(u32 addr)
     switch (addr >> 24)
     {
     case kRegionBios:
-        if (addr < 0x4000)
+        if (addr < Bios::kSize)
             return bios.readByte(addr);
         else
             return readUnused(addr);
@@ -36,8 +36,8 @@ u8 MMU::readByte(u32 addr)
     case kRegionIo:
         return io.readByte(addr);
 
-    case kRegionPalette:
-        return palette.readByte(addr);
+    case kRegionPram:
+        return pram.readByte(addr);
 
     case kRegionVram:
         return vram.readByte(addr);
@@ -53,8 +53,7 @@ u8 MMU::readByte(u32 addr)
         return gamepak.readByte(addr);
 
     case kRegionGamePak2H:
-        if (gamepak.save->type == Save::Type::Eeprom
-                && (gamepak.size() <= 0x100'0000 || addr >= 0xDFF'FF00))
+        if (isEepromAccess(addr))
             return 1;
 
         return gamepak.readByte(addr);
@@ -73,7 +72,7 @@ u16 MMU::readHalf(u32 addr)
     switch (addr >> 24)
     {
     case kRegionBios:
-        if (addr < 0x4000)
+        if (addr < Bios::kSize)
             return bios.readHalf(addr);
         else
             return readUnused(addr);
@@ -87,8 +86,8 @@ u16 MMU::readHalf(u32 addr)
     case kRegionIo:
         return io.readHalf(addr);
 
-    case kRegionPalette:
-        return palette.readHalf(addr);
+    case kRegionPram:
+        return pram.readHalf(addr);
 
     case kRegionVram:
         return vram.readHalf(addr);
@@ -104,8 +103,7 @@ u16 MMU::readHalf(u32 addr)
         return gamepak.readHalf(addr);
 
     case kRegionGamePak2H:
-        if (gamepak.save->type == Save::Type::Eeprom
-                && (gamepak.size() <= 0x100'0000 || addr >= 0xDFF'FF00))
+        if (isEepromAccess(addr))
             return 1;
 
         return gamepak.readHalf(addr);
@@ -124,7 +122,7 @@ u32 MMU::readWord(u32 addr)
     switch (addr >> 24)
     {
     case kRegionBios:
-        if (addr < 0x4000)
+        if (addr < Bios::kSize)
             return bios.readWord(addr);
         else
             return readUnused(addr);
@@ -138,8 +136,8 @@ u32 MMU::readWord(u32 addr)
     case kRegionIo:
         return io.readWord(addr);
 
-    case kRegionPalette:
-        return palette.readWord(addr);
+    case kRegionPram:
+        return pram.readWord(addr);
 
     case kRegionVram:
         return vram.readWord(addr);
@@ -155,15 +153,14 @@ u32 MMU::readWord(u32 addr)
         return gamepak.readWord(addr);
 
     case kRegionGamePak2H:
-        if (gamepak.save->type == Save::Type::Eeprom
-                && (gamepak.size() <= 0x100'0000 || addr >= 0xDFF'FF00))
+        if (isEepromAccess(addr))
             return 1;
 
         return gamepak.readWord(addr);
 
     case kRegionSramL:
     case kRegionSramH:
-        return readSave(addr) * 0x01010101;
+        return readSave(addr) * 0x0101'0101;
 
     default:
         return readUnused(addr);
@@ -189,8 +186,8 @@ void MMU::writeByte(u32 addr, u8 byte)
         io.writeByte(addr, byte);
         break;
 
-    case kRegionPalette:
-        palette.writeByte(addr, byte);
+    case kRegionPram:
+        pram.writeByte(addr, byte);
         break;
 
     case kRegionVram:
@@ -234,8 +231,8 @@ void MMU::writeHalf(u32 addr, u16 half)
         io.writeHalf(addr, half);
         break;
 
-    case kRegionPalette:
-        palette.writeHalf(addr, half);
+    case kRegionPram:
+        pram.writeHalf(addr, half);
         break;
 
     case kRegionVram:
@@ -280,8 +277,8 @@ void MMU::writeWord(u32 addr, u32 word)
         io.writeWord(addr, word);
         break;
 
-    case kRegionPalette:
-        palette.writeWord(addr, word);
+    case kRegionPram:
+        pram.writeWord(addr, word);
         break;
 
     case kRegionVram:
@@ -307,7 +304,7 @@ void MMU::writeWord(u32 addr, u32 word)
     }
 }
 
-u32 MMU::readUnused(u32 addr)
+u32 MMU::readUnused(u32 addr) const
 {
     u32 value = 0;
     if (arm.cpsr.t)
@@ -336,6 +333,12 @@ u32 MMU::readUnused(u32 addr)
         value = arm.pipe[1];
     }
     return value >> ((addr & 0x3) << 3);
+}
+
+bool MMU::isEepromAccess(u32 addr) const
+{
+    return (gamepak.save->type == Save::Type::Eeprom)
+        && (gamepak.size() <= 0x100'0000 || addr >= 0xDFF'FF00);
 }
 
 u8 MMU::readSave(u32 addr)

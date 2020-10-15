@@ -298,7 +298,7 @@ u16 PPU::upperLayer(const std::vector<BGLayer>& layers, int x)
     if (obj_master && object.opaque())
         return object.color;
 
-    return mmu.palette.backdrop();
+    return mmu.pram.backdrop();
 }
 
 template<int obj_master>
@@ -317,7 +317,7 @@ u16 PPU::upperLayer(const std::vector<BGLayer>& layers, int x, int flags)
     if (obj_master && flags & LF_OBJ && object.opaque())
         return object.color;
 
-    return mmu.palette.backdrop();
+    return mmu.pram.backdrop();
 }
 
 template<int obj_master>
@@ -345,7 +345,7 @@ bool PPU::findBlendLayers(const std::vector<BGLayer>& layers, int x, int flags, 
         upper = object.color;
         return flags_upper & LF_OBJ;
     }
-    upper = mmu.palette.backdrop();
+    upper = mmu.pram.backdrop();
     return flags_upper & LF_BDP;
 }
 
@@ -392,12 +392,12 @@ bool PPU::findBlendLayers(const std::vector<BGLayer>& layers, int x, int flags, 
     }
     if (upper_found)
     {
-        lower = mmu.palette.backdrop();
+        lower = mmu.pram.backdrop();
         return flags_lower & LF_BDP;
     }
     else
     {
-        upper = mmu.palette.backdrop();
+        upper = mmu.pram.backdrop();
         return false;
     }
 }

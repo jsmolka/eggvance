@@ -6,7 +6,7 @@ enum Region
     kRegionEwram     = 0x2,
     kRegionIwram     = 0x3,
     kRegionIo        = 0x4,
-    kRegionPalette   = 0x5,
+    kRegionPram      = 0x5,
     kRegionVram      = 0x6,
     kRegionOam       = 0x7,
     kRegionGamePak0L = 0x8,
