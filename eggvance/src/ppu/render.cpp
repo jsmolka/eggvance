@@ -254,6 +254,7 @@ void PPU::renderObjects()
                     if (entry.prio < object.prio || !object.opaque())
                     {
                         object.color = mmu.pram.colorFGOpaque(index, bank);
+                        object.prio  = entry.prio;
                         object.alpha = entry.mode == int(ObjectMode::Alpha);
                     }
                     break;
