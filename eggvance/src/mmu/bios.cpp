@@ -7,11 +7,6 @@
 #include "base/utility.h"
 #include "mmu/bios_normmatt.h"
 
-void Bios::reset()
-{
-    previous = 0xE129'F000;
-}
-
 void Bios::init(const fs::path& path)
 {
     if (path.empty())

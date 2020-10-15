@@ -42,7 +42,7 @@ void core::init(int argc, char* argv[])
 
         config.init(fs::makeAbsolute(*cfg));
 
-        mmu.bios.init(config.bios_file);
+        Bios::init(config.bios_file);
 
         audio_ctx.init();
         input_ctx.init();

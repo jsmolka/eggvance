@@ -7,8 +7,7 @@
 
 void MMU::reset()
 {
-    bios.reset();
-
+    shell::reconstruct(bios);
     shell::reconstruct(io);
     shell::reconstruct(ewram);
     shell::reconstruct(iwram);
