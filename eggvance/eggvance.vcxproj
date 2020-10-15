@@ -212,6 +212,7 @@
     <ClInclude Include="src\core\framecounter.h" />
     <ClInclude Include="src\core\synchronizer.h" />
     <ClInclude Include="src\mmu\bios_normmatt.h" />
+    <ClInclude Include="src\mmu\constants.h" />
     <ClInclude Include="src\mmu\io.h" />
     <ClInclude Include="src\ppu\dimensions.h" />
     <ClInclude Include="src\ppu\io.h" />

@@ -3,7 +3,7 @@
 #include <shell/utility.h>
 
 #include "arm/arm.h"
-#include "base/constants.h"
+#include "mmu/constants.h"
 
 void MMU::reset()
 {
