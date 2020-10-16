@@ -2,248 +2,53 @@
 
 struct Point
 {
-    constexpr Point()
-        : Point(0, 0)
-    {
-    
-    }
+    constexpr Point() = default;
 
     constexpr Point(int x, int y)
-        : x(x)
-        , y(y)
-    {
-    
-    }
+        : x(x), y(y) {}
 
     constexpr int index2d(int width) const
     {
         return width * y + x;
     }
 
-    constexpr Point operator+(int scalar) const
-    {
-        return Point(
-            x + scalar, 
-            y + scalar 
-        );
-    }
+    #define OPERATOR(op)                                        \
+        constexpr Point operator##op(int scalar) const          \
+        {                                                       \
+            return Point(x ##op scalar, y ##op scalar);         \
+        }                                                       \
+                                                                \
+        constexpr Point operator##op(const Point& other) const  \
+        {                                                       \
+            return Point(x ##op other.x, y ##op other.y);       \
+        }                                                       \
+                                                                \
+        constexpr Point& operator##op##=(int scalar)            \
+        {                                                       \
+            x ##op##= scalar;                                   \
+            y ##op##= scalar;                                   \
+            return *this;                                       \
+        }                                                       \
+                                                                \
+        constexpr Point& operator##op##=(const Point& other)    \
+        {                                                       \
+            x ##op##= other.x;                                  \
+            y ##op##= other.y;                                  \
+            return *this;                                       \
+        }
 
-    constexpr Point operator-(int scalar) const
-    {
-        return Point(
-            x - scalar, 
-            y - scalar 
-        );
-    }
+    OPERATOR(+)
+    OPERATOR(-)
+    OPERATOR(*)
+    OPERATOR(/)
+    OPERATOR(%)
+    OPERATOR(<<)
+    OPERATOR(>>)
 
-    constexpr Point operator*(int scalar) const
-    {
-        return Point(
-            x * scalar,
-            y * scalar
-        );
-    }
+    #undef OPERATOR
 
-    constexpr Point operator/(int scalar) const
-    {
-        return Point(
-            x / scalar,
-            y / scalar
-        );
-    }
-
-    constexpr Point operator%(int scalar) const
-    {
-        return Point(
-            x % scalar,
-            y % scalar
-        );
-    }
-
-    constexpr Point operator<<(int scalar) const
-    {
-        return Point(
-            x << scalar,
-            y << scalar
-        );
-    }
-
-    constexpr Point operator>>(int scalar) const
-    {
-        return Point(
-            x >> scalar,
-            y >> scalar
-        );
-    }
-
-    constexpr Point operator+(const Point& other) const
-    {
-        return Point(
-            x + other.x,
-            y + other.y
-        );
-    }
-
-    constexpr Point operator-(const Point& other) const
-    {
-        return Point(
-            x - other.x,
-            y - other.y
-        );
-    }
-
-    constexpr Point operator*(const Point& other) const
-    {
-        return Point(
-            x * other.x,
-            y * other.y
-        );
-    }
-
-    constexpr Point operator/(const Point& other) const
-    {
-        return Point(
-            x / other.x,
-            y / other.y
-        );
-    }
-
-    constexpr Point operator%(const Point& other) const
-    {
-        return Point(
-            x % other.x,
-            y % other.y
-        );
-    }
-
-    constexpr Point operator<<(const Point& other) const
-    {
-        return Point(
-            x << other.x,
-            y << other.y
-        );
-    }
-
-    constexpr Point operator>>(const Point& other) const
-    {
-        return Point(
-            x >> other.x,
-            y >> other.y
-        );
-    }
-
-    constexpr Point& operator+=(int scalar)
-    {
-        x += scalar;
-        y += scalar;
-
-        return *this;
-    }
-
-    constexpr Point& operator-=(int scalar)
-    {
-        x -= scalar;
-        y -= scalar;
-
-        return *this;
-    }
-
-    constexpr Point& operator*=(int scalar)
-    {
-        x *= scalar;
-        y *= scalar;
-
-        return *this;
-    }
-
-    constexpr Point& operator/=(int scalar)
-    {
-        x /= scalar;
-        y /= scalar;
-
-        return *this;
-    }
-
-    constexpr Point& operator%=(int scalar)
-    {
-        x %= scalar;
-        y %= scalar;
-
-        return *this;
-    }
-
-    constexpr Point& operator<<=(int scalar)
-    {
-        x <<= scalar;
-        y <<= scalar;
-
-        return *this;
-    }
-
-    constexpr Point& operator>>=(int scalar)
-    {
-        x >>= scalar;
-        y >>= scalar;
-
-        return *this;
-    }
-
-    constexpr Point& operator+=(const Point& other)
-    {
-        x += other.x;
-        y += other.y;
-
-        return *this;
-    }
-
-    constexpr Point& operator-=(const Point& other)
-    {
-        x -= other.x;
-        y -= other.y;
-
-        return *this;
-    }
-
-    constexpr Point& operator*=(const Point& other)
-    {
-        x *= other.x;
-        y *= other.y;
-
-        return *this;
-    }
-
-    constexpr Point& operator/=(const Point& other)
-    {
-        x /= other.x;
-        y /= other.y;
-
-        return *this;
-    }
-
-    constexpr Point& operator%=(const Point& other)
-    {
-        x %= other.x;
-        y %= other.y;
-
-        return *this;
-    }
-
-    constexpr Point& operator<<=(const Point& other)
-    {
-        x <<= other.x;
-        y <<= other.y;
-
-        return *this;
-    }
-
-    constexpr Point& operator>>=(const Point& other)
-    {
-        x >>= other.x;
-        y >>= other.y;
-
-        return *this;
-    }
-
-    int x;
-    int y;
+    int x = 0;
+    int y = 0;
 };
+
+inline constexpr Point kOrigin(0, 0);
