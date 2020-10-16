@@ -2,12 +2,12 @@
 
 #include <vector>
 
-#include "ppu/buffer.h"
-#include "ppu/dimensions.h"
-#include "ppu/io.h"
-#include "ppu/layer.h"
+#include "gpu/buffer.h"
+#include "gpu/dimensions.h"
+#include "gpu/io.h"
+#include "gpu/layer.h"
 
-class PPU
+class Gpu
 {
 public:
     void reset();
@@ -29,7 +29,7 @@ private:
         WF_WINOBJ = 1 << 2
     };
 
-    using RenderFunc = void(PPU::*)(int);
+    using RenderFunc = void(Gpu::*)(int);
 
     Point transform(int x, int bg);
 
@@ -88,4 +88,4 @@ private:
     bool objects_alpha;
 };
 
-inline PPU ppu;
+inline Gpu gpu;

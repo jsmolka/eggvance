@@ -5,8 +5,8 @@
 #include "base/config.h"
 #include "base/constants.h"
 #include "base/register.h"
-#include "ppu/dimensions.h"
-#include "ppu/layer.h"
+#include "gpu/dimensions.h"
+#include "gpu/layer.h"
 
 struct PpuIo
 {

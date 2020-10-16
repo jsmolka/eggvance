@@ -1,11 +1,11 @@
-#include "ppu.h"
+#include "gpu.h"
 
 #include "base/macros.h"
+#include "gpu/matrix.h"
+#include "gpu/mapentry.h"
 #include "mmu/mmu.h"
-#include "ppu/matrix.h"
-#include "ppu/mapentry.h"
 
-Point PPU::transform(int x, int bg)
+Point Gpu::transform(int x, int bg)
 {
     bg -= 2;
 
@@ -15,7 +15,7 @@ Point PPU::transform(int x, int bg)
     );
 }
 
-void PPU::renderBg(RenderFunc func, int bg)
+void Gpu::renderBg(RenderFunc func, int bg)
 {
     if (~io.dispcnt.layers & (1 << bg))
         return;
@@ -38,7 +38,7 @@ void PPU::renderBg(RenderFunc func, int bg)
     }
 }
 
-void PPU::renderBgMode0(int bg)
+void Gpu::renderBgMode0(int bg)
 {
     const auto& bgcnt = io.bgcnt[bg];
     const auto& dims  = io.bgcnt[bg].dimsReg();
@@ -96,7 +96,7 @@ void PPU::renderBgMode0(int bg)
     }
 }
 
-void PPU::renderBgMode2(int bg)
+void Gpu::renderBgMode2(int bg)
 {
     const auto& bgcnt = io.bgcnt[bg];
     const auto& dims  = io.bgcnt[bg].dimsAff();
@@ -133,7 +133,7 @@ void PPU::renderBgMode2(int bg)
     }
 }
 
-void PPU::renderBgMode3(int bg)
+void Gpu::renderBgMode3(int bg)
 {
     static constexpr Dimensions dims(kScreenW, kScreenH);
 
@@ -153,7 +153,7 @@ void PPU::renderBgMode3(int bg)
     }
 }
 
-void PPU::renderBgMode4(int bg)
+void Gpu::renderBgMode4(int bg)
 {
     static constexpr Dimensions dims(kScreenW, kScreenH);
 
@@ -174,7 +174,7 @@ void PPU::renderBgMode4(int bg)
     }
 }
 
-void PPU::renderBgMode5(int bg)
+void Gpu::renderBgMode5(int bg)
 {
     static constexpr Dimensions dims(160, 128);
 
@@ -194,7 +194,7 @@ void PPU::renderBgMode5(int bg)
     }
 }
 
-void PPU::renderObjects()
+void Gpu::renderObjects()
 {
     for (const auto& entry : mmu.oam.entries)
     {

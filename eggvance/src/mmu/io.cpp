@@ -4,9 +4,9 @@
 #include "base/macros.h"
 #include "dma/dma.h"
 #include "gamepad/gamepad.h"
+#include "gpu/gpu.h"
 #include "mmu/constants.h"
 #include "mmu/mmu.h"
-#include "ppu/ppu.h"
 #include "timer/timer.h"
 
 Io::Io()
@@ -24,18 +24,18 @@ u8 Io::readByte(u32 addr) const
 {
     switch (addr & 0x3FF'FFFF)
     {
-    INDEXED_CASE2(kMmioDispayControl , return ppu.io.dispcnt.read<kIndex>());
-    INDEXED_CASE2(kMmioGreenSwap     , return ppu.io.greenswap.read<kIndex>());
-    INDEXED_CASE2(kMmioDisplayStatus , return ppu.io.dispstat.read<kIndex>());
-    INDEXED_CASE2(kMmioVerticalCount , return ppu.io.vcount.read<kIndex>());
-    INDEXED_CASE2(kMmioBg0Control    , return ppu.io.bgcnt[0].read<kIndex>());
-    INDEXED_CASE2(kMmioBg1Control    , return ppu.io.bgcnt[1].read<kIndex>());
-    INDEXED_CASE2(kMmioBg2Control    , return ppu.io.bgcnt[2].read<kIndex>());
-    INDEXED_CASE2(kMmioBg3Control    , return ppu.io.bgcnt[3].read<kIndex>());
-    INDEXED_CASE2(kMmioWindowInside  , return ppu.io.winin.read<kIndex>());
-    INDEXED_CASE2(kMmioWindowOutside , return ppu.io.winout.read<kIndex>());
-    INDEXED_CASE2(kMmioBlendControl  , return ppu.io.bldcnt.read<kIndex>());
-    INDEXED_CASE2(kMmioBlendAlpha    , return ppu.io.bldalpha.read<kIndex>());
+    INDEXED_CASE2(kMmioDispayControl , return gpu.io.dispcnt.read<kIndex>());
+    INDEXED_CASE2(kMmioGreenSwap     , return gpu.io.greenswap.read<kIndex>());
+    INDEXED_CASE2(kMmioDisplayStatus , return gpu.io.dispstat.read<kIndex>());
+    INDEXED_CASE2(kMmioVerticalCount , return gpu.io.vcount.read<kIndex>());
+    INDEXED_CASE2(kMmioBg0Control    , return gpu.io.bgcnt[0].read<kIndex>());
+    INDEXED_CASE2(kMmioBg1Control    , return gpu.io.bgcnt[1].read<kIndex>());
+    INDEXED_CASE2(kMmioBg2Control    , return gpu.io.bgcnt[2].read<kIndex>());
+    INDEXED_CASE2(kMmioBg3Control    , return gpu.io.bgcnt[3].read<kIndex>());
+    INDEXED_CASE2(kMmioWindowInside  , return gpu.io.winin.read<kIndex>());
+    INDEXED_CASE2(kMmioWindowOutside , return gpu.io.winout.read<kIndex>());
+    INDEXED_CASE2(kMmioBlendControl  , return gpu.io.bldcnt.read<kIndex>());
+    INDEXED_CASE2(kMmioBlendAlpha    , return gpu.io.bldalpha.read<kIndex>());
     INDEXED_CASE2(kMmioSound1ControlL, return soundcnt1_l.read<kIndex>());
     INDEXED_CASE2(kMmioSound1ControlH, return soundcnt1_h.read<kIndex>());
     INDEXED_CASE2(kMmioSound1ControlX, return soundcnt1_x.read<kIndex>());
@@ -135,43 +135,43 @@ void Io::writeByte(u32 addr, u8 byte)
 {
     switch (addr & 0x3FF'FFFF)
     {
-    INDEXED_CASE2(kMmioDispayControl , ppu.io.dispcnt.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioGreenSwap     , ppu.io.greenswap.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioDisplayStatus , ppu.io.dispstat.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioBg0Control    , ppu.io.bgcnt[0].write<kIndex, 0xDFFF>(byte));
-    INDEXED_CASE2(kMmioBg1Control    , ppu.io.bgcnt[1].write<kIndex, 0xDFFF>(byte));
-    INDEXED_CASE2(kMmioBg2Control    , ppu.io.bgcnt[2].write<kIndex, 0xFFFF>(byte));
-    INDEXED_CASE2(kMmioBg3Control    , ppu.io.bgcnt[3].write<kIndex, 0xFFFF>(byte));
-    INDEXED_CASE2(kMmioBg0HorOffset  , ppu.io.bghofs[0].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioBg0VerOffset  , ppu.io.bgvofs[0].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioBg1HorOffset  , ppu.io.bghofs[1].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioBg1VerOffset  , ppu.io.bgvofs[1].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioBg2HorOffset  , ppu.io.bghofs[2].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioBg2VerOffset  , ppu.io.bgvofs[2].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioBg3HorOffset  , ppu.io.bghofs[3].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioBg3VerOffset  , ppu.io.bgvofs[3].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioBg2ParameterA , ppu.io.bgpa[0].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioBg2ParameterB , ppu.io.bgpb[0].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioBg2ParameterC , ppu.io.bgpc[0].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioBg2ParameterD , ppu.io.bgpd[0].write<kIndex>(byte));
-    INDEXED_CASE4(kMmioBg2ReferenceX , ppu.io.bgx[0].write<kIndex>(byte));
-    INDEXED_CASE4(kMmioBg2ReferenceY , ppu.io.bgy[0].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioBg3ParameterA , ppu.io.bgpa[1].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioBg3ParameterB , ppu.io.bgpb[1].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioBg3ParameterC , ppu.io.bgpc[1].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioBg3ParameterD , ppu.io.bgpd[1].write<kIndex>(byte));
-    INDEXED_CASE4(kMmioBg3ReferenceX , ppu.io.bgx[1].write<kIndex>(byte));
-    INDEXED_CASE4(kMmioBg3ReferenceY , ppu.io.bgy[1].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioWindow0Hor    , ppu.io.winh[0].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioWindow1Hor    , ppu.io.winh[1].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioWindow0Ver    , ppu.io.winv[0].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioWindow1Ver    , ppu.io.winv[1].write<kIndex>(byte));
-    INDEXED_CASE2(kMmioWindowInside  , ppu.io.winin.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioWindowOutside , ppu.io.winout.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioMosaic        , ppu.io.mosaic.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioBlendControl  , ppu.io.bldcnt.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioBlendAlpha    , ppu.io.bldalpha.write<kIndex>(byte));
-    INDEXED_CASE2(kMmioBlendFade     , ppu.io.bldfade.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioDispayControl , gpu.io.dispcnt.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioGreenSwap     , gpu.io.greenswap.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioDisplayStatus , gpu.io.dispstat.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioBg0Control    , gpu.io.bgcnt[0].write<kIndex, 0xDFFF>(byte));
+    INDEXED_CASE2(kMmioBg1Control    , gpu.io.bgcnt[1].write<kIndex, 0xDFFF>(byte));
+    INDEXED_CASE2(kMmioBg2Control    , gpu.io.bgcnt[2].write<kIndex, 0xFFFF>(byte));
+    INDEXED_CASE2(kMmioBg3Control    , gpu.io.bgcnt[3].write<kIndex, 0xFFFF>(byte));
+    INDEXED_CASE2(kMmioBg0HorOffset  , gpu.io.bghofs[0].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioBg0VerOffset  , gpu.io.bgvofs[0].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioBg1HorOffset  , gpu.io.bghofs[1].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioBg1VerOffset  , gpu.io.bgvofs[1].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioBg2HorOffset  , gpu.io.bghofs[2].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioBg2VerOffset  , gpu.io.bgvofs[2].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioBg3HorOffset  , gpu.io.bghofs[3].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioBg3VerOffset  , gpu.io.bgvofs[3].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioBg2ParameterA , gpu.io.bgpa[0].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioBg2ParameterB , gpu.io.bgpb[0].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioBg2ParameterC , gpu.io.bgpc[0].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioBg2ParameterD , gpu.io.bgpd[0].write<kIndex>(byte));
+    INDEXED_CASE4(kMmioBg2ReferenceX , gpu.io.bgx[0].write<kIndex>(byte));
+    INDEXED_CASE4(kMmioBg2ReferenceY , gpu.io.bgy[0].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioBg3ParameterA , gpu.io.bgpa[1].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioBg3ParameterB , gpu.io.bgpb[1].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioBg3ParameterC , gpu.io.bgpc[1].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioBg3ParameterD , gpu.io.bgpd[1].write<kIndex>(byte));
+    INDEXED_CASE4(kMmioBg3ReferenceX , gpu.io.bgx[1].write<kIndex>(byte));
+    INDEXED_CASE4(kMmioBg3ReferenceY , gpu.io.bgy[1].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioWindow0Hor    , gpu.io.winh[0].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioWindow1Hor    , gpu.io.winh[1].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioWindow0Ver    , gpu.io.winv[0].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioWindow1Ver    , gpu.io.winv[1].write<kIndex>(byte));
+    INDEXED_CASE2(kMmioWindowInside  , gpu.io.winin.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioWindowOutside , gpu.io.winout.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioMosaic        , gpu.io.mosaic.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioBlendControl  , gpu.io.bldcnt.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioBlendAlpha    , gpu.io.bldalpha.write<kIndex>(byte));
+    INDEXED_CASE2(kMmioBlendFade     , gpu.io.bldfade.write<kIndex>(byte));
     INDEXED_CASE2(kMmioSound1ControlL, soundcnt1_l.write<kIndex>(byte));
     INDEXED_CASE2(kMmioSound1ControlH, soundcnt1_h.write<kIndex>(byte));
     INDEXED_CASE2(kMmioSound1ControlX, soundcnt1_x.write<kIndex>(byte));

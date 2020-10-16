@@ -12,8 +12,8 @@
 #include "core/videocontext.h"
 #include "dma/dma.h"
 #include "gamepad/gamepad.h"
+#include "gpu/gpu.h"
 #include "mmu/mmu.h"
-#include "ppu/ppu.h"
 #include "timer/timer.h"
 
 void core::init(int argc, char* argv[])
@@ -67,7 +67,7 @@ void core::init(int argc, char* argv[])
 void core::reset()
 {
     mmu.reset();
-    ppu.reset();
+    gpu.reset();
 
     shell::reconstruct(arm);
     shell::reconstruct(dma);
@@ -82,21 +82,21 @@ void core::frame()
     for (uint visible = 0; visible < 160; ++visible)
     {
         arm.run(960);
-        ppu.scanline();
-        ppu.hblank();
+        gpu.scanline();
+        gpu.hblank();
         arm.run(272);
-        ppu.next();
+        gpu.next();
     }
 
-    ppu.vblank();
+    gpu.vblank();
 
     for (uint invisible = 0; invisible < 68; ++invisible)
     {
         arm.run(1232);
-        ppu.next();
+        gpu.next();
     }
 
-    ppu.present();
+    gpu.present();
 }
 
 void core::updateTitle()

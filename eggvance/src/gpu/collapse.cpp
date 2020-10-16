@@ -1,4 +1,4 @@
-#include "ppu.h"
+#include "gpu.h"
 
 #include <algorithm>
 
@@ -9,7 +9,7 @@
 
 #define MISSING_PIXEL 0x6C3F
 
-void PPU::collapse(int begin, int end)
+void Gpu::collapse(int begin, int end)
 {
     std::vector<BGLayer> layers;
     layers.reserve(end - begin);
@@ -35,7 +35,7 @@ void PPU::collapse(int begin, int end)
 }
 
 template<int obj_master>
-void PPU::collapse(const std::vector<BGLayer>& layers)
+void Gpu::collapse(const std::vector<BGLayer>& layers)
 {
     int windows = io.dispcnt.win0 || io.dispcnt.win1 || io.dispcnt.winobj;
     int effects = io.bldcnt.mode != PpuIo::BlendControl::kModeDisabled || objects_alpha;
@@ -54,7 +54,7 @@ void PPU::collapse(const std::vector<BGLayer>& layers)
 }
 
 template<int obj_master>
-void PPU::collapseNN(const std::vector<BGLayer>& layers)
+void Gpu::collapseNN(const std::vector<BGLayer>& layers)
 {
     u32* scanline = video_ctx.scanline(io.vcount.value);
 
@@ -65,7 +65,7 @@ void PPU::collapseNN(const std::vector<BGLayer>& layers)
 }
 
 template<int obj_master>
-void PPU::collapseNW(const std::vector<BGLayer>& layers)
+void Gpu::collapseNW(const std::vector<BGLayer>& layers)
 {
     switch (possibleWindows<obj_master>())
     {
@@ -85,7 +85,7 @@ void PPU::collapseNW(const std::vector<BGLayer>& layers)
 }
 
 template<int obj_master, int win_master>
-void PPU::collapseNW(const std::vector<BGLayer>& layers)
+void Gpu::collapseNW(const std::vector<BGLayer>& layers)
 {
     u32* scanline = video_ctx.scanline(io.vcount.value);
 
@@ -98,7 +98,7 @@ void PPU::collapseNW(const std::vector<BGLayer>& layers)
 }
 
 template<int obj_master>
-void PPU::collapseBN(const std::vector<BGLayer>& layers)
+void Gpu::collapseBN(const std::vector<BGLayer>& layers)
 {
     switch (io.bldcnt.mode)
     {
@@ -114,7 +114,7 @@ void PPU::collapseBN(const std::vector<BGLayer>& layers)
 }
 
 template<int obj_master, int blend_mode>
-void PPU::collapseBN(const std::vector<BGLayer>& layers)
+void Gpu::collapseBN(const std::vector<BGLayer>& layers)
 {
     constexpr int flags = 0xFFFF;
 
@@ -164,7 +164,7 @@ void PPU::collapseBN(const std::vector<BGLayer>& layers)
 }
 
 template<int obj_master>
-void PPU::collapseBW(const std::vector<BGLayer>& layers)
+void Gpu::collapseBW(const std::vector<BGLayer>& layers)
 {
     switch (io.bldcnt.mode)
     {
@@ -180,7 +180,7 @@ void PPU::collapseBW(const std::vector<BGLayer>& layers)
 }
 
 template<int obj_master, int blend_mode>
-void PPU::collapseBW(const std::vector<BGLayer>& layers)
+void Gpu::collapseBW(const std::vector<BGLayer>& layers)
 {
     switch (possibleWindows<obj_master>())
     {
@@ -200,7 +200,7 @@ void PPU::collapseBW(const std::vector<BGLayer>& layers)
 }
 
 template<int obj_master, int blend_mode, int win_master>
-void PPU::collapseBW(const std::vector<BGLayer>& layers)
+void Gpu::collapseBW(const std::vector<BGLayer>& layers)
 {
     u32* scanline = video_ctx.scanline(io.vcount.value);
 
@@ -254,7 +254,7 @@ void PPU::collapseBW(const std::vector<BGLayer>& layers)
 }
 
 template<int obj_master>
-int PPU::possibleWindows() const
+int Gpu::possibleWindows() const
 {
     int windows = 0;
     if (io.dispcnt.win0 && io.winv[0].contains(io.vcount.value))
@@ -268,7 +268,7 @@ int PPU::possibleWindows() const
 }
 
 template<int win_master>
-const PpuIo::Window& PPU::activeWindow(int x) const
+const PpuIo::Window& Gpu::activeWindow(int x) const
 {
     if (win_master & WF_WIN0 && io.winh[0].contains(x))
         return io.winin.win0;
@@ -283,7 +283,7 @@ const PpuIo::Window& PPU::activeWindow(int x) const
 }
 
 template<int obj_master>
-u16 PPU::upperLayer(const std::vector<BGLayer>& layers, int x)
+u16 Gpu::upperLayer(const std::vector<BGLayer>& layers, int x)
 {
     const auto& object = objects[x];
 
@@ -302,7 +302,7 @@ u16 PPU::upperLayer(const std::vector<BGLayer>& layers, int x)
 }
 
 template<int obj_master>
-u16 PPU::upperLayer(const std::vector<BGLayer>& layers, int x, int flags)
+u16 Gpu::upperLayer(const std::vector<BGLayer>& layers, int x, int flags)
 {    
     const auto& object = objects[x];
 
@@ -321,7 +321,7 @@ u16 PPU::upperLayer(const std::vector<BGLayer>& layers, int x, int flags)
 }
 
 template<int obj_master>
-bool PPU::findBlendLayers(const std::vector<BGLayer>& layers, int x, int flags, u16& upper)
+bool Gpu::findBlendLayers(const std::vector<BGLayer>& layers, int x, int flags, u16& upper)
 {
     const auto& object = objects[x];
 
@@ -364,7 +364,7 @@ bool PPU::findBlendLayers(const std::vector<BGLayer>& layers, int x, int flags, 
     }
 
 template<int obj_master>
-bool PPU::findBlendLayers(const std::vector<BGLayer>& layers, int x, int flags, u16& upper, u16& lower)
+bool Gpu::findBlendLayers(const std::vector<BGLayer>& layers, int x, int flags, u16& upper, u16& lower)
 {
     const auto& object = objects[x];
 

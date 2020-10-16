@@ -1,8 +1,8 @@
 #pragma once
 
 #include "base/constants.h"
+#include "gpu/point.h"
 #include "mmu/ram.h"
-#include "ppu/point.h"
 
 struct VramMirror
 {

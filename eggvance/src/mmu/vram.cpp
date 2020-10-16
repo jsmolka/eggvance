@@ -2,13 +2,13 @@
 
 #include "base/bit.h"
 #include "base/int.h"
-#include "ppu/ppu.h"
+#include "gpu/gpu.h"
 
 void Vram::writeByte(u32 addr, u8 byte)
 {
     addr = mirror(addr);
 
-    if (addr < (ppu.io.dispcnt.isBitmap() ? 0x1'4000U : 0x1'0000U))
+    if (addr < (gpu.io.dispcnt.isBitmap() ? 0x1'4000U : 0x1'0000U))
     {
         addr = align<u16>(addr);
 

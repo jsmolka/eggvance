@@ -27,12 +27,6 @@
     <ClCompile Include="src\mmu\mmu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ppu\ppu.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ppu\render.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\mmu\oam.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -46,15 +40,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\arm\bus.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ppu\collapse.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ppu\mapentry.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ppu\oamentry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\arm\instr_thumb.cpp">
@@ -138,6 +123,21 @@
     <ClCompile Include="src\mmu\pram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\gpu\collapse.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gpu\mapentry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gpu\oamentry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gpu\render.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gpu\gpu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\arm\psr.h">
@@ -153,12 +153,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\mmu\mmu.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ppu\ppu.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ppu\buffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\mmu\oam.h">
@@ -180,24 +174,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\mmu\ram.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ppu\point.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ppu\dimensions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ppu\mapentry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ppu\matrix.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ppu\oamentry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ppu\layer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\base\config.h">
@@ -240,9 +216,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\timer\io.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ppu\io.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\arm\io.h">
@@ -315,6 +288,33 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\mmu\pram.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gpu\buffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gpu\dimensions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gpu\io.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gpu\layer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gpu\mapentry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gpu\matrix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gpu\oamentry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gpu\point.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gpu\gpu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

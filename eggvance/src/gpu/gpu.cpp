@@ -1,4 +1,4 @@
-#include "ppu.h"
+#include "gpu.h"
 
 #include <algorithm>
 
@@ -9,7 +9,7 @@
 #include "core/videocontext.h"
 #include "dma/dma.h"
 
-void PPU::reset()
+void Gpu::reset()
 {
     io = PpuIo();
 
@@ -24,7 +24,7 @@ void PPU::reset()
     objects_alpha = false;
 }
 
-void PPU::scanline()
+void Gpu::scanline()
 {
     io.dispstat.vblank = false;
     io.dispstat.hblank = false;
@@ -55,44 +55,44 @@ void PPU::scanline()
     switch (io.dispcnt.mode)
     {
     case 0:
-        renderBg(&PPU::renderBgMode0, 0);
-        renderBg(&PPU::renderBgMode0, 1);
-        renderBg(&PPU::renderBgMode0, 2);
-        renderBg(&PPU::renderBgMode0, 3);
+        renderBg(&Gpu::renderBgMode0, 0);
+        renderBg(&Gpu::renderBgMode0, 1);
+        renderBg(&Gpu::renderBgMode0, 2);
+        renderBg(&Gpu::renderBgMode0, 3);
         collapse(0, 4);
         break;
 
     case 1:
-        renderBg(&PPU::renderBgMode0, 0);
-        renderBg(&PPU::renderBgMode0, 1);
-        renderBg(&PPU::renderBgMode2, 2);
+        renderBg(&Gpu::renderBgMode0, 0);
+        renderBg(&Gpu::renderBgMode0, 1);
+        renderBg(&Gpu::renderBgMode2, 2);
         collapse(0, 3);
         break;
 
     case 2:
-        renderBg(&PPU::renderBgMode2, 2);
-        renderBg(&PPU::renderBgMode2, 3);
+        renderBg(&Gpu::renderBgMode2, 2);
+        renderBg(&Gpu::renderBgMode2, 3);
         collapse(2, 4);
         break;
 
     case 3:
-        renderBg(&PPU::renderBgMode3, 2);
+        renderBg(&Gpu::renderBgMode3, 2);
         collapse(2, 3);
         break;
 
     case 4:
-        renderBg(&PPU::renderBgMode4, 2);
+        renderBg(&Gpu::renderBgMode4, 2);
         collapse(2, 3);
         break;
 
     case 5:
-        renderBg(&PPU::renderBgMode5, 2);
+        renderBg(&Gpu::renderBgMode5, 2);
         collapse(2, 3);
         break;
     }
 }
 
-void PPU::hblank()
+void Gpu::hblank()
 {
     io.dispstat.hblank = true;
     io.dispstat.vblank = false;
@@ -109,7 +109,7 @@ void PPU::hblank()
     dma.broadcast(DmaControl::kTimingHBlank);
 }
 
-void PPU::vblank()
+void Gpu::vblank()
 {
     io.dispstat.vblank = true;
     io.dispstat.hblank = false;
@@ -126,7 +126,7 @@ void PPU::vblank()
     dma.broadcast(DmaControl::kTimingVBlank);
 }
 
-void PPU::next()
+void Gpu::next()
 {
     io.dispstat.vmatch = io.vcount.value == io.dispstat.vcompare;
     if (io.dispstat.vmatch && io.dispstat.vmatch_irq)
@@ -136,7 +136,7 @@ void PPU::next()
     io.vcount.next();
 }
 
-void PPU::present()
+void Gpu::present()
 {
     io.dispstat.hblank = false;
     io.dispstat.vblank = false;
@@ -148,7 +148,7 @@ void PPU::present()
     }
 }
 
-void PPU::mosaic(int bg)
+void Gpu::mosaic(int bg)
 {
     int mosaic_x = io.mosaic.bgs.x;
     if (mosaic_x == 1)
@@ -165,17 +165,17 @@ void PPU::mosaic(int bg)
     }
 }
 
-bool PPU::mosaicAffected(int bg) const
+bool Gpu::mosaicAffected(int bg) const
 {
     return io.bgcnt[bg].mosaic && (io.mosaic.bgs.x > 1 || io.mosaic.bgs.y > 1);
 }
 
-bool PPU::mosaicDominant() const
+bool Gpu::mosaicDominant() const
 {
     return io.vcount.value % io.mosaic.bgs.y == 0;
 }
 
-u32 PPU::argb(u16 color)
+u32 Gpu::argb(u16 color)
 {
     return 0xFF000000
         | (color & (0x1F <<  0)) << 19
