@@ -22,7 +22,7 @@ struct PpuIo
                 mode     = bit::seq<0, 3>(byte);
                 frame    = bit::seq<4, 1>(byte) * 0xA000;
                 oam_free = bit::seq<5, 1>(byte);
-                mapping  = bit::seq<6, 1>(byte);
+                layout   = bit::seq<6, 1>(byte);
                 blank    = bit::seq<7, 1>(byte);
             }
             else
@@ -58,7 +58,7 @@ struct PpuIo
         uint mode     = 0;
         uint frame    = 0;
         uint oam_free = 0;
-        uint mapping  = 0;
+        uint layout   = 0;
         uint blank    = config.bios_skip;
         uint layers   = 0;
         uint win0     = 0;

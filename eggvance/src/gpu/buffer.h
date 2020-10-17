@@ -2,7 +2,8 @@
 
 #include <array>
 
-#include "gpu/constants.h"
+#include "constants.h"
+#include "base/int.h"
 
 template<typename T>
 using Buffer = std::array<T, kScreen.x>;
@@ -11,38 +12,33 @@ template<typename T>
 class DoubleBuffer
 {
 public:
-    constexpr DoubleBuffer()
-        : page(0)
-    {
-
-    }
-
-    constexpr T* data()
+    T* data()
     {
         return buffer[page].data();
     }
 
-    constexpr void flip()
+    void flip()
     {
         page ^= 1;
     }
 
-    constexpr void fill(const T& value)
+    void fill(const T& value)
     {
-        buffer[page].fill(value);
+        buffer[0].fill(value);
+        buffer[1].fill(value);
     }
 
-    constexpr T operator[](std::size_t index) const
+    T& operator[](uint index)
     {
         return buffer[page][index];
     }
 
-    constexpr T& operator[](std::size_t index)
+    const T& operator[](uint index) const
     {
         return buffer[page][index];
     }
 
 private:
-    int page;
+    uint page = 0;
     Buffer<T> buffer[2];
 };

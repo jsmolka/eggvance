@@ -9,6 +9,8 @@
 class Gpu
 {
 public:
+    Gpu();
+
     void reset();
 
     void scanline();
@@ -83,8 +85,8 @@ private:
 
     DoubleBuffer<u16> backgrounds[4];
     Buffer<ObjectLayer> objects;
-    bool objects_exist;
-    bool objects_alpha;
+    bool objects_exist = false;
+    bool objects_alpha = false;
 };
 
 inline Gpu gpu;

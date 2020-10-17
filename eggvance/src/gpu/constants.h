@@ -15,14 +15,22 @@ enum ColorMode
 
 enum BlendMode
 {
-    kBlendDisabled,
-    kBlendAlpha,
-    kBlendWhite,
-    kBlendBlack
+    kBlendModeDisabled,
+    kBlendModeAlpha,
+    kBlendModeWhite,
+    kBlendModeBlack
 };
 
-enum ObjectMapping
+enum ObjectMode
 {
-    kObjectMapping2d,
-    kObjectMapping1d
+    kObjectModeNormal,
+    kObjectModeAlpha,
+    kObjectModeWindow,
+    kObjectModeInvalid
+};
+
+enum ObjectLayout
+{
+    kObjectLayout2d,
+    kObjectLayout1d
 };

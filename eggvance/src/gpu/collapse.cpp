@@ -38,7 +38,7 @@ template<int obj_master>
 void Gpu::collapse(const std::vector<BgLayer>& layers)
 {
     int windows = io.dispcnt.win0 || io.dispcnt.win1 || io.dispcnt.winobj;
-    int effects = io.bldcnt.mode != kBlendDisabled || objects_alpha;
+    int effects = io.bldcnt.mode != kBlendModeDisabled || objects_alpha;
 
     switch ((effects << 1) | (windows << 0))
     {
@@ -135,22 +135,22 @@ void Gpu::collapseBN(const std::vector<BgLayer>& layers)
         {
             switch (blend_mode)
             {
-            case kBlendAlpha:
+            case kBlendModeAlpha:
                 if (findBlendLayers<obj_master>(layers, x, flags, upper, lower))
                     upper = io.bldalpha.blendAlpha(upper, lower);
                 break;
 
-            case kBlendWhite:
+            case kBlendModeWhite:
                 if (findBlendLayers<obj_master>(layers, x, flags, upper))
                     upper = io.bldfade.blendWhite(upper);
                 break;
 
-            case kBlendBlack:
+            case kBlendModeBlack:
                 if (findBlendLayers<obj_master>(layers, x, flags, upper))
                     upper = io.bldfade.blendBlack(upper);
                 break;
 
-            case kBlendDisabled:
+            case kBlendModeDisabled:
                 upper = upperLayer<obj_master>(layers, x);
                 break;
 
@@ -220,22 +220,22 @@ void Gpu::collapseBW(const std::vector<BgLayer>& layers)
         {
             switch (blend_mode)
             {
-            case kBlendAlpha:
+            case kBlendModeAlpha:
                 if (findBlendLayers<obj_master>(layers, x, window.flags, upper, lower))
                     upper = io.bldalpha.blendAlpha(upper, lower);
                 break;
 
-            case kBlendWhite:
+            case kBlendModeWhite:
                 if (findBlendLayers<obj_master>(layers, x, window.flags, upper))
                     upper = io.bldfade.blendWhite(upper);
                 break;
 
-            case kBlendBlack:
+            case kBlendModeBlack:
                 if (findBlendLayers<obj_master>(layers, x, window.flags, upper))
                     upper = io.bldfade.blendBlack(upper);
                 break;
 
-            case kBlendDisabled:
+            case kBlendModeDisabled:
                 upper = upperLayer<obj_master>(layers, x, window.flags);
                 break;
 

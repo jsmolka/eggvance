@@ -67,11 +67,11 @@ void core::init(int argc, char* argv[])
 void core::reset()
 {
     mmu.reset();
-    gpu.reset();
 
     shell::reconstruct(arm);
     shell::reconstruct(dma);
     shell::reconstruct(gamepad);
+    shell::reconstruct(gpu);
     shell::reconstruct(timer);
 }
 

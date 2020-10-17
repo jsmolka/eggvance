@@ -1,25 +1,18 @@
 #pragma once
 
+#include "point.h"
 #include "base/int.h"
-#include "gpu/point.h"
 
-enum ObjectMode
+class OamEntry
 {
-    kObjectModeNormal,
-    kObjectModeAlpha,
-    kObjectModeWindow,
-    kObjectModeInvalid
-};
-
-struct OamEntry
-{
+public:
     OamEntry();
 
     void writeHalf(uint attr, u16 half);
 
     uint tileSize() const;
     uint paletteBank() const;
-    uint tilesPerRow(uint mapping) const;
+    uint tilesPerRow(uint layout) const;
 
     bool flipX() const;
     bool flipY() const;
@@ -34,12 +27,10 @@ struct OamEntry
     uint mosaic;
     uint color_mode;
     uint shape;
-
     uint matrix;
     uint flip_x;
     uint flip_y;
     uint size;
-
     uint tile;
     uint prio;
     uint bank;

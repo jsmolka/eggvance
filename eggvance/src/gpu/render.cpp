@@ -205,7 +205,7 @@ void Gpu::renderObjects()
 
         int size  = entry.tileSize();
         int bank  = entry.paletteBank();
-        int tiles = entry.tilesPerRow(ObjectMapping(io.dispcnt.mapping));
+        int tiles = entry.tilesPerRow(io.dispcnt.layout);
 
         Point offset(
             -center.x + origin.x - std::min(origin.x, 0),

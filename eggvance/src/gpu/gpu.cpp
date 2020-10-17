@@ -9,19 +9,12 @@
 #include "core/videocontext.h"
 #include "dma/dma.h"
 
-void Gpu::reset()
+Gpu::Gpu()
 {
-    io = PpuIo();
-
-    for (auto& background : backgrounds)
-    {
-        background.fill(kTransparent);
-        background.flip();
-        background.fill(kTransparent);
-    }
-    objects.fill({});
-    objects_exist = false;
-    objects_alpha = false;
+    backgrounds[0].fill(kTransparent);
+    backgrounds[1].fill(kTransparent);
+    backgrounds[2].fill(kTransparent);
+    backgrounds[3].fill(kTransparent);
 }
 
 void Gpu::scanline()
@@ -177,7 +170,7 @@ bool Gpu::mosaicDominant() const
 
 u32 Gpu::argb(u16 color)
 {
-    return 0xFF000000
+    return 0xFF00'0000
         | (color & (0x1F <<  0)) << 19
         | (color & (0x1F <<  5)) <<  6
         | (color & (0x1F << 10)) >>  7;

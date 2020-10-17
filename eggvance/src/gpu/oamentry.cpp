@@ -1,9 +1,9 @@
 #include "oamentry.h"
 
+#include "constants.h"
 #include "base/bit.h"
 #include "base/int.h"
 #include "base/macros.h"
-#include "gpu/constants.h"
 
 static constexpr Point kSizes[4][4] =
 {
@@ -84,12 +84,16 @@ uint OamEntry::tileSize() const
 
 uint OamEntry::paletteBank() const
 {
-    return color_mode == kColorMode256x1 ? 0 : bank;
+    return color_mode == kColorMode16x16
+        ? bank
+        : 0;
 }
 
-uint OamEntry::tilesPerRow(uint mapping) const
+uint OamEntry::tilesPerRow(uint layout) const
 {
-    return mapping == kObjectMapping1d ? (dims.x / 8) : (32 >> color_mode);
+    return layout == kObjectLayout1d
+        ? (dims.x / 8)
+        : (32 >> color_mode);
 }
 
 bool OamEntry::flipX() const
@@ -131,5 +135,5 @@ void OamEntry::update()
     bounds = dims << double_size;
     center = origin + bounds / 2;
 
-    base_tile = 0x10000 + 0x20 * tile;
+    base_tile = 0x1'0000 + 0x20 * tile;
 }
