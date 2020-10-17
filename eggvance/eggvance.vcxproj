@@ -162,7 +162,6 @@
     <ClCompile Include="src\gamepak\sram.cpp" />
     <ClCompile Include="src\mmu\io.cpp" />
     <ClCompile Include="src\gpu\collapse.cpp" />
-    <ClCompile Include="src\gpu\mapentry.cpp" />
     <ClCompile Include="src\dma\dma.cpp" />
     <ClCompile Include="src\gamepad\gamepad.cpp" />
     <ClCompile Include="src\mmu\bios.cpp" />
@@ -187,7 +186,6 @@
     <ClInclude Include="src\arm\registers.h" />
     <ClInclude Include="src\base\bit.h" />
     <ClInclude Include="src\base\config.h" />
-    <ClInclude Include="src\base\constants.h" />
     <ClInclude Include="src\base\filesystem.h" />
     <ClInclude Include="src\base\int.h" />
     <ClInclude Include="src\base\sdl2.h" />
@@ -211,6 +209,7 @@
     <ClInclude Include="src\gamepad\io.h" />
     <ClInclude Include="src\core\framecounter.h" />
     <ClInclude Include="src\core\synchronizer.h" />
+    <ClInclude Include="src\gpu\constants.h" />
     <ClInclude Include="src\mmu\bios_normmatt.h" />
     <ClInclude Include="src\mmu\constants.h" />
     <ClInclude Include="src\mmu\io.h" />

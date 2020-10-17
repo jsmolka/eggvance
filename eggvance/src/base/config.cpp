@@ -2,8 +2,8 @@
 
 #include <shell/ini.h>
 
-#include "base/constants.h"
 #include "base/utility.h"
+#include "gpu/constants.h"
 
 template<>
 std::optional<SDL_Scancode> shell::parse(const std::string& data)

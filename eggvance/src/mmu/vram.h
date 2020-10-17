@@ -1,6 +1,5 @@
 #pragma once
 
-#include "base/constants.h"
 #include "gpu/point.h"
 #include "mmu/ram.h"
 
@@ -24,5 +23,5 @@ public:
 
     uint index256x1(u32 addr, const Point& pixel) const;
     uint index16x16(u32 addr, const Point& pixel) const;
-    uint index(u32 addr, const Point& pixel, ColorMode mode) const;
+    uint index(u32 addr, const Point& pixel, uint mode) const;
 };

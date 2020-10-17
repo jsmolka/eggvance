@@ -3,7 +3,6 @@
 #include <algorithm>
 
 #include "base/config.h"
-#include "base/constants.h"
 #include "base/register.h"
 #include "gpu/layer.h"
 #include "gpu/point.h"
@@ -286,8 +285,8 @@ struct PpuIo
         uint max{};
     };
 
-    WindowRange<kScreenW> winh[2];
-    WindowRange<kScreenH> winv[2];
+    WindowRange<kScreen.x> winh[2];
+    WindowRange<kScreen.y> winv[2];
 
     struct Mosaic
     {

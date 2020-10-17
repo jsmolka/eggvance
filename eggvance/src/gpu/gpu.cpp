@@ -2,9 +2,9 @@
 
 #include <algorithm>
 
+#include "constants.h"
 #include "arm/arm.h"
 #include "base/bit.h"
-#include "base/constants.h"
 #include "base/macros.h"
 #include "core/videocontext.h"
 #include "dma/dma.h"
@@ -32,7 +32,7 @@ void Gpu::scanline()
     if (io.dispcnt.blank)
     {
         u32* scanline = video_ctx.scanline(io.vcount.value);
-        std::fill_n(scanline, kScreenW, 0xFFFFFFFF);
+        std::fill_n(scanline, kScreen.x, 0xFFFFFFFF);
         return;
     }
 
@@ -155,7 +155,7 @@ void Gpu::mosaic(int bg)
         return;
 
     u16 color;
-    for (int x = 0; x < kScreenW; ++x)
+    for (int x = 0; x < kScreen.x; ++x)
     {
         if (x % mosaic_x == 0)
         {

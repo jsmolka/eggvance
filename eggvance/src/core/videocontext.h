@@ -3,9 +3,9 @@
 #include <array>
 #include <string>
 
-#include "base/constants.h"
 #include "base/int.h"
 #include "base/sdl2.h"
+#include "gpu/constants.h"
 
 class VideoContext
 {
@@ -36,7 +36,7 @@ private:
     SDL_Texture* texture = nullptr;
     SDL_Renderer* renderer = nullptr;
 
-    std::array<u32, kScreenW * kScreenH> buffer;
+    std::array<u32, kScreen.x * kScreen.y> buffer;
 };
 
 inline VideoContext video_ctx;

@@ -126,9 +126,6 @@
     <ClCompile Include="src\gpu\collapse.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\gpu\mapentry.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\gpu\oamentry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -177,9 +174,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\base\config.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\base\constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\base\macros.h">
@@ -312,6 +306,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\gpu\gpu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gpu\constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

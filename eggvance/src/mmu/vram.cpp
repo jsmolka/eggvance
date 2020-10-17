@@ -3,6 +3,7 @@
 #include "base/bit.h"
 #include "base/int.h"
 #include "gpu/gpu.h"
+#include "gpu/constants.h"
 
 void Vram::writeByte(u32 addr, u8 byte)
 {
@@ -28,9 +29,9 @@ uint Vram::index16x16(u32 addr, const Point& pixel) const
     return bit::nibble(data, pixel.x & 0x1);
 }
 
-uint Vram::index(u32 addr, const Point& pixel, ColorMode mode) const
+uint Vram::index(u32 addr, const Point& pixel, uint mode) const
 {
-    return mode == ColorMode::C256x1
+    return mode == kColorMode256x1
         ? index256x1(addr, pixel)
         : index16x16(addr, pixel);
 }

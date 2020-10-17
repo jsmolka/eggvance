@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include "base/constants.h"
+#include "constants.h"
 #include "base/macros.h"
 #include "core/videocontext.h"
 #include "mmu/mmu.h"
@@ -58,7 +58,7 @@ void Gpu::collapseNN(const std::vector<BGLayer>& layers)
 {
     u32* scanline = video_ctx.scanline(io.vcount.value);
 
-    for (int x = 0; x < kScreenW; ++x)
+    for (int x = 0; x < kScreen.x; ++x)
     {
         scanline[x] = argb(upperLayer<obj_master>(layers, x));
     }
@@ -89,7 +89,7 @@ void Gpu::collapseNW(const std::vector<BGLayer>& layers)
 {
     u32* scanline = video_ctx.scanline(io.vcount.value);
 
-    for (int x = 0; x < kScreenW; ++x)
+    for (int x = 0; x < kScreen.x; ++x)
     {
         const auto& window = activeWindow<win_master>(x);
 
@@ -120,7 +120,7 @@ void Gpu::collapseBN(const std::vector<BGLayer>& layers)
 
     u32* scanline = video_ctx.scanline(io.vcount.value);
 
-    for (int x = 0; x < kScreenW; ++x)
+    for (int x = 0; x < kScreen.x; ++x)
     {
         u16 upper = MISSING_PIXEL;
         u16 lower = MISSING_PIXEL;
@@ -204,7 +204,7 @@ void Gpu::collapseBW(const std::vector<BGLayer>& layers)
 {
     u32* scanline = video_ctx.scanline(io.vcount.value);
 
-    for (int x = 0; x < kScreenW; ++x)
+    for (int x = 0; x < kScreen.x; ++x)
     {
         u16 upper = MISSING_PIXEL;
         u16 lower = MISSING_PIXEL;

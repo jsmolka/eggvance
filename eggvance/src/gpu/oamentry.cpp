@@ -1,9 +1,9 @@
 #include "oamentry.h"
 
 #include "base/bit.h"
-#include "base/constants.h"
 #include "base/int.h"
 #include "base/macros.h"
+#include "gpu/constants.h"
 
 static constexpr Point sizes[4][4] =
 {
@@ -42,7 +42,7 @@ void OAMEntry::reset()
 
 void OAMEntry::writeHalf(int attr, u16 half)
 {
-    SHELL_ASSERT((attr & 0x6) < 0x6, "Invalid attribute");
+    SHELL_ASSERT((attr & 0x6) < 0x6);
 
     switch (attr)
     {
@@ -86,12 +86,12 @@ int OAMEntry::tileSize() const
 
 int OAMEntry::paletteBank() const
 {
-    return color_mode == int(ColorMode::C256x1) ? 0 : bank;
+    return color_mode == kColorMode256x1 ? 0 : bank;
 }
 
-int OAMEntry::tilesPerRow(ObjectMapping mapping) const
+int OAMEntry::tilesPerRow(uint mapping) const
 {
-    return mapping == ObjectMapping::OneDim ? (dims.x / 8) : (32 >> color_mode);
+    return mapping == kObjectMapping1d ? (dims.x / 8) : (32 >> color_mode);
 }
 
 bool OAMEntry::flipX() const
@@ -116,7 +116,7 @@ bool OAMEntry::isVisible(int vcount) const
 
 bool OAMEntry::isVisibleX() const
 {
-    return (origin.x + bounds.x) >= 0 && origin.x < kScreenW;
+    return (origin.x + bounds.x) >= 0 && origin.x < kScreen.x;
 }
 
 bool OAMEntry::isVisibleY(int vcount) const
@@ -126,8 +126,8 @@ bool OAMEntry::isVisibleY(int vcount) const
 
 void OAMEntry::update()
 {
-    if (origin.x >= kScreenW) origin.x -= 512;
-    if (origin.y >= kScreenH) origin.y -= 256;
+    if (origin.x >= kScreen.x) origin.x -= 512;
+    if (origin.y >= kScreen.y) origin.y -= 256;
 
     dims = sizes[shape][size];
     bounds = dims << double_size;

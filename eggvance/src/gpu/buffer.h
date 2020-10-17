@@ -2,10 +2,10 @@
 
 #include <array>
 
-#include "base/constants.h"
+#include "gpu/constants.h"
 
 template<typename T>
-using Buffer = std::array<T, kScreenW>;
+using Buffer = std::array<T, kScreen.x>;
 
 template<typename T>
 class DoubleBuffer

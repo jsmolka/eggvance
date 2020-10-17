@@ -1,6 +1,5 @@
 #pragma once
 
-#include "base/constants.h"
 #include "base/int.h"
 #include "gpu/point.h"
 
@@ -20,7 +19,7 @@ struct OAMEntry
 
     int tileSize() const;
     int paletteBank() const;
-    int tilesPerRow(ObjectMapping mapping) const;
+    int tilesPerRow(uint mapping) const;
 
     bool flipX() const;
     bool flipY() const;

@@ -1,7 +1,6 @@
 #include "timerchannel.h"
 
 #include "arm/arm.h"
-#include "base/constants.h"
 #include "timer/constants.h"
 
 constexpr uint kOverflow = 0x1'0000;

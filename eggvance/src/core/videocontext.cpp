@@ -38,7 +38,7 @@ void VideoContext::title(const std::string& title)
 
 void VideoContext::renderCopyTexture()
 {
-    SDL_UpdateTexture(texture, NULL, buffer.data(), sizeof(u32) * kScreenW);
+    SDL_UpdateTexture(texture, NULL, buffer.data(), sizeof(u32) * kScreen.x);
     SDL_RenderCopy(renderer, texture, NULL, NULL);
 }
 
@@ -74,9 +74,9 @@ void VideoContext::renderIcon()
 
 u32* VideoContext::scanline(uint line)
 {
-    SHELL_ASSERT(line < kScreenH);
+    SHELL_ASSERT(line < kScreen.y);
 
-    return buffer.data() + (kScreenW * line);
+    return buffer.data() + (kScreen.x * line);
 }
 
 void VideoContext::renderClear(u32 color)
@@ -108,7 +108,7 @@ bool VideoContext::initWindow()
         "eggvance",
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
-        2 * kScreenW, 2 * kScreenH,
+        2 * kScreen.x, 2 * kScreen.y,
         SDL_WINDOW_RESIZABLE);
 }
 
@@ -118,7 +118,7 @@ bool VideoContext::initRenderer()
         window, -1,
         SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
 
-    SDL_RenderSetLogicalSize(renderer, kScreenW, kScreenH);
+    SDL_RenderSetLogicalSize(renderer, kScreen.x, kScreen.y);
 
     return renderer;
 }
@@ -129,5 +129,5 @@ bool VideoContext::initTexture()
         renderer,
         SDL_PIXELFORMAT_ARGB8888,
         SDL_TEXTUREACCESS_STREAMING,
-        kScreenW, kScreenH);
+        kScreen.x, kScreen.y);
 }

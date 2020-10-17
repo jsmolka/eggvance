@@ -55,29 +55,27 @@ void Gpu::renderBgMode0(int bg)
     auto block = origin / 256;
     auto tile  = origin / 8 % 32;
 
-    for (int x = 0; x < kScreenW; block.x ^= (dims.x / 256) == 2)
+    for (int x = 0; x < kScreen.x; block.x ^= (dims.x / 256) == 2)
     {
         int offset = 0x800 * block.index2d(dims.x / 256) + 2 * tile.index2d(0x20);
 
         u16* map = mmu.vram.data<u16>(bgcnt.map_block + offset);
 
-        for (; tile.x < 32 && x < kScreenW; ++tile.x, ++map)
+        for (; tile.x < 32 && x < kScreen.x; ++tile.x, ++map)
         {
             MapEntry entry(*map);
 
-            if (bgcnt.color_mode == int(ColorMode::C256x1))
-            {
+            if (bgcnt.color_mode == kColorMode256x1)
                 entry.bank = 0;
-            }
 
             u32 addr = bgcnt.tile_block + (0x20 << bgcnt.color_mode) * entry.tile;
             if (addr < 0x1'0000)
             {
-                for (; pixel.x < 8 && x < kScreenW; ++pixel.x, ++x)
+                for (; pixel.x < 8 && x < kScreen.x; ++pixel.x, ++x)
                 {
                     int index = mmu.vram.index(
                         addr,
-                        { pixel.x ^ (0x7 * entry.flip_x), pixel.y ^ (0x7 * entry.flip_y), },
+                        Point(pixel.x ^ (0x7 * entry.flip_x), pixel.y ^ (0x7 * entry.flip_y)),
                         ColorMode(bgcnt.color_mode)
                     );
                     backgrounds[bg][x] = mmu.pram.colorBG(index, entry.bank);
@@ -85,7 +83,7 @@ void Gpu::renderBgMode0(int bg)
             }
             else
             {
-                for (; pixel.x < 8 && x < kScreenW; ++pixel.x, ++x)
+                for (; pixel.x < 8 && x < kScreen.x; ++pixel.x, ++x)
                 {
                     backgrounds[bg][x] = kTransparent;
                 }
@@ -101,7 +99,7 @@ void Gpu::renderBgMode2(int bg)
     const auto& bgcnt = io.bgcnt[bg];
     const auto& dims  = io.bgcnt[bg].dimsAff();
 
-    for (int x = 0; x < kScreenW; ++x)
+    for (int x = 0; x < kScreen.x; ++x)
     {
         auto texture = transform(x, bg) >> 8;
 
@@ -135,19 +133,17 @@ void Gpu::renderBgMode2(int bg)
 
 void Gpu::renderBgMode3(int bg)
 {
-    static constexpr Point dims(kScreenW, kScreenH);
-
-    for (int x = 0; x < kScreenW; ++x)
+    for (int x = 0; x < kScreen.x; ++x)
     {
         const auto texture = transform(x, bg) >> 8;
 
-        if (!(texture >= kOrigin && texture < dims))
+        if (!(texture >= kOrigin && texture < kScreen))
         {
             backgrounds[bg][x] = kTransparent;
             continue;
         }
 
-        int offset = sizeof(u16) * texture.index2d(dims.x);
+        int offset = sizeof(u16) * texture.index2d(kScreen.x);
 
         backgrounds[bg][x] = mmu.vram.readFast<u16>(offset) & kColorMask;
     }
@@ -155,19 +151,17 @@ void Gpu::renderBgMode3(int bg)
 
 void Gpu::renderBgMode4(int bg)
 {
-    static constexpr Point dims(kScreenW, kScreenH);
-
-    for (int x = 0; x < kScreenW; ++x)
+    for (int x = 0; x < kScreen.x; ++x)
     {
         const auto texture = transform(x, bg) >> 8;
 
-        if (!(texture >= kOrigin && texture < dims))
+        if (!(texture >= kOrigin && texture < kScreen))
         {
             backgrounds[bg][x] = kTransparent;
             continue;
         }
 
-        int offset = texture.index2d(dims.x);
+        int offset = texture.index2d(kScreen.x);
         int index  = mmu.vram.readFast<u8>(io.dispcnt.frame + offset);
 
         backgrounds[bg][x] = mmu.pram.colorBG(index);
@@ -176,19 +170,19 @@ void Gpu::renderBgMode4(int bg)
 
 void Gpu::renderBgMode5(int bg)
 {
-    static constexpr Point dims(160, 128);
+    constexpr Point kBitmap(160, 128);
 
-    for (int x = 0; x < kScreenW; ++x)
+    for (int x = 0; x < kScreen.x; ++x)
     {
         const auto texture = transform(x, bg) >> 8;
 
-        if (!(texture >= kOrigin && texture < dims))
+        if (!(texture >= kOrigin && texture < kBitmap))
         {
             backgrounds[bg][x] = kTransparent;
             continue;
         }
 
-        int offset = sizeof(u16) * texture.index2d(dims.x);
+        int offset = sizeof(u16) * texture.index2d(kBitmap.x);
 
         backgrounds[bg][x] = mmu.vram.readFast<u16>(io.dispcnt.frame + offset) & kColorMask;
     }
@@ -218,7 +212,7 @@ void Gpu::renderObjects()
             -center.y + io.vcount.value
         );
 
-        int end = std::min(origin.x + bounds.x, kScreenW);
+        int end = std::min(origin.x + bounds.x, kScreen.x);
 
         for (int x = center.x + offset.x; x < end; ++x, ++offset.x)
         {

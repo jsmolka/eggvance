@@ -1,6 +1,6 @@
 #include "pram.h"
 
-#include "base/constants.h"
+#include "gpu/constants.h"
 
 void Pram::writeByte(u32 addr, u8 byte)
 {

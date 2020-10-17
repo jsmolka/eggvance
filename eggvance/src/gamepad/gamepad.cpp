@@ -1,7 +1,6 @@
 #include "gamepad.h"
 
 #include "arm/arm.h"
-#include "base/constants.h"
 #include "core/inputcontext.h"
 
 void Gamepad::poll()

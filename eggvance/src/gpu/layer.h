@@ -1,7 +1,7 @@
 #pragma once
 
+#include "constants.h"
 #include "base/int.h"
-#include "base/constants.h"
 
 enum LayerFlag
 {
