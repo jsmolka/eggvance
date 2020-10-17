@@ -10,8 +10,8 @@ Point Gpu::transform(int x, int bg)
     bg -= 2;
 
     return Point(
-        io.bgx[bg] + io.bgpa[bg].value * x,
-        io.bgy[bg] + io.bgpc[bg].value * x
+        io.bgx[bg].current + io.bgpa[bg].value * x,
+        io.bgy[bg].current + io.bgpc[bg].value * x
     );
 }
 

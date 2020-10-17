@@ -13,6 +13,14 @@ enum ColorMode
     kColorMode256x1
 };
 
+enum BlendMode
+{
+    kBlendDisabled,
+    kBlendAlpha,
+    kBlendWhite,
+    kBlendBlack
+};
+
 enum ObjectMapping
 {
     kObjectMapping2d,

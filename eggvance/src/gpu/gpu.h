@@ -2,9 +2,9 @@
 
 #include <vector>
 
-#include "gpu/buffer.h"
-#include "gpu/io.h"
-#include "gpu/layer.h"
+#include "buffer.h"
+#include "io.h"
+#include "layer.h"
 
 class Gpu
 {

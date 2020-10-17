@@ -2,10 +2,10 @@
 
 #include <algorithm>
 
+#include "layer.h"
+#include "point.h"
 #include "base/config.h"
 #include "base/register.h"
-#include "gpu/layer.h"
-#include "gpu/point.h"
 
 struct PpuIo
 {
@@ -19,18 +19,18 @@ struct PpuIo
 
             if (Index == 0)
             {
-                mode     = bit::seq<0, 3>(data[Index]);
-                frame    = bit::seq<4, 1>(data[Index]) * 0xA000;
-                oam_free = bit::seq<5, 1>(data[Index]);
-                mapping  = bit::seq<6, 1>(data[Index]);
-                blank    = bit::seq<7, 1>(data[Index]);
+                mode     = bit::seq<0, 3>(byte);
+                frame    = bit::seq<4, 1>(byte) * 0xA000;
+                oam_free = bit::seq<5, 1>(byte);
+                mapping  = bit::seq<6, 1>(byte);
+                blank    = bit::seq<7, 1>(byte);
             }
             else
             {
-                layers = bit::seq<0, 5>(data[Index]);
-                win0   = bit::seq<5, 1>(data[Index]);
-                win1   = bit::seq<6, 1>(data[Index]);
-                winobj = bit::seq<7, 1>(data[Index]);
+                layers = bit::seq<0, 5>(byte);
+                win0   = bit::seq<5, 1>(byte);
+                win1   = bit::seq<6, 1>(byte);
+                winobj = bit::seq<7, 1>(byte);
             }
         }
 
@@ -55,15 +55,15 @@ struct PpuIo
             return mode > 2;
         }
 
-        uint mode{};
-        uint frame{};
-        uint oam_free{};
-        uint mapping{};
-        uint blank{ config.bios_skip };
-        uint layers{};
-        uint win0{};
-        uint win1{};
-        uint winobj{};
+        uint mode     = 0;
+        uint frame    = 0;
+        uint oam_free = 0;
+        uint mapping  = 0;
+        uint blank    = config.bios_skip;
+        uint layers   = 0;
+        uint win0     = 0;
+        uint win1     = 0;
+        uint winobj   = 0;
     }
     dispcnt;
 
@@ -77,8 +77,12 @@ struct PpuIo
         {
             u8 value = Register::read<Index>();
 
-            if (Index == 0) value |= (vblank << 0) | (hblank << 1) | (vmatch << 2);
-
+            if (Index == 0)
+            {
+                value |= vblank << 0;
+                value |= hblank << 1;
+                value |= vmatch << 2;
+            }
             return value;
         }
 
@@ -89,28 +93,29 @@ struct PpuIo
 
             if (Index == 0)
             {
-                vblank_irq = bit::seq<3, 1>(data[Index]);
-                hblank_irq = bit::seq<4, 1>(data[Index]);
-                vmatch_irq = bit::seq<5, 1>(data[Index]);
+                vblank_irq = bit::seq<3, 1>(byte);
+                hblank_irq = bit::seq<4, 1>(byte);
+                vmatch_irq = bit::seq<5, 1>(byte);
             }
             else
             {
-                vcompare = data[Index];
+                vcompare = byte;
             }
         }
 
-        uint vblank{};
-        uint hblank{};
-        uint vmatch{};
-        uint vblank_irq{};
-        uint hblank_irq{};
-        uint vmatch_irq{};
-        uint vcompare{};
+        uint vblank     = 0;
+        uint hblank     = 0;
+        uint vmatch     = 0;
+        uint vblank_irq = 0;
+        uint hblank_irq = 0;
+        uint vmatch_irq = 0;
+        uint vcompare   = 0;
     }
     dispstat;
 
-    struct VCount : RegisterR<u16>
+    class VCount : public RegisterR<u16>
     {
+    public:
         void next()
         {
             value = (value + 1) % 228;
@@ -118,8 +123,9 @@ struct PpuIo
     }
     vcount;
 
-    struct BGControl : Register<u16>
+    class BgControl : public Register<u16>
     {
+    public:
         template<uint Index, uint Mask>
         void write(u8 byte)
         {
@@ -127,20 +133,20 @@ struct PpuIo
 
             if (Index == 0)
             {
-                priority   = bit::seq<0, 2>(data[Index]);
-                tile_block = bit::seq<2, 2>(data[Index]) * 0x4000;
-                mosaic     = bit::seq<6, 1>(data[Index]);
-                color_mode = bit::seq<7, 1>(data[Index]);
+                priority   = bit::seq<0, 2>(byte);
+                tile_block = bit::seq<2, 2>(byte) * 0x4000;
+                mosaic     = bit::seq<6, 1>(byte);
+                color_mode = bit::seq<7, 1>(byte);
             }
             else
             {
-                map_block  = bit::seq<0, 5>(data[Index]) * 0x0800;
-                wraparound = bit::seq<5, 1>(data[Index]);
-                dimensions = bit::seq<6, 2>(data[Index]);
+                map_block  = bit::seq<0, 5>(byte) * 0x0800;
+                wraparound = bit::seq<5, 1>(byte);
+                dimensions = bit::seq<6, 2>(byte);
             }
         }
 
-        Point dimsReg() const 
+        Point dimsReg() const
         {
             return Point(
                 256 << bit::seq<0, 1>(dimensions),
@@ -156,13 +162,13 @@ struct PpuIo
             );
         }
 
-        uint priority{};
-        uint tile_block{};
-        uint mosaic{};
-        uint color_mode{};
-        uint map_block{};
-        uint wraparound{};
-        uint dimensions{};
+        uint priority   = 0;
+        uint tile_block = 0;
+        uint mosaic     = 0;
+        uint color_mode = 0;
+        uint map_block  = 0;
+        uint wraparound = 0;
+        uint dimensions = 0;
     }
     bgcnt[4];
 
@@ -184,13 +190,9 @@ struct PpuIo
     BgParameter<0x0000> bgpc[2];
     BgParameter<0x0100> bgpd[2];
 
-    struct BGReference : RegisterW<u32, 0x0FFF'FFFF>
+    class BgReference : public RegisterW<u32, 0x0FFF'FFFF>
     {
-        operator s32() const
-        {
-            return current;
-        }
-
+    public:
         template<uint Index>
         void write(u8 byte)
         {
@@ -209,33 +211,35 @@ struct PpuIo
             current = bit::signEx<28>(value);
         }
 
-        s32 current{};
+        s32 current = 0;
     };
 
-    BGReference bgx[2];
-    BGReference bgy[2];
+    BgReference bgx[2];
+    BgReference bgy[2];
 
-    struct Window
+    class Window
     {
+    public:
         void write(u8 byte)
         {
             flags = bit::seq<0, 5>(byte) | kLayerBdp;
             blend = bit::seq<5, 1>(byte);
         }
 
-        uint flags{};
-        uint blend{};
+        uint flags = kLayerBdp;
+        uint blend = 0;
     };
 
-    struct WindowInside : Register<u16, 0x3F3F>
+    class WindowInside : public Register<u16, 0x3F3F>
     {
+    public:
         template<uint Index>
         void write(u8 byte)
         {
             Register::write<Index>(byte);
 
-            if (Index == 0) win0.write(data[Index]);
-            if (Index == 1) win1.write(data[Index]);
+            if (Index == 0) win0.write(byte);
+            if (Index == 1) win1.write(byte);
         }
 
         Window win0;
@@ -243,15 +247,16 @@ struct PpuIo
     }
     winin;
 
-    struct WindowOutside : Register<u16, 0x3F3F>
+    class WindowOutside : public Register<u16, 0x3F3F>
     {
+    public:
         template<uint Index>
         void write(u8 byte)
         {
             Register::write<Index>(byte);
 
-            if (Index == 0) winout.write(data[Index]);
-            if (Index == 1) winobj.write(data[Index]);
+            if (Index == 0) winout.write(byte);
+            if (Index == 1) winobj.write(byte);
         }
 
         Window winout;
@@ -260,8 +265,9 @@ struct PpuIo
     winout;
 
     template<uint Max>
-    struct WindowRange : RegisterW<u16>
+    class WindowRange : public RegisterW<u16>
     {
+    public:
         static constexpr uint kMax = Max;
 
         template<uint Index>
@@ -281,15 +287,16 @@ struct PpuIo
             return value >= min && value < max;
         }
 
-        uint min{};
-        uint max{};
+        uint min = 0;
+        uint max = 0;
     };
 
     WindowRange<kScreen.x> winh[2];
     WindowRange<kScreen.y> winv[2];
 
-    struct Mosaic
+    class Mosaic
     {
+    public:
         struct Block
         {
             void write(u8 byte)
@@ -301,8 +308,8 @@ struct PpuIo
             uint mosaicX(uint value) const { return x * (value / x); }
             uint mosaicY(uint value) const { return y * (value / y); }
 
-            uint x{ 1 };
-            uint y{ 1 };
+            uint x = 1;
+            uint y = 1;
         };
 
         template<uint Index>
@@ -319,16 +326,9 @@ struct PpuIo
     }
     mosaic;
 
-    struct BlendControl : Register<u16, 0x3FFF>
+    class BlendControl : public Register<u16, 0x3FFF>
     {
-        enum Mode
-        {
-            kModeDisabled,
-            kModeAlpha,
-            kModeWhite,
-            kModeBlack
-        };
-
+    public:
         template<uint Index>
         void write(u8 byte)
         {
@@ -336,23 +336,24 @@ struct PpuIo
 
             if (Index == 0)
             {
-                upper = bit::seq<0, 6>(data[Index]);
-                mode  = bit::seq<6, 2>(data[Index]);
+                upper = bit::seq<0, 6>(byte);
+                mode  = bit::seq<6, 2>(byte);
             }
             else
             {
-                lower = bit::seq<0, 6>(data[Index]);
+                lower = bit::seq<0, 6>(byte);
             }
         }
 
-        uint mode{};
-        uint upper{};
-        uint lower{};
+        uint mode  = 0;
+        uint upper = 0;
+        uint lower = 0;
     }
     bldcnt;
 
-    struct BlendAlpha : Register<u16, 0x1F1F>
+    class BlendAlpha : public Register<u16, 0x1F1F>
     {
+    public:
         static constexpr uint kMaskR = 0x1F <<  0;
         static constexpr uint kMaskG = 0x1F <<  5;
         static constexpr uint kMaskB = 0x1F << 10;
@@ -362,24 +363,29 @@ struct PpuIo
         {
             Register::write<Index>(byte);
 
-            coeff[Index] = std::min<uint>(16u, bit::seq<0, 5>(data[Index]));
+            if (Index == 0)
+                eva = std::min<uint>(16, bit::seq<0, 5>(byte));
+            else
+                evb = std::min<uint>(16, bit::seq<0, 5>(byte));
         }
 
         u16 blendAlpha(u16 a, u16 b) const
         {
-            uint cr = std::min(kMaskR, ((a & kMaskR) * coeff[0] + (b & kMaskR) * coeff[1]) >> 4);
-            uint cg = std::min(kMaskG, ((a & kMaskG) * coeff[0] + (b & kMaskG) * coeff[1]) >> 4);
-            uint cb = std::min(kMaskB, ((a & kMaskB) * coeff[0] + (b & kMaskB) * coeff[1]) >> 4);
+            uint rr = std::min(kMaskR, ((a & kMaskR) * eva + (b & kMaskR) * evb) >> 4);
+            uint gg = std::min(kMaskG, ((a & kMaskG) * eva + (b & kMaskG) * evb) >> 4);
+            uint bb = std::min(kMaskB, ((a & kMaskB) * eva + (b & kMaskB) * evb) >> 4);
 
-            return (cr & kMaskR) | (cg & kMaskG) | (cb & kMaskB);
+            return (rr & kMaskR) | (gg & kMaskG) | (bb & kMaskB);
         }
 
-        uint coeff[2]{};
+        uint eva = 0;
+        uint evb = 0;
     }
     bldalpha;
 
-    struct BlendFade : RegisterW<u16, 0x001F>
+    class BlendFade : public RegisterW<u16, 0x001F>
     {
+    public:
         static constexpr uint kMaskR = 0x1F <<  0;
         static constexpr uint kMaskG = 0x1F <<  5;
         static constexpr uint kMaskB = 0x1F << 10;
@@ -389,7 +395,8 @@ struct PpuIo
         {
             RegisterW::write<Index>(byte);
 
-            coeff = std::min<uint>(16u, bit::seq<0, 5>(data[0]));
+            if (Index == 0)
+                evy = std::min<uint>(16, bit::seq<0, 5>(byte));
         }
 
         u16 blendWhite(u16 a) const
@@ -398,9 +405,9 @@ struct PpuIo
             uint g = a & kMaskG;
             uint b = a & kMaskB;
 
-            r += ((kMaskR - r) * coeff) >> 4;
-            g += ((kMaskG - g) * coeff) >> 4;
-            b += ((kMaskB - b) * coeff) >> 4;
+            r += ((kMaskR - r) * evy) >> 4;
+            g += ((kMaskG - g) * evy) >> 4;
+            b += ((kMaskB - b) * evy) >> 4;
 
             return (r & kMaskR) | (g & kMaskG) | (b & kMaskB);
         }
@@ -411,14 +418,14 @@ struct PpuIo
             uint g = a & kMaskG;
             uint b = a & kMaskB;
 
-            r -= (r * coeff) >> 4;
-            g -= (g * coeff) >> 4;
-            b -= (b * coeff) >> 4;
+            r -= (r * evy) >> 4;
+            g -= (g * evy) >> 4;
+            b -= (b * evy) >> 4;
 
             return (r & kMaskR) | (g & kMaskG) | (b & kMaskB);
         }
 
-        uint coeff{};
+        uint evy = 0;
     }
     bldfade;
 };

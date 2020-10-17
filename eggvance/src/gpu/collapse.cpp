@@ -38,7 +38,7 @@ template<int obj_master>
 void Gpu::collapse(const std::vector<BgLayer>& layers)
 {
     int windows = io.dispcnt.win0 || io.dispcnt.win1 || io.dispcnt.winobj;
-    int effects = io.bldcnt.mode != PpuIo::BlendControl::kModeDisabled || objects_alpha;
+    int effects = io.bldcnt.mode != kBlendDisabled || objects_alpha;
 
     switch ((effects << 1) | (windows << 0))
     {
@@ -135,22 +135,22 @@ void Gpu::collapseBN(const std::vector<BgLayer>& layers)
         {
             switch (blend_mode)
             {
-            case PpuIo::BlendControl::kModeAlpha:
+            case kBlendAlpha:
                 if (findBlendLayers<obj_master>(layers, x, flags, upper, lower))
                     upper = io.bldalpha.blendAlpha(upper, lower);
                 break;
 
-            case PpuIo::BlendControl::kModeWhite:
+            case kBlendWhite:
                 if (findBlendLayers<obj_master>(layers, x, flags, upper))
                     upper = io.bldfade.blendWhite(upper);
                 break;
 
-            case PpuIo::BlendControl::kModeBlack:
+            case kBlendBlack:
                 if (findBlendLayers<obj_master>(layers, x, flags, upper))
                     upper = io.bldfade.blendBlack(upper);
                 break;
 
-            case PpuIo::BlendControl::kModeDisabled:
+            case kBlendDisabled:
                 upper = upperLayer<obj_master>(layers, x);
                 break;
 
@@ -220,22 +220,22 @@ void Gpu::collapseBW(const std::vector<BgLayer>& layers)
         {
             switch (blend_mode)
             {
-            case PpuIo::BlendControl::kModeAlpha:
+            case kBlendAlpha:
                 if (findBlendLayers<obj_master>(layers, x, window.flags, upper, lower))
                     upper = io.bldalpha.blendAlpha(upper, lower);
                 break;
 
-            case PpuIo::BlendControl::kModeWhite:
+            case kBlendWhite:
                 if (findBlendLayers<obj_master>(layers, x, window.flags, upper))
                     upper = io.bldfade.blendWhite(upper);
                 break;
 
-            case PpuIo::BlendControl::kModeBlack:
+            case kBlendBlack:
                 if (findBlendLayers<obj_master>(layers, x, window.flags, upper))
                     upper = io.bldfade.blendBlack(upper);
                 break;
 
-            case PpuIo::BlendControl::kModeDisabled:
+            case kBlendDisabled:
                 upper = upperLayer<obj_master>(layers, x, window.flags);
                 break;
 
