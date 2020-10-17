@@ -1,21 +1,15 @@
 #pragma once
 
-#include "point.h"
 #include "base/int.h"
+#include "gpu/point.h"
 
 class Matrix
 {
 public:
     constexpr Matrix(s16 pa, s16 pb, s16 pc, s16 pd)
-        : pa(pa)
-        , pb(pb)
-        , pc(pc)
-        , pd(pd)
-    {
-    
-    }
+        : pa(pa), pb(pb), pc(pc), pd(pd) {}
 
-    constexpr Point multiply(const Point& point) const
+    constexpr Point operator*(const Point& point) const
     {
         return Point(
             pa * point.x + pb * point.y,
@@ -30,4 +24,4 @@ private:
     int pd;
 };
 
-static constexpr Matrix identity_matrix(0x100, 0, 0, 0x100);
+inline constexpr Matrix kIdentityMatrix(0x100, 0, 0, 0x100);

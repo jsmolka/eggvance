@@ -207,7 +207,7 @@ void Gpu::renderObjects()
         const auto& bounds = entry.bounds;
         const auto& matrix = entry.affine 
             ? mmu.oam.matrix(entry.matrix)
-            : identity_matrix;
+            : kIdentityMatrix;
 
         int size  = entry.tileSize();
         int bank  = entry.paletteBank();
@@ -222,7 +222,7 @@ void Gpu::renderObjects()
 
         for (int x = center.x + offset.x; x < end; ++x, ++offset.x)
         {
-            auto texture = (matrix.multiply(offset) >> 8) + (dims / 2);
+            auto texture = (matrix * offset >> 8) + (dims / 2);
 
             if (!(texture >= kOrigin && texture < dims))
                 continue;
