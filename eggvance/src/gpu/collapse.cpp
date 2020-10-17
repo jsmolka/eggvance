@@ -11,7 +11,7 @@
 
 void Gpu::collapse(int begin, int end)
 {
-    std::vector<BGLayer> layers;
+    std::vector<BgLayer> layers;
     layers.reserve(end - begin);
 
     for (int bg = begin; bg < end; ++bg)
@@ -26,7 +26,7 @@ void Gpu::collapse(int begin, int end)
         }
     }
 
-    std::sort(layers.begin(), layers.end(), std::less<BGLayer>());
+    std::sort(layers.begin(), layers.end(), std::less<BgLayer>());
 
     if (objects_exist)
         collapse<1>(layers);
@@ -35,7 +35,7 @@ void Gpu::collapse(int begin, int end)
 }
 
 template<int obj_master>
-void Gpu::collapse(const std::vector<BGLayer>& layers)
+void Gpu::collapse(const std::vector<BgLayer>& layers)
 {
     int windows = io.dispcnt.win0 || io.dispcnt.win1 || io.dispcnt.winobj;
     int effects = io.bldcnt.mode != PpuIo::BlendControl::kModeDisabled || objects_alpha;
@@ -54,7 +54,7 @@ void Gpu::collapse(const std::vector<BGLayer>& layers)
 }
 
 template<int obj_master>
-void Gpu::collapseNN(const std::vector<BGLayer>& layers)
+void Gpu::collapseNN(const std::vector<BgLayer>& layers)
 {
     u32* scanline = video_ctx.scanline(io.vcount.value);
 
@@ -65,7 +65,7 @@ void Gpu::collapseNN(const std::vector<BGLayer>& layers)
 }
 
 template<int obj_master>
-void Gpu::collapseNW(const std::vector<BGLayer>& layers)
+void Gpu::collapseNW(const std::vector<BgLayer>& layers)
 {
     switch (possibleWindows<obj_master>())
     {
@@ -85,7 +85,7 @@ void Gpu::collapseNW(const std::vector<BGLayer>& layers)
 }
 
 template<int obj_master, int win_master>
-void Gpu::collapseNW(const std::vector<BGLayer>& layers)
+void Gpu::collapseNW(const std::vector<BgLayer>& layers)
 {
     u32* scanline = video_ctx.scanline(io.vcount.value);
 
@@ -98,7 +98,7 @@ void Gpu::collapseNW(const std::vector<BGLayer>& layers)
 }
 
 template<int obj_master>
-void Gpu::collapseBN(const std::vector<BGLayer>& layers)
+void Gpu::collapseBN(const std::vector<BgLayer>& layers)
 {
     switch (io.bldcnt.mode)
     {
@@ -114,7 +114,7 @@ void Gpu::collapseBN(const std::vector<BGLayer>& layers)
 }
 
 template<int obj_master, int blend_mode>
-void Gpu::collapseBN(const std::vector<BGLayer>& layers)
+void Gpu::collapseBN(const std::vector<BgLayer>& layers)
 {
     constexpr int flags = 0xFFFF;
 
@@ -164,7 +164,7 @@ void Gpu::collapseBN(const std::vector<BGLayer>& layers)
 }
 
 template<int obj_master>
-void Gpu::collapseBW(const std::vector<BGLayer>& layers)
+void Gpu::collapseBW(const std::vector<BgLayer>& layers)
 {
     switch (io.bldcnt.mode)
     {
@@ -180,7 +180,7 @@ void Gpu::collapseBW(const std::vector<BGLayer>& layers)
 }
 
 template<int obj_master, int blend_mode>
-void Gpu::collapseBW(const std::vector<BGLayer>& layers)
+void Gpu::collapseBW(const std::vector<BgLayer>& layers)
 {
     switch (possibleWindows<obj_master>())
     {
@@ -200,7 +200,7 @@ void Gpu::collapseBW(const std::vector<BGLayer>& layers)
 }
 
 template<int obj_master, int blend_mode, int win_master>
-void Gpu::collapseBW(const std::vector<BGLayer>& layers)
+void Gpu::collapseBW(const std::vector<BgLayer>& layers)
 {
     u32* scanline = video_ctx.scanline(io.vcount.value);
 
@@ -283,7 +283,7 @@ const PpuIo::Window& Gpu::activeWindow(int x) const
 }
 
 template<int obj_master>
-u16 Gpu::upperLayer(const std::vector<BGLayer>& layers, int x)
+u16 Gpu::upperLayer(const std::vector<BgLayer>& layers, int x)
 {
     const auto& object = objects[x];
 
@@ -302,37 +302,37 @@ u16 Gpu::upperLayer(const std::vector<BGLayer>& layers, int x)
 }
 
 template<int obj_master>
-u16 Gpu::upperLayer(const std::vector<BGLayer>& layers, int x, int flags)
+u16 Gpu::upperLayer(const std::vector<BgLayer>& layers, int x, int flags)
 {    
     const auto& object = objects[x];
 
     for (const auto& layer : layers)
     {
-        if (obj_master && flags & LF_OBJ && object.opaque() && object <= layer)
+        if (obj_master && flags & kLayerObj && object.opaque() && object <= layer)
             return object.color;
 
         if (flags & layer.flag && layer.opaque(x))
             return layer.color(x);
     }
-    if (obj_master && flags & LF_OBJ && object.opaque())
+    if (obj_master && flags & kLayerObj && object.opaque())
         return object.color;
 
     return mmu.pram.backdrop();
 }
 
 template<int obj_master>
-bool Gpu::findBlendLayers(const std::vector<BGLayer>& layers, int x, int flags, u16& upper)
+bool Gpu::findBlendLayers(const std::vector<BgLayer>& layers, int x, int flags, u16& upper)
 {
     const auto& object = objects[x];
 
-    int flags_upper = object.alpha ? LF_OBJ : io.bldcnt.upper;
+    int flags_upper = object.alpha ? kLayerObj : io.bldcnt.upper;
 
     for (const auto& layer : layers)
     {
-        if (obj_master && flags & LF_OBJ && object.opaque() && object <= layer)
+        if (obj_master && flags & kLayerObj && object.opaque() && object <= layer)
         {
             upper = object.color;
-            return flags_upper & LF_OBJ;
+            return flags_upper & kLayerObj;
         }
         if (flags & layer.flag && layer.opaque(x))
         {
@@ -340,13 +340,13 @@ bool Gpu::findBlendLayers(const std::vector<BGLayer>& layers, int x, int flags, 
             return flags_upper & layer.flag;
         }
     }
-    if (obj_master && flags & LF_OBJ && object.opaque())
+    if (obj_master && flags & kLayerObj && object.opaque())
     {
         upper = object.color;
-        return flags_upper & LF_OBJ;
+        return flags_upper & kLayerObj;
     }
     upper = mmu.pram.backdrop();
-    return flags_upper & LF_BDP;
+    return flags_upper & kLayerBdp;
 }
 
 #define PROCESS_BLEND_LAYER(color, flag)  \
@@ -364,11 +364,11 @@ bool Gpu::findBlendLayers(const std::vector<BGLayer>& layers, int x, int flags, 
     }
 
 template<int obj_master>
-bool Gpu::findBlendLayers(const std::vector<BGLayer>& layers, int x, int flags, u16& upper, u16& lower)
+bool Gpu::findBlendLayers(const std::vector<BgLayer>& layers, int x, int flags, u16& upper, u16& lower)
 {
     const auto& object = objects[x];
 
-    int flags_upper = object.alpha ? LF_OBJ : io.bldcnt.upper;
+    int flags_upper = object.alpha ? kLayerObj : io.bldcnt.upper;
     int flags_lower = io.bldcnt.lower;
 
     bool upper_found = false;
@@ -376,9 +376,9 @@ bool Gpu::findBlendLayers(const std::vector<BGLayer>& layers, int x, int flags, 
 
     for (const auto& layer : layers)
     {
-        if (obj_master && flags & LF_OBJ && !object_used && object.opaque() && object <= layer)
+        if (obj_master && flags & kLayerObj && !object_used && object.opaque() && object <= layer)
         {
-            PROCESS_BLEND_LAYER(object.color, LF_OBJ);
+            PROCESS_BLEND_LAYER(object.color, kLayerObj);
             object_used = true;
         }
         if (flags & layer.flag && layer.opaque(x))
@@ -386,14 +386,14 @@ bool Gpu::findBlendLayers(const std::vector<BGLayer>& layers, int x, int flags, 
             PROCESS_BLEND_LAYER(layer.color(x), layer.flag);
         }
     }
-    if (obj_master && flags & LF_OBJ && !object_used && object.opaque())
+    if (obj_master && flags & kLayerObj && !object_used && object.opaque())
     {
-        PROCESS_BLEND_LAYER(object.color, LF_OBJ);
+        PROCESS_BLEND_LAYER(object.color, kLayerObj);
     }
     if (upper_found)
     {
         lower = mmu.pram.backdrop();
-        return flags_lower & LF_BDP;
+        return flags_lower & kLayerBdp;
     }
     else
     {

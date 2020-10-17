@@ -5,7 +5,7 @@
 #include "base/macros.h"
 #include "gpu/constants.h"
 
-static constexpr Point sizes[4][4] =
+static constexpr Point kSizes[4][4] =
 {
     {
         {  8,  8 },
@@ -33,14 +33,12 @@ static constexpr Point sizes[4][4] =
     }
 };
 
-void OAMEntry::reset()
+OamEntry::OamEntry()
 {
-    *this = {};
-
     update();
 }
 
-void OAMEntry::writeHalf(int attr, u16 half)
+void OamEntry::writeHalf(uint attr, u16 half)
 {
     SHELL_ASSERT((attr & 0x6) < 0x6);
 
@@ -79,57 +77,57 @@ void OAMEntry::writeHalf(int attr, u16 half)
     update();
 }
 
-int OAMEntry::tileSize() const
+uint OamEntry::tileSize() const
 {
     return 0x20 << color_mode;
 }
 
-int OAMEntry::paletteBank() const
+uint OamEntry::paletteBank() const
 {
     return color_mode == kColorMode256x1 ? 0 : bank;
 }
 
-int OAMEntry::tilesPerRow(uint mapping) const
+uint OamEntry::tilesPerRow(uint mapping) const
 {
     return mapping == kObjectMapping1d ? (dims.x / 8) : (32 >> color_mode);
 }
 
-bool OAMEntry::flipX() const
+bool OamEntry::flipX() const
 {
     return !affine && flip_x;
 }
 
-bool OAMEntry::flipY() const
+bool OamEntry::flipY() const
 {
     return !affine && flip_y;
 }
 
-bool OAMEntry::isDisabled() const
+bool OamEntry::isDisabled() const
 {
     return !affine && disabled;
 }
 
-bool OAMEntry::isVisible(int vcount) const
+bool OamEntry::isVisible(int vcount) const
 {
     return isVisibleY(vcount) && isVisibleX();
 }
 
-bool OAMEntry::isVisibleX() const
+bool OamEntry::isVisibleX() const
 {
     return (origin.x + bounds.x) >= 0 && origin.x < kScreen.x;
 }
 
-bool OAMEntry::isVisibleY(int vcount) const
+bool OamEntry::isVisibleY(int vcount) const
 {
     return vcount >= origin.y && vcount < (origin.y + bounds.y);
 }
 
-void OAMEntry::update()
+void OamEntry::update()
 {
     if (origin.x >= kScreen.x) origin.x -= 512;
     if (origin.y >= kScreen.y) origin.y -= 256;
 
-    dims = sizes[shape][size];
+    dims = kSizes[shape][size];
     bounds = dims << double_size;
     center = origin + bounds / 2;
 

@@ -1,11 +1,10 @@
 #pragma once
 
+#include "point.h"
 #include "base/int.h"
-#include "gpu/point.h"
 
-class Matrix
+struct Matrix
 {
-public:
     constexpr Matrix(s16 pa, s16 pb, s16 pc, s16 pd)
         : pa(pa), pb(pb), pc(pc), pd(pd) {}
 
@@ -17,7 +16,6 @@ public:
         );
     }
 
-private:
     int pa;
     int pb;
     int pc;

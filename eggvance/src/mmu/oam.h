@@ -15,5 +15,5 @@ public:
 
     Matrix matrix(uint index) const;
 
-    std::array<OAMEntry, 128> entries;
+    std::array<OamEntry, 128> entries;
 };

@@ -238,26 +238,26 @@ void Gpu::renderObjects()
 
             auto& object = objects[x];
 
-            int index = mmu.vram.index(addr, pixel, ColorMode(entry.color_mode));
+            int index = mmu.vram.index(addr, pixel, entry.color_mode);
             if (index != 0)
             {
-                switch (ObjectMode(entry.mode))
+                switch (entry.mode)
                 {
-                case ObjectMode::Alpha:
-                case ObjectMode::Normal:
+                case kObjectModeAlpha:
+                case kObjectModeNormal:
                     if (entry.prio < object.prio || !object.opaque())
                     {
                         object.color = mmu.pram.colorFGOpaque(index, bank);
                         object.prio  = entry.prio;
-                        object.alpha = entry.mode == int(ObjectMode::Alpha);
+                        object.alpha = entry.mode == kObjectModeAlpha;
                     }
                     break;
 
-                case ObjectMode::Window:
+                case kObjectModeWindow:
                     object.window = true;
                     break;
 
-                case ObjectMode::Invalid:
+                case kObjectModeInvalid:
                     break;
 
                 default:

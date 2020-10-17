@@ -219,7 +219,7 @@ struct PpuIo
     {
         void write(u8 byte)
         {
-            flags = bit::seq<0, 5>(byte) | LF_BDP;
+            flags = bit::seq<0, 5>(byte) | kLayerBdp;
             blend = bit::seq<5, 1>(byte);
         }
 

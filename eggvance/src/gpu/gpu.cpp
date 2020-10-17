@@ -32,7 +32,7 @@ void Gpu::scanline()
     if (io.dispcnt.blank)
     {
         u32* scanline = video_ctx.scanline(io.vcount.value);
-        std::fill_n(scanline, kScreen.x, 0xFFFFFFFF);
+        std::fill_n(scanline, kScreen.x, 0xFFFF'FFFF);
         return;
     }
 
@@ -47,7 +47,7 @@ void Gpu::scanline()
         objects_exist = false;
         objects_alpha = false;
     }
-    if (io.dispcnt.layers & LF_OBJ)
+    if (io.dispcnt.layers & kLayerObj)
     {
         renderObjects();
     }

@@ -5,83 +5,58 @@
 
 enum LayerFlag
 {
-    LF_BG0 = 1 << 0,
-    LF_BG1 = 1 << 1,
-    LF_BG2 = 1 << 2,
-    LF_BG3 = 1 << 3,
-    LF_OBJ = 1 << 4,
-    LF_BDP = 1 << 5
+    kLayerBg0 = 1 << 0,
+    kLayerBg1 = 1 << 1,
+    kLayerBg2 = 1 << 2,
+    kLayerBg3 = 1 << 3,
+    kLayerObj = 1 << 4,
+    kLayerBdp = 1 << 5
 };
 
 struct Layer
 {
-    constexpr Layer(int prio)
-        : prio(prio) 
-    {
-    
-    }
+    Layer(uint prio)
+        : prio(prio) {}
 
-    constexpr bool operator<(const Layer& other) const
-    {
-        return prio < other.prio;
-    }
+    bool operator<=(const Layer& other) const { return prio <= other.prio; }
+    bool operator< (const Layer& other) const { return prio <  other.prio; }
 
-    constexpr bool operator<=(const Layer& other) const
-    {
-        return prio <= other.prio;
-    }
-
-    int prio;
+    uint prio;
 };
 
-struct BGLayer : public Layer
+struct BgLayer : Layer
 {
-    constexpr BGLayer(int prio, u16* data, int flag)
-        : Layer(prio)
-        , data(data)
-        , flag(flag)
-    {
-    
-    }
+    BgLayer(uint prio, u16* data, uint flag)
+        : Layer(prio), data(data), flag(flag) {}
 
-    constexpr bool operator<(const BGLayer& other) const
-    {
-        return prio == other.prio
-            ? flag < other.flag
-            : prio < other.prio;
-    }
+    bool operator<=(const BgLayer& other) const { return prio == other.prio ? flag <= other.flag : prio <= other.prio; }
+    bool operator< (const BgLayer& other) const { return prio == other.prio ? flag <  other.flag : prio <  other.prio; }
 
-    constexpr bool opaque(int x) const
-    {
-        return data[x] != kTransparent;
-    }
-
-    constexpr u16 color(int x) const
+    u16 color(uint x) const
     {
         return data[x];
     }
 
-    u16* data;
-    int  flag;
-};
-
-struct ObjectLayer : public Layer
-{
-    constexpr ObjectLayer()
-        : Layer(4)
-        , color(kTransparent)
-        , window(false)
-        , alpha(false)
+    bool opaque(uint x) const
     {
-    
+        return color(x) != kTransparent;
     }
 
-    constexpr bool opaque() const
+    u16* data;
+    uint flag;
+};
+
+struct ObjectLayer : Layer
+{
+    ObjectLayer()
+        : Layer(4) {}
+
+    bool opaque() const
     {
         return color != kTransparent;
     }
 
-    u16  color;
-    bool window;
-    bool alpha;
+    u16  color  = kTransparent;
+    bool window = false;
+    bool alpha  = false;
 };

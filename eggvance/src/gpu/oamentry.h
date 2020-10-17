@@ -3,23 +3,23 @@
 #include "base/int.h"
 #include "gpu/point.h"
 
-enum class ObjectMode
+enum ObjectMode
 {
-    Normal  = 0b00,
-    Alpha   = 0b01,
-    Window  = 0b10,
-    Invalid = 0b11
+    kObjectModeNormal,
+    kObjectModeAlpha,
+    kObjectModeWindow,
+    kObjectModeInvalid
 };
 
-struct OAMEntry
+struct OamEntry
 {
-    void reset();
+    OamEntry();
 
-    void writeHalf(int attr, u16 half);
+    void writeHalf(uint attr, u16 half);
 
-    int tileSize() const;
-    int paletteBank() const;
-    int tilesPerRow(uint mapping) const;
+    uint tileSize() const;
+    uint paletteBank() const;
+    uint tilesPerRow(uint mapping) const;
 
     bool flipX() const;
     bool flipY() const;
@@ -27,22 +27,22 @@ struct OAMEntry
     bool isDisabled() const;
     bool isVisible(int vcount) const;
 
-    int affine;
-    int double_size;
-    int disabled;
-    int mode;
-    int mosaic;
-    int color_mode;
-    int shape;
+    uint affine;
+    uint double_size;
+    uint disabled;
+    uint mode;
+    uint mosaic;
+    uint color_mode;
+    uint shape;
 
-    int matrix;
-    int flip_x;
-    int flip_y;
-    int size;
+    uint matrix;
+    uint flip_x;
+    uint flip_y;
+    uint size;
 
-    int tile;
-    int prio;
-    int bank;
+    uint tile;
+    uint prio;
+    uint bank;
 
     Point origin;
     Point center;
