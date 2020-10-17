@@ -48,16 +48,16 @@ void Gpu::renderBgMode0(int bg)
         io.bgvofs[bg].value + io.vcount.value
     );
 
-    origin.x %= dims.w;
-    origin.y %= dims.h;
+    origin.x %= dims.x;
+    origin.y %= dims.y;
 
     auto pixel = origin % 8;
     auto block = origin / 256;
     auto tile  = origin / 8 % 32;
 
-    for (int x = 0; x < kScreenW; block.x ^= (dims.w / 256) == 2)
+    for (int x = 0; x < kScreenW; block.x ^= (dims.x / 256) == 2)
     {
-        int offset = 0x800 * block.index2d(dims.w / 256) + 2 * tile.index2d(0x20);
+        int offset = 0x800 * block.index2d(dims.x / 256) + 2 * tile.index2d(0x20);
 
         u16* map = mmu.vram.data<u16>(bgcnt.map_block + offset);
 
@@ -105,15 +105,15 @@ void Gpu::renderBgMode2(int bg)
     {
         auto texture = transform(x, bg) >> 8;
 
-        if (!dims.contains(texture))
+        if (!(texture >= kOrigin && texture < dims))
         {
             if (bgcnt.wraparound)
             {
-                texture.x %= dims.w;
-                texture.y %= dims.h;
+                texture.x %= dims.x;
+                texture.y %= dims.y;
 
-                if (texture.x < 0) texture.x += dims.w;
-                if (texture.y < 0) texture.y += dims.h;
+                if (texture.x < 0) texture.x += dims.x;
+                if (texture.y < 0) texture.y += dims.y;
             }
             else
             {
@@ -125,7 +125,7 @@ void Gpu::renderBgMode2(int bg)
         const auto tile  = texture / 8;
         const auto pixel = texture % 8;
 
-        int offset = tile.index2d(dims.w / 8);
+        int offset = tile.index2d(dims.x / 8);
         int entry  = mmu.vram.readFast<u8>(bgcnt.map_block + offset);
         int index  = mmu.vram.index256x1(bgcnt.tile_block + 0x40 * entry, pixel);
 
@@ -135,19 +135,19 @@ void Gpu::renderBgMode2(int bg)
 
 void Gpu::renderBgMode3(int bg)
 {
-    static constexpr Dimensions dims(kScreenW, kScreenH);
+    static constexpr Point dims(kScreenW, kScreenH);
 
     for (int x = 0; x < kScreenW; ++x)
     {
         const auto texture = transform(x, bg) >> 8;
 
-        if (!dims.contains(texture))
+        if (!(texture >= kOrigin && texture < dims))
         {
             backgrounds[bg][x] = kTransparent;
             continue;
         }
 
-        int offset = sizeof(u16) * texture.index2d(dims.w);
+        int offset = sizeof(u16) * texture.index2d(dims.x);
 
         backgrounds[bg][x] = mmu.vram.readFast<u16>(offset) & kColorMask;
     }
@@ -155,19 +155,19 @@ void Gpu::renderBgMode3(int bg)
 
 void Gpu::renderBgMode4(int bg)
 {
-    static constexpr Dimensions dims(kScreenW, kScreenH);
+    static constexpr Point dims(kScreenW, kScreenH);
 
     for (int x = 0; x < kScreenW; ++x)
     {
         const auto texture = transform(x, bg) >> 8;
 
-        if (!dims.contains(texture))
+        if (!(texture >= kOrigin && texture < dims))
         {
             backgrounds[bg][x] = kTransparent;
             continue;
         }
 
-        int offset = texture.index2d(dims.w);
+        int offset = texture.index2d(dims.x);
         int index  = mmu.vram.readFast<u8>(io.dispcnt.frame + offset);
 
         backgrounds[bg][x] = mmu.pram.colorBG(index);
@@ -176,19 +176,19 @@ void Gpu::renderBgMode4(int bg)
 
 void Gpu::renderBgMode5(int bg)
 {
-    static constexpr Dimensions dims(160, 128);
+    static constexpr Point dims(160, 128);
 
     for (int x = 0; x < kScreenW; ++x)
     {
         const auto texture = transform(x, bg) >> 8;
 
-        if (!dims.contains(texture))
+        if (!(texture >= kOrigin && texture < dims))
         {
             backgrounds[bg][x] = kTransparent;
             continue;
         }
 
-        int offset = sizeof(u16) * texture.index2d(dims.w);
+        int offset = sizeof(u16) * texture.index2d(dims.x);
 
         backgrounds[bg][x] = mmu.vram.readFast<u16>(io.dispcnt.frame + offset) & kColorMask;
     }
@@ -218,17 +218,17 @@ void Gpu::renderObjects()
             -center.y + io.vcount.value
         );
 
-        int end = std::min(origin.x + bounds.w, kScreenW);
+        int end = std::min(origin.x + bounds.x, kScreenW);
 
         for (int x = center.x + offset.x; x < end; ++x, ++offset.x)
         {
             auto texture = (matrix.multiply(offset) >> 8) + (dims / 2);
 
-            if (!dims.contains(texture))
+            if (!(texture >= kOrigin && texture < dims))
                 continue;
 
-            if (entry.flipX()) texture.x ^= entry.dims.w - 1;
-            if (entry.flipY()) texture.y ^= entry.dims.h - 1;
+            if (entry.flipX()) texture.x ^= entry.dims.x - 1;
+            if (entry.flipY()) texture.y ^= entry.dims.y - 1;
             if (entry.mosaic)
             {
                 texture.x = io.mosaic.obj.mosaicX(texture.x);

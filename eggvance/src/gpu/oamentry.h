@@ -1,8 +1,8 @@
 #pragma once
 
-#include "dimensions.h"
 #include "base/constants.h"
 #include "base/int.h"
+#include "gpu/point.h"
 
 enum class ObjectMode
 {
@@ -47,8 +47,8 @@ struct OAMEntry
 
     Point origin;
     Point center;
-    Dimensions dims;
-    Dimensions bounds;
+    Point dims;
+    Point bounds;
     u32 base_tile;
 
 private:

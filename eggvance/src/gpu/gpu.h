@@ -3,7 +3,6 @@
 #include <vector>
 
 #include "gpu/buffer.h"
-#include "gpu/dimensions.h"
 #include "gpu/io.h"
 #include "gpu/layer.h"
 

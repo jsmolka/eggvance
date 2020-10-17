@@ -5,7 +5,7 @@
 #include "base/int.h"
 #include "base/macros.h"
 
-static constexpr Dimensions sizes[4][4] =
+static constexpr Point sizes[4][4] =
 {
     {
         {  8,  8 },
@@ -91,7 +91,7 @@ int OAMEntry::paletteBank() const
 
 int OAMEntry::tilesPerRow(ObjectMapping mapping) const
 {
-    return mapping == ObjectMapping::OneDim ? (dims.w / 8) : (32 >> color_mode);
+    return mapping == ObjectMapping::OneDim ? (dims.x / 8) : (32 >> color_mode);
 }
 
 bool OAMEntry::flipX() const
@@ -116,12 +116,12 @@ bool OAMEntry::isVisible(int vcount) const
 
 bool OAMEntry::isVisibleX() const
 {
-    return (origin.x + bounds.w) >= 0 && origin.x < kScreenW;
+    return (origin.x + bounds.x) >= 0 && origin.x < kScreenW;
 }
 
 bool OAMEntry::isVisibleY(int vcount) const
 {
-    return vcount >= origin.y && vcount < (origin.y + bounds.h);
+    return vcount >= origin.y && vcount < (origin.y + bounds.y);
 }
 
 void OAMEntry::update()

@@ -5,8 +5,8 @@
 #include "base/config.h"
 #include "base/constants.h"
 #include "base/register.h"
-#include "gpu/dimensions.h"
 #include "gpu/layer.h"
+#include "gpu/point.h"
 
 struct PpuIo
 {
@@ -141,17 +141,17 @@ struct PpuIo
             }
         }
 
-        Dimensions dimsReg() const 
+        Point dimsReg() const 
         {
-            return Dimensions(
+            return Point(
                 256 << bit::seq<0, 1>(dimensions),
                 256 << bit::seq<1, 1>(dimensions)
             );
         }
 
-        Dimensions dimsAff() const
+        Point dimsAff() const
         {
-            return Dimensions(
+            return Point(
                 128 << dimensions,
                 128 << dimensions
             );

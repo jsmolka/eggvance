@@ -214,7 +214,6 @@
     <ClInclude Include="src\mmu\bios_normmatt.h" />
     <ClInclude Include="src\mmu\constants.h" />
     <ClInclude Include="src\mmu\io.h" />
-    <ClInclude Include="src\gpu\dimensions.h" />
     <ClInclude Include="src\gpu\io.h" />
     <ClInclude Include="src\gpu\mapentry.h" />
     <ClInclude Include="src\gpu\matrix.h" />

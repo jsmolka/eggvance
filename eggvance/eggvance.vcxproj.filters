@@ -293,9 +293,6 @@
     <ClInclude Include="src\gpu\buffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\gpu\dimensions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\gpu\io.h">
       <Filter>Header Files</Filter>
     </ClInclude>
