@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <shell/iterator.h>
 
 #include "buffer.h"
 #include "io.h"
@@ -24,10 +24,12 @@ public:
 private:
     enum WindowFlag
     {
-        WF_WIN0   = 1 << 0,
-        WF_WIN1   = 1 << 1,
-        WF_WINOBJ = 1 << 2
+        kWindow0   = 1 << 0,
+        kWindow1   = 1 << 1,
+        kWindowObj = 1 << 2
     };
+
+    using BgLayers = shell::IteratorRange<const BgLayer*>;
 
     using RenderFunc = void(Gpu::*)(int);
 
@@ -47,23 +49,23 @@ private:
 
     void collapse(int begin, int end);
     template<int obj_master>
-    void collapse(const std::vector<BgLayer>& layers);
+    void collapse(const BgLayers& layers);
     template<int obj_master>
-    void collapseNN(const std::vector<BgLayer>& layers);
+    void collapseNN(const BgLayers& layers);
     template<int obj_master>
-    void collapseNW(const std::vector<BgLayer>& layers);
+    void collapseNW(const BgLayers& layers);
     template<int obj_master, int win_master>
-    void collapseNW(const std::vector<BgLayer>& layers);
+    void collapseNW(const BgLayers& layers);
     template<int obj_master>
-    void collapseBN(const std::vector<BgLayer>& layers);
+    void collapseBN(const BgLayers& layers);
     template<int obj_master, int blend_mode>
-    void collapseBN(const std::vector<BgLayer>& layers);
+    void collapseBN(const BgLayers& layers);
     template<int obj_master>
-    void collapseBW(const std::vector<BgLayer>& layers);
+    void collapseBW(const BgLayers& layers);
     template<int obj_master, int blend_mode>
-    void collapseBW(const std::vector<BgLayer>& layers);
+    void collapseBW(const BgLayers& layers);
     template<int obj_master, int blend_mode, int win_master>
-    void collapseBW(const std::vector<BgLayer>& layers);
+    void collapseBW(const BgLayers& layers);
 
     template<int obj_master>
     int possibleWindows() const;
@@ -71,14 +73,14 @@ private:
     const Window& activeWindow(int x) const;
 
     template<int obj_master>
-    u16 upperLayer(const std::vector<BgLayer>& layers, int x);
+    u16 upperLayer(const BgLayers& layers, int x);
     template<int obj_master>
-    u16 upperLayer(const std::vector<BgLayer>& layers, int x, int flags);
+    u16 upperLayer(const BgLayers& layers, int x, int flags);
 
     template<int obj_master>
-    bool findBlendLayers(const std::vector<BgLayer>& layers, int x, int flags, u16& upper);
+    bool findBlendLayers(const BgLayers& layers, int x, int flags, u16& upper);
     template<int obj_master>
-    bool findBlendLayers(const std::vector<BgLayer>& layers, int x, int flags, u16& upper, u16& lower);
+    bool findBlendLayers(const BgLayers& layers, int x, int flags, u16& upper, u16& lower);
 
     static u32 argb(u16 color);
 

@@ -15,20 +15,14 @@ enum LayerFlag
 
 struct Layer
 {
-    Layer(uint priority)
-        : priority(priority) {}
-
     bool operator<=(const Layer& other) const { return priority <= other.priority; }
     bool operator< (const Layer& other) const { return priority <  other.priority; }
 
-    uint priority;
+    uint priority = 4;
 };
 
 struct BgLayer : Layer
 {
-    BgLayer(uint priority, u16* data, uint flag)
-        : Layer(priority), data(data), flag(flag) {}
-
     bool operator<=(const BgLayer& other) const { return priority == other.priority ? flag <= other.flag : priority <= other.priority; }
     bool operator< (const BgLayer& other) const { return priority == other.priority ? flag <  other.flag : priority <  other.priority; }
 
@@ -42,15 +36,12 @@ struct BgLayer : Layer
         return color(x) != kTransparent;
     }
 
-    u16* data;
-    uint flag;
+    u16* data = nullptr;
+    uint flag = 0;
 };
 
 struct ObjectLayer : Layer
 {
-    ObjectLayer()
-        : Layer(4) {}
-
     bool opaque() const
     {
         return color != kTransparent;
