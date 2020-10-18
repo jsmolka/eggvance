@@ -16,10 +16,10 @@ struct Matrix
         );
     }
 
-    int pa;
-    int pb;
-    int pc;
-    int pd;
+    s16 pa;
+    s16 pb;
+    s16 pc;
+    s16 pd;
 };
 
 inline constexpr Matrix kIdentityMatrix(0x100, 0, 0, 0x100);

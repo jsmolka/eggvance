@@ -41,27 +41,26 @@ void Gpu::renderBg(RenderFunc func, int bg)
 void Gpu::renderBgMode0(int bg)
 {
     const auto& bgcnt = io.bgcnt[bg];
-    const auto& dims  = io.bgcnt[bg].dimsReg();
+    const auto& size  = io.bgcnt[bg].sizeReg();
 
     Point origin(
         io.bghofs[bg].value,
-        io.bgvofs[bg].value + io.vcount.value
-    );
+        io.bgvofs[bg].value + io.vcount.value);
 
-    origin.x %= dims.x;
-    origin.y %= dims.y;
+    origin.x %= size.x;
+    origin.y %= size.y;
 
     auto pixel = origin % 8;
     auto block = origin / 256;
     auto tile  = origin / 8 % 32;
 
-    for (int x = 0; x < kScreen.x; block.x ^= (dims.x / 256) == 2)
+    for (int x = 0; x < kScreen.x; block.x ^= (size.x / 256) == 2, tile.x = 0)
     {
-        int offset = 0x800 * block.index2d(dims.x / 256) + 2 * tile.index2d(0x20);
+        uint offset = 0x800 * block.index2d(size.x / 256) + 2 * tile.index2d(0x20);
 
         u16* map = mmu.vram.data<u16>(bgcnt.map_block + offset);
 
-        for (; tile.x < 32 && x < kScreen.x; ++tile.x, ++map)
+        for (; tile.x < 32 && x < kScreen.x; ++tile.x, ++map, pixel.x = 0)
         {
             MapEntry entry(*map);
 
@@ -73,11 +72,8 @@ void Gpu::renderBgMode0(int bg)
             {
                 for (; pixel.x < 8 && x < kScreen.x; ++pixel.x, ++x)
                 {
-                    int index = mmu.vram.index(
-                        addr,
-                        Point(pixel.x ^ (0x7 * entry.flip_x), pixel.y ^ (0x7 * entry.flip_y)),
-                        ColorMode(bgcnt.color_mode)
-                    );
+                    uint index = mmu.vram.index(addr, pixel ^ entry.flip, bgcnt.color_mode);
+
                     backgrounds[bg][x] = mmu.pram.colorBg(index, entry.bank);
                 }
             }
@@ -88,30 +84,28 @@ void Gpu::renderBgMode0(int bg)
                     backgrounds[bg][x] = kTransparent;
                 }
             }
-            pixel.x = 0;
         }
-        tile.x = 0;
     }
 }
 
 void Gpu::renderBgMode2(int bg)
 {
     const auto& bgcnt = io.bgcnt[bg];
-    const auto& dims  = io.bgcnt[bg].dimsAff();
+    const auto& size  = io.bgcnt[bg].sizeAff();
 
     for (int x = 0; x < kScreen.x; ++x)
     {
         auto texture = transform(x, bg) >> 8;
 
-        if (!(texture >= kOrigin && texture < dims))
+        if (!(texture >= kOrigin && texture < size))
         {
             if (bgcnt.wraparound)
             {
-                texture.x %= dims.x;
-                texture.y %= dims.y;
+                texture.x %= size.x;
+                texture.y %= size.y;
 
-                if (texture.x < 0) texture.x += dims.x;
-                if (texture.y < 0) texture.y += dims.y;
+                if (texture.x < 0) texture.x += size.x;
+                if (texture.y < 0) texture.y += size.y;
             }
             else
             {
@@ -123,9 +117,9 @@ void Gpu::renderBgMode2(int bg)
         const auto tile  = texture / 8;
         const auto pixel = texture % 8;
 
-        int offset = tile.index2d(dims.x / 8);
-        int entry  = mmu.vram.readFast<u8>(bgcnt.map_block + offset);
-        int index  = mmu.vram.index256x1(bgcnt.tile_block + 0x40 * entry, pixel);
+        uint offset = tile.index2d(size.x / 8);
+        uint entry  = mmu.vram.readFast<u8>(bgcnt.map_block + offset);
+        uint index  = mmu.vram.index256x1(bgcnt.tile_block + 0x40 * entry, pixel);
 
         backgrounds[bg][x] = mmu.pram.colorBg(index);
     }
@@ -137,15 +131,16 @@ void Gpu::renderBgMode3(int bg)
     {
         const auto texture = transform(x, bg) >> 8;
 
-        if (!(texture >= kOrigin && texture < kScreen))
+        if (texture >= kOrigin && texture < kScreen)
+        {
+            uint offset = sizeof(u16) * texture.index2d(kScreen.x);
+
+            backgrounds[bg][x] = mmu.vram.readFast<u16>(offset) & kColorMask;
+        }
+        else
         {
             backgrounds[bg][x] = kTransparent;
-            continue;
         }
-
-        int offset = sizeof(u16) * texture.index2d(kScreen.x);
-
-        backgrounds[bg][x] = mmu.vram.readFast<u16>(offset) & kColorMask;
     }
 }
 
@@ -155,16 +150,17 @@ void Gpu::renderBgMode4(int bg)
     {
         const auto texture = transform(x, bg) >> 8;
 
-        if (!(texture >= kOrigin && texture < kScreen))
+        if (texture >= kOrigin && texture < kScreen)
+        {
+            uint offset = texture.index2d(kScreen.x);
+            uint index  = mmu.vram.readFast<u8>(io.dispcnt.frame + offset);
+
+            backgrounds[bg][x] = mmu.pram.colorBg(index);
+        }
+        else
         {
             backgrounds[bg][x] = kTransparent;
-            continue;
         }
-
-        int offset = texture.index2d(kScreen.x);
-        int index  = mmu.vram.readFast<u8>(io.dispcnt.frame + offset);
-
-        backgrounds[bg][x] = mmu.pram.colorBg(index);
     }
 }
 
@@ -176,15 +172,16 @@ void Gpu::renderBgMode5(int bg)
     {
         const auto texture = transform(x, bg) >> 8;
 
-        if (!(texture >= kOrigin && texture < kBitmap))
+        if (texture >= kOrigin && texture < kBitmap)
+        {
+            uint offset = sizeof(u16) * texture.index2d(kBitmap.x);
+
+            backgrounds[bg][x] = mmu.vram.readFast<u16>(io.dispcnt.frame + offset) & kColorMask;
+        }
+        else
         {
             backgrounds[bg][x] = kTransparent;
-            continue;
         }
-
-        int offset = sizeof(u16) * texture.index2d(kBitmap.x);
-
-        backgrounds[bg][x] = mmu.vram.readFast<u16>(io.dispcnt.frame + offset) & kColorMask;
     }
 }
 
@@ -195,11 +192,11 @@ void Gpu::renderObjects()
         if (entry.disabled || !entry.isVisible(io.vcount.value))
             continue;
 
-        const auto origin      = entry.origin;
-        const auto center      = entry.center;
-        const auto sprite_size = entry.sprite_size;
-        const auto screen_size = entry.screen_size;
-        const auto matrix      = entry.affine ? mmu.oam.matrix(entry.matrix_idx) : kIdentityMatrix;
+        const auto& origin      = entry.origin;
+        const auto& center      = entry.center;
+        const auto& sprite_size = entry.sprite_size;
+        const auto& screen_size = entry.screen_size;
+        const auto& matrix      = entry.affine ? mmu.oam.matrix(entry.matrix_idx) : kIdentityMatrix;
 
         uint tile_size = entry.tileSize();
         uint tiles_row = entry.tilesInRow(io.dispcnt.layout);

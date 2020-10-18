@@ -146,7 +146,7 @@ struct PpuIo
             }
         }
 
-        Point dimsReg() const
+        Point sizeReg() const
         {
             return Point(
                 256 << bit::seq<0, 1>(dimensions),
@@ -154,7 +154,7 @@ struct PpuIo
             );
         }
 
-        Point dimsAff() const
+        Point sizeAff() const
         {
             return Point(
                 128 << dimensions,
