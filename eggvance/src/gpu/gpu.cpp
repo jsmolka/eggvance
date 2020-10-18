@@ -19,12 +19,12 @@ Gpu::Gpu()
 
 void Gpu::scanline()
 {
-    io.dispstat.vblank = false;
-    io.dispstat.hblank = false;
+    dispstat.vblank = false;
+    dispstat.hblank = false;
 
-    if (io.dispcnt.blank)
+    if (dispcnt.blank)
     {
-        u32* scanline = video_ctx.scanline(io.vcount.value);
+        u32* scanline = video_ctx.scanline(vcount.value);
         std::fill_n(scanline, kScreen.x, 0xFFFF'FFFF);
         return;
     }
@@ -40,12 +40,12 @@ void Gpu::scanline()
         objects_exist = false;
         objects_alpha = false;
     }
-    if (io.dispcnt.layers & kLayerObj)
+    if (dispcnt.layers & kLayerObj)
     {
         renderObjects();
     }
 
-    switch (io.dispcnt.mode)
+    switch (dispcnt.mode)
     {
     case 0:
         renderBg(&Gpu::renderBgMode0, 0);
@@ -87,15 +87,15 @@ void Gpu::scanline()
 
 void Gpu::hblank()
 {
-    io.dispstat.hblank = true;
-    io.dispstat.vblank = false;
+    dispstat.hblank = true;
+    dispstat.vblank = false;
 
-    io.bgx[0].hblank(io.bgpb[0].value);
-    io.bgx[1].hblank(io.bgpb[1].value);
-    io.bgy[0].hblank(io.bgpd[0].value);
-    io.bgy[1].hblank(io.bgpd[1].value);
+    bgx[0].hblank(bgpb[0].value);
+    bgx[1].hblank(bgpb[1].value);
+    bgy[0].hblank(bgpd[0].value);
+    bgy[1].hblank(bgpd[1].value);
 
-    if (io.dispstat.hblank_irq)
+    if (dispstat.hblank_irq)
     {
         arm.raise(kIrqHBlank);
     }
@@ -104,15 +104,15 @@ void Gpu::hblank()
 
 void Gpu::vblank()
 {
-    io.dispstat.vblank = true;
-    io.dispstat.hblank = false;
+    dispstat.vblank = true;
+    dispstat.hblank = false;
 
-    io.bgx[0].vblank();
-    io.bgx[1].vblank();
-    io.bgy[0].vblank();
-    io.bgy[1].vblank();
+    bgx[0].vblank();
+    bgx[1].vblank();
+    bgy[0].vblank();
+    bgy[1].vblank();
 
-    if (io.dispstat.vblank_irq)
+    if (dispstat.vblank_irq)
     {
         arm.raise(kIrqVBlank);
     }
@@ -121,29 +121,29 @@ void Gpu::vblank()
 
 void Gpu::next()
 {
-    io.dispstat.vmatch = io.vcount.value == io.dispstat.vcompare;
-    if (io.dispstat.vmatch && io.dispstat.vmatch_irq)
+    dispstat.vmatch = vcount.value == dispstat.vcompare;
+    if (dispstat.vmatch && dispstat.vmatch_irq)
     {
         arm.raise(kIrqVMatch);
     }
-    io.vcount.next();
+    vcount.next();
 }
 
 void Gpu::present()
 {
-    io.dispstat.hblank = false;
-    io.dispstat.vblank = false;
+    dispstat.hblank = false;
+    dispstat.vblank = false;
 
-    if (io.dispcnt.isActive())
+    if (dispcnt.isActive())
     {
         video_ctx.renderCopyTexture();
         video_ctx.renderPresent();
     }
 }
 
-void Gpu::mosaic(int bg)
+void Gpu::mosaicBg(int bg)
 {
-    int mosaic_x = io.mosaic.bgs.x;
+    int mosaic_x = mosaic.bgs.x;
     if (mosaic_x == 1)
         return;
 
@@ -160,12 +160,12 @@ void Gpu::mosaic(int bg)
 
 bool Gpu::mosaicAffected(int bg) const
 {
-    return io.bgcnt[bg].mosaic && (io.mosaic.bgs.x > 1 || io.mosaic.bgs.y > 1);
+    return bgcnt[bg].mosaic && (mosaic.bgs.x > 1 || mosaic.bgs.y > 1);
 }
 
 bool Gpu::mosaicDominant() const
 {
-    return io.vcount.value % io.mosaic.bgs.y == 0;
+    return vcount.value % mosaic.bgs.y == 0;
 }
 
 u32 Gpu::argb(u16 color)

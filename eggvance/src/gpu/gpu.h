@@ -9,9 +9,10 @@
 class Gpu
 {
 public:
-    Gpu();
+    friend class Io;
+    friend class Vram;
 
-    void reset();
+    Gpu();
 
     void scanline();
     void hblank();
@@ -19,8 +20,6 @@ public:
     void next();
 
     void present();
-
-    PpuIo io;
 
 private:
     enum WindowFlag
@@ -42,7 +41,7 @@ private:
     void renderBgMode5(int bg);
     void renderObjects();
 
-    void mosaic(int bg);
+    void mosaicBg(int bg);
     bool mosaicAffected(int bg) const;
     bool mosaicDominant() const;
 
@@ -69,7 +68,7 @@ private:
     template<int obj_master>
     int possibleWindows() const;
     template<int win_master>
-    const PpuIo::Window& activeWindow(int x) const;
+    const Window& activeWindow(int x) const;
 
     template<int obj_master>
     u16 upperLayer(const std::vector<BgLayer>& layers, int x);
@@ -87,6 +86,28 @@ private:
     Buffer<ObjectLayer> objects;
     bool objects_exist = false;
     bool objects_alpha = false;
+
+    DisplayControl dispcnt;
+    Register<u16> greenswap;
+    DisplayStatus dispstat;
+    VCount vcount;
+    BgControl bgcnt[4];
+    RegisterW<u16, 0x01FF> bghofs[4];
+    RegisterW<u16, 0x01FF> bgvofs[4];
+    BgParameter<0x0100> bgpa[2];
+    BgParameter<0x0000> bgpb[2];
+    BgParameter<0x0000> bgpc[2];
+    BgParameter<0x0100> bgpd[2];
+    BgReference bgx[2];
+    BgReference bgy[2];
+    WindowInside winin;
+    WindowOutside winout;
+    WindowRange<kScreen.x> winh[2];
+    WindowRange<kScreen.y> winv[2];
+    Mosaic mosaic;
+    BlendControl bldcnt;
+    BlendAlpha bldalpha;
+    BlendFade bldfade;
 };
 
 inline Gpu gpu;

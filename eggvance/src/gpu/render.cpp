@@ -10,14 +10,14 @@ Point Gpu::transform(int x, int bg)
     bg -= 2;
 
     return Point(
-        io.bgx[bg].current + io.bgpa[bg].value * x,
-        io.bgy[bg].current + io.bgpc[bg].value * x
+        bgx[bg].current + bgpa[bg].value * x,
+        bgy[bg].current + bgpc[bg].value * x
     );
 }
 
 void Gpu::renderBg(RenderFunc func, int bg)
 {
-    if (~io.dispcnt.layers & (1 << bg))
+    if (~dispcnt.layers & (1 << bg))
         return;
 
     if (mosaicAffected(bg))
@@ -25,7 +25,7 @@ void Gpu::renderBg(RenderFunc func, int bg)
         if (mosaicDominant())
         {
             (this->*func)(bg);
-            mosaic(bg);
+            mosaicBg(bg);
         }
         else
         {
@@ -40,12 +40,12 @@ void Gpu::renderBg(RenderFunc func, int bg)
 
 void Gpu::renderBgMode0(int bg)
 {
-    const auto& bgcnt = io.bgcnt[bg];
-    const auto& size  = io.bgcnt[bg].sizeReg();
+    const auto& bgcnt = this->bgcnt[bg];
+    const auto& size  = this->bgcnt[bg].sizeReg();
 
     Point origin(
-        io.bghofs[bg].value,
-        io.bgvofs[bg].value + io.vcount.value);
+        bghofs[bg].value,
+        bgvofs[bg].value + vcount.value);
 
     origin.x %= size.x;
     origin.y %= size.y;
@@ -90,8 +90,8 @@ void Gpu::renderBgMode0(int bg)
 
 void Gpu::renderBgMode2(int bg)
 {
-    const auto& bgcnt = io.bgcnt[bg];
-    const auto& size  = io.bgcnt[bg].sizeAff();
+    const auto& bgcnt = this->bgcnt[bg];
+    const auto& size  = this->bgcnt[bg].sizeAff();
 
     for (int x = 0; x < kScreen.x; ++x)
     {
@@ -153,7 +153,7 @@ void Gpu::renderBgMode4(int bg)
         if (texture >= kOrigin && texture < kScreen)
         {
             uint offset = texture.index2d(kScreen.x);
-            uint index  = mmu.vram.readFast<u8>(io.dispcnt.frame + offset);
+            uint index  = mmu.vram.readFast<u8>(dispcnt.frame + offset);
 
             backgrounds[bg][x] = mmu.pram.colorBg(index);
         }
@@ -176,7 +176,7 @@ void Gpu::renderBgMode5(int bg)
         {
             uint offset = sizeof(u16) * texture.index2d(kBitmap.x);
 
-            backgrounds[bg][x] = mmu.vram.readFast<u16>(io.dispcnt.frame + offset) & kColorMask;
+            backgrounds[bg][x] = mmu.vram.readFast<u16>(dispcnt.frame + offset) & kColorMask;
         }
         else
         {
@@ -189,7 +189,7 @@ void Gpu::renderObjects()
 {
     for (const auto& entry : mmu.oam.entries)
     {
-        if (entry.disabled || !entry.isVisible(io.vcount.value))
+        if (entry.disabled || !entry.isVisible(vcount.value))
             continue;
 
         const auto& origin      = entry.origin;
@@ -199,12 +199,12 @@ void Gpu::renderObjects()
         const auto& matrix      = entry.affine ? mmu.oam.matrix(entry.matrix_idx) : kIdentityMatrix;
 
         uint tile_size = entry.tileSize();
-        uint tiles_row = entry.tilesInRow(io.dispcnt.layout);
+        uint tiles_row = entry.tilesInRow(dispcnt.layout);
         uint bank      = entry.paletteBank();
 
         Point offset(
             -center.x + origin.x - std::min(origin.x, 0),
-            -center.y + io.vcount.value);
+            -center.y + vcount.value);
 
         int end = std::min(origin.x + screen_size.x, kScreen.x);
 
@@ -223,15 +223,15 @@ void Gpu::renderObjects()
 
             if (entry.mosaic)
             {
-                texture.x = io.mosaic.obj.mosaicX(texture.x);
-                texture.y = io.mosaic.obj.mosaicY(texture.y);
+                texture.x = mosaic.obj.mosaicX(texture.x);
+                texture.y = mosaic.obj.mosaicY(texture.y);
             }
 
             const auto tile  = texture / 8;
             const auto pixel = texture % 8;
 
             u32 addr = mmu.vram.mirror(entry.base_addr + tile_size * tile.index2d(tiles_row));
-            if (addr < 0x1'4000 && io.dispcnt.isBitmap())
+            if (addr < 0x1'4000 && dispcnt.isBitmap())
                 continue;
 
             auto& object = objects[x];
