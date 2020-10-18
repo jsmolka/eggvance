@@ -15,22 +15,22 @@ enum LayerFlag
 
 struct Layer
 {
-    Layer(uint prio)
-        : prio(prio) {}
+    Layer(uint priority)
+        : priority(priority) {}
 
-    bool operator<=(const Layer& other) const { return prio <= other.prio; }
-    bool operator< (const Layer& other) const { return prio <  other.prio; }
+    bool operator<=(const Layer& other) const { return priority <= other.priority; }
+    bool operator< (const Layer& other) const { return priority <  other.priority; }
 
-    uint prio;
+    uint priority;
 };
 
 struct BgLayer : Layer
 {
-    BgLayer(uint prio, u16* data, uint flag)
-        : Layer(prio), data(data), flag(flag) {}
+    BgLayer(uint priority, u16* data, uint flag)
+        : Layer(priority), data(data), flag(flag) {}
 
-    bool operator<=(const BgLayer& other) const { return prio == other.prio ? flag <= other.flag : prio <= other.prio; }
-    bool operator< (const BgLayer& other) const { return prio == other.prio ? flag <  other.flag : prio <  other.prio; }
+    bool operator<=(const BgLayer& other) const { return priority == other.priority ? flag <= other.flag : priority <= other.priority; }
+    bool operator< (const BgLayer& other) const { return priority == other.priority ? flag <  other.flag : priority <  other.priority; }
 
     u16 color(uint x) const
     {

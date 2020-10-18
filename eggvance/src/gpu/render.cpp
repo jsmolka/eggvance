@@ -78,7 +78,7 @@ void Gpu::renderBgMode0(int bg)
                         Point(pixel.x ^ (0x7 * entry.flip_x), pixel.y ^ (0x7 * entry.flip_y)),
                         ColorMode(bgcnt.color_mode)
                     );
-                    backgrounds[bg][x] = mmu.pram.colorBG(index, entry.bank);
+                    backgrounds[bg][x] = mmu.pram.colorBg(index, entry.bank);
                 }
             }
             else
@@ -127,7 +127,7 @@ void Gpu::renderBgMode2(int bg)
         int entry  = mmu.vram.readFast<u8>(bgcnt.map_block + offset);
         int index  = mmu.vram.index256x1(bgcnt.tile_block + 0x40 * entry, pixel);
 
-        backgrounds[bg][x] = mmu.pram.colorBG(index);
+        backgrounds[bg][x] = mmu.pram.colorBg(index);
     }
 }
 
@@ -164,7 +164,7 @@ void Gpu::renderBgMode4(int bg)
         int offset = texture.index2d(kScreen.x);
         int index  = mmu.vram.readFast<u8>(io.dispcnt.frame + offset);
 
-        backgrounds[bg][x] = mmu.pram.colorBG(index);
+        backgrounds[bg][x] = mmu.pram.colorBg(index);
     }
 }
 
@@ -192,37 +192,38 @@ void Gpu::renderObjects()
 {
     for (const auto& entry : mmu.oam.entries)
     {
-        if (entry.isDisabled() || !entry.isVisible(io.vcount.value))
+        if (entry.disabled || !entry.isVisible(io.vcount.value))
             continue;
 
-        const auto& origin = entry.origin;
-        const auto& center = entry.center;
-        const auto& dims   = entry.dims;
-        const auto& bounds = entry.bounds;
-        const auto& matrix = entry.affine 
-            ? mmu.oam.matrix(entry.matrix)
-            : kIdentityMatrix;
+        const auto origin      = entry.origin;
+        const auto center      = entry.center;
+        const auto sprite_size = entry.sprite_size;
+        const auto screen_size = entry.screen_size;
+        const auto matrix      = entry.affine ? mmu.oam.matrix(entry.matrix_idx) : kIdentityMatrix;
 
-        int size  = entry.tileSize();
-        int bank  = entry.paletteBank();
-        int tiles = entry.tilesPerRow(io.dispcnt.layout);
+        uint tile_size = entry.tileSize();
+        uint tiles_row = entry.tilesInRow(io.dispcnt.layout);
+        uint bank      = entry.paletteBank();
 
         Point offset(
             -center.x + origin.x - std::min(origin.x, 0),
-            -center.y + io.vcount.value
-        );
+            -center.y + io.vcount.value);
 
-        int end = std::min(origin.x + bounds.x, kScreen.x);
+        int end = std::min(origin.x + screen_size.x, kScreen.x);
 
         for (int x = center.x + offset.x; x < end; ++x, ++offset.x)
         {
-            auto texture = (matrix * offset >> 8) + (dims / 2);
+            auto texture = (matrix * offset >> 8) + (sprite_size / 2);
 
-            if (!(texture >= kOrigin && texture < dims))
+            if (!(texture >= kOrigin && texture < sprite_size))
                 continue;
 
-            if (entry.flipX()) texture.x ^= entry.dims.x - 1;
-            if (entry.flipY()) texture.y ^= entry.dims.y - 1;
+            if (!entry.affine)
+            {
+                texture.x ^= entry.flip_x;
+                texture.y ^= entry.flip_y;
+            }
+
             if (entry.mosaic)
             {
                 texture.x = io.mosaic.obj.mosaicX(texture.x);
@@ -232,24 +233,24 @@ void Gpu::renderObjects()
             const auto tile  = texture / 8;
             const auto pixel = texture % 8;
 
-            u32 addr = mmu.vram.mirror(entry.base_tile + size * tile.index2d(tiles));
+            u32 addr = mmu.vram.mirror(entry.base_addr + tile_size * tile.index2d(tiles_row));
             if (addr < 0x1'4000 && io.dispcnt.isBitmap())
                 continue;
 
             auto& object = objects[x];
 
-            int index = mmu.vram.index(addr, pixel, entry.color_mode);
-            if (index != 0)
+            uint index = mmu.vram.index(addr, pixel, entry.color_mode);
+            if ( index != 0)
             {
-                switch (entry.mode)
+                switch (entry.object_mode)
                 {
-                case kObjectModeAlpha:
                 case kObjectModeNormal:
-                    if (entry.prio < object.prio || !object.opaque())
+                case kObjectModeAlpha:
+                    if (entry.priority < object.priority || !object.opaque())
                     {
-                        object.color = mmu.pram.colorFGOpaque(index, bank);
-                        object.prio  = entry.prio;
-                        object.alpha = entry.mode == kObjectModeAlpha;
+                        object.color    = mmu.pram.colorFgOpaque(index, bank);
+                        object.priority = entry.priority;
+                        object.alpha    = entry.object_mode == kObjectModeAlpha;
                     }
                     break;
 
@@ -268,7 +269,7 @@ void Gpu::renderObjects()
                 objects_alpha |= object.alpha;
             }
 
-            object.prio = std::min(object.prio, entry.prio);
+            object.priority = std::min(object.priority, entry.priority);
         }
     }
 }

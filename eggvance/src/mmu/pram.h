@@ -7,9 +7,9 @@ class Pram : public Ram<0x400>
 public:
     void writeByte(u32 addr, u8 byte);
 
-    u16 colorFG(uint index, uint bank = 0) const;
-    u16 colorBG(uint index, uint bank = 0) const;
-    u16 colorFGOpaque(uint index, uint bank = 0) const;
-    u16 colorBGOpaque(uint index, uint bank = 0) const;
+    u16 colorFg(uint index, uint bank = 0) const;
+    u16 colorBg(uint index, uint bank = 0) const;
+    u16 colorFgOpaque(uint index, uint bank = 0) const;
+    u16 colorBgOpaque(uint index, uint bank = 0) const;
     u16 backdrop() const;
 };

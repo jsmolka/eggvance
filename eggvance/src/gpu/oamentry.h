@@ -8,42 +8,37 @@ class OamEntry
 public:
     OamEntry();
 
-    void writeHalf(uint attr, u16 half);
+    void write(uint attr, u16 half);
+
+    bool isVisible(uint line) const;
 
     uint tileSize() const;
+    uint tilesInRow(uint layout) const;
     uint paletteBank() const;
-    uint tilesPerRow(uint layout) const;
 
-    bool flipX() const;
-    bool flipY() const;
-
-    bool isDisabled() const;
-    bool isVisible(int vcount) const;
-
-    uint affine;
-    uint double_size;
-    uint disabled;
-    uint mode;
-    uint mosaic;
-    uint color_mode;
-    uint shape;
-    uint matrix;
-    uint flip_x;
-    uint flip_y;
-    uint size;
-    uint tile;
-    uint prio;
-    uint bank;
+    uint affine      = 0;
+    uint disabled    = 0;
+    uint object_mode = 0;
+    uint mosaic      = 0;
+    uint color_mode  = 0;
+    uint matrix_idx  = 0;
+    uint flip_x      = 0;
+    uint flip_y      = 0;
+    uint priority    = 0;
+    uint base_addr   = 0;
 
     Point origin;
     Point center;
-    Point dims;
-    Point bounds;
-    u32 base_tile;
+    Point sprite_size;
+    Point screen_size;
 
 private:
-    bool isVisibleX() const;
-    bool isVisibleY(int vcount) const;
+    void compute();
 
-    void update();
+    uint double_size = 0;
+    uint shape       = 0;
+    uint size        = 0;
+    uint base_tile   = 0;
+    uint bank        = 0;
+    uint visible_x   = 0;
 };

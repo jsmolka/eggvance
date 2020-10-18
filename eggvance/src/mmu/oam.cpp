@@ -10,7 +10,7 @@ void Oam::writeHalf(u32 addr, u16 half)
 
     uint attr = addr & 0x6;
     if ( attr < 0x6)
-        entries[addr >> 3].writeHalf(attr, half);
+        entries[addr >> 3].write(attr, half);
 
     writeFast<u16>(addr, half);
 }
