@@ -5,7 +5,7 @@
 #include "arm/arm.h"
 #include "mmu/constants.h"
 
-void MMU::reset()
+void Mmu::reset()
 {
     shell::reconstruct(bios);
     shell::reconstruct(io);
@@ -16,7 +16,7 @@ void MMU::reset()
     shell::reconstruct(vram);
 }
 
-u8 MMU::readByte(u32 addr)
+u8 Mmu::readByte(u32 addr)
 {
     switch (addr >> 24)
     {
@@ -66,7 +66,7 @@ u8 MMU::readByte(u32 addr)
     }
 }
 
-u16 MMU::readHalf(u32 addr)
+u16 Mmu::readHalf(u32 addr)
 {
     switch (addr >> 24)
     {
@@ -116,7 +116,7 @@ u16 MMU::readHalf(u32 addr)
     }
 }
 
-u32 MMU::readWord(u32 addr)
+u32 Mmu::readWord(u32 addr)
 {
     switch (addr >> 24)
     {
@@ -166,7 +166,7 @@ u32 MMU::readWord(u32 addr)
     }
 }
 
-void MMU::writeByte(u32 addr, u8 byte)
+void Mmu::writeByte(u32 addr, u8 byte)
 {
     switch (addr >> 24)
     {
@@ -211,7 +211,7 @@ void MMU::writeByte(u32 addr, u8 byte)
     }
 }
 
-void MMU::writeHalf(u32 addr, u16 half)
+void Mmu::writeHalf(u32 addr, u16 half)
 {
     switch (addr >> 24)
     {
@@ -257,7 +257,7 @@ void MMU::writeHalf(u32 addr, u16 half)
     }
 }
 
-void MMU::writeWord(u32 addr, u32 word)
+void Mmu::writeWord(u32 addr, u32 word)
 {
     switch (addr >> 24)
     {
@@ -303,7 +303,7 @@ void MMU::writeWord(u32 addr, u32 word)
     }
 }
 
-u32 MMU::readUnused(u32 addr) const
+u32 Mmu::readUnused(u32 addr) const
 {
     u32 value = 0;
     if (arm.cpsr.t)
@@ -334,13 +334,13 @@ u32 MMU::readUnused(u32 addr) const
     return value >> ((addr & 0x3) << 3);
 }
 
-bool MMU::isEepromAccess(u32 addr) const
+bool Mmu::isEepromAccess(u32 addr) const
 {
     return (gamepak.save->type == Save::Type::Eeprom)
         && (gamepak.size() <= 0x100'0000 || addr >= 0xDFF'FF00);
 }
 
-u8 MMU::readSave(u32 addr)
+u8 Mmu::readSave(u32 addr)
 {
     switch (gamepak.save->type)
     {
@@ -358,7 +358,7 @@ u8 MMU::readSave(u32 addr)
     }
 }
 
-void MMU::writeSave(u32 addr, u8 byte)
+void Mmu::writeSave(u32 addr, u8 byte)
 {
     switch (gamepak.save->type)
     {

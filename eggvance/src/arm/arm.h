@@ -37,7 +37,7 @@ class Arm : public Registers
 public:
     friend class Io;
     friend class DmaChannel;
-    friend class MMU;
+    friend class Mmu;
 
     Arm();
 

@@ -7,7 +7,7 @@
 #include "mmu/pram.h"
 #include "mmu/vram.h"
 
-class MMU
+class Mmu
 {
 public:
     void reset();
@@ -39,4 +39,4 @@ private:
     Ram<0x08000> iwram;
 };
 
-inline MMU mmu;
+inline Mmu mmu;
