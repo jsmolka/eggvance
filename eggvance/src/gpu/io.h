@@ -281,6 +281,9 @@ public:
             y = bit::seq<4, 4>(byte) + 1;
         }
 
+        bool isDominantX(uint value) const { return value % x == 0; }
+        bool isDominantY(uint value) const { return value % y == 0; }
+
         uint mosaicX(uint value) const { return x * (value / x); }
         uint mosaicY(uint value) const { return y * (value / y); }
 

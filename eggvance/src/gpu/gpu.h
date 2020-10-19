@@ -35,17 +35,13 @@ private:
 
     Point transform(int x, int bg);
 
-    void renderBg(RenderFunc func, int bg);
+    void renderBg(RenderFunc render, int bg);
     void renderBgMode0(int bg);
     void renderBgMode2(int bg);
     void renderBgMode3(int bg);
     void renderBgMode4(int bg);
     void renderBgMode5(int bg);
     void renderObjects();
-
-    void mosaicBg(int bg);
-    bool mosaicAffected(int bg) const;
-    bool mosaicYDominant() const;
 
     void collapse(int begin, int end);
     template<uint Objects>

@@ -142,25 +142,6 @@ void Gpu::present()
     }
 }
 
-void Gpu::mosaicBg(int bg)
-{
-    if (mosaic.bgs.x == 1)
-        return;
-
-    for (int x = 0; x < kScreen.x; ++x)
-        backgrounds[bg][x] = backgrounds[bg][mosaic.bgs.mosaicX(x)];
-}
-
-bool Gpu::mosaicAffected(int bg) const
-{
-    return bgcnt[bg].mosaic && (mosaic.bgs.x > 1 || mosaic.bgs.y > 1);
-}
-
-bool Gpu::mosaicYDominant() const
-{
-    return vcount.value % mosaic.bgs.y == 0;
-}
-
 u32 Gpu::argb(u16 color)
 {
     return 0xFF00'0000

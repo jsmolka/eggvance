@@ -15,26 +15,26 @@ Point Gpu::transform(int x, int bg)
     );
 }
 
-void Gpu::renderBg(RenderFunc func, int bg)
+void Gpu::renderBg(RenderFunc render, int bg)
 {
-    if (~dispcnt.layers & (1 << bg))
+    if ((dispcnt.layers & (1 << bg)) == 0)
         return;
 
-    if (mosaicAffected(bg))
+    if (bgcnt[bg].mosaic && mosaic.bgs.y > 1 && !mosaic.bgs.isDominantY(vcount.value))
     {
-        if (mosaicYDominant())
-        {
-            (this->*func)(bg);
-            mosaicBg(bg);
-        }
-        else
-        {
-            backgrounds[bg].flip();
-        }
+        backgrounds[bg].flip();
     }
     else
     {
-        (this->*func)(bg);
+        std::invoke(render, this, bg);
+
+        if (bgcnt[bg].mosaic && mosaic.bgs.x > 1)
+        {
+            for (int x = 0; x < kScreen.x; ++x)
+            {
+                backgrounds[bg][x] = backgrounds[bg][mosaic.bgs.mosaicX(x)];
+            }
+        }
     }
 }
 
