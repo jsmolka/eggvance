@@ -31,7 +31,7 @@ void Bios::init(const fs::path& path)
 u8 Bios::readByte(u32 addr)
 {
     if (arm.pc < kSize)
-        return data.readByte(addr);
+        return data.readFast<u8>(addr);
     else
         return previous >> (addr & 0x3);
 }
@@ -39,7 +39,7 @@ u8 Bios::readByte(u32 addr)
 u16 Bios::readHalf(u32 addr)
 {
     if (arm.pc < kSize)
-        return data.readHalf(addr);
+        return data.readFast<u16>(addr);
     else
         return previous >> (addr & 0x2);
 }
@@ -47,7 +47,7 @@ u16 Bios::readHalf(u32 addr)
 u32 Bios::readWord(u32 addr)
 {
     if (arm.pc < kSize)
-        return previous = data.readWord(addr);
+        return previous = data.readFast<u32>(addr);
     else
         return previous;
 }

@@ -10,9 +10,8 @@ Point Gpu::transform(int x, int bg)
     bg -= 2;
 
     return Point(
-        bgx[bg].current + bgpa[bg].value * x,
-        bgy[bg].current + bgpc[bg].value * x
-    );
+        bgpa[bg].value * x + bgx[bg].current,
+        bgpc[bg].value * x + bgy[bg].current);
 }
 
 void Gpu::renderBg(RenderFunc render, int bg)
