@@ -22,7 +22,7 @@ void Gpu::renderBg(RenderFunc func, int bg)
 
     if (mosaicAffected(bg))
     {
-        if (mosaicDominant())
+        if (mosaicYDominant())
         {
             (this->*func)(bg);
             mosaicBg(bg);

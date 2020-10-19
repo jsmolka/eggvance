@@ -36,10 +36,11 @@ void Gpu::scanline()
 
     if (objects_exist)
     {
-        objects.fill({});
+        objects.fill(ObjectLayer());
         objects_exist = false;
         objects_alpha = false;
     }
+
     if (dispcnt.layers & kLayerObj)
     {
         renderObjects();
@@ -143,19 +144,11 @@ void Gpu::present()
 
 void Gpu::mosaicBg(int bg)
 {
-    int mosaic_x = mosaic.bgs.x;
-    if (mosaic_x == 1)
+    if (mosaic.bgs.x == 1)
         return;
 
-    u16 color;
     for (int x = 0; x < kScreen.x; ++x)
-    {
-        if (x % mosaic_x == 0)
-        {
-            color = backgrounds[bg][x];
-        }
-        backgrounds[bg][x] = color;
-    }
+        backgrounds[bg][x] = backgrounds[bg][mosaic.bgs.mosaicX(x)];
 }
 
 bool Gpu::mosaicAffected(int bg) const
@@ -163,7 +156,7 @@ bool Gpu::mosaicAffected(int bg) const
     return bgcnt[bg].mosaic && (mosaic.bgs.x > 1 || mosaic.bgs.y > 1);
 }
 
-bool Gpu::mosaicDominant() const
+bool Gpu::mosaicYDominant() const
 {
     return vcount.value % mosaic.bgs.y == 0;
 }

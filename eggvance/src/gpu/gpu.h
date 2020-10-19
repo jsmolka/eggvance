@@ -45,7 +45,7 @@ private:
 
     void mosaicBg(int bg);
     bool mosaicAffected(int bg) const;
-    bool mosaicDominant() const;
+    bool mosaicYDominant() const;
 
     void collapse(int begin, int end);
     template<uint Objects>
@@ -72,11 +72,8 @@ private:
     template<uint Windows>
     const Window& activeWindow(uint x) const;
 
-    template<uint Objects>
-    u16 upperLayer(const BgLayers& layers, uint x);
-    template<uint Objects>
-    u16 upperLayer(const BgLayers& layers, uint x, uint flags);
-
+    template<uint Objects> u16 upperLayer(const BgLayers& layers, uint x);
+    template<uint Objects> u16 upperLayer(const BgLayers& layers, uint x, uint flags);
     template<uint Objects> bool findBlendLayers(const BgLayers& layers, uint x, uint flags, u16& upper);
     template<uint Objects> bool findBlendLayers(const BgLayers& layers, uint x, uint flags, u16& upper, u16& lower);
 
