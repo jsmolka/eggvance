@@ -48,39 +48,37 @@ private:
     bool mosaicDominant() const;
 
     void collapse(int begin, int end);
-    template<int obj_master>
+    template<uint Objects>
     void collapse(const BgLayers& layers);
-    template<int obj_master>
+    template<uint Objects>
     void collapseNN(const BgLayers& layers);
-    template<int obj_master>
+    template<uint Objects>
     void collapseNW(const BgLayers& layers);
-    template<int obj_master, int win_master>
+    template<uint Objects, uint Windows>
     void collapseNW(const BgLayers& layers);
-    template<int obj_master>
+    template<uint Objects>
     void collapseBN(const BgLayers& layers);
-    template<int obj_master, int blend_mode>
+    template<uint Objects, uint BlendMode>
     void collapseBN(const BgLayers& layers);
-    template<int obj_master>
+    template<uint Objects>
     void collapseBW(const BgLayers& layers);
-    template<int obj_master, int blend_mode>
+    template<uint Objects, uint BlendMode>
     void collapseBW(const BgLayers& layers);
-    template<int obj_master, int blend_mode, int win_master>
+    template<uint Objects, uint BlendMode, uint Windows>
     void collapseBW(const BgLayers& layers);
 
-    template<int obj_master>
-    int possibleWindows() const;
-    template<int win_master>
-    const Window& activeWindow(int x) const;
+    template<uint Objects>
+    uint possibleWindows() const;
+    template<uint Windows>
+    const Window& activeWindow(uint x) const;
 
-    template<int obj_master>
-    u16 upperLayer(const BgLayers& layers, int x);
-    template<int obj_master>
-    u16 upperLayer(const BgLayers& layers, int x, int flags);
+    template<uint Objects>
+    u16 upperLayer(const BgLayers& layers, uint x);
+    template<uint Objects>
+    u16 upperLayer(const BgLayers& layers, uint x, uint flags);
 
-    template<int obj_master>
-    bool findBlendLayers(const BgLayers& layers, int x, int flags, u16& upper);
-    template<int obj_master>
-    bool findBlendLayers(const BgLayers& layers, int x, int flags, u16& upper, u16& lower);
+    template<uint Objects> bool findBlendLayers(const BgLayers& layers, uint x, uint flags, u16& upper);
+    template<uint Objects> bool findBlendLayers(const BgLayers& layers, uint x, uint flags, u16& upper, u16& lower);
 
     static u32 argb(u16 color);
 
