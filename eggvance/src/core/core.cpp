@@ -70,12 +70,14 @@ void core::reset()
     gamepak.gpio->reset();
     gamepak.save->reset();
 
-    shell::reconstruct(mmu);
     shell::reconstruct(arm);
-    shell::reconstruct(gpu);
     shell::reconstruct(dma);
-    shell::reconstruct(timer);
+    shell::reconstruct(gpu);
     shell::reconstruct(gamepad);
+    shell::reconstruct(mmu);
+    shell::reconstruct(timer);
+
+    arm.init();
 }
 
 void core::frame()

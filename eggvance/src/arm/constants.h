@@ -18,7 +18,7 @@ enum Irq
     kIrqGamePak = 1 << 13
 };
 
-enum
+enum State
 {
     kStateThumb = 1 << 0,
     kStateHalt  = 1 << 1,

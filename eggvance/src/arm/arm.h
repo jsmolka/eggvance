@@ -8,12 +8,13 @@
 class Arm : public Registers
 {
 public:
-    friend class Io;
     friend class DmaChannel;
+    friend class Io;
     friend class Mmu;
 
     Arm();
 
+    void init();
     void run(int cycles);
     void raise(uint irq);
 

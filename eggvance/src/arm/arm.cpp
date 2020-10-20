@@ -13,9 +13,13 @@ Arm::Arm()
     irq.master.process  = std::bind(&Arm::processIrq, this);
     irq.enable.process  = std::bind(&Arm::processIrq, this);
     irq.request.process = std::bind(&Arm::processIrq, this);
+}
 
-    flushWord();
-    pc += 4;
+void Arm::init()
+{
+    pipe[0] = readWord(pc + 0);
+    pipe[1] = readWord(pc + 4);
+    pc += 8;
 }
 
 void Arm::run(int cycles)
