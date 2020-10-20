@@ -22,10 +22,10 @@ void core::init(int argc, char* argv[])
     using namespace shell;
 
     Options options("eggvance");
-    options.add({   "--help", "-h" }, "Show this help text"    , Options::value<bool>()->optional());
-    options.add({ "--config", "-c" }, "Path to the config file", Options::value<fs::path>("eggvance.ini"));
-    options.add({   "--save", "-s" }, "Path to the save file"  , Options::value<fs::path>()->optional());
-    options.add({            "rom" }, "Path to the ROM file"   , Options::value<fs::path>()->positional()->optional());
+    options.add({   "--help", "-h"         }, "Show help"         , Options::value<bool>()->optional());
+    options.add({ "--config", "-c", "file" }, "Path to the config", Options::value<fs::path>("eggvance.ini"));
+    options.add({   "--save", "-s", "file" }, "Path to the save"  , Options::value<fs::path>()->optional());
+    options.add({      "rom"               }, "Path to the ROM"   , Options::value<fs::path>()->positional()->optional());
 
     try
     {

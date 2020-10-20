@@ -90,7 +90,7 @@ std::string rlist(u16 rlist)
     fmt::memory_buffer buffer;
     buffer.push_back('{');
 
-    for (uint x : bit::iterate(rlist))
+    for (uint x : bit::iterateBits(rlist))
     {
         fmt::format_to(
             std::back_inserter(buffer),
