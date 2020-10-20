@@ -6,7 +6,7 @@
 #include "gpu/constants.h"
 
 template<>
-std::optional<SDL_Scancode> shell::parse(const std::string& data)
+std::optional<SDL_Scancode> shell::utility::parse(const std::string& data)
 {
     const auto value = SDL_GetScancodeFromName(data.c_str());
     return value != SDL_SCANCODE_UNKNOWN
@@ -15,7 +15,7 @@ std::optional<SDL_Scancode> shell::parse(const std::string& data)
 }
 
 template<>
-std::optional<SDL_GameControllerButton> shell::parse(const std::string& data)
+std::optional<SDL_GameControllerButton> shell::utility::parse(const std::string& data)
 {
     const auto value = SDL_GameControllerGetButtonFromString(data.c_str());
     return value != SDL_CONTROLLER_BUTTON_INVALID
@@ -24,7 +24,7 @@ std::optional<SDL_GameControllerButton> shell::parse(const std::string& data)
 }
 
 template<>
-std::optional<Save::Type> shell::parse(const std::string& data)
+std::optional<Save::Type> shell::utility::parse(const std::string& data)
 {
     const auto type = shell::toLowerCopy(data);
 
@@ -38,7 +38,7 @@ std::optional<Save::Type> shell::parse(const std::string& data)
 }
 
 template<>
-std::optional<Gpio::Type> shell::parse(const std::string& data)
+std::optional<Gpio::Type> shell::utility::parse(const std::string& data)
 {
     const auto type = shell::toLowerCopy(data);
 
