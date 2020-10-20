@@ -1,6 +1,7 @@
 #include "io.h"
 
-#include "arm/arm.h"
+#include "arm.h"
+#include "constants.h"
 
 template<uint Index>
 void HaltControl::write(u8 byte)

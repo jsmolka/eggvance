@@ -2,7 +2,8 @@
 
 #include <utility>
 
-#include "arm/decode.h"
+#include "constants.h"
+#include "decode.h"
 #include "base/macros.h"
 #include "dma/dma.h"
 #include "timer/timer.h"

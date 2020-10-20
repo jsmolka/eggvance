@@ -1,6 +1,7 @@
 #include "dmachannel.h"
 
 #include "arm/arm.h"
+#include "arm/constants.h"
 #include "gamepak/eeprom.h"
 #include "gamepak/gamepak.h"
 #include "mmu/mmu.h"

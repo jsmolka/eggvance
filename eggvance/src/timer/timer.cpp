@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include "arm/arm.h"
+#include "arm/constants.h"
 
 Timer::Timer()
 {

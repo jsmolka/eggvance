@@ -4,6 +4,7 @@
 
 #include "constants.h"
 #include "arm/arm.h"
+#include "arm/constants.h"
 #include "base/bit.h"
 #include "base/macros.h"
 #include "core/videocontext.h"

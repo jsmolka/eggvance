@@ -1,6 +1,7 @@
 #include "arm.h"
 
-#include "arm/decode.h"
+#include "constants.h"
+#include "decode.h"
 
 template<uint Instr>
 void Arm::Thumb_MoveShiftedRegister(u16 instr)

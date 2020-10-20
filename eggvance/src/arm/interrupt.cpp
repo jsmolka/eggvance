@@ -1,5 +1,7 @@
 #include "arm.h"
 
+#include "constants.h"
+
 enum ExceptionVector
 {
     kVectorReset         = 0x00,
