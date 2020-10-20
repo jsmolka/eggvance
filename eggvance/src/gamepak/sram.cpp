@@ -6,6 +6,11 @@ Sram::Sram()
     data.resize(kSize, 0xFF);
 }
  
+void Sram::reset()
+{
+
+}
+
 u8 Sram::read(u32 addr)
 {
     return data[addr];

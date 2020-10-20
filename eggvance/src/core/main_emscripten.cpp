@@ -10,7 +10,7 @@
 #include "core/framecounter.h"
 #include "core/inputcontext.h"
 #include "core/videocontext.h"
-#include "mmu/mmu.h"
+#include "gamepak/gamepak.h"
 
 using namespace emscripten;
 
@@ -98,13 +98,13 @@ void emulate()
 
 void eggvanceLoadRom(const std::string& file)
 {
-    mmu.gamepak.loadRom(file, true);
+    gamepak.loadRom(file, true);
     emulateMain(kRefreshRate);
 }
 
 void eggvanceLoadSave(const std::string& file)
 {
-    mmu.gamepak.loadSave(file);
+    gamepak.loadSave(file);
     emulateMain(kRefreshRate);
 }
 

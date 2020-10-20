@@ -6,6 +6,10 @@ Rtc::Rtc()
 
 }
 
+void Rtc::reset()
+{
+}
+
 u16 Rtc::read(u32 addr)
 {
     return 0;

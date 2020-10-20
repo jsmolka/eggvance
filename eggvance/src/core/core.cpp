@@ -11,6 +11,7 @@
 #include "core/inputcontext.h"
 #include "core/videocontext.h"
 #include "dma/dma.h"
+#include "gamepak/gamepak.h"
 #include "gamepad/gamepad.h"
 #include "gpu/gpu.h"
 #include "mmu/mmu.h"
@@ -50,10 +51,10 @@ void core::init(int argc, char* argv[])
 
         if (rom.has_value())
         {
-            mmu.gamepak.loadRom(*rom, !sav);
+            gamepak.loadRom(*rom, !sav);
 
             if (sav.has_value())
-                mmu.gamepak.loadSave(*sav);
+                gamepak.loadSave(*sav);
         }
     }
     catch (const ParseError& error)
@@ -66,13 +67,15 @@ void core::init(int argc, char* argv[])
 
 void core::reset()
 {
-    mmu.reset();
+    gamepak.gpio->reset();
+    gamepak.save->reset();
 
+    shell::reconstruct(mmu);
     shell::reconstruct(arm);
-    shell::reconstruct(dma);
-    shell::reconstruct(gamepad);
     shell::reconstruct(gpu);
+    shell::reconstruct(dma);
     shell::reconstruct(timer);
+    shell::reconstruct(gamepad);
 }
 
 void core::frame()
@@ -102,10 +105,10 @@ void core::frame()
 void core::updateTitle()
 {
     const auto title = fmt::format(
-        mmu.gamepak.header.title.empty()
+        gamepak.header.title.empty()
             ? "eggvance"
             : "eggvance - {0}",
-        mmu.gamepak.header.title);
+        gamepak.header.title);
 
     video_ctx.title(title);
 }
@@ -113,10 +116,10 @@ void core::updateTitle()
 void core::updateTitle(double fps)
 {
     const auto title = fmt::format(
-        mmu.gamepak.header.title.empty()
+        gamepak.header.title.empty()
             ? "eggvance - {1:.1f} fps"
             : "eggvance - {0} - {1:.1f} fps",
-        mmu.gamepak.header.title, fps);
+        gamepak.header.title, fps);
 
     video_ctx.title(title);
 }

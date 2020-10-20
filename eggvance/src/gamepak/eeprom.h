@@ -10,6 +10,8 @@ public:
     static constexpr uint kSize4  = 0x0200;
     static constexpr uint kSize64 = 0x2000;
 
+    void reset() final;
+
     u8 read(u32 addr) final;
     void write(u32 addr, u8 byte) final;
 

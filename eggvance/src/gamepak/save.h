@@ -25,6 +25,8 @@ public:
 
     bool init(const fs::path& file);
 
+    virtual void reset();
+
     virtual u8 read(u32 addr);
     virtual void write(u32 addr, u8 byte);
 

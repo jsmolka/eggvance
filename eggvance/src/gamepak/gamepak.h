@@ -34,3 +34,5 @@ private:
     fs::path file;
     std::vector<u8> rom;
 };
+
+inline GamePak gamepak;

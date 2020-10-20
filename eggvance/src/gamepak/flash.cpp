@@ -13,7 +13,15 @@ Flash::Flash(uint size)
 
     data.resize(size, 0xFF);
 
-    bank = data.data();
+    reset();
+}
+
+void Flash::reset()
+{
+    command = 0;
+    chip    = false;
+    erase   = false;
+    bank    = data.data();
 }
 
 u8 Flash::read(u32 addr)

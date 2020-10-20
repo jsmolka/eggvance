@@ -79,6 +79,11 @@ bool Save::init(const fs::path& file)
     return true;
 }
 
+void Save::reset()
+{
+
+}
+
 u8 Save::read(u32 addr)
 {
     return 0;

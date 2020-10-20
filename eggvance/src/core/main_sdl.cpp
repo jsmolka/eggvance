@@ -9,7 +9,7 @@
 #include "core/inputcontext.h"
 #include "core/synchronizer.h"
 #include "core/videocontext.h"
-#include "mmu/mmu.h"
+#include "gamepak/gamepak.h"
 
 bool running = true;
 FrameCounter counter;
@@ -29,9 +29,9 @@ void processDropEvent(const SDL_DropEvent& event)
     SDL_free(event.file);
 
     if (file.extension() == ".sav")
-        mmu.gamepak.loadSave(file);
+        gamepak.loadSave(file);
     else
-        mmu.gamepak.loadRom(file, true);
+        gamepak.loadRom(file, true);
 
     reset();
 
@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
     {
         core::init(argc, argv);
 
-        while (running && mmu.gamepak.size() == 0)
+        while (running && gamepak.size() == 0)
         {
             processEvents();
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "gamepak/gamepak.h"
 #include "mmu/bios.h"
 #include "mmu/io.h"
 #include "mmu/oam.h"
@@ -10,8 +9,6 @@
 class Mmu
 {
 public:
-    void reset();
-
     u8  readByte(u32 addr);
     u16 readHalf(u32 addr);
     u32 readWord(u32 addr);
@@ -23,7 +20,6 @@ public:
     u32 readUnused(u32 addr) const;
 
     Bios bios;
-    GamePak gamepak;
     Pram pram;
     Vram vram;
     Oam oam;

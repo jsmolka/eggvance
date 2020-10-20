@@ -2,6 +2,7 @@
 
 #include "arm/arm.h"
 #include "gamepak/eeprom.h"
+#include "gamepak/gamepak.h"
 #include "mmu/mmu.h"
 
 enum AddressControl
@@ -73,7 +74,7 @@ void DmaChannel::run(int& cycles)
 
 bool DmaChannel::isEeprom(u32 addr)
 {
-    return mmu.gamepak.size() <= 0x100'0000
+    return gamepak.size() <= 0x100'0000
         ? addr >= 0xD00'0000 && addr < 0xE00'0000
         : addr >= 0xDFF'FF00 && addr < 0xE00'0000;
 }
@@ -117,7 +118,7 @@ void DmaChannel::initTransfer()
     bool eeprom_w = id == 3 && isEeprom(dst_addr);
     bool eeprom_r = id == 3 && isEeprom(src_addr);
 
-    if ((eeprom_r || eeprom_w) && mmu.gamepak.save->type == Save::Type::Eeprom)
+    if ((eeprom_r || eeprom_w) && gamepak.save->type == Save::Type::Eeprom)
     {
         initEeprom();
 
@@ -125,13 +126,13 @@ void DmaChannel::initTransfer()
         {
             transfer = [&]() {
                 u8 byte = static_cast<u8>(mmu.readHalf(src_addr));
-                mmu.gamepak.save->write(dst_addr, byte);
+                gamepak.save->write(dst_addr, byte);
             };
         }
         else
         {
             transfer = [&]() {
-                u8 byte = mmu.gamepak.save->read(src_addr);
+                u8 byte = gamepak.save->read(src_addr);
                 mmu.writeHalf(dst_addr, byte);
             };
         }
@@ -162,18 +163,18 @@ void DmaChannel::initEeprom()
     constexpr uint kBus14Write = 81;
     constexpr uint kBus14ReadSetAddress = 17;
 
-    if (mmu.gamepak.save->data.empty())
+    if (gamepak.save->data.empty())
     {
         switch (pending)
         {
         case kBus6Write:
         case kBus6ReadSetAddress:
-            mmu.gamepak.save->data.resize(Eeprom::kSize4, 0xFF);
+            gamepak.save->data.resize(Eeprom::kSize4, 0xFF);
             break;
 
         case kBus14Write:
         case kBus14ReadSetAddress:
-            mmu.gamepak.save->data.resize(Eeprom::kSize64, 0xFF);
+            gamepak.save->data.resize(Eeprom::kSize64, 0xFF);
             break;
         }
     }

@@ -12,6 +12,11 @@ Gpio::Gpio(Type type)
 
 }
 
+void Gpio::reset()
+{
+
+}
+
 u16 Gpio::read(u32 addr)
 {
     return 0;

@@ -4,17 +4,7 @@
 
 #include "arm/arm.h"
 #include "mmu/constants.h"
-
-void Mmu::reset()
-{
-    shell::reconstruct(bios);
-    shell::reconstruct(io);
-    shell::reconstruct(ewram);
-    shell::reconstruct(iwram);
-    shell::reconstruct(oam);
-    shell::reconstruct(pram);
-    shell::reconstruct(vram);
-}
+#include "gamepak/gamepak.h"
 
 u8 Mmu::readByte(u32 addr)
 {

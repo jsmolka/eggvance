@@ -3,7 +3,15 @@
 Eeprom::Eeprom()
     : Save(Type::Eeprom)
 {
-    state = State::Receive;
+    reset();
+}
+
+void Eeprom::reset()
+{
+    state   = State::Receive;
+    count   = 0;
+    buffer  = 0;
+    address = 0;
 }
 
 u8 Eeprom::read(u32 addr)
