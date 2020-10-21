@@ -5,11 +5,12 @@
 #include <shell/fmt/compile.h>
 #include <shell/fmt/format.h>
 
-#include "arm/decode.h"
+#include "decode.h"
 
 #define MNEMONIC "{:<8}"
 
-static constexpr std::array<const char*, 43> kBiosFunctions = {
+static constexpr std::array<const char*, 43> kBiosFunctions =
+{
     "SoftReset",
     "RegisterRamReset",
     "Halt",
@@ -283,6 +284,14 @@ std::string Arm_DataProcessing(u32 instr, u32 pc)
 
 std::string Arm_StatusTransfer(u32 instr)
 {
+    enum Bit
+    {
+        kBitC = 1 << 16,
+        kBitX = 1 << 17,
+        kBitS = 1 << 18,
+        kBitF = 1 << 19
+    };
+
     uint write = bit::seq<21, 1>(instr);
     uint spsr  = bit::seq<22, 1>(instr);
 
@@ -306,10 +315,10 @@ std::string Arm_StatusTransfer(u32 instr)
         }
 
         std::string fsxc;
-        if (instr & (1 << 19)) fsxc.append("f");
-        if (instr & (1 << 18)) fsxc.append("s");
-        if (instr & (1 << 17)) fsxc.append("x");
-        if (instr & (1 << 16)) fsxc.append("c");
+        if (instr & kBitF) fsxc.append("f");
+        if (instr & kBitS) fsxc.append("s");
+        if (instr & kBitX) fsxc.append("x");
+        if (instr & kBitC) fsxc.append("c");
 
         const auto mnemonic = fmt::format(
             FMT_COMPILE("msr{}"),

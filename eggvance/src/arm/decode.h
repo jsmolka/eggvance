@@ -1,6 +1,7 @@
 #pragma once
 
 #include "base/bit.h"
+#include "base/int.h"
 
 enum class InstructionArm
 {

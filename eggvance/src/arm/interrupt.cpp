@@ -21,9 +21,9 @@ void Arm::raise(uint irq)
     processIrq();
 }
 
-void Arm::interrupt(u32 pc, u32 lr, PSR::Mode mode)
+void Arm::interrupt(u32 pc, u32 lr, Psr::Mode mode)
 {
-    PSR cpsr = this->cpsr;
+    Psr cpsr = this->cpsr;
     switchMode(mode);
     spsr = cpsr;
 
@@ -41,14 +41,14 @@ void Arm::interruptHw()
 {
     u32 lr = pc - 2 * cpsr.size() + 4;
 
-    interrupt(kVectorIrq, lr, PSR::kModeIrq);
+    interrupt(kVectorIrq, lr, Psr::kModeIrq);
 }
 
 void Arm::interruptSw()
 {
     u32 lr = pc - cpsr.size();
 
-    interrupt(kVectorSwi, lr, PSR::kModeSvc);
+    interrupt(kVectorSwi, lr, Psr::kModeSvc);
 }
 
 void Arm::processIrq()

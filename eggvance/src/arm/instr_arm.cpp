@@ -164,7 +164,7 @@ void Arm::Arm_DataProcessing(u32 instr)
     {
         if (kFlags)
         {
-            PSR spsr = this->spsr;
+            Psr spsr = this->spsr;
             switchMode(spsr.m);
             cpsr = spsr;
         }
@@ -184,6 +184,14 @@ void Arm::Arm_DataProcessing(u32 instr)
 template<uint Instr>
 void Arm::Arm_StatusTransfer(u32 instr)
 {
+    enum Bit
+    {
+        kBitC = 1 << 16,
+        kBitX = 1 << 17,
+        kBitS = 1 << 18,
+        kBitF = 1 << 19
+    };
+
     constexpr uint kWrite = bit::seq<21, 1>(Instr);
     constexpr uint kSpsr  = bit::seq<22, 1>(Instr);
     constexpr uint kImmOp = bit::seq<25, 1>(Instr);
@@ -204,10 +212,10 @@ void Arm::Arm_StatusTransfer(u32 instr)
         }
 
         u32 mask = 0;
-        if (instr & (1 << 19)) mask |= 0xFF00'0000;
-        if (instr & (1 << 18)) mask |= 0x00FF'0000;
-        if (instr & (1 << 17)) mask |= 0x0000'FF00;
-        if (instr & (1 << 16)) mask |= 0x0000'00FF;
+        if (instr & kBitC) mask |= 0x0000'00FF;
+        if (instr & kBitX) mask |= 0x0000'FF00;
+        if (instr & kBitS) mask |= 0x00FF'0000;
+        if (instr & kBitF) mask |= 0xFF00'0000;
 
         if (kSpsr)
         {
@@ -215,7 +223,7 @@ void Arm::Arm_StatusTransfer(u32 instr)
         }
         else
         {
-            if (instr & (1 << 16))
+            if (instr & kBitC)
                 switchMode(op & 0x1F);
 
             cpsr = (cpsr & ~mask) | (op & mask);
@@ -490,7 +498,7 @@ void Arm::Arm_BlockDataTransfer(u32 instr)
 
     uint mode = cpsr.m;
     if (kUserMode)
-        switchMode(PSR::kModeUsr);
+        switchMode(Psr::kModeUsr);
 
     if (rlist != 0)
     {

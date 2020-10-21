@@ -100,17 +100,17 @@ void DmaChannel::initCycles()
 
     if (control.word)
     {
-        cycles_s += arm.waitcnt.cyclesWord(src_addr, true);
-        cycles_s += arm.waitcnt.cyclesWord(dst_addr, true);
-        cycles_n += arm.waitcnt.cyclesWord(src_addr, false);
-        cycles_n += arm.waitcnt.cyclesWord(dst_addr, false);
+        cycles_s += arm.wait_control.cyclesWord(src_addr, true);
+        cycles_s += arm.wait_control.cyclesWord(dst_addr, true);
+        cycles_n += arm.wait_control.cyclesWord(src_addr, false);
+        cycles_n += arm.wait_control.cyclesWord(dst_addr, false);
     }
     else
     {
-        cycles_s += arm.waitcnt.cyclesHalf(src_addr, true);
-        cycles_s += arm.waitcnt.cyclesHalf(dst_addr, true);
-        cycles_n += arm.waitcnt.cyclesHalf(src_addr, false);
-        cycles_n += arm.waitcnt.cyclesHalf(dst_addr, false);
+        cycles_s += arm.wait_control.cyclesHalf(src_addr, true);
+        cycles_s += arm.wait_control.cyclesHalf(dst_addr, true);
+        cycles_n += arm.wait_control.cyclesHalf(src_addr, false);
+        cycles_n += arm.wait_control.cyclesHalf(dst_addr, false);
     }
 }
 

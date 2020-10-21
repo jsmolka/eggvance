@@ -3,7 +3,7 @@
 #include "base/bit.h"
 #include "base/int.h"
 
-class PSR
+class Psr
 {
 public:
     enum Mode
@@ -17,7 +17,7 @@ public:
         kModeUnd = 0b11011
     };
 
-    PSR& operator=(u32 value)
+    Psr& operator=(u32 value)
     {
         m = bit::seq< 0, 5>(value);
         t = bit::seq< 5, 1>(value);

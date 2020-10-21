@@ -65,15 +65,13 @@ Registers::Bank Registers::modeToBank(uint mode)
 {
     switch (mode)
     {
-    case PSR::kModeUsr: return kBankDef;
-    case PSR::kModeSys: return kBankDef;
-    case PSR::kModeFiq: return kBankFiq;
-    case PSR::kModeIrq: return kBankIrq;
-    case PSR::kModeSvc: return kBankSvc;
-    case PSR::kModeAbt: return kBankAbt;
-    case PSR::kModeUnd: return kBankUnd;
-
-    default:
-        return kBankDef;
+    case Psr::kModeUsr: return kBankDef;
+    case Psr::kModeSys: return kBankDef;
+    case Psr::kModeFiq: return kBankFiq;
+    case Psr::kModeIrq: return kBankIrq;
+    case Psr::kModeSvc: return kBankSvc;
+    case Psr::kModeAbt: return kBankAbt;
+    case Psr::kModeUnd: return kBankUnd;
     }
+    return kBankDef;
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "arm/psr.h"
+#include "psr.h"
 
 class Registers
 {
@@ -19,8 +19,8 @@ public:
         u32 regs[16] = {};
     };
 
-    PSR cpsr;
-    PSR spsr;
+    Psr cpsr;
+    Psr spsr;
 
 protected:
     void switchMode(uint mode);
