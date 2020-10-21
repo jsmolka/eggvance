@@ -1,7 +1,7 @@
 #pragma once
 
-#include "base/bit.h"
-#include "base/int.h"
+#include "bit.h"
+#include "int.h"
 
 template<typename Integral, uint Mask>
 class RegisterBase

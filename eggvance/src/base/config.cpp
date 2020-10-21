@@ -2,7 +2,7 @@
 
 #include <shell/ini.h>
 
-#include "base/utility.h"
+#include "utility.h"
 #include "gpu/constants.h"
 
 template<>

@@ -2,7 +2,7 @@
 
 #include <shell/fmt/format.h>
 
-#include "base/sdl2.h"
+#include "sdl2.h"
 
 template<typename... Args>
 void message(const std::string& format, Args&&... args)
@@ -10,7 +10,7 @@ void message(const std::string& format, Args&&... args)
     const std::string message = fmt::format(format, std::forward<Args>(args)...);
 
     fmt::print(message);
-    SDL_ShowSimpleMessageBox(0, "Attention", message.c_str(), NULL);
+    SDL_ShowSimpleMessageBox(0, "Message", message.c_str(), NULL);
 }
 
 template<typename... Args>

@@ -4,15 +4,15 @@
 #include <shell/options.h>
 #include <shell/utility.h>
 
+#include "audiocontext.h"
+#include "inputcontext.h"
+#include "videocontext.h"
 #include "arm/arm.h"
 #include "base/config.h"
 #include "base/utility.h"
-#include "core/audiocontext.h"
-#include "core/inputcontext.h"
-#include "core/videocontext.h"
 #include "dma/dma.h"
-#include "gamepak/gamepak.h"
 #include "gamepad/gamepad.h"
+#include "gamepak/gamepak.h"
 #include "gpu/gpu.h"
 #include "mmu/mmu.h"
 #include "timer/timer.h"

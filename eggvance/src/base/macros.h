@@ -2,7 +2,7 @@
 
 #include <shell/macros.h>
 
-#include "base/int.h"
+#include "int.h"
 
 #define INDEXED_CASE(label, index, ...)         \
     case label + index:                         \

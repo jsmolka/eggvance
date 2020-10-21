@@ -2,13 +2,13 @@
 
 #if !SHELL_CC_EMSCRIPTEN
 
+#include "core.h"
+#include "framecounter.h"
+#include "inputcontext.h"
+#include "synchronizer.h"
+#include "videocontext.h"
 #include "base/config.h"
 #include "base/utility.h"
-#include "core/core.h"
-#include "core/framecounter.h"
-#include "core/inputcontext.h"
-#include "core/synchronizer.h"
-#include "core/videocontext.h"
 #include "gamepak/gamepak.h"
 
 bool running = true;
@@ -41,18 +41,14 @@ void processDropEvent(const SDL_DropEvent& event)
 template<typename Input>
 void processInputEvent(const Shortcuts<Input>& shortcuts, Input input)
 {
-    if (input == shortcuts.reset)
-        core::reset();
-
-    if (input == shortcuts.fullscreen)
-        video_ctx.fullscreen();
-
-    if (input == shortcuts.fr_hardware) synchronizer = Synchronizer(kRefreshRate);
-    if (input == shortcuts.fr_custom_1) synchronizer = Synchronizer(config.framerate[0]);
-    if (input == shortcuts.fr_custom_2) synchronizer = Synchronizer(config.framerate[1]);
-    if (input == shortcuts.fr_custom_3) synchronizer = Synchronizer(config.framerate[2]);
-    if (input == shortcuts.fr_custom_4) synchronizer = Synchronizer(config.framerate[3]);
-    if (input == shortcuts.fr_unbound)  synchronizer = Synchronizer(6000);
+    if      (input == shortcuts.reset)       core::reset();
+    else if (input == shortcuts.fullscreen)  video_ctx.fullscreen();
+    else if (input == shortcuts.fr_hardware) synchronizer = Synchronizer(kRefreshRate);
+    else if (input == shortcuts.fr_custom_1) synchronizer = Synchronizer(config.framerate[0]);
+    else if (input == shortcuts.fr_custom_2) synchronizer = Synchronizer(config.framerate[1]);
+    else if (input == shortcuts.fr_custom_3) synchronizer = Synchronizer(config.framerate[2]);
+    else if (input == shortcuts.fr_custom_4) synchronizer = Synchronizer(config.framerate[3]);
+    else if (input == shortcuts.fr_unbound)  synchronizer = Synchronizer(6000);
 }
 
 void processEvents()

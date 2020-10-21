@@ -2,53 +2,50 @@
 
 #if SHELL_CC_EMSCRIPTEN
 
+#include <cmath>
+
 #include <emscripten.h>
 #include <emscripten/bind.h>
 
+#include "core.h"
+#include "framecounter.h"
+#include "inputcontext.h"
+#include "videocontext.h"
 #include "base/config.h"
-#include "core/core.h"
-#include "core/framecounter.h"
-#include "core/inputcontext.h"
-#include "core/videocontext.h"
 #include "gamepak/gamepak.h"
 
 using namespace emscripten;
 
 FrameCounter counter;
 
-void idle();
-void idleMain()
-{
-    emscripten_cancel_main_loop();
-    emscripten_set_main_loop(idle, 0, 1);
-}
+using Frame = void(*)(void);
 
-void emulate();
-void emulateMain(uint fps)
+void reset()
 {
     core::reset();
     core::updateTitle();
     counter = FrameCounter();
-
-    emscripten_cancel_main_loop();
-    emscripten_set_main_loop(emulate, fps, 1);
 }
+
+void setMainLoop(Frame frame, double fps)
+{
+    emscripten_cancel_main_loop();
+    emscripten_set_main_loop(frame, std::lrint(fps), 1);
+}
+
+void emulate();
 
 template<typename Input>
 void processInputEvent(const Shortcuts<Input>& shortcuts, Input input)
 {
-    if (input == shortcuts.reset)
-        core::reset();
-
-    if (input == shortcuts.fullscreen)
-        video_ctx.fullscreen();
-
-    if (input == shortcuts.fr_hardware) emulateMain(kRefreshRate);
-    if (input == shortcuts.fr_custom_1) emulateMain(config.framerate[0]);
-    if (input == shortcuts.fr_custom_2) emulateMain(config.framerate[1]);
-    if (input == shortcuts.fr_custom_3) emulateMain(config.framerate[2]);
-    if (input == shortcuts.fr_custom_4) emulateMain(config.framerate[3]);
-    if (input == shortcuts.fr_unbound)  emulateMain(6000);
+    if      (input == shortcuts.reset)       core::reset();
+    else if (input == shortcuts.fullscreen)  video_ctx.fullscreen();
+    else if (input == shortcuts.fr_hardware) setMainLoop(emulate, kRefreshRate);
+    else if (input == shortcuts.fr_custom_1) setMainLoop(emulate, config.framerate[0]);
+    else if (input == shortcuts.fr_custom_2) setMainLoop(emulate, config.framerate[1]);
+    else if (input == shortcuts.fr_custom_3) setMainLoop(emulate, config.framerate[2]);
+    else if (input == shortcuts.fr_custom_4) setMainLoop(emulate, config.framerate[3]);
+    else if (input == shortcuts.fr_unbound)  setMainLoop(emulate, 6000);
 }
 
 void processEvents()
@@ -99,13 +96,15 @@ void emulate()
 void eggvanceLoadRom(const std::string& file)
 {
     gamepak.loadRom(file, true);
-    emulateMain(kRefreshRate);
+    reset();
+    setMainLoop(emulate, kRefreshRate);
 }
 
 void eggvanceLoadSave(const std::string& file)
 {
     gamepak.loadSave(file);
-    emulateMain(kRefreshRate);
+    reset();
+    setMainLoop(emulate, kRefreshRate);
 }
 
 EMSCRIPTEN_BINDINGS(eggvance)
@@ -120,7 +119,7 @@ int main(int argc, char* argv[])
     {
         core::init(argc, argv);
 
-        idleMain();
+        setMainLoop(idle, 0);
     }
     catch (const std::exception& ex)
     {

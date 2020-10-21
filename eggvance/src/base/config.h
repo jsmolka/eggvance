@@ -1,7 +1,7 @@
 #pragma once
 
-#include "base/filesystem.h"
-#include "base/sdl2.h"
+#include "filesystem.h"
+#include "sdl2.h"
 #include "gamepak/gpio.h"
 #include "gamepak/save.h"
 
