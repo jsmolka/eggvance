@@ -3,8 +3,8 @@
 #include <optional>
 #include <string>
 
-#include "gamepak/gpio.h"
-#include "gamepak/save.h"
+#include "gpio.h"
+#include "save.h"
 
 class Overwrite
 {

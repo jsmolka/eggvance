@@ -43,11 +43,11 @@ void Timer::run(int cycles)
 
 void Timer::runUntilIrq(int& cycles)
 {
-    int rem = event - count;
-    if (rem < cycles)
+    int pending = event - count;
+    if (pending < cycles)
     {
-        run(rem);
-        cycles -= rem;
+        run(pending);
+        cycles -= pending;
     }
     else
     {

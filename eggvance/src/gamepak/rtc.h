@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gamepak/gpio.h"
+#include "gpio.h"
 
 class Rtc : public Gpio
 {

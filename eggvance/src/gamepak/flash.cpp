@@ -1,8 +1,8 @@
 #include "flash.h"
 
 #include <algorithm>
-#include <climits>
 
+#include "base/bit.h"
 #include "base/macros.h"
 
 Flash::Flash(uint size)
@@ -32,7 +32,7 @@ u8 Flash::read(u32 addr)
             ? kChipMacronix512
             : kChipMacronix1024;
 
-        return static_cast<u8>(macronix >> (CHAR_BIT * addr));
+        return bit::byte(macronix, addr);
     }
     return bank[addr];
 }

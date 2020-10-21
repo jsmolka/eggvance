@@ -3,8 +3,8 @@
 #include <memory>
 #include <vector>
 
-#include "gamepak/header.h"
-#include "gamepak/overwrites.h"
+#include "header.h"
+#include "overwrites.h"
 
 class GamePak
 {

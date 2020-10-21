@@ -1,10 +1,16 @@
 #include "timerchannel.h"
 
+#include "constants.h"
 #include "arm/arm.h"
 #include "arm/constants.h"
-#include "timer/constants.h"
 
 constexpr uint kOverflow = 0x1'0000;
+
+TimerChannel::TimerChannel(uint id)
+    : id(id)
+{
+
+}
 
 void TimerChannel::start()
 {

@@ -5,9 +5,11 @@
 #include "io.h"
 #include "registers.h"
 
-class Arm : public ArmIo, public Registers
+class Arm : public Registers
 {
 public:
+    friend class DmaChannel;
+    friend class Io;
     friend class Mmu;
 
     Arm();
@@ -118,6 +120,16 @@ private:
     int cycles    = 0;
     u32 prev_addr = 0;
     u32 pipe[2]   = {};
+
+    HaltControl haltcnt;
+    WaitControl waitcnt;
+
+    struct
+    {
+        IrqMaster  master;
+        IrqEnable  enable;
+        IrqRequest request;
+    } irq;
 };
 
 inline Arm arm;

@@ -13,6 +13,7 @@ public:
 
     Gpio();
     explicit Gpio(Type type);
+    virtual ~Gpio() = default;
 
     virtual void reset();
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gamepak/save.h"
+#include "save.h"
 
 class Sram : public Save
 {

@@ -9,42 +9,42 @@ bool Arm::isSequential(u32 addr) const
 
 u8 Arm::readByte(u32 addr)
 {
-    cycles -= wait_control.cyclesHalf(addr, isSequential(addr));
+    cycles -= waitcnt.cyclesHalf(addr, isSequential(addr));
     prev_addr = addr;
     return mmu.readByte(addr);
 }
 
 u16 Arm::readHalf(u32 addr)
 {
-    cycles -= wait_control.cyclesHalf(addr, isSequential(addr));
+    cycles -= waitcnt.cyclesHalf(addr, isSequential(addr));
     prev_addr = addr;
     return mmu.readHalf(addr);
 }
 
 u32 Arm::readWord(u32 addr)
 {
-    cycles -= wait_control.cyclesWord(addr, isSequential(addr));
+    cycles -= waitcnt.cyclesWord(addr, isSequential(addr));
     prev_addr = addr;
     return mmu.readWord(addr);
 }
 
 void Arm::writeByte(u32 addr, u8 byte)
 {
-    cycles -= wait_control.cyclesHalf(addr, isSequential(addr));
+    cycles -= waitcnt.cyclesHalf(addr, isSequential(addr));
     prev_addr = addr;
     mmu.writeByte(addr, byte);
 }
 
 void Arm::writeHalf(u32 addr, u16 half)
 {
-    cycles -= wait_control.cyclesHalf(addr, isSequential(addr));
+    cycles -= waitcnt.cyclesHalf(addr, isSequential(addr));
     prev_addr = addr;
     mmu.writeHalf(addr, half);
 }
 
 void Arm::writeWord(u32 addr, u32 word)
 {
-    cycles -= wait_control.cyclesWord(addr, isSequential(addr));
+    cycles -= waitcnt.cyclesWord(addr, isSequential(addr));
     prev_addr = addr;
     mmu.writeWord(addr, word);
 }

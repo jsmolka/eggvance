@@ -3,8 +3,8 @@
 #include <array>
 #include <vector>
 
-#include "timer/constants.h"
-#include "timer/timerchannel.h"
+#include "constants.h"
+#include "timerchannel.h"
 
 class Timer
 {

@@ -1,12 +1,11 @@
 #pragma once
 
-#include "dma/io.h"
+#include "io.h"
 
 class DmaChannel
 {
 public:
-    DmaChannel(uint id)
-        : id(id) {}
+    DmaChannel(uint id);
 
     void start();
     void run(int& cycles);

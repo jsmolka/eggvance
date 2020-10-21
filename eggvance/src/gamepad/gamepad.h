@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gamepad/io.h"
+#include "io.h"
 
 class Gamepad
 {

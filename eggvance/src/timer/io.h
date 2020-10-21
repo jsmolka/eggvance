@@ -36,20 +36,21 @@ public:
     {
         static constexpr uint kPrescalers[8] = { 1, 64, 256, 1024, 1, 1, 1, 1 };
 
-        if (Index > 0) return;
-
         Register::write<Index>(byte);
 
-        run_channels();
+        if (Index == 0)
+        {
+            run_channels();
 
-        uint was_enabled = enable;
+            uint was_enabled = enable;
 
-        prescaler = kPrescalers[bit::seq<0, 3>(byte)];
-        cascade   = bit::seq<2, 1>(byte);
-        irq       = bit::seq<6, 1>(byte);
-        enable    = bit::seq<7, 1>(byte);
+            prescaler = kPrescalers[bit::seq<0, 3>(byte)];
+            cascade   = bit::seq<2, 1>(byte);
+            irq       = bit::seq<6, 1>(byte);
+            enable    = bit::seq<7, 1>(byte);
 
-        update_channel(!was_enabled && enable);
+            update_channel(!was_enabled && enable);
+        }
     }
 
     uint prescaler = 1;

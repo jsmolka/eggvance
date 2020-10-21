@@ -2,7 +2,7 @@
 
 #include <array>
 
-#include "dma/dmachannel.h"
+#include "dmachannel.h"
 
 class Dma
 {

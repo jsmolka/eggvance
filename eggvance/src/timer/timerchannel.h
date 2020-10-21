@@ -1,12 +1,11 @@
 #pragma once
 
-#include "timer/io.h"
+#include "io.h"
 
 class TimerChannel
 {
 public:
-    TimerChannel(uint id)
-        : id(id) {}
+    TimerChannel(uint id);
 
     void start();
     void update();

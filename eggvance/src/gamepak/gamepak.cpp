@@ -1,11 +1,11 @@
 #include "gamepak.h"
 
+#include "eeprom.h"
+#include "flash.h"
+#include "rtc.h"
+#include "sram.h"
 #include "base/config.h"
 #include "base/utility.h"
-#include "gamepak/eeprom.h"
-#include "gamepak/flash.h"
-#include "gamepak/rtc.h"
-#include "gamepak/sram.h"
 
 std::size_t GamePak::size() const
 {
@@ -39,7 +39,9 @@ void GamePak::loadRom(const fs::path& file, bool load_save)
 
     const auto overwrite = Overwrite::find(header.code);
 
-    initGpio(overwrite ? overwrite->gpio : config.gpio);
+    initGpio(overwrite
+        ? overwrite->gpio
+        : config.gpio);
 
     if (load_save)
     {
@@ -63,7 +65,9 @@ void GamePak::loadSave(const fs::path& file)
     if (const auto overwrite = Overwrite::find(header.code))
         type = overwrite->save;
 
-    initSave(file, type == Save::Type::None ? Save::parse(rom) : type);
+    initSave(file, type == Save::Type::None
+        ? Save::parse(rom)
+        : type);
 }
 
 u32 GamePak::readUnused(u32 addr)
@@ -112,6 +116,8 @@ void GamePak::initSave(const fs::path& file, Save::Type type)
     {
         const auto overwrite = Overwrite::find(header.code);
 
-        initSave(fs::path(),overwrite ? overwrite->save : Save::parse(rom));
+        initSave(fs::path(), overwrite
+            ? overwrite->save
+            : Save::parse(rom));
     }
 }

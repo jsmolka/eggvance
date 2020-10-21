@@ -2,4 +2,4 @@
 
 #include "base/int.h"
 
-constexpr uint kEventMax = 1 << 30;
+inline constexpr uint kEventMax = 1 << 30;
