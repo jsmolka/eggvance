@@ -3,8 +3,9 @@
 #include "base/bit.h"
 #include "base/int.h"
 
-struct MapEntry
+class MapEntry
 {
+public:
     MapEntry(u16 data)
     {
         tile   = bit::seq< 0, 10>(data);
@@ -13,7 +14,7 @@ struct MapEntry
         bank   = bit::seq<12,  4>(data);
     }
 
-    uint tile;
-    uint bank;
+    uint  tile;
+    uint  bank;
     Point flip;
 };

@@ -2,9 +2,9 @@
 
 #include <array>
 
+#include "ram.h"
 #include "gpu/oamentry.h"
 #include "gpu/matrix.h"
-#include "mmu/ram.h"
 
 class Oam : public Ram<0x400>
 {

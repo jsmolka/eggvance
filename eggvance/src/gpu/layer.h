@@ -13,16 +13,18 @@ enum LayerFlag
     kLayerBdp = 1 << 5
 };
 
-struct Layer
+class Layer
 {
+public:
     bool operator<=(const Layer& other) const { return priority <= other.priority; }
     bool operator< (const Layer& other) const { return priority <  other.priority; }
 
     uint priority = 4;
 };
 
-struct BgLayer : Layer
+class BgLayer : public Layer
 {
+public:
     bool operator<=(const BgLayer& other) const { return priority == other.priority ? flag <= other.flag : priority <= other.priority; }
     bool operator< (const BgLayer& other) const { return priority == other.priority ? flag <  other.flag : priority <  other.priority; }
 
@@ -40,8 +42,9 @@ struct BgLayer : Layer
     uint flag = 0;
 };
 
-struct ObjectLayer : Layer
+class ObjectLayer : public Layer
 {
+public:
     bool opaque() const
     {
         return color != kTransparent;

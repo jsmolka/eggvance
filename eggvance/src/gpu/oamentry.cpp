@@ -34,8 +34,8 @@ void OamEntry::write(uint attr, u16 half)
     case kAttribute1:
         origin.x   = bit::seq< 0, 9>(half);
         matrix_idx = bit::seq< 9, 5>(half);
-        flip_x     = bit::seq<12, 1>(half);
-        flip_y     = bit::seq<13, 1>(half);
+        flip.x     = bit::seq<12, 1>(half);
+        flip.y     = bit::seq<13, 1>(half);
         size       = bit::seq<14, 2>(half);
         break;
 
@@ -118,8 +118,8 @@ void OamEntry::compute()
     screen_size = sprite_size << double_size;
     center      = origin + screen_size / 2;
 
-    if (flip_x) flip_x = sprite_size.x - 1;
-    if (flip_y) flip_y = sprite_size.y - 1;
+    if (flip.x) flip.x = sprite_size.x - 1;
+    if (flip.y) flip.y = sprite_size.y - 1;
 
     visible_x = (origin.x + screen_size.x) >= 0 && origin.x < kScreen.x;
 }

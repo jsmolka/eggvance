@@ -18,7 +18,6 @@ public:
     void hblank();
     void vblank();
     void next();
-
     void present();
 
 private:
@@ -31,19 +30,19 @@ private:
 
     using BgLayers = shell::IteratorRange<const BgLayer*>;
 
-    using RenderFunc = void(Gpu::*)(int);
+    using RenderFunc = void(Gpu::*)(uint);
 
-    Point transform(int x, int bg);
+    Point transform(int x, uint bg);
 
-    void renderBg(RenderFunc render, int bg);
-    void renderBgMode0(int bg);
-    void renderBgMode2(int bg);
-    void renderBgMode3(int bg);
-    void renderBgMode4(int bg);
-    void renderBgMode5(int bg);
+    void renderBg(RenderFunc render, uint bg);
+    void renderBgMode0(uint bg);
+    void renderBgMode2(uint bg);
+    void renderBgMode3(uint bg);
+    void renderBgMode4(uint bg);
+    void renderBgMode5(uint bg);
     void renderObjects();
 
-    void collapse(int begin, int end);
+    void collapse(uint begin, uint end);
     template<uint Objects>
     void collapse(const BgLayers& layers);
     template<uint Objects>

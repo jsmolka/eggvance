@@ -1,8 +1,11 @@
 #pragma once
 
+#include "matrix.h"
 #include "point.h"
 
+inline constexpr auto kOrigin      = Point(0, 0);
 inline constexpr auto kScreen      = Point(240, 160);
+inline constexpr auto kIdentity    = Matrix(0x100, 0, 0, 0x100);
 inline constexpr auto kColorMask   = 0x7FFF;
 inline constexpr auto kTransparent = 0x8000;
 inline constexpr auto kRefreshRate = 59.737;

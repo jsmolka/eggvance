@@ -1,10 +1,10 @@
 #pragma once
 
-#include "mmu/bios.h"
-#include "mmu/io.h"
-#include "mmu/oam.h"
-#include "mmu/pram.h"
-#include "mmu/vram.h"
+#include "bios.h"
+#include "io.h"
+#include "oam.h"
+#include "pram.h"
+#include "vram.h"
 
 class Mmu
 {

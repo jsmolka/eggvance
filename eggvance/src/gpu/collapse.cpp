@@ -7,15 +7,13 @@
 #include "core/videocontext.h"
 #include "mmu/mmu.h"
 
-constexpr u16 kInvalidPixel = 0x6C3F;
-
-void Gpu::collapse(int begin, int end)
+void Gpu::collapse(uint begin, uint end)
 {
     BgLayer  layers[4];
     BgLayer* layers_beg = &layers[0];
     BgLayer* layers_end = &layers[0];
 
-    for (int bg = begin; bg < end; ++bg)
+    for (uint bg = begin; bg < end; ++bg)
     {
         if (dispcnt.layers & (1 << bg))
         {
@@ -112,8 +110,8 @@ void Gpu::collapseBN(const BgLayers& layers)
 
     for (uint x = 0; x < kScreen.x; ++x)
     {
-        u16 upper = kInvalidPixel;
-        u16 lower = kInvalidPixel;
+        u16 upper = 0;
+        u16 lower = 0;
 
         const auto& object = objects[x];
 
@@ -186,8 +184,8 @@ void Gpu::collapseBW(const BgLayers& layers)
 
     for (uint x = 0; x < kScreen.x; ++x)
     {
-        u16 upper = kInvalidPixel;
-        u16 lower = kInvalidPixel;
+        u16 upper = 0;
+        u16 lower = 0;
 
         const auto& object = objects[x];
         const auto& window = activeWindow<Windows>(x);

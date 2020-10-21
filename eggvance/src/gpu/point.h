@@ -1,11 +1,13 @@
 #pragma once
 
-struct Point
+class Point
 {
+public:
     constexpr Point() = default;
 
     constexpr Point(int x, int y)
-        : x(x), y(y) {}
+        : x(x)
+        , y(y) {}
 
     constexpr int index2d(int width) const
     {
@@ -60,5 +62,3 @@ struct Point
     int x = 0;
     int y = 0;
 };
-
-inline constexpr Point kOrigin(0, 0);

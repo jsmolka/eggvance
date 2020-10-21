@@ -1,12 +1,12 @@
 #include "io.h"
 
+#include "constants.h"
+#include "mmu.h"
 #include "arm/arm.h"
 #include "base/macros.h"
 #include "dma/dma.h"
 #include "gamepad/gamepad.h"
 #include "gpu/gpu.h"
-#include "mmu/constants.h"
-#include "mmu/mmu.h"
 #include "timer/timer.h"
 
 Io::Io()

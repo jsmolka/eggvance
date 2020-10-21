@@ -273,8 +273,9 @@ public:
 class Mosaic
 {
 public:
-    struct Block
+    class Block
     {
+    public:
         void write(u8 byte)
         {
             x = bit::seq<0, 4>(byte) + 1;

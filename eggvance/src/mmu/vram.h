@@ -1,10 +1,11 @@
 #pragma once
 
+#include "ram.h"
 #include "gpu/point.h"
-#include "mmu/ram.h"
 
-struct VramMirror
+class VramMirror
 {
+public:
     u32 operator()(u32 addr) const
     {
         addr &= 0x1'FFFF;

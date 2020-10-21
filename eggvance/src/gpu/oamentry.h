@@ -22,11 +22,10 @@ public:
     uint mosaic      = 0;
     uint color_mode  = 0;
     uint matrix_idx  = 0;
-    uint flip_x      = 0;
-    uint flip_y      = 0;
     uint priority    = 0;
     uint base_addr   = 0;
 
+    Point flip;
     Point origin;
     Point center;
     Point sprite_size;

@@ -1,11 +1,11 @@
 #include "gpu.h"
 
+#include "matrix.h"
+#include "mapentry.h"
 #include "base/macros.h"
-#include "gpu/matrix.h"
-#include "gpu/mapentry.h"
 #include "mmu/mmu.h"
 
-Point Gpu::transform(int x, int bg)
+Point Gpu::transform(int x, uint bg)
 {
     bg -= 2;
 
@@ -14,7 +14,7 @@ Point Gpu::transform(int x, int bg)
         bgpc[bg].value * x + bgy[bg].current);
 }
 
-void Gpu::renderBg(RenderFunc render, int bg)
+void Gpu::renderBg(RenderFunc render, uint bg)
 {
     if ((dispcnt.layers & (1 << bg)) == 0)
         return;
@@ -37,7 +37,7 @@ void Gpu::renderBg(RenderFunc render, int bg)
     }
 }
 
-void Gpu::renderBgMode0(int bg)
+void Gpu::renderBgMode0(uint bg)
 {
     const auto& bgcnt = this->bgcnt[bg];
     const auto& size  = this->bgcnt[bg].sizeReg();
@@ -87,7 +87,7 @@ void Gpu::renderBgMode0(int bg)
     }
 }
 
-void Gpu::renderBgMode2(int bg)
+void Gpu::renderBgMode2(uint bg)
 {
     const auto& bgcnt = this->bgcnt[bg];
     const auto& size  = this->bgcnt[bg].sizeAff();
@@ -124,7 +124,7 @@ void Gpu::renderBgMode2(int bg)
     }
 }
 
-void Gpu::renderBgMode3(int bg)
+void Gpu::renderBgMode3(uint bg)
 {
     for (int x = 0; x < kScreen.x; ++x)
     {
@@ -143,7 +143,7 @@ void Gpu::renderBgMode3(int bg)
     }
 }
 
-void Gpu::renderBgMode4(int bg)
+void Gpu::renderBgMode4(uint bg)
 {
     for (int x = 0; x < kScreen.x; ++x)
     {
@@ -163,7 +163,7 @@ void Gpu::renderBgMode4(int bg)
     }
 }
 
-void Gpu::renderBgMode5(int bg)
+void Gpu::renderBgMode5(uint bg)
 {
     constexpr Point kBitmap(160, 128);
 
@@ -195,7 +195,7 @@ void Gpu::renderObjects()
         const auto& center      = entry.center;
         const auto& sprite_size = entry.sprite_size;
         const auto& screen_size = entry.screen_size;
-        const auto& matrix      = entry.affine ? mmu.oam.matrix(entry.matrix_idx) : kIdentityMatrix;
+        const auto& matrix      = entry.affine ? mmu.oam.matrix(entry.matrix_idx) : kIdentity;
 
         uint tile_size = entry.tileSize();
         uint tiles_row = entry.tilesInRow(dispcnt.layout);
@@ -215,10 +215,7 @@ void Gpu::renderObjects()
                 continue;
 
             if (!entry.affine)
-            {
-                texture.x ^= entry.flip_x;
-                texture.y ^= entry.flip_y;
-            }
+                texture ^= entry.flip;
 
             if (entry.mosaic)
             {

@@ -3,8 +3,11 @@
 #include "point.h"
 #include "base/int.h"
 
-struct Matrix
+class Matrix
 {
+public:
+    constexpr Matrix() = default;
+
     constexpr Matrix(s16 pa, s16 pb, s16 pc, s16 pd)
         : pa(pa), pb(pb), pc(pc), pd(pd) {}
 
@@ -12,14 +15,11 @@ struct Matrix
     {
         return Point(
             pa * point.x + pb * point.y,
-            pc * point.x + pd * point.y
-        );
+            pc * point.x + pd * point.y);
     }
 
-    s16 pa;
-    s16 pb;
-    s16 pc;
-    s16 pd;
+    s16 pa = 0;
+    s16 pb = 0;
+    s16 pc = 0;
+    s16 pd = 0;
 };
-
-inline constexpr Matrix kIdentityMatrix(0x100, 0, 0, 0x100);

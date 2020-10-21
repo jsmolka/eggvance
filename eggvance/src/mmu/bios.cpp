@@ -2,15 +2,17 @@
 
 #include <shell/hash.h>
 
+#include "bios_normmatt.h"
 #include "arm/arm.h"
 #include "base/config.h"
 #include "base/utility.h"
-#include "mmu/bios_normmatt.h"
 
 void Bios::init(const fs::path& path)
 {
     if (path.empty())
     {
+        static_assert(kNormmattBios.size() == data.size());
+
         std::copy(kNormmattBios.begin(), kNormmattBios.end(), data.begin());
     }
     else

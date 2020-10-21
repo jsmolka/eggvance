@@ -2,8 +2,8 @@
 
 #include <shell/utility.h>
 
+#include "constants.h"
 #include "arm/arm.h"
-#include "mmu/constants.h"
 #include "gamepak/gamepak.h"
 
 u8 Mmu::readByte(u32 addr)
@@ -50,10 +50,8 @@ u8 Mmu::readByte(u32 addr)
     case kRegionSramL:
     case kRegionSramH:
         return readSave(addr);
-
-    default:
-        return readUnused(addr);
     }
+    return readUnused(addr);
 }
 
 u16 Mmu::readHalf(u32 addr)
@@ -100,10 +98,8 @@ u16 Mmu::readHalf(u32 addr)
     case kRegionSramL:
     case kRegionSramH:
         return readSave(addr) * 0x0101;
-
-    default:
-        return readUnused(addr);
     }
+    return readUnused(addr);
 }
 
 u32 Mmu::readWord(u32 addr)
@@ -150,10 +146,8 @@ u32 Mmu::readWord(u32 addr)
     case kRegionSramL:
     case kRegionSramH:
         return readSave(addr) * 0x0101'0101;
-
-    default:
-        return readUnused(addr);
     }
+    return readUnused(addr);
 }
 
 void Mmu::writeByte(u32 addr, u8 byte)

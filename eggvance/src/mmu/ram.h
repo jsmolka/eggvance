@@ -7,8 +7,9 @@
 #include "base/macros.h"
 
 template<uint N>
-struct Mirror
+class Mirror
 {
+public:
     u32 operator()(u32 addr) const
     {
         return addr & (N - 1);
