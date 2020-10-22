@@ -5,11 +5,8 @@
 class Gamepad
 {
 public:
-    friend class Io;
-
     void poll();
 
-private:
     KeyInput input;
     KeyControl control;
 };

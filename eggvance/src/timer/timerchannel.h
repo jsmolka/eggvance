@@ -13,7 +13,7 @@ public:
 
     uint nextEvent() const;
 
-    uint id;
+    const uint id;
     TimerCount count;
     TimerControl control;
     TimerChannel* prev = nullptr;

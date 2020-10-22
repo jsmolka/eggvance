@@ -15,10 +15,8 @@ public:
     u8 read(u32 addr) final;
     void write(u32 addr, u8 byte) final;
 
-    const uint size;
-
 protected:
-    bool isValidSize() const final;
+    bool isValid(uint size) const final;
 
 private:
     enum Command
@@ -38,6 +36,7 @@ private:
         kChipMacronix1024 = 0x09C2
     };
 
+    const uint size;
     bool chip = false;
     bool erase = false;
     uint command = 0;

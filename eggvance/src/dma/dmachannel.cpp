@@ -6,14 +6,6 @@
 #include "gamepak/gamepak.h"
 #include "mmu/mmu.h"
 
-enum AddressControl
-{
-    kAddressControlIncrement,
-    kAddressControlDecrement,
-    kAddressControlFixed,
-    kAddressControlReload
-};
-
 DmaChannel::DmaChannel(uint id)
     : id(id)
 {
@@ -22,6 +14,14 @@ DmaChannel::DmaChannel(uint id)
 
 void DmaChannel::start()
 {
+    enum AddressControl
+    {
+        kAddressControlIncrement,
+        kAddressControlDecrement,
+        kAddressControlFixed,
+        kAddressControlReload
+    };
+
     running = true;
     pending = count.count(id);
 
@@ -79,13 +79,6 @@ void DmaChannel::run(int& cycles)
         control.value &= ~DmaControl::kEnable;
 }
 
-bool DmaChannel::isEeprom(u32 addr)
-{
-    return gamepak.size() <= 0x100'0000
-        ? addr >= 0xD00'0000 && addr < 0xE00'0000
-        : addr >= 0xDFF'FF00 && addr < 0xE00'0000;
-}
-
 bool DmaChannel::isGamePak(u32 addr)
 {
     return addr >= 0x800'0000 && addr < 0xE00'0000;
@@ -94,9 +87,15 @@ bool DmaChannel::isGamePak(u32 addr)
 void DmaChannel::initCycles()
 {
     if (isGamePak(src_addr) && isGamePak(dst_addr))
-        cycles_s = cycles_n = 4;
+    {
+        cycles_s = 4;
+        cycles_n = 4;
+    }
     else
-        cycles_s = cycles_n = 2;
+    {
+        cycles_s = 2;
+        cycles_n = 2;
+    }
 
     if (control.word)
     {
@@ -116,10 +115,10 @@ void DmaChannel::initCycles()
 
 void DmaChannel::initTransfer()
 {
-    bool eeprom_w = id == 3 && isEeprom(dst_addr);
-    bool eeprom_r = id == 3 && isEeprom(src_addr);
+    bool eeprom_w = gamepak.isEeprom(dst_addr);
+    bool eeprom_r = gamepak.isEeprom(src_addr);
 
-    if ((eeprom_r || eeprom_w) && gamepak.save->type == Save::Type::Eeprom)
+    if ((eeprom_r || eeprom_w) && id == 3)
     {
         initEeprom();
 

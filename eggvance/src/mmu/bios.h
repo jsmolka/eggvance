@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ram.h"
-#include "base/int.h"
 #include "base/filesystem.h"
 
 class Bios

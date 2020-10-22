@@ -8,17 +8,25 @@
 class Arm : public Registers
 {
 public:
-    friend class DmaChannel;
-    friend class Io;
-    friend class Mmu;
-
     Arm();
 
     void init();
     void run(int cycles);
     void raise(uint irq);
 
-    uint state = 0;
+    uint state   = 0;
+    uint pipe[2] = {};
+
+    HaltControl haltcnt;
+    WaitControl waitcnt;
+
+    struct
+    {
+        IrqMaster  master;
+        IrqEnable  enable;
+        IrqRequest request;
+    } irq;
+
 
 private:
     using Instruction32 = void(Arm::*)(u32);
@@ -74,42 +82,42 @@ private:
     void interruptSw();
     void processIrq();
 
-    template<uint Instr> void Arm_BranchExchange(u32 instr);
-    template<uint Instr> void Arm_BranchLink(u32 instr);
-    template<uint Instr> void Arm_DataProcessing(u32 instr);
-    template<uint Instr> void Arm_StatusTransfer(u32 instr);
-    template<uint Instr> void Arm_Multiply(u32 instr);
-    template<uint Instr> void Arm_MultiplyLong(u32 instr);
-    template<uint Instr> void Arm_SingleDataTransfer(u32 instr);
-    template<uint Instr> void Arm_HalfSignedDataTransfer(u32 instr);
-    template<uint Instr> void Arm_BlockDataTransfer(u32 instr);
-    template<uint Instr> void Arm_SingleDataSwap(u32 instr);
-    template<uint Instr> void Arm_SoftwareInterrupt(u32 instr);
-    template<uint Instr> void Arm_CoprocessorDataOperations(u32 instr);
-    template<uint Instr> void Arm_CoprocessorDataTransfers(u32 instr);
-    template<uint Instr> void Arm_CoprocessorRegisterTransfers(u32 instr);
-    template<uint Instr> void Arm_Undefined(u32 instr);
+    template<u32 Instr> void Arm_BranchExchange(u32 instr);
+    template<u32 Instr> void Arm_BranchLink(u32 instr);
+    template<u32 Instr> void Arm_DataProcessing(u32 instr);
+    template<u32 Instr> void Arm_StatusTransfer(u32 instr);
+    template<u32 Instr> void Arm_Multiply(u32 instr);
+    template<u32 Instr> void Arm_MultiplyLong(u32 instr);
+    template<u32 Instr> void Arm_SingleDataTransfer(u32 instr);
+    template<u32 Instr> void Arm_HalfSignedDataTransfer(u32 instr);
+    template<u32 Instr> void Arm_BlockDataTransfer(u32 instr);
+    template<u32 Instr> void Arm_SingleDataSwap(u32 instr);
+    template<u32 Instr> void Arm_SoftwareInterrupt(u32 instr);
+    template<u32 Instr> void Arm_CoprocessorDataOperations(u32 instr);
+    template<u32 Instr> void Arm_CoprocessorDataTransfers(u32 instr);
+    template<u32 Instr> void Arm_CoprocessorRegisterTransfers(u32 instr);
+    template<u32 Instr> void Arm_Undefined(u32 instr);
 
-    template<uint Instr> void Thumb_MoveShiftedRegister(u16 instr);
-    template<uint Instr> void Thumb_AddSubtract(u16 instr);
-    template<uint Instr> void Thumb_ImmediateOperations(u16 instr);
-    template<uint Instr> void Thumb_AluOperations(u16 instr);
-    template<uint Instr> void Thumb_HighRegisterOperations(u16 instr);
-    template<uint Instr> void Thumb_LoadPcRelative(u16 instr);
-    template<uint Instr> void Thumb_LoadStoreRegisterOffset(u16 instr);
-    template<uint Instr> void Thumb_LoadStoreByteHalf(u16 instr);
-    template<uint Instr> void Thumb_LoadStoreImmediateOffset(u16 instr);
-    template<uint Instr> void Thumb_LoadStoreHalf(u16 instr);
-    template<uint Instr> void Thumb_LoadStoreSpRelative(u16 instr);
-    template<uint Instr> void Thumb_LoadRelativeAddress(u16 instr);
-    template<uint Instr> void Thumb_AddOffsetSp(u16 instr);
-    template<uint Instr> void Thumb_PushPopRegisters(u16 instr);
-    template<uint Instr> void Thumb_LoadStoreMultiple(u16 instr);
-    template<uint Instr> void Thumb_ConditionalBranch(u16 instr);
-    template<uint Instr> void Thumb_SoftwareInterrupt(u16 instr);
-    template<uint Instr> void Thumb_UnconditionalBranch(u16 instr);
-    template<uint Instr> void Thumb_LongBranchLink(u16 instr);
-    template<uint Instr> void Thumb_Undefined(u16 instr);
+    template<u16 Instr> void Thumb_MoveShiftedRegister(u16 instr);
+    template<u16 Instr> void Thumb_AddSubtract(u16 instr);
+    template<u16 Instr> void Thumb_ImmediateOperations(u16 instr);
+    template<u16 Instr> void Thumb_AluOperations(u16 instr);
+    template<u16 Instr> void Thumb_HighRegisterOperations(u16 instr);
+    template<u16 Instr> void Thumb_LoadPcRelative(u16 instr);
+    template<u16 Instr> void Thumb_LoadStoreRegisterOffset(u16 instr);
+    template<u16 Instr> void Thumb_LoadStoreByteHalf(u16 instr);
+    template<u16 Instr> void Thumb_LoadStoreImmediateOffset(u16 instr);
+    template<u16 Instr> void Thumb_LoadStoreHalf(u16 instr);
+    template<u16 Instr> void Thumb_LoadStoreSpRelative(u16 instr);
+    template<u16 Instr> void Thumb_LoadRelativeAddress(u16 instr);
+    template<u16 Instr> void Thumb_AddOffsetSp(u16 instr);
+    template<u16 Instr> void Thumb_PushPopRegisters(u16 instr);
+    template<u16 Instr> void Thumb_LoadStoreMultiple(u16 instr);
+    template<u16 Instr> void Thumb_ConditionalBranch(u16 instr);
+    template<u16 Instr> void Thumb_SoftwareInterrupt(u16 instr);
+    template<u16 Instr> void Thumb_UnconditionalBranch(u16 instr);
+    template<u16 Instr> void Thumb_LongBranchLink(u16 instr);
+    template<u16 Instr> void Thumb_Undefined(u16 instr);
 
     template<uint Hash> static constexpr Instruction32 Arm_Decode();
     template<uint Hash> static constexpr Instruction16 Thumb_Decode();
@@ -119,17 +127,6 @@ private:
 
     int cycles    = 0;
     u32 prev_addr = 0;
-    u32 pipe[2]   = {};
-
-    HaltControl haltcnt;
-    WaitControl waitcnt;
-
-    struct
-    {
-        IrqMaster  master;
-        IrqEnable  enable;
-        IrqRequest request;
-    } irq;
 };
 
 inline Arm arm;

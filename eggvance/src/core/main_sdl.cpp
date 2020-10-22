@@ -104,6 +104,9 @@ int main(int argc, char* argv[])
             SDL_Delay(16);
         }
 
+        if (!running)
+            return 0;
+
         reset();
 
         while (running)

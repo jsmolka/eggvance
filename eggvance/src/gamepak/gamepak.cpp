@@ -27,11 +27,19 @@ u32 GamePak::readWord(u32 addr) const
     return read<u32>(addr);
 }
 
+bool GamePak::isEeprom(u32 addr) const
+{
+    return save->type == Save::Type::Eeprom
+        && size() <= 0x100'0000
+            ? addr >= 0xD00'0000 && addr < 0xE00'0000
+            : addr >= 0xDFF'FF00 && addr < 0xE00'0000;
+}
+
 void GamePak::loadRom(const fs::path& file, bool load_save)
 {
     if (!fs::read(file, rom))
     {
-        message("Cannot read rom: {}", file);
+        message("Cannot read ROM: {}", file);
         return;
     }
 
@@ -39,9 +47,7 @@ void GamePak::loadRom(const fs::path& file, bool load_save)
 
     const auto overwrite = Overwrite::find(header.code);
 
-    initGpio(overwrite
-        ? overwrite->gpio
-        : config.gpio);
+    initGpio(overwrite ? overwrite->gpio : config.gpio);
 
     if (load_save)
     {
@@ -65,9 +71,7 @@ void GamePak::loadSave(const fs::path& file)
     if (const auto overwrite = Overwrite::find(header.code))
         type = overwrite->save;
 
-    initSave(file, type == Save::Type::None
-        ? Save::parse(rom)
-        : type);
+    initSave(file, type == Save::Type::None ? Save::parse(rom) : type);
 }
 
 u32 GamePak::readUnused(u32 addr)
@@ -89,8 +93,7 @@ T GamePak::read(u32 addr) const
 
 void GamePak::initGpio(Gpio::Type type)
 {
-    gpio = std::invoke([&]() -> std::unique_ptr<Gpio>
-    {
+    gpio = std::invoke([&]() -> std::unique_ptr<Gpio> {
         if (type == Gpio::Type::Rtc)
             return std::make_unique<Rtc>();
         
@@ -100,8 +103,7 @@ void GamePak::initGpio(Gpio::Type type)
 
 void GamePak::initSave(const fs::path& file, Save::Type type)
 {
-    save = std::invoke([&]() -> std::unique_ptr<Save>
-    {
+    save = std::invoke([&]() -> std::unique_ptr<Save> {
         switch (type)
         {
         case Save::Type::Sram:      return std::make_unique<Sram>();
@@ -116,8 +118,6 @@ void GamePak::initSave(const fs::path& file, Save::Type type)
     {
         const auto overwrite = Overwrite::find(header.code);
 
-        initSave(fs::path(), overwrite
-            ? overwrite->save
-            : Save::parse(rom));
+        initSave(fs::path(), overwrite ? overwrite->save : Save::parse(rom));
     }
 }

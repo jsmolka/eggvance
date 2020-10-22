@@ -70,7 +70,7 @@ bool Save::init(const fs::path& file)
         return false;
     }
 
-    if (!isValidSize())
+    if (!isValid(data.size()))
     {
         message("Invalid save size: {}", data.size());
         return false;
@@ -94,7 +94,7 @@ void Save::write(u32 addr, u8 byte)
 
 }
 
-bool Save::isValidSize() const
+bool Save::isValid(uint size) const
 {
     return true;
 }

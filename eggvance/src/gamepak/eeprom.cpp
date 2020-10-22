@@ -100,10 +100,10 @@ void Eeprom::write(u32 addr, u8 byte)
     }
 }
 
-bool Eeprom::isValidSize() const
+bool Eeprom::isValid(uint size) const
 {
-    return data.size() == kSize4
-        || data.size() == kSize64;
+    return size == kSize4
+        || size == kSize64;
 }
 
 uint Eeprom::bus() const

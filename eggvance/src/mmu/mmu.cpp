@@ -1,7 +1,5 @@
 #include "mmu.h"
 
-#include <shell/utility.h>
-
 #include "constants.h"
 #include "arm/arm.h"
 #include "gamepak/gamepak.h"
@@ -42,7 +40,7 @@ u8 Mmu::readByte(u32 addr)
         return gamepak.readByte(addr);
 
     case kRegionGamePak2H:
-        if (isEepromAccess(addr))
+        if (gamepak.isEeprom(addr))
             return 1;
 
         return gamepak.readByte(addr);
@@ -90,7 +88,7 @@ u16 Mmu::readHalf(u32 addr)
         return gamepak.readHalf(addr);
 
     case kRegionGamePak2H:
-        if (isEepromAccess(addr))
+        if (gamepak.isEeprom(addr))
             return 1;
 
         return gamepak.readHalf(addr);
@@ -138,7 +136,7 @@ u32 Mmu::readWord(u32 addr)
         return gamepak.readWord(addr);
 
     case kRegionGamePak2H:
-        if (isEepromAccess(addr))
+        if (gamepak.isEeprom(addr))
             return 1;
 
         return gamepak.readWord(addr);
@@ -318,12 +316,6 @@ u32 Mmu::readUnused(u32 addr) const
     return value >> ((addr & 0x3) << 3);
 }
 
-bool Mmu::isEepromAccess(u32 addr) const
-{
-    return (gamepak.save->type == Save::Type::Eeprom)
-        && (gamepak.size() <= 0x100'0000 || addr >= 0xDFF'FF00);
-}
-
 u8 Mmu::readSave(u32 addr)
 {
     switch (gamepak.save->type)
@@ -336,10 +328,8 @@ u8 Mmu::readSave(u32 addr)
     case Save::Type::Flash1024:
         addr &= 0xFFFF;
         return gamepak.save->read(addr);
-
-    default:
-        return 0xFF;
     }
+    return 0xFF;
 }
 
 void Mmu::writeSave(u32 addr, u8 byte)

@@ -12,12 +12,6 @@ public:
 class KeyControl : public Register<u16, 0xC3FF>
 {
 public:
-    enum Condition
-    {
-        kConditionAny,
-        kConditionAll
-    };
-
     template<uint Index>
     void write(u8 byte)
     {
@@ -34,6 +28,12 @@ public:
 
     bool raisesIrq(const KeyInput& input)
     {
+        enum Condition
+        {
+            kConditionAny,
+            kConditionAll
+        };
+
         u16 value = ~input.value & KeyInput::kMask;
 
         return cond == kConditionAll

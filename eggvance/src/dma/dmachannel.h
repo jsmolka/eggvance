@@ -10,7 +10,7 @@ public:
     void start();
     void run(int& cycles);
 
-    uint id;
+    const uint id;
     bool running = false;
 
     DmaCount count;
@@ -19,7 +19,6 @@ public:
     RegisterW<u32> dad;
 
 private:
-    static bool isEeprom(u32 addr);
     static bool isGamePak(u32 addr);
 
     void initCycles();

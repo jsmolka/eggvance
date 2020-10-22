@@ -15,5 +15,5 @@ public:
     void write(u32 addr, u8 byte) final;
 
 protected:
-    bool isValidSize() const final;
+    bool isValid(uint size) const final;
 };

@@ -103,7 +103,7 @@ void Flash::write(u32 addr, u8 byte)
     }
 }
 
-bool Flash::isValidSize() const
+bool Flash::isValid(uint size) const
 {
-    return data.size() == size;
+    return this->size == size;
 }

@@ -19,11 +19,10 @@ u8 Sram::read(u32 addr)
 void Sram::write(u32 addr, u8 byte)
 {
     changed = true;
-
     data[addr] = byte;
 }
 
-bool Sram::isValidSize() const
+bool Sram::isValid(uint size) const
 {
-    return data.size() == kSize;
+    return size == kSize;
 }

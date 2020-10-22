@@ -3,7 +3,7 @@
 #include "constants.h"
 #include "decode.h"
 
-template<uint Instr>
+template<u32 Instr>
 void Arm::Arm_BranchExchange(u32 instr)
 {
     uint rn = bit::seq<0, 4>(instr);
@@ -21,7 +21,7 @@ void Arm::Arm_BranchExchange(u32 instr)
     }
 }
 
-template<uint Instr>
+template<u32 Instr>
 void Arm::Arm_BranchLink(u32 instr)
 {
     constexpr uint kLink = bit::seq<24, 1>(Instr);
@@ -37,7 +37,7 @@ void Arm::Arm_BranchLink(u32 instr)
     flushWord();
 }
 
-template<uint Instr>
+template<u32 Instr>
 void Arm::Arm_DataProcessing(u32 instr)
 {
     enum Opcode
@@ -70,7 +70,7 @@ void Arm::Arm_DataProcessing(u32 instr)
 
     u32& dst = regs[rd];
     u32  op1 = regs[rn];
-    u32  op2;
+    u32  op2 = 0;
 
     constexpr bool kLogical = 
            kOpcode == kOpcodeAdd 
@@ -181,7 +181,7 @@ void Arm::Arm_DataProcessing(u32 instr)
     }
 }
 
-template<uint Instr>
+template<u32 Instr>
 void Arm::Arm_StatusTransfer(u32 instr)
 {
     enum Bit
@@ -198,7 +198,7 @@ void Arm::Arm_StatusTransfer(u32 instr)
 
     if (kWrite)
     {
-        u32 op;
+        u32 op = 0;
         if (kImmOp)
         {
             uint value  = bit::seq<0, 8>(instr);
@@ -236,7 +236,7 @@ void Arm::Arm_StatusTransfer(u32 instr)
     }
 }
 
-template<uint Instr>
+template<u32 Instr>
 void Arm::Arm_Multiply(u32 instr)
 {
     constexpr uint kFlags      = bit::seq<20, 1>(Instr);
@@ -264,7 +264,7 @@ void Arm::Arm_Multiply(u32 instr)
     booth<true>(op2);
 }
 
-template<uint Instr>
+template<u32 Instr>
 void Arm::Arm_MultiplyLong(u32 instr)
 {
     constexpr uint kFlags      = bit::seq<20, 1>(Instr);
@@ -302,7 +302,7 @@ void Arm::Arm_MultiplyLong(u32 instr)
     booth<kSign>(static_cast<u32>(op2));
 }
 
-template<uint Instr>
+template<u32 Instr>
 void Arm::Arm_SingleDataTransfer(u32 instr)
 {
     constexpr uint kLoad      = bit::seq<20, 1>(Instr);
@@ -372,9 +372,7 @@ void Arm::Arm_SingleDataTransfer(u32 instr)
     }
     else
     {
-        u32 value = rd == 15
-            ? dst + 4
-            : dst + 0;
+        u32 value = dst + (rd == 15 ? 4 : 0);
 
         if (kByte)
             writeByte(addr, value);
@@ -391,7 +389,7 @@ void Arm::Arm_SingleDataTransfer(u32 instr)
     }
 }
 
-template<uint Instr>
+template<u32 Instr>
 void Arm::Arm_HalfSignedDataTransfer(u32 instr)
 {
     enum Opcode
@@ -415,7 +413,7 @@ void Arm::Arm_HalfSignedDataTransfer(u32 instr)
     u32& dst = regs[rd];
     u32 addr = regs[rn];
 
-    u32 offset;
+    u32 offset = 0;
     if (kImmOp)
     {
         uint lower = bit::seq<0, 4>(instr);
@@ -465,9 +463,7 @@ void Arm::Arm_HalfSignedDataTransfer(u32 instr)
     }
     else
     {
-        u32 value = (rd == 15)
-            ? dst + 4
-            : dst + 0;
+        u32 value = dst + (rd == 15 ? 4 : 0);
 
         writeHalf(addr, value);
     }
@@ -481,7 +477,7 @@ void Arm::Arm_HalfSignedDataTransfer(u32 instr)
     }
 }
 
-template<uint Instr>
+template<u32 Instr>
 void Arm::Arm_BlockDataTransfer(u32 instr)
 {
     constexpr uint kLoad      = bit::seq<20, 1>(Instr);
@@ -560,18 +556,18 @@ void Arm::Arm_BlockDataTransfer(u32 instr)
         {
             enum Suffix
             {
-                kSuffixDA,
-                kSuffixDB,
-                kSuffixIA,
-                kSuffixIB
+                kSuffixDecPost,
+                kSuffixDecPre,
+                kSuffixIncPost,
+                kSuffixIncPre
             };
 
             switch ((kIncrement << 1) | pre_index)
             {
-            case kSuffixDA: writeWord(addr - 0x3C, pc + 4); break;
-            case kSuffixDB: writeWord(addr - 0x40, pc + 4); break;
-            case kSuffixIA: writeWord(addr + 0x00, pc + 4); break;
-            case kSuffixIB: writeWord(addr + 0x04, pc + 4); break;
+            case kSuffixDecPost: writeWord(addr - 0x3C, pc + 4); break;
+            case kSuffixDecPre : writeWord(addr - 0x40, pc + 4); break;
+            case kSuffixIncPost: writeWord(addr + 0x00, pc + 4); break;
+            case kSuffixIncPre : writeWord(addr + 0x04, pc + 4); break;
 
             default:
                 SHELL_UNREACHABLE;
@@ -591,7 +587,7 @@ void Arm::Arm_BlockDataTransfer(u32 instr)
         switchMode(mode);
 }
 
-template<uint Instr>
+template<u32 Instr>
 void Arm::Arm_SingleDataSwap(u32 instr)
 {
     constexpr uint kByte = bit::seq<22, 1>(Instr);
@@ -617,31 +613,31 @@ void Arm::Arm_SingleDataSwap(u32 instr)
     idle();
 }
 
-template<uint Instr>
+template<u32 Instr>
 void Arm::Arm_SoftwareInterrupt(u32 instr)
 {
     interruptSw();
 }
 
-template<uint Instr>
+template<u32 Instr>
 void Arm::Arm_CoprocessorDataOperations(u32 instr)
 {
     SHELL_ASSERT(false, SHELL_FUNCTION);
 }
 
-template<uint Instr>
+template<u32 Instr>
 void Arm::Arm_CoprocessorDataTransfers(u32 instr)
 {
     SHELL_ASSERT(false, SHELL_FUNCTION);
 }
 
-template<uint Instr>
+template<u32 Instr>
 void Arm::Arm_CoprocessorRegisterTransfers(u32 instr)
 {
     SHELL_ASSERT(false, SHELL_FUNCTION);
 }
 
-template<uint Instr>
+template<u32 Instr>
 void Arm::Arm_Undefined(u32 instr)
 {
     SHELL_ASSERT(false, SHELL_FUNCTION);

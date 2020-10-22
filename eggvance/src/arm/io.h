@@ -16,7 +16,7 @@ class WaitControl : public Register<u16>
 public:
     WaitControl()
     {
-        updateCycles();
+        compute();
     }
 
     template<uint Index>
@@ -38,7 +38,7 @@ public:
             ws2_s    = bit::seq<2, 1>(byte);
             prefetch = bit::seq<6, 1>(byte);
         }
-        updateCycles();
+        compute();
     }
 
     int cyclesHalf(u32 addr, bool sequential) const
@@ -61,7 +61,7 @@ public:
     uint prefetch = 0;
 
 private:
-    void updateCycles()
+    void compute()
     {
         static constexpr int kNonSeq[4] = { 4, 3, 2, 8 };
         static constexpr int kWs0Seq[2] = { 2, 1 };

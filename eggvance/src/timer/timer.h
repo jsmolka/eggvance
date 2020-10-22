@@ -1,6 +1,5 @@
 #pragma once
 
-#include <array>
 #include <vector>
 
 #include "constants.h"
@@ -9,12 +8,12 @@
 class Timer
 {
 public:
-    friend class Io;
-
     Timer();
 
     void run(int cycles);
     void runUntilIrq(int& cycles);
+
+    TimerChannel channels[4] = { 0, 1, 2, 3 };
 
 private:
     void schedule();
@@ -24,7 +23,6 @@ private:
     uint count = 0;
     uint event = kEventMax;
 
-    std::array<TimerChannel, 4> channels = { 0, 1, 2, 3 };
     std::vector<std::reference_wrapper<TimerChannel>> active;
 };
 

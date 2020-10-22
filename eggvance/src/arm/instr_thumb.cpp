@@ -3,7 +3,7 @@
 #include "constants.h"
 #include "decode.h"
 
-template<uint Instr>
+template<u16 Instr>
 void Arm::Thumb_MoveShiftedRegister(u16 instr)
 {
     constexpr uint kAmount = bit::seq< 6, 5>(Instr);
@@ -29,7 +29,7 @@ void Arm::Thumb_MoveShiftedRegister(u16 instr)
     }
 }
 
-template<uint Instr>
+template<u16 Instr>
 void Arm::Thumb_AddSubtract(u16 instr)
 {
     enum Opcode
@@ -62,7 +62,7 @@ void Arm::Thumb_AddSubtract(u16 instr)
     }
 }
 
-template<uint Instr>
+template<u16 Instr>
 void Arm::Thumb_ImmediateOperations(u16 instr)
 {
     enum Opcode
@@ -94,7 +94,7 @@ void Arm::Thumb_ImmediateOperations(u16 instr)
     }
 }
 
-template<uint Instr>
+template<u16 Instr>
 void Arm::Thumb_AluOperations(u16 instr)
 {
     enum Opcode
@@ -153,7 +153,7 @@ void Arm::Thumb_AluOperations(u16 instr)
     }
 }
 
-template<uint Instr>
+template<u16 Instr>
 void Arm::Thumb_HighRegisterOperations(u16 instr)
 {
     enum Opcode
@@ -214,7 +214,7 @@ void Arm::Thumb_HighRegisterOperations(u16 instr)
     }
 }
 
-template<uint Instr>
+template<u16 Instr>
 void Arm::Thumb_LoadPcRelative(u16 instr)
 {
     constexpr uint kRd = bit::seq<8, 3>(Instr);
@@ -226,7 +226,7 @@ void Arm::Thumb_LoadPcRelative(u16 instr)
     idle();
 }
 
-template<uint Instr>
+template<u16 Instr>
 void Arm::Thumb_LoadStoreRegisterOffset(u16 instr)
 {
     enum Opcode
@@ -272,7 +272,7 @@ void Arm::Thumb_LoadStoreRegisterOffset(u16 instr)
     }
 }
 
-template<uint Instr>
+template<u16 Instr>
 void Arm::Thumb_LoadStoreByteHalf(u16 instr)
 {
     enum Opcode
@@ -320,7 +320,7 @@ void Arm::Thumb_LoadStoreByteHalf(u16 instr)
     }
 }
 
-template<uint Instr>
+template<u16 Instr>
 void Arm::Thumb_LoadStoreImmediateOffset(u16 instr)
 {
     enum Opcode
@@ -366,7 +366,7 @@ void Arm::Thumb_LoadStoreImmediateOffset(u16 instr)
     }
 }
 
-template<uint Instr>
+template<u16 Instr>
 void Arm::Thumb_LoadStoreHalf(u16 instr)
 {
     constexpr uint kOffset = bit::seq< 6, 5>(Instr);
@@ -389,7 +389,7 @@ void Arm::Thumb_LoadStoreHalf(u16 instr)
     }
 }
 
-template<uint Instr>
+template<u16 Instr>
 void Arm::Thumb_LoadStoreSpRelative(u16 instr)
 {
     constexpr uint kRd   = bit::seq< 8, 3>(Instr);
@@ -411,7 +411,7 @@ void Arm::Thumb_LoadStoreSpRelative(u16 instr)
     }
 }
 
-template<uint Instr>
+template<u16 Instr>
 void Arm::Thumb_LoadRelativeAddress(u16 instr)
 {
     constexpr uint kRd = bit::seq< 8, 3>(Instr);
@@ -421,10 +421,10 @@ void Arm::Thumb_LoadRelativeAddress(u16 instr)
 
     offset <<= 2;
 
-    regs[kRd] = (kSp ? (sp & ~0x0) : (pc & ~0x2)) + offset;
+    regs[kRd] = (kSp ? sp : (pc & ~0x2)) + offset;
 }
 
-template<uint Instr>
+template<u16 Instr>
 void Arm::Thumb_AddOffsetSp(u16 instr)
 {
     constexpr uint kSign = bit::seq<7, 1>(Instr);
@@ -439,7 +439,7 @@ void Arm::Thumb_AddOffsetSp(u16 instr)
         sp += offset; 
 }
 
-template<uint Instr>
+template<u16 Instr>
 void Arm::Thumb_PushPopRegisters(u16 instr)
 {
     constexpr uint kRbit = bit::seq< 8, 1>(Instr);
@@ -476,7 +476,7 @@ void Arm::Thumb_PushPopRegisters(u16 instr)
     }
 }
 
-template<uint Instr>
+template<u16 Instr>
 void Arm::Thumb_LoadStoreMultiple(u16 instr)
 {
     constexpr uint kRb   = bit::seq< 8, 3>(Instr);
@@ -536,7 +536,7 @@ void Arm::Thumb_LoadStoreMultiple(u16 instr)
         regs[kRb] = addr;
 }
 
-template<uint Instr>
+template<u16 Instr>
 void Arm::Thumb_ConditionalBranch(u16 instr)
 {
     constexpr uint kCondition = bit::seq<8, 4>(Instr);
@@ -553,13 +553,13 @@ void Arm::Thumb_ConditionalBranch(u16 instr)
     }
 }
 
-template<uint Instr>
+template<u16 Instr>
 void Arm::Thumb_SoftwareInterrupt(u16 instr)
 {
     interruptSw();
 }
 
-template<uint Instr>
+template<u16 Instr>
 void Arm::Thumb_UnconditionalBranch(u16 instr)
 {
     uint offset = bit::seq<0, 11>(instr);
@@ -571,7 +571,7 @@ void Arm::Thumb_UnconditionalBranch(u16 instr)
     flushHalf();
 }
 
-template<uint Instr>
+template<u16 Instr>
 void Arm::Thumb_LongBranchLink(u16 instr)
 {
     constexpr uint kSecond = bit::seq<11, 1>(Instr);
@@ -597,7 +597,7 @@ void Arm::Thumb_LongBranchLink(u16 instr)
     }
 }
 
-template<uint Instr>
+template<u16 Instr>
 void Arm::Thumb_Undefined(u16 instr)
 {
     SHELL_ASSERT(false, SHELL_FUNCTION);

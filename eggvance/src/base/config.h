@@ -6,8 +6,9 @@
 #include "gamepak/save.h"
 
 template<typename Input>
-struct Controls
+class Controls
 {
+public:
     Input a;
     Input b;
     Input up;
@@ -21,8 +22,9 @@ struct Controls
 };
 
 template<typename Input>
-struct Shortcuts
+class Shortcuts
 {
+public:
     Input reset;
     Input fullscreen;
     Input fr_hardware;

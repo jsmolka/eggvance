@@ -34,7 +34,7 @@ public:
     std::vector<u8> data;
 
 protected:
-    virtual bool isValidSize() const;
+    virtual bool isValid(uint size) const;
 
     bool changed = false;
 

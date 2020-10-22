@@ -26,8 +26,6 @@ public:
     Io io;
 
 private:
-    bool isEepromAccess(u32 addr) const;
-
     u8 readSave(u32 addr);
     void writeSave(u32 addr, u8 byte);
 
