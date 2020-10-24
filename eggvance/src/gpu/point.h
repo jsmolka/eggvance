@@ -3,7 +3,9 @@
 class Point
 {
 public:
-    constexpr Point() = default;
+    constexpr Point()
+        : x(0)
+        , y(0) {}
 
     constexpr Point(int x, int y)
         : x(x)
@@ -59,6 +61,6 @@ public:
 
     #undef POINT_OPERATOR
 
-    int x = 0;
-    int y = 0;
+    int x;
+    int y;
 };

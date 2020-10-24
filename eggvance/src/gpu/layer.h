@@ -51,6 +51,6 @@ public:
     }
 
     u16  color  = kTransparent;
-    bool window = false;
     bool alpha  = false;
+    bool window = false;
 };

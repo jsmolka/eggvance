@@ -18,6 +18,14 @@ Gpu::Gpu()
     backgrounds[3].fill(kTransparent);
 }
 
+u32 Gpu::argb(u16 color)
+{
+    return 0xFF00'0000
+        | (color & (0x1F <<  0)) << 19
+        | (color & (0x1F <<  5)) <<  6
+        | (color & (0x1F << 10)) >>  7;
+}
+
 void Gpu::scanline()
 {
     dispstat.vblank = false;
@@ -142,12 +150,3 @@ void Gpu::present()
         video_ctx.renderPresent();
     }
 }
-
-u32 Gpu::argb(u16 color)
-{
-    return 0xFF00'0000
-        | (color & (0x1F <<  0)) << 19
-        | (color & (0x1F <<  5)) <<  6
-        | (color & (0x1F << 10)) >>  7;
-}
-

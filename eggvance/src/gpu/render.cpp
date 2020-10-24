@@ -1,7 +1,7 @@
 #include "gpu.h"
 
-#include "matrix.h"
 #include "mapentry.h"
+#include "matrix.h"
 #include "base/macros.h"
 #include "mmu/mmu.h"
 
@@ -46,16 +46,15 @@ void Gpu::renderBgMode0(uint bg)
         bghofs[bg].value,
         bgvofs[bg].value + vcount.value);
 
-    origin.x %= size.x;
-    origin.y %= size.y;
+    origin %= size;
 
-    auto pixel = origin % 8;
-    auto block = origin / 256;
-    auto tile  = origin / 8 % 32;
+    Point pixel = origin % 8;
+    Point block = origin / 256;
+    Point tile  = origin / 8 % 32;
 
-    for (int x = 0; x < kScreen.x; block.x ^= (size.x / 256) == 2, tile.x = 0)
+    for (int x = 0; x < kScreen.x; block.x ^= size.x / 512, tile.x = 0)
     {
-        uint offset = 0x800 * block.index2d(size.x / 256) + 2 * tile.index2d(0x20);
+        uint offset = 0x800 * block.index2d(size.x / 256) + 2 * tile.index2d(32);
 
         u16* map = mmu.vram.data<u16>(bgcnt.map_block + offset);
 
@@ -66,7 +65,7 @@ void Gpu::renderBgMode0(uint bg)
             if (bgcnt.color_mode == kColorMode256x1)
                 entry.bank = 0;
 
-            u32 addr = bgcnt.tile_block + (0x20 << bgcnt.color_mode) * entry.tile;
+            u32 addr = bgcnt.tile_block + bgcnt.tileSize() * entry.tile;
             if (addr < 0x1'0000)
             {
                 for (; pixel.x < 8 && x < kScreen.x; ++pixel.x, ++x)
@@ -223,8 +222,8 @@ void Gpu::renderObjects()
                 texture.y = mosaic.obj.mosaicY(texture.y);
             }
 
-            const auto tile  = texture / 8;
             const auto pixel = texture % 8;
+            const auto tile  = texture / 8;
 
             u32 addr = mmu.vram.mirror(entry.base_addr + tile_size * tile.index2d(tiles_row));
             if (addr < 0x1'4000 && dispcnt.isBitmap())

@@ -139,20 +139,23 @@ public:
         }
     }
 
+    uint tileSize() const
+    {
+        return 32 << color_mode;
+    }
+
     Point sizeReg() const
     {
         return Point(
             256 << bit::seq<0, 1>(dimensions),
-            256 << bit::seq<1, 1>(dimensions)
-        );
+            256 << bit::seq<1, 1>(dimensions));
     }
 
     Point sizeAff() const
     {
         return Point(
             128 << dimensions,
-            128 << dimensions
-        );
+            128 << dimensions);
     }
 
     uint priority   = 0;

@@ -6,10 +6,11 @@
 class Matrix
 {
 public:
-    constexpr Matrix() = default;
-
     constexpr Matrix(s16 pa, s16 pb, s16 pc, s16 pd)
-        : pa(pa), pb(pb), pc(pc), pd(pd) {}
+        : pa(pa)
+        , pb(pb)
+        , pc(pc)
+        , pd(pd) {}
 
     constexpr Point operator*(const Point& point) const
     {
@@ -18,8 +19,8 @@ public:
             pc * point.x + pd * point.y);
     }
 
-    s16 pa = 0;
-    s16 pb = 0;
-    s16 pc = 0;
-    s16 pd = 0;
+    s16 pa;
+    s16 pb;
+    s16 pc;
+    s16 pd;
 };

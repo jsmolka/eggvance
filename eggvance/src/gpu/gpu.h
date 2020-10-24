@@ -9,9 +9,6 @@
 class Gpu
 {
 public:
-    friend class Io;
-    friend class Vram;
-
     Gpu();
 
     void scanline();
@@ -19,6 +16,28 @@ public:
     void vblank();
     void next();
     void present();
+
+    DisplayControl dispcnt;
+    Register<u16> greenswap;
+    DisplayStatus dispstat;
+    VCount vcount;
+    BgControl bgcnt[4];
+    RegisterW<u16, 0x01FF> bghofs[4];
+    RegisterW<u16, 0x01FF> bgvofs[4];
+    BgParameter<0x0100> bgpa[2];
+    BgParameter<0x0000> bgpb[2];
+    BgParameter<0x0000> bgpc[2];
+    BgParameter<0x0100> bgpd[2];
+    BgReference bgx[2];
+    BgReference bgy[2];
+    WindowInside winin;
+    WindowOutside winout;
+    WindowRange<kScreen.x> winh[2];
+    WindowRange<kScreen.y> winv[2];
+    Mosaic mosaic;
+    BlendControl bldcnt;
+    BlendAlpha bldalpha;
+    BlendFade bldfade;
 
 private:
     enum WindowFlag
@@ -29,8 +48,9 @@ private:
     };
 
     using BgLayers = shell::IteratorRange<const BgLayer*>;
-
     using RenderFunc = void(Gpu::*)(uint);
+
+    static u32 argb(u16 color);
 
     Point transform(int x, uint bg);
 
@@ -72,34 +92,10 @@ private:
     template<uint Objects> bool findBlendLayers(const BgLayers& layers, uint x, uint flags, u16& upper);
     template<uint Objects> bool findBlendLayers(const BgLayers& layers, uint x, uint flags, u16& upper, u16& lower);
 
-    static u32 argb(u16 color);
-
     DoubleBuffer<u16> backgrounds[4];
     Buffer<ObjectLayer> objects;
     bool objects_exist = false;
     bool objects_alpha = false;
-
-    DisplayControl dispcnt;
-    Register<u16> greenswap;
-    DisplayStatus dispstat;
-    VCount vcount;
-    BgControl bgcnt[4];
-    RegisterW<u16, 0x01FF> bghofs[4];
-    RegisterW<u16, 0x01FF> bgvofs[4];
-    BgParameter<0x0100> bgpa[2];
-    BgParameter<0x0000> bgpb[2];
-    BgParameter<0x0000> bgpc[2];
-    BgParameter<0x0100> bgpd[2];
-    BgReference bgx[2];
-    BgReference bgy[2];
-    WindowInside winin;
-    WindowOutside winout;
-    WindowRange<kScreen.x> winh[2];
-    WindowRange<kScreen.y> winv[2];
-    Mosaic mosaic;
-    BlendControl bldcnt;
-    BlendAlpha bldalpha;
-    BlendFade bldfade;
 };
 
 inline Gpu gpu;

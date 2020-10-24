@@ -62,7 +62,7 @@ bool OamEntry::isVisible(uint line) const
 
 uint OamEntry::tileSize() const
 {
-    return 0x20 << color_mode;
+    return 32 << color_mode;
 }
 
 uint OamEntry::tilesInRow(uint layout) const

@@ -11,7 +11,6 @@ public:
     void write(uint attr, u16 half);
 
     bool isVisible(uint line) const;
-
     uint tileSize() const;
     uint tilesInRow(uint layout) const;
     uint paletteBank() const;

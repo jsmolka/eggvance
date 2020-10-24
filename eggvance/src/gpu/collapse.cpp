@@ -18,8 +18,8 @@ void Gpu::collapse(uint begin, uint end)
         if (dispcnt.layers & (1 << bg))
         {
             layers_end->priority = bgcnt[bg].priority;
-            layers_end->data     = backgrounds[bg].data();
-            layers_end->flag     = 1 << bg;
+            layers_end->data = backgrounds[bg].data();
+            layers_end->flag = 1 << bg;
             layers_end++;
         }
     }
@@ -56,7 +56,7 @@ void Gpu::collapseNN(const BgLayers& layers)
 {
     u32* scanline = video_ctx.scanline(vcount.value);
 
-    for (uint x = 0; x < kScreen.x; ++x)
+    for (int x = 0; x < kScreen.x; ++x)
     {
         scanline[x] = argb(upperLayer<Objects>(layers, x));
     }
@@ -80,7 +80,7 @@ void Gpu::collapseNW(const BgLayers& layers)
 {
     u32* scanline = video_ctx.scanline(vcount.value);
 
-    for (uint x = 0; x < kScreen.x; ++x)
+    for (int x = 0; x < kScreen.x; ++x)
     {
         const auto& window = activeWindow<Windows>(x);
 
@@ -108,7 +108,7 @@ void Gpu::collapseBN(const BgLayers& layers)
 
     u32* scanline = video_ctx.scanline(vcount.value);
 
-    for (uint x = 0; x < kScreen.x; ++x)
+    for (int x = 0; x < kScreen.x; ++x)
     {
         u16 upper = 0;
         u16 lower = 0;
@@ -182,7 +182,7 @@ void Gpu::collapseBW(const BgLayers& layers)
 {
     u32* scanline = video_ctx.scanline(vcount.value);
 
-    for (uint x = 0; x < kScreen.x; ++x)
+    for (int x = 0; x < kScreen.x; ++x)
     {
         u16 upper = 0;
         u16 lower = 0;
