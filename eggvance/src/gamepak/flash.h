@@ -5,10 +5,10 @@
 class Flash : public Save
 {
 public:
-    explicit Flash(uint size);
-
     static constexpr uint kSize512  = 0x10'000;
     static constexpr uint kSize1024 = 0x20'000;
+
+    explicit Flash(uint size);
 
     void reset() final;
 
@@ -37,8 +37,8 @@ private:
     };
 
     const uint size;
-    bool chip = false;
-    bool erase = false;
     uint command = 0;
-    u8* bank = nullptr;
+    bool chip    = false;
+    bool erase   = false;
+    u8* bank     = nullptr;
 };

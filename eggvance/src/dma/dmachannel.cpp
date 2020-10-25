@@ -46,22 +46,21 @@ void DmaChannel::start()
 
 void DmaChannel::run(int& cycles)
 {
-    static constexpr int kDeltas[2][4] = {
-        { 2, -2, 0, 2 },
-        { 4, -4, 0, 4 }
-    };
-
     while (pending-- > 0)
     {
+        static constexpr int kDeltas[2][4] = {
+            { 2, -2, 0, 2 },
+            { 4, -4, 0, 4 }
+        };
+
         transfer();
 
         src_addr += kDeltas[control.word][control.sadcnt];
         dst_addr += kDeltas[control.word][control.dadcnt];
 
-        if (pending == 0)
-            cycles -= cycles_n;
-        else
-            cycles -= cycles_s;
+        cycles -= pending == 0
+            ? cycles_n
+            : cycles_s;
 
         if (cycles <= 0 && pending > 0)
             return;

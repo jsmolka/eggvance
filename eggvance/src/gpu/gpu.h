@@ -52,7 +52,7 @@ private:
 
     static u32 argb(u16 color);
 
-    Point transform(int x, uint bg);
+    Point transform(uint x, uint bg);
 
     void renderBg(RenderFunc render, uint bg);
     void renderBgMode0(uint bg);
@@ -63,34 +63,38 @@ private:
     void renderObjects();
 
     void collapse(uint begin, uint end);
-    template<uint Objects>
+    template<bool Objects>
     void collapse(const BgLayers& layers);
-    template<uint Objects>
+    template<bool Objects>
     void collapseNN(const BgLayers& layers);
-    template<uint Objects>
+    template<bool Objects>
     void collapseNW(const BgLayers& layers);
-    template<uint Objects, uint Windows>
+    template<bool Objects, uint Windows>
     void collapseNW(const BgLayers& layers);
-    template<uint Objects>
+    template<bool Objects>
     void collapseBN(const BgLayers& layers);
-    template<uint Objects, uint BlendMode>
+    template<bool Objects, uint BlendMode>
     void collapseBN(const BgLayers& layers);
-    template<uint Objects>
+    template<bool Objects>
     void collapseBW(const BgLayers& layers);
-    template<uint Objects, uint BlendMode>
+    template<bool Objects, uint BlendMode>
     void collapseBW(const BgLayers& layers);
-    template<uint Objects, uint BlendMode, uint Windows>
+    template<bool Objects, uint BlendMode, uint Windows>
     void collapseBW(const BgLayers& layers);
 
-    template<uint Objects>
+    template<bool Objects>
     uint possibleWindows() const;
     template<uint Windows>
     const Window& activeWindow(uint x) const;
 
-    template<uint Objects> u16 upperLayer(const BgLayers& layers, uint x);
-    template<uint Objects> u16 upperLayer(const BgLayers& layers, uint x, uint flags);
-    template<uint Objects> bool findBlendLayers(const BgLayers& layers, uint x, uint flags, u16& upper);
-    template<uint Objects> bool findBlendLayers(const BgLayers& layers, uint x, uint flags, u16& upper, u16& lower);
+    template<bool Objects>
+    u16 upperLayer(const BgLayers& layers, uint x);
+    template<bool Objects>
+    u16 upperLayer(const BgLayers& layers, uint x, uint flags);
+    template<bool Objects>
+    bool findBlendLayers(const BgLayers& layers, uint x, uint flags, u16& upper);
+    template<bool Objects>
+    bool findBlendLayers(const BgLayers& layers, uint x, uint flags, u16& upper, u16& lower);
 
     DoubleBuffer<u16> backgrounds[4];
     Buffer<ObjectLayer> objects;

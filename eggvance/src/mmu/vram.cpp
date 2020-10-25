@@ -9,7 +9,7 @@ void Vram::writeByte(u32 addr, u8 byte)
 {
     addr = mirror(addr);
 
-    if (addr < (gpu.dispcnt.isBitmap() ? 0x1'4000U : 0x1'0000U))
+    if (addr < (gpu.dispcnt.isBitmap() ? 0x1'4000 : 0x1'0000))
     {
         addr = align<u16>(addr);
 

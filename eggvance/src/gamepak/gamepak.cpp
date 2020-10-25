@@ -7,7 +7,7 @@
 #include "base/config.h"
 #include "base/utility.h"
 
-std::size_t GamePak::size() const
+uint GamePak::size() const
 {
     return rom.size();
 }

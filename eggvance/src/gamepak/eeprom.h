@@ -5,10 +5,10 @@
 class Eeprom : public Save
 {
 public:
-    Eeprom();
-
     static constexpr uint kSize4  = 0x0200;
     static constexpr uint kSize64 = 0x2000;
+
+    Eeprom();
 
     void reset() final;
 

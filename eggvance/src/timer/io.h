@@ -34,14 +34,14 @@ public:
     template<uint Index>
     void write(u8 byte)
     {
-        static constexpr uint kPrescalers[8] = {
-            1, 64, 256, 1024, 1, 1, 1, 1
-        };
-
         Register::write<Index>(byte);
 
         if (Index == 0)
         {
+            static constexpr uint kPrescalers[8] = {
+                1, 64, 256, 1024, 1, 1, 1, 1
+            };
+
             run_channels();
 
             uint was_enabled = enable;

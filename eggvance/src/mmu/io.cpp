@@ -13,10 +13,10 @@ Io::Io()
 {
     if (config.bios_skip)
     {
-        rcnt.value = 0x8000;
-        postflag.value = 0x01;
+        rcnt.value       = 0x8000;
+        postflag.value   = 0x0001;
         soundcnt_h.value = 0x880E;
-        soundbias.value = 0x0200;
+        soundbias.value  = 0x0200;
     }
 }
 

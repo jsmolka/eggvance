@@ -17,8 +17,5 @@ public:
 
     virtual void reset();
 
-    virtual u16 read(u32 addr);
-    virtual void write(u32 addr, u16 half);
-
     const Type type;
 };

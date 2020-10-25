@@ -5,13 +5,13 @@
 #include "base/macros.h"
 #include "mmu/mmu.h"
 
-Point Gpu::transform(int x, uint bg)
+Point Gpu::transform(uint x, uint bg)
 {
     bg -= 2;
 
     return Point(
-        bgpa[bg].value * x + bgx[bg].current,
-        bgpc[bg].value * x + bgy[bg].current);
+        bgpa[bg].value * static_cast<int>(x) + bgx[bg].current,
+        bgpc[bg].value * static_cast<int>(x) + bgy[bg].current);
 }
 
 void Gpu::renderBg(RenderFunc render, uint bg)
@@ -29,7 +29,7 @@ void Gpu::renderBg(RenderFunc render, uint bg)
 
         if (bgcnt[bg].mosaic && mosaic.bgs.x > 1)
         {
-            for (int x = 0; x < kScreen.x; ++x)
+            for (uint x = 0; x < kScreen.x; ++x)
             {
                 backgrounds[bg][x] = backgrounds[bg][mosaic.bgs.mosaicX(x)];
             }
@@ -52,11 +52,10 @@ void Gpu::renderBgMode0(uint bg)
     Point block = origin / 256;
     Point tile  = origin / 8 % 32;
 
-    for (int x = 0; x < kScreen.x; block.x ^= size.x / 512, tile.x = 0)
+    for (uint x = 0; x < kScreen.x; block.x ^= size.x / 512, tile.x = 0)
     {
-        uint offset = 0x800 * block.index2d(size.x / 256) + 2 * tile.index2d(32);
-
-        u16* map = mmu.vram.data<u16>(bgcnt.map_block + offset);
+        u32  map_addr = 0x800 * block.index2d(size.x / 256) + 2 * tile.index2d(32);
+        u16* map = mmu.vram.data<u16>(bgcnt.map_block + map_addr);
 
         for (; tile.x < 32 && x < kScreen.x; ++tile.x, ++map, pixel.x = 0)
         {
@@ -91,7 +90,7 @@ void Gpu::renderBgMode2(uint bg)
     const auto& bgcnt = this->bgcnt[bg];
     const auto& size  = this->bgcnt[bg].sizeAff();
 
-    for (int x = 0; x < kScreen.x; ++x)
+    for (uint x = 0; x < kScreen.x; ++x)
     {
         auto texture = transform(x, bg) >> 8;
 
@@ -125,7 +124,7 @@ void Gpu::renderBgMode2(uint bg)
 
 void Gpu::renderBgMode3(uint bg)
 {
-    for (int x = 0; x < kScreen.x; ++x)
+    for (uint x = 0; x < kScreen.x; ++x)
     {
         const auto texture = transform(x, bg) >> 8;
 
@@ -144,7 +143,7 @@ void Gpu::renderBgMode3(uint bg)
 
 void Gpu::renderBgMode4(uint bg)
 {
-    for (int x = 0; x < kScreen.x; ++x)
+    for (uint x = 0; x < kScreen.x; ++x)
     {
         const auto texture = transform(x, bg) >> 8;
 
@@ -166,7 +165,7 @@ void Gpu::renderBgMode5(uint bg)
 {
     constexpr Point kBitmap(160, 128);
 
-    for (int x = 0; x < kScreen.x; ++x)
+    for (uint x = 0; x < kScreen.x; ++x)
     {
         const auto texture = transform(x, bg) >> 8;
 
@@ -204,9 +203,9 @@ void Gpu::renderObjects()
             -center.x + origin.x - std::min(origin.x, 0),
             -center.y + vcount.value);
 
-        int end = std::min(origin.x + screen_size.x, kScreen.x);
+        uint end = std::min(origin.x + screen_size.x, kScreen.x);
 
-        for (int x = center.x + offset.x; x < end; ++x, ++offset.x)
+        for (uint x = center.x + offset.x; x < end; ++x, ++offset.x)
         {
             auto texture = (matrix * offset >> 8) + (sprite_size / 2);
 

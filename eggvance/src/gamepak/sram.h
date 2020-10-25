@@ -5,9 +5,9 @@
 class Sram : public Save
 {
 public:
-    Sram();
-
     static constexpr uint kSize = 0x8000;
+
+    Sram();
 
     void reset() final;
 

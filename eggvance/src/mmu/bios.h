@@ -16,5 +16,6 @@ public:
 
 private:
     static inline Ram<kSize> data;
+
     u32 previous = 0xE129'F000;
 };

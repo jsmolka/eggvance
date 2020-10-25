@@ -9,7 +9,7 @@
 class GamePak
 {
 public:
-    std::size_t size() const;
+    uint size() const;
 
     u8  readByte(u32 addr) const;
     u16 readHalf(u32 addr) const;

@@ -34,7 +34,7 @@ public:
             kConditionAll
         };
 
-        u16 value = ~input.value & KeyInput::kMask;
+        uint value = ~input.value & KeyInput::kMask;
 
         return cond == kConditionAll
             ? (value == mask)

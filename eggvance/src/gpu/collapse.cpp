@@ -32,13 +32,13 @@ void Gpu::collapse(uint begin, uint end)
         collapse<0>({ layers_beg, layers_end });
 }
 
-template<uint Objects>
+template<bool Objects>
 void Gpu::collapse(const BgLayers& layers)
 {
-    uint windows = dispcnt.win0 || dispcnt.win1 || dispcnt.winobj;
-    uint effects = bldcnt.mode != kBlendModeDisabled || objects_alpha;
+    uint window = dispcnt.win0 || dispcnt.win1 || dispcnt.winobj;
+    uint blend  = bldcnt.mode != kBlendModeDisabled || objects_alpha;
 
-    switch ((effects << 1) | (windows << 0))
+    switch ((blend << 1) | (window << 0))
     {
     case 0b00: collapseNN<Objects>(layers); break;
     case 0b01: collapseNW<Objects>(layers); break;
@@ -51,18 +51,18 @@ void Gpu::collapse(const BgLayers& layers)
     }
 }
 
-template<uint Objects>
+template<bool Objects>
 void Gpu::collapseNN(const BgLayers& layers)
 {
     u32* scanline = video_ctx.scanline(vcount.value);
 
-    for (int x = 0; x < kScreen.x; ++x)
+    for (uint x = 0; x < kScreen.x; ++x)
     {
         scanline[x] = argb(upperLayer<Objects>(layers, x));
     }
 }
 
-template<uint Objects>
+template<bool Objects>
 void Gpu::collapseNW(const BgLayers& layers)
 {
     switch (possibleWindows<Objects>())
@@ -75,12 +75,12 @@ void Gpu::collapseNW(const BgLayers& layers)
     }
 }
 
-template<uint Objects, uint Windows>
+template<bool Objects, uint Windows>
 void Gpu::collapseNW(const BgLayers& layers)
 {
     u32* scanline = video_ctx.scanline(vcount.value);
 
-    for (int x = 0; x < kScreen.x; ++x)
+    for (uint x = 0; x < kScreen.x; ++x)
     {
         const auto& window = activeWindow<Windows>(x);
 
@@ -88,7 +88,7 @@ void Gpu::collapseNW(const BgLayers& layers)
     }
 }
 
-template<uint Objects>
+template<bool Objects>
 void Gpu::collapseBN(const BgLayers& layers)
 {
     switch (bldcnt.mode)
@@ -101,14 +101,14 @@ void Gpu::collapseBN(const BgLayers& layers)
     }
 }
 
-template<uint Objects, uint BlendMode>
+template<bool Objects, uint BlendMode>
 void Gpu::collapseBN(const BgLayers& layers)
 {
     constexpr uint kFlags = 0xFFFF;
 
     u32* scanline = video_ctx.scanline(vcount.value);
 
-    for (int x = 0; x < kScreen.x; ++x)
+    for (uint x = 0; x < kScreen.x; ++x)
     {
         u16 upper = 0;
         u16 lower = 0;
@@ -151,7 +151,7 @@ void Gpu::collapseBN(const BgLayers& layers)
     }
 }
 
-template<uint Objects>
+template<bool Objects>
 void Gpu::collapseBW(const BgLayers& layers)
 {
     switch (bldcnt.mode)
@@ -164,7 +164,7 @@ void Gpu::collapseBW(const BgLayers& layers)
     }
 }
 
-template<uint Objects, uint BlendMode>
+template<bool Objects, uint BlendMode>
 void Gpu::collapseBW(const BgLayers& layers)
 {
     switch (possibleWindows<Objects>())
@@ -177,12 +177,12 @@ void Gpu::collapseBW(const BgLayers& layers)
     }
 }
 
-template<uint Objects, uint BlendMode, uint Windows>
+template<bool Objects, uint BlendMode, uint Windows>
 void Gpu::collapseBW(const BgLayers& layers)
 {
     u32* scanline = video_ctx.scanline(vcount.value);
 
-    for (int x = 0; x < kScreen.x; ++x)
+    for (uint x = 0; x < kScreen.x; ++x)
     {
         u16 upper = 0;
         u16 lower = 0;
@@ -230,7 +230,7 @@ void Gpu::collapseBW(const BgLayers& layers)
     }
 }
 
-template<uint Objects>
+template<bool Objects>
 uint Gpu::possibleWindows() const
 {
     uint windows = 0;
@@ -260,7 +260,7 @@ const Window& Gpu::activeWindow(uint x) const
     return winout.winout;
 }
 
-template<uint Objects>
+template<bool Objects>
 u16 Gpu::upperLayer(const BgLayers& layers, uint x)
 {
     const auto& object = objects[x];
@@ -280,7 +280,7 @@ u16 Gpu::upperLayer(const BgLayers& layers, uint x)
     return mmu.pram.backdrop();
 }
 
-template<uint Objects>
+template<bool Objects>
 u16 Gpu::upperLayer(const BgLayers& layers, uint x, uint flags)
 {    
     const auto& object = objects[x];
@@ -300,7 +300,7 @@ u16 Gpu::upperLayer(const BgLayers& layers, uint x, uint flags)
     return mmu.pram.backdrop();
 }
 
-template<uint Objects>
+template<bool Objects>
 bool Gpu::findBlendLayers(const BgLayers& layers, uint x, uint flags, u16& upper)
 {
     const auto& object = objects[x];
@@ -346,7 +346,7 @@ bool Gpu::findBlendLayers(const BgLayers& layers, uint x, uint flags, u16& upper
             return false;               \
     }
 
-template<uint Objects>
+template<bool Objects>
 bool Gpu::findBlendLayers(const BgLayers& layers, uint x, uint flags, u16& upper, u16& lower)
 {
     const auto& object = objects[x];
