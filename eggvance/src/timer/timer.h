@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <shell/buffer.h>
 
 #include "constants.h"
 #include "timerchannel.h"
@@ -23,7 +23,7 @@ private:
     uint count = 0;
     uint event = kEventMax;
 
-    std::vector<std::reference_wrapper<TimerChannel>> active;
+    shell::FixedBuffer<TimerChannel*, 4> active;
 };
 
 inline Timer timer;

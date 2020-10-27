@@ -1,6 +1,6 @@
 #pragma once
 
-#include <shell/iterator.h>
+#include <shell/buffer.h>
 
 #include "buffer.h"
 #include "io.h"
@@ -47,7 +47,7 @@ private:
         kWindowObj = 1 << 2
     };
 
-    using BgLayers = shell::IteratorRange<const BgLayer*>;
+    using BgLayers = shell::FixedBuffer<BgLayer, 4>;
     using RenderFunc = void(Gpu::*)(uint);
 
     static u32 argb(u16 color);
@@ -62,7 +62,7 @@ private:
     void renderBgMode5(uint bg);
     void renderObjects();
 
-    void collapse(uint begin, uint end);
+    void collapse(uint bgs);
     template<bool Objects>
     void collapse(const BgLayers& layers);
     template<bool Objects>

@@ -7,29 +7,25 @@
 #include "core/videocontext.h"
 #include "mmu/mmu.h"
 
-void Gpu::collapse(uint begin, uint end)
+void Gpu::collapse(uint bgs)
 {
-    BgLayer  layers[4];
-    BgLayer* layers_beg = &layers[0];
-    BgLayer* layers_end = &layers[0];
+    BgLayers layers;
 
-    for (uint bg = begin; bg < end; ++bg)
+    for (uint bg : bit::iterateBits(bgs & dispcnt.layers))
     {
-        if (dispcnt.layers & (1 << bg))
-        {
-            layers_end->priority = bgcnt[bg].priority;
-            layers_end->data = backgrounds[bg].data();
-            layers_end->flag = 1 << bg;
-            layers_end++;
-        }
+        layers.push({ 
+            bgcnt[bg].priority,
+            backgrounds[bg].data(),
+            1U << bg
+        });
     }
 
-    std::sort(layers_beg, layers_end, std::less<BgLayer>());
+    std::sort(layers.begin(), layers.end(), std::less<BgLayer>());
 
     if (objects_exist)
-        collapse<1>({ layers_beg, layers_end });
+        collapse<1>(layers);
     else
-        collapse<0>({ layers_beg, layers_end });
+        collapse<0>(layers);
 }
 
 template<bool Objects>

@@ -62,35 +62,35 @@ void Gpu::scanline()
         renderBg(&Gpu::renderBgMode0, 1);
         renderBg(&Gpu::renderBgMode0, 2);
         renderBg(&Gpu::renderBgMode0, 3);
-        collapse(0, 4);
+        collapse(kLayerBg0 | kLayerBg1 | kLayerBg2 | kLayerBg3);
         break;
 
     case 1:
         renderBg(&Gpu::renderBgMode0, 0);
         renderBg(&Gpu::renderBgMode0, 1);
         renderBg(&Gpu::renderBgMode2, 2);
-        collapse(0, 3);
+        collapse(kLayerBg0 | kLayerBg1 | kLayerBg2);
         break;
 
     case 2:
         renderBg(&Gpu::renderBgMode2, 2);
         renderBg(&Gpu::renderBgMode2, 3);
-        collapse(2, 4);
+        collapse(kLayerBg2 | kLayerBg3);
         break;
 
     case 3:
         renderBg(&Gpu::renderBgMode3, 2);
-        collapse(2, 3);
+        collapse(kLayerBg2);
         break;
 
     case 4:
         renderBg(&Gpu::renderBgMode4, 2);
-        collapse(2, 3);
+        collapse(kLayerBg2);
         break;
 
     case 5:
         renderBg(&Gpu::renderBgMode5, 2);
-        collapse(2, 3);
+        collapse(kLayerBg2);
         break;
     }
 }

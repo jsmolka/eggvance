@@ -66,7 +66,7 @@ void Timer::schedule()
     {
         if (channel.control.enable && !channel.control.cascade)
         {
-            active.push_back(std::ref(channel));
+            active.push(&channel);
             arm.state |= kStateTimer;
 
             event = std::min(event, channel.nextEvent());
@@ -77,14 +77,14 @@ void Timer::schedule()
 void Timer::reschedule()
 {
     event = kEventMax;
-    for (TimerChannel& channel : active)
-        event = std::min(event, channel.nextEvent());
+    for (const auto& channel : active)
+        event = std::min(event, channel->nextEvent());
 }
 
 void Timer::runChannels()
 {
-    for (TimerChannel& channel : active)
-        channel.run(count);
+    for (const auto& channel : active)
+        channel->run(count);
 
     event -= count;
     count = 0;
