@@ -5,7 +5,7 @@
 #include "rtc.h"
 #include "sram.h"
 #include "base/config.h"
-#include "base/utility.h"
+#include "base/panic.h"
 
 uint GamePak::size() const
 {
@@ -39,7 +39,7 @@ void GamePak::loadRom(const fs::path& file, bool load_save)
 {
     if (!fs::read(file, rom))
     {
-        message("Cannot read ROM: {}", file);
+        alert("Cannot read ROM: {}", file);
         return;
     }
 

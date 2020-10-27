@@ -5,7 +5,7 @@
 #include "sdl2.h"
 
 template<typename... Args>
-void message(const std::string& format, Args&&... args)
+void alert(const std::string& format, Args&&... args)
 {
     const std::string message = fmt::format(format, std::forward<Args>(args)...);
 
@@ -14,9 +14,9 @@ void message(const std::string& format, Args&&... args)
 }
 
 template<typename... Args>
-void exit(const std::string& format, Args&&... args)
+void panic(const std::string& format, Args&&... args)
 {
-    message(format, std::forward<Args>(args)...);
+    alert(format, std::forward<Args>(args)...);
 
     std::exit(0);
 }

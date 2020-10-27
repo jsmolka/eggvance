@@ -5,7 +5,7 @@
 #include "bios_normmatt.h"
 #include "arm/arm.h"
 #include "base/config.h"
-#include "base/utility.h"
+#include "base/panic.h"
 
 void Bios::init(const fs::path& path)
 {
@@ -18,14 +18,14 @@ void Bios::init(const fs::path& path)
     else
     {
         if (!fs::read(path, data))
-            exit("Cannot read BIOS: {}", path);
+            panic("Cannot read BIOS: {}", path);
 
         if (config.bios_hash)
         {
             constexpr std::size_t kExpected = 0x860D'7AFF'82E9'94DC;
 
             if (shell::hashRange(data.begin(), data.end()) != kExpected)
-                exit("Invalid BIOS hash");
+                panic("Invalid BIOS hash");
         }
     }
 }

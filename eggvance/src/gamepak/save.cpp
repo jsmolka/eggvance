@@ -5,7 +5,7 @@
 #include <utility>
 
 #include "header.h"
-#include "base/utility.h"
+#include "base/panic.h"
 
 Save::Save()
     : type(Type::None)
@@ -27,7 +27,7 @@ Save::~Save()
         && type != Type::None)
     {
         if (!fs::write(file, data))
-            message("Cannot write save: {}", file);
+            alert("Cannot write save: {}", file);
     }
 }
 
@@ -66,13 +66,13 @@ bool Save::init(const fs::path& file)
 
     if (!fs::read(file, data))
     {
-        message("Cannot read save: {}", file);
+        alert("Cannot read save: {}", file);
         return false;
     }
 
     if (!isValid(data.size()))
     {
-        message("Invalid save size: {}", data.size());
+        alert("Invalid save size: {}", data.size());
         return false;
     }
 

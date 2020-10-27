@@ -9,7 +9,7 @@
 #include "videocontext.h"
 #include "arm/arm.h"
 #include "base/config.h"
-#include "base/utility.h"
+#include "base/panic.h"
 #include "dma/dma.h"
 #include "gamepad/gamepad.h"
 #include "gamepak/gamepak.h"
@@ -61,7 +61,7 @@ void core::init(int argc, char* argv[])
     {
         fmt::print(options.help());
 
-        exit("Cannot parse command line arguments\nError: {}", error.what());
+        panic("Cannot parse command line arguments\nError: {}", error.what());
     }
 }
 

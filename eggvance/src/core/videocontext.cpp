@@ -3,7 +3,7 @@
 #include <shell/icon.h>
 
 #include "base/bit.h"
-#include "base/utility.h"
+#include "base/panic.h"
 
 VideoContext::~VideoContext()
 {
@@ -13,11 +13,11 @@ VideoContext::~VideoContext()
 void VideoContext::init()
 {
     if (SDL_InitSubSystem(SDL_INIT_VIDEO))
-        exit("Cannot init video context");
+        panic("Cannot init video context");
 
-    if (!initWindow())   exit("Cannot init window");
-    if (!initRenderer()) exit("Cannot init renderer");
-    if (!initTexture())  exit("Cannot init texture");
+    if (!initWindow())   panic("Cannot init window");
+    if (!initRenderer()) panic("Cannot init renderer");
+    if (!initTexture())  panic("Cannot init texture");
 }
 
 void VideoContext::raise()

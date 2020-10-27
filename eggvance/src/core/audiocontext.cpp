@@ -1,7 +1,7 @@
 #include "audiocontext.h"
 
+#include "base/panic.h"
 #include "base/sdl2.h"
-#include "base/utility.h"
 
 AudioContext::~AudioContext()
 {
@@ -11,7 +11,7 @@ AudioContext::~AudioContext()
 void AudioContext::init()
 {
     if (SDL_InitSubSystem(SDL_INIT_AUDIO))
-        exit("Cannot init audio context");
+        panic("Cannot init audio context");
 }
 
 void AudioContext::deinit()

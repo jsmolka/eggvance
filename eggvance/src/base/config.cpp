@@ -2,7 +2,7 @@
 
 #include <shell/ini.h>
 
-#include "utility.h"
+#include "panic.h"
 #include "gpu/constants.h"
 
 template<>
@@ -57,7 +57,7 @@ void Config::init(const fs::path& file)
     }
     catch (const shell::ParseError& error)
     {
-        exit("Cannot parse config: {}\nError: {}", file, error.what());
+        panic("Cannot parse config: {}\nError: {}", file, error.what());
     }
 
     save_path = ini.findOr("general", "save_path", fs::path());
@@ -72,7 +72,7 @@ void Config::init(const fs::path& file)
         if (!fs::is_directory(save_path))
         {
             if (!fs::create_directories(save_path))
-                exit("Cannot create save path: {}", save_path);
+                panic("Cannot create save path: {}", save_path);
         }
     }
 
@@ -81,7 +81,7 @@ void Config::init(const fs::path& file)
         bios_file = fs::makeAbsolute(bios_file);
 
         if (!fs::is_regular_file(bios_file))
-            exit("Cannot find BIOS: {}", bios_file);
+            panic("Cannot find BIOS: {}", bios_file);
     }
     
     save = ini.findOr("cartridge", "save_type", Save::Type::None);

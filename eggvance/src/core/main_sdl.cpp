@@ -8,7 +8,7 @@
 #include "synchronizer.h"
 #include "videocontext.h"
 #include "base/config.h"
-#include "base/utility.h"
+#include "base/panic.h"
 #include "gamepak/gamepak.h"
 
 bool running = true;
@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
     }
     catch (const std::exception& ex)
     {
-        exit(ex.what());
+        panic(ex.what());
     }
     return 0;
 }

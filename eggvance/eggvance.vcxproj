@@ -190,7 +190,7 @@
     <ClInclude Include="src\base\filesystem.h" />
     <ClInclude Include="src\base\int.h" />
     <ClInclude Include="src\base\sdl2.h" />
-    <ClInclude Include="src\base\utility.h" />
+    <ClInclude Include="src\base\panic.h" />
     <ClInclude Include="src\common\critical.h" />
     <ClInclude Include="src\base\macros.h" />
     <ClInclude Include="src\core\audiocontext.h" />
