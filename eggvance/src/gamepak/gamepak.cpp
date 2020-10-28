@@ -29,13 +29,12 @@ u32 GamePak::readWord(u32 addr) const
 
 bool GamePak::isEeprom(u32 addr) const
 {
-    return save->type == Save::Type::Eeprom
-        && size() <= 0x100'0000
-            ? addr >= 0xD00'0000 && addr < 0xE00'0000
-            : addr >= 0xDFF'FF00 && addr < 0xE00'0000;
+    return save->type == Save::Type::Eeprom && size() <= 0x100'0000
+        ? addr >= 0xD00'0000 && addr < 0xE00'0000
+        : addr >= 0xDFF'FF00 && addr < 0xE00'0000;
 }
 
-void GamePak::loadRom(const fs::path& file, bool load_save)
+void GamePak::loadRom(const fs::path& file, bool save)
 {
     if (!fs::read(file, rom))
     {
@@ -49,7 +48,7 @@ void GamePak::loadRom(const fs::path& file, bool load_save)
 
     initGpio(overwrite ? overwrite->gpio : config.gpio);
 
-    if (load_save)
+    if (save)
     {
         fs::path save(file);
         save.replace_extension("sav");

@@ -17,7 +17,7 @@ public:
 
     bool isEeprom(u32 addr) const;
 
-    void loadRom(const fs::path& file, bool load_save);
+    void loadRom(const fs::path& file, bool save);
     void loadSave(const fs::path& file);
 
     Header header;

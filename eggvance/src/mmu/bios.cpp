@@ -22,15 +22,15 @@ void Bios::init(const fs::path& path)
 
         if (config.bios_hash)
         {
-            constexpr std::size_t kExpected = 0x860D'7AFF'82E9'94DC;
+            constexpr std::size_t kExpectedHash = 0x860D'7AFF'82E9'94DC;
 
-            if (shell::hashRange(data.begin(), data.end()) != kExpected)
+            if (shell::hashRange(data.begin(), data.end()) != kExpectedHash)
                 panic("Invalid BIOS hash");
         }
     }
 }
 
-u8 Bios::readByte(u32 addr)
+u8 Bios::readByte(u32 addr) const
 {
     if (arm.pc < kSize)
         return data.readFast<u8>(addr);
@@ -38,7 +38,7 @@ u8 Bios::readByte(u32 addr)
         return previous >> (addr & 0x3);
 }
 
-u16 Bios::readHalf(u32 addr)
+u16 Bios::readHalf(u32 addr) const
 {
     if (arm.pc < kSize)
         return data.readFast<u16>(addr);

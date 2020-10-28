@@ -84,7 +84,8 @@ void core::frame()
 {
     gamepad.poll();
 
-    for (uint visible = 0; visible < 160; ++visible)
+    uint visible = 160;
+    while (visible--)
     {
         arm.run(960);
         gpu.scanline();
@@ -95,7 +96,8 @@ void core::frame()
 
     gpu.vblank();
 
-    for (uint invisible = 0; invisible < 68; ++invisible)
+    uint invisible = 68;
+    while (invisible--)
     {
         arm.run(1232);
         gpu.next();

@@ -10,8 +10,8 @@ public:
 
     static void init(const fs::path& path);
 
-    u8  readByte(u32 addr);
-    u16 readHalf(u32 addr);
+    u8  readByte(u32 addr) const;
+    u16 readHalf(u32 addr) const;
     u32 readWord(u32 addr);
 
 private:

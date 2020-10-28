@@ -19,13 +19,13 @@ void InputContext::init()
 
 uint InputContext::state() const
 {
-    constexpr uint ud_mask = (1 << kBitUp)   | (1 << kBitDown);
-    constexpr uint lr_mask = (1 << kBitLeft) | (1 << kBitRight);
+    constexpr uint kUdMask = (1 << kBitUp)   | (1 << kBitDown);
+    constexpr uint kLrMask = (1 << kBitLeft) | (1 << kBitRight);
 
     uint state = keyboardState() | controllerState();
 
-    if ((state & ud_mask) == ud_mask) state &= ~ud_mask;
-    if ((state & lr_mask) == lr_mask) state &= ~lr_mask;
+    if ((state & kUdMask) == kUdMask) state &= ~kUdMask;
+    if ((state & kLrMask) == kLrMask) state &= ~kLrMask;
 
     return state;
 }
@@ -89,14 +89,14 @@ uint InputContext::controllerState() const
         int axis_tl = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_TRIGGERLEFT);
         int axis_tr = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_TRIGGERRIGHT);
 
-        constexpr int deadzone = 16000;
+        constexpr int kDeadzone = 16000;
 
-        state |= (axis_lx < 0 && std::abs(axis_lx) > deadzone) << kBitLeft;
-        state |= (axis_lx > 0 && std::abs(axis_lx) > deadzone) << kBitRight;
-        state |= (axis_ly < 0 && std::abs(axis_ly) > deadzone) << kBitUp;
-        state |= (axis_ly > 0 && std::abs(axis_ly) > deadzone) << kBitDown;
-        state |= (axis_tl > deadzone) << kBitL;
-        state |= (axis_tr > deadzone) << kBitR;
+        state |= (axis_lx < 0 && std::abs(axis_lx) > kDeadzone) << kBitLeft;
+        state |= (axis_lx > 0 && std::abs(axis_lx) > kDeadzone) << kBitRight;
+        state |= (axis_ly < 0 && std::abs(axis_ly) > kDeadzone) << kBitUp;
+        state |= (axis_ly > 0 && std::abs(axis_ly) > kDeadzone) << kBitDown;
+        state |= (axis_tl > kDeadzone) << kBitL;
+        state |= (axis_tr > kDeadzone) << kBitR;
     }
     return state;
 }
