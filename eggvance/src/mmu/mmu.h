@@ -1,7 +1,7 @@
 #pragma once
 
 #include "bios.h"
-#include "io.h"
+#include "mmio.h"
 #include "oam.h"
 #include "pram.h"
 #include "vram.h"
@@ -19,18 +19,18 @@ public:
 
     u32 readUnused(u32 addr) const;
 
-    Bios bios;
     Pram pram;
     Vram vram;
     Oam oam;
-    Io io;
 
 private:
     u8 readSave(u32 addr);
     void writeSave(u32 addr, u8 byte);
 
+    Bios bios;
     Ram<0x40000> ewram;
     Ram<0x08000> iwram;
+    Mmio mmio;
 };
 
 inline Mmu mmu;

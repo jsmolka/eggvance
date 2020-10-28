@@ -2,10 +2,10 @@
 
 #include "base/register.h"
 
-class Io
+class Mmio
 {
 public:
-    Io();
+    Mmio();
 
     u8  readByte(u32 addr) const;
     u16 readHalf(u32 addr) const;

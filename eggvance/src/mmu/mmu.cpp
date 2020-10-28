@@ -1,8 +1,26 @@
 #include "mmu.h"
 
-#include "constants.h"
 #include "arm/arm.h"
 #include "gamepak/gamepak.h"
+
+enum Region
+{
+    kRegionBios      = 0x0,
+    kRegionEwram     = 0x2,
+    kRegionIwram     = 0x3,
+    kRegionIo        = 0x4,
+    kRegionPram      = 0x5,
+    kRegionVram      = 0x6,
+    kRegionOam       = 0x7,
+    kRegionGamePak0L = 0x8,
+    kRegionGamePak0H = 0x9,
+    kRegionGamePak1L = 0xA,
+    kRegionGamePak1H = 0xB,
+    kRegionGamePak2L = 0xC,
+    kRegionGamePak2H = 0xD,
+    kRegionSramL     = 0xE,
+    kRegionSramH     = 0xF
+};
 
 u8 Mmu::readByte(u32 addr)
 {
@@ -21,7 +39,7 @@ u8 Mmu::readByte(u32 addr)
         return iwram.readByte(addr);
 
     case kRegionIo:
-        return io.readByte(addr);
+        return mmio.readByte(addr);
 
     case kRegionPram:
         return pram.readByte(addr);
@@ -69,7 +87,7 @@ u16 Mmu::readHalf(u32 addr)
         return iwram.readHalf(addr);
 
     case kRegionIo:
-        return io.readHalf(addr);
+        return mmio.readHalf(addr);
 
     case kRegionPram:
         return pram.readHalf(addr);
@@ -117,7 +135,7 @@ u32 Mmu::readWord(u32 addr)
         return iwram.readWord(addr);
 
     case kRegionIo:
-        return io.readWord(addr);
+        return mmio.readWord(addr);
 
     case kRegionPram:
         return pram.readWord(addr);
@@ -164,7 +182,7 @@ void Mmu::writeByte(u32 addr, u8 byte)
         break;
 
     case kRegionIo:
-        io.writeByte(addr, byte);
+        mmio.writeByte(addr, byte);
         break;
 
     case kRegionPram:
@@ -209,7 +227,7 @@ void Mmu::writeHalf(u32 addr, u16 half)
         break;
 
     case kRegionIo:
-        io.writeHalf(addr, half);
+        mmio.writeHalf(addr, half);
         break;
 
     case kRegionPram:
@@ -255,7 +273,7 @@ void Mmu::writeWord(u32 addr, u32 word)
         break;
 
     case kRegionIo:
-        io.writeWord(addr, word);
+        mmio.writeWord(addr, word);
         break;
 
     case kRegionPram:
