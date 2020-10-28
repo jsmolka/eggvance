@@ -1,7 +1,6 @@
 #pragma once
 
-#include <array>
-#include <type_traits>
+#include <shell/traits.h>
 
 #include "base/int.h"
 #include "base/macros.h"
@@ -17,24 +16,27 @@ public:
 };
 
 template<uint N, typename Mirror = Mirror<N>>
-class Ram : private std::array<u8, N>
+class Ram
 {
 public:
-    using typename std::array<u8, N>::value_type;
-    using std::array<u8, N>::size;
-    using std::array<u8, N>::data;
-    using std::array<u8, N>::begin;
-    using std::array<u8, N>::end;
+    using value_type = u8;
 
-    Ram()
-    {
-        this->fill(0);
-    }
+    constexpr uint size() const { return N; }
+
+    u8* data() { return data_; }
+    const u8* data() const { return data_; }
+
+    u8* begin() { return data_; }
+    u8* end() { return data_ + N; };
+    const u8* begin() const { return data_; }
+    const u8* end() const { return data_ + N; }
+    const u8* cbegin() const { return data_; }
+    const u8* cend() const { return data_ + N; }
 
     template<typename Integral>
     Integral* data(u32 addr)
     {
-        static_assert(std::is_integral_v<Integral>);
+        static_assert(is_memory_type<Integral>::value);
         SHELL_ASSERT(addr < N);
 
         return reinterpret_cast<Integral*>(data() + addr);
@@ -43,7 +45,7 @@ public:
     template<typename Integral>
     const Integral* data(u32 addr) const
     {
-        static_assert(std::is_integral_v<Integral>);
+        static_assert(is_memory_type<Integral>::value);
         SHELL_ASSERT(addr < N);
 
         return reinterpret_cast<const Integral*>(data() + addr);
@@ -52,7 +54,7 @@ public:
     template<typename Integral>
     Integral readFast(u32 addr) const
     {
-        static_assert(std::is_integral_v<Integral>);
+        static_assert(is_memory_type<Integral>::value);
 
         return *data<Integral>(addr);
     }
@@ -60,7 +62,7 @@ public:
     template<typename Integral>
     void writeFast(u32 addr, Integral value)
     {
-        static_assert(std::is_integral_v<Integral>);
+        static_assert(is_memory_type<Integral>::value);
 
         *data<Integral>(addr) = value;
     }
@@ -73,22 +75,25 @@ public:
     void writeHalf(u32 addr, u16 half) { write<u16>(addr, half); }
     void writeWord(u32 addr, u32 word) { write<u32>(addr, word); }
 
-    Mirror mirror;
+    const Mirror mirror;
 
 protected:
     template<typename Integral>
     static u32 align(u32 addr)
     {
-        static_assert(std::is_integral_v<Integral>);
+        static_assert(is_memory_type<Integral>::value);
 
         return addr & ~(sizeof(Integral) - 1);
     }
 
 private:
+    template<typename T>
+    struct is_memory_type : shell::is_any_of<T, u8, u16, u32> {};
+
     template<typename Integral>
     Integral read(u32 addr) const
     {
-        static_assert(std::is_integral_v<Integral>);
+        static_assert(is_memory_type<Integral>::value);
 
         addr = align<Integral>(addr);
         addr = mirror(addr);
@@ -99,11 +104,13 @@ private:
     template<typename Integral>
     void write(u32 addr, Integral value)
     {
-        static_assert(std::is_integral_v<Integral>);
+        static_assert(is_memory_type<Integral>::value);
 
         addr = align<Integral>(addr);
         addr = mirror(addr);
 
         writeFast<Integral>(addr, value);
     }
+
+    u8 data_[N] = {};
 };
