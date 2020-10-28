@@ -54,7 +54,7 @@ public:
 
     void setCAdd(u64 op1, u64 op2)
     {
-        c = op1 + op2 > 0xFFFF'FFFFULL;
+        c = op1 + op2 > 0xFFFF'FFFF;
     }
 
     void setCSub(u64 op1, u64 op2)

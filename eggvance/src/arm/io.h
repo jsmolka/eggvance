@@ -88,12 +88,14 @@ private:
         cycles_word[1][0xE] = cycles_word[1][0xF] = kNonSeq[sram];
     }
 
-    int cycles_half[2][256] = {
+    int cycles_half[2][256] =
+    {
         { 1, 1, 3, 1, 1, 1, 1, 1 },
         { 1, 1, 3, 1, 1, 1, 1, 1 }
     };
 
-    int cycles_word[2][256] = {
+    int cycles_word[2][256] =
+    {
         { 1, 1, 6, 1, 1, 2, 2, 1 },
         { 1, 1, 6, 1, 1, 2, 2, 1 }
     };

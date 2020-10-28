@@ -70,7 +70,7 @@ void Arm::Arm_DataProcessing(u32 instr)
 
     u32& dst = regs[rd];
     u32  op1 = regs[rn];
-    u32  op2 = 0;
+    u32  op2;
 
     constexpr bool kLogical = 
            kOpcode == kOpcodeAdd 
@@ -198,7 +198,7 @@ void Arm::Arm_StatusTransfer(u32 instr)
 
     if (kWrite)
     {
-        u32 op = 0;
+        u32 op;
         if (kImmOp)
         {
             uint value  = bit::seq<0, 8>(instr);
@@ -354,7 +354,7 @@ void Arm::Arm_SingleDataTransfer(u32 instr)
     }
 
     if (!kIncrement)
-        offset = -static_cast<int>(offset);
+        offset = bit::twos(offset);
 
     if (kPreIndex)
         addr += offset;
@@ -413,7 +413,7 @@ void Arm::Arm_HalfSignedDataTransfer(u32 instr)
     u32& dst = regs[rd];
     u32 addr = regs[rn];
 
-    u32 offset = 0;
+    u32 offset;
     if (kImmOp)
     {
         uint lower = bit::seq<0, 4>(instr);
@@ -427,7 +427,7 @@ void Arm::Arm_HalfSignedDataTransfer(u32 instr)
     }
 
     if (!kIncrement)
-        offset = -static_cast<int>(offset);
+        offset = bit::twos(offset);
 
     if (kPreIndex)
         addr += offset;
@@ -492,9 +492,12 @@ void Arm::Arm_BlockDataTransfer(u32 instr)
     u32 addr = regs[rn];
     u32 base = regs[rn];
 
-    uint mode = cpsr.m;
+    uint mode;
     if (kUserMode)
+    {
+        mode = cpsr.m;
         switchMode(Psr::kModeUsr);
+    }
 
     if (rlist != 0)
     {
@@ -556,18 +559,18 @@ void Arm::Arm_BlockDataTransfer(u32 instr)
         {
             enum Suffix
             {
-                kSuffixDecPost,
-                kSuffixDecPre,
-                kSuffixIncPost,
-                kSuffixIncPre
+                kSuffixDA,
+                kSuffixDB,
+                kSuffixIA,
+                kSuffixIB
             };
 
             switch ((kIncrement << 1) | pre_index)
             {
-            case kSuffixDecPost: writeWord(addr - 0x3C, pc + 4); break;
-            case kSuffixDecPre : writeWord(addr - 0x40, pc + 4); break;
-            case kSuffixIncPost: writeWord(addr + 0x00, pc + 4); break;
-            case kSuffixIncPre : writeWord(addr + 0x04, pc + 4); break;
+            case kSuffixDA: writeWord(addr - 0x3C, pc + 4); break;
+            case kSuffixDB: writeWord(addr - 0x40, pc + 4); break;
+            case kSuffixIA: writeWord(addr + 0x00, pc + 4); break;
+            case kSuffixIB: writeWord(addr + 0x04, pc + 4); break;
 
             default:
                 SHELL_UNREACHABLE;
