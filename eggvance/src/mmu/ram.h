@@ -75,7 +75,7 @@ public:
     void writeHalf(u32 addr, u16 half) { write<u16>(addr, half); }
     void writeWord(u32 addr, u32 word) { write<u32>(addr, word); }
 
-    const Mirror mirror;
+    const Mirror mirror = Mirror();
 
 protected:
     template<typename Integral>
