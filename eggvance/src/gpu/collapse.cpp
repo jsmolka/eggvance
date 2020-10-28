@@ -13,14 +13,14 @@ void Gpu::collapse(uint bgs)
 
     for (uint bg : bit::iterateBits(bgs & dispcnt.layers))
     {
-        layers.push({ 
+        layers.push({
             bgcnt[bg].priority,
             backgrounds[bg].data(),
             1U << bg
         });
     }
 
-    std::sort(layers.begin(), layers.end(), std::less<BgLayer>());
+    std::sort(layers.begin(), layers.end());
 
     if (objects_exist)
         collapse<1>(layers);
