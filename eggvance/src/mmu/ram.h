@@ -88,7 +88,7 @@ protected:
 
 private:
     template<typename T>
-    struct is_memory_type : shell::is_any_of<T, u8, u16, u32> {};
+    using is_memory_type = shell::is_any_of<T, u8, u16, u32>;
 
     template<typename Integral>
     Integral read(u32 addr) const
