@@ -22,8 +22,7 @@ void core::init(int argc, char* argv[])
     using namespace shell;
 
     Options options("eggvance");
-    options.add({   "--help", "-h"         }, "Show help"         , Options::value<bool>()->optional());
-    options.add({ "--config", "-c", "file" }, "Path to the config", Options::value<fs::path>("eggvance.ini"));
+    options.add({   "--help", "-h"         }, "Show help"         , Options::value<bool>());
     options.add({   "--save", "-s", "file" }, "Path to the save"  , Options::value<fs::path>()->optional());
     options.add({      "rom"               }, "Path to the ROM"   , Options::value<fs::path>()->positional()->optional());
 
@@ -31,7 +30,7 @@ void core::init(int argc, char* argv[])
     {
         OptionsResult result = options.parse(argc, argv);
 
-        if (result.has("--help"))
+        if (*result.find<bool>("--help"))
         {
             fmt::print(options.help());
             std::exit(0);
@@ -39,9 +38,8 @@ void core::init(int argc, char* argv[])
 
         const auto rom = result.find<fs::path>("rom");
         const auto sav = result.find<fs::path>("--save");
-        const auto cfg = result.find<fs::path>("--config");
 
-        config.init(fs::makeAbsolute(*cfg));
+        config.init(fs::makeAbsolute("eggvance.ini"));
 
         Bios::init(config.bios_file);
 

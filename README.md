@@ -8,7 +8,7 @@ Most aspects of the GBA are emulated with reasonably high accuracy. This results
 ROM and save files can be passed as command line arguments or dropped in the emulator window. Even though the included [BIOS](https://github.com/Nebuleon/ReGBA/tree/master/bios) should be enough to run most games, it is recommended to download the original one. Its location and many other things are customizable in the [config](eggvance/eggvance.ini).
 
 ```
-Usage: eggvance [--help] [--config <file>] [--save <file>] [<rom>]
+Usage: eggvance [--help] [--save <file>] [<rom>]
 ```
 
 ## Binaries
