@@ -96,8 +96,8 @@ private:
     template<bool Objects>
     bool findBlendLayers(const BgLayers& layers, uint x, uint flags, u16& upper, u16& lower);
 
-    DoubleBuffer<u16> backgrounds[4];
-    Buffer<ObjectLayer> objects;
+    ScanlineDoubleBuffer<u16> backgrounds[4];
+    ScanlineBuffer<ObjectLayer> objects;
     bool objects_exist = false;
     bool objects_alpha = false;
 };

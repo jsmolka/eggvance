@@ -34,29 +34,11 @@ public:
     const u8* cend() const { return data_ + N; }
 
     template<typename Integral>
-    Integral* data(u32 addr)
-    {
-        static_assert(is_memory_type<Integral>::value);
-        SHELL_ASSERT(addr < N);
-
-        return reinterpret_cast<Integral*>(data() + addr);
-    }
-
-    template<typename Integral>
-    const Integral* data(u32 addr) const
-    {
-        static_assert(is_memory_type<Integral>::value);
-        SHELL_ASSERT(addr < N);
-
-        return reinterpret_cast<const Integral*>(data() + addr);
-    }
-
-    template<typename Integral>
     Integral readFast(u32 addr) const
     {
         static_assert(is_memory_type<Integral>::value);
 
-        return *data<Integral>(addr);
+        return *reinterpret_cast<const Integral*>(data() + addr);
     }
 
     template<typename Integral>
@@ -64,7 +46,7 @@ public:
     {
         static_assert(is_memory_type<Integral>::value);
 
-        *data<Integral>(addr) = value;
+        *reinterpret_cast<Integral*>(data() + addr) = value;
     }
 
     u8  readByte(u32 addr) const { return read<u8 >(addr); }

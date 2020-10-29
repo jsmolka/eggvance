@@ -39,6 +39,13 @@ void Gpu::renderBg(RenderFunc render, uint bg)
 
 void Gpu::renderBgMode0(uint bg)
 {
+    // file:///C:/Users/Julian/OneDrive/Dev/gba/GBATEK.html#lcdvramoverview
+
+    constexpr uint kTileSize   = 8;
+    constexpr uint kTileBytes  = 0x20;
+    constexpr uint kBlockSize  = 256;
+    constexpr uint kBlockBytes = 0x800;
+
     const auto& bgcnt = this->bgcnt[bg];
     const auto& size  = this->bgcnt[bg].sizeReg();
 
@@ -48,16 +55,16 @@ void Gpu::renderBgMode0(uint bg)
 
     origin %= size;
 
-    Point pixel = origin % 8;
-    Point block = origin / 256;
-    Point tile  = origin / 8 % 32;
+    Point pixel = origin % kTileSize;
+    Point block = origin / kBlockSize;
+    Point tile  = origin / kTileSize % (kBlockSize / kTileSize);
 
-    for (uint x = 0; x < kScreen.x; block.x ^= size.x / 512, tile.x = 0)
+    for (uint x = 0; ; block.x ^= size.x / (2 * kBlockSize))
     {
-        u32  map_addr = 0x800 * block.index2d(size.x / 256) + 2 * tile.index2d(32);
-        u16* map = mmu.vram.data<u16>(bgcnt.map_block + map_addr);
+        u32  map_addr = bgcnt.map_block + kBlockBytes * block.index2d(size.x / kBlockSize) + sizeof(u16) * tile.index2d(kTileBytes);  // Todo: last might be wrong name
+        u16* map = reinterpret_cast<u16*>(mmu.vram.data() + map_addr);
 
-        for (; tile.x < 32 && x < kScreen.x; ++tile.x, ++map, pixel.x = 0)
+        for (; tile.x < 32; ++tile.x, ++map)
         {
             MapEntry entry(*map);
 
@@ -67,21 +74,29 @@ void Gpu::renderBgMode0(uint bg)
             u32 addr = bgcnt.tile_block + bgcnt.tileSize() * entry.tile;
             if (addr < 0x1'0000)
             {
-                for (; pixel.x < 8 && x < kScreen.x; ++pixel.x, ++x)
+                for (; pixel.x < kTileSize; ++pixel.x)
                 {
                     uint index = mmu.vram.index(addr, pixel ^ entry.flip, bgcnt.color_mode);
 
                     backgrounds[bg][x] = mmu.pram.colorBg(index, entry.bank);
+
+                    if (++x == kScreen.x)
+                        return;
                 }
             }
             else
             {
-                for (; pixel.x < 8 && x < kScreen.x; ++pixel.x, ++x)
+                for (; pixel.x < kTileSize; ++pixel.x)
                 {
                     backgrounds[bg][x] = kTransparent;
+
+                    if (++x == kScreen.x)
+                        return;
                 }
             }
+            pixel.x = 0;
         }
+        tile.x = 0;
     }
 }
 

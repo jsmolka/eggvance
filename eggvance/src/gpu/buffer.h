@@ -6,39 +6,44 @@
 #include "base/int.h"
 
 template<typename T>
-using Buffer = std::array<T, kScreen.x>;
+using ScanlineBuffer = std::array<T, kScreen.x>;
 
 template<typename T>
-class DoubleBuffer
+class ScanlineDoubleBuffer
 {
 public:
     T* data()
     {
-        return buffer[page].data();
+        return buffers[page].data();
+    }
+
+    const T* data() const
+    {
+        return buffers[page].data();
     }
 
     void flip()
     {
-        page ^= 1;
+        page ^= 0x1;
     }
 
     void fill(const T& value)
     {
-        buffer[0].fill(value);
-        buffer[1].fill(value);
+        buffers[0].fill(value);
+        buffers[1].fill(value);
     }
 
     T& operator[](uint index)
     {
-        return buffer[page][index];
+        return buffers[page][index];
     }
 
     const T& operator[](uint index) const
     {
-        return buffer[page][index];
+        return buffers[page][index];
     }
 
 private:
     uint page = 0;
-    Buffer<T> buffer[2];
+    ScanlineBuffer<T> buffers[2];
 };

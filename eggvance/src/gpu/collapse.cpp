@@ -34,7 +34,7 @@ void Gpu::collapse(const BgLayers& layers)
     uint window = dispcnt.win0 || dispcnt.win1 || dispcnt.winobj;
     uint blend  = bldcnt.mode != kBlendModeDisabled || objects_alpha;
 
-    switch ((blend << 1) | (window << 0))
+    switch ((blend << 1) | window)
     {
     case 0b00: collapseNN<Objects>(layers); break;
     case 0b01: collapseNW<Objects>(layers); break;
