@@ -64,6 +64,7 @@ void Config::init(const fs::path& file)
     bios_file = ini.findOr("general", "bios_file", fs::path());
     bios_skip = ini.findOr("general", "bios_skip", true);
     bios_hash = ini.findOr("general", "bios_hash", true);
+    lcd_color = ini.findOr("general", "lcd_color", true);
 
     if (!save_path.empty())
     {

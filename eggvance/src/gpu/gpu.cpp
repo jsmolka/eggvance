@@ -1,11 +1,13 @@
 #include "gpu.h"
 
 #include <algorithm>
+#include <numeric>
 
 #include "constants.h"
 #include "arm/arm.h"
 #include "arm/constants.h"
 #include "base/bit.h"
+#include "base/config.h"
 #include "base/macros.h"
 #include "core/videocontext.h"
 #include "dma/dma.h"
@@ -16,14 +18,29 @@ Gpu::Gpu()
     backgrounds[1].fill(kTransparent);
     backgrounds[2].fill(kTransparent);
     backgrounds[3].fill(kTransparent);
-}
 
-u32 Gpu::argb(u16 color)
-{
-    return 0xFF00'0000
-        | (color & (0x1F <<  0)) << 19
-        | (color & (0x1F <<  5)) <<  6
-        | (color & (0x1F << 10)) >>  7;
+    for (u32 color = 0; color < argb.size(); ++color)
+    {
+        uint r = bit::seq< 0, 5>(color) << 3;
+        uint g = bit::seq< 5, 5>(color) << 3;
+        uint b = bit::seq<10, 5>(color) << 3;
+
+        if (config.lcd_color)
+        {
+            constexpr double kLcdGamma = 4.0;
+            constexpr double kOutGamma = 2.6;
+            
+            double rr = pow(r / 255.0, kLcdGamma);
+            double gg = pow(g / 255.0, kLcdGamma);
+            double bb = pow(b / 255.0, kLcdGamma);
+
+            r = static_cast<uint>(std::min(1.0, std::pow((  0 * bb +  50 * gg + 255 * rr) / 255.0, 1 / kOutGamma)) * 255);
+            g = static_cast<uint>(std::min(1.0, std::pow(( 30 * bb + 230 * gg +  10 * rr) / 255.0, 1 / kOutGamma)) * 255);
+            b = static_cast<uint>(std::min(1.0, std::pow((220 * bb +  10 * gg +  50 * rr) / 255.0, 1 / kOutGamma)) * 255);
+        }
+
+        argb[color] = 0xFF00'0000 | (r << 16) | (g << 8) | b;
+    }
 }
 
 void Gpu::scanline()

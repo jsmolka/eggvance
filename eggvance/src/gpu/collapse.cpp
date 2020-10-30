@@ -54,7 +54,7 @@ void Gpu::collapseNN(const BgLayers& layers)
 
     for (uint x = 0; x < kScreen.x; ++x)
     {
-        scanline[x] = argb(upperLayer<Objects>(layers, x));
+        scanline[x] = argb[upperLayer<Objects>(layers, x)];
     }
 }
 
@@ -80,7 +80,7 @@ void Gpu::collapseNW(const BgLayers& layers)
     {
         const auto& window = activeWindow<Windows>(x);
 
-        scanline[x] = argb(upperLayer<Objects>(layers, x, window.flags));
+        scanline[x] = argb[upperLayer<Objects>(layers, x, window.flags)];
     }
 }
 
@@ -143,7 +143,7 @@ void Gpu::collapseBN(const BgLayers& layers)
                 break;
             }
         }
-        scanline[x] = argb(upper);
+        scanline[x] = argb[upper];
     }
 }
 
@@ -222,7 +222,7 @@ void Gpu::collapseBW(const BgLayers& layers)
         {
             upper = upperLayer<Objects>(layers, x, window.flags);
         }
-        scanline[x] = argb(upper);
+        scanline[x] = argb[upper];
     }
 }
 

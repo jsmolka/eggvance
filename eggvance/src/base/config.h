@@ -44,6 +44,7 @@ public:
     fs::path bios_file;
     bool bios_skip;
     bool bios_hash;
+    bool lcd_color;
 
     Save::Type save;
     Gpio::Type gpio;

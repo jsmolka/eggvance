@@ -50,8 +50,6 @@ private:
     using BgLayers = shell::FixedBuffer<BgLayer, 4>;
     using RenderFunc = void(Gpu::*)(uint);
 
-    static u32 argb(u16 color);
-
     Point transform(uint x, uint bg);
 
     void renderBg(RenderFunc render, uint bg);
@@ -103,6 +101,7 @@ private:
     ScanlineBuffer<ObjectLayer> objects;
     bool objects_exist = false;
     bool objects_alpha = false;
+    std::array<u32, 0x8000> argb;
 };
 
 inline Gpu gpu;
