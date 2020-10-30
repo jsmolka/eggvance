@@ -39,12 +39,25 @@ void Gpu::renderBg(RenderFunc render, uint bg)
 
 void Gpu::renderBgMode0(uint bg)
 {
-    // file:///C:/Users/Julian/OneDrive/Dev/gba/GBATEK.html#lcdvramoverview
+    switch (bgcnt[bg].color_mode)
+    {
+    case kColorMode16x16: renderBgMode0Impl<kColorMode16x16>(bg); break;
+    case kColorMode256x1: renderBgMode0Impl<kColorMode256x1>(bg); break;
 
+    default:
+        SHELL_UNREACHABLE;
+        break;
+    }
+}
+
+template<uint ColorMode>
+void Gpu::renderBgMode0Impl(uint bg)
+{
     constexpr uint kTileSize   = 8;
-    constexpr uint kTileBytes  = 0x20;
+    constexpr uint kTileBytes  = 0x20 << ColorMode;
     constexpr uint kBlockSize  = 256;
     constexpr uint kBlockBytes = 0x800;
+    constexpr uint kObjectArea = 0x1'0000;
 
     const auto& bgcnt = this->bgcnt[bg];
     const auto& size  = this->bgcnt[bg].sizeReg();
@@ -61,24 +74,25 @@ void Gpu::renderBgMode0(uint bg)
 
     for (uint x = 0; ; block.x ^= size.x / (2 * kBlockSize))
     {
-        u32  map_addr = bgcnt.map_block + kBlockBytes * block.index2d(size.x / kBlockSize) + sizeof(u16) * tile.index2d(kTileBytes);  // Todo: last might be wrong name
+        u32  map_addr = bgcnt.map_block + kBlockBytes * block.index2d(size.x / kBlockSize) + sizeof(u16) * tile.index2d(0x20);
         u16* map = reinterpret_cast<u16*>(mmu.vram.data() + map_addr);
 
         for (; tile.x < 32; ++tile.x, ++map)
         {
             MapEntry entry(*map);
 
-            if (bgcnt.color_mode == kColorMode256x1)
-                entry.bank = 0;
-
-            u32 addr = bgcnt.tile_block + bgcnt.tileSize() * entry.tile;
-            if (addr < 0x1'0000)
+            u32 addr = bgcnt.tile_block + kTileBytes * entry.tile;
+            if (addr < kObjectArea)
             {
                 for (; pixel.x < kTileSize; ++pixel.x)
                 {
-                    uint index = mmu.vram.index(addr, pixel ^ entry.flip, bgcnt.color_mode);
+                    uint index = ColorMode == kColorMode16x16
+                        ? mmu.vram.index16x16(addr, pixel ^ entry.flip)
+                        : mmu.vram.index256x1(addr, pixel ^ entry.flip);
 
-                    backgrounds[bg][x] = mmu.pram.colorBg(index, entry.bank);
+                    backgrounds[bg][x] = ColorMode == kColorMode16x16
+                        ? mmu.pram.colorBg(index, entry.bank)
+                        : mmu.pram.colorBg(index);
 
                     if (++x == kScreen.x)
                         return;

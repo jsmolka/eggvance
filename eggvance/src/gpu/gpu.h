@@ -62,6 +62,9 @@ private:
     void renderBgMode5(uint bg);
     void renderObjects();
 
+    template<uint ColorMode>
+    void renderBgMode0Impl(uint bg);
+
     void collapse(uint bgs);
     template<bool Objects>
     void collapse(const BgLayers& layers);
