@@ -18,8 +18,8 @@ inline constexpr uint kEntryBytes       = 2;
 inline constexpr uint kBlockSize        = 256;
 inline constexpr uint kBlockTiles       = kBlockSize / kTileSize;
 inline constexpr uint kBlockBytes       = 0x800;
-inline constexpr uint kObjectAreaTiled  = 0x1'0000;
-inline constexpr uint kObjectAreaBitmap = 0x1'4000;
+inline constexpr uint kObjectBase       = 0x1'0000;
+inline constexpr uint kObjectBaseBitmap = 0x1'4000;
 
 enum ColorMode
 {

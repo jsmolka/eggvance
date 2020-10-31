@@ -32,11 +32,11 @@ void OamEntry::write(uint attr, u16 half)
         break;
 
     case kAttribute1:
-        origin.x   = bit::seq< 0, 9>(half);
-        matrix_idx = bit::seq< 9, 5>(half);
-        flip.x     = bit::seq<12, 1>(half);
-        flip.y     = bit::seq<13, 1>(half);
-        size       = bit::seq<14, 2>(half);
+        origin.x = bit::seq< 0, 9>(half);
+        matrix   = bit::seq< 9, 5>(half);
+        flip.x   = bit::seq<12, 1>(half);
+        flip.y   = bit::seq<13, 1>(half);
+        size     = bit::seq<14, 2>(half);
         break;
 
     case kAttribute2:
@@ -60,16 +60,21 @@ bool OamEntry::isVisible(uint line) const
         && static_cast<int>(line) < (origin.y + screen_size.y);
 }
 
-uint OamEntry::tileSize() const
+uint OamEntry::tileBytes() const
 {
-    return 32 << color_mode;
+    return kTileBytes[color_mode];
 }
 
 uint OamEntry::tilesInRow(uint layout) const
 {
+    static constexpr Point kTileMatrix[2] = {
+        Point(32, 32),
+        Point(16, 32)
+    };
+
     return layout == kObjectLayout2d
-        ? 32 >> color_mode
-        : sprite_size.x / 8;
+        ? kTileMatrix[color_mode].x
+        : sprite_size.x / kTileSize;
 }
 
 uint OamEntry::paletteBank() const
@@ -109,7 +114,7 @@ void OamEntry::compute()
         }
     };
 
-    base_addr = 0x1'0000 + 0x20 * base_tile;
+    base_addr = kObjectBase + kTileBytes16x16 * base_tile;
 
     if (origin.x >= kScreen.x) origin.x -= 512;
     if (origin.y >= kScreen.y) origin.y -= 256;

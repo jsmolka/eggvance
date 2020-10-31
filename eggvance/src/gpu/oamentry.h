@@ -11,7 +11,7 @@ public:
     void write(uint attr, u16 half);
 
     bool isVisible(uint line) const;
-    uint tileSize() const;
+    uint tileBytes() const;
     uint tilesInRow(uint layout) const;
     uint paletteBank() const;
 
@@ -20,7 +20,7 @@ public:
     uint object_mode = 0;
     uint mosaic      = 0;
     uint color_mode  = 0;
-    uint matrix_idx  = 0;
+    uint matrix      = 0;
     uint priority    = 0;
     uint base_addr   = 0;
 
