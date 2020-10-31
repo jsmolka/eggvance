@@ -31,7 +31,7 @@ uint Vram::index16x16(u32 addr, const Point& pixel) const
 
 uint Vram::index(u32 addr, const Point& pixel, uint mode) const
 {
-    return mode == kColorMode256x1
-        ? index256x1(addr, pixel)
-        : index16x16(addr, pixel);
+    return mode == kColorMode16x16
+        ? index16x16(addr, pixel)
+        : index256x1(addr, pixel);
 }

@@ -53,11 +53,7 @@ void Gpu::renderBgMode0(uint bg)
 template<uint ColorMode>
 void Gpu::renderBgMode0Impl(uint bg)
 {
-    constexpr uint kTileSize   = 8;
-    constexpr uint kTileBytes  = 0x20 << ColorMode;
-    constexpr uint kBlockSize  = 256;
-    constexpr uint kBlockBytes = 0x800;
-    constexpr uint kObjectArea = 0x1'0000;
+    constexpr uint kTileBytes = ::kTileBytes[ColorMode];
 
     const auto& bgcnt = this->bgcnt[bg];
     const auto& size  = this->bgcnt[bg].sizeReg();
@@ -69,20 +65,21 @@ void Gpu::renderBgMode0Impl(uint bg)
     origin %= size;
 
     Point pixel = origin % kTileSize;
+    Point tile  = origin / kTileSize % kBlockTiles;
     Point block = origin / kBlockSize;
-    Point tile  = origin / kTileSize % (kBlockSize / kTileSize);
 
-    for (uint x = 0; ; block.x ^= size.x / (2 * kBlockSize))
+    for (uint x = 0; ; block.x ^= (size.x == 2 * kBlockSize) ? 1 : 0)
     {
-        u32  map_addr = bgcnt.map_block + kBlockBytes * block.index2d(size.x / kBlockSize) + sizeof(u16) * tile.index2d(0x20);
-        u16* map = reinterpret_cast<u16*>(mmu.vram.data() + map_addr);
+        u32 map = bgcnt.map_block
+            + kBlockBytes * block.index2d(size.x / kBlockSize)
+            + kEntryBytes * tile.index2d(kBlockTiles);
 
-        for (; tile.x < 32; ++tile.x, ++map)
+        for (; tile.x < kBlockTiles; ++tile.x, map += kEntryBytes)
         {
-            MapEntry entry(*map);
+            MapEntry entry(mmu.vram.readFast<u16>(map));
 
-            u32 addr = bgcnt.tile_block + kTileBytes * entry.tile;
-            if (addr < kObjectArea)
+            u32 addr = bgcnt.tile_block + kTileBytes[ColorMode] * entry.tile;
+            if (addr < kObjectAreaTiled)
             {
                 for (; pixel.x < kTileSize; ++pixel.x)
                 {
@@ -121,7 +118,7 @@ void Gpu::renderBgMode2(uint bg)
 
     for (uint x = 0; x < kScreen.x; ++x)
     {
-        auto texture = transform(x, bg) >> 8;
+        Point texture = transform(x, bg) >> kDecimals;
 
         if (!(texture >= kOrigin && texture < size))
         {
@@ -140,12 +137,11 @@ void Gpu::renderBgMode2(uint bg)
             }
         }
 
-        const auto tile  = texture / 8;
-        const auto pixel = texture % 8;
+        const Point pixel = texture % kTileSize;
+        const Point tile  = texture / kTileSize;
 
-        uint offset = tile.index2d(size.x / 8);
-        uint entry  = mmu.vram.readFast<u8>(bgcnt.map_block + offset);
-        uint index  = mmu.vram.index256x1(bgcnt.tile_block + 0x40 * entry, pixel);
+        uint entry = mmu.vram.readFast<u8>(bgcnt.map_block + tile.index2d(size.x / kTileSize));
+        uint index = mmu.vram.index256x1(bgcnt.tile_block + kTileBytes256x1 * entry, pixel);
 
         backgrounds[bg][x] = mmu.pram.colorBg(index);
     }
@@ -153,15 +149,18 @@ void Gpu::renderBgMode2(uint bg)
 
 void Gpu::renderBgMode3(uint bg)
 {
+    constexpr uint kDecimals   = 8;
+    constexpr uint kColorBytes = 2;
+
     for (uint x = 0; x < kScreen.x; ++x)
     {
-        const auto texture = transform(x, bg) >> 8;
+        const Point texture = transform(x, bg) >> kDecimals;
 
         if (texture >= kOrigin && texture < kScreen)
         {
-            uint offset = sizeof(u16) * texture.index2d(kScreen.x);
+            uint addr = kColorBytes * texture.index2d(kScreen.x);
 
-            backgrounds[bg][x] = mmu.vram.readFast<u16>(offset) & kColorMask;
+            backgrounds[bg][x] = mmu.vram.readFast<u16>(addr) & kColorMask;
         }
         else
         {
@@ -174,12 +173,11 @@ void Gpu::renderBgMode4(uint bg)
 {
     for (uint x = 0; x < kScreen.x; ++x)
     {
-        const auto texture = transform(x, bg) >> 8;
+        const Point texture = transform(x, bg) >> kDecimals;
 
         if (texture >= kOrigin && texture < kScreen)
         {
-            uint offset = texture.index2d(kScreen.x);
-            uint index  = mmu.vram.readFast<u8>(dispcnt.frame + offset);
+            uint index = mmu.vram.readFast<u8>(dispcnt.frame + texture.index2d(kScreen.x));
 
             backgrounds[bg][x] = mmu.pram.colorBg(index);
         }
@@ -196,13 +194,13 @@ void Gpu::renderBgMode5(uint bg)
 
     for (uint x = 0; x < kScreen.x; ++x)
     {
-        const auto texture = transform(x, bg) >> 8;
+        const Point texture = transform(x, bg) >> kDecimals;
 
         if (texture >= kOrigin && texture < kBitmap)
         {
-            uint offset = sizeof(u16) * texture.index2d(kBitmap.x);
+            uint addr = dispcnt.frame + kColorBytes * texture.index2d(kBitmap.x);
 
-            backgrounds[bg][x] = mmu.vram.readFast<u16>(dispcnt.frame + offset) & kColorMask;
+            backgrounds[bg][x] = mmu.vram.readFast<u16>(addr) & kColorMask;
         }
         else
         {
@@ -213,6 +211,8 @@ void Gpu::renderBgMode5(uint bg)
 
 void Gpu::renderObjects()
 {
+    constexpr Matrix kIdentity(1 << kDecimals, 0, 0, 1 << kDecimals);
+
     for (const auto& entry : mmu.oam.entries)
     {
         if (entry.disabled || !entry.isVisible(vcount.value))
@@ -236,7 +236,7 @@ void Gpu::renderObjects()
 
         for (uint x = center.x + offset.x; x < end; ++x, ++offset.x)
         {
-            auto texture = (matrix * offset >> 8) + (sprite_size / 2);
+            auto texture = (matrix * offset >> kDecimals) + (sprite_size / 2);
 
             if (!(texture >= kOrigin && texture < sprite_size))
                 continue;
@@ -250,11 +250,11 @@ void Gpu::renderObjects()
                 texture.y = mosaic.obj.mosaicY(texture.y);
             }
 
-            const auto pixel = texture % 8;
-            const auto tile  = texture / 8;
+            const auto tile  = texture / kTileSize;
+            const auto pixel = texture % kTileSize;
 
             u32 addr = mmu.vram.mirror(entry.base_addr + tile_size * tile.index2d(tiles_row));
-            if (addr < 0x1'4000 && dispcnt.isBitmap())
+            if (addr < kObjectAreaBitmap && dispcnt.isBitmap())
                 continue;
 
             auto& object = objects[x];
