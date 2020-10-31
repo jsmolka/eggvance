@@ -27,16 +27,21 @@ Gpu::Gpu()
 
         if (config.lcd_color)
         {
-            constexpr double kLcdGamma = 4.0;
-            constexpr double kOutGamma = 2.6;
-            
-            double rr = pow(r / 255.0, kLcdGamma);
-            double gg = pow(g / 255.0, kLcdGamma);
-            double bb = pow(b / 255.0, kLcdGamma);
+            constexpr double kDarken   = 0.5;
+            constexpr double kGammaOut = 2.2;
+            constexpr double kGammaLcd = 2.5;
 
-            r = static_cast<uint>(std::min(1.0, std::pow((  0 * bb +  50 * gg + 255 * rr) / 255.0, 1 / kOutGamma)) * 255);
-            g = static_cast<uint>(std::min(1.0, std::pow(( 30 * bb + 230 * gg +  10 * rr) / 255.0, 1 / kOutGamma)) * 255);
-            b = static_cast<uint>(std::min(1.0, std::pow((220 * bb +  10 * gg +  50 * rr) / 255.0, 1 / kOutGamma)) * 255);
+            double rs = pow(r / 255.0, kGammaOut + kDarken);
+            double gs = pow(g / 255.0, kGammaOut + kDarken);
+            double bs = pow(b / 255.0, kGammaOut + kDarken);
+
+            double rd = std::pow(0.84 * rs + 0.18 * gs + 0.00 * bs, 1 / kGammaLcd + kDarken * 0.125);
+            double gd = std::pow(0.09 * rs + 0.67 * gs + 0.26 * bs, 1 / kGammaLcd + kDarken * 0.125);
+            double bd = std::pow(0.15 * rs + 0.10 * gs + 0.73 * bs, 1 / kGammaLcd + kDarken * 0.125);
+
+            r = static_cast<uint>(std::min(1.0, rd) * 255);
+            g = static_cast<uint>(std::min(1.0, gd) * 255);
+            b = static_cast<uint>(std::min(1.0, bd) * 255);
         }
 
         argb[color] = 0xFF00'0000 | (r << 16) | (g << 8) | b;
