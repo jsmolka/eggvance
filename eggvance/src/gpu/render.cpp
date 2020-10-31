@@ -53,8 +53,6 @@ void Gpu::renderBgMode0(uint bg)
 template<uint ColorMode>
 void Gpu::renderBgMode0Impl(uint bg)
 {
-    constexpr uint kTileBytes = ::kTileBytes[ColorMode];
-
     const auto& bgcnt = this->bgcnt[bg];
     const auto& size  = this->bgcnt[bg].sizeReg();
 
@@ -118,7 +116,7 @@ void Gpu::renderBgMode2(uint bg)
 
     for (uint x = 0; x < kScreen.x; ++x)
     {
-        Point texture = transform(x, bg) >> kDecimals;
+        Point texture = transform(x, bg) >> kDecimalBits;
 
         if (!(texture >= kOrigin && texture < size))
         {
@@ -149,12 +147,9 @@ void Gpu::renderBgMode2(uint bg)
 
 void Gpu::renderBgMode3(uint bg)
 {
-    constexpr uint kDecimals   = 8;
-    constexpr uint kColorBytes = 2;
-
     for (uint x = 0; x < kScreen.x; ++x)
     {
-        const Point texture = transform(x, bg) >> kDecimals;
+        const Point texture = transform(x, bg) >> kDecimalBits;
 
         if (texture >= kOrigin && texture < kScreen)
         {
@@ -173,7 +168,7 @@ void Gpu::renderBgMode4(uint bg)
 {
     for (uint x = 0; x < kScreen.x; ++x)
     {
-        const Point texture = transform(x, bg) >> kDecimals;
+        const Point texture = transform(x, bg) >> kDecimalBits;
 
         if (texture >= kOrigin && texture < kScreen)
         {
@@ -194,7 +189,7 @@ void Gpu::renderBgMode5(uint bg)
 
     for (uint x = 0; x < kScreen.x; ++x)
     {
-        const Point texture = transform(x, bg) >> kDecimals;
+        const Point texture = transform(x, bg) >> kDecimalBits;
 
         if (texture >= kOrigin && texture < kBitmap)
         {
@@ -211,7 +206,7 @@ void Gpu::renderBgMode5(uint bg)
 
 void Gpu::renderObjects()
 {
-    constexpr Matrix kIdentity(1 << kDecimals, 0, 0, 1 << kDecimals);
+    constexpr Matrix kIdentity(1 << kDecimalBits, 0, 0, 1 << kDecimalBits);
 
     for (const auto& entry : mmu.oam.entries)
     {
@@ -236,7 +231,7 @@ void Gpu::renderObjects()
 
         for (uint x = center.x + offset.x; x < end; ++x, ++offset.x)
         {
-            auto texture = (matrix * offset >> kDecimals) + (sprite_size / 2);
+            auto texture = (matrix * offset >> kDecimalBits) + (sprite_size / 2);
 
             if (!(texture >= kOrigin && texture < sprite_size))
                 continue;
