@@ -114,7 +114,7 @@ void OamEntry::compute()
         }
     };
 
-    base_addr = kObjectBase + kTileBytes16x16 * base_tile;
+    base_addr = kObjectBase + kTileBytes[0] * base_tile;
 
     if (origin.x >= kScreen.x) origin.x -= 512;
     if (origin.y >= kScreen.y) origin.y -= 256;

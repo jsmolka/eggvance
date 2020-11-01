@@ -24,10 +24,10 @@ public:
     BgControl bgcnt[4];
     RegisterW<u16, 0x01FF> bghofs[4];
     RegisterW<u16, 0x01FF> bgvofs[4];
-    BgParameter<0x0100> bgpa[2];
-    BgParameter<0x0000> bgpb[2];
-    BgParameter<0x0000> bgpc[2];
-    BgParameter<0x0100> bgpd[2];
+    RegisterW<s16> bgpa[2];
+    RegisterW<s16> bgpb[2];
+    RegisterW<s16> bgpc[2];
+    RegisterW<s16> bgpd[2];
     BgReference bgx[2];
     BgReference bgy[2];
     WindowInside winin;

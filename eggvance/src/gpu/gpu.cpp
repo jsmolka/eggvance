@@ -19,6 +19,11 @@ Gpu::Gpu()
     backgrounds[2].fill(kTransparent);
     backgrounds[3].fill(kTransparent);
 
+    bgpa[0].value = 1 << kDecimalBits;
+    bgpa[1].value = 1 << kDecimalBits;
+    bgpd[0].value = 1 << kDecimalBits;
+    bgpd[1].value = 1 << kDecimalBits;
+
     for (u32 color = 0; color < argb.size(); ++color)
     {
         uint r = bit::seq< 0, 5>(color) << 3;

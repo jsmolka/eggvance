@@ -144,7 +144,7 @@ void Gpu::renderBgMode2(uint bg)
         const auto tile  = texture / kTileSize;
 
         uint entry = mmu.vram.readFast<u8>(bgcnt.map_block + tile.index2d(size.x / kTileSize));
-        uint index = mmu.vram.index256x1(bgcnt.tile_block + kTileBytes256x1 * entry, pixel);
+        uint index = mmu.vram.index256x1(bgcnt.tile_block + kTileBytes[kColorMode256x1] * entry, pixel);
 
         backgrounds[bg][x] = mmu.pram.colorBg(index);
     }

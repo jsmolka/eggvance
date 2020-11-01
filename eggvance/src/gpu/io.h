@@ -34,7 +34,8 @@ public:
 
     bool isActive() const
     {
-        static constexpr uint kLayers[8] = {
+        static constexpr uint kLayers[8] =
+        {
             kLayerBg0 | kLayerBg1 | kLayerBg2 | kLayerBg3 | kLayerObj,
             kLayerBg0 | kLayerBg1 | kLayerBg2 | kLayerObj,
             kLayerBg2 | kLayerBg3 | kLayerObj,
@@ -160,16 +161,6 @@ public:
     uint dimensions = 0;
 };
 
-template<uint Init>
-class BgParameter : public RegisterW<s16>
-{
-public:
-    static constexpr uint kInit = Init;
-
-    BgParameter()
-        : RegisterW(Init) {}
-};
-
 class BgReference : public RegisterW<u32, 0x0FFF'FFFF>
 {
 public:
@@ -178,7 +169,7 @@ public:
     {
         RegisterW::write<Index>(byte);
 
-        current = bit::signEx<28>(value);
+        vblank();
     }
 
     void hblank(s16 value)
