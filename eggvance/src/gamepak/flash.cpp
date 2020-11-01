@@ -104,5 +104,6 @@ void Flash::write(u32 addr, u8 byte)
 
 bool Flash::isValid(uint size) const
 {
-    return data.size() == size;
+    return size == kSize512
+        || size == kSize1024;
 }
