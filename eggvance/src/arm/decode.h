@@ -48,9 +48,17 @@ constexpr InstructionArm decodeArm(uint hash)
     if ((hash & 0b1111'1011'1111) == 0b0001'0000'1001) return InstructionArm::SingleDataSwap;
     if ((hash & 0b1110'0000'1001) == 0b0000'0000'1001)
     {
+        enum Opcode
+        {
+            kOpcodeSwap,
+            kOpcodeLdrh,
+            kOpcodeLdrsb,
+            kOpcodeLdrsh
+        };
+
         uint opcode = bit::seq<1, 2>(hash);
 
-        if (opcode == 0b00)
+        if (opcode == kOpcodeSwap)
             return InstructionArm::Undefined;
 
         return InstructionArm::HalfSignedDataTransfer;
@@ -58,10 +66,30 @@ constexpr InstructionArm decodeArm(uint hash)
     if ((hash & 0b1101'1001'0000) == 0b0001'0000'0000) return InstructionArm::StatusTransfer;
     if ((hash & 0b1100'0000'0000) == 0b0000'0000'0000)
     {
+        enum Opcode
+        {
+            kOpcodeAnd,
+            kOpcodeEor,
+            kOpcodeSub,
+            kOpcodeRsb,
+            kOpcodeAdd,
+            kOpcodeAdc,
+            kOpcodeSbc,
+            kOpcodeRsc,
+            kOpcodeTst,
+            kOpcodeTeq,
+            kOpcodeCmp,
+            kOpcodeCmn,
+            kOpcodeOrr,
+            kOpcodeMov,
+            kOpcodeBic,
+            kOpcodeMvn
+        };
+
         uint flags  = bit::seq<4, 1>(hash);
         uint opcode = bit::seq<5, 4>(hash);
 
-        if ((opcode >> 2) == 0b10 && !flags)
+        if ((opcode == kOpcodeTst || opcode == kOpcodeTeq || opcode == kOpcodeCmp || opcode == kOpcodeCmn) && !flags)
             return InstructionArm::Undefined;
 
         return InstructionArm::DataProcessing;
@@ -111,13 +139,21 @@ constexpr InstructionThumb decodeThumb(uint hash)
     if ((hash & 0b11'1111'0000) == 0b01'0000'0000) return InstructionThumb::AluOperations;
     if ((hash & 0b11'1111'0000) == 0b01'0001'0000)
     {
+        enum Opcode
+        {
+            kOpcodeAdd,
+            kOpcodeCmp,
+            kOpcodeMov,
+            kOpcodeBx
+        };
+
         uint hs     = bit::seq<0, 1>(hash);
         uint hd     = bit::seq<1, 1>(hash);
         uint opcode = bit::seq<2, 2>(hash);
 
-        if (opcode != 0b11 && hs == 0 && hd == 0)
+        if (opcode != kOpcodeBx && hs == 0 && hd == 0)
             return InstructionThumb::Undefined;
-        if (opcode == 0b11 && hd == 1)
+        if (opcode == kOpcodeBx && hd == 1)
             return InstructionThumb::Undefined;
 
         return InstructionThumb::HighRegisterOperations;
@@ -135,11 +171,31 @@ constexpr InstructionThumb decodeThumb(uint hash)
     if ((hash & 0b11'1111'1100) == 0b11'0111'1100) return InstructionThumb::SoftwareInterrupt;
     if ((hash & 0b11'1100'0000) == 0b11'0100'0000)
     {
+        enum Condition
+        {
+            kConditionEQ,
+            kConditionNE,
+            kConditionCS,
+            kConditionCC,
+            kConditionMI,
+            kConditionPL,
+            kConditionVS,
+            kConditionVC,
+            kConditionHI,
+            kConditionLS,
+            kConditionGE,
+            kConditionLT,
+            kConditionGT,
+            kConditionLE,
+            kConditionAL,
+            kConditionNV
+        };
+
         uint condition = bit::seq<2, 4>(hash);
 
-        if (condition == 0b1110)
+        if (condition == kConditionAL)
             return InstructionThumb::Undefined;
-        if (condition == 0b1111)
+        if (condition == kConditionNV)
             return InstructionThumb::Undefined;
 
         return InstructionThumb::ConditionalBranch;

@@ -10,9 +10,9 @@
 
 Arm::Arm()
 {
-    irq.master.process  = std::bind(&Arm::processIrq, this);
-    irq.enable.process  = std::bind(&Arm::processIrq, this);
-    irq.request.process = std::bind(&Arm::processIrq, this);
+    irqmaster.process  = std::bind(&Arm::processIrq, this);
+    irqenable.process  = std::bind(&Arm::processIrq, this);
+    irqrequest.process = std::bind(&Arm::processIrq, this);
 }
 
 void Arm::init()

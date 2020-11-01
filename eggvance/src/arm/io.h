@@ -41,15 +41,8 @@ public:
         compute();
     }
 
-    int cyclesHalf(u32 addr, bool sequential) const
-    {
-        return cycles_half[sequential][addr >> 24];
-    }
-
-    int cyclesWord(u32 addr, bool sequential) const
-    {
-        return cycles_word[sequential][addr >> 24];
-    }
+    int cyclesHalf(u32 addr, bool sequential) const { return cycles_half[sequential][addr >> 24]; }
+    int cyclesWord(u32 addr, bool sequential) const { return cycles_word[sequential][addr >> 24]; }
 
     uint sram     = 0;
     uint ws0_n    = 0;

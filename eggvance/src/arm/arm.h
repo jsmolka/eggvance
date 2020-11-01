@@ -17,16 +17,11 @@ public:
     uint state   = 0;
     uint pipe[2] = {};
 
-    HaltControl haltcnt;
+    IrqMaster   irqmaster;
+    IrqEnable   irqenable;
+    IrqRequest  irqrequest;
     WaitControl waitcnt;
-
-    struct
-    {
-        IrqMaster  master;
-        IrqEnable  enable;
-        IrqRequest request;
-    } irq;
-
+    HaltControl haltcnt;
 
 private:
     using Instruction32 = void(Arm::*)(u32);
