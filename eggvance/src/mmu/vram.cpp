@@ -9,7 +9,7 @@ void Vram::writeByte(u32 addr, u8 byte)
 {
     addr = mirror(addr);
 
-    if (addr < (gpu.dispcnt.isBitmap() ? 0x1'4000 : 0x1'0000))
+    if (addr < (gpu.dispcnt.isBitmap() ? kObjectBaseBitmap : kObjectBase))
     {
         addr = align<u16>(addr);
 
@@ -19,12 +19,12 @@ void Vram::writeByte(u32 addr, u8 byte)
 
 uint Vram::index256x1(u32 addr, const Point& pixel) const
 {
-    return readFast<u8>(addr + pixel.index2d(8));
+    return readFast<u8>(addr + pixel.index2d(kTileSize));
 }
 
 uint Vram::index16x16(u32 addr, const Point& pixel) const
 {
-    u8 data = readFast<u8>(addr + pixel.index2d(8) / 2);
+    u8 data = readFast<u8>(addr + pixel.index2d(kTileSize) / 2);
 
     return bit::nibble(data, pixel.x & 0x1);
 }

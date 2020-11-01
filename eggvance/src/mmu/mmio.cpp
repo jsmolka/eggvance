@@ -134,10 +134,10 @@ Mmio::Mmio()
 {
     if (config.bios_skip)
     {
-        rcnt.value       = 0x8000;
-        postflag.value   = 0x0001;
-        soundcnt_h.value = 0x880E;
-        soundbias.value  = 0x0200;
+        rcnt.value      = 0x8000;
+        postflag.value  = 0x0001;
+        soundcnth.value = 0x880E;
+        soundbias.value = 0x0200;
     }
 }
 
@@ -157,24 +157,24 @@ u8 Mmio::readByte(u32 addr) const
     INDEXED_CASE2(kRegWindowOutside,  return gpu.winout.read<kIndex>());
     INDEXED_CASE2(kRegBlendControl,   return gpu.bldcnt.read<kIndex>());
     INDEXED_CASE2(kRegBlendAlpha,     return gpu.bldalpha.read<kIndex>());
-    INDEXED_CASE2(kRegSound1ControlL, return soundcnt1_l.read<kIndex>());
-    INDEXED_CASE2(kRegSound1ControlH, return soundcnt1_h.read<kIndex>());
-    INDEXED_CASE2(kRegSound1ControlX, return soundcnt1_x.read<kIndex>());
+    INDEXED_CASE2(kRegSound1ControlL, return soundcnt1l.read<kIndex>());
+    INDEXED_CASE2(kRegSound1ControlH, return soundcnt1h.read<kIndex>());
+    INDEXED_CASE2(kRegSound1ControlX, return soundcnt1x.read<kIndex>());
     INDEXED_CASE2(kRegUnused066,      return 0);
-    INDEXED_CASE2(kRegSound2ControlL, return soundcnt2_l.read<kIndex>());
-    INDEXED_CASE2(kRegSound2ControlH, return soundcnt2_h.read<kIndex>());
+    INDEXED_CASE2(kRegSound2ControlL, return soundcnt2l.read<kIndex>());
+    INDEXED_CASE2(kRegSound2ControlH, return soundcnt2h.read<kIndex>());
     INDEXED_CASE2(kRegUnused06E,      return 0);
-    INDEXED_CASE2(kRegSound3ControlL, return soundcnt3_l.read<kIndex>());
-    INDEXED_CASE2(kRegSound3ControlH, return soundcnt3_h.read<kIndex>());
-    INDEXED_CASE2(kRegSound3ControlX, return soundcnt3_x.read<kIndex>());
+    INDEXED_CASE2(kRegSound3ControlL, return soundcnt3l.read<kIndex>());
+    INDEXED_CASE2(kRegSound3ControlH, return soundcnt3h.read<kIndex>());
+    INDEXED_CASE2(kRegSound3ControlX, return soundcnt3x.read<kIndex>());
     INDEXED_CASE2(kRegUnused076,      return 0);
-    INDEXED_CASE2(kRegSound4ControlL, return soundcnt4_l.read<kIndex>());
+    INDEXED_CASE2(kRegSound4ControlL, return soundcnt4l.read<kIndex>());
     INDEXED_CASE2(kRegUnused07A,      return 0);
-    INDEXED_CASE2(kRegSound4ControlH, return soundcnt4_h.read<kIndex>());
+    INDEXED_CASE2(kRegSound4ControlH, return soundcnt4h.read<kIndex>());
     INDEXED_CASE2(kRegUnused07E,      return 0);
-    INDEXED_CASE2(kRegSoundControlL,  return soundcnt_l.read<kIndex>());
-    INDEXED_CASE2(kRegSoundControlH,  return soundcnt_h.read<kIndex>());
-    INDEXED_CASE2(kRegSoundControlX,  return soundcnt_x.read<kIndex>());
+    INDEXED_CASE2(kRegSoundControlL,  return soundcntl.read<kIndex>());
+    INDEXED_CASE2(kRegSoundControlH,  return soundcnth.read<kIndex>());
+    INDEXED_CASE2(kRegSoundControlX,  return soundcntx.read<kIndex>());
     INDEXED_CASE2(kRegUnused086,      return 0);
     INDEXED_CASE2(kRegSoundBias,      return soundbias.read<kIndex>());
     INDEXED_CASE2(kRegUnused08A,      return 0);
@@ -293,19 +293,19 @@ void Mmio::writeByte(u32 addr, u8 byte)
     INDEXED_CASE2(kRegBlendControl,   gpu.bldcnt.write<kIndex>(byte));
     INDEXED_CASE2(kRegBlendAlpha,     gpu.bldalpha.write<kIndex>(byte));
     INDEXED_CASE2(kRegBlendFade,      gpu.bldfade.write<kIndex>(byte));
-    INDEXED_CASE2(kRegSound1ControlL, soundcnt1_l.write<kIndex>(byte));
-    INDEXED_CASE2(kRegSound1ControlH, soundcnt1_h.write<kIndex>(byte));
-    INDEXED_CASE2(kRegSound1ControlX, soundcnt1_x.write<kIndex>(byte));
-    INDEXED_CASE2(kRegSound2ControlL, soundcnt2_l.write<kIndex>(byte));
-    INDEXED_CASE2(kRegSound2ControlH, soundcnt2_h.write<kIndex>(byte));
-    INDEXED_CASE2(kRegSound3ControlL, soundcnt3_l.write<kIndex>(byte));
-    INDEXED_CASE2(kRegSound3ControlH, soundcnt3_h.write<kIndex>(byte));
-    INDEXED_CASE2(kRegSound3ControlX, soundcnt3_x.write<kIndex>(byte));
-    INDEXED_CASE2(kRegSound4ControlL, soundcnt4_l.write<kIndex>(byte));
-    INDEXED_CASE2(kRegSound4ControlH, soundcnt4_h.write<kIndex>(byte));
-    INDEXED_CASE2(kRegSoundControlL,  soundcnt_l.write<kIndex>(byte));
-    INDEXED_CASE2(kRegSoundControlH,  soundcnt_h.write<kIndex>(byte));
-    INDEXED_CASE2(kRegSoundControlX,  soundcnt_x.write<kIndex>(byte));
+    INDEXED_CASE2(kRegSound1ControlL, soundcnt1l.write<kIndex>(byte));
+    INDEXED_CASE2(kRegSound1ControlH, soundcnt1h.write<kIndex>(byte));
+    INDEXED_CASE2(kRegSound1ControlX, soundcnt1x.write<kIndex>(byte));
+    INDEXED_CASE2(kRegSound2ControlL, soundcnt2l.write<kIndex>(byte));
+    INDEXED_CASE2(kRegSound2ControlH, soundcnt2h.write<kIndex>(byte));
+    INDEXED_CASE2(kRegSound3ControlL, soundcnt3l.write<kIndex>(byte));
+    INDEXED_CASE2(kRegSound3ControlH, soundcnt3h.write<kIndex>(byte));
+    INDEXED_CASE2(kRegSound3ControlX, soundcnt3x.write<kIndex>(byte));
+    INDEXED_CASE2(kRegSound4ControlL, soundcnt4l.write<kIndex>(byte));
+    INDEXED_CASE2(kRegSound4ControlH, soundcnt4h.write<kIndex>(byte));
+    INDEXED_CASE2(kRegSoundControlL,  soundcntl.write<kIndex>(byte));
+    INDEXED_CASE2(kRegSoundControlH,  soundcnth.write<kIndex>(byte));
+    INDEXED_CASE2(kRegSoundControlX,  soundcntx.write<kIndex>(byte));
     INDEXED_CASE2(kRegSoundBias,      soundbias.write<kIndex>(byte));
     INDEXED_CASE2(kRegWaveRam0,       waveram[0].write<kIndex>(byte));
     INDEXED_CASE2(kRegWaveRam1,       waveram[1].write<kIndex>(byte));

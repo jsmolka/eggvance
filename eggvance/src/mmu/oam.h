@@ -1,7 +1,5 @@
 #pragma once
 
-#include <array>
-
 #include "ram.h"
 #include "gpu/oamentry.h"
 #include "gpu/matrix.h"
@@ -15,5 +13,5 @@ public:
 
     Matrix matrix(uint index) const;
 
-    std::array<OamEntry, 128> entries;
+    OamEntry entries[128];
 };

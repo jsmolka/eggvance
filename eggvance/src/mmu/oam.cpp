@@ -25,11 +25,19 @@ void Oam::writeWord(u32 addr, u32 word)
 
 Matrix Oam::matrix(uint index) const
 {
+    enum Parameter
+    {
+        kParameterA = 0x06,
+        kParameterB = 0x0E,
+        kParameterC = 0x16,
+        kParameterD = 0x1E
+    };
+
     u32 base = 0x20 * index;
 
     return Matrix(
-        readFast<u16>(base + 0x06),
-        readFast<u16>(base + 0x0E),
-        readFast<u16>(base + 0x16),
-        readFast<u16>(base + 0x1E));
+        readFast<u16>(base + kParameterA),
+        readFast<u16>(base + kParameterB),
+        readFast<u16>(base + kParameterC),
+        readFast<u16>(base + kParameterD));
 }

@@ -16,19 +16,19 @@ public:
     void writeWord(u32 addr, u32 word);
 
 private:
-    Register<u16, 0x007F> soundcnt1_l;
-    Register<u16, 0xFFC0> soundcnt1_h;
-    Register<u16, 0x4000> soundcnt1_x;
-    Register<u16, 0xFFC0> soundcnt2_l;
-    Register<u16, 0x4000> soundcnt2_h;
-    Register<u16, 0x00E0> soundcnt3_l;
-    Register<u16, 0xE000> soundcnt3_h;
-    Register<u16, 0x4000> soundcnt3_x;
-    Register<u16, 0xFF00> soundcnt4_l;
-    Register<u16, 0x40FF> soundcnt4_h;
-    Register<u16, 0xFF77> soundcnt_l;
-    Register<u16, 0x770F> soundcnt_h;
-    Register<u16, 0x0080> soundcnt_x;
+    Register<u16, 0x007F> soundcnt1l;
+    Register<u16, 0xFFC0> soundcnt1h;
+    Register<u16, 0x4000> soundcnt1x;
+    Register<u16, 0xFFC0> soundcnt2l;
+    Register<u16, 0x4000> soundcnt2h;
+    Register<u16, 0x00E0> soundcnt3l;
+    Register<u16, 0xE000> soundcnt3h;
+    Register<u16, 0x4000> soundcnt3x;
+    Register<u16, 0xFF00> soundcnt4l;
+    Register<u16, 0x40FF> soundcnt4h;
+    Register<u16, 0xFF77> soundcntl;
+    Register<u16, 0x770F> soundcnth;
+    Register<u16, 0x0080> soundcntx;
     Register<u16> soundbias;
     Register<u16> waveram[8];
     RegisterW<u32> fifo[2];
