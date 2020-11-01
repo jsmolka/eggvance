@@ -6,7 +6,9 @@ class KeyInput : public RegisterR<u16, 0x03FF>
 {
 public:
     KeyInput()
-        : RegisterR(kMask) {}
+    {
+        value = kMask;
+    }
 };
 
 class KeyControl : public Register<u16, 0xC3FF>

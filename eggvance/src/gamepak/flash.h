@@ -36,6 +36,7 @@ private:
         kChipMacronix1024 = 0x09C2
     };
 
+    const uint size;
     uint command = 0;
     bool chip    = false;
     bool erase   = false;

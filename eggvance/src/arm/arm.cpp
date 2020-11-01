@@ -17,9 +17,7 @@ Arm::Arm()
 
 void Arm::init()
 {
-    pipe[0] = readWord(pc + 0);
-    pipe[1] = readWord(pc + 4);
-    pc += 8;
+    flushWord();
 }
 
 void Arm::run(int cycles)

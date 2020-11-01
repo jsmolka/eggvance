@@ -285,11 +285,9 @@ void Gpu::renderObjects()
                     SHELL_UNREACHABLE;
                     break;
                 }
-                
                 objects_exist = true;
                 objects_alpha |= object.alpha;
             }
-
             object.priority = std::min(object.priority, entry.priority);
         }
     }

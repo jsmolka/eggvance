@@ -17,10 +17,10 @@
 #include "mmu/mmu.h"
 #include "timer/timer.h"
 
+using namespace shell::options;
+
 void core::init(int argc, char* argv[])
 {
-    using namespace shell;
-
     Options options("eggvance");
     options.add({   "--help", "-h"         }, "Show help"         , Options::value<bool>());
     options.add({   "--save", "-s", "file" }, "Path to the save"  , Options::value<fs::path>()->optional());
@@ -30,7 +30,7 @@ void core::init(int argc, char* argv[])
     {
         OptionsResult result = options.parse(argc, argv);
 
-        if (*result.find<bool>("--help"))
+        if (result.findOr("--help", false))
         {
             fmt::print(options.help());
             std::exit(0);
@@ -55,11 +55,10 @@ void core::init(int argc, char* argv[])
                 gamepak.loadSave(*sav);
         }
     }
-    catch (const ParseError& error)
+    catch (const shell::ParseError& error)
     {
         fmt::print(options.help());
-
-        panic("Cannot parse command line arguments\nError: {}", error.what());
+        panic("Cannot parse command line\nError: {}", error.what());
     }
 }
 

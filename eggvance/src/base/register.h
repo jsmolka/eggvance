@@ -9,12 +9,8 @@ class RegisterBase
 public:
     static_assert(std::is_integral_v<Integral>);
 
-    static constexpr uint kSize = sizeof(Integral);
     static constexpr uint kMask = Mask;
-
-    RegisterBase() = default;
-    RegisterBase(Integral value)
-        : value(value) {}
+    static constexpr uint kSize = sizeof(Integral);
 
     union
     {

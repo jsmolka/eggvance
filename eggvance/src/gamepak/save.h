@@ -23,7 +23,7 @@ public:
 
     static Type parse(const std::vector<u8>& rom);
 
-    bool init(const fs::path& file);
+    void init(const fs::path& file);
 
     virtual void reset();
 

@@ -37,10 +37,7 @@ bool GamePak::isEeprom(u32 addr) const
 void GamePak::loadRom(const fs::path& file, bool save)
 {
     if (!fs::read(file, rom))
-    {
-        alert("Cannot read ROM: {}", file);
-        return;
-    }
+        panic("Cannot read ROM: {}", file);
 
     header = Header(rom);
 
@@ -113,10 +110,5 @@ void GamePak::initSave(const fs::path& file, Save::Type type)
         return std::make_unique<Save>();
     });
 
-    if (!save->init(file))
-    {
-        const auto overwrite = Overwrite::find(header.code);
-
-        initSave(fs::path(), overwrite ? overwrite->save : Save::parse(rom));
-    }
+    save->init(file);
 }

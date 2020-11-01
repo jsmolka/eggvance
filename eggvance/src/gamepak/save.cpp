@@ -27,7 +27,7 @@ Save::~Save()
         && type != Type::None)
     {
         if (!fs::write(file, data))
-            alert("Cannot write save: {}", file);
+            panic("Cannot write save: {}", file);
     }
 }
 
@@ -57,26 +57,18 @@ Save::Type Save::parse(const std::vector<u8>& rom)
     return Type::None;
 }
 
-bool Save::init(const fs::path& file)
+void Save::init(const fs::path& file)
 {
     this->file = file;
 
-    if (!fs::is_regular_file(file))
-        return true;
-
-    if (!fs::read(file, data))
+    if (fs::is_regular_file(file))
     {
-        alert("Cannot read save: {}", file);
-        return false;
-    }
+        if (!fs::read(file, data))
+            panic("Cannot read save: {}", file);
 
-    if (!isValid(data.size()))
-    {
-        alert("Invalid save size: {}", data.size());
-        return false;
+        if (!isValid(data.size()))
+            panic("Invalid save size: {}", data.size());
     }
-
-    return true;
 }
 
 void Save::reset()

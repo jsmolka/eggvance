@@ -17,9 +17,9 @@ public:
     uint state   = 0;
     uint pipe[2] = {};
 
-    IrqMaster   irqmaster;
-    IrqEnable   irqenable;
-    IrqRequest  irqrequest;
+    IrqMaster irqmaster;
+    IrqEnable irqenable;
+    IrqRequest irqrequest;
     WaitControl waitcnt;
     HaltControl haltcnt;
 

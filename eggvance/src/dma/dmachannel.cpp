@@ -157,24 +157,24 @@ void DmaChannel::initTransfer()
 
 void DmaChannel::initEeprom()
 {
+    if (!gamepak.save->data.empty())
+        return;
+
     constexpr uint kBus6Write = 73;
     constexpr uint kBus6ReadSetAddress = 9;
     constexpr uint kBus14Write = 81;
     constexpr uint kBus14ReadSetAddress = 17;
 
-    if (gamepak.save->data.empty())
+    switch (pending)
     {
-        switch (pending)
-        {
-        case kBus6Write:
-        case kBus6ReadSetAddress:
-            gamepak.save->data.resize(Eeprom::kSize4, 0xFF);
-            break;
+    case kBus6Write:
+    case kBus6ReadSetAddress:
+        gamepak.save->data.resize(Eeprom::kSize4, 0xFF);
+        break;
 
-        case kBus14Write:
-        case kBus14ReadSetAddress:
-            gamepak.save->data.resize(Eeprom::kSize64, 0xFF);
-            break;
-        }
+    case kBus14Write:
+    case kBus14ReadSetAddress:
+        gamepak.save->data.resize(Eeprom::kSize64, 0xFF);
+        break;
     }
 }

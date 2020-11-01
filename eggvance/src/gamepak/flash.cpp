@@ -7,6 +7,7 @@
 
 Flash::Flash(uint size)
     : Save(size == kSize512 ? Type::Flash512 : Type::Flash1024)
+    , size(size)
 {
     SHELL_ASSERT(size == kSize512 || size == kSize1024);
 
@@ -27,7 +28,7 @@ u8 Flash::read(u32 addr)
 {
     if (chip && addr <= 1)
     {
-        uint macronix = data.size() == kSize512
+        uint macronix = size == kSize512
             ? kChipMacronix512
             : kChipMacronix1024;
 
@@ -47,7 +48,7 @@ void Flash::write(u32 addr, u8 byte)
         return;
 
     case kCommandSwitchBank:
-        if (data.size() == kSize1024)
+        if (size == kSize1024)
             bank = &data[kSize512 * (byte & 0x1)];
         command = 0;
         return;
@@ -104,6 +105,5 @@ void Flash::write(u32 addr, u8 byte)
 
 bool Flash::isValid(uint size) const
 {
-    return size == kSize512
-        || size == kSize1024;
+    return this->size == size;
 }

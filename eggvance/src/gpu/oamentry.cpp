@@ -67,13 +67,13 @@ uint OamEntry::tileBytes() const
 
 uint OamEntry::tilesInRow(uint layout) const
 {
-    static constexpr Point kLayout2d[2] = {
+    static constexpr Point kTileLayout2d[2] = {
         Point(32, 32),
         Point(16, 32)
     };
 
     return layout == kObjectLayout2d
-        ? kLayout2d[color_mode].x
+        ? kTileLayout2d[color_mode].x
         : sprite_size.x / kTileSize;
 }
 
@@ -114,7 +114,7 @@ void OamEntry::compute()
         }
     };
 
-    base_addr = kObjectBase + kTileBytes[0] * base_tile;
+    base_addr = kObjectBase + kTileBytes[kColorMode16x16] * base_tile;
 
     if (origin.x >= kScreen.x) origin.x -= 512;
     if (origin.y >= kScreen.y) origin.y -= 256;
