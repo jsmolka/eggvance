@@ -68,16 +68,16 @@ void Gpu::renderBgMode0Impl(uint bg)
     origin %= size;
 
     auto pixel = origin % kTileSize;
-    auto tile  = origin / kTileSize % kBlockTiles;
-    auto block = origin / kBlockSize;
+    auto tile  = origin / kTileSize % kMapBlockTiles;
+    auto block = origin / kMapBlockSize;
 
-    for (uint x = 0; ; block.x ^= (size.x == 2 * kBlockSize) ? 1 : 0)
+    for (uint x = 0; ; block.x ^= (size.x == 2 * kMapBlockSize) ? 1 : 0)
     {
         u32 map = bgcnt.map_block
-            + kBlockBytes * block.index2d(size.x / kBlockSize)
-            + kEntryBytes * tile.index2d(kBlockTiles);
+            + kMapBlockBytes * block.index2d(size.x / kMapBlockSize)
+            + kEntryBytes * tile.index2d(kMapBlockTiles);
 
-        for (; tile.x < kBlockTiles; ++tile.x, map += kEntryBytes)
+        for (; tile.x < kMapBlockTiles; ++tile.x, map += kEntryBytes)
         {
             MapEntry entry(mmu.vram.readFast<u16>(map));
 
@@ -158,7 +158,7 @@ void Gpu::renderBgMode3(uint bg)
 
         if (texture >= kOrigin && texture < kScreen)
         {
-            uint addr = kColorBytes * texture.index2d(kScreen.x);
+            u32 addr = kColorBytes * texture.index2d(kScreen.x);
 
             backgrounds[bg][x] = mmu.vram.readFast<u16>(addr) & kColorMask;
         }
@@ -198,7 +198,7 @@ void Gpu::renderBgMode5(uint bg)
 
         if (texture >= kOrigin && texture < kBitmap)
         {
-            uint addr = dispcnt.frame + kColorBytes * texture.index2d(kBitmap.x);
+            u32 addr = dispcnt.frame + kColorBytes * texture.index2d(kBitmap.x);
 
             backgrounds[bg][x] = mmu.vram.readFast<u16>(addr) & kColorMask;
         }

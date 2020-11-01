@@ -15,9 +15,11 @@ inline constexpr uint kTileBytes256x1   = 64;
 inline constexpr uint kTileBytes[2]     = { kTileBytes16x16, kTileBytes256x1 };
 inline constexpr uint kColorBytes       = 2;
 inline constexpr uint kEntryBytes       = 2;
-inline constexpr uint kBlockSize        = 256;
-inline constexpr uint kBlockTiles       = kBlockSize / kTileSize;
-inline constexpr uint kBlockBytes       = 0x800;
+inline constexpr uint kMapBlockSize     = 256;
+inline constexpr uint kMapBlockTiles    = kMapBlockSize / kTileSize;
+inline constexpr uint kMapBlockBytes    = 0x800;
+inline constexpr uint kTileBlockBytes   = 0x4000;
+inline constexpr uint kFrameBytes       = 0xA000;
 inline constexpr uint kObjectBase       = 0x1'0000;
 inline constexpr uint kObjectBaseBitmap = 0x1'4000;
 

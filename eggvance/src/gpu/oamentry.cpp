@@ -67,13 +67,13 @@ uint OamEntry::tileBytes() const
 
 uint OamEntry::tilesInRow(uint layout) const
 {
-    static constexpr Point kTileMatrix[2] = {
+    static constexpr Point kLayout2d[2] = {
         Point(32, 32),
         Point(16, 32)
     };
 
     return layout == kObjectLayout2d
-        ? kTileMatrix[color_mode].x
+        ? kLayout2d[color_mode].x
         : sprite_size.x / kTileSize;
 }
 

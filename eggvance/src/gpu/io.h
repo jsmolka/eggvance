@@ -18,7 +18,7 @@ public:
         if (Index == 0)
         {
             mode     = bit::seq<0, 3>(byte);
-            frame    = bit::seq<4, 1>(byte) * 0xA000;
+            frame    = bit::seq<4, 1>(byte) * kFrameBytes;
             oam_free = bit::seq<5, 1>(byte);
             layout   = bit::seq<6, 1>(byte);
             blank    = bit::seq<7, 1>(byte);
@@ -34,18 +34,16 @@ public:
 
     bool isActive() const
     {
-        switch (mode)
-        {
-        case 0: return 0b11111 & layers;
-        case 1: return 0b10111 & layers;
-        case 2: return 0b11100 & layers;
-        case 3: return 0b10100 & layers;
-        case 4: return 0b10100 & layers;
-        case 5: return 0b10100 & layers;
-
-        default:
-            return false;
-        }
+        static constexpr uint kLayers[8] = {
+            kLayerBg0 | kLayerBg1 | kLayerBg2 | kLayerBg3 | kLayerObj,
+            kLayerBg0 | kLayerBg1 | kLayerBg2 | kLayerObj,
+            kLayerBg2 | kLayerBg3 | kLayerObj,
+            kLayerBg2 | kLayerObj,
+            kLayerBg2 | kLayerObj,
+            kLayerBg2 | kLayerObj,
+            0, 0
+        };
+        return kLayers[mode] & layers;
     }
 
     bool isBitmap() const
@@ -127,21 +125,16 @@ public:
         if (Index == 0)
         {
             priority   = bit::seq<0, 2>(byte);
-            tile_block = bit::seq<2, 2>(byte) * 0x4000;
+            tile_block = bit::seq<2, 2>(byte) * kTileBlockBytes;
             mosaic     = bit::seq<6, 1>(byte);
             color_mode = bit::seq<7, 1>(byte);
         }
         else
         {
-            map_block  = bit::seq<0, 5>(byte) * 0x0800;
+            map_block  = bit::seq<0, 5>(byte) * kMapBlockBytes;
             wraparound = bit::seq<5, 1>(byte);
             dimensions = bit::seq<6, 2>(byte);
         }
-    }
-
-    uint tileSize() const
-    {
-        return 32 << color_mode;
     }
 
     Point sizeReg() const
