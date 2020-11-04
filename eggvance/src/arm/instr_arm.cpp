@@ -82,6 +82,12 @@ void Arm::Arm_DataProcessing(u32 instr)
         || kOpcode == kOpcodeTst
         || kOpcode == kOpcodeTeq;
 
+    constexpr bool kNoWriteback =
+           kOpcode == kOpcodeCmp
+        || kOpcode == kOpcodeCmn
+        || kOpcode == kOpcodeTst
+        || kOpcode == kOpcodeTeq;
+
     if (kImmOp)
     {
         uint value  = bit::seq<0, 8>(instr);
@@ -160,7 +166,7 @@ void Arm::Arm_DataProcessing(u32 instr)
         break;
     }
 
-    if (rd == 15)
+    if (!kNoWriteback && rd == 15)
     {
         if (kFlags)
         {
