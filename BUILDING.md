@@ -1,8 +1,8 @@
 # Building
-This document contains detailed instructions on how to build eggvance from source. A basic requirement for this is a C++17 compliant compiler.
+A C++17 compliant compiler is required on all platforms.
 
 ## Clone
-Install [git](https://git-scm.com/), clone the repository and initialize the submodules.
+Use [git](https://git-scm.com/) to clone the repository and its submodules.
 
 ```
 > git clone https://github.com/jsmolka/eggvance
@@ -62,14 +62,14 @@ $ source ./emsdk_env.sh
 ## Build
 
 ### Windows
-Build the Visual Studio solution. This can also be done with the command line.
+Build the Visual Studio solution. This can also be done on the command line.
 
 ```
-> call "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Auxiliary/Build/vcvars64.bat"
+> call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
 > msbuild /property:Configuration=Release eggvance.sln
 ```
 
-### Linux and macOS
+### Linux / macOS
 Build with [cmake](https://cmake.org/).
 
 ```
