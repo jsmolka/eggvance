@@ -14,6 +14,7 @@ public:
     uint tileBytes() const;
     uint tilesInRow(uint layout) const;
     uint paletteBank() const;
+    int  cycles() const;
 
     uint affine      = 0;
     uint disabled    = 0;

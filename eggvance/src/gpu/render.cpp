@@ -213,6 +213,8 @@ void Gpu::renderObjects()
 {
     constexpr Matrix kIdentity(1 << kDecimalBits, 0, 0, 1 << kDecimalBits);
 
+    int cycles = dispcnt.oam_free ? 954 : 1210;
+
     for (const auto& entry : mmu.oam.entries)
     {
         if (entry.disabled || !entry.isVisible(vcount.value))
@@ -290,5 +292,9 @@ void Gpu::renderObjects()
             }
             object.priority = std::min(object.priority, entry.priority);
         }
+
+        cycles -= entry.cycles();
+        if (cycles <= 0)
+            break;
     }
 }

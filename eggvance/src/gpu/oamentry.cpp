@@ -84,6 +84,13 @@ uint OamEntry::paletteBank() const
         : 0;
 }
 
+int OamEntry::cycles() const
+{
+    return affine
+        ? screen_size.x * 2 + 10
+        : screen_size.x;
+}
+
 void OamEntry::compute()
 {
     static constexpr Point kSpriteSizes[4][4] =

@@ -14,7 +14,7 @@ public:
         bank   = bit::seq<12,  4>(data);
     }
 
-    uint tile;
-    uint bank;
+    uint  tile;
+    uint  bank;
     Point flip;
 };
