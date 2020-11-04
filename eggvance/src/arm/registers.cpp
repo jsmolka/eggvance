@@ -10,13 +10,12 @@ Registers::Registers()
         lr   = 0x0800'0000;
         pc   = 0x0800'0000;
         spsr = 0x0000'0000;
-        cpsr = 0x0000'005F;
+        cpsr = 0x0000'001F;
 
-        bank_def[kBankFiq][0] = 0x0300'7F00;
-        bank_def[kBankAbt][0] = 0x0300'7F00;
-        bank_def[kBankUnd][0] = 0x0300'7F00;
-        bank_def[kBankSvc][0] = 0x0300'7FE0;
+        bank_def[kBankDef][0] = 0x0300'7F00;
+        bank_def[kBankDef][1] = 0x0000'00C0;
         bank_def[kBankIrq][0] = 0x0300'7FA0;
+        bank_def[kBankSvc][0] = 0x0300'7FE0;
     }
     else 
     {
