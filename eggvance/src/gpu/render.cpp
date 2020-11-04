@@ -121,17 +121,17 @@ void Gpu::renderBgMode2(uint bg)
 
     for (uint x = 0; x < kScreen.x; ++x)
     {
-        auto texture = transform(x, bg) >> kDecimalBits;
+        auto texel = transform(x, bg) >> kDecimalBits;
 
-        if (!(texture >= kOrigin && texture < size))
+        if (!(texel >= kOrigin && texel < size))
         {
             if (bgcnt.wraparound)
             {
-                texture.x %= size.x;
-                texture.y %= size.y;
+                texel.x %= size.x;
+                texel.y %= size.y;
 
-                if (texture.x < 0) texture.x += size.x;
-                if (texture.y < 0) texture.y += size.y;
+                if (texel.x < 0) texel.x += size.x;
+                if (texel.y < 0) texel.y += size.y;
             }
             else
             {
@@ -140,8 +140,8 @@ void Gpu::renderBgMode2(uint bg)
             }
         }
 
-        const auto pixel = texture % kTileSize;
-        const auto tile  = texture / kTileSize;
+        const auto pixel = texel % kTileSize;
+        const auto tile  = texel / kTileSize;
 
         uint entry = mmu.vram.readFast<u8>(bgcnt.map_block + tile.index2d(size.x / kTileSize));
         uint index = mmu.vram.index256x1(bgcnt.tile_block + kTileBytes[kColorMode256x1] * entry, pixel);
@@ -154,11 +154,11 @@ void Gpu::renderBgMode3(uint bg)
 {
     for (uint x = 0; x < kScreen.x; ++x)
     {
-        const auto texture = transform(x, bg) >> kDecimalBits;
+        const auto texel = transform(x, bg) >> kDecimalBits;
 
-        if (texture >= kOrigin && texture < kScreen)
+        if (texel >= kOrigin && texel < kScreen)
         {
-            u32 addr = kColorBytes * texture.index2d(kScreen.x);
+            u32 addr = kColorBytes * texel.index2d(kScreen.x);
 
             backgrounds[bg][x] = mmu.vram.readFast<u16>(addr) & kColorMask;
         }
@@ -173,11 +173,11 @@ void Gpu::renderBgMode4(uint bg)
 {
     for (uint x = 0; x < kScreen.x; ++x)
     {
-        const auto texture = transform(x, bg) >> kDecimalBits;
+        const auto texel = transform(x, bg) >> kDecimalBits;
 
-        if (texture >= kOrigin && texture < kScreen)
+        if (texel >= kOrigin && texel < kScreen)
         {
-            uint index = mmu.vram.readFast<u8>(dispcnt.frame + texture.index2d(kScreen.x));
+            uint index = mmu.vram.readFast<u8>(dispcnt.frame + texel.index2d(kScreen.x));
 
             backgrounds[bg][x] = mmu.pram.colorBg(index);
         }
@@ -194,11 +194,11 @@ void Gpu::renderBgMode5(uint bg)
 
     for (uint x = 0; x < kScreen.x; ++x)
     {
-        const auto texture = transform(x, bg) >> kDecimalBits;
+        const auto texel = transform(x, bg) >> kDecimalBits;
 
-        if (texture >= kOrigin && texture < kBitmap)
+        if (texel >= kOrigin && texel < kBitmap)
         {
-            u32 addr = dispcnt.frame + kColorBytes * texture.index2d(kBitmap.x);
+            u32 addr = dispcnt.frame + kColorBytes * texel.index2d(kBitmap.x);
 
             backgrounds[bg][x] = mmu.vram.readFast<u16>(addr) & kColorMask;
         }
@@ -238,22 +238,22 @@ void Gpu::renderObjects()
 
         for (uint x = center.x + offset.x; x < end; ++x, ++offset.x)
         {
-            auto texture = (matrix * offset >> kDecimalBits) + (sprite_size / 2);
+            auto texel = (matrix * offset >> kDecimalBits) + (sprite_size / 2);
 
-            if (!(texture >= kOrigin && texture < sprite_size))
+            if (!(texel >= kOrigin && texel < sprite_size))
                 continue;
 
             if (!entry.affine)
-                texture ^= entry.flip;
+                texel ^= entry.flip;
 
             if (entry.mosaic)
             {
-                texture.x = mosaic.obj.mosaicX(texture.x);
-                texture.y = mosaic.obj.mosaicY(texture.y);
+                texel.x = mosaic.obj.mosaicX(texel.x);
+                texel.y = mosaic.obj.mosaicY(texel.y);
             }
 
-            const auto tile  = texture / kTileSize;
-            const auto pixel = texture % kTileSize;
+            const auto tile  = texel / kTileSize;
+            const auto pixel = texel % kTileSize;
 
             u32 addr = mmu.vram.mirror(entry.base_addr + tile_bytes * tile.index2d(tiles_row));
             if (addr < kObjectBaseBitmap && dispcnt.isBitmap())
