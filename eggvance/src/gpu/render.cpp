@@ -75,9 +75,9 @@ void Gpu::renderBgMode0Impl(uint bg)
     {
         u32 map = bgcnt.map_block
             + kMapBlockBytes * block.index2d(size.x / kMapBlockSize)
-            + kEntryBytes * tile.index2d(kMapBlockTiles);
+            + kMapEntryBytes * tile.index2d(kMapBlockTiles);
 
-        for (; tile.x < kMapBlockTiles; ++tile.x, map += kEntryBytes)
+        for (; tile.x < kMapBlockTiles; ++tile.x, map += kMapEntryBytes)
         {
             MapEntry entry(mmu.vram.readFast<u16>(map));
 
