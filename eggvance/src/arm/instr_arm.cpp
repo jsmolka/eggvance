@@ -73,7 +73,7 @@ void Arm::Arm_DataProcessing(u32 instr)
     u32  op2;
 
     constexpr bool kLogical = 
-           kOpcode == kOpcodeAdd 
+           kOpcode == kOpcodeAnd 
         || kOpcode == kOpcodeEor
         || kOpcode == kOpcodeOrr
         || kOpcode == kOpcodeMov
