@@ -8,7 +8,6 @@
 #include "arm/constants.h"
 #include "base/bit.h"
 #include "base/config.h"
-#include "base/macros.h"
 #include "core/videocontext.h"
 #include "dma/dma.h"
 
@@ -36,9 +35,9 @@ Gpu::Gpu()
             constexpr double kGammaOut = 2.2;
             constexpr double kGammaLcd = 2.5;
 
-            double rs = pow(r / 255.0, kGammaOut + kDarken);
-            double gs = pow(g / 255.0, kGammaOut + kDarken);
-            double bs = pow(b / 255.0, kGammaOut + kDarken);
+            double rs = std::pow(r / 255.0, kGammaOut + kDarken);
+            double gs = std::pow(g / 255.0, kGammaOut + kDarken);
+            double bs = std::pow(b / 255.0, kGammaOut + kDarken);
 
             double rd = std::pow(0.84 * rs + 0.18 * gs + 0.00 * bs, 1 / kGammaLcd + kDarken * 0.125);
             double gd = std::pow(0.09 * rs + 0.67 * gs + 0.26 * bs, 1 / kGammaLcd + kDarken * 0.125);
