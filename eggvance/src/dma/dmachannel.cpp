@@ -114,8 +114,8 @@ void DmaChannel::initCycles()
 
 void DmaChannel::initTransfer()
 {
-    bool eeprom_w = gamepak.isEeprom(dst_addr);
-    bool eeprom_r = gamepak.isEeprom(src_addr);
+    bool eeprom_w = gamepak.isEepromAccess(dst_addr);
+    bool eeprom_r = gamepak.isEepromAccess(src_addr);
 
     if ((eeprom_r || eeprom_w) && id == 3)
     {

@@ -27,7 +27,17 @@ u32 GamePak::readWord(u32 addr) const
     return read<u32>(addr);
 }
 
-bool GamePak::isEeprom(u32 addr) const
+bool GamePak::isGpioAccess(u32 addr) const
+{
+    if (gpio->type == Gpio::Type::None)
+        return false;
+
+    return addr == Gpio::kPortData
+        || addr == Gpio::kPortDirection
+        || addr == Gpio::kPortReadEnable;
+}
+
+bool GamePak::isEepromAccess(u32 addr) const
 {
     return save->type == Save::Type::Eeprom && size() <= 0x100'0000
         ? addr >= 0xD00'0000 && addr < 0xE00'0000

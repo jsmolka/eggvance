@@ -15,7 +15,8 @@ public:
     u16 readHalf(u32 addr) const;
     u32 readWord(u32 addr) const;
 
-    bool isEeprom(u32 addr) const;
+    bool isGpioAccess(u32 addr) const;
+    bool isEepromAccess(u32 addr) const;
 
     void loadRom(const fs::path& file, bool save);
     void loadSave(const fs::path& file);

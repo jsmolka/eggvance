@@ -8,4 +8,8 @@ public:
     Rtc();
 
     void reset() final;
+
+protected:
+    u16 readPort() final;
+    void writePort(u16 half) final;
 };
