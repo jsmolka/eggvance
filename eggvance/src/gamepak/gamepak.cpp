@@ -32,9 +32,9 @@ bool GamePak::isGpioAccess(u32 addr) const
     if (gpio->type == Gpio::Type::None)
         return false;
 
-    return addr == Gpio::kPortData
-        || addr == Gpio::kPortDirection
-        || addr == Gpio::kPortReadEnable;
+    return addr == Gpio::kAddressData
+        || addr == Gpio::kAddressDirection
+        || addr == Gpio::kAddressReadable;
 }
 
 bool GamePak::isEepromAccess(u32 addr) const
@@ -105,6 +105,8 @@ void GamePak::initGpio(Gpio::Type type)
         
         return std::make_unique<Gpio>();
     });
+
+    gpio->reset();
 }
 
 void GamePak::initSave(const fs::path& file, Save::Type type)

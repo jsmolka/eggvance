@@ -98,8 +98,8 @@ u16 Mmu::readHalf(u32 addr)
         return oam.readHalf(addr);
 
     case kRegionGamePak0L:
-        if (gamepak.isGpioAccess(addr) && gamepak.gpio->readable)
-            return gamepak.gpio->readHalf(addr);
+        if (gamepak.isGpioAccess(addr) && gamepak.gpio->isReadable())
+            return gamepak.gpio->read(addr);
         [[fallthrough]];
 
     case kRegionGamePak0H:
@@ -149,8 +149,8 @@ u32 Mmu::readWord(u32 addr)
         return oam.readWord(addr);
 
     case kRegionGamePak0L:
-        if (gamepak.isGpioAccess(addr) && gamepak.gpio->readable)
-            return gamepak.gpio->readWord(addr);
+        if (gamepak.isGpioAccess(addr) && gamepak.gpio->isReadable())
+            return gamepak.gpio->read(addr);
         [[fallthrough]];
 
     case kRegionGamePak0H:
@@ -249,7 +249,7 @@ void Mmu::writeHalf(u32 addr, u16 half)
 
     case kRegionGamePak0L:
         if (gamepak.isGpioAccess(addr))
-            gamepak.gpio->writeHalf(addr, half);
+            gamepak.gpio->write(addr, half);
         [[fallthrough]];
 
     case kRegionGamePak0H:
@@ -299,7 +299,7 @@ void Mmu::writeWord(u32 addr, u32 word)
 
     case kRegionGamePak0L:
         if (gamepak.isGpioAccess(addr))
-            gamepak.gpio->writeWord(addr, word);
+            gamepak.gpio->write(addr, word);
         [[fallthrough]];
 
     case kRegionGamePak0H:

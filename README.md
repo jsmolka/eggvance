@@ -2,7 +2,7 @@
 A Game Boy Advance emulator.
 
 ## State
-Most aspects of the GBA are emulated with reasonably high accuracy. This results in the majority of games being playable with some minor issues here and there. The most notable missing features are audio, prefetch and RTC emulation.
+Most aspects of the GBA are emulated with reasonably high accuracy. This results in the majority of games being playable with some minor issues here and there. The most notable missing features are audio, prefetch and ~~RTC~~ emulation.
 
 ## Usage
 ROM and save files can be passed as command line arguments or dropped in the emulator window. Even though the included [BIOS](https://github.com/Nebuleon/ReGBA/tree/master/bios) should be enough to run most games, it is recommended to download the original one. Its location and many other things are customizable in the [config](eggvance/eggvance.ini).

@@ -1,6 +1,9 @@
 #include "gpio.h"
 
+#include <shell/utility.h>
+
 #include "base/bit.h"
+#include "base/macros.h"
 
 Gpio::Gpio()
     : type(Type::None)
@@ -16,18 +19,19 @@ Gpio::Gpio(Type type)
 
 void Gpio::reset()
 {
-    readable  = 0;
-    direction = 0;
-    data      = 0;
+    shell::reconstruct(*this, type);
 }
 
-u16 Gpio::readHalf(u32 addr)
+bool Gpio::isReadable() const
 {
-    addr &= ~0x1;
+    return readable;
+}
 
+u8 Gpio::read(u32 addr)
+{
     switch (addr)
     {
-    case kPortData:
+    case kAddressData:
     {
         uint value = readPort() & maskGpioToGba();
 
@@ -37,73 +41,66 @@ u16 Gpio::readHalf(u32 addr)
         return value;
     }
 
-    case kPortDirection:
+    case kAddressDirection:
         return direction;
 
-    case kPortReadEnable:
+    case kAddressReadable:
         return readable;
     }
     return 0;
 }
 
-u32 Gpio::readWord(u32 addr)
+void Gpio::write(u32 addr, u8 byte)
 {
-    addr &= ~0x3;
-
-    u32 value = 0;
-    value |= readHalf(addr + 0) <<  0;
-    value |= readHalf(addr + 2) << 16;
-
-    return value;
-}
-
-void Gpio::writeHalf(u32 addr, u16 half)
-{
-    addr &= ~0x1;
-
     switch (addr)
     {
-    case kPortData:
+    case kAddressData:
         data &= maskGpioToGba();
-        data |= maskGbaToGpio() & half;
+        data |= maskGbaToGpio() & byte;
 
         writePort(data);
         break;
 
-    case kPortDirection:
-        direction = half & 0xF;
+    case kAddressDirection:
+        direction = byte & 0xF;
         break;
 
-    case kPortReadEnable:
-        readable = half & 0x1;
+    case kAddressReadable:
+        readable = byte & 0x1;
         break;
     }
 }
 
-void Gpio::writeWord(u32 addr, u32 word)
-{
-    addr &= ~0x3;
-
-    writeHalf(addr + 0, bit::seq< 0, 16>(word));
-    writeHalf(addr + 2, bit::seq<16, 16>(word));
-}
-
-u16 Gpio::readPort()
+u8 Gpio::readPort()
 {
     return 0;
 }
 
-void Gpio::writePort(u16 half)
+void Gpio::writePort(u8 data)
 {
+    
+}
 
+bool Gpio::isGpioToGba(uint port) const
+{
+    SHELL_ASSERT(port < 4);
+
+    return maskGpioToGba() & (1 << port);
+}
+
+bool Gpio::isGbaToGpio(uint port) const
+{
+    SHELL_ASSERT(port < 4);
+
+    return maskGbaToGpio() & (1 << port);
 }
 
 uint Gpio::maskGpioToGba() const
 {
-    return ~direction;
+    return ~maskGbaToGpio();
 }
 
 uint Gpio::maskGbaToGpio() const
 {
-    return direction;
+    return direction & 0xF;
 }

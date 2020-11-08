@@ -11,11 +11,11 @@ public:
         Rtc
     };
 
-    enum Port
+    enum Address
     {
-        kPortData       = 0x0800'00C4,
-        kPortDirection  = 0x0800'00C6,
-        kPortReadEnable = 0x0800'00C8
+        kAddressData      = 0x0800'00C4,
+        kAddressDirection = 0x0800'00C6,
+        kAddressReadable  = 0x0800'00C8
     };
 
     Gpio();
@@ -24,23 +24,25 @@ public:
 
     virtual void reset();
 
-    u16 readHalf(u32 addr);
-    u32 readWord(u32 addr);
+    bool isReadable() const;
 
-    void writeHalf(u32 addr, u16 half);
-    void writeWord(u32 addr, u32 word);
+    u8 read(u32 addr);
+    void write(u32 addr, u8 byte);
 
-    Type type;
-    uint readable;
+    const Type type;
 
 protected:
-    virtual u16 readPort();
-    virtual void writePort(u16 half);
+    virtual u8 readPort();
+    virtual void writePort(u8 byte);
+
+    bool isGpioToGba(uint port) const;
+    bool isGbaToGpio(uint port) const;
 
 private:
     uint maskGpioToGba() const;
     uint maskGbaToGpio() const;
 
-    uint direction;
-    uint data;
+    uint data      = 0;
+    uint direction = 0;
+    uint readable  = 0;
 };
