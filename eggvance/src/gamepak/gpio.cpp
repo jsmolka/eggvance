@@ -27,7 +27,7 @@ bool Gpio::isReadable() const
     return readable;
 }
 
-u8 Gpio::read(u32 addr)
+u16 Gpio::read(u32 addr)
 {
     switch (addr)
     {
@@ -50,33 +50,33 @@ u8 Gpio::read(u32 addr)
     return 0;
 }
 
-void Gpio::write(u32 addr, u8 byte)
+void Gpio::write(u32 addr, u16 half)
 {
     switch (addr)
     {
     case kAddressData:
         data &= maskGpioToGba();
-        data |= maskGbaToGpio() & byte;
+        data |= maskGbaToGpio() & half;
 
         writePort(data);
         break;
 
     case kAddressDirection:
-        direction = byte & 0xF;
+        direction = half & 0xF;
         break;
 
     case kAddressReadable:
-        readable = byte & 0x1;
+        readable = half & 0x1;
         break;
     }
 }
 
-u8 Gpio::readPort()
+u16 Gpio::readPort()
 {
     return 0;
 }
 
-void Gpio::writePort(u8 data)
+void Gpio::writePort(u16 half)
 {
     
 }
@@ -97,10 +97,10 @@ bool Gpio::isGbaToGpio(uint port) const
 
 uint Gpio::maskGpioToGba() const
 {
-    return ~maskGbaToGpio();
+    return ~direction;
 }
 
 uint Gpio::maskGbaToGpio() const
 {
-    return direction & 0xF;
+    return direction;
 }

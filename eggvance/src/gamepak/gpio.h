@@ -26,14 +26,14 @@ public:
 
     bool isReadable() const;
 
-    u8 read(u32 addr);
-    void write(u32 addr, u8 byte);
+    u16 read(u32 addr);
+    void write(u32 addr, u16 half);
 
     const Type type;
 
 protected:
-    virtual u8 readPort();
-    virtual void writePort(u8 byte);
+    virtual u16 readPort();
+    virtual void writePort(u16 half);
 
     bool isGpioToGba(uint port) const;
     bool isGbaToGpio(uint port) const;

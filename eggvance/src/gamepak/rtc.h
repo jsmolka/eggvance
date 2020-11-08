@@ -12,8 +12,8 @@ public:
     void reset() final;
 
 protected:
-    u8 readPort() final;
-    void writePort(u8 byte) final;
+    u16 readPort() final;
+    void writePort(u16 half) final;
 
 private:
     static constexpr uint kParameterBytes[8] = {

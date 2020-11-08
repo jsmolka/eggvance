@@ -17,7 +17,7 @@ void Rtc::reset()
     shell::reconstruct(*this);
 }
 
-u8 Rtc::readPort()
+u16 Rtc::readPort()
 {
     if (state == State::Transmit)
         return port.sio << kPinSio;
@@ -25,19 +25,19 @@ u8 Rtc::readPort()
     return 1;
 }
 
-void Rtc::writePort(u8 byte)
+void Rtc::writePort(u16 half)
 {
     Port prev = port;
 
-    if (isGbaToGpio(kPinCs))  port.cs  = bit::seq<kPinCs,  1>(byte);
-    if (isGbaToGpio(kPinSio)) port.sio = bit::seq<kPinSio, 1>(byte);
-    if (isGbaToGpio(kPinSck)) port.sck = bit::seq<kPinSck, 1>(byte);
+    if (isGbaToGpio(kPinCs))  port.cs  = bit::seq<kPinCs,  1>(half);
+    if (isGbaToGpio(kPinSio)) port.sio = bit::seq<kPinSio, 1>(half);
+    if (isGbaToGpio(kPinSck)) port.sck = bit::seq<kPinSck, 1>(half);
 
     if (!prev.cs && port.cs)
     {
-        this->state = State::Command;
-        this->bit  = 0;
-        this->byte = 0;
+        state = State::Command;
+        bit  = 0;
+        byte = 0;
     }
 
     if (!port.cs || !(!prev.sck && port.sck))
