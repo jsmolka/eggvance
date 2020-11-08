@@ -36,8 +36,8 @@ void Rtc::writePort(u16 half)
     if (!prev.cs && port.cs)
     {
         state = State::Command;
-        bit  = 0;
-        byte = 0;
+        bit   = 0;
+        byte  = 0;
     }
 
     if (!port.cs || !(!prev.sck && port.sck))
