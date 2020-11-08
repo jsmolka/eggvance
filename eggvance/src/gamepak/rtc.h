@@ -54,7 +54,7 @@ private:
     {
         uint unknown    = 0;
         uint minute_irq = 0;
-        uint format_24h = 0;
+        uint format_24h = 1;
     } control;
 
     uint data = 0;

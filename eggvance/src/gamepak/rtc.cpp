@@ -61,11 +61,7 @@ void Rtc::writePort(u16 half)
 
 std::tm Rtc::readBcdTime() const
 {
-    static constexpr uint kDaysSinceMonday[7] = {
-        6, 5, 4, 3, 2, 1, 0
-    };
-
-    auto toBcd = [](u8 decimal) {
+    auto toBcd = [](uint decimal) {
         return ((decimal / 10) << 4) | (decimal % 10);
     };
 
@@ -75,7 +71,7 @@ std::tm Rtc::readBcdTime() const
     bcd.tm_year = toBcd(bcd.tm_year - 100);
     bcd.tm_mon  = toBcd(bcd.tm_mon + 1);
     bcd.tm_mday = toBcd(bcd.tm_mday);
-    bcd.tm_wday = toBcd(kDaysSinceMonday[bcd.tm_wday]);
+    bcd.tm_wday = toBcd(bcd.tm_wday);
     bcd.tm_hour = toBcd(bcd.tm_hour % (control.format_24h ? 24 : 12));
     bcd.tm_min  = toBcd(bcd.tm_min);
     bcd.tm_sec  = toBcd(bcd.tm_sec);
