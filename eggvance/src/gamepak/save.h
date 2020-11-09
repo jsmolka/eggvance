@@ -25,8 +25,6 @@ public:
 
     void init(const fs::path& file);
 
-    bool isEepromAccess(u32 addr) const;
-
     virtual void reset();
 
     virtual u8 read(u32 addr);

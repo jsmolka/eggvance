@@ -1,7 +1,5 @@
 #pragma once
 
-#include <shell/traits.h>
-
 #include "base/int.h"
 #include "base/macros.h"
 
@@ -36,16 +34,12 @@ public:
     template<typename Integral>
     Integral readFast(u32 addr) const
     {
-        static_assert(is_memory_type<Integral>::value);
-
         return *reinterpret_cast<const Integral*>(data() + addr);
     }
 
     template<typename Integral>
     void writeFast(u32 addr, Integral value)
     {
-        static_assert(is_memory_type<Integral>::value);
-
         *reinterpret_cast<Integral*>(data() + addr) = value;
     }
 
@@ -63,20 +57,13 @@ protected:
     template<typename Integral>
     static u32 align(u32 addr)
     {
-        static_assert(is_memory_type<Integral>::value);
-
         return addr & ~(sizeof(Integral) - 1);
     }
 
 private:
-    template<typename T>
-    using is_memory_type = shell::is_any_of<T, u8, u16, u32>;
-
     template<typename Integral>
     Integral read(u32 addr) const
     {
-        static_assert(is_memory_type<Integral>::value);
-
         addr = align<Integral>(addr);
         addr = mirror(addr);
 
@@ -86,8 +73,6 @@ private:
     template<typename Integral>
     void write(u32 addr, Integral value)
     {
-        static_assert(is_memory_type<Integral>::value);
-
         addr = align<Integral>(addr);
         addr = mirror(addr);
 

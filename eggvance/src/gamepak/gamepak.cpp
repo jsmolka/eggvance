@@ -1,7 +1,5 @@
 #include "gamepak.h"
 
-#include <shell/traits.h>
-
 #include "eeprom.h"
 #include "flash.h"
 #include "rtc.h"
@@ -10,39 +8,11 @@
 #include "base/log.h"
 #include "base/panic.h"
 
+constexpr uint kMaxRomSize = 0x200'0000;
+
 uint GamePak::size() const
 {
     return rom.size();
-}
-
-u8 GamePak::readByte(u32 addr) const
-{
-    return read<u8>(addr);
-}
-
-u16 GamePak::readHalf(u32 addr) const
-{
-    return read<u16>(addr);
-}
-
-u32 GamePak::readWord(u32 addr) const
-{
-    return read<u32>(addr);
-}
-
-void GamePak::writeByte(u32 addr, u8 byte)
-{
-    write<u8>(addr, byte);
-}
-
-void GamePak::writeHalf(u32 addr, u16 half)
-{
-    write<u16>(addr, half);
-}
-
-void GamePak::writeWord(u32 addr, u32 word)
-{
-    write<u32>(addr, word);
 }
 
 bool GamePak::isEepromAccess(u32 addr) const
@@ -51,6 +21,14 @@ bool GamePak::isEepromAccess(u32 addr) const
         ? addr >= 0xD00'0000 && addr < 0xE00'0000
         : addr >= 0xDFF'FF00 && addr < 0xE00'0000;
 }
+
+u8  GamePak::readByte(u32 addr) const { return read<u8 >(addr); }
+u16 GamePak::readHalf(u32 addr) const { return read<u16>(addr); }
+u32 GamePak::readWord(u32 addr) const { return read<u32>(addr); }
+
+void GamePak::writeByte(u32 addr, u8  byte) { write(addr, byte); }
+void GamePak::writeHalf(u32 addr, u16 half) { write(addr, half); }
+void GamePak::writeWord(u32 addr, u32 word) { write(addr, word); }
 
 void GamePak::loadRom(const fs::path& file, bool save)
 {
@@ -77,8 +55,7 @@ void GamePak::loadRom(const fs::path& file, bool save)
 
 void GamePak::loadSave(const fs::path& file)
 {
-    if (rom.empty())
-        return;
+    if (rom.empty()) return;
 
     Save::Type type = config.save;
 
@@ -91,12 +68,10 @@ void GamePak::loadSave(const fs::path& file)
 template<typename Integral>
 Integral GamePak::read(u32 addr) const
 {
-    static_assert(shell::is_any_of_v<Integral, u8, u16, u32>);
-
     if (isEepromAccess(addr))
         return 1;
 
-    addr &= 0x200'0000 - sizeof(Integral);
+    addr &= kMaxRomSize - sizeof(Integral);
 
     if (gpio->isAccess(addr) && gpio->isReadable())
         return gpio->read(addr);
@@ -113,9 +88,7 @@ Integral GamePak::read(u32 addr) const
 template<typename Integral>
 void GamePak::write(u32 addr, Integral value)
 {
-    static_assert(shell::is_any_of_v<Integral, u8, u16, u32>);
-
-    addr &= 0x200'0000 - sizeof(Integral);
+    addr &= kMaxRomSize - sizeof(Integral);
 
     if (gpio->isAccess(addr))
         gpio->write(addr, value);
@@ -123,31 +96,20 @@ void GamePak::write(u32 addr, Integral value)
 
 void GamePak::initGpio(Gpio::Type type)
 {
-    gpio = std::invoke([&]() -> std::unique_ptr<Gpio>
-    {
-        switch (type)
-        {
-        case Gpio::Type::Rtc: return std::make_unique<Rtc>();
-        }
-        return std::make_unique<Gpio>();
-    });
-
-    gpio->reset();
+    gpio = type == Gpio::Type::Rtc
+        ? std::make_unique<Rtc>()
+        : std::make_unique<Gpio>();
 }
 
 void GamePak::initSave(const fs::path& file, Save::Type type)
 {
-    save = std::invoke([&]() -> std::unique_ptr<Save>
+    switch (type)
     {
-        switch (type)
-        {
-        case Save::Type::Sram:      return std::make_unique<Sram>();
-        case Save::Type::Eeprom:    return std::make_unique<Eeprom>();
-        case Save::Type::Flash512:  return std::make_unique<Flash>(Flash::kSize512);
-        case Save::Type::Flash1024: return std::make_unique<Flash>(Flash::kSize1024);
-        }
-        return std::make_unique<Save>();
-    });
-
+    case Save::Type::Sram:      save = std::make_unique<Sram>(); break;
+    case Save::Type::Eeprom:    save = std::make_unique<Eeprom>(); break;
+    case Save::Type::Flash512:  save = std::make_unique<Flash>(Flash::kSize512); break;
+    case Save::Type::Flash1024: save = std::make_unique<Flash>(Flash::kSize1024); break;
+    default:                    save = std::make_unique<Save>(); break;
+    }
     save->init(file);
 }

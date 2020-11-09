@@ -5,6 +5,7 @@
 #include <utility>
 
 #include "header.h"
+#include "base/log.h"
 #include "base/panic.h"
 
 Save::Save()
@@ -54,6 +55,8 @@ Save::Type Save::parse(const std::vector<u8>& rom)
                 return type;
         }
     }
+
+    SHELL_LOG_WARN("No save found");
     return Type::None;
 }
 
