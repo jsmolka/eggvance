@@ -31,7 +31,7 @@ u16 Gpio::read(u32 addr)
 {
     switch (addr)
     {
-    case kAddressData:
+    case kAddrData:
     {
         uint value = readPort() & maskGpioToGba();
 
@@ -41,10 +41,10 @@ u16 Gpio::read(u32 addr)
         return value;
     }
 
-    case kAddressDirection:
+    case kAddrDirection:
         return direction;
 
-    case kAddressReadable:
+    case kAddrControl:
         return readable;
     }
     return 0;
@@ -54,18 +54,18 @@ void Gpio::write(u32 addr, u16 half)
 {
     switch (addr)
     {
-    case kAddressData:
+    case kAddrData:
         data &= maskGpioToGba();
         data |= maskGbaToGpio() & half;
 
         writePort(data);
         break;
 
-    case kAddressDirection:
+    case kAddrDirection:
         direction = half & 0xF;
         break;
 
-    case kAddressReadable:
+    case kAddrControl:
         readable = half & 0x1;
         break;
     }

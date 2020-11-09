@@ -15,7 +15,10 @@ public:
     u16 readHalf(u32 addr) const;
     u32 readWord(u32 addr) const;
 
-    bool isGpioAccess(u32 addr) const;
+    void writeByte(u32 addr, u8  byte);
+    void writeHalf(u32 addr, u16 half);
+    void writeWord(u32 addr, u32 word);
+
     bool isEepromAccess(u32 addr) const;
 
     void loadRom(const fs::path& file, bool save);
@@ -28,8 +31,10 @@ public:
 private:
     static u32 readUnused(u32 addr);
 
-    template<typename T>
-    T read(u32 addr) const;
+    template<typename Integral>
+    Integral read(u32 addr) const;
+    template<typename Integral>
+    void write(u32 addr, Integral value);
 
     void initGpio(Gpio::Type type);
     void initSave(const fs::path& file, Save::Type type);

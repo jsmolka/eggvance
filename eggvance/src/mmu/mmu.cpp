@@ -98,10 +98,6 @@ u16 Mmu::readHalf(u32 addr)
         return oam.readHalf(addr);
 
     case kRegionGamePak0L:
-        if (gamepak.isGpioAccess(addr) && gamepak.gpio->isReadable())
-            return gamepak.gpio->read(addr);
-        [[fallthrough]];
-
     case kRegionGamePak0H:
     case kRegionGamePak1L:
     case kRegionGamePak1H:
@@ -149,10 +145,6 @@ u32 Mmu::readWord(u32 addr)
         return oam.readWord(addr);
 
     case kRegionGamePak0L:
-        if (gamepak.isGpioAccess(addr) && gamepak.gpio->isReadable())
-            return gamepak.gpio->read(addr);
-        [[fallthrough]];
-
     case kRegionGamePak0H:
     case kRegionGamePak1L:
     case kRegionGamePak1H:
@@ -207,6 +199,7 @@ void Mmu::writeByte(u32 addr, u8 byte)
     case kRegionGamePak1H:
     case kRegionGamePak2L:
     case kRegionGamePak2H:
+        gamepak.writeByte(addr, byte);
         break;
 
     case kRegionSramL:
@@ -248,15 +241,12 @@ void Mmu::writeHalf(u32 addr, u16 half)
         break;
 
     case kRegionGamePak0L:
-        if (gamepak.isGpioAccess(addr))
-            gamepak.gpio->write(addr, half);
-        [[fallthrough]];
-
     case kRegionGamePak0H:
     case kRegionGamePak1L:
     case kRegionGamePak1H:
     case kRegionGamePak2L:
     case kRegionGamePak2H:
+        gamepak.writeHalf(addr, half);
         break;
 
     case kRegionSramL:
@@ -298,15 +288,12 @@ void Mmu::writeWord(u32 addr, u32 word)
         break;
 
     case kRegionGamePak0L:
-        if (gamepak.isGpioAccess(addr))
-            gamepak.gpio->write(addr, word);
-        [[fallthrough]];
-
     case kRegionGamePak0H:
     case kRegionGamePak1L:
     case kRegionGamePak1H:
     case kRegionGamePak2L:
     case kRegionGamePak2H:
+        gamepak.writeWord(addr, word);
         break;
 
     case kRegionSramL:

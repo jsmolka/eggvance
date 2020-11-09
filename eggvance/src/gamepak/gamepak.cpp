@@ -1,5 +1,7 @@
 #include "gamepak.h"
 
+#include <shell/traits.h>
+
 #include "eeprom.h"
 #include "flash.h"
 #include "rtc.h"
@@ -27,14 +29,19 @@ u32 GamePak::readWord(u32 addr) const
     return read<u32>(addr);
 }
 
-bool GamePak::isGpioAccess(u32 addr) const
+void GamePak::writeByte(u32 addr, u8 byte)
 {
-    if (gpio->type == Gpio::Type::None)
-        return false;
+    write<u8>(addr, byte);
+}
 
-    return addr == Gpio::kAddressData
-        || addr == Gpio::kAddressDirection
-        || addr == Gpio::kAddressReadable;
+void GamePak::writeHalf(u32 addr, u16 half)
+{
+    write<u16>(addr, half);
+}
+
+void GamePak::writeWord(u32 addr, u32 word)
+{
+    write<u32>(addr, word);
 }
 
 bool GamePak::isEepromAccess(u32 addr) const
@@ -86,15 +93,31 @@ u32 GamePak::readUnused(u32 addr)
     return (addr & 0xFFFF) | ((addr + 1) & 0xFFFF) << 16;
 }
 
-template<typename T>
-T GamePak::read(u32 addr) const
+template<typename Integral>
+Integral GamePak::read(u32 addr) const
 {
-    addr &= 0x200'0000 - sizeof(T);
+    static_assert(shell::is_any_of_v<Integral, u8, u16, u32>);
+
+    addr &= 0x200'0000 - sizeof(Integral);
+
+    if (gpio->type != Gpio::Type::None && addr >= Gpio::kAddrData && addr <= Gpio::kAddrControl)
+        return gpio->read(addr);
 
     if (addr < rom.size())
-        return *reinterpret_cast<const T*>(&rom[addr]);
+        return *reinterpret_cast<const Integral*>(rom.data() + addr);
     else
         return readUnused(addr);
+}
+
+template<typename Integral>
+void GamePak::write(u32 addr, Integral value)
+{
+    static_assert(shell::is_any_of_v<Integral, u8, u16, u32>);
+
+    addr &= 0x200'0000 - sizeof(Integral);
+
+    if (gpio->type != Gpio::Type::None && addr >= Gpio::kAddrData && addr <= Gpio::kAddrControl)
+        gpio->write(addr, value);
 }
 
 void GamePak::initGpio(Gpio::Type type)

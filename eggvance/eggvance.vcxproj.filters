@@ -311,6 +311,9 @@
     <ClInclude Include="src\mmu\mmio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\base\log.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="eggvance.rc">

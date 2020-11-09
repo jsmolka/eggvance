@@ -13,9 +13,9 @@ public:
 
     enum Address
     {
-        kAddressData      = 0x0800'00C4,
-        kAddressDirection = 0x0800'00C6,
-        kAddressReadable  = 0x0800'00C8
+        kAddrData      = 0xC4,
+        kAddrDirection = 0xC6,
+        kAddrControl   = 0xC8
     };
 
     Gpio();
