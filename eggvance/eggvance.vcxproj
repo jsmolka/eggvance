@@ -66,7 +66,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/Ob3 %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NO_CONSOLE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <WarningLevel>Level2</WarningLevel>
