@@ -98,7 +98,7 @@ Integral GamePak::read(u32 addr) const
 
     addr &= 0x200'0000 - sizeof(Integral);
 
-    if (gpio->isAccess(addr))
+    if (gpio->isAccess(addr) && gpio->isReadable())
         return gpio->read(addr);
 
     if (addr < rom.size())
