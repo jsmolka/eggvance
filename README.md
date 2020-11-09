@@ -17,4 +17,10 @@ Binaries for Windows, Linux and macOS are built on each commit and can be found 
 ## Building
 Detailed build instructions can be found [here](BUILDING.md).
 
+## Credits
+The following projects were invaluable resources while creating the emulator.
+- [GBATEK](https://problemkaputt.de/gbatek.htm) and [No$GBA](https://problemkaputt.de/gba.htm) by Martin Korth
+- [NanoboyAdvance](https://github.com/fleroviux/NanoboyAdvance) by fleroviux
+- [mGBA](https://github.com/mgba-emu/mgba) by endrift
+
 ![mew](media/emerald_lcd.png)
