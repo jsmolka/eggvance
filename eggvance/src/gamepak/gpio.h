@@ -25,6 +25,7 @@ public:
     virtual void reset();
 
     bool isReadable() const;
+    bool isAccess(u32 addr) const;
 
     u16 read(u32 addr);
     void write(u32 addr, u16 half);

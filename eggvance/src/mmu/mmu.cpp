@@ -50,16 +50,12 @@ u8 Mmu::readByte(u32 addr)
     case kRegionOam:
         return oam.readByte(addr);
 
-    case kRegionGamePak2H:
-        if (gamepak.isEepromAccess(addr))
-            return 1;
-        [[fallthrough]];
-
     case kRegionGamePak0L:
     case kRegionGamePak0H:
     case kRegionGamePak1L:
     case kRegionGamePak1H:
     case kRegionGamePak2L:
+    case kRegionGamePak2H:
         return gamepak.readByte(addr);
     
     case kRegionSramL:
@@ -102,11 +98,7 @@ u16 Mmu::readHalf(u32 addr)
     case kRegionGamePak1L:
     case kRegionGamePak1H:
     case kRegionGamePak2L:
-        return gamepak.readHalf(addr);
-
     case kRegionGamePak2H:
-        if (gamepak.isEepromAccess(addr))
-            return 1;
         return gamepak.readHalf(addr);
 
     case kRegionSramL:
@@ -149,11 +141,7 @@ u32 Mmu::readWord(u32 addr)
     case kRegionGamePak1L:
     case kRegionGamePak1H:
     case kRegionGamePak2L:
-        return gamepak.readWord(addr);
-
     case kRegionGamePak2H:
-        if (gamepak.isEepromAccess(addr))
-            return 1;
         return gamepak.readWord(addr);
 
     case kRegionSramL:

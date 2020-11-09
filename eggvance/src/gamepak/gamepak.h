@@ -29,8 +29,6 @@ public:
     std::unique_ptr<Save> save;
 
 private:
-    static u32 readUnused(u32 addr);
-
     template<typename Integral>
     Integral read(u32 addr) const;
     template<typename Integral>

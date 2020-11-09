@@ -7,6 +7,7 @@
 #include "rtc.h"
 #include "sram.h"
 #include "base/config.h"
+#include "base/log.h"
 #include "base/panic.h"
 
 uint GamePak::size() const
@@ -87,26 +88,26 @@ void GamePak::loadSave(const fs::path& file)
     initSave(file, type == Save::Type::None ? Save::parse(rom) : type);
 }
 
-u32 GamePak::readUnused(u32 addr)
-{
-    addr = (addr & ~0x3) >> 1;
-    return (addr & 0xFFFF) | ((addr + 1) & 0xFFFF) << 16;
-}
-
 template<typename Integral>
 Integral GamePak::read(u32 addr) const
 {
     static_assert(shell::is_any_of_v<Integral, u8, u16, u32>);
 
+    if (isEepromAccess(addr))
+        return 1;
+
     addr &= 0x200'0000 - sizeof(Integral);
 
-    if (gpio->type != Gpio::Type::None && addr >= Gpio::kAddrData && addr <= Gpio::kAddrControl)
+    if (gpio->isAccess(addr))
         return gpio->read(addr);
 
     if (addr < rom.size())
         return *reinterpret_cast<const Integral*>(rom.data() + addr);
-    else
-        return readUnused(addr);
+
+    SHELL_LOG_WARN("Invalid address {:08X}", addr);
+
+    addr = (addr & ~0x3) >> 1;
+    return (addr & 0xFFFF) | ((addr + 1) & 0xFFFF) << 16;
 }
 
 template<typename Integral>
@@ -116,16 +117,18 @@ void GamePak::write(u32 addr, Integral value)
 
     addr &= 0x200'0000 - sizeof(Integral);
 
-    if (gpio->type != Gpio::Type::None && addr >= Gpio::kAddrData && addr <= Gpio::kAddrControl)
+    if (gpio->isAccess(addr))
         gpio->write(addr, value);
 }
 
 void GamePak::initGpio(Gpio::Type type)
 {
-    gpio = std::invoke([&]() -> std::unique_ptr<Gpio> {
-        if (type == Gpio::Type::Rtc)
-            return std::make_unique<Rtc>();
-        
+    gpio = std::invoke([&]() -> std::unique_ptr<Gpio>
+    {
+        switch (type)
+        {
+        case Gpio::Type::Rtc: return std::make_unique<Rtc>();
+        }
         return std::make_unique<Gpio>();
     });
 
@@ -134,7 +137,8 @@ void GamePak::initGpio(Gpio::Type type)
 
 void GamePak::initSave(const fs::path& file, Save::Type type)
 {
-    save = std::invoke([&]() -> std::unique_ptr<Save> {
+    save = std::invoke([&]() -> std::unique_ptr<Save>
+    {
         switch (type)
         {
         case Save::Type::Sram:      return std::make_unique<Sram>();

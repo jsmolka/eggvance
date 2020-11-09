@@ -27,6 +27,11 @@ bool Gpio::isReadable() const
     return readable;
 }
 
+bool Gpio::isAccess(u32 addr) const
+{
+    return type != Type::None && addr >= kAddrData && addr <= kAddrControl;
+}
+
 u16 Gpio::read(u32 addr)
 {
     switch (addr)
