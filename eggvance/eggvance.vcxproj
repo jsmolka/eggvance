@@ -207,6 +207,7 @@
     <ClInclude Include="src\gamepak\overwrites.h" />
     <ClInclude Include="src\gamepak\rtc.h" />
     <ClInclude Include="src\gamepak\save.h" />
+    <ClInclude Include="src\gamepak\serialbuffer.h" />
     <ClInclude Include="src\gamepak\sram.h" />
     <ClInclude Include="src\gamepad\io.h" />
     <ClInclude Include="src\core\framecounter.h" />

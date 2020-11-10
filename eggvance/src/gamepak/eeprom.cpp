@@ -1,55 +1,65 @@
 #include "eeprom.h"
 
+#include <shell/utility.h>
+
+#include "base/log.h"
+
 Eeprom::Eeprom()
     : Save(Type::Eeprom)
 {
-    reset();
+
 }
 
 void Eeprom::reset()
 {
-    state   = State::Receive;
-    count   = 0;
-    buffer  = 0;
-    address = 0;
+    shell::reconstruct(*this);
 }
 
 u8 Eeprom::read(u32 addr)
 {
+    uint bit = 1;
     switch (state)
     {
     case State::ReadUnused:
-        if (++count == 4)
+        if (++buffer.size == 4)
+        {
             setState(State::Read);
+            buffer.data = *reinterpret_cast<u64*>(data.data() + address);
+            buffer.size = 64;
+        }
         break;
 
     case State::Read:
-        {
-            uint index  = count % 8;
-            uint offset = count / 8;
+        bit = buffer.popl();
+        if (buffer.size == 0)
+            setState(State::Receive);
+        break;
 
-            if (++count == 64)
-                setState(State::Receive);
-
-            return (data[address + offset] >> (7 - index)) & 0x1;
-        }
+    default:
+        SHELL_LOG_WARN("Bad state {}", state);
+        break;
     }
-    return 1;
+    return bit;
 }
 
 void Eeprom::write(u32 addr, u8 byte)
 {
     if (state == State::Read || state == State::ReadUnused)
+    {
+        SHELL_LOG_WARN("Bad state {}", state);
         return;
+    }
 
-    count++;
-    buffer = (buffer << 1) | (byte & 0x1);
+    buffer.pushr(byte);
 
     switch (state)
     {
     case State::Receive:
-        if (count == 2)
+        if (buffer.size == 2)
         {
+            if (buffer.data < 2)
+                SHELL_LOG_WARN("Bad receive {}", buffer.data);
+
             static constexpr State kStates[4] = {
                 State::Receive,
                 State::Receive,
@@ -58,14 +68,14 @@ void Eeprom::write(u32 addr, u8 byte)
             };
 
             address = 0;
-            setState(kStates[buffer]);
+            setState(kStates[buffer.data]);
         }
         break;
 
     case State::ReadSetAddress:
-        if (count == bus())
+        if (buffer.size == bus())
         {
-            address = buffer << 3;
+            address = buffer.data << 3;
             setState(State::ReadSetAddressEnd);
         }
         break;
@@ -75,22 +85,19 @@ void Eeprom::write(u32 addr, u8 byte)
         break;
 
     case State::WriteSetAddress:
-        if (count == bus())
+        if (buffer.size == bus())
         {
-            address = buffer << 3;
+            address = buffer.data << 3;
             setState(State::Write);
         }
         break;
 
     case State::Write:
-        if (count % 8 == 0)
+        if (buffer.size == 64)
         {
             changed = true;
-            data[address++] = buffer;
-            buffer = 0;
-
-            if (count == 64)
-                setState(State::WriteEnd);
+            *reinterpret_cast<u64*>(data.data() + address) = buffer.data;
+            setState(State::WriteEnd);
         }
         break;
 
@@ -114,7 +121,5 @@ uint Eeprom::bus() const
 void Eeprom::setState(State state)
 {
     this->state = state;
-
-    count  = 0;
-    buffer = 0;
+    this->buffer.clear();
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "save.h"
+#include "serialbuffer.h"
 
 class Eeprom : public Save
 {
@@ -29,12 +30,11 @@ private:
         WriteSetAddress,
         Write,
         WriteEnd
-    } state;
+    } state = State::Receive;
 
     uint bus() const;
     void setState(State state);
 
-    uint count   = 0;
-    uint buffer  = 0;
+    SerialBuffer<u64> buffer;
     uint address = 0;
 };
