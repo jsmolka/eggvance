@@ -3,7 +3,6 @@
 #include <type_traits>
 
 #include "base/bit.h"
-#include "base/int.h"
 #include "base/macros.h"
 
 template<typename Integral>
@@ -19,7 +18,7 @@ public:
         size = 0;
     }
 
-    void pushr(uint bit)
+    void pushr(Integral bit)
     {
         SHELL_ASSERT(size < bit::bits_v<Integral>);
 
@@ -27,7 +26,7 @@ public:
         size++;
     }
 
-    void pushl(uint bit)
+    void pushl(Integral bit)
     {
         SHELL_ASSERT(size < bit::bits_v<Integral>);
 
@@ -35,17 +34,17 @@ public:
         size++;
     }
 
-    uint popr()
+    Integral popr()
     {
         SHELL_ASSERT(size > 0);
 
-        uint bit = data & 0x1;
+        Integral bit = data & 0x1;
         data >>= 1;
         size--;
         return bit;
     }
 
-    uint popl()
+    Integral popl()
     {
         SHELL_ASSERT(size > 0);
 

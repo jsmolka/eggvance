@@ -1,7 +1,5 @@
 #include "eeprom.h"
 
-#include <shell/utility.h>
-
 #include "base/log.h"
 
 Eeprom::Eeprom()
@@ -12,7 +10,8 @@ Eeprom::Eeprom()
 
 void Eeprom::reset()
 {
-    shell::reconstruct(*this);
+    address = 0;
+    setState(State::Receive);
 }
 
 u8 Eeprom::read(u32 addr)
