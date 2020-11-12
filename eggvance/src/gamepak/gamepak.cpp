@@ -68,18 +68,15 @@ void GamePak::loadSave(const fs::path& file)
 template<typename Integral>
 Integral GamePak::read(u32 addr) const
 {
-    if (isEepromAccess(addr))
-        return 1;
-
     addr &= kMaxRomSize - sizeof(Integral);
 
-    if (gpio->isAccess(addr) && gpio->isReadable())
+    if (sizeof(Integral) > 1 && gpio->isAccess(addr) && gpio->isReadable())
         return gpio->read(addr);
 
     if (addr < rom.size())
         return *reinterpret_cast<const Integral*>(rom.data() + addr);
 
-    SHELL_LOG_WARN("Invalid address {:08X}", addr);
+    SHELL_LOG_WARN("Bad read {:08X}", addr);
 
     addr = (addr & ~0x3) >> 1;
     return (addr & 0xFFFF) | ((addr + 1) & 0xFFFF) << 16;
@@ -90,8 +87,10 @@ void GamePak::write(u32 addr, Integral value)
 {
     addr &= kMaxRomSize - sizeof(Integral);
 
-    if (gpio->isAccess(addr))
+    if (sizeof(Integral) > 1 && gpio->isAccess(addr))
         gpio->write(addr, value);
+    else
+        SHELL_LOG_WARN("Bad write {:08X}", addr);
 }
 
 void GamePak::initGpio(Gpio::Type type)
