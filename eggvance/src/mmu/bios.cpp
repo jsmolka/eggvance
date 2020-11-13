@@ -50,7 +50,7 @@ Integral Bios::read(u32 addr)
         return value;
     }
 
-    SHELL_LOG_WARN("Bad pc {:08}", arm.pc);
+    SHELL_LOG_WARN("Bad pc {:08X}", arm.pc);
 
     return previous >> (8 * (addr & 0x3));
 }

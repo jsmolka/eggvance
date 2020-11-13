@@ -227,7 +227,7 @@ u8 Mmio::readByte(u32 addr) const
     INDEXED_CASE1(kRegPostFlag,       return postflag.read<kIndex>());
 
     default:
-        SHELL_LOG_WARN("Bad read {:08}", addr);
+        SHELL_LOG_WARN("Bad read {:08X}", addr);
         return mmu.readUnused(addr);
     }
 }
@@ -365,7 +365,7 @@ void Mmio::writeByte(u32 addr, u8 byte)
     INDEXED_CASE1(kRegHaltControl,    arm.haltcnt.write<kIndex>(byte));
 
     default:
-        SHELL_LOG_WARN("Bad write {:08} -> {:02}", addr, byte);
+        SHELL_LOG_WARN("Bad write {:08X} -> {:02X}", addr, byte);
         break;
     }
 }

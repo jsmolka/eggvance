@@ -64,7 +64,7 @@ u8 Mmu::readByte(u32 addr)
         [[fallthrough]];
 
     default:
-        SHELL_LOG_WARN("Bad read {:08}", addr);
+        SHELL_LOG_WARN("Bad read {:08X}", addr);
         return readUnused(addr);
     }
 }
@@ -113,7 +113,7 @@ u16 Mmu::readHalf(u32 addr)
         [[fallthrough]];
 
     default:
-        SHELL_LOG_WARN("Bad read {:08}", addr);
+        SHELL_LOG_WARN("Bad read {:08X}", addr);
         return readUnused(addr);
     }
 }
@@ -162,7 +162,7 @@ u32 Mmu::readWord(u32 addr)
         [[fallthrough]];
 
     default:
-        SHELL_LOG_WARN("Bad read {:08}", addr);
+        SHELL_LOG_WARN("Bad read {:08X}", addr);
         return readUnused(addr);
     }
 }
@@ -210,7 +210,7 @@ void Mmu::writeByte(u32 addr, u8 byte)
         [[fallthrough]];
 
     default:
-        SHELL_LOG_WARN("Bad write {:08} -> {:02}", addr, byte);
+        SHELL_LOG_WARN("Bad write {:08X} -> {:02X}", addr, byte);
         break;
     }
 }
@@ -261,7 +261,7 @@ void Mmu::writeHalf(u32 addr, u16 half)
         [[fallthrough]];
 
     default:
-        SHELL_LOG_WARN("Bad write {:08} -> {:04}", addr, half);
+        SHELL_LOG_WARN("Bad write {:08X} -> {:04X}", addr, half);
         break;
     }
 }
@@ -312,7 +312,7 @@ void Mmu::writeWord(u32 addr, u32 word)
         [[fallthrough]];
 
     default:
-        SHELL_LOG_WARN("Bad write {:08} -> {:08}", addr, word);
+        SHELL_LOG_WARN("Bad write {:08X} -> {:08X}", addr, word);
         break;
     }
 }
@@ -362,7 +362,7 @@ u8 Mmu::readSave(u32 addr)
         return gamepak.save->read(addr);
 
     default:
-        SHELL_LOG_WARN("Bad read {:08}", addr);
+        SHELL_LOG_WARN("Bad read {:08X}", addr);
         return 0xFF;
     }
 }
@@ -383,7 +383,7 @@ void Mmu::writeSave(u32 addr, u8 byte)
         break;
 
     default:
-        SHELL_LOG_WARN("Bad write {:08} -> {:02}", addr, byte);
+        SHELL_LOG_WARN("Bad write {:08X} -> {:02X}", addr, byte);
         break;
     }
 }
