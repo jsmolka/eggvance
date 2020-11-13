@@ -2,10 +2,11 @@
 
 #include <shell/hash.h>
 
-#include "bios_normmatt.h"
 #include "arm/arm.h"
 #include "base/config.h"
+#include "base/log.h"
 #include "base/panic.h"
+#include "bios_normmatt.h"
 
 void Bios::init(const fs::path& path)
 {
@@ -18,38 +19,38 @@ void Bios::init(const fs::path& path)
     else
     {
         if (!fs::read(path, data))
-            panic("Cannot read BIOS: {}", path);
+            panic("Cannot read bios {}", path);
 
         if (config.bios_hash)
         {
-            constexpr std::size_t kExpectedHash = 0x860D'7AFF'82E9'94DC;
+            constexpr std::size_t kHash = 0x860D'7AFF'82E9'94DC;
 
-            if (shell::hashRange(data.begin(), data.end()) != kExpectedHash)
-                panic("Invalid BIOS hash");
+            if (shell::hashRange(data.begin(), data.end()) != kHash)
+                panic("Bad bios hash");
         }
     }
 }
 
-u8 Bios::readByte(u32 addr) const
-{
-    if (arm.pc < kSize)
-        return data.readFast<u8>(addr);
-    else
-        return previous >> (addr & 0x3);
-}
+u8  Bios::readByte(u32 addr) { return read<u8 >(addr); }
+u16 Bios::readHalf(u32 addr) { return read<u16>(addr); }
+u32 Bios::readWord(u32 addr) { return read<u32>(addr); }
 
-u16 Bios::readHalf(u32 addr) const
+template<typename Integral>
+Integral Bios::read(u32 addr)
 {
-    if (arm.pc < kSize)
-        return data.readFast<u16>(addr);
-    else
-        return previous >> (addr & 0x2);
-}
+    constexpr auto kMask = ~(sizeof(Integral) - 1);
 
-u32 Bios::readWord(u32 addr)
-{
     if (arm.pc < kSize)
-        return previous = data.readFast<u32>(addr);
-    else
-        return previous;
+    {
+        auto value = data.readFast<Integral>(addr & kMask);
+
+        if (std::is_same_v<Integral, u32>)
+            previous = value;
+
+        return value;
+    }
+
+    SHELL_LOG_WARN("Bad pc {:08}", arm.pc);
+
+    return previous >> (8 * (addr & 0x3));
 }
