@@ -1,20 +1,12 @@
 #pragma once
 
-#include "ram.h"
 #include "gpu/point.h"
+#include "ram.h"
 
 class VramMirror
 {
 public:
-    u32 operator()(u32 addr) const
-    {
-        addr &= 0x1'FFFF;
-
-        if (addr >= 0x1'8000)
-            addr -= 0x0'8000;
-
-        return addr;
-    }
+    u32 operator()(u32 addr) const;
 };
 
 class Vram : public Ram<0x1'8000, VramMirror>

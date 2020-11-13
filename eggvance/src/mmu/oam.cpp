@@ -1,7 +1,6 @@
 #include "oam.h"
 
 #include "base/bit.h"
-#include "base/int.h"
 
 void Oam::writeHalf(u32 addr, u16 half)
 {

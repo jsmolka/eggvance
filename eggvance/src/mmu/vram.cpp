@@ -1,9 +1,18 @@
 #include "vram.h"
 
 #include "base/bit.h"
-#include "base/int.h"
 #include "gpu/gpu.h"
 #include "gpu/constants.h"
+
+u32 VramMirror::operator()(u32 addr) const
+{
+    addr &= 0x1'FFFF;
+
+    if (addr >= 0x1'8000)
+        addr -= 0x0'8000;
+
+    return addr;
+}
 
 void Vram::writeByte(u32 addr, u8 byte)
 {

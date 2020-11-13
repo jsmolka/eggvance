@@ -1,37 +1,33 @@
 #include "mmu.h"
 
 #include "arm/arm.h"
+#include "base/log.h"
 #include "gamepak/gamepak.h"
 
 enum Region
 {
-    kRegionBios      = 0x0,
-    kRegionEwram     = 0x2,
-    kRegionIwram     = 0x3,
-    kRegionIo        = 0x4,
-    kRegionPram      = 0x5,
-    kRegionVram      = 0x6,
-    kRegionOam       = 0x7,
-    kRegionGamePak0L = 0x8,
-    kRegionGamePak0H = 0x9,
-    kRegionGamePak1L = 0xA,
-    kRegionGamePak1H = 0xB,
-    kRegionGamePak2L = 0xC,
-    kRegionGamePak2H = 0xD,
-    kRegionSramL     = 0xE,
-    kRegionSramH     = 0xF
+    kRegionBios,
+    kRegionUnused,
+    kRegionEwram,
+    kRegionIwram,
+    kRegionIo,
+    kRegionPram,
+    kRegionVram,
+    kRegionOam,
+    kRegionGamePak0L,
+    kRegionGamePak0H,
+    kRegionGamePak1L,
+    kRegionGamePak1H,
+    kRegionGamePak2L,
+    kRegionGamePak2H,
+    kRegionSaveL,
+    kRegionSaveH
 };
 
 u8 Mmu::readByte(u32 addr)
 {
     switch (addr >> 24)
     {
-    case kRegionBios:
-        if (addr < Bios::kSize)
-            return bios.readByte(addr);
-        else
-            return readUnused(addr);
-
     case kRegionEwram:
         return ewram.readByte(addr);
 
@@ -58,23 +54,25 @@ u8 Mmu::readByte(u32 addr)
     case kRegionGamePak2H:
         return gamepak.readByte(addr);
     
-    case kRegionSramL:
-    case kRegionSramH:
+    case kRegionSaveL:
+    case kRegionSaveH:
         return readSave(addr);
+
+    case kRegionBios:
+        if (addr < Bios::kSize)
+            return bios.readByte(addr);
+        [[fallthrough]];
+
+    default:
+        SHELL_LOG_WARN("Bad read {:08}", addr);
+        return readUnused(addr);
     }
-    return readUnused(addr);
 }
 
 u16 Mmu::readHalf(u32 addr)
 {
     switch (addr >> 24)
     {
-    case kRegionBios:
-        if (addr < Bios::kSize)
-            return bios.readHalf(addr);
-        else
-            return readUnused(addr);
-
     case kRegionEwram:
         return ewram.readHalf(addr);
 
@@ -105,23 +103,25 @@ u16 Mmu::readHalf(u32 addr)
     case kRegionGamePak2L:
         return gamepak.readHalf(addr);
 
-    case kRegionSramL:
-    case kRegionSramH:
+    case kRegionSaveL:
+    case kRegionSaveH:
         return readSave(addr) * 0x0101;
+
+    case kRegionBios:
+        if (addr < Bios::kSize)
+            return bios.readHalf(addr);
+        [[fallthrough]];
+
+    default:
+        SHELL_LOG_WARN("Bad read {:08}", addr);
+        return readUnused(addr);
     }
-    return readUnused(addr);
 }
 
 u32 Mmu::readWord(u32 addr)
 {
     switch (addr >> 24)
     {
-    case kRegionBios:
-        if (addr < Bios::kSize)
-            return bios.readWord(addr);
-        else
-            return readUnused(addr);
-
     case kRegionEwram:
         return ewram.readWord(addr);
 
@@ -152,20 +152,25 @@ u32 Mmu::readWord(u32 addr)
     case kRegionGamePak2L:
         return gamepak.readWord(addr);
 
-    case kRegionSramL:
-    case kRegionSramH:
+    case kRegionSaveL:
+    case kRegionSaveH:
         return readSave(addr) * 0x0101'0101;
+
+    case kRegionBios:
+        if (addr < Bios::kSize)
+            return bios.readWord(addr);
+        [[fallthrough]];
+
+    default:
+        SHELL_LOG_WARN("Bad read {:08}", addr);
+        return readUnused(addr);
     }
-    return readUnused(addr);
 }
 
 void Mmu::writeByte(u32 addr, u8 byte)
 {
     switch (addr >> 24)
     {
-    case kRegionBios:
-        break;
-
     case kRegionEwram:
         ewram.writeByte(addr, byte);
         break;
@@ -186,9 +191,6 @@ void Mmu::writeByte(u32 addr, u8 byte)
         vram.writeByte(addr, byte);
         break;
 
-    case kRegionOam:
-        break;
-
     case kRegionGamePak0L:
     case kRegionGamePak0H:
     case kRegionGamePak1L:
@@ -198,9 +200,17 @@ void Mmu::writeByte(u32 addr, u8 byte)
         gamepak.writeByte(addr, byte);
         break;
 
-    case kRegionSramL:
-    case kRegionSramH:
+    case kRegionSaveL:
+    case kRegionSaveH:
         writeSave(addr, byte);
+        break;
+
+    case kRegionBios:
+    case kRegionOam:
+        [[fallthrough]];
+
+    default:
+        SHELL_LOG_WARN("Bad write {:08} -> {:02}", addr, byte);
         break;
     }
 }
@@ -209,9 +219,6 @@ void Mmu::writeHalf(u32 addr, u16 half)
 {
     switch (addr >> 24)
     {
-    case kRegionBios:
-        break;
-
     case kRegionEwram:
         ewram.writeHalf(addr, half);
         break;
@@ -245,9 +252,16 @@ void Mmu::writeHalf(u32 addr, u16 half)
         gamepak.writeHalf(addr, half);
         break;
 
-    case kRegionSramL:
-    case kRegionSramH:
-        writeSave(addr, half >> ((addr & 0x1) << 3));
+    case kRegionSaveL:
+    case kRegionSaveH:
+        writeSave(addr, half >> (8 * (addr & 0x1)));
+        break;
+
+    case kRegionBios:
+        [[fallthrough]];
+
+    default:
+        SHELL_LOG_WARN("Bad write {:08} -> {:04}", addr, half);
         break;
     }
 }
@@ -256,9 +270,6 @@ void Mmu::writeWord(u32 addr, u32 word)
 {
     switch (addr >> 24)
     {
-    case kRegionBios:
-        break;
-
     case kRegionEwram:
         ewram.writeWord(addr, word);
         break;
@@ -292,9 +303,16 @@ void Mmu::writeWord(u32 addr, u32 word)
         gamepak.writeWord(addr, word);
         break;
 
-    case kRegionSramL:
-    case kRegionSramH:
-        writeSave(addr, word >> ((addr & 0x3) << 3));
+    case kRegionSaveL:
+    case kRegionSaveH:
+        writeSave(addr, word >> (8 * (addr & 0x3)));
+        break;
+
+    case kRegionBios:
+        [[fallthrough]];
+
+    default:
+        SHELL_LOG_WARN("Bad write {:08} -> {:08}", addr, word);
         break;
     }
 }
@@ -327,7 +345,7 @@ u32 Mmu::readUnused(u32 addr) const
     {
         value = arm.pipe[1];
     }
-    return value >> ((addr & 0x3) << 3);
+    return bit::ror(value, 8 * (addr & 0x3));
 }
 
 u8 Mmu::readSave(u32 addr)
@@ -342,8 +360,11 @@ u8 Mmu::readSave(u32 addr)
     case Save::Type::Flash1024:
         addr &= 0xFFFF;
         return gamepak.save->read(addr);
+
+    default:
+        SHELL_LOG_WARN("Bad read {:08}", addr);
+        return 0xFF;
     }
-    return 0xFF;
 }
 
 void Mmu::writeSave(u32 addr, u8 byte)
@@ -359,6 +380,10 @@ void Mmu::writeSave(u32 addr, u8 byte)
     case Save::Type::Flash1024:
         addr &= 0xFFFF;
         gamepak.save->write(addr, byte);
+        break;
+
+    default:
+        SHELL_LOG_WARN("Bad write {:08} -> {:02}", addr, byte);
         break;
     }
 }

@@ -1,12 +1,13 @@
 #include "mmio.h"
 
-#include "mmu.h"
 #include "arm/arm.h"
+#include "base/log.h"
 #include "base/macros.h"
 #include "dma/dma.h"
 #include "gamepad/gamepad.h"
 #include "gpu/gpu.h"
 #include "timer/timer.h"
+#include "mmu.h"
 
 enum MmioRegister
 {
@@ -224,8 +225,11 @@ u8 Mmio::readByte(u32 addr) const
     INDEXED_CASE2(kRegUnused206,      return 0);
     INDEXED_CASE4(kRegIrqMaster,      return arm.irqmaster.read<kIndex>());
     INDEXED_CASE1(kRegPostFlag,       return postflag.read<kIndex>());
+
+    default:
+        SHELL_LOG_WARN("Bad read {:08}", addr);
+        return mmu.readUnused(addr);
     }
-    return mmu.readUnused(addr);
 }
 
 u16 Mmio::readHalf(u32 addr) const
@@ -359,6 +363,10 @@ void Mmio::writeByte(u32 addr, u8 byte)
     INDEXED_CASE4(kRegIrqMaster,      arm.irqmaster.write<kIndex>(byte));
     INDEXED_CASE1(kRegPostFlag,       postflag.write<kIndex>(byte));
     INDEXED_CASE1(kRegHaltControl,    arm.haltcnt.write<kIndex>(byte));
+
+    default:
+        SHELL_LOG_WARN("Bad write {:08} -> {:02}", addr, byte);
+        break;
     }
 }
 
