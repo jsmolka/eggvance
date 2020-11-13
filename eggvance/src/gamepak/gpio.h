@@ -11,6 +11,13 @@ public:
         Rtc
     };
 
+    enum Address
+    {
+        kAddrData      = 0xC4,
+        kAddrDirection = 0xC6,
+        kAddrControl   = 0xC8
+    };
+
     Gpio();
     explicit Gpio(Type type);
     virtual ~Gpio() = default;
@@ -18,7 +25,6 @@ public:
     virtual void reset();
 
     bool isReadable() const;
-    bool isAccess(u32 addr) const;
 
     u16 read(u32 addr);
     void write(u32 addr, u16 half);
@@ -33,13 +39,6 @@ protected:
     bool isGbaToGpio(uint port) const;
 
 private:
-    enum Address
-    {
-        kAddrData      = 0xC4,
-        kAddrDirection = 0xC6,
-        kAddrControl   = 0xC8
-    };
-
     uint maskGpioToGba() const;
     uint maskGbaToGpio() const;
 

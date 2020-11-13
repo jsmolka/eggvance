@@ -70,7 +70,11 @@ Integral GamePak::read(u32 addr) const
 {
     addr &= kMaxRomSize - sizeof(Integral);
 
-    if (sizeof(Integral) > 1 && gpio->isAccess(addr) && gpio->isReadable())
+    if (sizeof(Integral) > 1 
+            && addr <= Gpio::kAddrControl 
+            && addr >= Gpio::kAddrData
+            && gpio->type != Gpio::Type::None
+            && gpio->isReadable())
         return gpio->read(addr);
 
     if (addr < rom.size())
@@ -87,7 +91,10 @@ void GamePak::write(u32 addr, Integral value)
 {
     addr &= kMaxRomSize - sizeof(Integral);
 
-    if (sizeof(Integral) > 1 && gpio->isAccess(addr))
+    if (sizeof(Integral) > 1
+            && addr <= Gpio::kAddrControl 
+            && addr >= Gpio::kAddrData
+            && gpio->type != Gpio::Type::None)
         gpio->write(addr, value);
     else
         SHELL_LOG_WARN("Bad write {:08X}", addr);
