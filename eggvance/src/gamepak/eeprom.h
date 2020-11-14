@@ -35,6 +35,6 @@ private:
     uint bus() const;
     void setState(State state);
 
-    SerialBuffer<u64> buffer;
     uint address = 0;
+    SerialBuffer<u64> buffer;
 };

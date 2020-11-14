@@ -8,12 +8,14 @@ public:
     static constexpr uint kSize512  = 0x10'000;
     static constexpr uint kSize1024 = 0x20'000;
 
-    explicit Flash(uint size);
+    Flash(uint size);
 
     void reset() final;
 
     u8 read(u32 addr) final;
     void write(u32 addr, u8 byte) final;
+
+    const uint size;
 
 protected:
     bool isValid(uint size) const final;
@@ -36,7 +38,6 @@ private:
         kChipMacronix1024 = 0x09C2
     };
 
-    const uint size;
     uint command = 0;
     bool chip    = false;
     bool erase   = false;

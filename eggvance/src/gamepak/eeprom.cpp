@@ -57,7 +57,7 @@ void Eeprom::write(u32 addr, u8 byte)
         if (buffer.size == 2)
         {
             if (buffer.data < 2)
-                SHELL_LOG_WARN("Bad receive {}", buffer.data);
+                SHELL_LOG_ERROR("Bad receive {}", buffer.data);
 
             static constexpr State kStates[4] = {
                 State::Receive,

@@ -56,7 +56,7 @@ Save::Type Save::parse(const std::vector<u8>& rom)
         }
     }
 
-    SHELL_LOG_WARN("No save found");
+    SHELL_LOG_WARN("Bad save");
     return Type::None;
 }
 
@@ -67,10 +67,10 @@ void Save::init(const fs::path& file)
     if (fs::is_regular_file(file))
     {
         if (!fs::read(file, data))
-            panic("Cannot read save: {}", file);
+            panic("Cannot read save {}", file);
 
         if (!isValid(data.size()))
-            panic("Invalid save size: {}", data.size());
+            panic("Invalid save size {}", data.size());
     }
 }
 

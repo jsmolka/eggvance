@@ -33,7 +33,7 @@ void GamePak::writeWord(u32 addr, u32 word) { write(addr, word); }
 void GamePak::loadRom(const fs::path& file, bool save)
 {
     if (!fs::read(file, rom))
-        panic("Cannot read ROM: {}", file);
+        panic("Cannot read rom {}", file);
 
     header = Header(rom);
 
@@ -55,7 +55,8 @@ void GamePak::loadRom(const fs::path& file, bool save)
 
 void GamePak::loadSave(const fs::path& file)
 {
-    if (rom.empty()) return;
+    if (rom.empty())
+        return;
 
     Save::Type type = config.save;
 
@@ -97,7 +98,7 @@ void GamePak::write(u32 addr, Integral value)
             && gpio->type != Gpio::Type::None)
         gpio->write(addr, value);
     else
-        SHELL_LOG_WARN("Bad write {:08X}", addr);
+        SHELL_LOG_WARN("Bad write {:08X} -> {:08X}", addr, value);
 }
 
 void GamePak::initGpio(Gpio::Type type)
