@@ -21,7 +21,7 @@ Detailed build instructions can be found [here](BUILDING.md).
 These projects were invaluable resources while creating the emulator:
 - [GBATEK](https://problemkaputt.de/gbatek.htm) and [No$GBA](https://problemkaputt.de/gba.htm) by Martin Korth
 - [NanoboyAdvance](https://github.com/fleroviux/NanoboyAdvance) by fleroviux
+- [mGBA](https://github.com/mgba-emu/mgba) and [suite](https://github.com/mgba-emu/suite) by endrift
 - [Tonc](https://www.coranac.com/tonc/text/toc.htm) by Jasper Vijn
-- [mGBA](https://github.com/mgba-emu/mgba) by endrift
 
 ![mew](media/emerald_lcd.png)
