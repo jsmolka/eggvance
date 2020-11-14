@@ -23,7 +23,7 @@ u8 Eeprom::read(u32 addr)
         if (++buffer.size == 4)
         {
             setState(State::Read);
-            buffer.data = *reinterpret_cast<u64*>(data.data() + address);
+            buffer = *reinterpret_cast<u64*>(data.data() + address);
             buffer.size = 64;
         }
         break;
@@ -56,8 +56,8 @@ void Eeprom::write(u32 addr, u8 byte)
     case State::Receive:
         if (buffer.size == 2)
         {
-            if (buffer.data < 2)
-                SHELL_LOG_ERROR("Bad receive {}", buffer.data);
+            if (buffer < 2)
+                SHELL_LOG_ERROR("Bad receive {}", buffer);
 
             static constexpr State kStates[4] = {
                 State::Receive,
@@ -67,14 +67,14 @@ void Eeprom::write(u32 addr, u8 byte)
             };
 
             address = 0;
-            setState(kStates[buffer.data]);
+            setState(kStates[buffer]);
         }
         break;
 
     case State::ReadSetAddress:
         if (buffer.size == bus())
         {
-            address = buffer.data << 3;
+            address = buffer << 3;
             setState(State::ReadSetAddressEnd);
         }
         break;
@@ -86,7 +86,7 @@ void Eeprom::write(u32 addr, u8 byte)
     case State::WriteSetAddress:
         if (buffer.size == bus())
         {
-            address = buffer.data << 3;
+            address = buffer << 3;
             setState(State::Write);
         }
         break;
@@ -95,7 +95,7 @@ void Eeprom::write(u32 addr, u8 byte)
         if (buffer.size == 64)
         {
             changed = true;
-            *reinterpret_cast<u64*>(data.data() + address) = buffer.data;
+            *reinterpret_cast<u64*>(data.data() + address) = buffer;
             setState(State::WriteEnd);
         }
         break;

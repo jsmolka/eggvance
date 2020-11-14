@@ -12,6 +12,32 @@ public:
     static_assert(std::is_integral_v<Integral>);
     static_assert(std::is_unsigned_v<Integral>);
 
+    SerialBuffer& operator=(Integral data)
+    {
+        this->data = data;
+        
+        return *this;
+    }
+
+    operator Integral() const
+    {
+        return data;
+    }
+
+    u8& operator[](std::size_t index)
+    {
+        SHELL_ASSERT(index < sizeof(Integral));
+
+        return *(reinterpret_cast<u8*>(&data) + index);
+    }
+
+    u8 operator[](std::size_t index) const
+    {
+        SHELL_ASSERT(index < sizeof(Integral));
+
+        return *(reinterpret_cast<const u8*>(&data) + index);
+    }
+
     void clear()
     {
         data = 0;

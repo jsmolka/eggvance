@@ -34,11 +34,7 @@ void Rtc::writePort(u16 half)
     if (isGbaToGpio(kPinSck)) port.sck = bit::seq<kPinSck, 1>(half);
 
     if (!prev.cs && port.cs)
-    {
-        state = State::Command;
-        bit   = 0;
-        byte  = 0;
-    }
+        setState(State::Command);
 
     if (!port.cs || !(!prev.sck && port.sck))
         return;
@@ -50,11 +46,11 @@ void Rtc::writePort(u16 half)
         break;
 
     case State::Receive:
-        receiveBufferSio();
+        receiveDataSio();
         break;
 
     case State::Transmit:
-        transmitBufferSio();
+        transmitDataSio();
         break;
     }
 }
@@ -86,26 +82,29 @@ void Rtc::readRegister()
     switch (reg)
     {
     case kRegControl:
-        buffer[0] = 0;
-        buffer[0] |= control.unknown    << 1;
-        buffer[0] |= control.minute_irq << 3;
-        buffer[0] |= control.format_24h << 6;
+        data[0] = 0;
+        data[0] |= control.unknown    << 1;
+        data[0] |= control.minute_irq << 3;
+        data[0] |= control.format_24h << 6;
+        data.size = 8;
         break;
 
     case kRegDateTime:
-        buffer[0] = time.tm_year;
-        buffer[1] = time.tm_mon;
-        buffer[2] = time.tm_mday;
-        buffer[3] = time.tm_wday;
-        buffer[4] = time.tm_hour;
-        buffer[5] = time.tm_min;
-        buffer[6] = time.tm_sec;
+        data[0] = time.tm_year;
+        data[1] = time.tm_mon;
+        data[2] = time.tm_mday;
+        data[3] = time.tm_wday;
+        data[4] = time.tm_hour;
+        data[5] = time.tm_min;
+        data[6] = time.tm_sec;
+        data.size = 56;
         break;
 
     case kRegTime:
-        buffer[0] = time.tm_hour;
-        buffer[1] = time.tm_min;
-        buffer[2] = time.tm_sec;
+        data[0] = time.tm_hour;
+        data[1] = time.tm_min;
+        data[2] = time.tm_sec;
+        data.size = 24;
         break;
     }
 }
@@ -115,9 +114,9 @@ void Rtc::writeRegister()
     switch (reg)
     {
     case kRegControl:
-        control.unknown    = bit::seq<1, 1>(buffer[0]);
-        control.minute_irq = bit::seq<3, 1>(buffer[0]);
-        control.format_24h = bit::seq<6, 1>(buffer[0]);
+        control.unknown    = bit::seq<1, 1>(buffer.data);
+        control.minute_irq = bit::seq<3, 1>(buffer.data);
+        control.format_24h = bit::seq<6, 1>(buffer.data);
         break;
 
     case kRegForceReset:
@@ -130,79 +129,67 @@ void Rtc::writeRegister()
     }
 }
 
-bool Rtc::readByteSio()
-{
-    data &= ~(1 << bit);
-    data |= port.sio << bit;
-
-    if (++bit == 8)
-        bit = 0;
-
-    return bit == 0;
-}
-
 void Rtc::receiveCommandSio()
 {
-    if (!readByteSio())
+    buffer.pushl(port.sio);
+
+    if (buffer.size < 8)
         return;
 
-    if ((data >> 4) == 6)
+    if ((buffer >> 4) == 6)
     {
-        data = (data & 0xF0) >> 4 | (data & 0x0F) << 4;
-        data = (data & 0xCC) >> 2 | (data & 0x33) << 2;
-        data = (data & 0xAA) >> 1 | (data & 0x55) << 1;
+        buffer = (buffer & 0xF0) >> 4 | (buffer & 0x0F) << 4;
+        buffer = (buffer & 0xCC) >> 2 | (buffer & 0x33) << 2;
+        buffer = (buffer & 0xAA) >> 1 | (buffer & 0x55) << 1;
     }
 
-    reg  = bit::seq<4, 3>(data);
-    bit  = 0;
-    byte = 0;
+    reg = bit::seq<4, 3>(buffer.data);
 
-    if (data & 0x80)
+    if (buffer & 0x80)
     {
         readRegister();
 
-        state = kParameterBytes[reg] > 0
+        setState(kParameterBits[reg]
             ? State::Transmit
-            : State::Command;
+            : State::Command);
     }
     else
     {
-        if (kParameterBytes[reg] > 0)
+        if (kParameterBits[reg])
         {
-            state = State::Receive;
+            setState(State::Receive);
         }
         else
         {
             writeRegister();
-            state = State::Command;
+
+            setState(State::Command);
         }
     }
 }
 
-void Rtc::receiveBufferSio()
+void Rtc::receiveDataSio()
 {
-    if (byte < kParameterBytes[reg] && readByteSio())
+    buffer.pushl(port.sio);
+
+    if (buffer.size == kParameterBits[reg])
     {
-        buffer[byte] = data;
+        writeRegister();
 
-        if (++byte == kParameterBytes[reg])
-        {
-            writeRegister();
-
-            state = State::Command;
-        }
+        setState(State::Command);
     }
 }
 
-void Rtc::transmitBufferSio()
+void Rtc::transmitDataSio()
 {
-    port.sio = buffer[byte] & 0x1;
-    buffer[byte] >>= 1;
+    port.sio = data.popr();
 
-    if (++bit == 8)
-    {
-        bit = 0;
-        if (++byte == kParameterBytes[reg])
-            state = State::Command;
-    }
+    if (data.size == 0)
+        setState(State::Command);
+}
+
+void Rtc::setState(State state)
+{
+    this->state = state;
+    this->buffer.clear();
 }

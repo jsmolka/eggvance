@@ -3,6 +3,7 @@
 #include <ctime>
 
 #include "gpio.h"
+#include "serialbuffer.h"
 
 class Rtc : public Gpio
 {
@@ -16,8 +17,8 @@ protected:
     void writePort(u16 half) final;
 
 private:
-    static constexpr uint kParameterBytes[8] = {
-        0, 0, 7, 0, 1, 0, 3, 0
+    static constexpr uint kParameterBits[8] = {
+        0, 0, 56, 0, 8, 0, 24, 0
     };
 
     enum Pin
@@ -57,19 +58,17 @@ private:
         uint format_24h = 1;
     } control;
 
-    uint data = 0;
-    uint reg  = 0;
-    uint bit  = 0;
-    uint byte = 0;
-    uint buffer[7] = {};
-
     void readRegister();
     void writeRegister();
 
     std::tm readBcdTime() const;
     
-    bool readByteSio();
     void receiveCommandSio();
-    void receiveBufferSio();
-    void transmitBufferSio();
+    void receiveDataSio();
+    void transmitDataSio();
+    void setState(State state);
+
+    uint reg = 0;
+    SerialBuffer<u64> data;
+    SerialBuffer<u64> buffer;
 };
