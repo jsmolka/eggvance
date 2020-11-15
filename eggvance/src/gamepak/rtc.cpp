@@ -47,19 +47,94 @@ void Rtc::writePort(u16 half)
 
     case State::Command:
         if (port.isBitTransfer(prev))
-            receiveCommandSio();
+            receiveCommand();
         break;
 
     case State::Receive:
         if (port.isBitTransfer(prev))
-            receiveDataSio();
+            receiveData();
         break;
 
     case State::Transmit:
         if (port.isBitTransfer(prev))
-            transmitDataSio();
+            transmitData();
+        break;
+
+    case State::Finalize:
+        if (prev.cs == 1 && port.cs == 0)
+            setState(State::InitOne);
         break;
     }
+}
+
+bool Rtc::Port::isBitTransfer(const Port& prev)
+{
+    return cs == 1 && prev.sck == 0 && sck == 1;
+}
+
+void Rtc::setState(State state)
+{
+    this->state = state;
+    this->buffer.clear();
+}
+
+void Rtc::receiveCommand()
+{
+    buffer.pushl(port.sio);
+
+    if (buffer.size < 8)
+        return;
+
+    if ((buffer >> 4) == 6)
+    {
+        buffer = (buffer & 0xF0) >> 4 | (buffer & 0x0F) << 4;
+        buffer = (buffer & 0xCC) >> 2 | (buffer & 0x33) << 2;
+        buffer = (buffer & 0xAA) >> 1 | (buffer & 0x55) << 1;
+    }
+
+    reg = bit::seq<4, 3>(buffer.data);
+
+    if (buffer & 0x80)
+    {
+        readRegister();
+
+        setState(kDataBits[reg] > 0
+            ? State::Transmit
+            : State::Finalize);
+    }
+    else
+    {
+        if (kDataBits[reg] > 0)
+        {
+            setState(State::Receive);
+        }
+        else
+        {
+            writeRegister();
+
+            setState(State::Finalize);
+        }
+    }
+}
+
+void Rtc::receiveData()
+{
+    buffer.pushl(port.sio);
+
+    if (buffer.size == kDataBits[reg])
+    {
+        writeRegister();
+
+        setState(State::Finalize);
+    }
+}
+
+void Rtc::transmitData()
+{
+    port.sio = data.popr();
+
+    if (data.size == 0)
+        setState(State::Finalize);
 }
 
 std::tm Rtc::readBcdTime() const
@@ -134,74 +209,4 @@ void Rtc::writeRegister()
         arm.raise(kIrqGamePak);
         break;
     }
-}
-
-void Rtc::receiveCommandSio()
-{
-    buffer.pushl(port.sio);
-
-    if (buffer.size < 8)
-        return;
-
-    if ((buffer >> 4) == 6)
-    {
-        buffer = (buffer & 0xF0) >> 4 | (buffer & 0x0F) << 4;
-        buffer = (buffer & 0xCC) >> 2 | (buffer & 0x33) << 2;
-        buffer = (buffer & 0xAA) >> 1 | (buffer & 0x55) << 1;
-    }
-
-    reg = bit::seq<4, 3>(buffer.data);
-
-    if (buffer & 0x80)
-    {
-        readRegister();
-
-        setState(kParameterBits[reg]
-            ? State::Transmit
-            : State::Command);
-    }
-    else
-    {
-        if (kParameterBits[reg])
-        {
-            setState(State::Receive);
-        }
-        else
-        {
-            writeRegister();
-
-            setState(State::Command);
-        }
-    }
-}
-
-void Rtc::receiveDataSio()
-{
-    buffer.pushl(port.sio);
-
-    if (buffer.size == kParameterBits[reg])
-    {
-        writeRegister();
-
-        setState(State::Command);
-    }
-}
-
-void Rtc::transmitDataSio()
-{
-    port.sio = data.popr();
-
-    if (data.size == 0)
-        setState(State::Command);
-}
-
-void Rtc::setState(State state)
-{
-    this->state = state;
-    this->buffer.clear();
-}
-
-bool Rtc::Port::isBitTransfer(const Port& prev)
-{
-    return cs == 1 && prev.sck == 0 && sck == 1;
 }

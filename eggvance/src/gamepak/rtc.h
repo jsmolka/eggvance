@@ -17,7 +17,7 @@ protected:
     void writePort(u16 half) final;
 
 private:
-    static constexpr uint kParameterBits[8] = {
+    static constexpr uint kDataBits[8] = {
         0, 0, 56, 0, 8, 0, 24, 0
     };
 
@@ -43,7 +43,8 @@ private:
         InitTwo,
         Command,
         Receive,
-        Transmit
+        Transmit,
+        Finalize
     } state = State::InitOne;
 
     struct Port
@@ -62,15 +63,15 @@ private:
         uint format_24h = 1;
     } control;
 
-    void readRegister();
-    void writeRegister();
+    
+    void setState(State state);
+    void receiveCommand();
+    void receiveData();
+    void transmitData();
 
     std::tm readBcdTime() const;
-    
-    void receiveCommandSio();
-    void receiveDataSio();
-    void transmitDataSio();
-    void setState(State state);
+    void readRegister();
+    void writeRegister();
 
     uint reg = 0;
     SerialBuffer<u64> data;
