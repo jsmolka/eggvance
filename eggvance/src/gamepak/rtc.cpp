@@ -157,8 +157,9 @@ void Rtc::readRegister()
     {
     case kRegControl:
         data[0] = 0;
-        data[0] |= control.unknown    << 1;
+        data[0] |= control.unknown1   << 1;
         data[0] |= control.minute_irq << 3;
+        data[0] |= control.unknown2   << 5;
         data[0] |= control.format_24h << 6;
         data.size = 8;
         break;
@@ -188,8 +189,9 @@ void Rtc::writeRegister()
     switch (reg)
     {
     case kRegControl:
-        control.unknown    = bit::seq<1, 1>(buffer.data);
+        control.unknown1   = bit::seq<1, 1>(buffer.data);
         control.minute_irq = bit::seq<3, 1>(buffer.data);
+        control.unknown2   = bit::seq<5, 1>(buffer.data);
         control.format_24h = bit::seq<6, 1>(buffer.data);
         break;
 

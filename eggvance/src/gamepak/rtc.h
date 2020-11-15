@@ -50,8 +50,9 @@ private:
 
     struct Control
     {
-        uint unknown    = 0;
+        uint unknown1   = 0;
         uint minute_irq = 0;
+        uint unknown2   = 0;
         uint format_24h = 1;
     } control;
 
