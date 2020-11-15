@@ -19,57 +19,49 @@ void Rtc::reset()
 
 u16 Rtc::readPort()
 {
-    if (state == State::Transmit)
-        return port.sio << kPinSio;
-
-    return 1;
+    return state == State::Transmit
+        ? port.sio << kBitSio
+        : 1;
 }
 
 void Rtc::writePort(u16 half)
 {
-    Port prev = port;
-
-    if (isGbaToGpio(kPinCs))  port.cs  = bit::seq<kPinCs,  1>(half);
-    if (isGbaToGpio(kPinSio)) port.sio = bit::seq<kPinSio, 1>(half);
-    if (isGbaToGpio(kPinSck)) port.sck = bit::seq<kPinSck, 1>(half);
+    if (isGbaToGpio(kBitCs))  port.cs  = bit::seq<kBitCs,  1>(half);
+    if (isGbaToGpio(kBitSio)) port.sio = bit::seq<kBitSio, 1>(half);
+    if (isGbaToGpio(kBitSck)) port.sck = bit::seq<kBitSck, 1>(half);
 
     switch (state)
     {
     case State::InitOne:
-        if (port.cs == 0 && port.sck == 1)
+        if (port.cs.low() && port.sck.high())
             setState(State::InitTwo);
         break;
 
     case State::InitTwo:
-        if (prev.cs == 0 && port.cs == 1)
+        if (port.cs.rising())
             setState(State::Command);
         break;
 
     case State::Command:
-        if (port.isBitTransfer(prev))
+        if (port.cs.high() && port.sck.rising())
             receiveCommand();
         break;
 
     case State::Receive:
-        if (port.isBitTransfer(prev))
+        if (port.cs.high() && port.sck.rising())
             receiveData();
         break;
 
     case State::Transmit:
-        if (port.isBitTransfer(prev))
+        if (port.cs.high() && port.sck.rising())
             transmitData();
         break;
 
     case State::Finalize:
-        if (prev.cs == 1 && port.cs == 0)
+        if (port.cs.falling())
             setState(State::InitOne);
         break;
     }
-}
-
-bool Rtc::Port::isBitTransfer(const Port& prev)
-{
-    return cs == 1 && prev.sck == 0 && sck == 1;
 }
 
 void Rtc::setState(State state)

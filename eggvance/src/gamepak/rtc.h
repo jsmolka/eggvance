@@ -3,6 +3,7 @@
 #include <ctime>
 
 #include "gpio.h"
+#include "pin.h"
 #include "serialbuffer.h"
 
 class Rtc : public Gpio
@@ -21,11 +22,11 @@ private:
         0, 0, 56, 0, 8, 0, 24, 0
     };
 
-    enum Pin
+    enum Bit
     {
-        kPinSck,
-        kPinSio,
-        kPinCs
+        kBitSck,
+        kBitSio,
+        kBitCs
     };
 
     enum Register
@@ -47,15 +48,6 @@ private:
         Finalize
     } state = State::InitOne;
 
-    struct Port
-    {
-        bool isBitTransfer(const Port& prev);
-
-        uint sck = 0;
-        uint sio = 0;
-        uint cs  = 0;
-    } port;
-
     struct Control
     {
         uint unknown    = 0;
@@ -63,6 +55,12 @@ private:
         uint format_24h = 1;
     } control;
 
+    struct Port
+    {
+        Pin sck;
+        Pin sio;
+        Pin cs;
+    } port;
     
     void setState(State state);
     void receiveCommand();

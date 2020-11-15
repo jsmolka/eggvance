@@ -205,6 +205,7 @@
     <ClInclude Include="src\gamepak\gpio.h" />
     <ClInclude Include="src\gamepak\header.h" />
     <ClInclude Include="src\gamepak\overwrites.h" />
+    <ClInclude Include="src\gamepak\pin.h" />
     <ClInclude Include="src\gamepak\rtc.h" />
     <ClInclude Include="src\gamepak\save.h" />
     <ClInclude Include="src\gamepak\serialbuffer.h" />
