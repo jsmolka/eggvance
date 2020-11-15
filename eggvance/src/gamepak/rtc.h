@@ -1,7 +1,5 @@
 #pragma once
 
-#include <ctime>
-
 #include "gpio.h"
 #include "pin.h"
 #include "serialbuffer.h"
@@ -20,13 +18,6 @@ protected:
 private:
     static constexpr uint kDataBits[8] = {
         0, 0, 56, 0, 8, 0, 24, 0
-    };
-
-    enum Bit
-    {
-        kBitSck,
-        kBitSio,
-        kBitCs
     };
 
     enum Register
@@ -58,6 +49,13 @@ private:
 
     struct Port
     {
+        enum Bit
+        {
+            kBitSck,
+            kBitSio,
+            kBitCs
+        };
+
         Pin sck;
         Pin sio;
         Pin cs;
@@ -68,7 +66,6 @@ private:
     void receiveData();
     void transmitData();
 
-    std::tm readBcdTime() const;
     void readRegister();
     void writeRegister();
 

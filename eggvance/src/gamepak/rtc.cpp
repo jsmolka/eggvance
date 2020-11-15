@@ -1,10 +1,12 @@
 #include "rtc.h"
 
+#include <ctime>
+
+#include <shell/utility.h>
+
 #include "arm/arm.h"
 #include "arm/constants.h"
 #include "base/bit.h"
-
-#include <shell/utility.h>
 
 Rtc::Rtc()
     : Gpio(Type::Rtc)
@@ -20,15 +22,15 @@ void Rtc::reset()
 u16 Rtc::readPort()
 {
     return state == State::Transmit
-        ? port.sio << kBitSio
+        ? port.sio << Port::kBitSio
         : 1;
 }
 
 void Rtc::writePort(u16 half)
 {
-    if (isGbaToGpio(kBitCs))  port.cs  = bit::seq<kBitCs,  1>(half);
-    if (isGbaToGpio(kBitSio)) port.sio = bit::seq<kBitSio, 1>(half);
-    if (isGbaToGpio(kBitSck)) port.sck = bit::seq<kBitSck, 1>(half);
+    if (isGbaToGpio(Port::kBitCs))  port.cs  = bit::seq<Port::kBitCs,  1>(half);
+    if (isGbaToGpio(Port::kBitSio)) port.sio = bit::seq<Port::kBitSio, 1>(half);
+    if (isGbaToGpio(Port::kBitSck)) port.sck = bit::seq<Port::kBitSck, 1>(half);
 
     switch (state)
     {
@@ -129,29 +131,14 @@ void Rtc::transmitData()
         setState(State::Finalize);
 }
 
-std::tm Rtc::readBcdTime() const
-{
-    auto toBcd = [](uint decimal) {
-        return ((decimal / 10) << 4) | (decimal % 10);
-    };
-
-    auto time = std::time(NULL);
-    auto bcd = *std::localtime(&time);
-
-    bcd.tm_year = toBcd(bcd.tm_year - 100);
-    bcd.tm_mon  = toBcd(bcd.tm_mon + 1);
-    bcd.tm_mday = toBcd(bcd.tm_mday);
-    bcd.tm_wday = toBcd(bcd.tm_wday);
-    bcd.tm_hour = toBcd(bcd.tm_hour % (control.format_24h ? 24 : 12));
-    bcd.tm_min  = toBcd(bcd.tm_min);
-    bcd.tm_sec  = toBcd(bcd.tm_sec);
-
-    return bcd;
-}
-
 void Rtc::readRegister()
 {
-    auto time = readBcdTime();
+    auto bcd = [](auto value) {
+        return ((value / 10) << 4) | (value % 10);
+    };
+
+    auto stamp = std::time(NULL);
+    auto time = *std::localtime(&stamp);
 
     switch (reg)
     {
@@ -165,20 +152,20 @@ void Rtc::readRegister()
         break;
 
     case kRegDateTime:
-        data[0] = time.tm_year;
-        data[1] = time.tm_mon;
-        data[2] = time.tm_mday;
-        data[3] = time.tm_wday;
-        data[4] = time.tm_hour;
-        data[5] = time.tm_min;
-        data[6] = time.tm_sec;
+        data[0] = bcd(time.tm_year - 100);
+        data[1] = bcd(time.tm_mon + 1);
+        data[2] = bcd(time.tm_mday);
+        data[3] = bcd(time.tm_wday);
+        data[4] = bcd(time.tm_hour % (control.format_24h ? 24 : 12));
+        data[5] = bcd(time.tm_min);
+        data[6] = bcd(time.tm_sec);
         data.size = 56;
         break;
 
     case kRegTime:
-        data[0] = time.tm_hour;
-        data[1] = time.tm_min;
-        data[2] = time.tm_sec;
+        data[0] = bcd(time.tm_hour % (control.format_24h ? 24 : 12));
+        data[1] = bcd(time.tm_min);
+        data[2] = bcd(time.tm_sec);
         data.size = 24;
         break;
     }
@@ -196,7 +183,7 @@ void Rtc::writeRegister()
         break;
 
     case kRegForceReset:
-        control = {};
+        control = Control();
         break;
 
     case kRegForceIrq:
