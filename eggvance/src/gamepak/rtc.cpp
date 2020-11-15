@@ -33,24 +33,31 @@ void Rtc::writePort(u16 half)
     if (isGbaToGpio(kPinSio)) port.sio = bit::seq<kPinSio, 1>(half);
     if (isGbaToGpio(kPinSck)) port.sck = bit::seq<kPinSck, 1>(half);
 
-    if (!prev.cs && port.cs)
-        setState(State::Command);
-
-    if (!port.cs || !(!prev.sck && port.sck))
-        return;
-
     switch (state)
     {
+    case State::InitOne:
+        if (port.cs == 0 && port.sck == 1)
+            setState(State::InitTwo);
+        break;
+
+    case State::InitTwo:
+        if (prev.cs == 0 && port.cs == 1)
+            setState(State::Command);
+        break;
+
     case State::Command:
-        receiveCommandSio();
+        if (port.isBitTransfer(prev))
+            receiveCommandSio();
         break;
 
     case State::Receive:
-        receiveDataSio();
+        if (port.isBitTransfer(prev))
+            receiveDataSio();
         break;
 
     case State::Transmit:
-        transmitDataSio();
+        if (port.isBitTransfer(prev))
+            transmitDataSio();
         break;
     }
 }
@@ -192,4 +199,9 @@ void Rtc::setState(State state)
 {
     this->state = state;
     this->buffer.clear();
+}
+
+bool Rtc::Port::isBitTransfer(const Port& prev)
+{
+    return cs == 1 && prev.sck == 0 && sck == 1;
 }

@@ -39,13 +39,17 @@ private:
 
     enum class State
     {
+        InitOne,
+        InitTwo,
         Command,
         Receive,
         Transmit
-    } state = State::Command;
+    } state = State::InitOne;
 
     struct Port
     {
+        bool isBitTransfer(const Port& prev);
+
         uint sck = 0;
         uint sio = 0;
         uint cs  = 0;
