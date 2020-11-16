@@ -7,6 +7,7 @@
 #include "arm/arm.h"
 #include "arm/constants.h"
 #include "base/bit.h"
+#include "base/log.h"
 
 Rtc::Rtc()
     : Gpio(Type::Rtc)
@@ -22,15 +23,15 @@ void Rtc::reset()
 u16 Rtc::readPort()
 {
     return state == State::Transmit
-        ? port.sio << Port::kBitSio
+        ? port.sio << 1
         : 1;
 }
 
 void Rtc::writePort(u16 half)
 {
-    if (isGbaToGpio(Port::kBitCs))  port.cs  = bit::seq<Port::kBitCs,  1>(half);
-    if (isGbaToGpio(Port::kBitSio)) port.sio = bit::seq<Port::kBitSio, 1>(half);
-    if (isGbaToGpio(Port::kBitSck)) port.sck = bit::seq<Port::kBitSck, 1>(half);
+    if (isGbaToGpio(0)) port.sck = bit::seq<0, 1>(half); else SHELL_LOG_WARN("Bad SCK direction");
+    if (isGbaToGpio(1)) port.sio = bit::seq<1, 1>(half);
+    if (isGbaToGpio(2)) port.cs  = bit::seq<2, 1>(half); else SHELL_LOG_WARN("Bad CS direction");
 
     switch (state)
     {
@@ -63,6 +64,10 @@ void Rtc::writePort(u16 half)
         if (port.cs.falling())
             setState(State::InitOne);
         break;
+
+    default:
+        SHELL_UNREACHABLE;
+        break;
     }
 }
 
@@ -79,11 +84,20 @@ void Rtc::receiveCommand()
     if (buffer.size < 8)
         return;
 
-    if ((buffer >> 4) == 6)
+    constexpr uint kFixedBits = 0b0110;
+
+    if (bit::seq<0, 4>(buffer.data) != kFixedBits &&
+        bit::seq<4, 4>(buffer.data) == kFixedBits)
     {
         buffer = (buffer & 0xF0) >> 4 | (buffer & 0x0F) << 4;
         buffer = (buffer & 0xCC) >> 2 | (buffer & 0x33) << 2;
         buffer = (buffer & 0xAA) >> 1 | (buffer & 0x55) << 1;
+    }
+
+    if (bit::seq<0, 4>(buffer.data) != kFixedBits)
+    {
+        SHELL_LOG_WARN("Bad command {:02X}", buffer.data);
+        return;
     }
 
     reg = bit::seq<4, 3>(buffer.data);
@@ -115,12 +129,12 @@ void Rtc::receiveData()
 {
     buffer.pushl(port.sio);
 
-    if (buffer.size == kDataBits[reg])
-    {
-        writeRegister();
+    if (buffer.size < kDataBits[reg])
+        return;
 
-        setState(State::Finalize);
-    }
+    writeRegister();
+
+    setState(State::Finalize);
 }
 
 void Rtc::transmitData()
@@ -168,6 +182,10 @@ void Rtc::readRegister()
         data[2] = bcd(time.tm_sec);
         data.size = 24;
         break;
+
+    default:
+        SHELL_LOG_WARN("Bad register {}", reg);
+        break;
     }
 }
 
@@ -188,6 +206,10 @@ void Rtc::writeRegister()
 
     case kRegForceIrq:
         arm.raise(kIrqGamePak);
+        break;
+
+    default:
+        SHELL_LOG_WARN("Bad register {}", reg);
         break;
     }
 }

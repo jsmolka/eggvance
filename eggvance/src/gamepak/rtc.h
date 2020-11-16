@@ -49,13 +49,6 @@ private:
 
     struct Port
     {
-        enum Bit
-        {
-            kBitSck,
-            kBitSio,
-            kBitCs
-        };
-
         Pin sck;
         Pin sio;
         Pin cs;
