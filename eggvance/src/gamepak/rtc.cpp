@@ -22,16 +22,19 @@ void Rtc::reset()
 
 u16 Rtc::readPort()
 {
+    if (isGbaToGpio(Port::kSio))
+        SHELL_LOG_DEBUG("Bad SIO direction");
+
     return state == State::Transmit
         ? port.sio << 1
-        : 1;
+        : 0;
 }
 
 void Rtc::writePort(u16 half)
 {
-    if (isGbaToGpio(0)) port.sck = bit::seq<0, 1>(half); else SHELL_LOG_WARN("Bad SCK direction");
-    if (isGbaToGpio(1)) port.sio = bit::seq<1, 1>(half);
-    if (isGbaToGpio(2)) port.cs  = bit::seq<2, 1>(half); else SHELL_LOG_WARN("Bad CS direction");
+    if (isGbaToGpio(Port::kSck)) port.sck = bit::seq<Port::kSck, 1>(half); else SHELL_LOG_DEBUG("Bad SCK direction");
+    if (isGbaToGpio(Port::kSio)) port.sio = bit::seq<Port::kSio, 1>(half);
+    if (isGbaToGpio(Port::kCs))  port.cs  = bit::seq<Port::kCs,  1>(half); else SHELL_LOG_DEBUG("Bad CS direction");
 
     switch (state)
     {
@@ -46,17 +49,23 @@ void Rtc::writePort(u16 half)
         break;
 
     case State::Command:
-        if (port.cs.high() && port.sck.rising())
+        if (port.cs.low())
+            setState(State::InitOne);
+        else if (port.sck.rising())
             receiveCommand();
         break;
 
     case State::Receive:
-        if (port.cs.high() && port.sck.rising())
+        if (port.cs.low())
+            setState(State::InitOne);
+        else if (port.sck.rising())
             receiveData();
         break;
 
     case State::Transmit:
-        if (port.cs.high() && port.sck.rising())
+        if (port.cs.low())
+            setState(State::InitOne);
+        else if (port.sck.rising())
             transmitData();
         break;
 
@@ -79,6 +88,9 @@ void Rtc::setState(State state)
 
 void Rtc::receiveCommand()
 {
+    if (isGpioToGba(Port::kSio))
+        SHELL_LOG_DEBUG("Bad SIO direction");
+
     buffer.pushl(port.sio);
 
     if (buffer.size < 8)
@@ -92,6 +104,7 @@ void Rtc::receiveCommand()
         buffer = (buffer & 0xF0) >> 4 | (buffer & 0x0F) << 4;
         buffer = (buffer & 0xCC) >> 2 | (buffer & 0x33) << 2;
         buffer = (buffer & 0xAA) >> 1 | (buffer & 0x55) << 1;
+        SHELL_LOG_DEBUG("Swapped command bits");
     }
 
     if (bit::seq<0, 4>(buffer.data) != kFixedBits)
@@ -127,6 +140,9 @@ void Rtc::receiveCommand()
 
 void Rtc::receiveData()
 {
+    if (isGpioToGba(Port::kSio))
+        SHELL_LOG_DEBUG("Bad SIO direction");
+
     buffer.pushl(port.sio);
 
     if (buffer.size < kDataBits[reg])
@@ -139,6 +155,9 @@ void Rtc::receiveData()
 
 void Rtc::transmitData()
 {
+    if (isGbaToGpio(Port::kSio))
+        SHELL_LOG_DEBUG("Bad SIO direction");
+
     port.sio = data.popr();
 
     if (data.size == 0)
