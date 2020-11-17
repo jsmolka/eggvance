@@ -57,9 +57,9 @@ private:
     } port;
     
     void setState(State state);
-    void receiveCommand();
-    void receiveData();
-    void transmitData();
+    void receiveCommandBit();
+    void receiveDataBit();
+    void transmitDataBit();
 
     void readRegister();
     void writeRegister();
