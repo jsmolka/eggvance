@@ -1,7 +1,6 @@
 #pragma once
 
-#include <vector>
-
+#include "rom.h"
 #include "base/int.h"
 #include "base/filesystem.h"
 
@@ -21,7 +20,7 @@ public:
     explicit Save(Type type);
     virtual ~Save();
 
-    static Type parse(const std::vector<u8>& rom);
+    static Type parse(const Rom& rom);
 
     void init(const fs::path& file);
 

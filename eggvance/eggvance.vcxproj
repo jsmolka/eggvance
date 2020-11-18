@@ -155,8 +155,8 @@
     <ClCompile Include="src\gamepak\flash.cpp" />
     <ClCompile Include="src\gamepak\gamepak.cpp" />
     <ClCompile Include="src\gamepak\gpio.cpp" />
-    <ClCompile Include="src\gamepak\header.cpp" />
     <ClCompile Include="src\gamepak\overwrites.cpp" />
+    <ClCompile Include="src\gamepak\rom.cpp" />
     <ClCompile Include="src\gamepak\rtc.cpp" />
     <ClCompile Include="src\gamepak\save.cpp" />
     <ClCompile Include="src\gamepak\sram.cpp" />
@@ -203,9 +203,9 @@
     <ClInclude Include="src\gamepak\flash.h" />
     <ClInclude Include="src\gamepak\gamepak.h" />
     <ClInclude Include="src\gamepak\gpio.h" />
-    <ClInclude Include="src\gamepak\header.h" />
     <ClInclude Include="src\gamepak\overwrites.h" />
     <ClInclude Include="src\gamepak\pin.h" />
+    <ClInclude Include="src\gamepak\rom.h" />
     <ClInclude Include="src\gamepak\rtc.h" />
     <ClInclude Include="src\gamepak\save.h" />
     <ClInclude Include="src\gamepak\serialbuffer.h" />

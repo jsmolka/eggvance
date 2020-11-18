@@ -1,16 +1,14 @@
 #pragma once
 
 #include <memory>
-#include <vector>
 
-#include "header.h"
-#include "overwrites.h"
+#include "gpio.h"
+#include "rom.h"
+#include "save.h"
 
 class GamePak
 {
 public:
-    uint size() const;
-
     bool isEepromAccess(u32 addr) const;
 
     u8  readByte(u32 addr) const;
@@ -23,7 +21,7 @@ public:
 
     void load(fs::path gba, fs::path sav);
 
-    Header header;
+    Rom rom;
     std::unique_ptr<Gpio> gpio;
     std::unique_ptr<Save> save;
 
@@ -33,9 +31,6 @@ private:
 
     template<typename Integral>
     void write(u32 addr, Integral value);
-
-    fs::path file;
-    std::vector<u8> rom;
 };
 
 inline GamePak gamepak;

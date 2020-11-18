@@ -4,7 +4,6 @@
 #include <string_view>
 #include <utility>
 
-#include "header.h"
 #include "base/log.h"
 #include "base/panic.h"
 
@@ -32,7 +31,7 @@ Save::~Save()
     }
 }
 
-Save::Type Save::parse(const std::vector<u8>& rom)
+Save::Type Save::parse(const Rom& rom)
 {
     static constexpr std::pair<std::string_view, Save::Type> kSignatures[] =
     {
@@ -44,14 +43,14 @@ Save::Type Save::parse(const std::vector<u8>& rom)
         { "FLASH1M_V" , Save::Type::Flash1024 }
     };
 
-    for (uint x = Header::kSize; x < rom.size(); x += 4)
+    for (uint x = Rom::kHeaderSize; x < rom.size(); x += 4)
     {
         for (const auto& [signature, type] : kSignatures)
         {
             if (x + signature.size() >= rom.size())
                 continue;
 
-            if (std::equal(signature.begin(), signature.end(), &rom[x]))
+            if (std::equal(signature.begin(), signature.end(), rom.data.begin() + x))
                 return type;
         }
     }

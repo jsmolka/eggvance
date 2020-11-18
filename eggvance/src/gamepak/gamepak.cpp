@@ -2,22 +2,16 @@
 
 #include "eeprom.h"
 #include "flash.h"
+#include "overwrites.h"
 #include "rtc.h"
 #include "sram.h"
 #include "base/config.h"
 #include "base/log.h"
 #include "base/panic.h"
 
-constexpr uint kMaxRomSize = 0x200'0000;
-
-uint GamePak::size() const
-{
-    return rom.size();
-}
-
 bool GamePak::isEepromAccess(u32 addr) const
 {
-    return save->type == Save::Type::Eeprom && size() <= 0x100'0000
+    return save->type == Save::Type::Eeprom && rom.size() < Rom::kSize
         ? addr >= 0xD00'0000 && addr < 0xE00'0000
         : addr >= 0xDFF'FF00 && addr < 0xE00'0000;
 }
@@ -34,10 +28,7 @@ void GamePak::load(fs::path gba, fs::path sav)
 {
     if (gba.extension() == ".gba")
     {
-        if (!fs::read(gba, rom))
-            panic("Cannot read ROM {}", gba);
-
-        header = Header(rom);
+        rom.load(gba);
 
         if (sav.empty())
         {
@@ -50,7 +41,7 @@ void GamePak::load(fs::path gba, fs::path sav)
     Gpio::Type gpio_type = config.gpio;
     Save::Type save_type = config.save;
 
-    if (const auto overwrite = Overwrite::find(header.code))
+    if (const auto overwrite = Overwrite::find(rom.code))
     {
         gpio_type = overwrite->gpio;
         save_type = overwrite->save;
@@ -80,7 +71,7 @@ void GamePak::load(fs::path gba, fs::path sav)
 template<typename Integral>
 Integral GamePak::read(u32 addr) const
 {
-    addr &= kMaxRomSize - sizeof(Integral);
+    addr &= Rom::kSize - sizeof(Integral);
 
     if (sizeof(Integral) > 1 
             && addr <= Gpio::kRegControl 
@@ -90,24 +81,22 @@ Integral GamePak::read(u32 addr) const
         return gpio->read(addr);
 
     if (addr < rom.size())
-        return *reinterpret_cast<const Integral*>(rom.data() + addr);
+        return rom.read<Integral>(addr);
 
-    SHELL_LOG_WARN("Bad read {:08X}", addr);
+    u32 unused = (((addr + 0) >> 1) & 0xFFFF) << 0
+               | (((addr + 2) >> 1) & 0xFFFF) << 16;
 
-    addr = (addr & ~0x3) >> 1;
-    return (addr & 0xFFFF) | ((addr + 1) & 0xFFFF) << 16;
+    return unused >> (8 * (addr & 0x1));
 }
 
 template<typename Integral>
 void GamePak::write(u32 addr, Integral value)
 {
-    addr &= kMaxRomSize - sizeof(Integral);
+    addr &= Rom::kSize - sizeof(Integral);
 
     if (sizeof(Integral) > 1
             && addr <= Gpio::kRegControl 
             && addr >= Gpio::kRegData
             && gpio->type != Gpio::Type::None)
         gpio->write(addr, value);
-    else
-        SHELL_LOG_WARN("Bad write {:08X} -> {:08X}", addr, value);
 }

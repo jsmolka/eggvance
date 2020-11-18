@@ -102,10 +102,10 @@ void core::frame()
 void core::updateTitle()
 {
     const auto title = fmt::format(
-        gamepak.header.title.empty()
+        gamepak.rom.title.empty()
             ? "eggvance"
             : "eggvance - {0}",
-        gamepak.header.title);
+        gamepak.rom.title);
 
     video_ctx.title(title);
 }
@@ -113,10 +113,10 @@ void core::updateTitle()
 void core::updateTitle(double fps)
 {
     const auto title = fmt::format(
-        gamepak.header.title.empty()
+        gamepak.rom.title.empty()
             ? "eggvance - {1:.1f} fps"
             : "eggvance - {0} - {1:.1f} fps",
-        gamepak.header.title, fps);
+        gamepak.rom.title, fps);
 
     video_ctx.title(title);
 }
