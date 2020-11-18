@@ -3,7 +3,9 @@
 #include <numeric>
 
 #include <shell/algorithm.h>
+#include <shell/utility.h>
 
+#include "base/bit.h"
 #include "base/panic.h"
 
 template<uint N>
@@ -16,21 +18,22 @@ static std::string makeAscii(const u8 (&data)[N])
     return ascii;
 }
 
-template<typename Integral>
-Integral intceil(Integral value, Integral multiple)
-{
-    return multiple * (value + multiple - 1) / multiple;
-}
-
 void Rom::load(const fs::path& file)
 {
     if (!fs::read(file, data))
         panic("Cannot read ROM {}", file);
 
-    if (data.size() < kHeaderSize || data.size() > kSize)
+    size = data.size();
+
+    if (size < kHeaderSize || size > kSize)
         panic("Bad ROM size");
 
-    data.resize(intceil(data.size(), sizeof(u32)), 0);
+    data.reserve(kSize);
+
+    for (auto x = data.size(); x < kSize; ++x)
+    {
+        data.push_back(bit::byte(x >> 1, x & 0x1));
+    }
 
     const Header& header = *reinterpret_cast<const Header*>(data.data());
 

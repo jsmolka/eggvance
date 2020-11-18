@@ -29,11 +29,6 @@ public:
     static constexpr uint kSize = 0x200'0000;
     static constexpr uint kHeaderSize = sizeof(Header);
 
-    std::size_t size() const
-    {
-        return data.size();
-    }
-
     template<typename Integral>
     Integral read(u32 addr) const
     {
@@ -44,6 +39,7 @@ public:
 
     std::string code;
     std::string title;
+    std::size_t size;
     std::vector<u8> data;
 
 private:

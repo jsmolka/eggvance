@@ -11,7 +11,7 @@
 
 bool GamePak::isEepromAccess(u32 addr) const
 {
-    return save->type == Save::Type::Eeprom && rom.size() < Rom::kSize
+    return save->type == Save::Type::Eeprom && rom.size < Rom::kSize
         ? addr >= 0xD00'0000 && addr < 0xE00'0000
         : addr >= 0xDFF'FF00 && addr < 0xE00'0000;
 }
@@ -80,13 +80,7 @@ Integral GamePak::read(u32 addr) const
             && gpio->isReadable())
         return gpio->read(addr);
 
-    if (addr < rom.size())
-        return rom.read<Integral>(addr);
-
-    u32 unused = (((addr + 0) >> 1) & 0xFFFF) << 0
-               | (((addr + 2) >> 1) & 0xFFFF) << 16;
-
-    return unused >> (8 * (addr & 0x1));
+    return rom.read<Integral>(addr);
 }
 
 template<typename Integral>

@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
     {
         core::init(argc, argv);
 
-        while (running && gamepak.rom.size() == 0)
+        while (running && gamepak.rom.size == 0)
         {
             processEvents();
 
