@@ -93,24 +93,24 @@ void emulate()
         core::updateTitle(*fps);
 }
 
-void eggvanceLoadRom(const std::string& file)
+void eggvanceLoadGba(const std::string& gba)
 {
-    gamepak.loadRom(file, true);
+    gamepak.load(gba, fs::path());
     reset();
     setMainLoop(emulate, kRefreshRate);
 }
 
-void eggvanceLoadSave(const std::string& file)
+void eggvanceLoadSav(const std::string& sav)
 {
-    gamepak.loadSave(file);
+    gamepak.load(fs::path(), sav);
     reset();
     setMainLoop(emulate, kRefreshRate);
 }
 
 EMSCRIPTEN_BINDINGS(eggvance)
 {
-    function("eggvanceLoadRom", &eggvanceLoadRom);
-    function("eggvanceLoadSave", &eggvanceLoadSave);
+    function("eggvanceLoadGba", &eggvanceLoadGba);
+    function("eggvanceLoadSav", &eggvanceLoadSav);
 }
 
 int main(int argc, char* argv[])

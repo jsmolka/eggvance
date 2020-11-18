@@ -6,23 +6,23 @@
   </head>
   <body>
     <canvas id="canvas" style="background: white"></canvas>
-    <input id="rom-input" type="file" accept=".gba" style="display: none" onchange="Module.loadRom()">
-    <input id="save-input" type="file" accept=".sav" style="display: none" onchange="Module.loadSave()">
+    <input id="gba-input" type="file" accept=".gba" style="display: none" onchange="Module.loadGba()">
+    <input id="sav-input" type="file" accept=".sav" style="display: none" onchange="Module.loadSav()">
     <div style="display: flex; margin-top: 8px">
-      <button onclick="inputRom.click()">Load rom</button>
-      <button onclick="inputSave.click()" style="margin-left: 8px">Load save</button>
+      <button onclick="inputGba.click()">Load rom</button>
+      <button onclick="inputSav.click()" style="margin-left: 8px">Load save</button>
     </div>
     <script type="text/javascript">
-      const inputRom  = document.getElementById('rom-input');
-      const inputSave = document.getElementById('save-input');
+      const inputGba = document.getElementById('gba-input');
+      const inputSav = document.getElementById('sav-input');
 
       class FileSystem {
         constructor() {
           this.id = 0;
         }
 
-        write(data) {
-          const filename = `data${this.id++}.bin`;
+        write(data, ext) {
+          const filename = `data${this.id++}.${ext}`;
           FS.writeFile(filename, data);
 
           return filename;
@@ -32,6 +32,7 @@
       var Module = {
         fs: new FileSystem(),
         canvas: document.getElementById('canvas'),
+
         preInit() {
           FS.writeFile('eggvance.ini', `
             [general]
@@ -96,6 +97,7 @@
             fr_unbound  =
           `);
         },
+
         async readUrl(url) {
           return new Promise(resolve => {
             const request = new XMLHttpRequest();
@@ -108,6 +110,7 @@
             request.send();
           });
         },
+
         async readFile(input) {
           return new Promise(resolve => {
             const reader = new FileReader();
@@ -118,13 +121,15 @@
             input.value = '';
           });
         },
-        async loadRom() {
-          const data = await this.readFile(inputRom);
-          this.eggvanceLoadRom(this.fs.write(data));
+
+        async loadGba() {
+          const data = await this.readFile(inputGba);
+          this.eggvanceLoadGba(this.fs.write(data, "gba"));
         },
-        async loadSave() {
-          const data = await this.readFile(inputSave);
-          this.eggvanceLoadSave(this.fs.write(data));
+
+        async loadSav() {
+          const data = await this.readFile(inputSav);
+          this.eggvanceLoadSav(this.fs.write(data, "sav"));
         }
       };
 
