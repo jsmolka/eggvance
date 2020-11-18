@@ -24,16 +24,21 @@ void reset()
 
 void processDropEvent(const SDL_DropEvent& event)
 {
-    const auto file = fs::u8path(event.file);
+    const fs::path file = fs::u8path(event.file);
 
     SDL_free(event.file);
 
+    if (file.extension() == ".gba")
+    {
+        gamepak.load(file, fs::path());
+        reset();
+    }
+    
     if (file.extension() == ".sav")
-        gamepak.loadSave(file);
-    else
-        gamepak.loadRom(file, true);
-
-    reset();
+    {
+        gamepak.load(fs::path(), file);
+        reset();
+    }
 
     video_ctx.raise();
 }

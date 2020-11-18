@@ -30,40 +30,51 @@ void GamePak::writeByte(u32 addr, u8  byte) { write(addr, byte); }
 void GamePak::writeHalf(u32 addr, u16 half) { write(addr, half); }
 void GamePak::writeWord(u32 addr, u32 word) { write(addr, word); }
 
-void GamePak::loadRom(const fs::path& file, bool save)
+void GamePak::load(fs::path gba, fs::path sav)
 {
-    if (!fs::read(file, rom))
-        panic("Cannot read rom {}", file);
-
-    header = Header(rom);
-
-    const auto overwrite = Overwrite::find(header.code);
-
-    initGpio(overwrite ? overwrite->gpio : config.gpio);
-
-    if (save)
+    if (gba.extension() == ".gba")
     {
-        fs::path save(file);
-        save.replace_extension("sav");
+        if (!fs::read(gba, rom))
+            panic("Cannot read ROM {}", gba);
 
-        if (!config.save_path.empty())
-            save = config.save_path / save.filename();
+        header = Header(rom);
 
-        loadSave(save);
+        if (sav.empty())
+        {
+            sav = gba.replace_extension("sav");
+            if (!config.save_path.empty())
+                sav = config.save_path / sav.filename();
+        }
     }
-}
 
-void GamePak::loadSave(const fs::path& file)
-{
-    if (rom.empty())
-        return;
-
-    Save::Type type = config.save;
+    Gpio::Type gpio_type = config.gpio;
+    Save::Type save_type = config.save;
 
     if (const auto overwrite = Overwrite::find(header.code))
-        type = overwrite->save;
+    {
+        gpio_type = overwrite->gpio;
+        save_type = overwrite->save;
+    }
 
-    initSave(file, type == Save::Type::None ? Save::parse(rom) : type);
+    gpio = gpio_type == Gpio::Type::None
+        ? std::make_unique<Gpio>()
+        : std::make_unique<Rtc>();
+
+    if (sav.extension() == ".sav")
+    {
+        if (save_type == Save::Type::None)
+            save_type =  Save::parse(rom);
+
+        switch (save_type)
+        {
+        case Save::Type::Sram:      save = std::make_unique<Sram>(); break;
+        case Save::Type::Eeprom:    save = std::make_unique<Eeprom>(); break;
+        case Save::Type::Flash512:  save = std::make_unique<Flash>(Flash::kSize512); break;
+        case Save::Type::Flash1024: save = std::make_unique<Flash>(Flash::kSize1024); break;
+        default:                    save = std::make_unique<Save>(); break;
+        }
+        save->init(sav);
+    }
 }
 
 template<typename Integral>
@@ -99,24 +110,4 @@ void GamePak::write(u32 addr, Integral value)
         gpio->write(addr, value);
     else
         SHELL_LOG_WARN("Bad write {:08X} -> {:08X}", addr, value);
-}
-
-void GamePak::initGpio(Gpio::Type type)
-{
-    gpio = type == Gpio::Type::Rtc
-        ? std::make_unique<Rtc>()
-        : std::make_unique<Gpio>();
-}
-
-void GamePak::initSave(const fs::path& file, Save::Type type)
-{
-    switch (type)
-    {
-    case Save::Type::Sram:      save = std::make_unique<Sram>(); break;
-    case Save::Type::Eeprom:    save = std::make_unique<Eeprom>(); break;
-    case Save::Type::Flash512:  save = std::make_unique<Flash>(Flash::kSize512); break;
-    case Save::Type::Flash1024: save = std::make_unique<Flash>(Flash::kSize1024); break;
-    default:                    save = std::make_unique<Save>(); break;
-    }
-    save->init(file);
 }

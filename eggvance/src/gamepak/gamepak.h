@@ -21,8 +21,7 @@ public:
     void writeHalf(u32 addr, u16 half);
     void writeWord(u32 addr, u32 word);
 
-    void loadRom(const fs::path& file, bool save);
-    void loadSave(const fs::path& file);
+    void load(fs::path gba, fs::path sav);
 
     Header header;
     std::unique_ptr<Gpio> gpio;
@@ -34,9 +33,6 @@ private:
 
     template<typename Integral>
     void write(u32 addr, Integral value);
-
-    void initGpio(Gpio::Type type);
-    void initSave(const fs::path& file, Save::Type type);
 
     fs::path file;
     std::vector<u8> rom;

@@ -36,7 +36,7 @@ void core::init(int argc, char* argv[])
             std::exit(0);
         }
 
-        const auto rom = result.find<fs::path>("rom");
+        const auto gba = result.find<fs::path>("rom");
         const auto sav = result.find<fs::path>("--save");
 
         config.init(fs::makeAbsolute("eggvance.ini"));
@@ -47,13 +47,9 @@ void core::init(int argc, char* argv[])
         input_ctx.init();
         video_ctx.init();
 
-        if (rom.has_value())
-        {
-            gamepak.loadRom(*rom, !sav);
-
-            if (sav.has_value())
-                gamepak.loadSave(*sav);
-        }
+        gamepak.load(
+            gba.value_or(fs::path()),
+            sav.value_or(fs::path()));
     }
     catch (const shell::ParseError& error)
     {
