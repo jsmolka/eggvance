@@ -29,6 +29,7 @@ void GamePak::load(fs::path gba, fs::path sav)
     if (gba.extension() == ".gba")
     {
         rom.load(gba);
+        rom.mask = Rom::kSize;
 
         if (sav.empty())
         {
@@ -45,6 +46,7 @@ void GamePak::load(fs::path gba, fs::path sav)
     {
         gpio_type = overwrite->gpio;
         save_type = overwrite->save;
+        rom.mask  = overwrite->mirror ? bit::ceilPow2(rom.size) : Rom::kSize;
     }
 
     gpio = gpio_type == Gpio::Type::None
@@ -71,7 +73,7 @@ void GamePak::load(fs::path gba, fs::path sav)
 template<typename Integral>
 Integral GamePak::read(u32 addr) const
 {
-    addr &= Rom::kSize - sizeof(Integral);
+    addr &= rom.mask - sizeof(Integral);
 
     if (sizeof(Integral) > 1 
             && addr <= Gpio::kRegControl 
@@ -86,7 +88,7 @@ Integral GamePak::read(u32 addr) const
 template<typename Integral>
 void GamePak::write(u32 addr, Integral value)
 {
-    addr &= Rom::kSize - sizeof(Integral);
+    addr &= rom.mask - sizeof(Integral);
 
     if (sizeof(Integral) > 1
             && addr <= Gpio::kRegControl 

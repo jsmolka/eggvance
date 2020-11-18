@@ -40,6 +40,7 @@ public:
     std::string code;
     std::string title;
     std::size_t size;
+    std::size_t mask;
     std::vector<u8> data;
 
 private:
