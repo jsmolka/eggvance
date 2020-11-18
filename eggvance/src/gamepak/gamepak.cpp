@@ -72,8 +72,8 @@ Integral GamePak::read(u32 addr) const
     addr &= kMaxRomSize - sizeof(Integral);
 
     if (sizeof(Integral) > 1 
-            && addr <= Gpio::kAddrControl 
-            && addr >= Gpio::kAddrData
+            && addr <= Gpio::kRegControl 
+            && addr >= Gpio::kRegData
             && gpio->type != Gpio::Type::None
             && gpio->isReadable())
         return gpio->read(addr);
@@ -93,8 +93,8 @@ void GamePak::write(u32 addr, Integral value)
     addr &= kMaxRomSize - sizeof(Integral);
 
     if (sizeof(Integral) > 1
-            && addr <= Gpio::kAddrControl 
-            && addr >= Gpio::kAddrData
+            && addr <= Gpio::kRegControl 
+            && addr >= Gpio::kRegData
             && gpio->type != Gpio::Type::None)
         gpio->write(addr, value);
     else

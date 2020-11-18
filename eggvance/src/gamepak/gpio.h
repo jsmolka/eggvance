@@ -11,11 +11,11 @@ public:
         Rtc
     };
 
-    enum Address
+    enum Register
     {
-        kAddrData      = 0xC4,
-        kAddrDirection = 0xC6,
-        kAddrControl   = 0xC8
+        kRegData      = 0xC4,
+        kRegDirection = 0xC6,
+        kRegControl   = 0xC8
     };
 
     Gpio();
@@ -39,10 +39,10 @@ protected:
     bool isGbaToGpio(uint port) const;
 
 private:
-    uint maskGpioToGba() const;
-    uint maskGbaToGpio() const;
+    u16 maskGpioToGba() const;
+    u16 maskGbaToGpio() const;
 
-    uint data      = 0;
-    uint direction = 0;
-    uint readable  = 0;
+    u16 data      = 0;
+    u16 direction = 0;
+    u16 readable  = 0;
 };
