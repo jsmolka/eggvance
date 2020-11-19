@@ -35,7 +35,7 @@ void Rtc::writePort(u16 half)
     switch (state)
     {
     case State::InitOne:
-        if (port.cs.low() && port.sck.high())
+        if (port.cs.low())
             setState(State::InitTwo);
         break;
 
