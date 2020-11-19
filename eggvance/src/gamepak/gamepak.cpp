@@ -6,30 +6,13 @@
 #include "rtc.h"
 #include "sram.h"
 #include "base/config.h"
-#include "base/log.h"
 #include "base/panic.h"
-
-bool GamePak::isEepromAccess(u32 addr) const
-{
-    return save->type == Save::Type::Eeprom && rom.size < Rom::kSize
-        ? addr >= 0xD00'0000 && addr < 0xE00'0000
-        : addr >= 0xDFF'FF00 && addr < 0xE00'0000;
-}
-
-u8  GamePak::readByte(u32 addr) const { return read<u8 >(addr); }
-u16 GamePak::readHalf(u32 addr) const { return read<u16>(addr); }
-u32 GamePak::readWord(u32 addr) const { return read<u32>(addr); }
-
-void GamePak::writeByte(u32 addr, u8  byte) { write(addr, byte); }
-void GamePak::writeHalf(u32 addr, u16 half) { write(addr, half); }
-void GamePak::writeWord(u32 addr, u32 word) { write(addr, word); }
 
 void GamePak::load(fs::path gba, fs::path sav)
 {
     if (gba.extension() == ".gba")
     {
-        rom.load(gba);
-        rom.mask = Rom::kSize;
+        rom = std::move(Rom(gba));
 
         if (sav.empty())
         {
@@ -46,7 +29,7 @@ void GamePak::load(fs::path gba, fs::path sav)
     {
         gpio_type = overwrite->gpio;
         save_type = overwrite->save;
-        rom.mask  = overwrite->mirror ? bit::ceilPow2(rom.size) : Rom::kSize;
+        rom.mask  = overwrite->mirror ? bit::ceilPow2(rom.size) : Rom::kMaxSize;
     }
 
     gpio = gpio_type == Gpio::Type::None
@@ -70,29 +53,9 @@ void GamePak::load(fs::path gba, fs::path sav)
     }
 }
 
-template<typename Integral>
-Integral GamePak::read(u32 addr) const
+bool GamePak::isEepromAccess(u32 addr) const
 {
-    addr &= rom.mask - sizeof(Integral);
-
-    if (sizeof(Integral) > 1 
-            && addr <= Gpio::kRegControl 
-            && addr >= Gpio::kRegData
-            && gpio->type != Gpio::Type::None
-            && gpio->isReadable())
-        return gpio->read(addr);
-
-    return rom.read<Integral>(addr);
-}
-
-template<typename Integral>
-void GamePak::write(u32 addr, Integral value)
-{
-    addr &= rom.mask - sizeof(Integral);
-
-    if (sizeof(Integral) > 1
-            && addr <= Gpio::kRegControl 
-            && addr >= Gpio::kRegData
-            && gpio->type != Gpio::Type::None)
-        gpio->write(addr, value);
+    return save->type == Save::Type::Eeprom && rom.size < Rom::kMaxSize
+        ? addr >= 0xD00'0000 && addr < 0xE00'0000
+        : addr >= 0xDFF'FF00 && addr < 0xE00'0000;
 }

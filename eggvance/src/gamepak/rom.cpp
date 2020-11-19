@@ -9,7 +9,7 @@
 #include "base/panic.h"
 
 template<uint N>
-static std::string makeAscii(const u8 (&data)[N])
+std::string makeAscii(const u8 (&data)[N])
 {
     std::string ascii(reinterpret_cast<const char*>(data), N);
 
@@ -18,19 +18,19 @@ static std::string makeAscii(const u8 (&data)[N])
     return ascii;
 }
 
-void Rom::load(const fs::path& file)
+Rom::Rom(const fs::path& file)
 {
     if (!fs::read(file, data))
         panic("Cannot read ROM {}", file);
 
     size = data.size();
 
-    if (size < kHeaderSize || size > kSize)
+    if (size < kHeaderSize || size > kMaxSize)
         panic("Bad ROM size");
 
-    data.reserve(kSize);
+    data.reserve(kMaxSize);
 
-    for (auto x = data.size(); x < kSize; ++x)
+    for (auto x = data.size(); x < data.capacity(); ++x)
     {
         data.push_back(bit::byte(x >> 1, x & 0x1));
     }

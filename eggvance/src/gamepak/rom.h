@@ -26,8 +26,11 @@ private:
     };
 
 public:
-    static constexpr uint kSize = 0x200'0000;
+    static constexpr uint kMaxSize = 0x200'0000;
     static constexpr uint kHeaderSize = sizeof(Header);
+
+    Rom() = default;
+    explicit Rom(const fs::path& file);
 
     template<typename Integral>
     Integral read(u32 addr) const
@@ -35,12 +38,10 @@ public:
         return *reinterpret_cast<const Integral*>(data.data() + addr);
     }
 
-    void load(const fs::path& file);
-
+    uint size = 0;
+    uint mask = kMaxSize;
     std::string code;
     std::string title;
-    std::size_t size;
-    std::size_t mask;
     std::vector<u8> data;
 
 private:

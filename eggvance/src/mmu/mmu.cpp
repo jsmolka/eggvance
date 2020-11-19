@@ -52,7 +52,7 @@ u8 Mmu::readByte(u32 addr)
     case kRegionGamePak1H:
     case kRegionGamePak2L:
     case kRegionGamePak2H:
-        return gamepak.readByte(addr);
+        return gamepak.read<u8>(addr);
     
     case kRegionSaveL:
     case kRegionSaveH:
@@ -101,7 +101,7 @@ u16 Mmu::readHalf(u32 addr)
     case kRegionGamePak1L:
     case kRegionGamePak1H:
     case kRegionGamePak2L:
-        return gamepak.readHalf(addr);
+        return gamepak.read<u16>(addr);
 
     case kRegionSaveL:
     case kRegionSaveH:
@@ -150,7 +150,7 @@ u32 Mmu::readWord(u32 addr)
     case kRegionGamePak1L:
     case kRegionGamePak1H:
     case kRegionGamePak2L:
-        return gamepak.readWord(addr);
+        return gamepak.read<u32>(addr);
 
     case kRegionSaveL:
     case kRegionSaveH:
@@ -197,7 +197,7 @@ void Mmu::writeByte(u32 addr, u8 byte)
     case kRegionGamePak1H:
     case kRegionGamePak2L:
     case kRegionGamePak2H:
-        gamepak.writeByte(addr, byte);
+        gamepak.write<u8>(addr, byte);
         break;
 
     case kRegionSaveL:
@@ -249,7 +249,7 @@ void Mmu::writeHalf(u32 addr, u16 half)
     case kRegionGamePak1H:
     case kRegionGamePak2L:
     case kRegionGamePak2H:
-        gamepak.writeHalf(addr, half);
+        gamepak.write<u16>(addr, half);
         break;
 
     case kRegionSaveL:
@@ -300,7 +300,7 @@ void Mmu::writeWord(u32 addr, u32 word)
     case kRegionGamePak1H:
     case kRegionGamePak2L:
     case kRegionGamePak2H:
-        gamepak.writeWord(addr, word);
+        gamepak.write<u32>(addr, word);
         break;
 
     case kRegionSaveL:
