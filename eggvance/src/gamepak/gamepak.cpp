@@ -29,7 +29,7 @@ void GamePak::load(fs::path gba, fs::path sav)
     {
         gpio_type = overwrite->gpio;
         save_type = overwrite->save;
-        rom.mask  = overwrite->mirror ? bit::ceilPow2(rom.size) : Rom::kMaxSize;
+        rom.mask  = overwrite->mirror ? rom.size : Rom::kMaxSize;
     }
 
     gpio = gpio_type == Gpio::Type::None

@@ -6,12 +6,7 @@
 
 u32 VramMirror::operator()(u32 addr) const
 {
-    addr &= 0x1'FFFF;
-
-    if (addr >= 0x1'8000)
-        addr -= 0x0'8000;
-
-    return addr;
+    return addr & ((addr & 0x1'0000) ? 0x1'7FFF : 0x0'FFFF);
 }
 
 void Vram::writeByte(u32 addr, u8 byte)

@@ -20,15 +20,17 @@ std::string makeAscii(const u8 (&data)[N])
 
 Rom::Rom(const fs::path& file)
 {
+    data.reserve(kMaxSize);
+
     if (!fs::read(file, data))
         panic("Cannot read ROM {}", file);
 
-    size = data.size();
+    size = bit::ceilPow2(data.size());
+
+    data.resize(size, 0);
 
     if (size < kHeaderSize || size > kMaxSize)
         panic("Bad ROM size");
-
-    data.reserve(kMaxSize);
 
     for (auto x = data.size(); x < data.capacity(); ++x)
     {
