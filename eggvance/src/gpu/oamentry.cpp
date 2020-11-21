@@ -2,53 +2,42 @@
 
 #include "constants.h"
 #include "base/bit.h"
-#include "base/macros.h"
 
 OamEntry::OamEntry()
 {
     compute();
 }
 
-void OamEntry::write(uint attr, u16 half)
+void OamEntry::writeAttr0(u16 half)
 {
-    enum Attribute
-    {
-        kAttribute0 = 0,
-        kAttribute1 = 2,
-        kAttribute2 = 4
-    };
+    origin.y    = bit::seq< 0, 8>(half);
+    affine      = bit::seq< 8, 1>(half);
+    double_size = bit::seq< 9, 1>(half);
+    disabled    = bit::seq< 9, 1>(half) && !affine;
+    object_mode = bit::seq<10, 2>(half);
+    mosaic      = bit::seq<12, 1>(half);
+    color_mode  = bit::seq<13, 1>(half);
+    shape       = bit::seq<14, 2>(half);
 
-    switch (attr)
-    {
-    case kAttribute0:
-        origin.y    = bit::seq< 0, 8>(half);
-        affine      = bit::seq< 8, 1>(half);
-        double_size = bit::seq< 9, 1>(half);
-        disabled    = bit::seq< 9, 1>(half) && !affine;
-        object_mode = bit::seq<10, 2>(half);
-        mosaic      = bit::seq<12, 1>(half);
-        color_mode  = bit::seq<13, 1>(half);
-        shape       = bit::seq<14, 2>(half);
-        break;
+    compute();
+}
 
-    case kAttribute1:
-        origin.x = bit::seq< 0, 9>(half);
-        matrix   = bit::seq< 9, 5>(half);
-        flip.x   = bit::seq<12, 1>(half);
-        flip.y   = bit::seq<13, 1>(half);
-        size     = bit::seq<14, 2>(half);
-        break;
+void OamEntry::writeAttr1(u16 half)
+{
+    origin.x = bit::seq< 0, 9>(half);
+    matrix   = bit::seq< 9, 5>(half);
+    flip.x   = bit::seq<12, 1>(half);
+    flip.y   = bit::seq<13, 1>(half);
+    size     = bit::seq<14, 2>(half);
 
-    case kAttribute2:
-        base_tile = bit::seq< 0, 10>(half);
-        priority  = bit::seq<10,  2>(half);
-        bank      = bit::seq<12,  4>(half);
-        break;
+    compute();
+}
 
-    default:
-        SHELL_UNREACHABLE;
-        break;
-    }
+void OamEntry::writeAttr2(u16 half)
+{
+    base_tile = bit::seq< 0, 10>(half);
+    priority  = bit::seq<10,  2>(half);
+    bank      = bit::seq<12,  4>(half);
 
     compute();
 }
@@ -68,8 +57,7 @@ uint OamEntry::tileBytes() const
 uint OamEntry::tilesInRow(uint layout) const
 {
     static constexpr Point kTileLayout2d[2] = {
-        Point(32, 32),
-        Point(16, 32)
+        Point(32, 32), Point(16, 32)
     };
 
     return layout == kObjectLayout2d
@@ -95,30 +83,10 @@ void OamEntry::compute()
 {
     static constexpr Point kSpriteSizes[4][4] =
     {
-        {
-            {  8,  8 },
-            { 16, 16 },
-            { 32, 32 },
-            { 64, 64 },
-        },
-        {
-            { 16,  8 },
-            { 32,  8 },
-            { 32, 16 },
-            { 64, 32 },
-        },
-        {
-            {  8, 16 },
-            {  8, 32 },
-            { 16, 32 },
-            { 32, 64 },
-        },
-        {
-            {  0,  0 },
-            {  0,  0 },
-            {  0,  0 },
-            {  0,  0 }
-        }
+        { {  8,  8 }, { 16, 16 }, { 32, 32 }, { 64, 64 }, },
+        { { 16,  8 }, { 32,  8 }, { 32, 16 }, { 64, 32 }, },
+        { {  8, 16 }, {  8, 32 }, { 16, 32 }, { 32, 64 }, },
+        { {  8,  8 }, {  8,  8 }, {  8,  8 }, {  8,  8 }  }
     };
 
     base_addr = kObjectBase + kTileBytes[kColorMode16x16] * base_tile;

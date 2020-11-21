@@ -224,7 +224,7 @@ void Gpu::renderObjects()
         const auto& center      = entry.center;
         const auto& sprite_size = entry.sprite_size;
         const auto& screen_size = entry.screen_size;
-        const auto& matrix      = entry.affine ? mmu.oam.matrix(entry.matrix) : kIdentity;
+        const auto& matrix      = entry.affine ? mmu.oam.matrices[entry.matrix] : kIdentity;
 
         uint tile_bytes = entry.tileBytes();
         uint tiles_row  = entry.tilesInRow(dispcnt.layout);

@@ -25,12 +25,12 @@ Rom::Rom(const fs::path& file)
     if (!fs::read(file, data))
         panic("Cannot read ROM {}", file);
 
+    if (data.size() < kHeaderSize || data.size() > kMaxSize)
+        panic("Bad ROM size");
+
     size = bit::ceilPow2(data.size());
 
     data.resize(size, 0);
-
-    if (size < kHeaderSize || size > kMaxSize)
-        panic("Bad ROM size");
 
     for (auto x = data.size(); x < data.capacity(); ++x)
     {

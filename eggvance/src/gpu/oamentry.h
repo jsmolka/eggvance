@@ -8,7 +8,9 @@ class OamEntry
 public:
     OamEntry();
 
-    void write(uint attr, u16 half);
+    void writeAttr0(u16 half);
+    void writeAttr1(u16 half);
+    void writeAttr2(u16 half);
 
     bool isVisible(uint line) const;
     uint tileBytes() const;
