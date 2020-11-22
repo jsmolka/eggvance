@@ -1,8 +1,8 @@
 #pragma once
 
 #include "ram.h"
-#include "gpu/oamentry.h"
 #include "gpu/matrix.h"
+#include "gpu/oamentry.h"
 
 class Oam : public Ram<0x400>
 {

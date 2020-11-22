@@ -6,7 +6,11 @@
 class Matrix
 {
 public:
-    constexpr Matrix() = default;
+    constexpr Matrix()
+        : pa(0)
+        , pb(0)
+        , pc(0)
+        , pd(0) {}
 
     constexpr Matrix(s16 pa, s16 pb, s16 pc, s16 pd)
         : pa(pa)
@@ -40,6 +44,6 @@ public:
             s16 pc;
             s16 pd;
         };
-        s16 data[4] = {};
+        s16 data[4];
     };
 };

@@ -3,8 +3,8 @@
 #include "bios.h"
 #include "mmio.h"
 #include "oam.h"
-#include "pram.h"
-#include "vram.h"
+#include "paletteram.h"
+#include "videoram.h"
 
 class Mmu
 {
@@ -19,8 +19,8 @@ public:
 
     u32 readUnused(u32 addr) const;
 
-    Pram pram;
-    Vram vram;
+    PaletteRam pram;
+    VideoRam vram;
     Oam oam;
 
 private:

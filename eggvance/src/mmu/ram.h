@@ -1,10 +1,11 @@
 #pragma once
 
+#include <array>
+
 #include "base/int.h"
-#include "base/macros.h"
 
 template<uint N>
-class Mirror
+class BasicMirror
 {
 public:
     u32 operator()(u32 addr) const
@@ -13,23 +14,22 @@ public:
     }
 };
 
-template<uint N, typename Mirror = Mirror<N>>
-class Ram
+template<uint N, typename Mirror = BasicMirror<N>>
+class Ram : protected std::array<u8, N>
 {
 public:
-    using value_type = u8;
+    using typename std::array<u8, N>::value_type;
+    using typename std::array<u8, N>::iterator;
+    using typename std::array<u8, N>::const_iterator;
+    using typename std::array<u8, N>::reverse_iterator;
+    using typename std::array<u8, N>::const_reverse_iterator;
 
-    constexpr uint size() const { return N; }
+    Ram() : std::array<u8, N>{} {}
 
-    u8* data() { return data_; }
-    const u8* data() const { return data_; }
-
-    u8* begin() { return data_; }
-    u8* end() { return data_ + N; };
-    const u8* begin() const { return data_; }
-    const u8* end() const { return data_ + N; }
-    const u8* cbegin() const { return data_; }
-    const u8* cend() const { return data_ + N; }
+    using std::array<u8, N>::size;
+    using std::array<u8, N>::data;
+    using std::array<u8, N>::begin;
+    using std::array<u8, N>::end;
 
     template<typename Integral>
     Integral readFast(u32 addr) const
@@ -51,20 +51,13 @@ public:
     void writeHalf(u32 addr, u16 half) { write<u16>(addr, half); }
     void writeWord(u32 addr, u32 word) { write<u32>(addr, word); }
 
-    const Mirror mirror = Mirror();
-
-protected:
-    template<typename Integral>
-    static u32 align(u32 addr)
-    {
-        return addr & ~(sizeof(Integral) - 1);
-    }
+    const Mirror mirror{};
 
 private:
     template<typename Integral>
     Integral read(u32 addr) const
     {
-        addr = align<Integral>(addr);
+        addr &= ~(sizeof(Integral) - 1);
         addr = mirror(addr);
 
         return readFast<Integral>(addr);
@@ -73,11 +66,9 @@ private:
     template<typename Integral>
     void write(u32 addr, Integral value)
     {
-        addr = align<Integral>(addr);
+        addr &= ~(sizeof(Integral) - 1);
         addr = mirror(addr);
 
         writeFast<Integral>(addr, value);
     }
-
-    u8 data_[N] = {};
 };

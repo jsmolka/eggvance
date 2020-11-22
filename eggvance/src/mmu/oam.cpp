@@ -5,8 +5,8 @@
 
 void Oam::writeHalf(u32 addr, u16 half)
 {
+    addr &= ~0x1;
     addr = mirror(addr);
-    addr = align<u16>(addr);
 
     auto& entry = entries[addr >> 3];
     auto& matrix = matrices[addr >> 5];
@@ -28,7 +28,7 @@ void Oam::writeHalf(u32 addr, u16 half)
 
 void Oam::writeWord(u32 addr, u32 word)
 {
-    addr = align<u32>(addr);
+    addr &= ~0x3;
 
     writeHalf(addr + 0, bit::seq< 0, 16>(word));
     writeHalf(addr + 2, bit::seq<16, 16>(word));

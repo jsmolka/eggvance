@@ -1,17 +1,16 @@
 #include "mmio.h"
 
+#include "mmu.h"
 #include "arm/arm.h"
-#include "base/log.h"
 #include "base/macros.h"
 #include "dma/dma.h"
 #include "gamepad/gamepad.h"
 #include "gpu/gpu.h"
 #include "timer/timer.h"
-#include "mmu.h"
 
-enum MmioRegister
+enum IoRegister
 {
-    kRegDispayControl  = 0x000,
+    kRegDisplayControl = 0x000,
     kRegGreenSwap      = 0x002,
     kRegDisplayStatus  = 0x004,
     kRegVerticalCount  = 0x006,
@@ -146,7 +145,7 @@ u8 Mmio::readByte(u32 addr) const
 {
     switch (addr & 0x3FF'FFFF)
     {
-    INDEXED_CASE2(kRegDispayControl,  return gpu.dispcnt.read<kIndex>());
+    INDEXED_CASE2(kRegDisplayControl, return gpu.dispcnt.read<kIndex>());
     INDEXED_CASE2(kRegGreenSwap,      return gpu.greenswap.read<kIndex>());
     INDEXED_CASE2(kRegDisplayStatus,  return gpu.dispstat.read<kIndex>());
     INDEXED_CASE2(kRegVerticalCount,  return gpu.vcount.read<kIndex>());
@@ -227,7 +226,6 @@ u8 Mmio::readByte(u32 addr) const
     INDEXED_CASE1(kRegPostFlag,       return postflag.read<kIndex>());
 
     default:
-        SHELL_LOG_WARN("Bad read {:08X}", addr);
         return mmu.readUnused(addr);
     }
 }
@@ -260,7 +258,7 @@ void Mmio::writeByte(u32 addr, u8 byte)
 {
     switch (addr & 0x3FF'FFFF)
     {
-    INDEXED_CASE2(kRegDispayControl,  gpu.dispcnt.write<kIndex>(byte));
+    INDEXED_CASE2(kRegDisplayControl, gpu.dispcnt.write<kIndex>(byte));
     INDEXED_CASE2(kRegGreenSwap,      gpu.greenswap.write<kIndex>(byte));
     INDEXED_CASE2(kRegDisplayStatus,  gpu.dispstat.write<kIndex>(byte));
     INDEXED_CASE2(kRegBg0Control,     gpu.bgcnt[0].write<kIndex, 0xDFFF>(byte));
@@ -363,10 +361,6 @@ void Mmio::writeByte(u32 addr, u8 byte)
     INDEXED_CASE4(kRegIrqMaster,      arm.irqmaster.write<kIndex>(byte));
     INDEXED_CASE1(kRegPostFlag,       postflag.write<kIndex>(byte));
     INDEXED_CASE1(kRegHaltControl,    arm.haltcnt.write<kIndex>(byte));
-
-    default:
-        SHELL_LOG_WARN("Bad write {:08X} -> {:02X}", addr, byte);
-        break;
     }
 }
 

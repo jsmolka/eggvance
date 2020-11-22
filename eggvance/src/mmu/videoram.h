@@ -1,15 +1,15 @@
 #pragma once
 
-#include "gpu/point.h"
 #include "ram.h"
+#include "gpu/point.h"
 
-class VramMirror
+class VideoRamMirror
 {
 public:
     u32 operator()(u32 addr) const;
 };
 
-class Vram : public Ram<0x1'8000, VramMirror>
+class VideoRam : public Ram<0x1'8000, VideoRamMirror>
 {
 public:
     void writeByte(u32 addr, u8 byte);

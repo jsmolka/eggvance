@@ -30,9 +30,6 @@
     <ClCompile Include="src\mmu\oam.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\mmu\vram.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\arm\disassemble.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -114,9 +111,6 @@
     <ClCompile Include="src\gamepak\overwrites.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\mmu\pram.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\gpu\collapse.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -129,10 +123,16 @@
     <ClCompile Include="src\gpu\gpu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\mmu\mmio.cpp">
+    <ClCompile Include="src\gamepak\rom.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\gamepak\rom.cpp">
+    <ClCompile Include="src\mmu\videoram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mmu\paletteram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mmu\mmio.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -153,9 +153,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\mmu\oam.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\vram.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\common\critical.h">
@@ -269,9 +266,6 @@
     <ClInclude Include="src\gamepak\overwrites.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\pram.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\gpu\buffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -305,9 +299,6 @@
     <ClInclude Include="src\base\panic.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\mmio.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\base\log.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -318,6 +309,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\gamepak\rom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\videoram.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\paletteram.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mmu\mmio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
