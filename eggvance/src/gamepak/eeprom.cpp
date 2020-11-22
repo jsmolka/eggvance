@@ -1,7 +1,5 @@
 #include "eeprom.h"
 
-#include "base/log.h"
-
 Eeprom::Eeprom()
     : Save(Type::Eeprom)
 {
@@ -33,10 +31,6 @@ u8 Eeprom::read(u32 addr)
         if (buffer.size == 0)
             setState(State::Receive);
         break;
-
-    default:
-        SHELL_LOG_WARN("Bad state {}", state);
-        break;
     }
     return bit;
 }
@@ -44,10 +38,7 @@ u8 Eeprom::read(u32 addr)
 void Eeprom::write(u32 addr, u8 byte)
 {
     if (state == State::Read || state == State::ReadUnused)
-    {
-        SHELL_LOG_WARN("Bad state {}", state);
         return;
-    }
 
     buffer.pushr(byte);
 
@@ -56,9 +47,6 @@ void Eeprom::write(u32 addr, u8 byte)
     case State::Receive:
         if (buffer.size == 2)
         {
-            if (buffer < 2)
-                SHELL_LOG_ERROR("Bad receive {}", buffer);
-
             static constexpr State kStates[4] = {
                 State::Receive,
                 State::Receive,

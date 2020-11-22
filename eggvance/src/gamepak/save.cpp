@@ -4,7 +4,6 @@
 #include <string_view>
 #include <utility>
 
-#include "base/log.h"
 #include "base/panic.h"
 
 Save::Save()
@@ -54,8 +53,6 @@ Save::Type Save::parse(const Rom& rom)
                 return type;
         }
     }
-
-    SHELL_LOG_WARN("Bad save");
     return Type::None;
 }
 
