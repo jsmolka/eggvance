@@ -299,9 +299,6 @@
     <ClInclude Include="src\base\panic.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\base\log.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\gamepak\serialbuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>

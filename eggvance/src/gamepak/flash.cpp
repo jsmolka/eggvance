@@ -3,7 +3,6 @@
 #include <algorithm>
 
 #include "base/bit.h"
-#include "base/log.h"
 #include "base/macros.h"
 
 Flash::Flash(uint size)
@@ -43,8 +42,6 @@ void Flash::write(u32 addr, u8 byte)
     switch (command)
     {
     case kCommandWriteByte:
-        if (bank[addr] != 0xFF)
-            SHELL_LOG_WARN("Unerased write {:04X} -> {:02X}", addr, byte);
         changed = true;
         bank[addr] = byte;
         command = 0;
@@ -53,8 +50,6 @@ void Flash::write(u32 addr, u8 byte)
     case kCommandSwitchBank:
         if (size == kSize1024)
             bank = data.data() + kSize512 * (byte & 0x1);
-        else
-            SHELL_LOG_WARN("Bad bank switch");
         command = 0;
         return;
     }
@@ -82,10 +77,6 @@ void Flash::write(u32 addr, u8 byte)
                 std::fill(data.begin(), data.end(), 0xFF);
                 erase = false;
             }
-            else
-            {
-                SHELL_LOG_WARN("Bad chip erase");
-            }
             break;
 
         case kCommandChipEnter:
@@ -107,14 +98,6 @@ void Flash::write(u32 addr, u8 byte)
                 std::fill_n(sector, 0x1000, 0xFF);
                 erase = false;
             }
-            else
-            {
-                SHELL_LOG_WARN("Bad sector erase {:08X}", command);
-            }
-        }
-        else
-        {
-            SHELL_LOG_ERROR("Bad write {:08X} {:08X} -> {:02X}", command, addr, byte);
         }
         break;
     }

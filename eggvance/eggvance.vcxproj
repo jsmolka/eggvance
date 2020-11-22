@@ -66,7 +66,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/Ob3 %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>NO_CONSOLE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <WarningLevel>Level2</WarningLevel>
@@ -189,7 +189,6 @@
     <ClInclude Include="src\base\config.h" />
     <ClInclude Include="src\base\filesystem.h" />
     <ClInclude Include="src\base\int.h" />
-    <ClInclude Include="src\base\log.h" />
     <ClInclude Include="src\base\sdl2.h" />
     <ClInclude Include="src\base\panic.h" />
     <ClInclude Include="src\common\critical.h" />
