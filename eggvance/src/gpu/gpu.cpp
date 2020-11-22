@@ -25,9 +25,9 @@ Gpu::Gpu()
 
     for (u32 color = 0; color < argb.size(); ++color)
     {
-        uint r = bit::seq< 0, 5>(color) << 3;
-        uint g = bit::seq< 5, 5>(color) << 3;
-        uint b = bit::seq<10, 5>(color) << 3;
+        uint r = bit::seq< 0, 5>(color) << 3 | 0x7;
+        uint g = bit::seq< 5, 5>(color) << 3 | 0x7;
+        uint b = bit::seq<10, 5>(color) << 3 | 0x7;
 
         if (config.lcd_color)
         {
