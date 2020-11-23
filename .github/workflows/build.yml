@@ -50,7 +50,9 @@ jobs:
           submodules: true
 
       - name: Dependencies
-        run: sudo apt-get install libsdl2-dev
+        run: |
+          sudo apt-get update -y -qq
+          sudo apt-get install libsdl2-dev
 
       - name: Build
         run: |
