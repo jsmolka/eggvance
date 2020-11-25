@@ -42,7 +42,7 @@ public:
         }
         else
         {
-            uint was_enabled = enable;
+            uint was_enable = enable;
 
             repeat = bit::seq<1, 1>(byte);
             word   = bit::seq<2, 1>(byte);
@@ -51,9 +51,7 @@ public:
             irq    = bit::seq<6, 1>(byte);
             enable = bit::seq<7, 1>(byte);
 
-            reload = !was_enabled && enable;
-
-            emit_immediate();
+            on_write(!was_enable && enable);
         }
     }
 
@@ -65,7 +63,6 @@ public:
     uint timing = 0;
     uint irq    = 0;
     uint enable = 0;
-    uint reload = 0;
 
-    std::function<void(void)> emit_immediate;
+    std::function<void(bool)> on_write;
 };

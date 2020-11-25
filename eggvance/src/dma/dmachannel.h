@@ -7,6 +7,7 @@ class DmaChannel
 public:
     DmaChannel(uint id);
 
+    void reload();
     void start();
     void run(int& cycles);
 
@@ -28,8 +29,13 @@ private:
     int pending  = 0;
     int cycles_s = 0;
     int cycles_n = 0;
-    u32 src_addr = 0;
-    u32 dst_addr = 0;
+
+    struct
+    {
+        u32 count    = 0;
+        u32 src_addr = 0;
+        u32 dst_addr = 0;
+    } cache;
 
     std::function<void(void)> transfer;
 };

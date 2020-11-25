@@ -12,33 +12,36 @@ DmaChannel::DmaChannel(uint id)
 
 }
 
+void DmaChannel::reload()
+{
+    cache.count    = count.count(id);
+    cache.src_addr = sad.value;
+    cache.dst_addr = dad.value;
+}
+
 void DmaChannel::start()
 {
-    enum AddressControl
+    enum Control
     {
-        kAddressControlIncrement,
-        kAddressControlDecrement,
-        kAddressControlFixed,
-        kAddressControlReload
+        kControlIncrement,
+        kControlDecrement,
+        kControlFixed,
+        kControlReload
     };
 
+    if (control.repeat)
+    {
+        cache.count = count.count(id);
+
+        if (control.dadcnt == kControlReload)
+            cache.dst_addr = dad.value;
+    }
+
     running = true;
-    pending = count.count(id);
+    pending = cache.count;
 
-    if (control.reload)
-    {
-        control.reload = false;
-
-        src_addr = sad.value;
-        dst_addr = dad.value;
-    }
-    else if (control.repeat && control.dadcnt == kAddressControlReload)
-    {
-        dst_addr = dad.value;
-    }
-
-    src_addr &= ~((2 << control.word) - 1);
-    dst_addr &= ~((2 << control.word) - 1);
+    cache.src_addr &= ~((2 << control.word) - 1);
+    cache.dst_addr &= ~((2 << control.word) - 1);
 
     initCycles();
     initTransfer();
@@ -55,8 +58,8 @@ void DmaChannel::run(int& cycles)
 
         transfer();
 
-        src_addr += kDeltas[control.word][control.sadcnt];
-        dst_addr += kDeltas[control.word][control.dadcnt];
+        cache.src_addr += kDeltas[control.word][control.sadcnt];
+        cache.dst_addr += kDeltas[control.word][control.dadcnt];
 
         cycles -= pending == 0
             ? cycles_n
@@ -85,7 +88,7 @@ bool DmaChannel::isGamePak(u32 addr)
 
 void DmaChannel::initCycles()
 {
-    if (isGamePak(src_addr) && isGamePak(dst_addr))
+    if (isGamePak(cache.src_addr) && isGamePak(cache.dst_addr))
     {
         cycles_s = 4;
         cycles_n = 4;
@@ -98,24 +101,24 @@ void DmaChannel::initCycles()
 
     if (control.word)
     {
-        cycles_s += arm.waitcnt.cyclesWord(src_addr, true);
-        cycles_s += arm.waitcnt.cyclesWord(dst_addr, true);
-        cycles_n += arm.waitcnt.cyclesWord(src_addr, false);
-        cycles_n += arm.waitcnt.cyclesWord(dst_addr, false);
+        cycles_s += arm.waitcnt.cyclesWord(cache.src_addr, true);
+        cycles_s += arm.waitcnt.cyclesWord(cache.dst_addr, true);
+        cycles_n += arm.waitcnt.cyclesWord(cache.src_addr, false);
+        cycles_n += arm.waitcnt.cyclesWord(cache.dst_addr, false);
     }
     else
     {
-        cycles_s += arm.waitcnt.cyclesHalf(src_addr, true);
-        cycles_s += arm.waitcnt.cyclesHalf(dst_addr, true);
-        cycles_n += arm.waitcnt.cyclesHalf(src_addr, false);
-        cycles_n += arm.waitcnt.cyclesHalf(dst_addr, false);
+        cycles_s += arm.waitcnt.cyclesHalf(cache.src_addr, true);
+        cycles_s += arm.waitcnt.cyclesHalf(cache.dst_addr, true);
+        cycles_n += arm.waitcnt.cyclesHalf(cache.src_addr, false);
+        cycles_n += arm.waitcnt.cyclesHalf(cache.dst_addr, false);
     }
 }
 
 void DmaChannel::initTransfer()
 {
-    bool eeprom_w = gamepak.isEepromAccess(dst_addr);
-    bool eeprom_r = gamepak.isEepromAccess(src_addr);
+    bool eeprom_w = gamepak.isEepromAccess(cache.dst_addr);
+    bool eeprom_r = gamepak.isEepromAccess(cache.src_addr);
 
     if ((eeprom_r || eeprom_w) && id == 3)
     {
@@ -124,15 +127,15 @@ void DmaChannel::initTransfer()
         if (eeprom_w)
         {
             transfer = [&]() {
-                u8 byte = mmu.readHalf(src_addr);
-                gamepak.save->write(dst_addr, byte);
+                u8 byte = mmu.readHalf(cache.src_addr);
+                gamepak.save->write(cache.dst_addr, byte);
             };
         }
         else
         {
             transfer = [&]() {
-                u8 byte = gamepak.save->read(src_addr);
-                mmu.writeHalf(dst_addr, byte);
+                u8 byte = gamepak.save->read(cache.src_addr);
+                mmu.writeHalf(cache.dst_addr, byte);
             };
         }
     }
@@ -141,15 +144,15 @@ void DmaChannel::initTransfer()
         if (control.word)
         {
             transfer = [&]() {
-                u32 word = mmu.readWord(src_addr);
-                mmu.writeWord(dst_addr, word);
+                u32 word = mmu.readWord(cache.src_addr);
+                mmu.writeWord(cache.dst_addr, word);
             };
         }
         else
         {
             transfer = [&]() {
-                u16 half = mmu.readHalf(src_addr);
-                mmu.writeHalf(dst_addr, half);
+                u16 half = mmu.readHalf(cache.src_addr);
+                mmu.writeHalf(cache.dst_addr, half);
             };
         }
     }

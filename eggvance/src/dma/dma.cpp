@@ -7,7 +7,10 @@ Dma::Dma()
 {
     for (auto& channel : channels)
     {
-        channel.control.emit_immediate = [&]() {
+        channel.control.on_write = [&](bool reload) {
+            if (reload)
+                channel.reload();
+
             emit(channel, DmaControl::kTimingImmediate);
         };
     }
