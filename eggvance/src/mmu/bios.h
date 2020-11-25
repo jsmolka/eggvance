@@ -20,5 +20,5 @@ private:
     template<typename Integral>
     Integral read(u32 addr);
 
-    u32 previous = 0xE129'F000;
+    u32 cache = 0xE129'F000;
 };

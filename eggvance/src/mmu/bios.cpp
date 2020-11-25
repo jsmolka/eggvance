@@ -40,13 +40,7 @@ Integral Bios::read(u32 addr)
     addr &= ~(sizeof(Integral) - 1);
 
     if (arm.pc < kSize)
-    {
-        Integral value = data.readFast<Integral>(addr);
+        cache = data.readFast<u32>(addr & ~0x3);
 
-        if (std::is_same_v<Integral, u32>)
-            previous = value;
-
-        return value;
-    }
-    return previous >> (8 * (addr & 0x3));
+    return cache >> (8 * (addr & 0x3));
 }
