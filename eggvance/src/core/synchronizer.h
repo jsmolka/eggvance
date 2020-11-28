@@ -32,7 +32,7 @@ private:
     using Duration = std::chrono::high_resolution_clock::duration;
 
     template<typename Callback>
-    Duration measure(Callback callback)
+    static Duration measure(Callback callback)
     {
         const auto begin = Clock::now();
 
