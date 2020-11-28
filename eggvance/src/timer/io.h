@@ -51,7 +51,7 @@ public:
             irq       = bit::seq<6, 1>(byte);
             enable    = bit::seq<7, 1>(byte);
 
-            update_channel(!was_enabled && enable);
+            on_write(!was_enabled && enable);
         }
     }
 
@@ -60,6 +60,6 @@ public:
     uint irq       = 0;
     uint enable    = 0;
 
+    std::function<void(bool)> on_write;
     std::function<void(void)> run_channels;
-    std::function<void(bool)> update_channel;
 };

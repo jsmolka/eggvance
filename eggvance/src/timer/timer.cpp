@@ -19,7 +19,7 @@ Timer::Timer()
     {
         channel.count.run_channels = std::bind(&Timer::runChannels, this);
         channel.control.run_channels = std::bind(&Timer::runChannels, this);
-        channel.control.update_channel = [&](bool start) {
+        channel.control.on_write = [&](bool start) {
             if (start)
                 channel.start();
             else
