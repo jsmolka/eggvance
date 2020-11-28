@@ -46,7 +46,7 @@ void TimerChannel::run(int cycles)
 
 uint TimerChannel::nextEvent() const
 {
-    if (!control.irq)
+    if (!control.irq && id > 1)
         return kEventMax;
 
     if (!control.cascade)
