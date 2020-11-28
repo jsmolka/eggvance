@@ -114,7 +114,7 @@ void Arm::dispatch()
             }
         }
 
-        if (State & kStateTimer)
+        if (state & kStateTimer)
             timer.run(previous - cycles);
     }
 }
