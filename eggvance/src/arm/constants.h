@@ -29,6 +29,6 @@ enum State
 
 enum class Access
 {
-    Sequential,
-    NonSequential
+    NonSequential,
+    Sequential
 };

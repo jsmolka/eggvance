@@ -95,8 +95,8 @@ void Arm::dispatch()
                         u16 instr = pipe[0];
 
                         pipe[0] = pipe[1];
-                        pipe[1] = readHalf(pc, pipe.access);
                         pipe.access = Access::Sequential;
+                        pipe[1] = readHalf(pc, pipe.access);
 
                         std::invoke(instr_thumb[hashThumb(instr)], this, instr);
                     }
@@ -105,8 +105,8 @@ void Arm::dispatch()
                         u32 instr = pipe[0];
 
                         pipe[0] = pipe[1];
-                        pipe[1] = readWord(pc, pipe.access);
                         pipe.access = Access::Sequential;
+                        pipe[1] = readWord(pc, pipe.access);
 
                         if (cpsr.check(instr >> 28))
                         {
