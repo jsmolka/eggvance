@@ -18,9 +18,13 @@ public:
     uint state = 0;
     Pipeline pipe;
 
-    IrqMaster irqmaster;
-    IrqEnable irqenable;
-    IrqRequest irqrequest;
+    struct
+    {
+        IrqMaster  master;
+        IrqEnable  enable;
+        IrqRequest request;
+    } irq;
+
     WaitControl waitcnt;
     HaltControl haltcnt;
 

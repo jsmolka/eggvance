@@ -218,11 +218,11 @@ u8 Mmio::readByte(u32 addr) const
     INDEXED_CASE4(kRegJoyTransmit,    return joytrans.read<kIndex>());
     INDEXED_CASE2(kRegJoyStatus,      return joystat.read<kIndex>());
     INDEXED_CASE2(kRegUnused15A,      return 0);
-    INDEXED_CASE2(kRegIrqEnable,      return arm.irqenable.read<kIndex>());
-    INDEXED_CASE2(kRegIrqRequest,     return arm.irqrequest.read<kIndex>());
+    INDEXED_CASE2(kRegIrqEnable,      return arm.irq.enable.read<kIndex>());
+    INDEXED_CASE2(kRegIrqRequest,     return arm.irq.request.read<kIndex>());
     INDEXED_CASE2(kRegWaitControl,    return arm.waitcnt.read<kIndex>());
     INDEXED_CASE2(kRegUnused206,      return 0);
-    INDEXED_CASE4(kRegIrqMaster,      return arm.irqmaster.read<kIndex>());
+    INDEXED_CASE4(kRegIrqMaster,      return arm.irq.master.read<kIndex>());
     INDEXED_CASE1(kRegPostFlag,       return postflag.read<kIndex>());
 
     default:
@@ -355,10 +355,10 @@ void Mmio::writeByte(u32 addr, u8 byte)
     INDEXED_CASE4(kRegJoyReceive,     joyrecv.write<kIndex>(byte));
     INDEXED_CASE4(kRegJoyTransmit,    joytrans.write<kIndex>(byte));
     INDEXED_CASE2(kRegJoyStatus,      joystat.write<kIndex>(byte));
-    INDEXED_CASE2(kRegIrqEnable,      arm.irqenable.write<kIndex>(byte));
-    INDEXED_CASE2(kRegIrqRequest,     arm.irqrequest.write<kIndex>(byte));
+    INDEXED_CASE2(kRegIrqEnable,      arm.irq.enable.write<kIndex>(byte));
+    INDEXED_CASE2(kRegIrqRequest,     arm.irq.request.write<kIndex>(byte));
     INDEXED_CASE2(kRegWaitControl,    arm.waitcnt.write<kIndex>(byte));
-    INDEXED_CASE4(kRegIrqMaster,      arm.irqmaster.write<kIndex>(byte));
+    INDEXED_CASE4(kRegIrqMaster,      arm.irq.master.write<kIndex>(byte));
     INDEXED_CASE1(kRegPostFlag,       postflag.write<kIndex>(byte));
     INDEXED_CASE1(kRegHaltControl,    arm.haltcnt.write<kIndex>(byte));
     }

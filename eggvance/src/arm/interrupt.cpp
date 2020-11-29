@@ -16,7 +16,7 @@ enum ExceptionVector
 
 void Arm::raise(uint irq)
 {
-    irqrequest.value |= irq;
+    this->irq.request.value |= irq;
 
     processIrq();
 }
@@ -53,12 +53,12 @@ void Arm::interruptSw()
 
 void Arm::processIrq()
 {
-    bool interrupt = irqenable.value & irqrequest.value;
+    bool interrupt = irq.enable.value & irq.request.value;
 
     if (interrupt)
         state &= ~kStateHalt;
 
-    if (interrupt && irqmaster.value)
+    if (interrupt && irq.master.value)
         state |= kStateIrq;
     else
         state &= ~kStateIrq;
