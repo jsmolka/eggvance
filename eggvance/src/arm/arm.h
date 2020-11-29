@@ -3,6 +3,7 @@
 #include <array>
 
 #include "io.h"
+#include "pipeline.h"
 #include "registers.h"
 
 class Arm : public Registers
@@ -14,8 +15,8 @@ public:
     void run(int cycles);
     void raise(uint irq);
 
-    uint state   = 0;
-    uint pipe[2] = {};
+    uint state = 0;
+    Pipeline pipe;
 
     IrqMaster irqmaster;
     IrqEnable irqenable;

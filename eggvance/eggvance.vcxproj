@@ -183,6 +183,7 @@
     <ClInclude Include="src\arm\decode.h" />
     <ClInclude Include="src\arm\disassemble.h" />
     <ClInclude Include="src\arm\io.h" />
+    <ClInclude Include="src\arm\pipeline.h" />
     <ClInclude Include="src\arm\psr.h" />
     <ClInclude Include="src\arm\registers.h" />
     <ClInclude Include="src\base\bit.h" />
