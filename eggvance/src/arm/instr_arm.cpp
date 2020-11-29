@@ -522,6 +522,8 @@ void Arm::Arm_BlockDataTransfer(u32 instr)
             }
         }
 
+        Access access = Access::NonSequential;
+
         if (kLoad)
         {
             if (rlist & (1 << rn))
@@ -530,8 +532,9 @@ void Arm::Arm_BlockDataTransfer(u32 instr)
             for (uint x : bit::iterateBits(rlist))
             {
                 addr += 4 * pre_index;
-                regs[x] = readWord(addr);
+                regs[x] = readWord(addr, access);
                 addr += 4 * pre_index ^ 0x4;
+                access = Access::Sequential;
             }
 
             if (rlist & (1 << 15))
@@ -552,8 +555,9 @@ void Arm::Arm_BlockDataTransfer(u32 instr)
                         : base + (kIncrement ? 4 : -4) * bit::popcnt(rlist);
 
                 addr += 4 * pre_index;
-                writeWord(addr, value);
+                writeWord(addr, value, access);
                 addr += 4 * pre_index ^ 0x4;
+                access = Access::Sequential;
             }
         }
     }

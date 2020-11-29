@@ -45,16 +45,18 @@ void Arm::run(int cycles)
 void Arm::flushHalf()
 {
     pc &= ~0x1;
-    pipe[0] = readHalf(pc + 0);
-    pipe[1] = readHalf(pc + 2);
+    pipe[0] = readHalf(pc + 0, pipe.access);
+    pipe.access = Access::Sequential;
+    pipe[1] = readHalf(pc + 2, pipe.access);
     pc += 2;
 }
 
 void Arm::flushWord()
 {
     pc &= ~0x3;
-    pipe[0] = readWord(pc + 0);
-    pipe[1] = readWord(pc + 4);
+    pipe[0] = readWord(pc + 0, pipe.access);
+    pipe.access = Access::Sequential;
+    pipe[1] = readWord(pc + 4, pipe.access);
     pc += 4;
 }
 
@@ -93,7 +95,8 @@ void Arm::dispatch()
                         u16 instr = pipe[0];
 
                         pipe[0] = pipe[1];
-                        pipe[1] = readHalf(pc);
+                        pipe[1] = readHalf(pc, pipe.access);
+                        pipe.access = Access::Sequential;
 
                         std::invoke(instr_thumb[hashThumb(instr)], this, instr);
                     }
@@ -102,7 +105,8 @@ void Arm::dispatch()
                         u32 instr = pipe[0];
 
                         pipe[0] = pipe[1];
-                        pipe[1] = readWord(pc);
+                        pipe[1] = readWord(pc, pipe.access);
+                        pipe.access = Access::Sequential;
 
                         if (cpsr.check(instr >> 28))
                         {
@@ -121,5 +125,6 @@ void Arm::dispatch()
 
 void Arm::idle()
 {
+    pipe.access = Access::NonSequential;
     cycles--;
 }

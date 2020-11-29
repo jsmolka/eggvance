@@ -1,5 +1,6 @@
 #pragma once
 
+#include "constants.h"
 #include "base/int.h"
 
 class Pipeline
@@ -14,6 +15,8 @@ public:
     {
         return data[index];
     }
+
+    Access access = Access::NonSequential;
 
 private:
     u32 data[2] = {};

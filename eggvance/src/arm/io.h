@@ -2,6 +2,7 @@
 
 #include <functional>
 
+#include "constants.h"
 #include "base/register.h"
 
 class HaltControl : public RegisterW<u8>
@@ -38,8 +39,8 @@ public:
         update();
     }
 
-    int cyclesHalf(u32 addr, bool sequential) const { return cycles_half[(addr >> 24) & 0xF][sequential]; }
-    int cyclesWord(u32 addr, bool sequential) const { return cycles_word[(addr >> 24) & 0xF][sequential]; }
+    int cyclesHalf(u32 addr, Access access) const { return cycles_half[(addr >> 24) & 0xF][static_cast<uint>(access)]; }
+    int cyclesWord(u32 addr, Access access) const { return cycles_word[(addr >> 24) & 0xF][static_cast<uint>(access)]; }
 
     uint sram     = 0;
     uint ws0_n    = 0;

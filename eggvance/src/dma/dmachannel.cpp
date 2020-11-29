@@ -101,17 +101,17 @@ void DmaChannel::initCycles()
 
     if (control.word)
     {
-        cycles_s += arm.waitcnt.cyclesWord(cache.src_addr, true);
-        cycles_s += arm.waitcnt.cyclesWord(cache.dst_addr, true);
-        cycles_n += arm.waitcnt.cyclesWord(cache.src_addr, false);
-        cycles_n += arm.waitcnt.cyclesWord(cache.dst_addr, false);
+        cycles_n += arm.waitcnt.cyclesWord(cache.src_addr, Access::NonSequential);
+        cycles_n += arm.waitcnt.cyclesWord(cache.dst_addr, Access::NonSequential);
+        cycles_s += arm.waitcnt.cyclesWord(cache.src_addr, Access::Sequential);
+        cycles_s += arm.waitcnt.cyclesWord(cache.dst_addr, Access::Sequential);
     }
     else
     {
-        cycles_s += arm.waitcnt.cyclesHalf(cache.src_addr, true);
-        cycles_s += arm.waitcnt.cyclesHalf(cache.dst_addr, true);
-        cycles_n += arm.waitcnt.cyclesHalf(cache.src_addr, false);
-        cycles_n += arm.waitcnt.cyclesHalf(cache.dst_addr, false);
+        cycles_n += arm.waitcnt.cyclesHalf(cache.src_addr, Access::NonSequential);
+        cycles_n += arm.waitcnt.cyclesHalf(cache.dst_addr, Access::NonSequential);
+        cycles_s += arm.waitcnt.cyclesHalf(cache.src_addr, Access::Sequential);
+        cycles_s += arm.waitcnt.cyclesHalf(cache.dst_addr, Access::Sequential);
     }
 }
 

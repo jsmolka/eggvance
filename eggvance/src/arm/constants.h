@@ -26,3 +26,9 @@ enum State
     kStateDma   = 1 << 3,
     kStateTimer = 1 << 4
 };
+
+enum class Access
+{
+    Sequential,
+    NonSequential
+};

@@ -55,17 +55,17 @@ private:
 
     bool isSequential(u32 addr) const;
 
-    u8  readByte(u32 addr);
-    u16 readHalf(u32 addr);
-    u32 readWord(u32 addr);
+    u8  readByte(u32 addr, Access access = Access::NonSequential);
+    u16 readHalf(u32 addr, Access access = Access::NonSequential);
+    u32 readWord(u32 addr, Access access = Access::NonSequential);
 
-    void writeByte(u32 addr, u8  byte);
-    void writeHalf(u32 addr, u16 half);
-    void writeWord(u32 addr, u32 word);
+    void writeByte(u32 addr, u8  byte, Access access = Access::NonSequential);
+    void writeHalf(u32 addr, u16 half, Access access = Access::NonSequential);
+    void writeWord(u32 addr, u32 word, Access access = Access::NonSequential);
 
-    u32 readWordRotate(u32 addr);
-    u32 readHalfRotate(u32 addr);
-    u32 readHalfSignEx(u32 addr);
+    u32 readWordRotate(u32 addr, Access access = Access::NonSequential);
+    u32 readHalfRotate(u32 addr, Access access = Access::NonSequential);
+    u32 readHalfSignEx(u32 addr, Access access = Access::NonSequential);
 
     void flushHalf();
     void flushWord();
@@ -125,8 +125,7 @@ private:
     static const std::array<Instruction32, 4096> instr_arm;
     static const std::array<Instruction16, 1024> instr_thumb;
 
-    int cycles    = 0;
-    u32 prev_addr = 0;
+    int cycles = 0;
 };
 
 inline Arm arm;

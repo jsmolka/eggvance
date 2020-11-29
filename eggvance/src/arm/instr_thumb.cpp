@@ -449,11 +449,14 @@ void Arm::Thumb_PushPopRegisters(u16 instr)
 
     rlist |= kRbit << (kPop ? 15 : 14);
 
+    Access access = Access::NonSequential;
+
     if (kPop)
     {
         for (uint x : bit::iterateBits(rlist))
         {
-            regs[x] = readWord(sp);
+            regs[x] = readWord(sp, access);
+            access = Access::Sequential;
             sp += 4;
         }
 
@@ -470,7 +473,8 @@ void Arm::Thumb_PushPopRegisters(u16 instr)
 
         for (uint x : bit::iterateBits(rlist))
         {
-            writeWord(addr, regs[x]);
+            writeWord(addr, regs[x], access);
+            access = Access::Sequential;
             addr += 4;
         }
     }
@@ -489,6 +493,8 @@ void Arm::Thumb_LoadStoreMultiple(u16 instr)
 
     bool writeback = true;
 
+    Access access = Access::NonSequential;
+
     if (rlist != 0)
     {
         if (kLoad)
@@ -498,7 +504,8 @@ void Arm::Thumb_LoadStoreMultiple(u16 instr)
 
             for (uint x : bit::iterateBits(rlist))
             {
-                regs[x] = readWord(addr);
+                regs[x] = readWord(addr, access);
+                access = Access::Sequential;
                 addr += 4;
             }
             idle();
@@ -513,7 +520,8 @@ void Arm::Thumb_LoadStoreMultiple(u16 instr)
                         ? base
                         : base + 4 * bit::popcnt(rlist);
 
-                writeWord(addr, value);
+                writeWord(addr, value, access);
+                access = Access::Sequential;
                 addr += 4;
             }
         }

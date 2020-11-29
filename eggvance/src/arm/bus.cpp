@@ -2,77 +2,70 @@
 
 #include "mmu/mmu.h"
 
-bool Arm::isSequential(u32 addr) const
+u8 Arm::readByte(u32 addr, Access access)
 {
-    return (addr - prev_addr) <= 4;
-}
-
-u8 Arm::readByte(u32 addr)
-{
-    cycles -= waitcnt.cyclesHalf(addr, isSequential(addr));
-    prev_addr = addr;
+    pipe.access = Access::NonSequential;
+    cycles -= waitcnt.cyclesHalf(addr, access);
     return mmu.readByte(addr);
 }
 
-u16 Arm::readHalf(u32 addr)
+u16 Arm::readHalf(u32 addr, Access access)
 {
-    cycles -= waitcnt.cyclesHalf(addr, isSequential(addr));
-    prev_addr = addr;
+    pipe.access = Access::NonSequential;
+    cycles -= waitcnt.cyclesHalf(addr, access);
     return mmu.readHalf(addr);
 }
 
-u32 Arm::readWord(u32 addr)
+u32 Arm::readWord(u32 addr, Access access)
 {
-    cycles -= waitcnt.cyclesWord(addr, isSequential(addr));
-    prev_addr = addr;
+    pipe.access = Access::NonSequential;
+    cycles -= waitcnt.cyclesWord(addr, access);
     return mmu.readWord(addr);
 }
 
-void Arm::writeByte(u32 addr, u8 byte)
+void Arm::writeByte(u32 addr, u8 byte, Access access)
 {
-    cycles -= waitcnt.cyclesHalf(addr, isSequential(addr));
-    prev_addr = addr;
+    pipe.access = Access::NonSequential;
+    cycles -= waitcnt.cyclesHalf(addr, access);
     mmu.writeByte(addr, byte);
 }
 
-void Arm::writeHalf(u32 addr, u16 half)
+void Arm::writeHalf(u32 addr, u16 half, Access access)
 {
-    cycles -= waitcnt.cyclesHalf(addr, isSequential(addr));
-    prev_addr = addr;
+    pipe.access = Access::NonSequential;
+    cycles -= waitcnt.cyclesHalf(addr, access);
     mmu.writeHalf(addr, half);
 }
 
-void Arm::writeWord(u32 addr, u32 word)
+void Arm::writeWord(u32 addr, u32 word, Access access)
 {
-    cycles -= waitcnt.cyclesWord(addr, isSequential(addr));
-    prev_addr = addr;
+    pipe.access = Access::NonSequential;
+    cycles -= waitcnt.cyclesWord(addr, access);
     mmu.writeWord(addr, word);
 }
 
-u32 Arm::readWordRotate(u32 addr)
+u32 Arm::readWordRotate(u32 addr, Access access)
 {
-    u32 value = readWord(addr);
-
-    return bit::ror(value, (addr & 0x3) << 3);
+    u32 value = readWord(addr, access);
+    return bit::ror(value, 8 * (addr & 0x3));
 }
 
-u32 Arm::readHalfRotate(u32 addr)
+u32 Arm::readHalfRotate(u32 addr, Access access)
 {
-    u32 value = readHalf(addr);
-
-    return bit::ror(value, (addr & 0x1) << 3);
+    u32 value = readHalf(addr, access);
+    return bit::ror(value, 8 * (addr & 0x1));
 }
 
-u32 Arm::readHalfSignEx(u32 addr)
+u32 Arm::readHalfSignEx(u32 addr, Access access)
 {
     if (addr & 0x1)
     {
-        u32 value = readByte(addr);
+        u32 value = readByte(addr, access);
         return bit::signEx<8>(value);
     }
     else
     {
-        u32 value = readHalf(addr);
+        u32 value = readHalf(addr, access);
         return bit::signEx<16>(value);
     }
 }
