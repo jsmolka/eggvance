@@ -83,6 +83,9 @@ void Timer::reschedule()
 
 void Timer::runChannels()
 {
+    if (count == 0)
+        return;
+
     for (const auto& channel : active)
         channel->run(count);
 
