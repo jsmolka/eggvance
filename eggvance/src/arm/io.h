@@ -14,10 +14,7 @@ public:
 class WaitControl : public Register<u16>
 {
 public:
-    WaitControl()
-    {
-        compute();
-    }
+    WaitControl();
 
     template<uint Index>
     void write(u8 byte)
@@ -38,11 +35,11 @@ public:
             ws2_s    = bit::seq<2, 1>(byte);
             prefetch = bit::seq<6, 1>(byte);
         }
-        compute();
+        update();
     }
 
-    int cyclesHalf(u32 addr, bool sequential) const { return cycles_half[sequential][addr >> 24]; }
-    int cyclesWord(u32 addr, bool sequential) const { return cycles_word[sequential][addr >> 24]; }
+    int cyclesHalf(u32 addr, bool sequential) const { return cycles_half[(addr >> 24) & 0xF][sequential]; }
+    int cyclesWord(u32 addr, bool sequential) const { return cycles_word[(addr >> 24) & 0xF][sequential]; }
 
     uint sram     = 0;
     uint ws0_n    = 0;
@@ -54,43 +51,30 @@ public:
     uint prefetch = 0;
 
 private:
-    void compute()
+    void update();
+
+    s8 cycles_half[16][2] =
     {
-        static constexpr int kNonSeq[4] = { 4, 3, 2, 8 };
-        static constexpr int kWs0Seq[2] = { 2, 1 };
-        static constexpr int kWs1Seq[2] = { 4, 1 };
-        static constexpr int kWs2Seq[2] = { 8, 1 };
-
-        cycles_half[0][0x8] = cycles_half[0][0x9] = kNonSeq[ws0_n];
-        cycles_half[1][0x8] = cycles_half[1][0x9] = kWs0Seq[ws0_s];
-        cycles_half[0][0xA] = cycles_half[0][0xB] = kNonSeq[ws1_n];
-        cycles_half[1][0xA] = cycles_half[1][0xB] = kWs1Seq[ws1_s];
-        cycles_half[0][0xC] = cycles_half[0][0xD] = kNonSeq[ws2_n];
-        cycles_half[1][0xC] = cycles_half[1][0xD] = kWs2Seq[ws2_s];
-
-        cycles_word[0][0x8] = cycles_word[0][0x9] = 2 * kNonSeq[ws0_n];
-        cycles_word[1][0x8] = cycles_word[1][0x9] = 2 * kWs0Seq[ws0_s];
-        cycles_word[0][0xA] = cycles_word[0][0xB] = 2 * kNonSeq[ws1_n];
-        cycles_word[1][0xA] = cycles_word[1][0xB] = 2 * kWs1Seq[ws1_s];
-        cycles_word[0][0xC] = cycles_word[0][0xD] = 2 * kNonSeq[ws2_n];
-        cycles_word[1][0xC] = cycles_word[1][0xD] = 2 * kWs2Seq[ws2_s];
-
-        cycles_half[0][0xE] = cycles_half[0][0xF] = kNonSeq[sram];
-        cycles_half[1][0xE] = cycles_half[1][0xF] = kNonSeq[sram];
-        cycles_word[0][0xE] = cycles_word[0][0xF] = kNonSeq[sram];
-        cycles_word[1][0xE] = cycles_word[1][0xF] = kNonSeq[sram];
-    }
-
-    int cycles_half[2][256] =
-    {
-        { 1, 1, 3, 1, 1, 1, 1, 1 },
-        { 1, 1, 3, 1, 1, 1, 1, 1 }
+        { 1, 1 },
+        { 1, 1 },
+        { 3, 3 },
+        { 1, 1 },
+        { 1, 1 },
+        { 1, 1 },
+        { 1, 1 },
+        { 1, 1 }
     };
 
-    int cycles_word[2][256] =
+    s8 cycles_word[16][2] =
     {
-        { 1, 1, 6, 1, 1, 2, 2, 1 },
-        { 1, 1, 6, 1, 1, 2, 2, 1 }
+        { 1, 1 },
+        { 1, 1 },
+        { 6, 6 },
+        { 1, 1 },
+        { 1, 1 },
+        { 2, 2 },
+        { 2, 2 },
+        { 1, 1 }
     };
 };
 
