@@ -1,46 +1,59 @@
 #include "arm.h"
 
 #include "mmu/mmu.h"
+#include "timer/timer.h"
 
 u8 Arm::readByte(u32 addr, Access access)
 {
     pipe.access = Access::NonSequential;
-    cycles -= waitcnt.cyclesHalf(addr, access);
+    auto value = waitcnt.cyclesHalf(addr, access);
+    if (state & kStateTimer) timer.run(value);
+    cycles -= value;
     return mmu.readByte(addr);
 }
 
 u16 Arm::readHalf(u32 addr, Access access)
 {
     pipe.access = Access::NonSequential;
-    cycles -= waitcnt.cyclesHalf(addr, access);
+    auto value = waitcnt.cyclesHalf(addr, access);
+    if (state & kStateTimer) timer.run(value);
+    cycles -= value;
     return mmu.readHalf(addr);
 }
 
 u32 Arm::readWord(u32 addr, Access access)
 {
     pipe.access = Access::NonSequential;
-    cycles -= waitcnt.cyclesWord(addr, access);
+    auto value = waitcnt.cyclesWord(addr, access);
+    if (state & kStateTimer) timer.run(value);
+    cycles -= value;
     return mmu.readWord(addr);
 }
 
 void Arm::writeByte(u32 addr, u8 byte, Access access)
 {
     pipe.access = Access::NonSequential;
-    cycles -= waitcnt.cyclesHalf(addr, access);
+    auto value = waitcnt.cyclesHalf(addr, access);
+    if (state & kStateTimer) timer.run(value);
+    cycles -= value;
     mmu.writeByte(addr, byte);
 }
 
 void Arm::writeHalf(u32 addr, u16 half, Access access)
 {
     pipe.access = Access::NonSequential;
-    cycles -= waitcnt.cyclesHalf(addr, access);
+    auto value = waitcnt.cyclesHalf(addr, access);
+    if (state & kStateTimer) timer.run(value);
+    cycles -= value;
     mmu.writeHalf(addr, half);
 }
 
 void Arm::writeWord(u32 addr, u32 word, Access access)
 {
     pipe.access = Access::NonSequential;
-    cycles -= waitcnt.cyclesWord(addr, access);
+    auto value = waitcnt.cyclesWord(addr, access);
+    if (state & kStateTimer) timer.run(value);
+    cycles -= value;
     mmu.writeWord(addr, word);
 }
 

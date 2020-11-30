@@ -65,11 +65,14 @@ void Arm::dispatch()
 {
     while (cycles > 0 && state == State)
     {
-        int previous = cycles;
-
         if (State & kStateDma)
         {
+            int prev = cycles;
+
             dma.run(cycles);
+
+            if (State & kStateTimer)
+                timer.run(prev - cycles);
         }
         else
         {
@@ -117,13 +120,12 @@ void Arm::dispatch()
                 pc += cpsr.size();
             }
         }
-
-        if (state & kStateTimer)
-            timer.run(previous - cycles);
     }
 }
 
 void Arm::idle()
 {
+    timer.run(1);
+
     cycles--;
 }
