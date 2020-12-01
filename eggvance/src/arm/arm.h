@@ -73,9 +73,9 @@ private:
     template<uint State>
     void dispatch();
 
+    void clock(int cycles);
     void idle();
-    template<bool Signed>
-    void booth(u32 multiplier);
+    void booth(u32 multiplier, bool sign);
 
     void interrupt(u32 pc, u32 lr, Psr::Mode mode);
     void interruptHw();

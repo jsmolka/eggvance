@@ -143,7 +143,7 @@ void Arm::Thumb_AluOperations(u16 instr)
     case kOpcodeSbc: dst = sbc(dst,   src); break;
     case kOpcodeNeg: dst = sub(  0,   src); break;
     case kOpcodeMul:
-        booth<true>(dst);
+        booth(dst, true);
         dst = log(dst * src);
         break;
 

@@ -270,7 +270,7 @@ void Arm::Arm_Multiply(u32 instr)
     }
     log(dst, kFlags);
 
-    booth<true>(op2);
+    booth(op2, true);
 }
 
 template<u32 Instr>
@@ -308,7 +308,8 @@ void Arm::Arm_MultiplyLong(u32 instr)
     dstl = static_cast<u32>(res);
     dsth = static_cast<u32>(res >> 32);
 
-    booth<kSign>(static_cast<u32>(op2));
+    booth(static_cast<u32>(op2), kSign);
+    idle();
 }
 
 template<u32 Instr>

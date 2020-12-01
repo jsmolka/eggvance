@@ -71,7 +71,7 @@ void Arm::dispatch()
 
             dma.run(cycles);
 
-            if (State & kStateTimer)
+            if (state & kStateTimer)
                 timer.run(prev - cycles);
         }
         else
@@ -123,9 +123,34 @@ void Arm::dispatch()
     }
 }
 
+void Arm::clock(int cycles)
+{
+    this->cycles -= cycles;
+
+    if (state & kStateTimer)
+        timer.run(cycles);
+}
+
 void Arm::idle()
 {
-    timer.run(1);
+    pipe.access = Access::NonSequential;
 
-    cycles--;
+    clock(1);
+}
+
+void Arm::booth(u32 multiplier, bool sign)
+{
+    if (sign)
+    {
+        if ((multiplier >>  8) != 0 && (multiplier >>  8) != 0xFF'FFFF) idle();
+        if ((multiplier >> 16) != 0 && (multiplier >> 16) != 0x00'FFFF) idle();
+        if ((multiplier >> 24) != 0 && (multiplier >> 24) != 0x00'00FF) idle();
+    }
+    else
+    {
+        if ((multiplier >>  8) != 0) idle();
+        if ((multiplier >> 16) != 0) idle();
+        if ((multiplier >> 24) != 0) idle();
+    }
+    idle();
 }
