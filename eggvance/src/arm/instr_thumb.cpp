@@ -460,10 +460,10 @@ void Arm::Thumb_PushPopRegisters(u16 instr)
             sp += 4;
         }
 
+        idle();
+
         if (kRbit)
             flushHalf();
-
-        idle();
     }
     else
     {

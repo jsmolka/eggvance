@@ -375,10 +375,10 @@ void Arm::Arm_SingleDataTransfer(u32 instr)
             ? readByte(addr)
             : readWordRotate(addr);
 
+        idle();
+
         if (rd == 15)
             flushWord();
-
-        idle();
     }
     else
     {
@@ -466,10 +466,10 @@ void Arm::Arm_HalfSignedDataTransfer(u32 instr)
             break;
         }
 
+        idle();
+
         if (rd == 15)
             flushWord();
-
-        idle();
     }
     else
     {
@@ -538,10 +538,10 @@ void Arm::Arm_BlockDataTransfer(u32 instr)
                 access = Access::Sequential;
             }
 
+            idle();
+            
             if (rlist & (1 << 15))
                 flushWord();
-
-            idle();
         }
         else
         {
