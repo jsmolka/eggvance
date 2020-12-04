@@ -17,8 +17,6 @@ public:
     void writeHalf(u32 addr, u16 half);
     void writeWord(u32 addr, u32 word);
 
-    u32 readUnused(u32 addr) const;
-
     PaletteRam pram;
     VideoRam vram;
     Oam oam;

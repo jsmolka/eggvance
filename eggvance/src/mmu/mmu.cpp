@@ -1,27 +1,8 @@
 #include "mmu.h"
 
+#include "constants.h"
 #include "arm/arm.h"
 #include "gamepak/gamepak.h"
-
-enum Region
-{
-    kRegionBios,
-    kRegionUnused,
-    kRegionExternalWorkRam,
-    kRegionInternalWorkRam,
-    kRegionMmio,
-    kRegionPaletteRam,
-    kRegionVideoRam,
-    kRegionOam,
-    kRegionGamePak0L,
-    kRegionGamePak0H,
-    kRegionGamePak1L,
-    kRegionGamePak1H,
-    kRegionGamePak2L,
-    kRegionGamePak2H,
-    kRegionSaveL,
-    kRegionSaveH
-};
 
 u8 Mmu::readByte(u32 addr)
 {
@@ -33,7 +14,7 @@ u8 Mmu::readByte(u32 addr)
         [[fallthrough]];
 
     case kRegionUnused:
-        return readUnused(addr);
+        return arm.readUnused(addr);
 
     case kRegionExternalWorkRam:
         return ewram.readByte(addr);
@@ -66,7 +47,7 @@ u8 Mmu::readByte(u32 addr)
         return readSave(addr);
 
     default:
-        return readUnused(addr);
+        return arm.readUnused(addr);
     }
 }
 
@@ -80,7 +61,7 @@ u16 Mmu::readHalf(u32 addr)
         [[fallthrough]];
 
     case kRegionUnused:
-        return readUnused(addr);
+        return arm.readUnused(addr);
 
     case kRegionExternalWorkRam:
         return ewram.readHalf(addr);
@@ -117,7 +98,7 @@ u16 Mmu::readHalf(u32 addr)
         return readSave(addr) * 0x0101;
 
     default:
-        return readUnused(addr);
+        return arm.readUnused(addr);
     }
 }
 
@@ -131,7 +112,7 @@ u32 Mmu::readWord(u32 addr)
         [[fallthrough]];
 
     case kRegionUnused:
-        return readUnused(addr);
+        return arm.readUnused(addr);
 
     case kRegionExternalWorkRam:
         return ewram.readWord(addr);
@@ -168,7 +149,7 @@ u32 Mmu::readWord(u32 addr)
         return readSave(addr) * 0x0101'0101;
 
     default:
-        return readUnused(addr);
+        return arm.readUnused(addr);
     }
 }
 
@@ -313,37 +294,6 @@ void Mmu::writeWord(u32 addr, u32 word)
         writeSave(addr, word >> (8 * (addr & 0x3)));
         break;
     }
-}
-
-u32 Mmu::readUnused(u32 addr) const
-{
-    u32 value = 0;
-    if (arm.cpsr.t)
-    {
-        u32 lsw = arm.pipe[1];
-        u32 msw = arm.pipe[1];
-
-        switch (addr >> 24)
-        {
-        case kRegionBios:
-        case kRegionOam:
-            lsw = arm.pipe[0];
-            break;
-
-        case kRegionInternalWorkRam:
-            if (addr & 0x3)
-                lsw = arm.pipe[0];
-            else
-                msw = arm.pipe[0];
-            break;
-        }
-        value = (msw << 16) | lsw;
-    }
-    else
-    {
-        value = arm.pipe[1];
-    }
-    return bit::ror(value, 8 * (addr & 0x3));
 }
 
 u8 Mmu::readSave(u32 addr)

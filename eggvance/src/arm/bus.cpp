@@ -1,7 +1,42 @@
 #include "arm.h"
 
+#include "mmu/constants.h"
 #include "mmu/mmu.h"
 #include "timer/timer.h"
+
+u32 Arm::readUnused(u32 addr) const
+{
+    u32 value = arm.pipe[1];
+
+    if (arm.cpsr.t)
+    {
+        switch (arm.pc >> 24)
+        {
+        case kRegionBios:
+        case kRegionOam:
+            value <<= 16;
+            value |= arm.pipe[0];
+            break;
+
+        case kRegionInternalWorkRam:
+            if (arm.pc & 0x2)
+            {
+                value <<= 16;
+                value |= arm.pipe[0];
+            }
+            else
+            {
+                value |= arm.pipe[0] << 16;
+            }
+            break;
+
+        default:
+            value |= value << 16;
+            break;
+        }
+    }
+    return bit::ror(value, 8 * (addr & 0x3));
+}
 
 u8 Arm::readByte(u32 addr, Access access)
 {

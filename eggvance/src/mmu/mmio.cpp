@@ -1,6 +1,5 @@
 #include "mmio.h"
 
-#include "mmu.h"
 #include "arm/arm.h"
 #include "base/macros.h"
 #include "dma/dma.h"
@@ -226,7 +225,7 @@ u8 Mmio::readByte(u32 addr) const
     INDEXED_CASE1(kRegPostFlag,       return postflag.read<kIndex>());
 
     default:
-        return mmu.readUnused(addr);
+        return arm.readUnused(addr);
     }
 }
 

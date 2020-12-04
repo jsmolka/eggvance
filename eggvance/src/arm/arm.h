@@ -15,6 +15,8 @@ public:
     void run(int cycles);
     void raise(uint irq);
 
+    u32 readUnused(u32 addr) const;
+
     uint state = 0;
     Pipeline pipe;
 
