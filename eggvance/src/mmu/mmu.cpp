@@ -14,7 +14,7 @@ u8 Mmu::readByte(u32 addr)
         [[fallthrough]];
 
     case kRegionUnused:
-        return arm.readUnused(addr);
+        return bit::ror(arm.readUnused(), 8 * (addr & 0x3));
 
     case kRegionExternalWorkRam:
         return ewram.readByte(addr);
@@ -47,7 +47,7 @@ u8 Mmu::readByte(u32 addr)
         return readSave(addr);
 
     default:
-        return arm.readUnused(addr);
+        return bit::ror(arm.readUnused(), 8 * (addr & 0x3));
     }
 }
 
@@ -61,7 +61,7 @@ u16 Mmu::readHalf(u32 addr)
         [[fallthrough]];
 
     case kRegionUnused:
-        return arm.readUnused(addr);
+        return bit::ror(arm.readUnused(), 8 * (addr & 0x1));
 
     case kRegionExternalWorkRam:
         return ewram.readHalf(addr);
@@ -98,7 +98,7 @@ u16 Mmu::readHalf(u32 addr)
         return readSave(addr) * 0x0101;
 
     default:
-        return arm.readUnused(addr);
+        return bit::ror(arm.readUnused(), 8 * (addr & 0x1));
     }
 }
 
@@ -112,7 +112,7 @@ u32 Mmu::readWord(u32 addr)
         [[fallthrough]];
 
     case kRegionUnused:
-        return arm.readUnused(addr);
+        return arm.readUnused();
 
     case kRegionExternalWorkRam:
         return ewram.readWord(addr);
@@ -149,7 +149,7 @@ u32 Mmu::readWord(u32 addr)
         return readSave(addr) * 0x0101'0101;
 
     default:
-        return arm.readUnused(addr);
+        return arm.readUnused();
     }
 }
 

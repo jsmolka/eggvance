@@ -4,7 +4,7 @@
 #include "mmu/mmu.h"
 #include "timer/timer.h"
 
-u32 Arm::readUnused(u32 addr) const
+u32 Arm::readUnused() const
 {
     u32 value = arm.pipe[1];
 
@@ -35,7 +35,7 @@ u32 Arm::readUnused(u32 addr) const
             break;
         }
     }
-    return bit::ror(value, 8 * (addr & 0x3));
+    return value;
 }
 
 u8 Arm::readByte(u32 addr, Access access)

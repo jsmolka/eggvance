@@ -225,7 +225,7 @@ u8 Mmio::readByte(u32 addr) const
     INDEXED_CASE1(kRegPostFlag,       return postflag.read<kIndex>());
 
     default:
-        return arm.readUnused(addr);
+        return bit::ror(arm.readUnused(), 8 * (addr & 0x3));
     }
 }
 
