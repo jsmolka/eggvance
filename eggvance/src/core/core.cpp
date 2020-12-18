@@ -1,6 +1,6 @@
 #include "core.h"
 
-#include <shell/fmt/format.h>
+#include <shell/fmt.h>
 #include <shell/options.h>
 #include <shell/utility.h>
 
@@ -17,14 +17,14 @@
 #include "mmu/mmu.h"
 #include "timer/timer.h"
 
-using namespace shell::options;
+using namespace shell;
 
 void core::init(int argc, char* argv[])
 {
     Options options("eggvance");
-    options.add({   "--help", "-h"         }, "Show help"         , Options::value<bool>());
-    options.add({   "--save", "-s", "file" }, "Path to the save"  , Options::value<fs::path>()->optional());
-    options.add({      "rom"               }, "Path to the ROM"   , Options::value<fs::path>()->positional()->optional());
+    options.add({ "--help,-h", "Show help"                }, Options::value<bool>());
+    options.add({ "--save,-s", "Path to the save", "file" }, Options::value<fs::path>()->optional());
+    options.add({       "rom", "Path to the ROM"          }, Options::value<fs::path>()->positional()->optional());
 
     try
     {
@@ -39,7 +39,7 @@ void core::init(int argc, char* argv[])
         const auto gba = result.find<fs::path>("rom");
         const auto sav = result.find<fs::path>("--save");
 
-        config.init(fs::makeAbsolute("eggvance.ini"));
+        config.init(fs::absolute("eggvance.ini"));
 
         Bios::init(config.bios_file);
 

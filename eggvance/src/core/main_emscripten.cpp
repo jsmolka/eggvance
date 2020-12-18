@@ -1,4 +1,4 @@
-#include <shell/env.h>
+#include <shell/predef.h>
 
 #if SHELL_CC_EMSCRIPTEN
 

@@ -11,9 +11,9 @@ void Gpu::collapse(uint bgs)
 {
     BgLayers layers;
 
-    for (uint bg : bit::iterateBits(bgs & dispcnt.layers))
+    for (uint bg : bit::iterate(bgs & dispcnt.layers))
     {
-        layers.push({
+        layers.push_back({
             bgcnt[bg].priority,
             backgrounds[bg].data(),
             1U << bg

@@ -2,8 +2,7 @@
 
 #include <array>
 
-#include <shell/fmt/compile.h>
-#include <shell/fmt/format.h>
+#include <shell/fmt.h>
 
 #include "decode.h"
 
@@ -91,7 +90,7 @@ std::string rlist(u16 rlist)
     fmt::memory_buffer buffer;
     buffer.push_back('{');
 
-    for (uint x : bit::iterateBits(rlist))
+    for (uint x : bit::iterate(rlist))
     {
         fmt::format_to(
             std::back_inserter(buffer),

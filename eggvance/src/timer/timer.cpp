@@ -66,7 +66,7 @@ void Timer::schedule()
     {
         if (channel.control.enable && !channel.control.cascade)
         {
-            active.push(&channel);
+            active.push_back(&channel);
             arm.state |= kStateTimer;
 
             event = std::min(event, channel.nextEvent());

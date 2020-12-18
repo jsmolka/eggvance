@@ -25,7 +25,7 @@ Save::~Save()
         && !data.empty()
         && type != Type::None)
     {
-        if (!fs::write(file, data))
+        if (fs::write(file, data) != fs::Status::Ok)
             panic("Cannot write save: {}", file);
     }
 }
@@ -62,7 +62,7 @@ void Save::init(const fs::path& file)
 
     if (fs::is_regular_file(file))
     {
-        if (!fs::read(file, data))
+        if (fs::read(file, data) != fs::Status::Ok)
             panic("Cannot read save {}", file);
 
         if (!isValid(data.size()))

@@ -530,7 +530,7 @@ void Arm::Arm_BlockDataTransfer(u32 instr)
             if (rlist & (1 << rn))
                 writeback = false;
 
-            for (uint x : bit::iterateBits(rlist))
+            for (uint x : bit::iterate(rlist))
             {
                 addr += 4 * pre_index;
                 regs[x] = readWord(addr, access);
@@ -545,7 +545,7 @@ void Arm::Arm_BlockDataTransfer(u32 instr)
         }
         else
         {
-            for (uint x : bit::iterateBits(rlist))
+            for (uint x : bit::iterate(rlist))
             {
                 u32 value = x != rn
                     ? x != 15

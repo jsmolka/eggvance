@@ -17,8 +17,19 @@ void Bios::init(const fs::path& path)
     }
     else
     {
-        if (!fs::read(path, data))
+        fs::Status status = fs::read(path, data);
+
+        switch (status)
+        {
+        case fs::Status::BadSize:
+            panic("Bad BIOS size");
+            break;
+
+        case fs::Status::BadFile:
+        case fs::Status::BadStream:
             panic("Cannot read BIOS {}", path);
+            break;
+        }
 
         if (config.bios_hash)
         {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <shell/fmt/format.h>
+#include <shell/fmt.h>
 
 #include "sdl2.h"
 
