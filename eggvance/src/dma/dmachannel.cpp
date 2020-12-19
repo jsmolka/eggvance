@@ -127,15 +127,15 @@ void DmaChannel::initTransfer()
         if (eeprom_w)
         {
             transfer = [&]() {
-                u8 byte = mmu.readHalf(cache.src_addr);
-                gamepak.save->write(cache.dst_addr, byte);
+                if (cache.src_addr >= 0x200'0000) bus = mmu.readHalf(cache.src_addr);
+                if (cache.dst_addr >= 0x200'0000) gamepak.save->write(cache.dst_addr, bus);
             };
         }
         else
         {
             transfer = [&]() {
-                u8 byte = gamepak.save->read(cache.src_addr);
-                mmu.writeHalf(cache.dst_addr, byte);
+                if (cache.src_addr >= 0x200'0000) bus = gamepak.save->read(cache.src_addr);
+                if (cache.dst_addr >= 0x200'0000) mmu.writeHalf(cache.dst_addr, bus);
             };
         }
     }
@@ -144,15 +144,15 @@ void DmaChannel::initTransfer()
         if (control.word)
         {
             transfer = [&]() {
-                u32 word = mmu.readWord(cache.src_addr);
-                mmu.writeWord(cache.dst_addr, word);
+                if (cache.src_addr >= 0x200'0000) bus = mmu.readWord(cache.src_addr);
+                if (cache.dst_addr >= 0x200'0000) mmu.writeWord(cache.dst_addr, bus);
             };
         }
         else
         {
             transfer = [&]() {
-                u16 half = mmu.readHalf(cache.src_addr);
-                mmu.writeHalf(cache.dst_addr, half);
+                if (cache.src_addr >= 0x200'0000) bus = mmu.readHalf(cache.src_addr);
+                if (cache.dst_addr >= 0x200'0000) mmu.writeHalf(cache.dst_addr, bus);
             };
         }
     }

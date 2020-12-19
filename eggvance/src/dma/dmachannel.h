@@ -29,6 +29,7 @@ private:
     int pending  = 0;
     int cycles_s = 0;
     int cycles_n = 0;
+    u32 bus      = 0;
 
     struct
     {
