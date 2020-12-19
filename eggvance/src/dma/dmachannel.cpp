@@ -14,9 +14,9 @@ DmaChannel::DmaChannel(uint id)
 
 void DmaChannel::reload()
 {
-    cache.count    = count.count(id);
-    cache.src_addr = sad.value;
-    cache.dst_addr = dad.value;
+    internal.count    = count.count(id);
+    internal.src_addr = sad.value;
+    internal.dst_addr = dad.value;
 }
 
 void DmaChannel::start()
@@ -31,17 +31,17 @@ void DmaChannel::start()
 
     if (control.repeat)
     {
-        cache.count = count.count(id);
+        internal.count = count.count(id);
 
         if (control.dadcnt == kControlReload)
-            cache.dst_addr = dad.value;
+            internal.dst_addr = dad.value;
     }
 
     running = true;
-    pending = cache.count;
+    pending = internal.count;
 
-    cache.src_addr &= ~((2 << control.word) - 1);
-    cache.dst_addr &= ~((2 << control.word) - 1);
+    internal.src_addr &= ~((2 << control.word) - 1);
+    internal.dst_addr &= ~((2 << control.word) - 1);
 
     initCycles();
     initTransfer();
@@ -58,8 +58,8 @@ void DmaChannel::run(int& cycles)
 
         transfer();
 
-        cache.src_addr += kDeltas[control.word][control.sadcnt];
-        cache.dst_addr += kDeltas[control.word][control.dadcnt];
+        internal.src_addr += kDeltas[control.word][control.sadcnt];
+        internal.dst_addr += kDeltas[control.word][control.dadcnt];
 
         cycles -= pending == 0
             ? cycles_n
@@ -88,7 +88,7 @@ bool DmaChannel::isGamePak(u32 addr)
 
 void DmaChannel::initCycles()
 {
-    if (isGamePak(cache.src_addr) && isGamePak(cache.dst_addr))
+    if (isGamePak(internal.src_addr) && isGamePak(internal.dst_addr))
     {
         cycles_s = 4;
         cycles_n = 4;
@@ -101,41 +101,46 @@ void DmaChannel::initCycles()
 
     if (control.word)
     {
-        cycles_n += arm.waitcnt.cyclesWord(cache.src_addr, Access::NonSequential);
-        cycles_n += arm.waitcnt.cyclesWord(cache.dst_addr, Access::NonSequential);
-        cycles_s += arm.waitcnt.cyclesWord(cache.src_addr, Access::Sequential);
-        cycles_s += arm.waitcnt.cyclesWord(cache.dst_addr, Access::Sequential);
+        cycles_n += arm.waitcnt.cyclesWord(internal.src_addr, Access::NonSequential);
+        cycles_n += arm.waitcnt.cyclesWord(internal.dst_addr, Access::NonSequential);
+        cycles_s += arm.waitcnt.cyclesWord(internal.src_addr, Access::Sequential);
+        cycles_s += arm.waitcnt.cyclesWord(internal.dst_addr, Access::Sequential);
     }
     else
     {
-        cycles_n += arm.waitcnt.cyclesHalf(cache.src_addr, Access::NonSequential);
-        cycles_n += arm.waitcnt.cyclesHalf(cache.dst_addr, Access::NonSequential);
-        cycles_s += arm.waitcnt.cyclesHalf(cache.src_addr, Access::Sequential);
-        cycles_s += arm.waitcnt.cyclesHalf(cache.dst_addr, Access::Sequential);
+        cycles_n += arm.waitcnt.cyclesHalf(internal.src_addr, Access::NonSequential);
+        cycles_n += arm.waitcnt.cyclesHalf(internal.dst_addr, Access::NonSequential);
+        cycles_s += arm.waitcnt.cyclesHalf(internal.src_addr, Access::Sequential);
+        cycles_s += arm.waitcnt.cyclesHalf(internal.dst_addr, Access::Sequential);
     }
 }
 
 void DmaChannel::initTransfer()
 {
-    bool eeprom_w = gamepak.isEepromAccess(cache.dst_addr);
-    bool eeprom_r = gamepak.isEepromAccess(cache.src_addr);
+    bool eeprom_r = gamepak.isEepromAccess(internal.src_addr);
+    bool eeprom_w = gamepak.isEepromAccess(internal.dst_addr);
 
     if ((eeprom_r || eeprom_w) && id == 3)
     {
         initEeprom();
 
-        if (eeprom_w)
+        if (eeprom_r)
         {
             transfer = [&]() {
-                if (cache.src_addr >= 0x200'0000) bus = mmu.readHalf(cache.src_addr);
-                if (cache.dst_addr >= 0x200'0000) gamepak.save->write(cache.dst_addr, bus);
+                if (internal.src_addr >= 0x200'0000) bus = gamepak.save->read(internal.src_addr);
+                if (internal.dst_addr >= 0x200'0000) mmu.writeHalf(internal.dst_addr, bus);
             };
         }
         else
         {
             transfer = [&]() {
-                if (cache.src_addr >= 0x200'0000) bus = gamepak.save->read(cache.src_addr);
-                if (cache.dst_addr >= 0x200'0000) mmu.writeHalf(cache.dst_addr, bus);
+                if (internal.src_addr >= 0x200'0000) 
+                {
+                    bus = mmu.readHalf(internal.src_addr);
+                    bus |= bus << 16;
+                }
+                if (internal.dst_addr >= 0x200'0000) 
+                    gamepak.save->write(internal.dst_addr, bus);
             };
         }
     }
@@ -144,15 +149,20 @@ void DmaChannel::initTransfer()
         if (control.word)
         {
             transfer = [&]() {
-                if (cache.src_addr >= 0x200'0000) bus = mmu.readWord(cache.src_addr);
-                if (cache.dst_addr >= 0x200'0000) mmu.writeWord(cache.dst_addr, bus);
+                if (internal.src_addr >= 0x200'0000) bus = mmu.readWord(internal.src_addr);
+                if (internal.dst_addr >= 0x200'0000) mmu.writeWord(internal.dst_addr, bus);
             };
         }
         else
         {
             transfer = [&]() {
-                if (cache.src_addr >= 0x200'0000) bus = mmu.readHalf(cache.src_addr);
-                if (cache.dst_addr >= 0x200'0000) mmu.writeHalf(cache.dst_addr, bus);
+                if (internal.src_addr >= 0x200'0000)
+                {
+                    bus = mmu.readHalf(internal.src_addr);
+                    bus |= bus << 16;
+                }
+                if (internal.dst_addr >= 0x200'0000)
+                    mmu.writeHalf(internal.dst_addr, bus);
             };
         }
     }

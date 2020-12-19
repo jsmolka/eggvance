@@ -36,7 +36,7 @@ private:
         u32 count    = 0;
         u32 src_addr = 0;
         u32 dst_addr = 0;
-    } cache;
+    } internal;
 
     std::function<void(void)> transfer;
 };
