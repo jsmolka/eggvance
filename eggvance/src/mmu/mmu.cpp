@@ -61,7 +61,7 @@ u16 Mmu::readHalf(u32 addr)
         [[fallthrough]];
 
     case kRegionUnused:
-        return bit::ror(arm.readUnused(), 8 * (addr & 0x1));
+        return bit::ror(arm.readUnused(), 8 * (addr & 0x2));
 
     case kRegionExternalWorkRam:
         return ewram.readHalf(addr);
@@ -98,7 +98,7 @@ u16 Mmu::readHalf(u32 addr)
         return readSave(addr) * 0x0101;
 
     default:
-        return bit::ror(arm.readUnused(), 8 * (addr & 0x1));
+        return bit::ror(arm.readUnused(), 8 * (addr & 0x2));
     }
 }
 
