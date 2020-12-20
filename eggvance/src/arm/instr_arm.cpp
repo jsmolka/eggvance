@@ -448,18 +448,9 @@ void Arm::Arm_HalfSignedDataTransfer(u32 instr)
 
         switch (kOpcode)
         {
-        case kOpcodeLdrh:
-            dst = readHalfRotate(addr);
-            break;
-
-        case kOpcodeLdrsb:
-            dst = readByte(addr);
-            dst = bit::signEx<8>(dst);
-            break;
-
-        case kOpcodeLdrsh:
-            dst = readHalfSignEx(addr);
-            break;
+        case kOpcodeLdrh:  dst = readHalfRotate(addr); break;
+        case kOpcodeLdrsb: dst = readByteSignEx(addr); break;
+        case kOpcodeLdrsh: dst = readHalfSignEx(addr); break;
 
         default:
             SHELL_UNREACHABLE;

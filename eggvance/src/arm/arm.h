@@ -66,8 +66,9 @@ private:
     u32 adc(u32 op1, u32 op2, bool flags = true);
     u32 sbc(u32 op1, u32 op2, bool flags = true);
 
-    u32 readWordRotate(u32 addr, Access access = Access::NonSequential);
     u32 readHalfRotate(u32 addr, Access access = Access::NonSequential);
+    u32 readWordRotate(u32 addr, Access access = Access::NonSequential);
+    u32 readByteSignEx(u32 addr, Access access = Access::NonSequential);
     u32 readHalfSignEx(u32 addr, Access access = Access::NonSequential);
 
     void flushHalf();

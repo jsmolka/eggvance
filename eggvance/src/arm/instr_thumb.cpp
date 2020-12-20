@@ -299,8 +299,7 @@ void Arm::Thumb_LoadStoreByteHalf(u16 instr)
         break;
 
     case kOpcodeLdrsb:
-        dst = readByte(addr);
-        dst = bit::signEx<8>(dst);
+        dst = readByteSignEx(addr);
         idle();
         break;
 

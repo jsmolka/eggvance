@@ -1,42 +1,46 @@
 #include "arm.h"
 
 #include "gamepak/gamepak.h"
-#include "mmu/constants.h"
 #include "mmu/mmu.h"
 #include "timer/timer.h"
 
+enum Region
+{
+    kRegionBios,
+    kRegionUnused,
+    kRegionExternalWorkRam,
+    kRegionInternalWorkRam,
+    kRegionMmio,
+    kRegionPaletteRam,
+    kRegionVideoRam,
+    kRegionOam,
+    kRegionGamePak0L,
+    kRegionGamePak0H,
+    kRegionGamePak1L,
+    kRegionGamePak1H,
+    kRegionGamePak2L,
+    kRegionGamePak2H,
+    kRegionSaveL,
+    kRegionSaveH
+};
+
 u32 Arm::readUnused() const
 {
-    u32 value = pipe[1];
+    if (cpsr.t == 0)
+        return pipe[1];
 
-    if (cpsr.t)
+    switch (pc >> 24)
     {
-        switch (pc >> 24)
-        {
-        case kRegionBios:
-        case kRegionOam:
-            value <<= 16;
-            value |= pipe[0];
-            break;
+    case kRegionBios:
+    case kRegionOam:
+        return (pipe[1] << 16) | pipe[0];
 
-        case kRegionInternalWorkRam:
-            if (pc & 0x2)
-            {
-                value <<= 16;
-                value |= pipe[0];
-            }
-            else
-            {
-                value |= pipe[0] << 16;
-            }
-            break;
+    case kRegionInternalWorkRam:
+        return (pipe[1] << 16) | pipe[(pc >> 1) ^ 0x1];
 
-        default:
-            value |= value << 16;
-            break;
-        }
+    default:
+        return (pipe[1] << 16) | pipe[1];
     }
-    return value;
 }
 
 u8 Arm::readByte(u32 addr, Access access)
@@ -494,16 +498,22 @@ void Arm::writeWord(u32 addr, u32 word, Access access)
     clock(wait);
 }
 
+u32 Arm::readHalfRotate(u32 addr, Access access)
+{
+    u32 value = readHalf(addr, access);
+    return bit::ror(value, 8 * (addr & 0x1));
+}
+
 u32 Arm::readWordRotate(u32 addr, Access access)
 {
     u32 value = readWord(addr, access);
     return bit::ror(value, 8 * (addr & 0x3));
 }
 
-u32 Arm::readHalfRotate(u32 addr, Access access)
+u32 Arm::readByteSignEx(u32 addr, Access access)
 {
-    u32 value = readHalf(addr, access);
-    return bit::ror(value, 8 * (addr & 0x1));
+    u32 value = readByte(addr, access);
+    return bit::signEx<8>(value);
 }
 
 u32 Arm::readHalfSignEx(u32 addr, Access access)
