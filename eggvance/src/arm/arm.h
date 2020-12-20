@@ -4,7 +4,6 @@
 
 #include "bios.h"
 #include "io.h"
-#include "mmio.h"
 #include "pipeline.h"
 #include "registers.h"
 #include "base/ram.h"
@@ -41,13 +40,13 @@ public:
         IrqRequest request;
     } irq;
 
-    WaitControl waitcnt;
-    HaltControl haltcnt;
+    WaitControl  waitcnt;
+    HaltControl  haltcnt;
+    Register<u8> postflag;
 
     Bios bios;
     Ram<0x40000> ewram;
     Ram<0x08000> iwram;
-    Mmio mmio;
 
 private:
     using Instruction32 = void(Arm::*)(u32);
@@ -73,6 +72,9 @@ private:
     u32 sub(u32 op1, u32 op2, bool flags = true);
     u32 adc(u32 op1, u32 op2, bool flags = true);
     u32 sbc(u32 op1, u32 op2, bool flags = true);
+
+    u8 readIo(u32 addr);
+    void writeIo(u32 addr, u8 byte);
 
     u32 readHalfRotate(u32 addr, Access access = Access::NonSequential);
     u32 readWordRotate(u32 addr, Access access = Access::NonSequential);

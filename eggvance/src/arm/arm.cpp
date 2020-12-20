@@ -4,6 +4,7 @@
 
 #include "constants.h"
 #include "decode.h"
+#include "base/config.h"
 #include "base/macros.h"
 #include "dma/dma.h"
 #include "timer/timer.h"
@@ -13,6 +14,8 @@ Arm::Arm()
     irq.master.process  = std::bind(&Arm::processIrq, this);
     irq.enable.process  = std::bind(&Arm::processIrq, this);
     irq.request.process = std::bind(&Arm::processIrq, this);
+
+    postflag.value = config.bios_skip;
 }
 
 void Arm::init()

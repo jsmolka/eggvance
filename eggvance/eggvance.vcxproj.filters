@@ -108,9 +108,6 @@
     <ClCompile Include="src\arm\bios.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\arm\mmio.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\ppu\collapse.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -130,6 +127,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\ppu\videoram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\apu\apu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sio\sio.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -272,9 +275,6 @@
     <ClInclude Include="src\arm\bios.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\arm\mmio.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\ppu\buffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -309,6 +309,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ppu\videoram.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\apu\apu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sio\sio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

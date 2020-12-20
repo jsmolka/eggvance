@@ -7,6 +7,7 @@
 #include "audiocontext.h"
 #include "inputcontext.h"
 #include "videocontext.h"
+#include "apu/apu.h"
 #include "arm/arm.h"
 #include "base/config.h"
 #include "base/panic.h"
@@ -14,6 +15,7 @@
 #include "gamepad/gamepad.h"
 #include "gamepak/gamepak.h"
 #include "ppu/ppu.h"
+#include "sio/sio.h"
 #include "timer/timer.h"
 
 using namespace shell;
@@ -62,10 +64,12 @@ void core::reset()
     gamepak.gpio->reset();
     gamepak.save->reset();
 
+    shell::reconstruct(apu);
     shell::reconstruct(arm);
     shell::reconstruct(dma);
     shell::reconstruct(ppu);
     shell::reconstruct(gamepad);
+    shell::reconstruct(sio);
     shell::reconstruct(timer);
 
     arm.init();

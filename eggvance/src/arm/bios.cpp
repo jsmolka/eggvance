@@ -43,8 +43,8 @@ Integral Bios::read(u32 addr)
 {
     addr &= ~(sizeof(Integral) - 1);
 
-    if (std::is_same_v<Integral, u32> && arm.pc < kSize)
-        previous = *reinterpret_cast<Integral*>(&data[addr & ~0x3]);
+    if (arm.pc < kSize)
+        previous = *reinterpret_cast<u32*>(&data[addr & ~0x3]);
 
     return previous >> (8 * (addr & 0x3));
 }
