@@ -9,9 +9,6 @@
 class Mmu
 {
 public:
-    u8 readSave(u32 addr);
-    void writeSave(u32 addr, u8 byte);
-
     PaletteRam pram;
     VideoRam vram;
     Oam oam;

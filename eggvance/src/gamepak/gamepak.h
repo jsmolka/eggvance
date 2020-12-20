@@ -40,6 +40,9 @@ public:
             gpio->write(addr, value);
     }
 
+    u8 readSave(u32 addr);
+    void writeSave(u32 addr, u8 byte);
+
     Rom rom;
     std::unique_ptr<Gpio> gpio;
     std::unique_ptr<Save> save;

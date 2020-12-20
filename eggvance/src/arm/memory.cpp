@@ -93,7 +93,7 @@ u8 Arm::readByte(u32 addr, Access access)
     case kRegionSaveL:
     case kRegionSaveH:
         clock(waitcnt.cyclesHalf(addr, access));
-        return mmu.readSave(addr);
+        return gamepak.readSave(addr);
 
     default:
         clock(1);
@@ -162,7 +162,7 @@ u16 Arm::readHalf(u32 addr, Access access)
     case kRegionSaveL:
     case kRegionSaveH:
         clock(waitcnt.cyclesHalf(addr, access));
-        return mmu.readSave(addr) * 0x0101;
+        return gamepak.readSave(addr) * 0x0101;
 
     default:
         clock(1);
@@ -228,7 +228,7 @@ u32 Arm::readWord(u32 addr, Access access)
     case kRegionSaveL:
     case kRegionSaveH:
         clock(waitcnt.cyclesWord(addr, access));
-        return mmu.readSave(addr) * 0x0101'0101;
+        return gamepak.readSave(addr) * 0x0101'0101;
 
     default:
         clock(1);
@@ -239,7 +239,6 @@ u32 Arm::readWord(u32 addr, Access access)
 void Arm::writeByte(u32 addr, u8 byte, Access access)
 {
     pipe.access = Access::NonSequential;
-    clock(waitcnt.cyclesHalf(addr, access));
     
     switch (addr >> 24)
     {
@@ -288,7 +287,7 @@ void Arm::writeByte(u32 addr, u8 byte, Access access)
 
     case kRegionSaveL:
     case kRegionSaveH:
-        mmu.writeSave(addr, byte);
+        gamepak.writeSave(addr, byte);
         break;
 
     default:
@@ -351,7 +350,7 @@ void Arm::writeHalf(u32 addr, u16 half, Access access)
     case kRegionSaveL:
     case kRegionSaveH:
         clock(waitcnt.cyclesHalf(addr, access));
-        mmu.writeSave(addr, half >> (8 * (addr & 0x1)));
+        gamepak.writeSave(addr, half >> (8 * (addr & 0x1)));
         break;
 
     default:
@@ -414,7 +413,7 @@ void Arm::writeWord(u32 addr, u32 word, Access access)
     case kRegionSaveL:
     case kRegionSaveH:
         clock(waitcnt.cyclesWord(addr, access));
-        mmu.writeSave(addr, word >> (8 * (addr & 0x3)));
+        gamepak.writeSave(addr, word >> (8 * (addr & 0x3)));
         break;
 
     default:

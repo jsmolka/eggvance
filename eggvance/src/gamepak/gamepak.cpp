@@ -59,3 +59,38 @@ bool GamePak::isEepromAccess(u32 addr) const
         ? addr >= 0xD00'0000 && addr < 0xE00'0000
         : addr >= 0xDFF'FF00 && addr < 0xE00'0000;
 }
+
+u8 GamePak::readSave(u32 addr)
+{
+    switch (save->type)
+    {
+    case Save::Type::Sram:
+        addr &= 0x7FFF;
+        return save->read(addr);
+
+    case Save::Type::Flash512:
+    case Save::Type::Flash1024:
+        addr &= 0xFFFF;
+        return save->read(addr);
+
+    default:
+        return 0xFF;
+    }
+}
+
+void GamePak::writeSave(u32 addr, u8 byte)
+{
+    switch (save->type)
+    {
+    case Save::Type::Sram:
+        addr &= 0x7FFF;
+        save->write(addr, byte);
+        break;
+
+    case Save::Type::Flash512:
+    case Save::Type::Flash1024:
+        addr &= 0xFFFF;
+        save->write(addr, byte);
+        break;
+    }
+}
