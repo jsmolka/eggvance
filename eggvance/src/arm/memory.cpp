@@ -7,27 +7,27 @@
 
 u32 Arm::readUnused() const
 {
-    u32 value = arm.pipe[1];
+    u32 value = pipe[1];
 
-    if (arm.cpsr.t)
+    if (cpsr.t)
     {
-        switch (arm.pc >> 24)
+        switch (pc >> 24)
         {
         case kRegionBios:
         case kRegionOam:
             value <<= 16;
-            value |= arm.pipe[0];
+            value |= pipe[0];
             break;
 
         case kRegionInternalWorkRam:
-            if (arm.pc & 0x2)
+            if (pc & 0x2)
             {
                 value <<= 16;
-                value |= arm.pipe[0];
+                value |= pipe[0];
             }
             else
             {
-                value |= arm.pipe[0] << 16;
+                value |= pipe[0] << 16;
             }
             break;
 
@@ -43,43 +43,54 @@ u8 Arm::readByte(u32 addr, Access access)
 {
     pipe.access = Access::NonSequential;
 
+    u8  byte;
+    int wait;
+
     switch (addr >> 24)
     {
     case kRegionBios:
         if (addr < Bios::kSize)
         {
-            clock(1);
-            return mmu.bios.readByte(addr);
+            byte = mmu.bios.readByte(addr);
+            wait = 1;
+            break;
         }
         [[fallthrough]];
 
     case kRegionUnused:
-        clock(1);
-        return bit::ror(readUnused(), 8 * (addr & 0x3));
+        byte = bit::ror(readUnused(), 8 * (addr & 0x3));
+        wait = 1;
+        break;
 
     case kRegionExternalWorkRam:
-        clock(3);
-        return mmu.ewram.readByte(addr);
+        byte = mmu.ewram.readByte(addr);
+        wait = 3;
+        break;
 
     case kRegionInternalWorkRam:
-        clock(1);
-        return mmu.iwram.readByte(addr);
+        byte = mmu.iwram.readByte(addr);
+        wait = 1;
+        break;
 
     case kRegionMmio:
-        clock(1);
-        return mmu.mmio.readByte(addr);
+        byte = mmu.mmio.readByte(addr);
+        wait = 1;
+        break;
 
     case kRegionPaletteRam:
-        clock(1);
-        return mmu.pram.readByte(addr);
+        byte = mmu.pram.readByte(addr);
+        wait = 1;
+        break;
 
     case kRegionVideoRam:
-        clock(1);
-        return mmu.vram.readByte(addr);
+        byte = mmu.vram.readByte(addr);
+        wait = 1;
+        break;
 
     case kRegionOam:
-        clock(1);
-        return mmu.oam.readByte(addr);
+        byte = mmu.oam.readByte(addr);
+        wait = 1;
+        break;
 
     case kRegionGamePak0L:
     case kRegionGamePak0H:
@@ -87,67 +98,86 @@ u8 Arm::readByte(u32 addr, Access access)
     case kRegionGamePak1H:
     case kRegionGamePak2L:
     case kRegionGamePak2H:
-        clock(waitcnt.cyclesHalf(addr, access));
-        return gamepak.read<u8>(addr);
+        byte = gamepak.read<u8>(addr);
+        wait = waitcnt.cyclesHalf(addr, access);
+        break;
 
     case kRegionSaveL:
     case kRegionSaveH:
-        clock(waitcnt.cyclesHalf(addr, access));
-        return gamepak.readSave(addr);
+        byte = gamepak.readSave(addr);
+        wait = waitcnt.cyclesHalf(addr, access);
+        break;
 
     default:
-        clock(1);
-        return bit::ror(arm.readUnused(), 8 * (addr & 0x3));
+        byte = bit::ror(readUnused(), 8 * (addr & 0x3));
+        wait = 1;
+        break;
     }
+
+    clock(wait);
+
+    return byte;
 }
 
 u16 Arm::readHalf(u32 addr, Access access)
 {
     pipe.access = Access::NonSequential;
+
+    u16 half;
+    int wait;
     
     switch (addr >> 24)
     {
     case kRegionBios:
         if (addr < Bios::kSize)
         {
-            clock(1);
-            return mmu.bios.readHalf(addr);
+            half = mmu.bios.readHalf(addr);
+            wait = 1;
+            break;
         }
         [[fallthrough]];
 
     case kRegionUnused:
-        clock(1);
-        return bit::ror(readUnused(), 8 * (addr & 0x2));
+        half = bit::ror(readUnused(), 8 * (addr & 0x2));
+        wait = 1;
+        break;
 
     case kRegionExternalWorkRam:
-        clock(3);
-        return mmu.ewram.readHalf(addr);
+        half = mmu.ewram.readHalf(addr);
+        wait = 3;
+        break;
 
     case kRegionInternalWorkRam:
-        clock(1);
-        return mmu.iwram.readHalf(addr);
+        half = mmu.iwram.readHalf(addr);
+        wait = 1;
+        break;
 
     case kRegionMmio:
-        clock(1);
-        return mmu.mmio.readHalf(addr);
+        half = mmu.mmio.readHalf(addr);
+        wait = 1;
+        break;
 
     case kRegionPaletteRam:
-        clock(1);
-        return mmu.pram.readHalf(addr);
+        half = mmu.pram.readHalf(addr);
+        wait = 1;
+        break;
 
     case kRegionVideoRam:
-        clock(1);
-        return mmu.vram.readHalf(addr);
+        half = mmu.vram.readHalf(addr);
+        wait = 1;
+        break;
 
     case kRegionOam:
-        clock(1);
-        return mmu.oam.readHalf(addr);
+        half = mmu.oam.readHalf(addr);
+        wait = 1;
+        break;
 
     case kRegionGamePak2H:
         if (gamepak.isEepromAccess(addr))
         {
-            clock(waitcnt.cyclesHalf(addr, access));
-            return 1;
+            half = 1;
+            wait = waitcnt.cyclesHalf(addr, access);
+            break;
         }
         [[fallthrough]];
 
@@ -156,65 +186,86 @@ u16 Arm::readHalf(u32 addr, Access access)
     case kRegionGamePak1L:
     case kRegionGamePak1H:
     case kRegionGamePak2L:
-        clock(waitcnt.cyclesHalf(addr, access));
-        return gamepak.read<u16>(addr);
+        half = gamepak.read<u16>(addr);
+        wait = waitcnt.cyclesHalf(addr, access);
+        break;
 
     case kRegionSaveL:
     case kRegionSaveH:
-        clock(waitcnt.cyclesHalf(addr, access));
-        return gamepak.readSave(addr) * 0x0101;
+        half = gamepak.readSave(addr) * 0x0101;
+        wait = waitcnt.cyclesHalf(addr, access);
+        break;
 
     default:
-        clock(1);
-        return bit::ror(readUnused(), 8 * (addr & 0x2));
+        half = bit::ror(readUnused(), 8 * (addr & 0x2));
+        wait = 1;
     }
+
+    clock(wait);
+
+    return half;
 }
 
 u32 Arm::readWord(u32 addr, Access access)
 {
     pipe.access = Access::NonSequential;
 
+    u32 word;
+    int wait;
+
     switch (addr >> 24)
     {
     case kRegionBios:
         if (addr < Bios::kSize)
         {
-            clock(1);
-            return mmu.bios.readWord(addr);
+            word = mmu.bios.readWord(addr);
+            wait = 1;
+            break;
         }
         [[fallthrough]];
 
     case kRegionUnused:
-        clock(1);
-        return readUnused();
+        word = readUnused();
+        wait = 1;
+        break;
 
     case kRegionExternalWorkRam:
-        clock(6);
-        return mmu.ewram.readWord(addr);
+        word = mmu.ewram.readWord(addr);
+        wait = 6;
+        break;
 
     case kRegionInternalWorkRam:
-        clock(1);
-        return mmu.iwram.readWord(addr);
+        word = mmu.iwram.readWord(addr);
+        wait = 1;
+        break;
 
     case kRegionMmio:
-        clock(1);
-        return mmu.mmio.readWord(addr);
+        word = mmu.mmio.readWord(addr);
+        wait = 1;
+        break;
 
     case kRegionPaletteRam:
-        clock(2);
-        return mmu.pram.readWord(addr);
+        word = mmu.pram.readWord(addr);
+        wait = 2;
+        break;
 
     case kRegionVideoRam:
-        clock(2);
-        return mmu.vram.readWord(addr);
+        word = mmu.vram.readWord(addr);
+        wait = 2;
+        break;
 
     case kRegionOam:
-        clock(1);
-        return mmu.oam.readWord(addr);
+        word = mmu.oam.readWord(addr);
+        wait = 1;
+        break;
 
     case kRegionGamePak2H:
         if (gamepak.isEepromAccess(addr))
-            return 1;
+        {
+            word = 1;
+            wait = waitcnt.cyclesWord(addr, access);
+            break;
+        }
         [[fallthrough]];
 
     case kRegionGamePak0L:
@@ -222,58 +273,67 @@ u32 Arm::readWord(u32 addr, Access access)
     case kRegionGamePak1L:
     case kRegionGamePak1H:
     case kRegionGamePak2L:
-        clock(waitcnt.cyclesWord(addr, access));
-        return gamepak.read<u32>(addr);
+        word = gamepak.read<u32>(addr);
+        wait = waitcnt.cyclesWord(addr, access);
+        break;
 
     case kRegionSaveL:
     case kRegionSaveH:
-        clock(waitcnt.cyclesWord(addr, access));
-        return gamepak.readSave(addr) * 0x0101'0101;
+        word = gamepak.readSave(addr) * 0x0101'0101;
+        wait = waitcnt.cyclesWord(addr, access);
+        break;
 
     default:
-        clock(1);
-        return readUnused();
+        word = readUnused();
+        wait = 1;
+        break;
     }
+
+    clock(wait);
+
+    return word;
 }
 
 void Arm::writeByte(u32 addr, u8 byte, Access access)
 {
     pipe.access = Access::NonSequential;
+
+    int wait;
     
     switch (addr >> 24)
     {
     case kRegionBios:
     case kRegionUnused:
-        clock(1);
+        wait = 1;
         break;
 
     case kRegionExternalWorkRam:
-        clock(3);
         mmu.ewram.writeByte(addr, byte);
+        wait = 3;
         break;
 
     case kRegionInternalWorkRam:
-        clock(1);
         mmu.iwram.writeByte(addr, byte);
+        wait = 1;
         break;
 
     case kRegionMmio:
-        clock(1);
         mmu.mmio.writeByte(addr, byte);
+        wait = 1;
         break;
 
     case kRegionPaletteRam:
-        clock(1);
         mmu.pram.writeByte(addr, byte);
+        wait = 1;
         break;
 
     case kRegionVideoRam:
-        clock(1);
         mmu.vram.writeByte(addr, byte);
+        wait = 1;
         break;
 
     case kRegionOam:
-        clock(1);
+        wait = 1;
         break;
 
     case kRegionGamePak0L:
@@ -283,58 +343,64 @@ void Arm::writeByte(u32 addr, u8 byte, Access access)
     case kRegionGamePak2L:
     case kRegionGamePak2H:
         gamepak.write<u8>(addr, byte);
+        wait = waitcnt.cyclesHalf(addr, access);
         break;
 
     case kRegionSaveL:
     case kRegionSaveH:
         gamepak.writeSave(addr, byte);
+        wait = waitcnt.cyclesHalf(addr, access);
         break;
 
     default:
-        clock(1);
+        wait = 1;
         break;
     }
+
+    clock(wait);
 }
 
 void Arm::writeHalf(u32 addr, u16 half, Access access)
 {
     pipe.access = Access::NonSequential;
+    
+    int wait;
 
     switch (addr >> 24)
     {
     case kRegionBios:
     case kRegionUnused:
-        clock(1);
+        wait = 1;
         break;
 
     case kRegionExternalWorkRam:
-        clock(3);
         mmu.ewram.writeHalf(addr, half);
+        wait = 3;
         break;
 
     case kRegionInternalWorkRam:
-        clock(1);
         mmu.iwram.writeHalf(addr, half);
+        wait = 1;
         break;
 
     case kRegionMmio:
-        clock(1);
         mmu.mmio.writeHalf(addr, half);
+        wait = 1;
         break;
 
     case kRegionPaletteRam:
-        clock(1);
         mmu.pram.writeHalf(addr, half);
+        wait = 1;
         break;
 
     case kRegionVideoRam:
-        clock(1);
         mmu.vram.writeHalf(addr, half);
+        wait = 1;
         break;
 
     case kRegionOam:
-        clock(1);
         mmu.oam.writeHalf(addr, half);
+        wait = 1;
         break;
 
     case kRegionGamePak0L:
@@ -343,61 +409,65 @@ void Arm::writeHalf(u32 addr, u16 half, Access access)
     case kRegionGamePak1H:
     case kRegionGamePak2L:
     case kRegionGamePak2H:
-        clock(waitcnt.cyclesHalf(addr, access));
         gamepak.write<u16>(addr, half);
+        wait = waitcnt.cyclesHalf(addr, access);
         break;
 
     case kRegionSaveL:
     case kRegionSaveH:
-        clock(waitcnt.cyclesHalf(addr, access));
         gamepak.writeSave(addr, half >> (8 * (addr & 0x1)));
+        wait = waitcnt.cyclesHalf(addr, access);
         break;
 
     default:
-        clock(1);
+        wait = 1;
         break;
     }
+
+    clock(wait);
 }
 
 void Arm::writeWord(u32 addr, u32 word, Access access)
 {
     pipe.access = Access::NonSequential;
     
+    int wait;
+
     switch (addr >> 24)
     {
     case kRegionBios:
     case kRegionUnused:
-        clock(1);
+        wait = 1;
         break;
 
     case kRegionExternalWorkRam:
-        clock(6);
         mmu.ewram.writeWord(addr, word);
+        wait = 6;
         break;
 
     case kRegionInternalWorkRam:
-        clock(1);
         mmu.iwram.writeWord(addr, word);
+        wait = 1;
         break;
 
     case kRegionMmio:
-        clock(1);
         mmu.mmio.writeWord(addr, word);
+        wait = 1;
         break;
 
     case kRegionPaletteRam:
-        clock(2);
         mmu.pram.writeWord(addr, word);
+        wait = 2;
         break;
 
     case kRegionVideoRam:
-        clock(2);
         mmu.vram.writeWord(addr, word);
+        wait = 2;
         break;
 
     case kRegionOam:
-        clock(1);
         mmu.oam.writeWord(addr, word);
+        wait = 1;
         break;
 
     case kRegionGamePak0L:
@@ -406,20 +476,22 @@ void Arm::writeWord(u32 addr, u32 word, Access access)
     case kRegionGamePak1H:
     case kRegionGamePak2L:
     case kRegionGamePak2H:
-        clock(waitcnt.cyclesWord(addr, access));
         gamepak.write<u32>(addr, word);
+        wait = waitcnt.cyclesWord(addr, access);
         break;
 
     case kRegionSaveL:
     case kRegionSaveH:
-        clock(waitcnt.cyclesWord(addr, access));
         gamepak.writeSave(addr, word >> (8 * (addr & 0x3)));
+        wait = waitcnt.cyclesWord(addr, access);
         break;
 
     default:
-        clock(1);
+        wait = 1;
         break;
     }
+
+    clock(wait);
 }
 
 u32 Arm::readWordRotate(u32 addr, Access access)

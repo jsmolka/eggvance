@@ -39,8 +39,8 @@ public:
         update();
     }
 
-    int cyclesHalf(u32 addr, Access access) const { return cycles_half[(addr >> 24) & 0xF][static_cast<uint>(access)]; }
-    int cyclesWord(u32 addr, Access access) const { return cycles_word[(addr >> 24) & 0xF][static_cast<uint>(access)]; }
+    int cyclesHalf(u32 addr, Access access) const { return cycles_half[(addr >> 25) - 4][static_cast<uint>(access)]; }
+    int cyclesWord(u32 addr, Access access) const { return cycles_word[(addr >> 25) - 4][static_cast<uint>(access)]; }
 
     uint sram     = 0;
     uint ws0_n    = 0;
@@ -54,29 +54,8 @@ public:
 private:
     void update();
 
-    s8 cycles_half[16][2] =
-    {
-        { 1, 1 },
-        { 1, 1 },
-        { 3, 3 },
-        { 1, 1 },
-        { 1, 1 },
-        { 1, 1 },
-        { 1, 1 },
-        { 1, 1 }
-    };
-
-    s8 cycles_word[16][2] =
-    {
-        { 1, 1 },
-        { 1, 1 },
-        { 6, 6 },
-        { 1, 1 },
-        { 1, 1 },
-        { 2, 2 },
-        { 2, 2 },
-        { 1, 1 }
-    };
+    int cycles_half[4][2];
+    int cycles_word[4][2];
 };
 
 class IrqMaster : public Register<u32, 0x0001>
