@@ -1,4 +1,4 @@
-#include "gpu.h"
+#include "ppu.h"
 
 #include <algorithm>
 
@@ -6,7 +6,7 @@
 #include "base/macros.h"
 #include "core/videocontext.h"
 
-void Gpu::collapse(uint bgs)
+void Ppu::collapse(uint bgs)
 {
     BgLayers layers;
 
@@ -28,7 +28,7 @@ void Gpu::collapse(uint bgs)
 }
 
 template<bool Objects>
-void Gpu::collapse(const BgLayers& layers)
+void Ppu::collapse(const BgLayers& layers)
 {
     uint window = dispcnt.win0 || dispcnt.win1 || dispcnt.winobj;
     uint blend  = bldcnt.mode != kBlendModeDisabled || objects_alpha;
@@ -47,7 +47,7 @@ void Gpu::collapse(const BgLayers& layers)
 }
 
 template<bool Objects>
-void Gpu::collapseNN(const BgLayers& layers)
+void Ppu::collapseNN(const BgLayers& layers)
 {
     u32* scanline = video_ctx.scanline(vcount.value);
 
@@ -58,7 +58,7 @@ void Gpu::collapseNN(const BgLayers& layers)
 }
 
 template<bool Objects>
-void Gpu::collapseNW(const BgLayers& layers)
+void Ppu::collapseNW(const BgLayers& layers)
 {
     switch (possibleWindows<Objects>())
     {
@@ -71,7 +71,7 @@ void Gpu::collapseNW(const BgLayers& layers)
 }
 
 template<bool Objects, uint Windows>
-void Gpu::collapseNW(const BgLayers& layers)
+void Ppu::collapseNW(const BgLayers& layers)
 {
     u32* scanline = video_ctx.scanline(vcount.value);
 
@@ -84,7 +84,7 @@ void Gpu::collapseNW(const BgLayers& layers)
 }
 
 template<bool Objects>
-void Gpu::collapseBN(const BgLayers& layers)
+void Ppu::collapseBN(const BgLayers& layers)
 {
     switch (bldcnt.mode)
     {
@@ -97,7 +97,7 @@ void Gpu::collapseBN(const BgLayers& layers)
 }
 
 template<bool Objects, uint BlendMode>
-void Gpu::collapseBN(const BgLayers& layers)
+void Ppu::collapseBN(const BgLayers& layers)
 {
     constexpr uint kFlags = 0xFFFF;
 
@@ -147,7 +147,7 @@ void Gpu::collapseBN(const BgLayers& layers)
 }
 
 template<bool Objects>
-void Gpu::collapseBW(const BgLayers& layers)
+void Ppu::collapseBW(const BgLayers& layers)
 {
     switch (bldcnt.mode)
     {
@@ -160,7 +160,7 @@ void Gpu::collapseBW(const BgLayers& layers)
 }
 
 template<bool Objects, uint BlendMode>
-void Gpu::collapseBW(const BgLayers& layers)
+void Ppu::collapseBW(const BgLayers& layers)
 {
     switch (possibleWindows<Objects>())
     {
@@ -173,7 +173,7 @@ void Gpu::collapseBW(const BgLayers& layers)
 }
 
 template<bool Objects, uint BlendMode, uint Windows>
-void Gpu::collapseBW(const BgLayers& layers)
+void Ppu::collapseBW(const BgLayers& layers)
 {
     u32* scanline = video_ctx.scanline(vcount.value);
 
@@ -226,7 +226,7 @@ void Gpu::collapseBW(const BgLayers& layers)
 }
 
 template<bool Objects>
-uint Gpu::possibleWindows() const
+uint Ppu::possibleWindows() const
 {
     uint windows = 0;
 
@@ -241,7 +241,7 @@ uint Gpu::possibleWindows() const
 }
 
 template<uint Windows>
-const Window& Gpu::activeWindow(uint x) const
+const Window& Ppu::activeWindow(uint x) const
 {
     if (Windows & kWindow0 && winh[0].contains(x))
         return winin.win0;
@@ -256,7 +256,7 @@ const Window& Gpu::activeWindow(uint x) const
 }
 
 template<bool Objects>
-u16 Gpu::upperLayer(const BgLayers& layers, uint x)
+u16 Ppu::upperLayer(const BgLayers& layers, uint x)
 {
     const auto& object = objects[x];
 
@@ -276,7 +276,7 @@ u16 Gpu::upperLayer(const BgLayers& layers, uint x)
 }
 
 template<bool Objects>
-u16 Gpu::upperLayer(const BgLayers& layers, uint x, uint flags)
+u16 Ppu::upperLayer(const BgLayers& layers, uint x, uint flags)
 {    
     const auto& object = objects[x];
 
@@ -296,7 +296,7 @@ u16 Gpu::upperLayer(const BgLayers& layers, uint x, uint flags)
 }
 
 template<bool Objects>
-bool Gpu::findBlendLayers(const BgLayers& layers, uint x, uint flags, u16& upper)
+bool Ppu::findBlendLayers(const BgLayers& layers, uint x, uint flags, u16& upper)
 {
     const auto& object = objects[x];
 
@@ -342,7 +342,7 @@ bool Gpu::findBlendLayers(const BgLayers& layers, uint x, uint flags, u16& upper
     }
 
 template<bool Objects>
-bool Gpu::findBlendLayers(const BgLayers& layers, uint x, uint flags, u16& upper, u16& lower)
+bool Ppu::findBlendLayers(const BgLayers& layers, uint x, uint flags, u16& upper, u16& lower)
 {
     const auto& object = objects[x];
 

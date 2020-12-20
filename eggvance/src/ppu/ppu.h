@@ -9,12 +9,12 @@
 #include "paletteram.h"
 #include "videoram.h"
 
-class Gpu
+class Ppu
 {
 public:
     friend class Arm;
 
-    Gpu();
+    Ppu();
 
     void scanline();
     void hblank();
@@ -53,7 +53,7 @@ private:
     };
 
     using BgLayers = shell::FixedBuffer<BgLayer, 4>;
-    using RenderFunc = void(Gpu::*)(uint);
+    using RenderFunc = void(Ppu::*)(uint);
 
     Point transform(uint x, uint bg);
 
@@ -113,4 +113,4 @@ private:
     Oam oam;
 };
 
-inline Gpu gpu;
+inline Ppu ppu;

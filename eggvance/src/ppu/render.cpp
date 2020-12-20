@@ -1,10 +1,10 @@
-#include "gpu.h"
+#include "ppu.h"
 
 #include "mapentry.h"
 #include "matrix.h"
 #include "base/macros.h"
 
-Point Gpu::transform(uint x, uint bg)
+Point Ppu::transform(uint x, uint bg)
 {
     bg -= 2;
 
@@ -13,7 +13,7 @@ Point Gpu::transform(uint x, uint bg)
         bgpc[bg].value * static_cast<int>(x) + bgy[bg].current);
 }
 
-void Gpu::renderBg(RenderFunc render, uint bg)
+void Ppu::renderBg(RenderFunc render, uint bg)
 {
     if ((dispcnt.layers & (1 << bg)) == 0)
         return;
@@ -39,7 +39,7 @@ void Gpu::renderBg(RenderFunc render, uint bg)
     }
 }
 
-void Gpu::renderBgMode0(uint bg)
+void Ppu::renderBgMode0(uint bg)
 {
     switch (bgcnt[bg].color_mode)
     {
@@ -53,7 +53,7 @@ void Gpu::renderBgMode0(uint bg)
 }
 
 template<uint ColorMode>
-void Gpu::renderBgMode0Impl(uint bg)
+void Ppu::renderBgMode0Impl(uint bg)
 {
     static_assert(ColorMode == kColorMode16x16 || ColorMode == kColorMode256x1);
 
@@ -113,7 +113,7 @@ void Gpu::renderBgMode0Impl(uint bg)
     }
 }
 
-void Gpu::renderBgMode2(uint bg)
+void Ppu::renderBgMode2(uint bg)
 {
     const auto& bgcnt = this->bgcnt[bg];
     const auto& size  = this->bgcnt[bg].sizeAff();
@@ -149,7 +149,7 @@ void Gpu::renderBgMode2(uint bg)
     }
 }
 
-void Gpu::renderBgMode3(uint bg)
+void Ppu::renderBgMode3(uint bg)
 {
     for (uint x = 0; x < kScreen.x; ++x)
     {
@@ -168,7 +168,7 @@ void Gpu::renderBgMode3(uint bg)
     }
 }
 
-void Gpu::renderBgMode4(uint bg)
+void Ppu::renderBgMode4(uint bg)
 {
     for (uint x = 0; x < kScreen.x; ++x)
     {
@@ -187,7 +187,7 @@ void Gpu::renderBgMode4(uint bg)
     }
 }
 
-void Gpu::renderBgMode5(uint bg)
+void Ppu::renderBgMode5(uint bg)
 {
     constexpr Point kBitmap(160, 128);
 
@@ -208,7 +208,7 @@ void Gpu::renderBgMode5(uint bg)
     }
 }
 
-void Gpu::renderObjects()
+void Ppu::renderObjects()
 {
     constexpr Matrix kIdentity(1 << kDecimalBits, 0, 0, 1 << kDecimalBits);
 

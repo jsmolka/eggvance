@@ -1,7 +1,7 @@
 #include "arm.h"
 
 #include "gamepak/gamepak.h"
-#include "gpu/gpu.h"
+#include "ppu/ppu.h"
 #include "timer/timer.h"
 
 enum Region
@@ -82,17 +82,17 @@ u8 Arm::readByte(u32 addr, Access access)
         break;
 
     case kRegionPaletteRam:
-        byte = gpu.pram.readByte(addr);
+        byte = ppu.pram.readByte(addr);
         wait = 1;
         break;
 
     case kRegionVideoRam:
-        byte = gpu.vram.readByte(addr);
+        byte = ppu.vram.readByte(addr);
         wait = 1;
         break;
 
     case kRegionOam:
-        byte = gpu.oam.readByte(addr);
+        byte = ppu.oam.readByte(addr);
         wait = 1;
         break;
 
@@ -162,17 +162,17 @@ u16 Arm::readHalf(u32 addr, Access access)
         break;
 
     case kRegionPaletteRam:
-        half = gpu.pram.readHalf(addr);
+        half = ppu.pram.readHalf(addr);
         wait = 1;
         break;
 
     case kRegionVideoRam:
-        half = gpu.vram.readHalf(addr);
+        half = ppu.vram.readHalf(addr);
         wait = 1;
         break;
 
     case kRegionOam:
-        half = gpu.oam.readHalf(addr);
+        half = ppu.oam.readHalf(addr);
         wait = 1;
         break;
 
@@ -249,17 +249,17 @@ u32 Arm::readWord(u32 addr, Access access)
         break;
 
     case kRegionPaletteRam:
-        word = gpu.pram.readWord(addr);
+        word = ppu.pram.readWord(addr);
         wait = 2;
         break;
 
     case kRegionVideoRam:
-        word = gpu.vram.readWord(addr);
+        word = ppu.vram.readWord(addr);
         wait = 2;
         break;
 
     case kRegionOam:
-        word = gpu.oam.readWord(addr);
+        word = ppu.oam.readWord(addr);
         wait = 1;
         break;
 
@@ -327,12 +327,12 @@ void Arm::writeByte(u32 addr, u8 byte, Access access)
         break;
 
     case kRegionPaletteRam:
-        gpu.pram.writeByte(addr, byte);
+        ppu.pram.writeByte(addr, byte);
         wait = 1;
         break;
 
     case kRegionVideoRam:
-        gpu.vram.writeByte(addr, byte);
+        ppu.vram.writeByte(addr, byte);
         wait = 1;
         break;
 
@@ -393,17 +393,17 @@ void Arm::writeHalf(u32 addr, u16 half, Access access)
         break;
 
     case kRegionPaletteRam:
-        gpu.pram.writeHalf(addr, half);
+        ppu.pram.writeHalf(addr, half);
         wait = 1;
         break;
 
     case kRegionVideoRam:
-        gpu.vram.writeHalf(addr, half);
+        ppu.vram.writeHalf(addr, half);
         wait = 1;
         break;
 
     case kRegionOam:
-        gpu.oam.writeHalf(addr, half);
+        ppu.oam.writeHalf(addr, half);
         wait = 1;
         break;
 
@@ -460,17 +460,17 @@ void Arm::writeWord(u32 addr, u32 word, Access access)
         break;
 
     case kRegionPaletteRam:
-        gpu.pram.writeWord(addr, word);
+        ppu.pram.writeWord(addr, word);
         wait = 2;
         break;
 
     case kRegionVideoRam:
-        gpu.vram.writeWord(addr, word);
+        ppu.vram.writeWord(addr, word);
         wait = 2;
         break;
 
     case kRegionOam:
-        gpu.oam.writeWord(addr, word);
+        ppu.oam.writeWord(addr, word);
         wait = 1;
         break;
 

@@ -3,7 +3,7 @@
 #include <shell/ini.h>
 
 #include "panic.h"
-#include "gpu/constants.h"
+#include "ppu/constants.h"
 
 template<>
 std::optional<SDL_Scancode> shell::parse(const std::string& data)

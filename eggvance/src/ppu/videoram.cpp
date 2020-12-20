@@ -1,7 +1,7 @@
 #include "videoram.h"
 
 #include "constants.h"
-#include "gpu.h"
+#include "ppu.h"
 #include "base/bit.h"
 
 u32 VideoRamMirror::operator()(u32 addr) const
@@ -13,7 +13,7 @@ void VideoRam::writeByte(u32 addr, u8 byte)
 {
     addr = mirror(addr);
 
-    if (addr < (gpu.dispcnt.isBitmap() ? kObjectBaseBitmap : kObjectBase))
+    if (addr < (ppu.dispcnt.isBitmap() ? kObjectBaseBitmap : kObjectBase))
     {
         writeFast<u16>(addr & ~0x1, byte * 0x0101);
     }

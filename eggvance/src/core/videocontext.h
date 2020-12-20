@@ -5,7 +5,7 @@
 
 #include "base/int.h"
 #include "base/sdl2.h"
-#include "gpu/constants.h"
+#include "ppu/constants.h"
 
 class VideoContext
 {

@@ -13,7 +13,7 @@
 #include "dma/dma.h"
 #include "gamepad/gamepad.h"
 #include "gamepak/gamepak.h"
-#include "gpu/gpu.h"
+#include "ppu/ppu.h"
 #include "timer/timer.h"
 
 using namespace shell;
@@ -64,7 +64,7 @@ void core::reset()
 
     shell::reconstruct(arm);
     shell::reconstruct(dma);
-    shell::reconstruct(gpu);
+    shell::reconstruct(ppu);
     shell::reconstruct(gamepad);
     shell::reconstruct(timer);
 
@@ -79,22 +79,22 @@ void core::frame()
     while (visible--)
     {
         arm.run(960);
-        gpu.scanline();
-        gpu.hblank();
+        ppu.scanline();
+        ppu.hblank();
         arm.run(272);
-        gpu.next();
+        ppu.next();
     }
 
-    gpu.vblank();
+    ppu.vblank();
 
     uint invisible = 68;
     while (invisible--)
     {
         arm.run(1232);
-        gpu.next();
+        ppu.next();
     }
 
-    gpu.present();
+    ppu.present();
 }
 
 void core::updateTitle()

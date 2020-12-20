@@ -1,4 +1,4 @@
-#include "gpu.h"
+#include "ppu.h"
 
 #include <algorithm>
 #include <numeric>
@@ -11,7 +11,7 @@
 #include "core/videocontext.h"
 #include "dma/dma.h"
 
-Gpu::Gpu()
+Ppu::Ppu()
 {
     backgrounds[0].fill(kTransparent);
     backgrounds[1].fill(kTransparent);
@@ -52,7 +52,7 @@ Gpu::Gpu()
     }
 }
 
-void Gpu::scanline()
+void Ppu::scanline()
 {
     dispstat.vblank = false;
     dispstat.hblank = false;
@@ -84,44 +84,44 @@ void Gpu::scanline()
     switch (dispcnt.mode)
     {
     case 0:
-        renderBg(&Gpu::renderBgMode0, 0);
-        renderBg(&Gpu::renderBgMode0, 1);
-        renderBg(&Gpu::renderBgMode0, 2);
-        renderBg(&Gpu::renderBgMode0, 3);
+        renderBg(&Ppu::renderBgMode0, 0);
+        renderBg(&Ppu::renderBgMode0, 1);
+        renderBg(&Ppu::renderBgMode0, 2);
+        renderBg(&Ppu::renderBgMode0, 3);
         collapse(kLayerBg0 | kLayerBg1 | kLayerBg2 | kLayerBg3);
         break;
 
     case 1:
-        renderBg(&Gpu::renderBgMode0, 0);
-        renderBg(&Gpu::renderBgMode0, 1);
-        renderBg(&Gpu::renderBgMode2, 2);
+        renderBg(&Ppu::renderBgMode0, 0);
+        renderBg(&Ppu::renderBgMode0, 1);
+        renderBg(&Ppu::renderBgMode2, 2);
         collapse(kLayerBg0 | kLayerBg1 | kLayerBg2);
         break;
 
     case 2:
-        renderBg(&Gpu::renderBgMode2, 2);
-        renderBg(&Gpu::renderBgMode2, 3);
+        renderBg(&Ppu::renderBgMode2, 2);
+        renderBg(&Ppu::renderBgMode2, 3);
         collapse(kLayerBg2 | kLayerBg3);
         break;
 
     case 3:
-        renderBg(&Gpu::renderBgMode3, 2);
+        renderBg(&Ppu::renderBgMode3, 2);
         collapse(kLayerBg2);
         break;
 
     case 4:
-        renderBg(&Gpu::renderBgMode4, 2);
+        renderBg(&Ppu::renderBgMode4, 2);
         collapse(kLayerBg2);
         break;
 
     case 5:
-        renderBg(&Gpu::renderBgMode5, 2);
+        renderBg(&Ppu::renderBgMode5, 2);
         collapse(kLayerBg2);
         break;
     }
 }
 
-void Gpu::hblank()
+void Ppu::hblank()
 {
     dispstat.hblank = true;
     dispstat.vblank = false;
@@ -138,7 +138,7 @@ void Gpu::hblank()
     dma.broadcast(DmaControl::kTimingHBlank);
 }
 
-void Gpu::vblank()
+void Ppu::vblank()
 {
     dispstat.vblank = true;
     dispstat.hblank = false;
@@ -155,7 +155,7 @@ void Gpu::vblank()
     dma.broadcast(DmaControl::kTimingVBlank);
 }
 
-void Gpu::next()
+void Ppu::next()
 {
     dispstat.vmatch = vcount.value == dispstat.vcompare;
     if (dispstat.vmatch && dispstat.vmatch_irq)
@@ -165,7 +165,7 @@ void Gpu::next()
     vcount.next();
 }
 
-void Gpu::present()
+void Ppu::present()
 {
     dispstat.hblank = false;
     dispstat.vblank = false;

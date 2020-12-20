@@ -7,6 +7,7 @@
 #include "mmio.h"
 #include "pipeline.h"
 #include "registers.h"
+#include "base/ram.h"
 
 class Arm : public Registers
 {
