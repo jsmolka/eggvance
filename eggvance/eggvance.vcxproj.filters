@@ -21,12 +21,6 @@
     <ClCompile Include="src\arm\arm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\mmu\bios.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mmu\mmu.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\arm\disassemble.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -120,9 +114,6 @@
     <ClCompile Include="src\gamepak\rom.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\mmu\mmio.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\arm\memory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -133,6 +124,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\gpu\oam.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\arm\bios.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\arm\mmio.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -146,12 +143,6 @@
     <ClInclude Include="src\arm\arm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\bios.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\mmu.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\common\critical.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -159,9 +150,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\arm\disassemble.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mmu\ram.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\base\config.h">
@@ -257,9 +245,6 @@
     <ClInclude Include="src\gamepad\gamepad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\bios_normmatt.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\gamepak\overwrites.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -305,9 +290,6 @@
     <ClInclude Include="src\gamepak\rom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mmu\mmio.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\arm\pipeline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -318,6 +300,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\gpu\oam.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\ram.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\arm\bios.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\arm\bios_normmatt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\arm\mmio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

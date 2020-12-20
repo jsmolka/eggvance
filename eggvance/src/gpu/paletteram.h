@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mmu/ram.h"
+#include "base/ram.h"
 
 class PaletteRam : public Ram<0x400>
 {

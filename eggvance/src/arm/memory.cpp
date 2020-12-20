@@ -2,7 +2,6 @@
 
 #include "gamepak/gamepak.h"
 #include "gpu/gpu.h"
-#include "mmu/mmu.h"
 #include "timer/timer.h"
 
 enum Region
@@ -56,7 +55,7 @@ u8 Arm::readByte(u32 addr, Access access)
     case kRegionBios:
         if (addr < Bios::kSize)
         {
-            byte = mmu.bios.readByte(addr);
+            byte = bios.readByte(addr);
             wait = 1;
             break;
         }
@@ -68,17 +67,17 @@ u8 Arm::readByte(u32 addr, Access access)
         break;
 
     case kRegionExternalWorkRam:
-        byte = mmu.ewram.readByte(addr);
+        byte = ewram.readByte(addr);
         wait = 3;
         break;
 
     case kRegionInternalWorkRam:
-        byte = mmu.iwram.readByte(addr);
+        byte = iwram.readByte(addr);
         wait = 1;
         break;
 
     case kRegionMmio:
-        byte = mmu.mmio.readByte(addr);
+        byte = mmio.readByte(addr);
         wait = 1;
         break;
 
@@ -136,7 +135,7 @@ u16 Arm::readHalf(u32 addr, Access access)
     case kRegionBios:
         if (addr < Bios::kSize)
         {
-            half = mmu.bios.readHalf(addr);
+            half = bios.readHalf(addr);
             wait = 1;
             break;
         }
@@ -148,17 +147,17 @@ u16 Arm::readHalf(u32 addr, Access access)
         break;
 
     case kRegionExternalWorkRam:
-        half = mmu.ewram.readHalf(addr);
+        half = ewram.readHalf(addr);
         wait = 3;
         break;
 
     case kRegionInternalWorkRam:
-        half = mmu.iwram.readHalf(addr);
+        half = iwram.readHalf(addr);
         wait = 1;
         break;
 
     case kRegionMmio:
-        half = mmu.mmio.readHalf(addr);
+        half = mmio.readHalf(addr);
         wait = 1;
         break;
 
@@ -223,7 +222,7 @@ u32 Arm::readWord(u32 addr, Access access)
     case kRegionBios:
         if (addr < Bios::kSize)
         {
-            word = mmu.bios.readWord(addr);
+            word = bios.readWord(addr);
             wait = 1;
             break;
         }
@@ -235,17 +234,17 @@ u32 Arm::readWord(u32 addr, Access access)
         break;
 
     case kRegionExternalWorkRam:
-        word = mmu.ewram.readWord(addr);
+        word = ewram.readWord(addr);
         wait = 6;
         break;
 
     case kRegionInternalWorkRam:
-        word = mmu.iwram.readWord(addr);
+        word = iwram.readWord(addr);
         wait = 1;
         break;
 
     case kRegionMmio:
-        word = mmu.mmio.readWord(addr);
+        word = mmio.readWord(addr);
         wait = 1;
         break;
 
@@ -313,17 +312,17 @@ void Arm::writeByte(u32 addr, u8 byte, Access access)
         break;
 
     case kRegionExternalWorkRam:
-        mmu.ewram.writeByte(addr, byte);
+        ewram.writeByte(addr, byte);
         wait = 3;
         break;
 
     case kRegionInternalWorkRam:
-        mmu.iwram.writeByte(addr, byte);
+        iwram.writeByte(addr, byte);
         wait = 1;
         break;
 
     case kRegionMmio:
-        mmu.mmio.writeByte(addr, byte);
+        mmio.writeByte(addr, byte);
         wait = 1;
         break;
 
@@ -379,17 +378,17 @@ void Arm::writeHalf(u32 addr, u16 half, Access access)
         break;
 
     case kRegionExternalWorkRam:
-        mmu.ewram.writeHalf(addr, half);
+        ewram.writeHalf(addr, half);
         wait = 3;
         break;
 
     case kRegionInternalWorkRam:
-        mmu.iwram.writeHalf(addr, half);
+        iwram.writeHalf(addr, half);
         wait = 1;
         break;
 
     case kRegionMmio:
-        mmu.mmio.writeHalf(addr, half);
+        mmio.writeHalf(addr, half);
         wait = 1;
         break;
 
@@ -446,17 +445,17 @@ void Arm::writeWord(u32 addr, u32 word, Access access)
         break;
 
     case kRegionExternalWorkRam:
-        mmu.ewram.writeWord(addr, word);
+        ewram.writeWord(addr, word);
         wait = 6;
         break;
 
     case kRegionInternalWorkRam:
-        mmu.iwram.writeWord(addr, word);
+        iwram.writeWord(addr, word);
         wait = 1;
         break;
 
     case kRegionMmio:
-        mmu.mmio.writeWord(addr, word);
+        mmio.writeWord(addr, word);
         wait = 1;
         break;
 

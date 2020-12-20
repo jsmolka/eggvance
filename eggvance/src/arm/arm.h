@@ -2,7 +2,9 @@
 
 #include <array>
 
+#include "bios.h"
 #include "io.h"
+#include "mmio.h"
 #include "pipeline.h"
 #include "registers.h"
 
@@ -40,6 +42,11 @@ public:
 
     WaitControl waitcnt;
     HaltControl haltcnt;
+
+    Bios bios;
+    Ram<0x40000> ewram;
+    Ram<0x08000> iwram;
+    Mmio mmio;
 
 private:
     using Instruction32 = void(Arm::*)(u32);

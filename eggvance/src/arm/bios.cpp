@@ -51,7 +51,7 @@ Integral Bios::read(u32 addr)
     addr &= ~(sizeof(Integral) - 1);
 
     if (arm.pc < kSize)
-        cache = data.readFast<u32>(addr & ~0x3);
+        previous = data.readFast<u32>(addr & ~0x3);
 
-    return cache >> (8 * (addr & 0x3));
+    return previous >> (8 * (addr & 0x3));
 }

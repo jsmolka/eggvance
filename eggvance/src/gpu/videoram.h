@@ -1,7 +1,7 @@
 #pragma once
 
 #include "point.h"
-#include "mmu/ram.h"
+#include "base/ram.h"
 
 class VideoRamMirror
 {

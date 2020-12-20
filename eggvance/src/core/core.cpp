@@ -14,7 +14,6 @@
 #include "gamepad/gamepad.h"
 #include "gamepak/gamepak.h"
 #include "gpu/gpu.h"
-#include "mmu/mmu.h"
 #include "timer/timer.h"
 
 using namespace shell;
@@ -67,7 +66,6 @@ void core::reset()
     shell::reconstruct(dma);
     shell::reconstruct(gpu);
     shell::reconstruct(gamepad);
-    shell::reconstruct(mmu);
     shell::reconstruct(timer);
 
     arm.init();
