@@ -5,7 +5,6 @@
 #include "constants.h"
 #include "base/macros.h"
 #include "core/videocontext.h"
-#include "mmu/mmu.h"
 
 void Gpu::collapse(uint bgs)
 {
@@ -273,7 +272,7 @@ u16 Gpu::upperLayer(const BgLayers& layers, uint x)
     if (Objects && object.opaque())
         return object.color;
 
-    return mmu.pram.backdrop();
+    return pram.backdrop();
 }
 
 template<bool Objects>
@@ -293,7 +292,7 @@ u16 Gpu::upperLayer(const BgLayers& layers, uint x, uint flags)
     if (Objects && flags & kLayerObj && object.opaque())
         return object.color;
 
-    return mmu.pram.backdrop();
+    return pram.backdrop();
 }
 
 template<bool Objects>
@@ -324,7 +323,7 @@ bool Gpu::findBlendLayers(const BgLayers& layers, uint x, uint flags, u16& upper
         return flags_upper & kLayerObj;
     }
     
-    upper = mmu.pram.backdrop();
+    upper = pram.backdrop();
     return flags_upper & kLayerBdp;
 }
 
@@ -370,12 +369,12 @@ bool Gpu::findBlendLayers(const BgLayers& layers, uint x, uint flags, u16& upper
     
     if (upper_found)
     {
-        lower = mmu.pram.backdrop();
+        lower = pram.backdrop();
         return flags_lower & kLayerBdp;
     }
     else
     {
-        upper = mmu.pram.backdrop();
+        upper = pram.backdrop();
         return false;
     }
 }

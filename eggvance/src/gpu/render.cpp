@@ -3,7 +3,6 @@
 #include "mapentry.h"
 #include "matrix.h"
 #include "base/macros.h"
-#include "mmu/mmu.h"
 
 Point Gpu::transform(uint x, uint bg)
 {
@@ -79,7 +78,7 @@ void Gpu::renderBgMode0Impl(uint bg)
 
         for (; tile.x < kMapBlockTiles; ++tile.x, map += kMapEntryBytes)
         {
-            MapEntry entry(mmu.vram.readFast<u16>(map));
+            MapEntry entry(vram.readFast<u16>(map));
 
             u32 addr = bgcnt.tile_block + kTileBytes[ColorMode] * entry.tile;
             if (addr < kObjectBase)
@@ -87,12 +86,12 @@ void Gpu::renderBgMode0Impl(uint bg)
                 for (; pixel.x < kTileSize; ++pixel.x)
                 {
                     uint index = ColorMode == kColorMode16x16
-                        ? mmu.vram.index16x16(addr, pixel ^ entry.flip)
-                        : mmu.vram.index256x1(addr, pixel ^ entry.flip);
+                        ? vram.index16x16(addr, pixel ^ entry.flip)
+                        : vram.index256x1(addr, pixel ^ entry.flip);
 
                     backgrounds[bg][x] = ColorMode == kColorMode16x16
-                        ? mmu.pram.colorBg(index, entry.bank)
-                        : mmu.pram.colorBg(index);
+                        ? pram.colorBg(index, entry.bank)
+                        : pram.colorBg(index);
 
                     if (++x == kScreen.x)
                         return;
@@ -143,10 +142,10 @@ void Gpu::renderBgMode2(uint bg)
         const auto pixel = texel % kTileSize;
         const auto tile  = texel / kTileSize;
 
-        uint entry = mmu.vram.readFast<u8>(bgcnt.map_block + tile.index2d(size.x / kTileSize));
-        uint index = mmu.vram.index256x1(bgcnt.tile_block + kTileBytes[kColorMode256x1] * entry, pixel);
+        uint entry = vram.readFast<u8>(bgcnt.map_block + tile.index2d(size.x / kTileSize));
+        uint index = vram.index256x1(bgcnt.tile_block + kTileBytes[kColorMode256x1] * entry, pixel);
 
-        backgrounds[bg][x] = mmu.pram.colorBg(index);
+        backgrounds[bg][x] = pram.colorBg(index);
     }
 }
 
@@ -160,7 +159,7 @@ void Gpu::renderBgMode3(uint bg)
         {
             u32 addr = kColorBytes * texel.index2d(kScreen.x);
 
-            backgrounds[bg][x] = mmu.vram.readFast<u16>(addr) & kColorMask;
+            backgrounds[bg][x] = vram.readFast<u16>(addr) & kColorMask;
         }
         else
         {
@@ -177,9 +176,9 @@ void Gpu::renderBgMode4(uint bg)
 
         if (texel >= kOrigin && texel < kScreen)
         {
-            uint index = mmu.vram.readFast<u8>(dispcnt.frame + texel.index2d(kScreen.x));
+            uint index = vram.readFast<u8>(dispcnt.frame + texel.index2d(kScreen.x));
 
-            backgrounds[bg][x] = mmu.pram.colorBg(index);
+            backgrounds[bg][x] = pram.colorBg(index);
         }
         else
         {
@@ -200,7 +199,7 @@ void Gpu::renderBgMode5(uint bg)
         {
             u32 addr = dispcnt.frame + kColorBytes * texel.index2d(kBitmap.x);
 
-            backgrounds[bg][x] = mmu.vram.readFast<u16>(addr) & kColorMask;
+            backgrounds[bg][x] = vram.readFast<u16>(addr) & kColorMask;
         }
         else
         {
@@ -215,7 +214,7 @@ void Gpu::renderObjects()
 
     int cycles = dispcnt.oam_free ? 954 : 1210;
 
-    for (const auto& entry : mmu.oam.entries)
+    for (const auto& entry : oam.entries)
     {
         if (entry.disabled || !entry.isVisible(vcount.value))
             continue;
@@ -224,7 +223,7 @@ void Gpu::renderObjects()
         const auto& center      = entry.center;
         const auto& sprite_size = entry.sprite_size;
         const auto& screen_size = entry.screen_size;
-        const auto& matrix      = entry.affine ? mmu.oam.matrices[entry.matrix] : kIdentity;
+        const auto& matrix      = entry.affine ? oam.matrices[entry.matrix] : kIdentity;
 
         uint tile_bytes = entry.tileBytes();
         uint tiles_row  = entry.tilesInRow(dispcnt.layout);
@@ -255,13 +254,13 @@ void Gpu::renderObjects()
             const auto tile  = texel / kTileSize;
             const auto pixel = texel % kTileSize;
 
-            u32 addr = mmu.vram.mirror(entry.base_addr + tile_bytes * tile.index2d(tiles_row));
+            u32 addr = vram.mirror(entry.base_addr + tile_bytes * tile.index2d(tiles_row));
             if (addr < kObjectBaseBitmap && dispcnt.isBitmap())
                 continue;
 
             auto& object = objects[x];
 
-            uint index = mmu.vram.index(addr, pixel, entry.color_mode);
+            uint index = vram.index(addr, pixel, entry.color_mode);
             if ( index != 0)
             {
                 switch (entry.object_mode)
@@ -270,7 +269,7 @@ void Gpu::renderObjects()
                 case kObjectModeAlpha:
                     if (entry.priority < object.priority || !object.opaque())
                     {
-                        object.color    = mmu.pram.colorFgOpaque(index, bank);
+                        object.color    = pram.colorFgOpaque(index, bank);
                         object.priority = entry.priority;
                         object.alpha    = entry.object_mode == kObjectModeAlpha;
                     }

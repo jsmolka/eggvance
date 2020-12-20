@@ -1,6 +1,6 @@
 #include "paletteram.h"
 
-#include "gpu/constants.h"
+#include "constants.h"
 
 constexpr uint kBankBytes = 0x20;
 constexpr uint kPaletteFg = 0x200;

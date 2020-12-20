@@ -1,8 +1,8 @@
 #include "videoram.h"
 
+#include "constants.h"
+#include "gpu.h"
 #include "base/bit.h"
-#include "gpu/constants.h"
-#include "gpu/gpu.h"
 
 u32 VideoRamMirror::operator()(u32 addr) const
 {

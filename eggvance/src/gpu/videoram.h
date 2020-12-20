@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ram.h"
-#include "gpu/point.h"
+#include "point.h"
+#include "mmu/ram.h"
 
 class VideoRamMirror
 {

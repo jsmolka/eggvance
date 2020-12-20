@@ -5,10 +5,15 @@
 #include "buffer.h"
 #include "io.h"
 #include "layer.h"
+#include "oam.h"
+#include "paletteram.h"
+#include "videoram.h"
 
 class Gpu
 {
 public:
+    friend class Arm;
+
     Gpu();
 
     void scanline();
@@ -102,6 +107,10 @@ private:
     bool objects_exist = false;
     bool objects_alpha = false;
     std::array<u32, 0x8000> argb;
+
+    PaletteRam pram;
+    VideoRam vram;
+    Oam oam;
 };
 
 inline Gpu gpu;

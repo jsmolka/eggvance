@@ -167,12 +167,12 @@
     <ClCompile Include="src\mmu\bios.cpp" />
     <ClCompile Include="src\mmu\mmu.cpp" />
     <ClCompile Include="src\dma\dmachannel.cpp" />
-    <ClCompile Include="src\mmu\oam.cpp" />
+    <ClCompile Include="src\gpu\oam.cpp" />
     <ClCompile Include="src\gpu\oamentry.cpp" />
-    <ClCompile Include="src\mmu\paletteram.cpp" />
+    <ClCompile Include="src\gpu\paletteram.cpp" />
     <ClCompile Include="src\gpu\gpu.cpp" />
     <ClCompile Include="src\gpu\render.cpp" />
-    <ClCompile Include="src\mmu\videoram.cpp" />
+    <ClCompile Include="src\gpu\videoram.cpp" />
     <ClCompile Include="src\timer\timerchannel.cpp" />
     <ClCompile Include="src\timer\timer.cpp" />
   </ItemGroup>
@@ -231,11 +231,11 @@
     <ClInclude Include="src\mmu\mmu.h" />
     <ClInclude Include="src\gpu\buffer.h" />
     <ClInclude Include="src\gpu\layer.h" />
-    <ClInclude Include="src\mmu\oam.h" />
+    <ClInclude Include="src\gpu\oam.h" />
     <ClInclude Include="src\gpu\oamentry.h" />
-    <ClInclude Include="src\mmu\paletteram.h" />
+    <ClInclude Include="src\gpu\paletteram.h" />
     <ClInclude Include="src\gpu\gpu.h" />
-    <ClInclude Include="src\mmu\videoram.h" />
+    <ClInclude Include="src\gpu\videoram.h" />
     <ClInclude Include="src\timer\timerchannel.h" />
     <ClInclude Include="src\timer\timer.h" />
   </ItemGroup>
