@@ -1,6 +1,7 @@
 #pragma once
 
 #include "io.h"
+#include "arm/constants.h"
 
 class DmaChannel
 {
@@ -9,7 +10,7 @@ public:
 
     void reload();
     void start();
-    void run(int& cycles);
+    void run();
 
     const uint id;
     bool running = false;
@@ -20,15 +21,10 @@ public:
     RegisterW<u32> dad;
 
 private:
-    static bool isGamePak(u32 addr);
-
-    void initCycles();
     void initTransfer();
     void initEeprom();
 
     int pending  = 0;
-    int cycles_s = 0;
-    int cycles_n = 0;
     u32 bus      = 0;
 
     struct
@@ -38,5 +34,5 @@ private:
         u32 dst_addr = 0;
     } internal;
 
-    std::function<void(void)> transfer;
+    std::function<void(Access)> transfer;
 };

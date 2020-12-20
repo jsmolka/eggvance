@@ -9,13 +9,24 @@
 class Arm : public Registers
 {
 public:
+    friend class Dma;
+    friend class DmaChannel;
+
     Arm();
 
     void init();
     void run(int cycles);
     void raise(uint irq);
 
+    u8  readByte(u32 addr, Access access = Access::NonSequential);
+    u16 readHalf(u32 addr, Access access = Access::NonSequential);
+    u32 readWord(u32 addr, Access access = Access::NonSequential);
+
     u32 readUnused() const;
+
+    void writeByte(u32 addr, u8  byte, Access access = Access::NonSequential);
+    void writeHalf(u32 addr, u16 half, Access access = Access::NonSequential);
+    void writeWord(u32 addr, u32 word, Access access = Access::NonSequential);
 
     uint state = 0;
     Pipeline pipe;
@@ -56,14 +67,6 @@ private:
     u32 sbc(u32 op1, u32 op2, bool flags = true);
 
     bool isSequential(u32 addr) const;
-
-    u8  readByte(u32 addr, Access access = Access::NonSequential);
-    u16 readHalf(u32 addr, Access access = Access::NonSequential);
-    u32 readWord(u32 addr, Access access = Access::NonSequential);
-
-    void writeByte(u32 addr, u8  byte, Access access = Access::NonSequential);
-    void writeHalf(u32 addr, u16 half, Access access = Access::NonSequential);
-    void writeWord(u32 addr, u32 word, Access access = Access::NonSequential);
 
     u32 readWordRotate(u32 addr, Access access = Access::NonSequential);
     u32 readHalfRotate(u32 addr, Access access = Access::NonSequential);

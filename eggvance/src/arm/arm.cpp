@@ -67,12 +67,7 @@ void Arm::dispatch()
     {
         if (State & kStateDma)
         {
-            int prev = cycles;
-
-            dma.run(cycles);
-
-            if (state & kStateTimer)
-                timer.run(prev - cycles);
+            dma.run();
         }
         else
         {

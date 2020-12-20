@@ -16,11 +16,11 @@ Dma::Dma()
     }
 }
 
-void Dma::run(int& cycles)
+void Dma::run()
 {
-    while (active && cycles > 0)
+    while (active && arm.cycles > 0)
     {
-        active->run(cycles);
+        active->run();
 
         if (!active->running)
         {

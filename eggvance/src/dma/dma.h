@@ -7,7 +7,7 @@ class Dma
 public:
     Dma();
 
-    void run(int& cycles);
+    void run();
     void broadcast(DmaControl::Timing timing);
 
     DmaChannel channels[4] = { 0, 1, 2, 3 };

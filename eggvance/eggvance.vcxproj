@@ -136,7 +136,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\arm\arm.cpp" />
-    <ClCompile Include="src\arm\bus.cpp" />
+    <ClCompile Include="src\arm\memory.cpp" />
     <ClCompile Include="src\arm\disassemble.cpp" />
     <ClCompile Include="src\arm\instr_arm.cpp" />
     <ClCompile Include="src\arm\instr_thumb.cpp" />

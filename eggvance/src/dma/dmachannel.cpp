@@ -4,7 +4,6 @@
 #include "arm/constants.h"
 #include "gamepak/eeprom.h"
 #include "gamepak/gamepak.h"
-#include "mmu/mmu.h"
 
 DmaChannel::DmaChannel(uint id)
     : id(id)
@@ -43,29 +42,36 @@ void DmaChannel::start()
     internal.src_addr &= ~((2 << control.word) - 1);
     internal.dst_addr &= ~((2 << control.word) - 1);
 
-    initCycles();
     initTransfer();
 }
 
-void DmaChannel::run(int& cycles)
+void DmaChannel::run()
 {
     while (pending-- > 0)
     {
+        if (pending == 0)
+        {
+            if (!((internal.src_addr & 0x800'0000) && (internal.dst_addr & 0x800'0000)))
+            {
+                arm.idle();
+                arm.idle();
+            }
+            transfer(Access::NonSequential);
+        }
+        else
+        {
+            transfer(Access::Sequential);
+        }
+
         static constexpr int kDeltas[2][4] = {
             { 2, -2, 0, 2 },
             { 4, -4, 0, 4 }
         };
 
-        transfer();
-
         internal.src_addr += kDeltas[control.word][control.sadcnt];
         internal.dst_addr += kDeltas[control.word][control.dadcnt];
 
-        cycles -= pending == 0
-            ? cycles_n
-            : cycles_s;
-
-        if (cycles <= 0 && pending > 0)
+        if (arm.cycles <= 0 && pending > 0)
             return;
     }
 
@@ -81,40 +87,6 @@ void DmaChannel::run(int& cycles)
         control.value &= ~DmaControl::kEnable;
 }
 
-bool DmaChannel::isGamePak(u32 addr)
-{
-    return addr >= 0x800'0000 && addr < 0xE00'0000;
-}
-
-void DmaChannel::initCycles()
-{
-    if (isGamePak(internal.src_addr) && isGamePak(internal.dst_addr))
-    {
-        cycles_s = 4;
-        cycles_n = 4;
-    }
-    else
-    {
-        cycles_s = 2;
-        cycles_n = 2;
-    }
-
-    if (control.word)
-    {
-        cycles_n += arm.waitcnt.cyclesWord(internal.src_addr, Access::NonSequential);
-        cycles_n += arm.waitcnt.cyclesWord(internal.dst_addr, Access::NonSequential);
-        cycles_s += arm.waitcnt.cyclesWord(internal.src_addr, Access::Sequential);
-        cycles_s += arm.waitcnt.cyclesWord(internal.dst_addr, Access::Sequential);
-    }
-    else
-    {
-        cycles_n += arm.waitcnt.cyclesHalf(internal.src_addr, Access::NonSequential);
-        cycles_n += arm.waitcnt.cyclesHalf(internal.dst_addr, Access::NonSequential);
-        cycles_s += arm.waitcnt.cyclesHalf(internal.src_addr, Access::Sequential);
-        cycles_s += arm.waitcnt.cyclesHalf(internal.dst_addr, Access::Sequential);
-    }
-}
-
 void DmaChannel::initTransfer()
 {
     bool eeprom_r = gamepak.isEepromAccess(internal.src_addr);
@@ -126,17 +98,17 @@ void DmaChannel::initTransfer()
 
         if (eeprom_r)
         {
-            transfer = [&]() {
+            transfer = [&](Access access) {
                 if (internal.src_addr >= 0x200'0000) bus = gamepak.save->read(internal.src_addr);
-                if (internal.dst_addr >= 0x200'0000) mmu.writeHalf(internal.dst_addr, bus);
+                if (internal.dst_addr >= 0x200'0000) arm.writeHalf(internal.dst_addr, bus, access);
             };
         }
         else
         {
-            transfer = [&]() {
+            transfer = [&](Access access) {
                 if (internal.src_addr >= 0x200'0000) 
                 {
-                    bus = mmu.readHalf(internal.src_addr);
+                    bus = arm.readHalf(internal.src_addr, access);
                     bus |= bus << 16;
                 }
                 if (internal.dst_addr >= 0x200'0000) 
@@ -148,21 +120,21 @@ void DmaChannel::initTransfer()
     {
         if (control.word)
         {
-            transfer = [&]() {
-                if (internal.src_addr >= 0x200'0000) bus = mmu.readWord(internal.src_addr);
-                if (internal.dst_addr >= 0x200'0000) mmu.writeWord(internal.dst_addr, bus);
+            transfer = [&](Access access) {
+                if (internal.src_addr >= 0x200'0000) bus = arm.readWord(internal.src_addr, access);
+                if (internal.dst_addr >= 0x200'0000) arm.writeWord(internal.dst_addr, bus, access);
             };
         }
         else
         {
-            transfer = [&]() {
+            transfer = [&](Access access) {
                 if (internal.src_addr >= 0x200'0000)
                 {
-                    bus = mmu.readHalf(internal.src_addr);
+                    bus = arm.readHalf(internal.src_addr, access);
                     bus |= bus << 16;
                 }
                 if (internal.dst_addr >= 0x200'0000)
-                    mmu.writeHalf(internal.dst_addr, bus);
+                    arm.writeHalf(internal.dst_addr, bus, access);
             };
         }
     }
