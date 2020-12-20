@@ -34,6 +34,21 @@ void Bios::init(const fs::path& path)
     }
 }
 
+u8  Bios::readByte(u32 addr) { return read< u8>(addr); }
+u16 Bios::readHalf(u32 addr) { return read<u16>(addr); }
+u32 Bios::readWord(u32 addr) { return read<u32>(addr); }
+
+template<typename Integral>
+Integral Bios::read(u32 addr)
+{
+    addr &= ~(sizeof(Integral) - 1);
+
+    if (std::is_same_v<Integral, u32> && arm.pc < kSize)
+        previous = *reinterpret_cast<Integral*>(&data[addr & ~0x3]);
+
+    return previous >> (8 * (addr & 0x3));
+}
+
 std::array<u8, Bios::kSize> Bios::data =
 {
     0x0C, 0x00, 0x00, 0xEA, 0x15, 0x00, 0x00, 0xEA, 0x15, 0x00, 0x00, 0xEA, 0x13, 0x00, 0x00, 0xEA, 0x12, 0x00, 0x00, 0xEA, 0x11, 0x00, 0x00, 0xEA, 0x00, 0x00, 0x00, 0xEA, 0xFF, 0xFF, 0xFF, 0xEA,
