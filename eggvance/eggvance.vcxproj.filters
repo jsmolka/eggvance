@@ -308,9 +308,6 @@
     <ClInclude Include="src\arm\bios.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\arm\bios_normmatt.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\arm\mmio.h">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -55,7 +55,7 @@ u8 Arm::readByte(u32 addr, Access access)
     case kRegionBios:
         if (addr < Bios::kSize)
         {
-            byte = bios.readByte(addr);
+            byte = bios.read<u8>(addr);
             wait = 1;
             break;
         }
@@ -135,7 +135,7 @@ u16 Arm::readHalf(u32 addr, Access access)
     case kRegionBios:
         if (addr < Bios::kSize)
         {
-            half = bios.readHalf(addr);
+            half = bios.read<u16>(addr);
             wait = 1;
             break;
         }
@@ -222,7 +222,7 @@ u32 Arm::readWord(u32 addr, Access access)
     case kRegionBios:
         if (addr < Bios::kSize)
         {
-            word = bios.readWord(addr);
+            word = bios.read<u32>(addr);
             wait = 1;
             break;
         }
