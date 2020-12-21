@@ -280,15 +280,15 @@ void Arm::Arm_MultiplyLong(u32 instr)
     constexpr uint kAccumulate = bit::seq<21, 1>(Instr);
     constexpr uint kSign       = bit::seq<22, 1>(Instr);
 
-    uint rm  = bit::seq< 0, 4>(instr);
-    uint rs  = bit::seq< 8, 4>(instr);
-    uint rdl = bit::seq<12, 4>(instr);
-    uint rdh = bit::seq<16, 4>(instr);
+    uint rm    = bit::seq< 0, 4>(instr);
+    uint rs    = bit::seq< 8, 4>(instr);
+    uint rd_lo = bit::seq<12, 4>(instr);
+    uint rd_hi = bit::seq<16, 4>(instr);
 
-    u64  op1  = regs[rm];
-    u64  op2  = regs[rs];
-    u32& dstl = regs[rdl];
-    u32& dsth = regs[rdh];
+    u64  op1    = regs[rm];
+    u64  op2    = regs[rs];
+    u32& dst_lo = regs[rd_lo];
+    u32& dst_hi = regs[rd_hi];
 
     if (kSign)
     {
@@ -300,13 +300,14 @@ void Arm::Arm_MultiplyLong(u32 instr)
 
     if (kAccumulate)
     {
-        res += (static_cast<u64>(dsth) << 32) | dstl;
+        res += static_cast<u64>(dst_hi) << 32 | dst_lo;
+
         idle();
     }
     log(res, kFlags);
 
-    dstl = static_cast<u32>(res);
-    dsth = static_cast<u32>(res >> 32);
+    dst_lo = static_cast<u32>(res);
+    dst_hi = static_cast<u32>(res >> 32);
 
     booth(static_cast<u32>(op2), kSign);
     idle();
