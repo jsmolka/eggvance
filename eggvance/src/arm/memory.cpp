@@ -859,14 +859,7 @@ u32 Arm::readByteSignEx(u32 addr, Access access)
 
 u32 Arm::readHalfSignEx(u32 addr, Access access)
 {
-    if (addr & 0x1)
-    {
-        u32 value = readByte(addr, access);
-        return bit::signEx<8>(value);
-    }
-    else
-    {
-        u32 value = readHalf(addr, access);
-        return bit::signEx<16>(value);
-    }
+    u32 value = readHalf(addr, access);
+    value = bit::signEx<16>(value);
+    return bit::sar(value, 8 * (addr & 0x3));
 }
