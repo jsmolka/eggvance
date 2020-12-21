@@ -57,7 +57,7 @@ void Config::init(const fs::path& file)
     }
     catch (const shell::ParseError& error)
     {
-        panic("Cannot parse config: {}\nError: {}", file, error.what());
+        panic("Cannot parse config {}\n{}", file, error.what());
     }
 
     save_path = ini.findOr("general", "save_path", fs::path());
@@ -73,7 +73,7 @@ void Config::init(const fs::path& file)
         if (!fs::is_directory(save_path))
         {
             if (!fs::create_directories(save_path))
-                panic("Cannot create save path: {}", save_path);
+                panic("Cannot create save path {}", save_path);
         }
     }
 

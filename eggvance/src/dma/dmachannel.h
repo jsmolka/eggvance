@@ -24,8 +24,8 @@ private:
     void initTransfer();
     void initEeprom();
 
-    int pending  = 0;
-    u32 bus      = 0;
+    int pending = 0;
+    u32 bus     = 0;
 
     struct
     {

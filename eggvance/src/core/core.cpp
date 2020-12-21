@@ -55,7 +55,7 @@ void core::init(int argc, char* argv[])
     catch (const shell::ParseError& error)
     {
         fmt::print(options.help());
-        panic("Cannot parse command line\nError: {}", error.what());
+        panic("Cannot parse command line\n{}", error.what());
     }
 }
 

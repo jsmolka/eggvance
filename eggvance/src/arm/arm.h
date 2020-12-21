@@ -52,6 +52,9 @@ private:
         kShiftRor
     };
 
+    static const std::array<Instruction32, 4096> instr_arm;
+    static const std::array<Instruction16, 1024> instr_thumb;
+
     template<uint Hash> static constexpr Instruction32 Arm_Decode();
     template<uint Hash> static constexpr Instruction16 Thumb_Decode();
 
@@ -126,9 +129,6 @@ private:
     template<u16 Instr> void Thumb_UnconditionalBranch(u16 instr);
     template<u16 Instr> void Thumb_LongBranchLink(u16 instr);
     template<u16 Instr> void Thumb_Undefined(u16 instr);
-
-    static const std::array<Instruction32, 4096> instr_arm;
-    static const std::array<Instruction16, 1024> instr_thumb;
 
     Bios bios;
     Ram<0x40000> ewram{};
