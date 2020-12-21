@@ -861,5 +861,5 @@ u32 Arm::readHalfSignEx(u32 addr, Access access)
 {
     u32 value = readHalf(addr, access);
     value = bit::signEx<16>(value);
-    return bit::sar(value, 8 * (addr & 0x3));
+    return bit::sar(value, 8 * (addr & 0x1));
 }
