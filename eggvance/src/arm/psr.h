@@ -36,19 +36,13 @@ public:
         return (m << 0) | (t << 5) | (f << 6) | (i << 7) | (v << 28) | (c << 29) | (z << 30) | (n << 31);
     }
 
-    template<typename Integral>
-    void setZ(Integral value)
+    void setZ(u32 value)
     {
-        static_assert(shell::is_any_of_v<Integral, u32, u64>);
-
         z = value == 0;
     }
 
-    template<typename Integral>
-    void setN(Integral value)
+    void setN(u32 value)
     {
-        static_assert(shell::is_any_of_v<Integral, u32, u64>);
-
         n = bit::msb(value);
     }
 

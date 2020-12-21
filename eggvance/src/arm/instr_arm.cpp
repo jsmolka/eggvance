@@ -301,10 +301,14 @@ void Arm::Arm_MultiplyLong(u32 instr)
     if (kAccumulate)
     {
         res += static_cast<u64>(dst_hi) << 32 | dst_lo;
-
         idle();
     }
-    log(res, kFlags);
+
+    if (kFlags)
+    {
+        cpsr.z = res == 0;
+        cpsr.n = bit::msb(res);
+    }
 
     dst_lo = static_cast<u32>(res);
     dst_hi = static_cast<u32>(res >> 32);

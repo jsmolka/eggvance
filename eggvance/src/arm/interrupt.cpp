@@ -18,7 +18,7 @@ void Arm::raise(uint irq)
 {
     this->irq.request.value |= irq;
 
-    processIrq();
+    interruptProcess();
 }
 
 void Arm::interrupt(u32 pc, u32 lr, Psr::Mode mode)
@@ -51,7 +51,7 @@ void Arm::interruptSw()
     interrupt(kVectorSwi, lr, Psr::kModeSvc);
 }
 
-void Arm::processIrq()
+void Arm::interruptProcess()
 {
     bool interrupt = irq.enable.value & irq.request.value;
 

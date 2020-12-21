@@ -1,5 +1,15 @@
 #include "arm.h"
 
+u32 Arm::log(u32 op1, bool flags)
+{
+    if (flags)
+    {
+        cpsr.setZ(op1);
+        cpsr.setN(op1);
+    }
+    return op1;
+}
+
 u32 Arm::add(u32 op1, u32 op2, bool flags)
 {
     u32 res = op1 + op2;

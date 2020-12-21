@@ -1,18 +1,3 @@
-#pragma once
-
-template<typename Integral>
-Integral Arm::log(Integral value, bool flags)
-{
-    static_assert(shell::is_any_of_v<Integral, u32, u64>);
-
-    if (flags)
-    {
-        cpsr.setZ(value);
-        cpsr.setN(value);
-    }
-    return value;
-}
-
 template<bool Immediate>
 u32 Arm::lsl(u32 value, u32 amount, bool flags)
 {

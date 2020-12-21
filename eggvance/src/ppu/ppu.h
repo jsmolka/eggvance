@@ -108,9 +108,9 @@ private:
     bool objects_alpha = false;
     std::array<u32, 0x8000> argb;
 
-    PaletteRam pram;
-    VideoRam vram;
-    Oam oam;
+    PaletteRam pram{};
+    VideoRam vram{};
+    Oam oam{};
 };
 
 inline Ppu ppu;

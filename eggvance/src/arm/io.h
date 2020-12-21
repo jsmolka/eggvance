@@ -66,10 +66,10 @@ public:
     {
         Register::write<Index>(byte);
 
-        process();
+        on_write();
     }
 
-    std::function<void(void)> process;
+    std::function<void(void)> on_write;
 };
 
 class IrqEnable : public Register<u16, 0x3FFF>
@@ -80,10 +80,10 @@ public:
     {
         Register::write<Index>(byte);
 
-        process();
+        on_write();
     }
 
-    std::function<void(void)> process;
+    std::function<void(void)> on_write;
 };
 
 class IrqRequest : public Register<u16, 0x3FFF>
@@ -96,9 +96,9 @@ public:
 
         data[Index] &= ~(byte & bit::byte<Index>(kMask));
 
-        process();
+        on_write();
     }
 
-    std::function<void(void)> process;
+    std::function<void(void)> on_write;
 };
 

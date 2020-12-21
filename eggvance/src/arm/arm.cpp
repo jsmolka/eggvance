@@ -1,7 +1,5 @@
 #include "arm.h"
 
-#include <utility>
-
 #include "constants.h"
 #include "decode.h"
 #include "base/config.h"
@@ -11,18 +9,17 @@
 
 Arm::Arm()
 {
-    irq.master.process  = std::bind(&Arm::processIrq, this);
-    irq.enable.process  = std::bind(&Arm::processIrq, this);
-    irq.request.process = std::bind(&Arm::processIrq, this);
+    irq.master.on_write  = std::bind(&Arm::interruptProcess, this);
+    irq.enable.on_write  = std::bind(&Arm::interruptProcess, this);
+    irq.request.on_write = std::bind(&Arm::interruptProcess, this);
 
-    postflag.value = config.bios_skip;
+    postflg.value = config.bios_skip;
 }
 
 void Arm::init()
 {
-    pipe[0] = readWord(pc + 0);
-    pipe[1] = readWord(pc + 4);
-    pc += 8;
+    flushWord();
+    pc += 4;
 }
 
 void Arm::run(int cycles)
@@ -80,8 +77,6 @@ void Arm::dispatch()
                     timer.runUntilIrq(cycles);
                 else
                     cycles = 0;
-
-                return;
             }
             else
             {

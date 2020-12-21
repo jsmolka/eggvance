@@ -15,22 +15,9 @@ public:
 };
 
 template<uint N, typename Mirror = BasicMirror<N>>
-class Ram : protected std::array<u8, N>
+class Ram : public std::array<u8, N>
 {
 public:
-    using typename std::array<u8, N>::value_type;
-    using typename std::array<u8, N>::iterator;
-    using typename std::array<u8, N>::const_iterator;
-    using typename std::array<u8, N>::reverse_iterator;
-    using typename std::array<u8, N>::const_reverse_iterator;
-
-    Ram() : std::array<u8, N>{} {}
-
-    using std::array<u8, N>::size;
-    using std::array<u8, N>::data;
-    using std::array<u8, N>::begin;
-    using std::array<u8, N>::end;
-
     template<typename Integral>
     Integral readFast(u32 addr) const
     {

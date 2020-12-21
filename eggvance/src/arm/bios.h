@@ -1,9 +1,7 @@
 #pragma once
 
-#include <array>
-
 #include "base/filesystem.h"
-#include "base/int.h"
+#include "base/ram.h"
 
 class Bios
 {
@@ -20,7 +18,7 @@ private:
     template<typename Integral>
     Integral read(u32 addr);
 
-    static std::array<u8, kSize> data;
+    static Ram<kSize> data;
 
     u32 previous = 0xE129'F000;
 };
