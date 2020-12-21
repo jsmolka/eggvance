@@ -21,13 +21,13 @@ public:
     template<typename Integral>
     Integral readFast(u32 addr) const
     {
-        return *reinterpret_cast<const Integral*>(data() + addr);
+        return *reinterpret_cast<const Integral*>(this->data() + addr);
     }
 
     template<typename Integral>
     void writeFast(u32 addr, Integral value)
     {
-        *reinterpret_cast<Integral*>(data() + addr) = value;
+        *reinterpret_cast<Integral*>(this->data() + addr) = value;
     }
 
     u8  readByte(u32 addr) const { return read<u8 >(addr); }
