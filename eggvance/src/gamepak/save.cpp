@@ -26,7 +26,7 @@ Save::~Save()
         && type != Type::None)
     {
         if (fs::write(file, data) != fs::Status::Ok)
-            panic("Cannot write save: {}", file);
+            panic("Cannot write save {}", file);
     }
 }
 
@@ -66,7 +66,7 @@ void Save::init(const fs::path& file)
             panic("Cannot read save {}", file);
 
         if (!isValid(data.size()))
-            panic("Invalid save size {}", data.size());
+            panic("Bad save size {}", data.size());
     }
 }
 

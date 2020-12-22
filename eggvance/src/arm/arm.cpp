@@ -80,8 +80,10 @@ void Arm::dispatch()
             }
             else
             {
-                if (State & kStateIrq && !cpsr.i)
+                if (State & kStateIrq && !cpsr.i && irq.delay == 0)
                 {
+                    irq.delaying = false;
+
                     interruptHw();
                 }
                 else
@@ -122,6 +124,12 @@ void Arm::clock(int cycles)
 
     if (state & kStateTimer)
         timer.run(cycles);
+
+    while (irq.delay && cycles)
+    {
+        --irq.delay;
+        --cycles;
+    }
 }
 
 void Arm::idle()

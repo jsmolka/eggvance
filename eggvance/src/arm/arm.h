@@ -31,6 +31,9 @@ public:
 
     struct
     {
+        uint delay = 0;
+        bool delaying = false;
+
         IrqMaster  master;
         IrqEnable  enable;
         IrqRequest request;
