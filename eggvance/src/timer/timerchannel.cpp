@@ -14,6 +14,7 @@ TimerChannel::TimerChannel(uint id)
 
 void TimerChannel::start()
 {
+    delay    = 2;
     counter  = 0;
     initial  = count.initial;
     overflow = control.prescaler * (kOverflow - initial);
@@ -27,6 +28,12 @@ void TimerChannel::update()
 
 void TimerChannel::run(int cycles)
 {
+    while (delay && cycles)
+    {
+        --delay;
+        --cycles;
+    }
+
     counter += cycles;
     
     if (counter >= overflow)
@@ -50,7 +57,7 @@ uint TimerChannel::nextEvent() const
         return kEventMax;
 
     if (!control.cascade)
-        return overflow - counter;
+        return overflow - counter + delay;
 
     if (!prev)
         return kEventMax;
@@ -63,5 +70,5 @@ uint TimerChannel::nextEvent() const
         event *= channel->control.prescaler * (kOverflow - channel->initial);
         count += channel->counter;
     }
-    return event - count;
+    return event - count + delay;
 }

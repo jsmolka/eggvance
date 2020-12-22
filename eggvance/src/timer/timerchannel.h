@@ -20,6 +20,7 @@ public:
     TimerChannel* next = nullptr;
 
 private:
+    uint delay    = 2;
     uint counter  = 0;
     uint initial  = 0;
     uint overflow = 0;
