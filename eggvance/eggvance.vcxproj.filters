@@ -135,6 +135,9 @@
     <ClCompile Include="src\sio\sio.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\arm\mmio.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\arm\psr.h">

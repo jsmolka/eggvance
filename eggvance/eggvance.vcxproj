@@ -144,6 +144,7 @@
     <ClCompile Include="src\arm\interrupt.cpp" />
     <ClCompile Include="src\arm\io.cpp" />
     <ClCompile Include="src\arm\arithmetic.cpp" />
+    <ClCompile Include="src\arm\mmio.cpp" />
     <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\base\config.cpp" />
     <ClCompile Include="src\core\audiocontext.cpp" />
