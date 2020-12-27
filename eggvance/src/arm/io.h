@@ -39,8 +39,8 @@ public:
         update();
     }
 
-    int cyclesHalf(u32 addr, Access access) const { return cycles_half[(addr >> 25) - 4][static_cast<uint>(access)]; }
-    int cyclesWord(u32 addr, Access access) const { return cycles_word[(addr >> 25) - 4][static_cast<uint>(access)]; }
+    int cyclesHalf(u32 addr, Access access) const { return cycles_half[(addr >> 25) & 0x3][static_cast<uint>(access)]; }
+    int cyclesWord(u32 addr, Access access) const { return cycles_word[(addr >> 25) & 0x3][static_cast<uint>(access)]; }
 
     uint sram     = 0;
     uint ws0_n    = 0;
