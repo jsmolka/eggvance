@@ -27,9 +27,6 @@ u8 Arm::readByte(u32 addr, Access access)
 {
     pipe.access = Access::NonSequential;
 
-    u8  byte;
-    int wait;
-
     switch (addr >> 24)
     {
     case kRegionBios:
