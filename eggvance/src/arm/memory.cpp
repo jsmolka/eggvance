@@ -98,7 +98,7 @@ u8 Arm::readByte(u32 addr, Access access)
         break;
     }
 
-    clock(wait);
+    clock(prefetch(addr, wait));
 
     return byte;
 }
@@ -189,7 +189,7 @@ u16 Arm::readHalf(u32 addr, Access access)
         break;
     }
 
-    clock(wait);
+    clock(prefetch(addr, wait));
 
     return half;
 }
@@ -282,7 +282,7 @@ u32 Arm::readWord(u32 addr, Access access)
         break;
     }
 
-    clock(wait);
+    clock(prefetch(addr, wait));
 
     return word;
 }
@@ -350,7 +350,7 @@ void Arm::writeByte(u32 addr, u8 byte, Access access)
         break;
     }
 
-    clock(wait);
+    clock(prefetch(addr, wait));
 }
 
 void Arm::writeHalf(u32 addr, u16 half, Access access)
@@ -419,7 +419,7 @@ void Arm::writeHalf(u32 addr, u16 half, Access access)
         break;
     }
 
-    clock(wait);
+    clock(prefetch(addr, wait));
 }
 
 void Arm::writeWord(u32 addr, u32 word, Access access)
@@ -490,7 +490,7 @@ void Arm::writeWord(u32 addr, u32 word, Access access)
         break;
     }
 
-    clock(wait);
+    clock(prefetch(addr, wait));
 }
 
 u32 Arm::readUnused() const

@@ -146,6 +146,7 @@
     <ClCompile Include="src\arm\arithmetic.cpp" />
     <ClCompile Include="src\arm\mmio.cpp" />
     <ClCompile Include="src\arm\registers.cpp" />
+    <ClCompile Include="src\arm\prefetch.cpp" />
     <ClCompile Include="src\base\config.cpp" />
     <ClCompile Include="src\core\audiocontext.cpp" />
     <ClCompile Include="src\core\core.cpp" />

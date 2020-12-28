@@ -133,6 +133,8 @@ private:
     template<u16 Instr> void Thumb_LongBranchLink(u16 instr);
     template<u16 Instr> void Thumb_Undefined(u16 instr);
 
+    int prefetch(u32 addr, int wait);
+
     Bios bios;
     Ram<0x40000> ewram{};
     Ram<0x08000> iwram{};
