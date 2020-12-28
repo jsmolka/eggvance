@@ -87,9 +87,12 @@ private:
     template<uint State>
     void dispatch();
 
-    void clock(int cycles);
+    void tick(int cycles);
     void idle();
     void booth(u32 multiplier, bool sign);
+
+    void prefetchRam(int cycles);
+    void prefetchRom(u32 addr, int cycles);
 
     void interrupt(u32 pc, u32 lr, Psr::Mode mode);
     void interruptHw();
@@ -132,8 +135,6 @@ private:
     template<u16 Instr> void Thumb_UnconditionalBranch(u16 instr);
     template<u16 Instr> void Thumb_LongBranchLink(u16 instr);
     template<u16 Instr> void Thumb_Undefined(u16 instr);
-
-    int prefetch(u32 addr, int wait);
 
     Bios bios;
     Ram<0x40000> ewram{};

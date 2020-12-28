@@ -118,7 +118,7 @@ void Arm::dispatch()
     }
 }
 
-void Arm::clock(int cycles)
+void Arm::tick(int cycles)
 {
     this->cycles -= cycles;
 
@@ -136,7 +136,7 @@ void Arm::idle()
 {
     pipe.access = Access::NonSequential;
 
-    clock(1);
+    prefetchRam(1);
 }
 
 void Arm::booth(u32 multiplier, bool sign)
