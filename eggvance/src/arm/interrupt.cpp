@@ -63,7 +63,7 @@ void Arm::interruptProcess()
 
     if (interrupt && irq.master.value)
     {
-        irq.delay = 5;
+        irq.delay = 4;
         irq.delaying = true;
 
         state |= kStateIrq;
