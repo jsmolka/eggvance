@@ -4,7 +4,6 @@
 
 struct Prefetch
 {
-	u32 pc = 0;
     int cycles = 0;
 } prefetch;
 
@@ -12,28 +11,30 @@ void Arm::prefetchRam(int cycles)
 {
     if (waitcnt.prefetch)
     {
-        int n = waitcnt.cyclesHalf(pc, Access::NonSequential);
-        int s = waitcnt.cyclesHalf(pc, Access::Sequential);
+        int seq = waitcnt.cyclesHalf(pc, Access::Sequential);
 
-        prefetch.cycles = std::min(8 * s, prefetch.cycles + cycles + n - s);
+        prefetch.cycles = std::min(8 * seq, prefetch.cycles + cycles);
     }
     tick(cycles);
 }
 
 void Arm::prefetchRom(u32 addr, int cycles)
 {
-    if (addr >= 0x800'0000 && addr < 0xE00'0000 && waitcnt.prefetch)
+    if (!waitcnt.prefetch)
+        return tick(cycles);
+
+    if (addr >= 0x800'0000 && addr < 0xE00'0000)
     {
-        int diff = std::min(prefetch.cycles, cycles);
-        prefetch.cycles -= diff;
-        cycles -= diff;
-    }
-    else
-    {
-        prefetch.cycles = 0;
+        if (prefetch.cycles)
+        {
+            int non = waitcnt.cyclesHalf(addr, Access::NonSequential);
+            int seq = waitcnt.cyclesHalf(addr, Access::Sequential);
+
+            cycles -= non - seq + 1;
+        }
     }
 
-    prefetch.pc = addr;
+    prefetch.cycles = 0;
 
     tick(cycles);
 }
