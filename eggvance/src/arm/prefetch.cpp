@@ -2,36 +2,38 @@
 
 #include <cmath>
 
-int prefetched = 0;
+struct Prefetch
+{
+	u32 pc = 0;
+    int cycles = 0;
+} prefetch;
 
 void Arm::prefetchRam(int cycles)
 {
-    if (!waitcnt.prefetch)
+    if (waitcnt.prefetch)
     {
-        tick(cycles);
-        return;
+        int n = waitcnt.cyclesHalf(pc, Access::NonSequential);
+        int s = waitcnt.cyclesHalf(pc, Access::Sequential);
+
+        prefetch.cycles = std::min(8 * s, prefetch.cycles + cycles + n - s);
     }
-    
-    int non = waitcnt.cyclesHalf(pc, Access::NonSequential) - 1;
-    int seq = waitcnt.cyclesHalf(pc, Access::Sequential) - 1;
-    int max = 8 * seq;
-
-    prefetched = std::min(max, prefetched + cycles + non - seq);
-
     tick(cycles);
 }
 
 void Arm::prefetchRom(u32 addr, int cycles)
 {
-    if (!waitcnt.prefetch)
+    if (addr >= 0x800'0000 && addr < 0xE00'0000 && waitcnt.prefetch)
     {
-        tick(cycles);
-        return;
+        int diff = std::min(prefetch.cycles, cycles);
+        prefetch.cycles -= diff;
+        cycles -= diff;
+    }
+    else
+    {
+        prefetch.cycles = 0;
     }
 
-    int diff = std::min(prefetched, cycles);
-    prefetched -= diff;
-    cycles -= diff;
+    prefetch.pc = addr;
 
     tick(cycles);
 }
