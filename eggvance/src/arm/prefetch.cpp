@@ -26,6 +26,9 @@ void Arm::prefetchRom(u32 addr, int cycles)
         int seq = waitcnt.cyclesHalf(addr, Access::Sequential);
 
         cycles -= non - seq + std::min(8 * seq, prefetch.cycles);
+
+        if (cycles < 0)
+            cycles = 0;
     }
 
     prefetch.cycles = 0;
