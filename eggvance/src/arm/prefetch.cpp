@@ -1,6 +1,6 @@
 #include "arm.h"
 
-#include <cmath>
+#include <algorithm>
 
 struct Prefetch
 {
@@ -17,21 +17,19 @@ void Arm::prefetchRam(int cycles)
 
 void Arm::prefetchRom(u32 addr, int cycles)
 {
-    if (!waitcnt.prefetch)
-        return tick(cycles);
-
-    if (prefetch.cycles > 0)
+    if (waitcnt.prefetch)
     {
-        int non = waitcnt.cyclesHalf(addr, Access::NonSequential);
-        int seq = waitcnt.cyclesHalf(addr, Access::Sequential);
+        if (addr == pc && prefetch.cycles > 0)
+        {
+            int non = waitcnt.cyclesHalf(addr, Access::NonSequential);
+            int seq = waitcnt.cyclesHalf(addr, Access::Sequential);
 
-        cycles -= non - seq + std::min(8 * seq, prefetch.cycles);
+            cycles -= non - seq + std::min(8 * seq, prefetch.cycles);
 
-        if (cycles < 0)
-            cycles = 0;
+            if (cycles < 0)
+                cycles = 0;
+        }
+        prefetch.cycles = 0;
     }
-
-    prefetch.cycles = 0;
-
     tick(cycles);
 }
