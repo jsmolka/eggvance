@@ -29,7 +29,7 @@ public:
     uint state = 0;
     int cycles = 0;
 
-    struct
+    struct Irq
     {
         uint delay = 0;
         bool delaying = false;
@@ -135,6 +135,12 @@ private:
     template<u16 Instr> void Thumb_UnconditionalBranch(u16 instr);
     template<u16 Instr> void Thumb_LongBranchLink(u16 instr);
     template<u16 Instr> void Thumb_Undefined(u16 instr);
+
+    struct Prefetch
+    {
+        int active = 0;
+        int cycles = 0;
+    } prefetch;
 
     Bios bios;
     Ram<0x40000> ewram{};
