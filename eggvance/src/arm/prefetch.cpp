@@ -9,7 +9,7 @@ struct Prefetch
 
 void Arm::prefetchRam(int cycles)
 {
-    if (waitcnt.prefetch)
+    if (waitcnt.prefetch && !(state & kStateDma))
         prefetch.cycles += cycles;
 
     tick(cycles);
@@ -17,7 +17,7 @@ void Arm::prefetchRam(int cycles)
 
 void Arm::prefetchRom(u32 addr, int cycles)
 {
-    if (waitcnt.prefetch)
+    if (waitcnt.prefetch && !(state & kStateDma))
     {
         if (addr == pc && prefetch.cycles > 0)
         {
