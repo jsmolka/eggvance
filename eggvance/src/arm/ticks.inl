@@ -9,10 +9,12 @@ SHELL_INLINE void Arm::tick(int cycles)
     if (state & kStateTimer)
         timer.run(cycles);
 
-    while (irq.delay && cycles)
+    if (irq.delaying)
     {
-        --irq.delay;
-        --cycles;
+        irq.delay -= cycles;
+
+        if (irq.delay < 0)
+            irq.delay = 0;
     }
 }
 
@@ -44,8 +46,11 @@ SHELL_INLINE void Arm::tickRom(u32 addr, int cycles)
 
             cycles -= non - seq + std::min(8 * seq, prefetch.cycles);
 
-            if (cycles < 0)
-                cycles = 0;
+            if (cycles <= 0)
+            {
+                prefetch.cycles = 0;
+                return;
+            }
         }
         prefetch.cycles = 0;
     }

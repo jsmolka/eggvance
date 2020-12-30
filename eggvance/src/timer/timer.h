@@ -10,7 +10,17 @@ class Timer
 public:
     Timer();
 
-    void run(int cycles);
+    SHELL_INLINE void run(int cycles)
+    {
+        count += cycles;
+
+        if (count >= event)
+        {
+            runChannels();
+            reschedule();
+        }
+    }
+
     void runUntilIrq(int& cycles);
 
     TimerChannel channels[4] = { 0, 1, 2, 3 };

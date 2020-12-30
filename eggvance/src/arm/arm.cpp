@@ -42,24 +42,6 @@ void Arm::run(int cycles)
     }
 }
 
-void Arm::flushHalf()
-{
-    pc &= ~0x1;
-    pipe[0] = readHalf(pc, Access::NonSequential);
-    pc += 2;
-    pipe[1] = readHalf(pc, Access::Sequential);
-    pipe.access = Access::Sequential;
-}
-
-void Arm::flushWord()
-{
-    pc &= ~0x3;
-    pipe[0] = readWord(pc, Access::NonSequential);
-    pc += 4;
-    pipe[1] = readWord(pc, Access::Sequential);
-    pipe.access = Access::Sequential;
-}
-
 template<uint State>
 void Arm::dispatch()
 {
@@ -116,4 +98,22 @@ void Arm::dispatch()
             }
         }
     }
+}
+
+void Arm::flushHalf()
+{
+    pc &= ~0x1;
+    pipe[0] = readHalf(pc, Access::NonSequential);
+    pc += 2;
+    pipe[1] = readHalf(pc, Access::Sequential);
+    pipe.access = Access::Sequential;
+}
+
+void Arm::flushWord()
+{
+    pc &= ~0x3;
+    pipe[0] = readWord(pc, Access::NonSequential);
+    pc += 4;
+    pipe[1] = readWord(pc, Access::Sequential);
+    pipe.access = Access::Sequential;
 }

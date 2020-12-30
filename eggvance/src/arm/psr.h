@@ -33,7 +33,14 @@ public:
 
     operator u32() const
     {
-        return (m << 0) | (t << 5) | (f << 6) | (i << 7) | (v << 28) | (c << 29) | (z << 30) | (n << 31);
+        return (m <<  0)
+             | (t <<  5)
+             | (f <<  6)
+             | (i <<  7)
+             | (v << 28)
+             | (c << 29)
+             | (z << 30)
+             | (n << 31);
     }
 
     void setZ(u32 value)

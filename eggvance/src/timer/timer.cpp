@@ -30,17 +30,6 @@ Timer::Timer()
     }
 }
 
-void Timer::run(int cycles)
-{
-    count += cycles;
-
-    if (count >= event)
-    {
-        runChannels();
-        reschedule();
-    }
-}
-
 void Timer::runUntilIrq(int& cycles)
 {
     int pending = event - count;

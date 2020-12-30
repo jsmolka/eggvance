@@ -6,15 +6,8 @@
 class Pipeline
 {
 public:
-    u32& operator[](uint index)
-    {
-        return data[index];
-    }
-
-    u32  operator[](uint index) const
-    {
-        return data[index];
-    }
+    u32  operator[](uint index) const { return data[index]; }
+    u32& operator[](uint index)       { return data[index]; }
 
     Access access = Access::NonSequential;
 

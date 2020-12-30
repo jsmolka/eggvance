@@ -336,7 +336,7 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="src\arm\arithmetic.inl">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
 </Project>
