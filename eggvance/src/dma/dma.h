@@ -5,15 +5,17 @@
 class Dma
 {
 public:
+    enum class Timing { Immediate, VBlank, HBlank, Audio, Video };
+
     Dma();
 
     void run();
-    void broadcast(DmaControl::Timing timing);
+    void broadcast(Timing timing);
 
     DmaChannel channels[4] = { 0, 1, 2, 3 };
 
 private:
-    void emit(DmaChannel& channel, DmaControl::Timing timing);
+    void emit(DmaChannel& channel, Timing timing);
 
     DmaChannel* active = nullptr;
 };
