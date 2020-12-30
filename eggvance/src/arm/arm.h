@@ -25,23 +25,7 @@ public:
     void writeHalf(u32 addr, u16 half, Access access = Access::NonSequential);
     void writeWord(u32 addr, u32 word, Access access = Access::NonSequential);
 
-    Pipeline pipe;
     uint state = 0;
-    int cycles = 0;
-
-    struct Irq
-    {
-        uint delay = 0;
-        bool delaying = false;
-
-        IrqMaster  master;
-        IrqEnable  enable;
-        IrqRequest request;
-    } irq;
-
-    WaitControl  waitcnt;
-    HaltControl  haltcnt;
-    Register<u8> postflg;
 
 private:
     using Instruction32 = void(Arm::*)(u32);
@@ -84,15 +68,14 @@ private:
     void flushHalf();
     void flushWord();
 
-    template<uint State>
+    template<uint State> 
     void dispatch();
 
     void tick(int cycles);
     void idle(int cycles = 1);
-    void booth(u32 multiplier, bool sign);
-
-    void prefetchRam(int cycles);
-    void prefetchRom(u32 addr, int cycles);
+    void tickRam(int cycles);
+    void tickRom(u32 addr, int cycles);
+    void tickMul(u32 multiplier, bool sign);
 
     void interrupt(u32 pc, u32 lr, Psr::Mode mode);
     void interruptHw();
@@ -136,11 +119,28 @@ private:
     template<u16 Instr> void Thumb_LongBranchLink(u16 instr);
     template<u16 Instr> void Thumb_Undefined(u16 instr);
 
+    Pipeline pipe;
+    int cycles = 0;
+
+    struct Irq
+    {
+        int delay = 0;
+        int delaying = false;
+
+        IrqMaster  master;
+        IrqEnable  enable;
+        IrqRequest request;
+    } irq;
+
     struct Prefetch
     {
         int active = 0;
         int cycles = 0;
     } prefetch;
+
+    WaitControl  waitcnt;
+    HaltControl  haltcnt;
+    Register<u8> postflg;
 
     Bios bios;
     Ram<0x40000> ewram{};
@@ -149,4 +149,4 @@ private:
 
 inline Arm arm;
 
-#include "shifts.inl"
+#include "arm.inl"

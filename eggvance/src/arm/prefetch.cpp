@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-void Arm::prefetchRam(int cycles)
+void Arm::tickRam(int cycles)
 {
     if (waitcnt.prefetch && !(state & kStateDma) && prefetch.active)
         prefetch.cycles += cycles;
@@ -10,7 +10,7 @@ void Arm::prefetchRam(int cycles)
     tick(cycles);
 }
 
-void Arm::prefetchRom(u32 addr, int cycles)
+void Arm::tickRom(u32 addr, int cycles)
 {
     if (waitcnt.prefetch && !(state & kStateDma))
     {

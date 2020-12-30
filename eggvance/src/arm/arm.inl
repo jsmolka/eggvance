@@ -1,3 +1,5 @@
+#pragma once
+
 template<bool Immediate>
 u32 Arm::lsl(u32 value, u32 amount, bool flags)
 {

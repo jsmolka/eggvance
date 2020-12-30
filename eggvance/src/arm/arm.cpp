@@ -136,10 +136,10 @@ void Arm::idle(int cycles)
 {
     pipe.access = Access::NonSequential;
 
-    prefetchRam(cycles);
+    tickRam(cycles);
 }
 
-void Arm::booth(u32 multiplier, bool sign)
+void Arm::tickMul(u32 multiplier, bool sign)
 {
     int cycles = 1;
 

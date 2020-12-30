@@ -249,7 +249,7 @@
   <ItemGroup>
     <None Include="eggvance.html" />
     <None Include="eggvance.ini" />
-    <None Include="src\arm\shifts.inl" />
+    <None Include="src\arm\arm.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

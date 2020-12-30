@@ -335,7 +335,7 @@
   <ItemGroup>
     <None Include="eggvance.html" />
     <None Include="eggvance.ini" />
-    <None Include="src\arm\shifts.inl">
+    <None Include="src\arm\arm.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
