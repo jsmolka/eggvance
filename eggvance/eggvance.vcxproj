@@ -143,10 +143,11 @@
     <ClCompile Include="src\arm\instr_thumb.cpp" />
     <ClCompile Include="src\arm\interrupt.cpp" />
     <ClCompile Include="src\arm\io.cpp" />
-    <ClCompile Include="src\arm\arithmetic.cpp" />
+    <None Include="src\arm\arithmetic.inl">
+      <FileType>Document</FileType>
+    </None>
     <ClCompile Include="src\arm\mmio.cpp" />
     <ClCompile Include="src\arm\registers.cpp" />
-    <ClCompile Include="src\arm\prefetch.cpp" />
     <ClCompile Include="src\base\config.cpp" />
     <ClCompile Include="src\core\audiocontext.cpp" />
     <ClCompile Include="src\core\core.cpp" />
@@ -249,7 +250,8 @@
   <ItemGroup>
     <None Include="eggvance.html" />
     <None Include="eggvance.ini" />
-    <None Include="src\arm\arm.inl" />
+    <None Include="src\arm\shifts.inl" />
+    <None Include="src\arm\ticks.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

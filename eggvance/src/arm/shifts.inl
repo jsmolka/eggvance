@@ -1,7 +1,7 @@
 #pragma once
 
 template<bool Immediate>
-u32 Arm::lsl(u32 value, u32 amount, bool flags)
+SHELL_INLINE u32 Arm::lsl(u32 value, u32 amount, bool flags)
 {
     if (amount != 0)
     {
@@ -28,7 +28,7 @@ u32 Arm::lsl(u32 value, u32 amount, bool flags)
 }
 
 template<bool Immediate>
-u32 Arm::lsr(u32 value, u32 amount, bool flags)
+SHELL_INLINE u32 Arm::lsr(u32 value, u32 amount, bool flags)
 {
     if (amount != 0)
     {
@@ -62,7 +62,7 @@ u32 Arm::lsr(u32 value, u32 amount, bool flags)
 }
 
 template<bool Immediate>
-u32 Arm::asr(u32 value, u32 amount, bool flags)
+SHELL_INLINE u32 Arm::asr(u32 value, u32 amount, bool flags)
 {
     if (amount != 0)
     {
@@ -92,7 +92,7 @@ u32 Arm::asr(u32 value, u32 amount, bool flags)
 }
 
 template<bool Immediate>
-u32 Arm::ror(u32 value, u32 amount, bool flags)
+SHELL_INLINE u32 Arm::ror(u32 value, u32 amount, bool flags)
 {
     if (amount != 0)
     {

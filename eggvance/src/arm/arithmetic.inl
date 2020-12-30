@@ -1,6 +1,6 @@
-#include "arm.h"
+#pragma once
 
-u32 Arm::log(u32 op1, bool flags)
+SHELL_INLINE u32 Arm::log(u32 op1, bool flags)
 {
     if (flags)
     {
@@ -10,7 +10,7 @@ u32 Arm::log(u32 op1, bool flags)
     return op1;
 }
 
-u32 Arm::add(u32 op1, u32 op2, bool flags)
+SHELL_INLINE u32 Arm::add(u32 op1, u32 op2, bool flags)
 {
     u32 res = op1 + op2;
 
@@ -24,7 +24,7 @@ u32 Arm::add(u32 op1, u32 op2, bool flags)
     return res;
 }
 
-u32 Arm::sub(u32 op1, u32 op2, bool flags)
+SHELL_INLINE u32 Arm::sub(u32 op1, u32 op2, bool flags)
 {
     u32 res = op1 - op2;
 
@@ -38,7 +38,7 @@ u32 Arm::sub(u32 op1, u32 op2, bool flags)
     return res;
 }
 
-u32 Arm::adc(u32 op1, u32 op2, bool flags)
+SHELL_INLINE u32 Arm::adc(u32 op1, u32 op2, bool flags)
 {
     u64 opc = static_cast<u64>(op2) + cpsr.c;
     u32 res = static_cast<u32>(op1 + opc);
@@ -53,7 +53,7 @@ u32 Arm::adc(u32 op1, u32 op2, bool flags)
     return res;
 }
 
-u32 Arm::sbc(u32 op1, u32 op2, bool flags)
+SHELL_INLINE u32 Arm::sbc(u32 op1, u32 op2, bool flags)
 {
     u64 opc = static_cast<u64>(op2) - cpsr.c + 1;
     u32 res = static_cast<u32>(op1 - opc);

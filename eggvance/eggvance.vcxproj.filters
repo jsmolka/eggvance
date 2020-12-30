@@ -93,9 +93,6 @@
     <ClCompile Include="src\gamepad\gamepad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\arm\arithmetic.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\gamepak\overwrites.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -136,9 +133,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\arm\mmio.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\arm\prefetch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -335,8 +329,14 @@
   <ItemGroup>
     <None Include="eggvance.html" />
     <None Include="eggvance.ini" />
-    <None Include="src\arm\arm.inl">
+    <None Include="src\arm\shifts.inl">
       <Filter>Header Files</Filter>
+    </None>
+    <None Include="src\arm\ticks.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="src\arm\arithmetic.inl">
+      <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
 </Project>

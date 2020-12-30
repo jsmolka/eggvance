@@ -270,7 +270,7 @@ void Arm::Arm_Multiply(u32 instr)
     }
     log(dst, kFlags);
 
-    tickMul(op2, true);
+    tickMultiply<true>(op2);
 }
 
 template<u32 Instr>
@@ -313,7 +313,7 @@ void Arm::Arm_MultiplyLong(u32 instr)
     dst_lo = static_cast<u32>(res);
     dst_hi = static_cast<u32>(res >> 32);
 
-    tickMul(static_cast<u32>(op2), kSign);
+    tickMultiply<kSign>(static_cast<u32>(op2));
     idle();
 }
 

@@ -71,7 +71,7 @@ public:
         return 4 >> t;
     }
 
-    bool check(uint condition) const
+    SHELL_INLINE bool check(uint condition) const
     {
         enum Condition
         {

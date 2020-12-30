@@ -45,16 +45,16 @@ private:
     template<uint Hash> static constexpr Instruction32 Arm_Decode();
     template<uint Hash> static constexpr Instruction16 Thumb_Decode();
 
-    template<bool Immediate> u32 lsl(u32 value, u32 amount, bool flags = true);
-    template<bool Immediate> u32 lsr(u32 value, u32 amount, bool flags = true);
-    template<bool Immediate> u32 asr(u32 value, u32 amount, bool flags = true);
-    template<bool Immediate> u32 ror(u32 value, u32 amount, bool flags = true);
+    template<bool Immediate> SHELL_INLINE u32 lsl(u32 value, u32 amount, bool flags = true);
+    template<bool Immediate> SHELL_INLINE u32 lsr(u32 value, u32 amount, bool flags = true);
+    template<bool Immediate> SHELL_INLINE u32 asr(u32 value, u32 amount, bool flags = true);
+    template<bool Immediate> SHELL_INLINE u32 ror(u32 value, u32 amount, bool flags = true);
 
-    u32 log(u32 op1,          bool flags = true);
-    u32 add(u32 op1, u32 op2, bool flags = true);
-    u32 sub(u32 op1, u32 op2, bool flags = true);
-    u32 adc(u32 op1, u32 op2, bool flags = true);
-    u32 sbc(u32 op1, u32 op2, bool flags = true);
+    SHELL_INLINE u32 log(u32 op1,          bool flags = true);
+    SHELL_INLINE u32 add(u32 op1, u32 op2, bool flags = true);
+    SHELL_INLINE u32 sub(u32 op1, u32 op2, bool flags = true);
+    SHELL_INLINE u32 adc(u32 op1, u32 op2, bool flags = true);
+    SHELL_INLINE u32 sbc(u32 op1, u32 op2, bool flags = true);
 
     u8 readIo(u32 addr);
     void writeIo(u32 addr, u8 byte);
@@ -65,17 +65,17 @@ private:
     u32 readByteSignEx(u32 addr, Access access = Access::NonSequential);
     u32 readHalfSignEx(u32 addr, Access access = Access::NonSequential);
 
+    template<uint State> 
+    void dispatch();
     void flushHalf();
     void flushWord();
 
-    template<uint State> 
-    void dispatch();
-
-    void tick(int cycles);
-    void idle(int cycles = 1);
-    void tickRam(int cycles);
-    void tickRom(u32 addr, int cycles);
-    void tickMul(u32 multiplier, bool sign);
+    SHELL_INLINE void tick(int cycles);
+    SHELL_INLINE void idle(int cycles = 1);
+    SHELL_INLINE void tickRam(int cycles);
+    SHELL_INLINE void tickRom(u32 addr, int cycles);
+    template<bool Signed>
+    SHELL_INLINE void tickMultiply(u32 multiplier);
 
     void interrupt(u32 pc, u32 lr, Psr::Mode mode);
     void interruptHw();
@@ -149,4 +149,6 @@ private:
 
 inline Arm arm;
 
-#include "arm.inl"
+#include "arithmetic.inl"
+#include "shifts.inl"
+#include "ticks.inl"
