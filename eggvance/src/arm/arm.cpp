@@ -51,51 +51,66 @@ void Arm::dispatch()
         {
             dma.run();
         }
+        else if (State & kStateHalt)
+        {
+            int event = cycles;
+
+            if (State & kStateIrq && irq.delaying)
+            {
+                event = std::min(event, irq.delay);
+            }
+
+            if (State & kStateTimer)
+            {
+                event = std::min(event, timer.cycles());
+            }
+
+            tick(event);
+
+            if (State & kStateIrq && !cpsr.i && irq.delay == 0)
+            {
+                irq.delaying = false;
+
+                interruptHw();
+
+                pc += cpsr.size();
+            }
+        }
         else
         {
-            if (State & kStateHalt)
+            if (State & kStateIrq && !cpsr.i && irq.delay == 0)
             {
-                if (State & kStateTimer)
-                    timer.runUntilIrq(cycles);
-                else
-                    cycles = 0;
+                irq.delaying = false;
+
+                interruptHw();
             }
             else
             {
-                if (State & kStateIrq && !cpsr.i && irq.delay == 0)
+                if (State & kStateThumb)
                 {
-                    irq.delaying = false;
+                    u16 instr = pipe[0];
 
-                    interruptHw();
+                    pipe[0] = pipe[1];
+                    pipe[1] = readHalf(pc, pipe.access);
+                    pipe.access = Access::Sequential;
+
+                    std::invoke(instr_thumb[hashThumb(instr)], this, instr);
                 }
                 else
                 {
-                    if (State & kStateThumb)
+                    u32 instr = pipe[0];
+
+                    pipe[0] = pipe[1];
+                    pipe[1] = readWord(pc, pipe.access);
+                    pipe.access = Access::Sequential;
+
+                    if (cpsr.check(instr >> 28))
                     {
-                        u16 instr = pipe[0];
-
-                        pipe[0] = pipe[1];
-                        pipe[1] = readHalf(pc, pipe.access);
-                        pipe.access = Access::Sequential;
-
-                        std::invoke(instr_thumb[hashThumb(instr)], this, instr);
-                    }
-                    else
-                    {
-                        u32 instr = pipe[0];
-
-                        pipe[0] = pipe[1];
-                        pipe[1] = readWord(pc, pipe.access);
-                        pipe.access = Access::Sequential;
-
-                        if (cpsr.check(instr >> 28))
-                        {
-                            std::invoke(instr_arm[hashArm(instr)], this, instr);
-                        }
+                        std::invoke(instr_arm[hashArm(instr)], this, instr);
                     }
                 }
-                pc += cpsr.size();
             }
+            pc += cpsr.size();
         }
     }
 }

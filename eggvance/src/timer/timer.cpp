@@ -30,19 +30,13 @@ Timer::Timer()
     }
 }
 
-void Timer::runUntilIrq(int& cycles)
+int Timer::cycles() const
 {
-    int pending = event - count;
-    if (pending < cycles)
-    {
-        run(pending);
-        cycles -= pending;
-    }
-    else
-    {
-        run(cycles);
-        cycles = 0;
-    }
+    int cycles = event - count;
+    if (cycles < 0)
+        cycles = kEventMax;
+
+    return cycles;
 }
 
 void Timer::schedule()

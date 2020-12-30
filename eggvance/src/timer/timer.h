@@ -21,7 +21,7 @@ public:
         }
     }
 
-    void runUntilIrq(int& cycles);
+    int cycles() const;
 
     TimerChannel channels[4] = { 0, 1, 2, 3 };
 
