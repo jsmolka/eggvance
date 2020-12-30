@@ -435,7 +435,9 @@ u32 Arm::readUnused() const
         return pipe[1] << 16 | pipe[0];
 
     case kRegionInternalWorkRam:
-        return pipe[1] << 16 | pipe[(pc >> 1) ^ 0x1];
+        return pc & 0x2
+            ? pipe[1] << 16 | pipe[0]
+            : pipe[0] << 16 | pipe[1];
 
     default:
         return pipe[1] << 16 | pipe[1];
