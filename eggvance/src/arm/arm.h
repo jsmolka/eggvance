@@ -88,7 +88,7 @@ private:
     void dispatch();
 
     void tick(int cycles);
-    void idle();
+    void idle(int cycles = 1);
     void booth(u32 multiplier, bool sign);
 
     void prefetchRam(int cycles);

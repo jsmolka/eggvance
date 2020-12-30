@@ -132,26 +132,28 @@ void Arm::tick(int cycles)
     }
 }
 
-void Arm::idle()
+void Arm::idle(int cycles)
 {
     pipe.access = Access::NonSequential;
 
-    prefetchRam(1);
+    prefetchRam(cycles);
 }
 
 void Arm::booth(u32 multiplier, bool sign)
 {
+    int cycles = 1;
+
     if (sign)
     {
-        if ((multiplier >>  8) != 0 && (multiplier >>  8) != 0xFF'FFFF) idle();
-        if ((multiplier >> 16) != 0 && (multiplier >> 16) != 0x00'FFFF) idle();
-        if ((multiplier >> 24) != 0 && (multiplier >> 24) != 0x00'00FF) idle();
+        cycles += (multiplier >>  8) != 0 && (multiplier >>  8) != 0xFF'FFFF;
+        cycles += (multiplier >> 16) != 0 && (multiplier >> 16) != 0x00'FFFF;
+        cycles += (multiplier >> 24) != 0 && (multiplier >> 24) != 0x00'00FF;
     }
     else
     {
-        if ((multiplier >>  8) != 0) idle();
-        if ((multiplier >> 16) != 0) idle();
-        if ((multiplier >> 24) != 0) idle();
+        cycles += (multiplier >>  8) != 0;
+        cycles += (multiplier >> 16) != 0;
+        cycles += (multiplier >> 24) != 0;
     }
-    idle();
+    idle(cycles);
 }
