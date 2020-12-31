@@ -50,7 +50,7 @@ void Dma::broadcast(Timing timing)
 
 void Dma::emit(DmaChannel& channel, Timing timing)
 {
-    bool matches = std::invoke([&]() {
+    auto matches = [](const DmaChannel& channel, Timing timing) {
         switch (timing)
         {
         case Dma::Timing::Immediate: return channel.control.timing == DmaControl::kTimingImmediate;
@@ -60,9 +60,9 @@ void Dma::emit(DmaChannel& channel, Timing timing)
         case Dma::Timing::Video:     return channel.control.timing == DmaControl::kTimingSpecial && (channel.id == 3);
         }
         return false;
-    });
+    };
 
-    if (channel.running || !channel.control.enable || !matches)
+    if (channel.running || !channel.control.enable || !matches(channel, timing))
         return;
 
     channel.start();

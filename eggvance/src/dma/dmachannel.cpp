@@ -51,7 +51,7 @@ void DmaChannel::run()
     {
         if (pending == 0)
         {
-            if (!((internal.src_addr & 0x800'0000) && (internal.dst_addr & 0x800'0000)))
+            if (!(internal.src_addr & internal.dst_addr & 0x800'0000))
                 arm.idle(2);
 
             transfer(Access::NonSequential);
