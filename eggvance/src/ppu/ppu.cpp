@@ -135,10 +135,13 @@ void Ppu::hblank()
     {
         arm.raise(kIrqHBlank);
     }
-    
-    dma.broadcast(Dma::Timing::HBlank);
 
-    if (vcount.value >= 2 && vcount.value < 162)
+    if (vcount.value < 160)
+    {
+        dma.broadcast(Dma::Timing::HBlank);
+    }
+
+    if (vcount.value > 1 && vcount.value < 162)
     {
         dma.broadcast(Dma::Timing::Video);
     }
