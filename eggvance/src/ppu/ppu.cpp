@@ -54,9 +54,6 @@ Ppu::Ppu()
 
 void Ppu::scanline()
 {
-    dispstat.vblank = false;
-    dispstat.hblank = false;
-
     if (dispcnt.blank)
     {
         u32* scanline = video_ctx.scanline(vcount.value);
@@ -124,12 +121,6 @@ void Ppu::scanline()
 void Ppu::hblank()
 {
     dispstat.hblank = true;
-    dispstat.vblank = false;
-
-    bgx[0].hblank(bgpb[0].value);
-    bgx[1].hblank(bgpb[1].value);
-    bgy[0].hblank(bgpd[0].value);
-    bgy[1].hblank(bgpd[1].value);
 
     if (dispstat.hblank_irq)
     {
@@ -138,6 +129,11 @@ void Ppu::hblank()
 
     if (vcount.value < 160)
     {
+        bgx[0].hblank(bgpb[0].value);
+        bgx[1].hblank(bgpb[1].value);
+        bgy[0].hblank(bgpd[0].value);
+        bgy[1].hblank(bgpd[1].value);
+
         dma.broadcast(Dma::Timing::HBlank);
     }
 
@@ -150,8 +146,7 @@ void Ppu::hblank()
 void Ppu::vblank()
 {
     dispstat.vblank = true;
-    dispstat.hblank = false;
-
+    
     bgx[0].vblank();
     bgx[1].vblank();
     bgy[0].vblank();
@@ -166,6 +161,8 @@ void Ppu::vblank()
 
 void Ppu::next()
 {
+    dispstat.hblank = false;
+
     dispstat.vmatch = vcount.value == dispstat.vcompare;
     if (dispstat.vmatch && dispstat.vmatch_irq)
     {
@@ -176,7 +173,6 @@ void Ppu::next()
 
 void Ppu::present()
 {
-    dispstat.hblank = false;
     dispstat.vblank = false;
 
     if (dispcnt.isActive())

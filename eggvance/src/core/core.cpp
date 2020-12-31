@@ -94,7 +94,9 @@ void core::frame()
     uint invisible = 68;
     while (invisible--)
     {
-        arm.run(1232);
+        arm.run(960);
+        ppu.hblank();
+        arm.run(272);
         ppu.next();
     }
 
