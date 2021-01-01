@@ -11,7 +11,7 @@ InputContext::~InputContext()
 void InputContext::init()
 {
     if (SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER))
-        panic("Cannot init input context");
+        panic("Cannot init input context %s", SDL_GetError());
 
     if (SDL_NumJoysticks() > 0)
         controller = SDL_GameControllerOpen(0);

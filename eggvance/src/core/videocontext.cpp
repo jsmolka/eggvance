@@ -13,11 +13,11 @@ VideoContext::~VideoContext()
 void VideoContext::init()
 {
     if (SDL_InitSubSystem(SDL_INIT_VIDEO))
-        panic("Cannot init video context");
+        panic("Cannot init video context %s", SDL_GetError());
 
-    if (!initWindow())   panic("Cannot init window");
-    if (!initRenderer()) panic("Cannot init renderer");
-    if (!initTexture())  panic("Cannot init texture");
+    if (!initWindow())   panic("Cannot init window %s",   SDL_GetError());
+    if (!initRenderer()) panic("Cannot init renderer %s", SDL_GetError());
+    if (!initTexture())  panic("Cannot init texture %s",  SDL_GetError());
 }
 
 void VideoContext::raise()

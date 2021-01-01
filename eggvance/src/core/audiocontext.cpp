@@ -11,7 +11,7 @@ AudioContext::~AudioContext()
 void AudioContext::init()
 {
     if (SDL_InitSubSystem(SDL_INIT_AUDIO))
-        panic("Cannot init audio context");
+        panic("Cannot init audio context %s", SDL_GetError());
 }
 
 void AudioContext::deinit()
