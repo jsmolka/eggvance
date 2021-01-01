@@ -73,6 +73,7 @@ void core::reset()
     shell::reconstruct(timer);
 
     arm.init();
+    apu.init();
 }
 
 void core::frame()

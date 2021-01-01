@@ -7,6 +7,8 @@ class Apu
 public:
     Apu();
 
+    void init();
+
     Register<u16, 0x007F> soundcnt1l;
     Register<u16, 0xFFC0> soundcnt1h;
     Register<u16, 0x4000> soundcnt1x;
