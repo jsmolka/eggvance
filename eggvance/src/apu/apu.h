@@ -1,6 +1,6 @@
 #pragma once
 
-#include "base/register.h"
+#include "io.h"
 
 class Apu
 {
@@ -8,6 +8,8 @@ public:
     Apu();
 
     void init();
+
+    DmaSoundControl dma_control;    
 
     Register<u16, 0x007F> soundcnt1l;
     Register<u16, 0xFFC0> soundcnt1h;
@@ -20,7 +22,6 @@ public:
     Register<u16, 0xFF00> soundcnt4l;
     Register<u16, 0x40FF> soundcnt4h;
     Register<u16, 0xFF77> soundcntl;
-    Register<u16, 0x770F> soundcnth;
     Register<u16, 0x0080> soundcntx;
     Register<u16> soundbias;
     Register<u16> waveram[8];

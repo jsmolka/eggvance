@@ -23,9 +23,11 @@ void callback(void* userdata, u8* stream8, int len8)
 
 Apu::Apu()
 {
+    dma_control.reset_fifo_a = []() {};
+    dma_control.reset_fifo_b = []() {};
+
     if (config.bios_skip)
     {
-        soundcnth.value = 0x880E;
         soundbias.value = 0x0200;
     }
 }
