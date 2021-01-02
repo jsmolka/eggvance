@@ -23,10 +23,10 @@ void AudioContext::open(void* userdata, SDL_AudioCallback callback)
     SDL_AudioSpec want = {};
     SDL_AudioSpec have = {};
 
-    want.freq     = 44100;
-    want.samples  = 2048;
-    want.format   = AUDIO_S16;
-    want.channels = 2;
+    want.freq     = 48000;
+    want.samples  = 1024;
+    want.format   = AUDIO_F32SYS;
+    want.channels = 1;
     want.userdata = userdata;
     want.callback = callback;
 

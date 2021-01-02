@@ -56,8 +56,13 @@ private:
     SHELL_INLINE u32 adc(u32 op1, u32 op2, bool flags = true);
     SHELL_INLINE u32 sbc(u32 op1, u32 op2, bool flags = true);
 
-    u8 readIo(u32 addr);
-    void writeIo(u32 addr, u8 byte);
+    u8  readByteIo(u32 addr);
+    u16 readHalfIo(u32 addr);
+    u32 readWordIo(u32 addr);
+
+    void writeByteIo(u32 addr, u8  byte);
+    void writeHalfIo(u32 addr, u16 half);
+    void writeWordIo(u32 addr, u32 word);
 
     u32 readUnused() const;
     u32 readHalfRotate(u32 addr, Access access = Access::NonSequential);

@@ -12,6 +12,9 @@ public:
     void start();
     void run();
 
+    bool isFifoA() const;
+    bool isFifoB() const;
+
     const uint id;
     bool running = false;
 
@@ -19,6 +22,7 @@ public:
     DmaControl control;
     RegisterW<u32> sad;
     RegisterW<u32> dad;
+    bool fifo = false;
 
 private:
     void initTransfer();

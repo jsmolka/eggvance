@@ -1,6 +1,58 @@
 #pragma once
 
+#include <list>
+
 #include "io.h"
+
+constexpr auto kFifoSize = 32;
+constexpr auto kAudioSampleRate = 48000;
+constexpr auto kAudioBufferSize = 4096;
+constexpr auto kCpuFrequency = 16 * 1024 * 1024;
+constexpr auto kSampleEveryCycles = kCpuFrequency / kAudioSampleRate;
+
+template<typename T, std::size_t N>
+struct RingBuffer
+{
+    T read()
+    {
+        return buf[(read_index++) % N];
+    }
+
+    void write(const T& value)
+    {
+        buf[(write_index++) % N] = value;
+    }
+
+    int size()
+    {
+        return write_index - read_index;
+    }
+
+    T buf[N];
+    u64 read_index = 0;
+    u64 write_index = 1;
+};
+
+struct Fifo : RingBuffer<u8, kFifoSize>
+{
+    void writeWord(u32 value)
+    {
+        if (size() <= 28)
+        {
+            write(bit::seq< 0, 8>(value));
+            write(bit::seq< 8, 8>(value));
+            write(bit::seq<16, 8>(value));
+            write(bit::seq<24, 8>(value));
+        }
+    }
+
+    u8 sample = 0;
+};
+
+struct AudioBuffer : RingBuffer<float, kAudioBufferSize>
+{
+
+};
 
 class Apu
 {
@@ -8,6 +60,15 @@ public:
     Apu();
 
     void init();
+    void run(int cycles);
+    void pushSample();
+    float mix();
+    void tickDmaSound(int channel);
+    void onTimerOverflow(uint id);
+
+    Fifo fifo[2];
+    AudioBuffer audio;
+    float last_sample;
 
     DmaSoundControl dma_control;    
 
@@ -25,7 +86,8 @@ public:
     Register<u16, 0x0080> soundcntx;
     Register<u16> soundbias;
     Register<u16> waveram[8];
-    RegisterW<u32> fifo[2];
+
+    int cycles = 0;
 };
 
 inline Apu apu;

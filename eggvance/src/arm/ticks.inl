@@ -1,5 +1,6 @@
 #pragma once
 
+#include "apu/apu.h"
 #include "timer/timer.h"
 
 SHELL_INLINE void Arm::tick(int cycles)
@@ -16,6 +17,8 @@ SHELL_INLINE void Arm::tick(int cycles)
         if (irq.delay < 0)
             irq.delay = 0;
     }
+
+    apu.run(cycles);
 }
 
 SHELL_INLINE void Arm::idle(int cycles)

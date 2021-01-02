@@ -1,6 +1,7 @@
 #include "timerchannel.h"
 
 #include "constants.h"
+#include "apu/apu.h"
 #include "arm/arm.h"
 #include "arm/constants.h"
 
@@ -47,6 +48,9 @@ void TimerChannel::run(int cycles)
         counter %= overflow;
         initial  = count.initial;
         overflow = control.prescaler * (kOverflow - initial);
+
+        if (id <= 1)
+            apu.onTimerOverflow(id);
     }
     count.value = counter / control.prescaler + initial;
 }

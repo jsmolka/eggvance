@@ -56,7 +56,8 @@ void Dma::emit(DmaChannel& channel, Timing timing)
         case Dma::Timing::Immediate: return channel.control.timing == DmaControl::kTimingImmediate;
         case Dma::Timing::VBlank:    return channel.control.timing == DmaControl::kTimingVBlank;
         case Dma::Timing::HBlank:    return channel.control.timing == DmaControl::kTimingHBlank;
-        case Dma::Timing::Audio:     return channel.control.timing == DmaControl::kTimingSpecial && (channel.id == 1 || channel.id == 2);
+        case Dma::Timing::FifoA:     return channel.isFifoA();
+        case Dma::Timing::FifoB:     return channel.isFifoB();
         case Dma::Timing::Video:     return channel.control.timing == DmaControl::kTimingSpecial && (channel.id == 3);
         }
         return false;

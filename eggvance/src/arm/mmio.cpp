@@ -130,7 +130,7 @@ enum IoRegister
     kRegHaltControl    = 0x301
 };
 
-u8 Arm::readIo(u32 addr)
+u8 Arm::readByteIo(u32 addr)
 {
     switch (addr & 0x3FF'FFFF)
     {
@@ -219,7 +219,23 @@ u8 Arm::readIo(u32 addr)
     }
 }
 
-void Arm::writeIo(u32 addr, u8 byte)
+u16 Arm::readHalfIo(u32 addr)
+{
+    addr &= ~0x1;
+    return readByteIo(addr + 0) << 0
+         | readByteIo(addr + 1) << 8;
+}
+
+u32 Arm::readWordIo(u32 addr)
+{
+    addr &= ~0x3;
+    return readByteIo(addr + 0) <<  0
+         | readByteIo(addr + 1) <<  8
+         | readByteIo(addr + 2) << 16
+         | readByteIo(addr + 3) << 24;
+}
+
+void Arm::writeByteIo(u32 addr, u8 byte)
 {
     switch (addr & 0x3FF'FFFF)
     {
@@ -282,8 +298,6 @@ void Arm::writeIo(u32 addr, u8 byte)
     INDEXED_CASE2(kRegWaveRam5,       apu.waveram[5].write<kIndex>(byte));
     INDEXED_CASE2(kRegWaveRam6,       apu.waveram[6].write<kIndex>(byte));
     INDEXED_CASE2(kRegWaveRam7,       apu.waveram[7].write<kIndex>(byte));
-    INDEXED_CASE4(kRegFifoA,          apu.fifo[0].write<kIndex>(byte));
-    INDEXED_CASE4(kRegFifoB,          apu.fifo[1].write<kIndex>(byte));
     INDEXED_CASE4(kRegDma0Sad,        dma.channels[0].sad.write<kIndex, 0x07FF'FFFF>(byte));
     INDEXED_CASE4(kRegDma0Dad,        dma.channels[0].dad.write<kIndex, 0x07FF'FFFF>(byte));
     INDEXED_CASE2(kRegDma0Count,      dma.channels[0].count.write<kIndex, 0x3FFF>(byte));
@@ -326,5 +340,34 @@ void Arm::writeIo(u32 addr, u8 byte)
     INDEXED_CASE4(kRegIrqMaster,      irq.master.write<kIndex>(byte));
     INDEXED_CASE1(kRegPostFlag,       postflg.write<kIndex>(byte));
     INDEXED_CASE1(kRegHaltControl,    haltcnt.write<kIndex>(byte));
+    }
+}
+
+void Arm::writeHalfIo(u32 addr, u16 half)
+{
+    addr &= ~0x1;
+    writeByteIo(addr + 0, bit::seq<0, 8>(half));
+    writeByteIo(addr + 1, bit::seq<8, 8>(half));
+}
+
+void Arm::writeWordIo(u32 addr, u32 word)
+{
+    addr &= ~0x3;
+    switch (addr)
+    {
+    case 0x400'0000 | kRegFifoA:
+        apu.fifo[0].writeWord(word);
+        break;
+
+    case 0x400'0000 | kRegFifoB:
+        apu.fifo[1].writeWord(word);
+        break;
+
+    default:
+        writeByteIo(addr + 0, bit::seq< 0, 8>(word));
+        writeByteIo(addr + 1, bit::seq< 8, 8>(word));
+        writeByteIo(addr + 2, bit::seq<16, 8>(word));
+        writeByteIo(addr + 3, bit::seq<24, 8>(word));
+        break;
     }
 }

@@ -51,7 +51,7 @@ u8 Arm::readByte(u32 addr, Access access)
 
     case kRegionIo:
         tickRam(1);
-        return readIo(addr);
+        return readByteIo(addr);
 
     case kRegionPaletteRam:
         tickRam(1);
@@ -113,9 +113,7 @@ u16 Arm::readHalf(u32 addr, Access access)
 
     case kRegionIo:
         tickRam(1);
-        addr &= ~0x1;
-        return readIo(addr + 0) << 0
-             | readIo(addr + 1) << 8;
+        return readHalfIo(addr);
 
     case kRegionPaletteRam:
         tickRam(1);
@@ -184,11 +182,7 @@ u32 Arm::readWord(u32 addr, Access access)
 
     case kRegionIo:
         tickRam(1);
-        addr &= ~0x3;
-        return readIo(addr + 0) <<  0
-             | readIo(addr + 1) <<  8
-             | readIo(addr + 2) << 16
-             | readIo(addr + 3) << 24;
+        return readWordIo(addr);
 
     case kRegionPaletteRam:
         tickRam(2);
@@ -252,7 +246,7 @@ void Arm::writeByte(u32 addr, u8 byte, Access access)
 
     case kRegionIo:
         tickRam(1);
-        writeIo(addr, byte);
+        writeByteIo(addr, byte);
         break;
 
     case kRegionPaletteRam:
@@ -314,9 +308,7 @@ void Arm::writeHalf(u32 addr, u16 half, Access access)
 
     case kRegionIo:
         tickRam(1);
-        addr &= ~0x1;
-        writeIo(addr + 0, bit::seq<0, 8>(half));
-        writeIo(addr + 1, bit::seq<8, 8>(half));
+        writeHalfIo(addr, half);
         break;
 
     case kRegionPaletteRam:
@@ -379,11 +371,7 @@ void Arm::writeWord(u32 addr, u32 word, Access access)
 
     case kRegionIo:
         tickRam(1);
-        addr &= ~0x3;
-        writeIo(addr + 0, bit::seq< 0, 8>(word));
-        writeIo(addr + 1, bit::seq< 8, 8>(word));
-        writeIo(addr + 2, bit::seq<16, 8>(word));
-        writeIo(addr + 3, bit::seq<24, 8>(word));
+        writeWordIo(addr, word);
         break;
 
     case kRegionPaletteRam:

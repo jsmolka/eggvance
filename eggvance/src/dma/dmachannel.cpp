@@ -1,5 +1,6 @@
 #include "dmachannel.h"
 
+#include "apu/apu.h"
 #include "arm/arm.h"
 #include "arm/constants.h"
 #include "gamepak/eeprom.h"
@@ -67,7 +68,9 @@ void DmaChannel::run()
         };
 
         internal.src_addr += kDeltas[control.word][control.sadcnt];
-        internal.dst_addr += kDeltas[control.word][control.dadcnt];
+        
+        if (!fifo)
+            internal.dst_addr += kDeltas[control.word][control.dadcnt];
 
         if (arm.cycles <= 0 && pending > 0)
             return;
@@ -85,8 +88,20 @@ void DmaChannel::run()
         control.value &= ~DmaControl::kEnable;
 }
 
+bool DmaChannel::isFifoA() const
+{
+    return control.timing == DmaControl::kTimingSpecial && (id == 1 || id == 2) && control.repeat && dad.value == 0x400'00A0;
+}
+
+bool DmaChannel::isFifoB() const
+{
+    return control.timing == DmaControl::kTimingSpecial && (id == 1 || id == 2) && control.repeat && dad.value == 0x400'00A4;
+}
+
 void DmaChannel::initTransfer()
 {
+    fifo = false;
+
     bool eeprom_r = gamepak.isEepromAccess(internal.src_addr);
     bool eeprom_w = gamepak.isEepromAccess(internal.dst_addr);
 
@@ -116,7 +131,11 @@ void DmaChannel::initTransfer()
     }
     else
     {
-        if (control.word)
+        fifo = isFifoA() || isFifoB();
+        if (fifo)
+            internal.count = 4;
+
+        if (control.word || fifo)
         {
             transfer = [&](Access access) {
                 if (internal.src_addr >= 0x200'0000) bus = arm.readWord(internal.src_addr, access);
