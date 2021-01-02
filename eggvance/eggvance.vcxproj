@@ -179,6 +179,7 @@
   <ItemGroup>
     <ClInclude Include="external\icon\themes\default\cpp\shell\icon.h" />
     <ClInclude Include="src\apu\apu.h" />
+    <ClInclude Include="src\apu\fifo.h" />
     <ClInclude Include="src\apu\io.h" />
     <ClInclude Include="src\arm\arm.h" />
     <ClInclude Include="src\arm\constants.h" />

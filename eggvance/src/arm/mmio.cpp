@@ -298,6 +298,8 @@ void Arm::writeByteIo(u32 addr, u8 byte)
     INDEXED_CASE2(kRegWaveRam5,       apu.waveram[5].write<kIndex>(byte));
     INDEXED_CASE2(kRegWaveRam6,       apu.waveram[6].write<kIndex>(byte));
     INDEXED_CASE2(kRegWaveRam7,       apu.waveram[7].write<kIndex>(byte));
+    INDEXED_CASE4(kRegFifoA,          apu.fifo[0].write(byte));
+    INDEXED_CASE4(kRegFifoB,          apu.fifo[1].write(byte));
     INDEXED_CASE4(kRegDma0Sad,        dma.channels[0].sad.write<kIndex, 0x07FF'FFFF>(byte));
     INDEXED_CASE4(kRegDma0Dad,        dma.channels[0].dad.write<kIndex, 0x07FF'FFFF>(byte));
     INDEXED_CASE2(kRegDma0Count,      dma.channels[0].count.write<kIndex, 0x3FFF>(byte));

@@ -25,14 +25,14 @@ void callback(void* userdata, u8* stream, int length)
         if (apu->audio.read_index < apu->audio.write_index)
             apu->last_sample = apu->audio.read();
 
-        *out++ = apu->last_sample;
+        *out++ = apu->last_sample * 0.1;
     }
 }
 
 Apu::Apu()
 {
-    dma_control.reset_fifo_a = [&]() { };
-    dma_control.reset_fifo_b = [&]() { };
+    dma_control.reset_fifo_a = [&]() { fifo[0].clear(); };
+    dma_control.reset_fifo_b = [&]() { fifo[1].clear(); };
 
     if (config.bios_skip)
     {
@@ -77,12 +77,9 @@ float Apu::mix()
 
 void Apu::tickDmaSound(int channel)
 {
-    uint64_t wi = fifo[channel].write_index;
-    uint64_t ri = fifo[channel].read_index;
-
-    if (ri < wi)
+    if (const auto sample = fifo[channel].read())
     {
-        fifo[channel].sample = fifo[channel].read();
+        fifo[channel].sample = *sample;
 
         if (fifo[channel].size() <= 16)
         {

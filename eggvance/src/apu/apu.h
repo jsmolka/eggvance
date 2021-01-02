@@ -1,10 +1,8 @@
 #pragma once
 
-#include <list>
-
 #include "io.h"
+#include "fifo.h"
 
-constexpr auto kFifoSize = 32;
 constexpr auto kAudioSampleRate = 48000;
 constexpr auto kAudioBufferSize = 4096;
 constexpr auto kCpuFrequency = 16 * 1024 * 1024;
@@ -30,10 +28,10 @@ struct RingBuffer
 
     T buf[N];
     u64 read_index = 0;
-    u64 write_index = 1;
+    u64 write_index = 0;
 };
 
-struct Fifo : RingBuffer<u8, kFifoSize>
+struct Fifo2 : public Fifo<u8, 32>
 {
     void writeWord(u32 value)
     {
@@ -45,8 +43,6 @@ struct Fifo : RingBuffer<u8, kFifoSize>
             write(bit::seq<24, 8>(value));
         }
     }
-
-    u8 sample = 0;
 };
 
 struct AudioBuffer : RingBuffer<float, kAudioBufferSize>
@@ -66,7 +62,7 @@ public:
     void tickDmaSound(int channel);
     void onTimerOverflow(uint id);
 
-    Fifo fifo[2];
+    Fifo2 fifo[2];
     AudioBuffer audio;
     float last_sample;
 
