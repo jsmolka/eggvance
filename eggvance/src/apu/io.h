@@ -68,7 +68,7 @@ public:
     template<uint Index>
     void write(u8 byte)
     {
-        Register::write(byte);
+        Register::write<Index>(byte);
 
         bias = bit::seq<1, 9>(value);
 

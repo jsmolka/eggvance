@@ -3,55 +3,22 @@
 #include "io.h"
 #include "fifo.h"
 
-constexpr auto kAudioSampleRate = 44100;
+constexpr auto kAudioSampleRate = 0x8000;
 constexpr auto kAudioBufferSize = 4096;
 constexpr auto kCpuFrequency = 16 * 1024 * 1024;
 constexpr auto kSampleEveryCycles = kCpuFrequency / kAudioSampleRate;
-
-template<typename T, std::size_t N>
-struct RingBuffer
-{
-    T read()
-    {
-        return buf[(read_index++) % N];
-    }
-
-    void write(const T& value)
-    {
-        buf[(write_index++) % N] = value;
-    }
-
-    int size()
-    {
-        return write_index - read_index;
-    }
-
-    T buf[N];
-    u64 read_index = 0;
-    u64 write_index = 0;
-};
-
-struct AudioBuffer : RingBuffer<float, kAudioBufferSize>
-{
-
-};
 
 class Apu
 {
 public:
     Apu();
 
-    void init();
     void run(int cycles);
     void sample();
-    float mix();
     void tickDmaSound(int channel);
     void onTimerOverflow(uint id);
 
     Fifo<u8, 32> fifo[2];
-    AudioBuffer audio;
-    float last_sample;
-
     DmaSoundControl dma_control;    
 
     Register<u16, 0x007F> soundcnt1l;
