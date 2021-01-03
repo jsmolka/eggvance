@@ -5,7 +5,7 @@
 class Dma
 {
 public:
-    enum class Timing { Immediate, VBlank, HBlank, FifoA, FifoB, Video };
+    enum class Timing { Immediate, VBlank, HBlank, Video, FifoA, FifoB };
 
     Dma();
 

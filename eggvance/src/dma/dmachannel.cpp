@@ -2,7 +2,6 @@
 
 #include "apu/apu.h"
 #include "arm/arm.h"
-#include "arm/constants.h"
 #include "gamepak/eeprom.h"
 #include "gamepak/gamepak.h"
 
@@ -14,43 +13,48 @@ DmaChannel::DmaChannel(uint id)
 
 void DmaChannel::reload()
 {
-    internal.count    = count.count(id);
+    fifo = control.timing == DmaControl::Timing::kSpecial
+        && control.repeat
+        && (dad.value == 0x400'00A0 || dad.value == 0x400'00A4)
+        && (id == 1 || id == 2);
+
+    internal.count    = fifo ? 4 : count.count(id);
     internal.src_addr = sad.value;
     internal.dst_addr = dad.value;
 }
 
 void DmaChannel::start()
 {
-    enum Control
-    {
-        kControlIncrement,
-        kControlDecrement,
-        kControlFixed,
-        kControlReload
-    };
-
     if (control.repeat)
     {
-        internal.count = count.count(id);
+        internal.count = fifo ? 4 : count.count(id);
 
-        if (control.dadcnt == kControlReload)
+        if (control.dadcnt == DmaControl::Control::kReload)
             internal.dst_addr = dad.value;
     }
 
-    running = true;
-    pending = internal.count;
-
     internal.src_addr &= ~((2 << control.word) - 1);
     internal.dst_addr &= ~((2 << control.word) - 1);
+
+    running = true;
+    pending = internal.count;
 
     initTransfer();
 }
 
 void DmaChannel::run()
 {
+    static constexpr int kDeltas[2][4] = {
+        { 2, -2, 0, 2 },
+        { 4, -4, 0, 4 }
+    };
+
+    int delta_src = kDeltas[control.word | fifo][control.sadcnt];
+    int delta_dst = kDeltas[control.word | fifo][fifo ? DmaControl::Control::kFixed : control.dadcnt];
+
     while (pending-- > 0)
     {
-        if (pending == 0)
+        if (pending == internal.count - 1)
         {
             if (!(internal.src_addr & internal.dst_addr & 0x800'0000))
                 arm.idle(2);
@@ -62,15 +66,8 @@ void DmaChannel::run()
             transfer(Access::Sequential);
         }
 
-        static constexpr int kDeltas[2][4] = {
-            { 2, -2, 0, 2 },
-            { 4, -4, 0, 4 }
-        };
-
-        internal.src_addr += kDeltas[control.word][control.sadcnt];
-        
-        if (!fifo)
-            internal.dst_addr += kDeltas[control.word][control.dadcnt];
+        internal.src_addr += delta_src;
+        internal.dst_addr += delta_dst;
 
         if (arm.cycles <= 0 && pending > 0)
             return;
@@ -82,25 +79,15 @@ void DmaChannel::run()
         arm.raise(kIrqDma0 << id);
 
     control.enable = control.repeat
-        && control.timing != DmaControl::kTimingImmediate;
+        && control.timing != DmaControl::Timing::kImmediate;
 
     if (!control.enable)
-        control.value &= ~DmaControl::kEnable;
-}
-
-bool DmaChannel::isFifoA() const
-{
-    return control.timing == DmaControl::kTimingSpecial && (id == 1 || id == 2) && control.repeat && dad.value == 0x400'00A0;
-}
-
-bool DmaChannel::isFifoB() const
-{
-    return control.timing == DmaControl::kTimingSpecial && (id == 1 || id == 2) && control.repeat && dad.value == 0x400'00A4;
+        control.value &= ~(1 << 15);
 }
 
 void DmaChannel::initTransfer()
 {
-    fifo = false;
+    constexpr uint kExternalWram = 0x200'0000;
 
     bool eeprom_r = gamepak.isEepromAccess(internal.src_addr);
     bool eeprom_w = gamepak.isEepromAccess(internal.dst_addr);
@@ -112,45 +99,41 @@ void DmaChannel::initTransfer()
         if (eeprom_r)
         {
             transfer = [&](Access access) {
-                if (internal.src_addr >= 0x200'0000) bus = gamepak.save->read(internal.src_addr);
-                if (internal.dst_addr >= 0x200'0000) arm.writeHalf(internal.dst_addr, bus, access);
+                if (internal.src_addr >= kExternalWram) bus = gamepak.save->read(internal.src_addr);
+                if (internal.dst_addr >= kExternalWram) arm.writeHalf(internal.dst_addr, bus, access);
             };
         }
         else
         {
             transfer = [&](Access access) {
-                if (internal.src_addr >= 0x200'0000) 
+                if (internal.src_addr >= kExternalWram) 
                 {
                     bus = arm.readHalf(internal.src_addr, access);
                     bus |= bus << 16;
                 }
-                if (internal.dst_addr >= 0x200'0000) 
+                if (internal.dst_addr >= kExternalWram) 
                     gamepak.save->write(internal.dst_addr, bus);
             };
         }
     }
     else
     {
-        fifo = isFifoA() || isFifoB();
-        if (fifo)
-            internal.count = 4;
-
-        if (control.word || fifo)
+        if (control.word | fifo)
         {
             transfer = [&](Access access) {
-                if (internal.src_addr >= 0x200'0000) bus = arm.readWord(internal.src_addr, access);
-                if (internal.dst_addr >= 0x200'0000) arm.writeWord(internal.dst_addr, bus, access);
+                if (internal.src_addr >= kExternalWram) bus = arm.readWord(internal.src_addr, access);
+                if (internal.dst_addr >= kExternalWram) arm.writeWord(internal.dst_addr, bus, access);
             };
         }
         else
         {
             transfer = [&](Access access) {
-                if (internal.src_addr >= 0x200'0000)
+                if (internal.src_addr >= kExternalWram)
                 {
                     bus = arm.readHalf(internal.src_addr, access);
                     bus |= bus << 16;
                 }
-                if (internal.dst_addr >= 0x200'0000)
+                if (internal.dst_addr >= kExternalWram)
                     arm.writeHalf(internal.dst_addr, bus, access);
             };
         }

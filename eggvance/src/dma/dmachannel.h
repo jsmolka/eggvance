@@ -12,17 +12,14 @@ public:
     void start();
     void run();
 
-    bool isFifoA() const;
-    bool isFifoB() const;
-
-    const uint id;
+    uint id;
     bool running = false;
+    uint fifo    = false;
 
     DmaCount count;
     DmaControl control;
     RegisterW<u32> sad;
     RegisterW<u32> dad;
-    bool fifo = false;
 
 private:
     void initTransfer();
@@ -31,7 +28,7 @@ private:
     int pending = 0;
     u32 bus     = 0;
 
-    struct
+    struct Internal
     {
         u32 count    = 0;
         u32 src_addr = 0;

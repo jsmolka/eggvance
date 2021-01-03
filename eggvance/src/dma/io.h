@@ -19,15 +19,21 @@ public:
 class DmaControl : public Register<u16>
 {
 public:
-    enum Timing
+    enum Control
     {
-        kTimingImmediate,
-        kTimingVBlank,
-        kTimingHBlank,
-        kTimingSpecial
+        kIncrement,
+        kDecrement,
+        kFixed,
+        kReload
     };
 
-    static constexpr uint kEnable = 1 << 15;
+    enum Timing
+    {
+        kImmediate,
+        kVBlank,
+        kHBlank,
+        kSpecial
+    };
 
     template<uint Index, uint Mask>
     void write(u8 byte)
