@@ -1,8 +1,12 @@
 #include "apu.h"
 
+#include <mutex>
+
 #include "dma/dma.h"
 #include "base/config.h"
 #include "core/audiocontext.h"
+
+std::mutex mutex;
 
 #define s8_min (-127.0f)
 #define s8_max (128.0f)
@@ -18,13 +22,14 @@ inline float convert_sample(u8 sample)
 
 void callback(void* userdata, u8* stream, int length)
 {
+    std::lock_guard<std::mutex> _(mutex);
+
     Apu* apu = (Apu*)userdata;
     float* out = (float*)stream;
     for (int i = 0; i < length / sizeof(float); i++)
     {
         if (apu->audio.read_index < apu->audio.write_index)
             apu->last_sample = apu->audio.read();
-
         *out++ = apu->last_sample * 0.1;
     }
 }
@@ -60,6 +65,8 @@ void Apu::run(int cycles)
 
 void Apu::pushSample()
 {
+    std::lock_guard<std::mutex> _(mutex);
+
     u64 size = audio.write_index - audio.read_index;
     if (size < kAudioBufferSize)
     {

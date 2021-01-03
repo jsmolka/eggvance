@@ -17,6 +17,11 @@ public:
         return length;
     }
 
+    bool needsRefill() const
+    {
+        return length <= 16;
+    }
+
     std::optional<T> read()
     {
         if (length == 0)

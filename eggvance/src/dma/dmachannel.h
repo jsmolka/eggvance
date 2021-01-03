@@ -6,16 +6,15 @@
 class DmaChannel
 {
 public:
+    friend class Dma;
+
     DmaChannel(uint id);
 
     void reload();
-    void start();
+    bool start();
     void run();
 
-    uint id;
-    bool running = false;
-    uint fifo    = false;
-
+    const uint id;
     DmaCount count;
     DmaControl control;
     RegisterW<u32> sad;
@@ -25,6 +24,8 @@ private:
     void initTransfer();
     void initEeprom();
 
+    int running = false;
+    int fifo    = false;
     int pending = 0;
     u32 bus     = 0;
 

@@ -23,8 +23,11 @@ void DmaChannel::reload()
     internal.dst_addr = dad.value;
 }
 
-void DmaChannel::start()
+bool DmaChannel::start()
 {
+    if (fifo && !apu.fifo[internal.dst_addr == 0x400'00A4].needsRefill())
+        return false;
+
     if (control.repeat)
     {
         internal.count = fifo ? 4 : count.count(id);
@@ -40,6 +43,8 @@ void DmaChannel::start()
     pending = internal.count;
 
     initTransfer();
+
+    return true;
 }
 
 void DmaChannel::run()

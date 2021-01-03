@@ -3,7 +3,7 @@
 #include "io.h"
 #include "fifo.h"
 
-constexpr auto kAudioSampleRate = 48000;
+constexpr auto kAudioSampleRate = 44100;
 constexpr auto kAudioBufferSize = 4096;
 constexpr auto kCpuFrequency = 16 * 1024 * 1024;
 constexpr auto kSampleEveryCycles = kCpuFrequency / kAudioSampleRate;
