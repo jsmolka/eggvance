@@ -1,6 +1,7 @@
 #include "apu.h"
 
 #include <mutex>
+#include <shell/utility.h>
 
 #include "dma/dma.h"
 #include "base/config.h"
@@ -19,7 +20,6 @@ inline float convert_sample(u8 sample)
     return ((((float)ssample - s8_min) * (f32_max - f32_min)) / (s8_max - s8_min)) + f32_min;
 }
 
-
 void callback(void* userdata, u8* stream, int length)
 {
     std::lock_guard<std::mutex> _(mutex);
@@ -36,8 +36,8 @@ void callback(void* userdata, u8* stream, int length)
 
 Apu::Apu()
 {
-    dma_control.reset_fifo_a = [&]() { fifo[0].clear(); };
-    dma_control.reset_fifo_b = [&]() { fifo[1].clear(); };
+    dma_control.channels[0].clear_fifo = [&]() { fifo[0].clear(); };
+    dma_control.channels[1].clear_fifo = [&]() { fifo[1].clear(); };
 
     if (config.bios_skip)
     {
@@ -56,20 +56,19 @@ void Apu::run(int cycles)
 
     while (this->cycles >= kSampleEveryCycles)
     {
-        pushSample();
+        sample();
 
         this->cycles -= kSampleEveryCycles;
     }
 
 }
 
-void Apu::pushSample()
+void Apu::sample()
 {
-    std::lock_guard<std::mutex> _(mutex);
-
     u64 size = audio.write_index - audio.read_index;
     if (size < kAudioBufferSize)
     {
+        std::lock_guard<std::mutex> _(mutex);
         audio.write(mix());
     }
 }
@@ -101,9 +100,9 @@ void Apu::tickDmaSound(int channel)
 
 void Apu::onTimerOverflow(uint id)
 {
-    if (dma_control.a.timer == id)
-        tickDmaSound(0);
-
-    if (dma_control.b.timer == id)
-        tickDmaSound(1);
+    for (auto [fifo_id, channel] : shell::enumerate(dma_control.channels))
+    {
+        if (channel.timer == id)
+            tickDmaSound(fifo_id);
+    }
 }

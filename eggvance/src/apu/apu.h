@@ -31,20 +31,6 @@ struct RingBuffer
     u64 write_index = 0;
 };
 
-struct Fifo2 : public Fifo<u8, 32>
-{
-    void writeWord(u32 value)
-    {
-        if (size() <= 28)
-        {
-            write(bit::seq< 0, 8>(value));
-            write(bit::seq< 8, 8>(value));
-            write(bit::seq<16, 8>(value));
-            write(bit::seq<24, 8>(value));
-        }
-    }
-};
-
 struct AudioBuffer : RingBuffer<float, kAudioBufferSize>
 {
 
@@ -57,12 +43,12 @@ public:
 
     void init();
     void run(int cycles);
-    void pushSample();
+    void sample();
     float mix();
     void tickDmaSound(int channel);
     void onTimerOverflow(uint id);
 
-    Fifo2 fifo[2];
+    Fifo<u8, 32> fifo[2];
     AudioBuffer audio;
     float last_sample;
 
