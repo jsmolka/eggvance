@@ -34,7 +34,7 @@ public:
     void write(const T& value)
     {
         if (length == N)
-            idx_rd = idx_rd++ % N;
+            idx_rd = (idx_rd + 1) % N;
         else
             length++;
 

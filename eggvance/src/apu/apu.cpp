@@ -5,6 +5,7 @@
 
 #include "dma/dma.h"
 #include "base/config.h"
+#include "base/stereosample.h"
 #include "core/audiocontext.h"
 
 Apu::Apu()
@@ -36,11 +37,7 @@ void Apu::sample()
     s8 ssample = fifo[0].sample;
     s16 sssample = ssample << 6;
 
-    s16 x[2] = { 
-        sssample, sssample
-    };
-
-    audio_ctx.write(x);
+    audio_ctx.write({ sssample, sssample });
 }
 
 void Apu::tickDmaSound(int channel)

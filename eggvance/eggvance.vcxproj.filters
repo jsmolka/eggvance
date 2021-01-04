@@ -323,6 +323,12 @@
     <ClInclude Include="src\apu\fifo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\base\ringbuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\stereosample.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="eggvance.rc">
