@@ -92,8 +92,6 @@ void DmaChannel::run()
 
 void DmaChannel::initTransfer()
 {
-    constexpr uint kExternalWram = 0x200'0000;
-
     bool eeprom_r = gamepak.isEepromAccess(internal.src_addr);
     bool eeprom_w = gamepak.isEepromAccess(internal.dst_addr);
 
@@ -104,19 +102,19 @@ void DmaChannel::initTransfer()
         if (eeprom_r)
         {
             transfer = [&](Access access) {
-                if (internal.src_addr >= kExternalWram) bus = gamepak.save->read(internal.src_addr);
-                if (internal.dst_addr >= kExternalWram) arm.writeHalf(internal.dst_addr, bus, access);
+                if (internal.src_addr >= 0x200'0000) bus = gamepak.save->read(internal.src_addr);
+                if (internal.dst_addr >= 0x200'0000) arm.writeHalf(internal.dst_addr, bus, access);
             };
         }
         else
         {
             transfer = [&](Access access) {
-                if (internal.src_addr >= kExternalWram) 
+                if (internal.src_addr >= 0x200'0000) 
                 {
                     bus = arm.readHalf(internal.src_addr, access);
                     bus |= bus << 16;
                 }
-                if (internal.dst_addr >= kExternalWram) 
+                if (internal.dst_addr >= 0x200'0000) 
                     gamepak.save->write(internal.dst_addr, bus);
             };
         }
@@ -126,19 +124,19 @@ void DmaChannel::initTransfer()
         if (control.word | fifo)
         {
             transfer = [&](Access access) {
-                if (internal.src_addr >= kExternalWram) bus = arm.readWord(internal.src_addr, access);
-                if (internal.dst_addr >= kExternalWram) arm.writeWord(internal.dst_addr, bus, access);
+                if (internal.src_addr >= 0x200'0000) bus = arm.readWord(internal.src_addr, access);
+                if (internal.dst_addr >= 0x200'0000) arm.writeWord(internal.dst_addr, bus, access);
             };
         }
         else
         {
             transfer = [&](Access access) {
-                if (internal.src_addr >= kExternalWram)
+                if (internal.src_addr >= 0x200'0000)
                 {
                     bus = arm.readHalf(internal.src_addr, access);
                     bus |= bus << 16;
                 }
-                if (internal.dst_addr >= kExternalWram)
+                if (internal.dst_addr >= 0x200'0000)
                     arm.writeHalf(internal.dst_addr, bus, access);
             };
         }
