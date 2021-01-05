@@ -53,20 +53,24 @@ void Arm::interruptSw()
 
 void Arm::interruptProcess()
 {
-    bool interrupt = irq.enable.value & irq.request.value;
+    bool servable = irq.enable.value & irq.request.value;
 
-    if (interrupt)
+    if (servable)
         state &= ~kStateHalt;
 
-    if (interrupt && irq.master.value)
+    if (servable && irq.master.value)
     {
-        irq.delay = 4;
-        irq.delaying = true;
-
+        if (!irq.delaying)
+        {
+            irq.delay = 4;
+            irq.delaying = true;
+        }
         state |= kStateIrq;
     }
     else
     {
+        irq.delay = 0;
+        irq.delaying = false;
         state &= ~kStateIrq;
     }
 }
