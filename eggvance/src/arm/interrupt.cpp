@@ -53,9 +53,6 @@ void Arm::interruptSw()
 
 void Arm::interruptProcess()
 {
-    if (irq.delaying)
-        return;
-
     bool interrupt = irq.enable.value & irq.request.value;
 
     if (interrupt)
