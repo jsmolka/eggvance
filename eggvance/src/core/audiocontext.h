@@ -12,7 +12,7 @@ public:
 
     void init();
     void pause();
-    void resume();
+    void unpause();
     void write(s16 left, s16 right);
     void clear();
 

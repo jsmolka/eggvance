@@ -8,6 +8,7 @@
 #include <emscripten/bind.h>
 
 #include "core.h"
+#include "audiocontext.h"
 #include "framecounter.h"
 #include "inputcontext.h"
 #include "videocontext.h"
@@ -95,15 +96,27 @@ void emulate()
 
 void eggvanceLoadGba(const std::string& gba)
 {
+    audio_ctx.pause();
+    audio_ctx.clear();
+
     gamepak.load(gba, fs::path());
     reset();
+
+    audio_ctx.unpause();
+
     setMainLoop(emulate, kRefreshRate);
 }
 
 void eggvanceLoadSav(const std::string& sav)
 {
+    audio_ctx.pause();
+    audio_ctx.clear();
+
     gamepak.load(fs::path(), sav);
     reset();
+
+    audio_ctx.unpause();
+
     setMainLoop(emulate, kRefreshRate);
 }
 

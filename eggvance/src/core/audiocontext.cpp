@@ -27,8 +27,6 @@ void AudioContext::init()
 
     if (!(stream = SDL_NewAudioStream(AUDIO_S16, 2, 32768, have.format, have.channels, have.freq)))
         panic("Cannot init audio stream {}", SDL_GetError());
-
-    resume();
 }
 
 void AudioContext::pause()
@@ -36,7 +34,7 @@ void AudioContext::pause()
     SDL_PauseAudioDevice(device, true);
 }
 
-void AudioContext::resume()
+void AudioContext::unpause()
 {
     SDL_PauseAudioDevice(device, false);
 }
@@ -55,6 +53,7 @@ void AudioContext::write(s16 left, s16 right)
 
 void AudioContext::clear()
 {
+    std::lock_guard lock(mutex);
     SDL_AudioStreamClear(stream);
 }
 

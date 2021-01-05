@@ -3,6 +3,7 @@
 #if !SHELL_CC_EMSCRIPTEN
 
 #include "core.h"
+#include "audiocontext.h"
 #include "framecounter.h"
 #include "inputcontext.h"
 #include "synchronizer.h"
@@ -30,14 +31,24 @@ void processDropEvent(const SDL_DropEvent& event)
 
     if (file.extension() == ".gba")
     {
+        audio_ctx.pause();
+        audio_ctx.clear();
+
         gamepak.load(file, fs::path());
         reset();
+
+        audio_ctx.unpause();
     }
     
     if (file.extension() == ".sav")
     {
+        audio_ctx.pause();
+        audio_ctx.clear();
+
         gamepak.load(fs::path(), file);
         reset();
+
+        audio_ctx.unpause();
     }
 
     video_ctx.raise();
@@ -113,6 +124,8 @@ int main(int argc, char* argv[])
 
         reset();
 
+        audio_ctx.unpause();
+
         while (running)
         {
             synchronizer.sync([]() {
@@ -123,6 +136,9 @@ int main(int argc, char* argv[])
             if (const auto fps = (++counter).fps())
                 core::updateTitle(*fps);
         }
+
+        audio_ctx.pause();
+        audio_ctx.clear();
     }
     catch (const std::exception& ex)
     {
