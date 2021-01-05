@@ -5,13 +5,12 @@
 
 #include "dma/dma.h"
 #include "base/config.h"
-#include "base/stereosample.h"
 #include "core/audiocontext.h"
 
 Apu::Apu()
 {
-    dma_control.channels[0].clear_fifo = [&]() { fifo[0].clear(); };
-    dma_control.channels[1].clear_fifo = [&]() { fifo[1].clear(); };
+    dmacnt.channels[0].clear_fifo = [&]() { fifo[0].clear(); };
+    dmacnt.channels[1].clear_fifo = [&]() { fifo[1].clear(); };
 
     if (config.bios_skip)
     {
@@ -34,34 +33,34 @@ void Apu::run(int cycles)
 
 void Apu::sample()
 {
-    s8 ssample = fifo[0].sample;
-    s16 sssample = ssample << 6;
+    s16 sample = (s8)fifo[0].sample << 6; 
 
-    audio_ctx.write({ sssample, sssample });
-}
-
-void Apu::tickDmaSound(int channel)
-{
-    if (const auto sample = fifo[channel].read())
-    {
-        fifo[channel].sample = *sample;
-
-        if (fifo[channel].size() <= 16)
-        {
-            dma.broadcast(channel == 0 ? Dma::Timing::FifoA : Dma::Timing::FifoB);
-        }
-    }
-    else 
-    {
-        fifo[channel].sample = 0;
-    }
+    audio_ctx.write(sample, sample);
 }
 
 void Apu::onTimerOverflow(uint id)
 {
-    for (auto [fifo_id, channel] : shell::enumerate(dma_control.channels))
+    constexpr Dma::Timing refill[2] = { Dma::Timing::FifoA, Dma::Timing::FifoB };
+
+    for (auto [index, channel] : shell::enumerate(dmacnt.channels))
     {
-        if (channel.timer == id)
-            tickDmaSound(fifo_id);
+        if (channel.timer != id)
+            continue;
+
+        auto& fifo = this->fifo[index];
+
+        if (fifo.size() > 0)
+        {
+            fifo.sample = fifo.read();
+
+            if (fifo.refillable())
+            {
+                dma.broadcast(refill[index]);
+            }
+        }
+        else 
+        {
+            fifo.sample = 0;
+        }
     }
 }

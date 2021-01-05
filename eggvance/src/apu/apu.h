@@ -15,11 +15,10 @@ public:
 
     void run(int cycles);
     void sample();
-    void tickDmaSound(int channel);
     void onTimerOverflow(uint id);
 
-    Fifo<u8, 32> fifo[2];
-    DmaSoundControl dma_control;    
+    Fifo fifo[2];
+    DmaSoundControl dmacnt;    
 
     Register<u16, 0x007F> soundcnt1l;
     Register<u16, 0xFFC0> soundcnt1h;

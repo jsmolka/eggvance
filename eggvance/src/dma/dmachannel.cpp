@@ -25,7 +25,7 @@ void DmaChannel::reload()
 
 bool DmaChannel::start()
 {
-    if (fifo && !apu.fifo[internal.dst_addr == 0x400'00A4].needsRefill())
+    if (fifo && !apu.fifo[internal.dst_addr == 0x400'00A4].refillable())
         return false;
 
     if (control.repeat)
