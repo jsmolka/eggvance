@@ -18,19 +18,6 @@ Apu::Apu()
     }
 }
 
-void Apu::run(int cycles)
-{
-    this->cycles += cycles;
-
-    while (this->cycles >= kSampleEveryCycles)
-    {
-        sample();
-
-        this->cycles -= kSampleEveryCycles;
-    }
-
-}
-
 void Apu::sample()
 {
     s16 sample = (s8)fifo[0].sample << 6; 

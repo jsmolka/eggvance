@@ -44,7 +44,7 @@ void AudioContext::write(s16 left, s16 right)
     constexpr std::size_t kSecond = 44100 * 2 * sizeof(float);
 
     std::lock_guard lock(mutex);
-    if (SDL_AudioStreamAvailable(stream) < kSecond / 4)
+    if (SDL_AudioStreamAvailable(stream) < kSecond / 8)
     {
         s16 sample[] = { left, right };
         SDL_AudioStreamPut(stream, &sample, sizeof(sample));

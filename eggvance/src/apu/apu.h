@@ -3,17 +3,27 @@
 #include "io.h"
 #include "fifo.h"
 
-constexpr auto kAudioSampleRate = 0x8000;
-constexpr auto kAudioBufferSize = 4096;
-constexpr auto kCpuFrequency = 16 * 1024 * 1024;
-constexpr auto kSampleEveryCycles = kCpuFrequency / kAudioSampleRate;
-
 class Apu
 {
 public:
     Apu();
 
-    void run(int cycles);
+    SHELL_INLINE void run(int cycles)
+    {
+        constexpr auto kCpuFrequency = 16 * 1024 * 1024;
+        constexpr auto kSampleRate   = 32768;
+        constexpr auto kSampleCycles = kCpuFrequency / kSampleRate;
+
+        this->cycles += cycles;
+
+        while (this->cycles >= kSampleCycles)
+        {
+            sample();
+
+            this->cycles -= kSampleCycles;
+        }
+    }
+
     void sample();
     void onTimerOverflow(uint id);
 
