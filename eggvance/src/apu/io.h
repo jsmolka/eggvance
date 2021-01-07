@@ -57,12 +57,15 @@ public:
     Channel channels[2];
 };
 
-class SoundBias : public Register<u16>
+class SoundBias : public Register<u16, 0xC3FF>
 {
 public:
     SoundBias()
     {
-        bias = config.bios_skip << 8;
+        if (config.bios_skip)
+        {
+            level = 0x200;
+        }
     }
 
     template<uint Index>
@@ -70,14 +73,14 @@ public:
     {
         Register::write<Index>(byte);
 
-        bias = bit::seq<1, 9>(value);
+        level = bit::seq<0, 10>(value);
 
         if (Index == 1)
         {
-            sampling = 0;
+            sampling = bit::seq<6, 2>(byte);
         }
     }
 
-    uint bias     = 0;
+    uint level    = 0;
     uint sampling = 0;
 };

@@ -1,6 +1,5 @@
 #include "apu.h"
 
-#include <mutex>
 #include <shell/utility.h>
 
 #include "dma/dma.h"
@@ -20,14 +19,23 @@ Apu::Apu()
 
 void Apu::sample()
 {
-    s16 sample = (s8)fifo[0].sample << 6; 
+    int sample_l = soundbias.level - 0x200;
+    int sample_r = soundbias.level - 0x200;
 
-    audio_ctx.write(sample, sample);
+    if (dmacnt.channels[0].enable_l) sample_l += fifo[0].sample << dmacnt.channels[0].volume;
+    if (dmacnt.channels[1].enable_l) sample_l += fifo[1].sample << dmacnt.channels[1].volume;
+    if (dmacnt.channels[0].enable_r) sample_r += fifo[0].sample << dmacnt.channels[0].volume;
+    if (dmacnt.channels[1].enable_r) sample_r += fifo[1].sample << dmacnt.channels[1].volume;
+
+    sample_l = std::clamp(sample_l, -0x400, 0x3FF);
+    sample_r = std::clamp(sample_r, -0x400, 0x3FF);
+
+    audio_ctx.write(sample_l << 5, sample_r << 5);
 }
 
 void Apu::onTimerOverflow(uint id)
 {
-    constexpr Dma::Timing refill[2] = { Dma::Timing::FifoA, Dma::Timing::FifoB };
+    constexpr Dma::Timing kRefill[2] = { Dma::Timing::FifoA, Dma::Timing::FifoB };
 
     for (auto [index, channel] : shell::enumerate(dmacnt.channels))
     {
@@ -42,7 +50,7 @@ void Apu::onTimerOverflow(uint id)
 
             if (fifo.refillable())
             {
-                dma.broadcast(refill[index]);
+                dma.broadcast(kRefill[index]);
             }
         }
         else 
