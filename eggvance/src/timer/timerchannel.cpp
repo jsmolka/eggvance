@@ -45,12 +45,12 @@ void TimerChannel::run(int cycles)
         if (next && next->control.cascade)
             next->run(counter / overflow);
 
+        if (id <= 1)
+            apu.onTimerOverflow(id, counter / overflow);
+
         counter %= overflow;
         initial  = count.initial;
         overflow = control.prescaler * (kOverflow - initial);
-
-        if (id <= 1)
-            apu.onTimerOverflow(id);
     }
     count.value = counter / control.prescaler + initial;
 }

@@ -22,10 +22,13 @@ void Apu::sample()
     s16 sample_l = soundbias.level - 0x200;
     s16 sample_r = soundbias.level - 0x200;
 
-    if (dmacnt.channels[0].enable_l) sample_l += fifo[0].sample << dmacnt.channels[0].volume;
-    if (dmacnt.channels[1].enable_l) sample_l += fifo[1].sample << dmacnt.channels[1].volume;
-    if (dmacnt.channels[0].enable_r) sample_r += fifo[0].sample << dmacnt.channels[0].volume;
-    if (dmacnt.channels[1].enable_r) sample_r += fifo[1].sample << dmacnt.channels[1].volume;
+    if (sndenable.enable)
+    {
+        if (dmacnt.channels[0].enable_l) sample_l += fifo[0].sample << dmacnt.channels[0].volume;
+        if (dmacnt.channels[1].enable_l) sample_l += fifo[1].sample << dmacnt.channels[1].volume;
+        if (dmacnt.channels[0].enable_r) sample_r += fifo[0].sample << dmacnt.channels[0].volume;
+        if (dmacnt.channels[1].enable_r) sample_r += fifo[1].sample << dmacnt.channels[1].volume;
+    }
 
     sample_l = std::clamp<s16>(sample_l, -0x400, 0x3FF);
     sample_r = std::clamp<s16>(sample_r, -0x400, 0x3FF);
@@ -33,8 +36,11 @@ void Apu::sample()
     audio_ctx.write(sample_l << 5, sample_r << 5);
 }
 
-void Apu::onTimerOverflow(uint id)
+void Apu::onTimerOverflow(uint id, uint times)
 {
+    if (!sndenable.enable)
+        return;
+
     constexpr Dma::Timing kRefill[2] = { Dma::Timing::FifoA, Dma::Timing::FifoB };
 
     for (auto [index, channel] : shell::enumerate(dmacnt.channels))
@@ -44,18 +50,16 @@ void Apu::onTimerOverflow(uint id)
 
         auto& fifo = this->fifo[index];
 
-        if (fifo.size() > 0)
+        for (uint x = 0; x < times; ++x)
         {
-            fifo.sample = fifo.read();
-
-            if (fifo.refillable())
-            {
-                dma.broadcast(kRefill[index]);
-            }
+            fifo.sample = fifo.size() > 0
+                ? fifo.read()
+                : 0;
         }
-        else 
+
+        if (fifo.refillable())
         {
-            fifo.sample = 0;
+            dma.broadcast(kRefill[index]);
         }
     }
 }

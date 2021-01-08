@@ -5,7 +5,7 @@
 #include "base/config.h"
 #include "base/register.h"
 
-class DmaSoundControl : public Register<u16, 0x770F>
+class SoundControlDma : public Register<u16, 0x770F>
 {
 public:
     struct Channel
@@ -18,7 +18,7 @@ public:
         std::function<void(void)> clear_fifo;
     };
 
-    DmaSoundControl()
+    SoundControlDma()
     {
         if (config.bios_skip)
         {
@@ -55,6 +55,21 @@ public:
 
     uint volume = 0;
     Channel channels[2];
+};
+
+class SoundControlEnable : public Register<u16, 0x0080>
+{
+public:
+    template<uint Index>
+    void write(u8 byte)
+    {
+        if (Index == 0)
+        {
+            enable = bit::seq<7, 1>(byte);
+        }
+    }
+
+    uint enable = 0;
 };
 
 class SoundBias : public Register<u16, 0xC3FF>
