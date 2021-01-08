@@ -8,26 +8,21 @@
 
 Apu::Apu()
 {
-    dmacnt.channels[0].clear_fifo = [&]() { fifo[0].clear(); };
-    dmacnt.channels[1].clear_fifo = [&]() { fifo[1].clear(); };
-
-    if (config.bios_skip)
-    {
-        soundbias.value = 0x0200;
-    }
+    direct_sound.channels[0].clear_fifo = [&]() { fifo[0].clear(); };
+    direct_sound.channels[1].clear_fifo = [&]() { fifo[1].clear(); };
 }
 
 void Apu::sample()
 {
-    s16 sample_l = soundbias.level - 0x200;
-    s16 sample_r = soundbias.level - 0x200;
+    s16 sample_l = sound_bias.level - 0x200;
+    s16 sample_r = sound_bias.level - 0x200;
 
-    if (sndenable.enable)
+    if (sound_enable.enable)
     {
-        if (dmacnt.channels[0].enable_l) sample_l += fifo[0].sample << dmacnt.channels[0].volume;
-        if (dmacnt.channels[1].enable_l) sample_l += fifo[1].sample << dmacnt.channels[1].volume;
-        if (dmacnt.channels[0].enable_r) sample_r += fifo[0].sample << dmacnt.channels[0].volume;
-        if (dmacnt.channels[1].enable_r) sample_r += fifo[1].sample << dmacnt.channels[1].volume;
+        if (direct_sound.channels[0].enable_l) sample_l += fifo[0].sample << direct_sound.channels[0].volume;
+        if (direct_sound.channels[1].enable_l) sample_l += fifo[1].sample << direct_sound.channels[1].volume;
+        if (direct_sound.channels[0].enable_r) sample_r += fifo[0].sample << direct_sound.channels[0].volume;
+        if (direct_sound.channels[1].enable_r) sample_r += fifo[1].sample << direct_sound.channels[1].volume;
     }
 
     sample_l = std::clamp<s16>(sample_l, -0x400, 0x3FF);
@@ -38,12 +33,12 @@ void Apu::sample()
 
 void Apu::onTimerOverflow(uint id, uint times)
 {
-    if (!sndenable.enable)
+    if (!sound_enable.enable)
         return;
 
     constexpr Dma::Timing kRefill[2] = { Dma::Timing::FifoA, Dma::Timing::FifoB };
 
-    for (auto [index, channel] : shell::enumerate(dmacnt.channels))
+    for (auto [index, channel] : shell::enumerate(direct_sound.channels))
     {
         if (channel.timer != id)
             continue;

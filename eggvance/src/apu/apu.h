@@ -28,9 +28,9 @@ public:
     void onTimerOverflow(uint id, uint times);
 
     Fifo fifo[2];
-    SoundBias soundbias;
-    SoundControlEnable sndenable;
-    SoundControlDma dmacnt;
+    SoundBias sound_bias;
+    SoundControl sound_enable;
+    DirectSoundControl direct_sound;
 
     Register<u16, 0x007F> soundcnt1l;
     Register<u16, 0xFFC0> soundcnt1h;

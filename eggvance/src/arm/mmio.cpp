@@ -162,10 +162,10 @@ u8 Arm::readIo(u32 addr)
     INDEXED_CASE2(kRegSound4ControlH, return apu.soundcnt4h.read<kIndex>());
     INDEXED_CASE2(kRegUnused07E,      return 0);
     INDEXED_CASE2(kRegSoundControlL,  return apu.soundcntl.read<kIndex>());
-    INDEXED_CASE2(kRegSoundControlH,  return apu.dmacnt.read<kIndex>());
-    INDEXED_CASE2(kRegSoundControlX,  return apu.sndenable.read<kIndex>());
+    INDEXED_CASE2(kRegSoundControlH,  return apu.direct_sound.read<kIndex>());
+    INDEXED_CASE2(kRegSoundControlX,  return apu.sound_enable.read<kIndex>());
     INDEXED_CASE2(kRegUnused086,      return 0);
-    INDEXED_CASE2(kRegSoundBias,      return apu.soundbias.read<kIndex>());
+    INDEXED_CASE2(kRegSoundBias,      return apu.sound_bias.read<kIndex>());
     INDEXED_CASE2(kRegUnused08A,      return 0);
     INDEXED_CASE2(kRegWaveRam0,       return apu.waveram[0].read<kIndex>());
     INDEXED_CASE2(kRegWaveRam1,       return apu.waveram[1].read<kIndex>());
@@ -271,9 +271,9 @@ void Arm::writeIo(u32 addr, u8 byte)
     INDEXED_CASE2(kRegSound4ControlL, apu.soundcnt4l.write<kIndex>(byte));
     INDEXED_CASE2(kRegSound4ControlH, apu.soundcnt4h.write<kIndex>(byte));
     INDEXED_CASE2(kRegSoundControlL,  apu.soundcntl.write<kIndex>(byte));
-    INDEXED_CASE2(kRegSoundControlH,  apu.dmacnt.write<kIndex>(byte));
-    INDEXED_CASE2(kRegSoundControlX,  apu.sndenable.write<kIndex>(byte));
-    INDEXED_CASE2(kRegSoundBias,      apu.soundbias.write<kIndex>(byte));
+    INDEXED_CASE2(kRegSoundControlH,  apu.direct_sound.write<kIndex>(byte));
+    INDEXED_CASE2(kRegSoundControlX,  apu.sound_enable.write<kIndex>(byte));
+    INDEXED_CASE2(kRegSoundBias,      apu.sound_bias.write<kIndex>(byte));
     INDEXED_CASE2(kRegWaveRam0,       apu.waveram[0].write<kIndex>(byte));
     INDEXED_CASE2(kRegWaveRam1,       apu.waveram[1].write<kIndex>(byte));
     INDEXED_CASE2(kRegWaveRam2,       apu.waveram[2].write<kIndex>(byte));
