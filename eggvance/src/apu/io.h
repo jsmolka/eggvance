@@ -77,10 +77,10 @@ public:
 
         if (Index == 1)
         {
-            sampling = bit::seq<6, 2>(byte);
+            aplitude = bit::seq<6, 2>(byte);
         }
     }
 
     uint level    = 0;
-    uint sampling = 0;
+    uint aplitude = 0;
 };

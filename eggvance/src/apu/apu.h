@@ -11,7 +11,7 @@ public:
     SHELL_INLINE void run(int cycles)
     {
         constexpr auto kCpuFrequency = 16 * 1024 * 1024;
-        constexpr auto kSampleRate   = 32768;
+        constexpr auto kSampleRate   = 32 * 1024;
         constexpr auto kSampleCycles = kCpuFrequency / kSampleRate;
 
         this->cycles += cycles;

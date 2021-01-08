@@ -19,16 +19,16 @@ Apu::Apu()
 
 void Apu::sample()
 {
-    int sample_l = soundbias.level - 0x200;
-    int sample_r = soundbias.level - 0x200;
+    s16 sample_l = soundbias.level - 0x200;
+    s16 sample_r = soundbias.level - 0x200;
 
     if (dmacnt.channels[0].enable_l) sample_l += fifo[0].sample << dmacnt.channels[0].volume;
     if (dmacnt.channels[1].enable_l) sample_l += fifo[1].sample << dmacnt.channels[1].volume;
     if (dmacnt.channels[0].enable_r) sample_r += fifo[0].sample << dmacnt.channels[0].volume;
     if (dmacnt.channels[1].enable_r) sample_r += fifo[1].sample << dmacnt.channels[1].volume;
 
-    sample_l = std::clamp(sample_l, -0x400, 0x3FF);
-    sample_r = std::clamp(sample_r, -0x400, 0x3FF);
+    sample_l = std::clamp<s16>(sample_l, -0x400, 0x3FF);
+    sample_r = std::clamp<s16>(sample_r, -0x400, 0x3FF);
 
     audio_ctx.write(sample_l << 5, sample_r << 5);
 }

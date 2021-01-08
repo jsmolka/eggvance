@@ -87,9 +87,7 @@ void AudioContext::deinit()
 
     if (SDL_WasInit(SDL_INIT_AUDIO))
     {
-        if (stream)
-            SDL_FreeAudioStream(stream);
-
+        SDL_FreeAudioStream(stream);
         SDL_CloseAudioDevice(device);
 
         SDL_QuitSubSystem(SDL_INIT_AUDIO);
