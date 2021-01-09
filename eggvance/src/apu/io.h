@@ -81,7 +81,8 @@ public:
     {
         if (config.bios_skip)
         {
-            level = 0x200;
+            write<0>(0x00);
+            write<1>(0x02);
         }
     }
 
