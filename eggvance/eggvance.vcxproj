@@ -136,6 +136,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\apu\apu.cpp" />
+    <ClCompile Include="src\apu\channels\sequencer.cpp" />
     <ClCompile Include="src\arm\arm.cpp" />
     <ClCompile Include="src\arm\memory.cpp" />
     <ClCompile Include="src\arm\disassemble.cpp" />
@@ -179,7 +180,9 @@
   <ItemGroup>
     <ClInclude Include="external\icon\themes\default\cpp\shell\icon.h" />
     <ClInclude Include="src\apu\apu.h" />
-    <ClInclude Include="src\apu\fifo.h" />
+    <ClInclude Include="src\apu\channels\fifo.h" />
+    <ClInclude Include="src\apu\channels\sequencer.h" />
+    <ClInclude Include="src\apu\constants.h" />
     <ClInclude Include="src\apu\io.h" />
     <ClInclude Include="src\arm\arm.h" />
     <ClInclude Include="src\arm\constants.h" />

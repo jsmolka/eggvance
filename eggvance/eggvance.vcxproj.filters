@@ -135,6 +135,9 @@
     <ClCompile Include="src\arm\mmio.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\apu\channels\sequencer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\arm\psr.h">
@@ -320,7 +323,13 @@
     <ClInclude Include="src\apu\io.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\apu\fifo.h">
+    <ClInclude Include="src\apu\channels\fifo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\apu\channels\sequencer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\apu\constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

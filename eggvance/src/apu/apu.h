@@ -1,29 +1,15 @@
 #pragma once
 
 #include "io.h"
-#include "fifo.h"
+#include "channels/fifo.h"
+#include "channels/sequencer.h"
 
 class Apu
 {
 public:
     Apu();
 
-    SHELL_INLINE void run(int cycles)
-    {
-        constexpr auto kCpuFrequency = 16 * 1024 * 1024;
-        constexpr auto kSampleRate   = 32 * 1024;
-        constexpr auto kSampleCycles = kCpuFrequency / kSampleRate;
-
-        this->cycles += cycles;
-
-        while (this->cycles >= kSampleCycles)
-        {
-            sample();
-
-            this->cycles -= kSampleCycles;
-        }
-    }
-
+    void run(int cycles);
     void sample();
     void onTimerOverflow(uint id, uint times);
 
@@ -31,6 +17,7 @@ public:
     SoundBias sound_bias;
     SoundControl sound_enable;
     DirectSoundControl direct_sound;
+    Sequencer sequencer;
 
     Register<u16, 0x007F> soundcnt1l;
     Register<u16, 0xFFC0> soundcnt1h;

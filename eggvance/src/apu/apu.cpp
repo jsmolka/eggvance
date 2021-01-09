@@ -12,6 +12,24 @@ Apu::Apu()
     direct_sound.channels[1].clear_fifo = [&]() { fifo[1].clear(); };
 }
 
+void Apu::run(int cycles_)
+{
+    constexpr auto kCpuFrequency = 16 * 1024 * 1024;
+    constexpr auto kSampleRate   = 32 * 1024;
+    constexpr auto kSampleCycles = kCpuFrequency / kSampleRate;
+
+    //sequencer.run(cycles_);
+
+    cycles += cycles_;
+
+    while (cycles >= kSampleCycles)
+    {
+        sample();
+
+        cycles -= kSampleCycles;
+    }
+}
+
 void Apu::sample()
 {
     s16 sample_l = sound_bias.level - 0x200;
