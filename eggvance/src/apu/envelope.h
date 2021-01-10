@@ -1,16 +1,18 @@
 #pragma once
 
-#include "base/bit.h"
 #include "base/int.h"
 
 class Envelope
 {
 public:
+    void init();
     void tick();
     void write(u8 byte);
+    bool enable() const;
 
-    uint volume    = 0;
-    uint step_time = 0;
-    uint direction = 0;
-    uint initial   = 0;
+    uint period      = 0;
+    uint period_init = 0;
+    uint volume      = 0;
+    uint volume_init = 0;
+    uint direction   = 0;
 };

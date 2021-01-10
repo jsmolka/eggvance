@@ -34,15 +34,16 @@ void Sequencer::tick()
 
             if (step % kFrequencyLength == 0)
             {
-                // Tick length
+                square1.length.tick();
+                square2.length.tick();
             }
         }
     }
 
-    //noise.tick();
-    //square1.tick();
+    noise.tick();
+    square1.tick();
     square2.tick();
-    //wave.tick();
+    wave.tick();
 
     step = (step + 1) % kFrequency;
 }

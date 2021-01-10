@@ -8,5 +8,6 @@ void Length::init()
 
 void Length::tick()
 {
-
+    if (value > 0)
+        value--;
 }

@@ -38,7 +38,6 @@ public:
 
             if (byte & 0x80)
             {
-                length.init();
             }
         }
     }
