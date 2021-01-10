@@ -9,8 +9,7 @@
 class Sequencer
 {
 public:
-    static constexpr int kFrequency  = 512;
-    static constexpr int kStepCycles = kCpuFrequency / kFrequency;
+    static constexpr auto kFrequency = 262144;
 
     void run(int cycles);
 
@@ -20,7 +19,7 @@ public:
     Wave wave;
 
 private:
-    void sequence();
+    void tick();
 
     int step = 0;
     int cycles = 0;

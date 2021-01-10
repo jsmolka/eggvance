@@ -2,36 +2,47 @@
 
 #include "base/macros.h"
 
-void Sequencer::run(int cycles_)
+void Sequencer::run(int amount)
 {
-    cycles += cycles_;
+    constexpr auto kTickCycles = kCpuFrequency / kFrequency;
 
-    while (cycles >= kStepCycles)
+    cycles += amount;
+
+    while (cycles >= kTickCycles)
     {
-        sequence();
+        tick();
 
-        cycles -= kStepCycles;
+        cycles -= kTickCycles;
     }
 }
 
-void Sequencer::sequence()
+void Sequencer::tick()
 {
-    switch (step)
-    {
-    case 0:
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-    case 6:
-    case 7:
-        break;
+    constexpr auto kFrequencyEnvelope = 64;
+    constexpr auto kFrequencySweep    = 128;
+    constexpr auto kFrequencyLength   = 256;
 
-    default:
-        SHELL_UNREACHABLE;
-        break;
+    if (step % kFrequencyEnvelope == 0)
+    {
+        noise.envelope.tick();
+        square1.envelope.tick();
+        square2.envelope.tick();
+
+        if (step % kFrequencySweep == 0)
+        {
+            square1.sweep.tick();
+
+            if (step % kFrequencyLength == 0)
+            {
+                // Tick length
+            }
+        }
     }
 
-    step = (step + 1) % 8;
+    //noise.tick();
+    //square1.tick();
+    square2.tick();
+    //wave.tick();
+
+    step = (step + 1) % kFrequency;
 }

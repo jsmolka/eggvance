@@ -18,7 +18,7 @@ void Apu::run(int cycles_)
     constexpr auto kSampleRate   = 32 * 1024;
     constexpr auto kSampleCycles = kCpuFrequency / kSampleRate;
 
-    //sequencer.run(cycles_);
+    sequencer.run(cycles_);
 
     cycles += cycles_;
 
