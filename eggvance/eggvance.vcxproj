@@ -182,6 +182,7 @@
     <ClInclude Include="src\apu\apu.h" />
     <ClInclude Include="src\apu\channels\fifo.h" />
     <ClInclude Include="src\apu\channels\sequencer.h" />
+    <ClInclude Include="src\apu\channels\wave.h" />
     <ClInclude Include="src\apu\constants.h" />
     <ClInclude Include="src\apu\io.h" />
     <ClInclude Include="src\arm\arm.h" />
