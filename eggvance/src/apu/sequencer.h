@@ -1,7 +1,10 @@
 #pragma once
 
+#include "constants.h"
+#include "noise.h"
+#include "square1.h"
+#include "square2.h"
 #include "wave.h"
-#include "apu/constants.h"
 
 class Sequencer
 {
@@ -11,6 +14,9 @@ public:
 
     void run(int cycles);
 
+    Noise noise;
+    Square1 square1;
+    Square2 square2;
     Wave wave;
 
 private:

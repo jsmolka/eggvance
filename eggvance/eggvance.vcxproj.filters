@@ -135,7 +135,7 @@
     <ClCompile Include="src\arm\mmio.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\apu\channels\sequencer.cpp">
+    <ClCompile Include="src\apu\sequencer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -323,16 +323,28 @@
     <ClInclude Include="src\apu\io.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\apu\channels\fifo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\apu\channels\sequencer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\apu\constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\apu\channels\wave.h">
+    <ClInclude Include="src\apu\channel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\apu\fifo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\apu\noise.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\apu\sequencer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\apu\square1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\apu\square2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\apu\wave.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
