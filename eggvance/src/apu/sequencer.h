@@ -18,6 +18,8 @@ public:
     Square2 square2;
     Wave wave;
 
+    s16 sample = 0;
+
 private:
     void tick();
 

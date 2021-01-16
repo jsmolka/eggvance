@@ -5,7 +5,7 @@
 #include "length.h"
 #include "sweep.h"
 
-class Square1 : public Channel<0x007F, 0xFFC0, 0x4000>
+class Square1 : public Channel<0x007F, 0xFFFF, 0xC7FF>
 {
 public:
     void tick();
@@ -54,6 +54,7 @@ public:
             {
                 length.init();
                 envelope.init();
+                timer = 2 * (2048 - frequency);
             }
         }
     }
@@ -61,7 +62,10 @@ public:
     Sweep sweep;
     Envelope envelope;
     Length length;
+    uint timer     = 0;
     uint step      = 0;
     uint wave_duty = 0;
     uint frequency = 0;
+
+    s16 sample = 0;
 };

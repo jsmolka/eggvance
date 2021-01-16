@@ -6,18 +6,28 @@ void Sequencer::run(int amount)
 {
     constexpr auto kTickCycles = kCpuFrequency / kFrequency;
 
-    cycles += amount;
-
-    while (cycles >= kTickCycles)
+    while (amount--)
     {
-        tick();
-
-        cycles -= kTickCycles;
+        noise.tick();
+        square1.tick();
+        square2.tick();
+        wave.tick();
     }
+
+    //cycles += amount;
+
+    //while (cycles >= kTickCycles)
+    //{
+    //    tick();
+
+    //    cycles -= kTickCycles;
+    //}
 }
 
 void Sequencer::tick()
 {
+    // Called with a frequency of 262144 Hz
+
     constexpr auto kFrequencyEnvelope = 64;
     constexpr auto kFrequencySweep    = 128;
     constexpr auto kFrequencyLength   = 256;
@@ -39,11 +49,6 @@ void Sequencer::tick()
             }
         }
     }
-
-    noise.tick();
-    square1.tick();
-    square2.tick();
-    wave.tick();
 
     step = (step + 1) % kFrequency;
 }

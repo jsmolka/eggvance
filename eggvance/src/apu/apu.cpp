@@ -35,6 +35,9 @@ void Apu::sample()
     s16 sample_l = sound_bias.level - 0x200;
     s16 sample_r = sound_bias.level - 0x200;
 
+    sample_l += sequencer.square1.sample;
+    sample_r += sequencer.square1.sample;
+
     if (sound_enable.enable)
     {
         if (direct_sound.channels[0].enable_l) sample_l += fifo[0].sample << direct_sound.channels[0].volume;
