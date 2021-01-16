@@ -21,7 +21,7 @@ public:
     Length length;
     uint timer     = 0;
     uint step      = 0;
-    uint pattern = 0;
+    uint pattern   = 0;
     uint frequency = 0;
 
     s16 sample = 0;

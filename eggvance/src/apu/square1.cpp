@@ -10,7 +10,7 @@ void Square1::tick()
     constexpr auto kWaves = 0b00111111'00001111'00000011'00000001;
 
     sample = (kWaves >> (8 * pattern + step)) & 0x1;
-    sample <<= 4;
+    sample *= envelope.volume;
 
     step = (step + 1) % 8;
 

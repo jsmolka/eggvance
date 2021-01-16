@@ -9,8 +9,6 @@
 class Sequencer
 {
 public:
-    static constexpr auto kFrequency = 262144;
-
     void run(int cycles);
 
     Noise noise;
@@ -18,11 +16,9 @@ public:
     Square2 square2;
     Wave wave;
 
-    s16 sample = 0;
-
 private:
     void tick();
 
-    int step = 0;
-    int cycles = 0;
+    uint step   = 0;
+    uint cycles = 0;
 };

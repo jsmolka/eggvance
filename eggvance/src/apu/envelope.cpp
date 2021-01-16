@@ -15,12 +15,18 @@ void Envelope::tick()
 
     period = period_init;
 
-    if (volume == 0 || volume == 15)
-        return;
+    enum Direction { kDec, kInc };
 
-    constexpr int kOffset[2] = { -1 , 1 };
-
-    volume += kOffset[direction];
+    if (direction == Direction::kDec)
+    {
+        if (volume > 0)
+            volume--;
+    }
+    else
+    {
+        if (volume < 15)
+            volume++;
+    }
 }
 
 void Envelope::write(u8 byte)

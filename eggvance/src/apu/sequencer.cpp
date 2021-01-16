@@ -1,54 +1,69 @@
 #include "sequencer.h"
 
 #include "base/macros.h"
+#include "constants.h"
 
-void Sequencer::run(int amount)
+void Sequencer::run(int cycles)
 {
-    constexpr auto kTickCycles = kCpuFrequency / kFrequency;
-
-    while (amount--)
-    {
-        noise.tick();
-        square1.tick();
-        square2.tick();
-        wave.tick();
-    }
-
-    //cycles += amount;
-
-    //while (cycles >= kTickCycles)
-    //{
-    //    tick();
-
-    //    cycles -= kTickCycles;
-    //}
+    while (cycles--)
+        tick();
 }
 
 void Sequencer::tick()
 {
-    // Called with a frequency of 262144 Hz
+    constexpr auto kSequencerCycles = kCpuFrequency / 512;
 
-    constexpr auto kFrequencyEnvelope = 64;
-    constexpr auto kFrequencySweep    = 128;
-    constexpr auto kFrequencyLength   = 256;
-
-    if (step % kFrequencyEnvelope == 0)
+    if (cycles == 0)
     {
-        noise.envelope.tick();
-        square1.envelope.tick();
-        square2.envelope.tick();
+        auto tick_length = [&]() {
+            square1.length.tick();
+            square2.length.tick();
+        };
 
-        if (step % kFrequencySweep == 0)
-        {
+        auto tick_envelope = [&]() {
+            noise.envelope.tick();
+            square1.envelope.tick();
+            square2.envelope.tick();
+        };
+
+        auto tick_sweep = [&]() {
             square1.sweep.tick();
+        };
 
-            if (step % kFrequencyLength == 0)
-            {
-                square1.length.tick();
-                square2.length.tick();
-            }
+        switch (step)
+        {
+        case 0:
+        case 4:
+            tick_length();
+            break;
+
+        case 1:
+        case 3:
+        case 5:
+            break;
+
+        case 2:
+        case 6:
+            tick_length();
+            tick_sweep();
+            break;
+
+        case 7:
+            tick_envelope();
+            break;
+
+        default:
+            SHELL_UNREACHABLE;
+            break;
         }
+
+        step = (step + 1) % 8;
     }
 
-    step = (step + 1) % kFrequency;
+    noise.tick();
+    square1.tick();
+    square2.tick();
+    wave.tick();
+
+    cycles = (cycles + 1) % kSequencerCycles;
 }
