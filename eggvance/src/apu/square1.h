@@ -8,8 +8,7 @@
 class Square1 : public Channel<0x007F, 0xFFFF, 0xC7FF>
 {
 public:
-    static constexpr auto kFrequency = 131072;
-
+    void trigger();
     void tick();
     void tickSweep();
     void tickLength();
@@ -21,14 +20,16 @@ public:
 
     s16 sample = 0;
 
-    bool enable = false;
+    bool enabled = false;
 
 private:
+    static constexpr auto kFrequency = 131072;
+
     void updateTimer();
     void updateSweep(bool writeback);
 
     Sweep sweep;
-    Length length;
+    Length length = 64;
     Envelope envelope;
 
     uint timer     = 0;
@@ -55,8 +56,8 @@ void Square1::writeH(u8 byte)
 
     if (Index == 0)
     {
-        length.initial = bit::seq<0, 6>(byte);
-        pattern        = bit::seq<6, 2>(byte);
+        length.length = bit::seq<0, 6>(byte);
+        pattern       = bit::seq<6, 2>(byte);
     }
     if (Index == 1)
     {
@@ -76,14 +77,6 @@ void Square1::writeX(u8 byte)
         length.expire = bit::seq<6, 1>(byte);
 
         if (byte & 0x80)
-        {
-            sweep.init();
-            sweep.shadow = frequency;
-            if (sweep.shift)
-                updateSweep(false);
-            length.init();
-            envelope.init();
-            updateTimer();
-        }
+            trigger();
     }
 }

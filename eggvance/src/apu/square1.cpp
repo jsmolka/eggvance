@@ -2,6 +2,20 @@
 
 #include "constants.h"
 
+void Square1::trigger()
+{
+    sweep.init();
+    sweep.shadow = frequency;
+    if (sweep.shift)
+        updateSweep(false);
+    // Todo: should this always reset and not only if != 0?
+    length.init();
+    envelope.init();
+    updateTimer();
+
+    enabled = true;
+}
+
 void Square1::tick()
 {
     if (!(timer && --timer == 0))
@@ -31,11 +45,15 @@ void Square1::tickSweep()
 void Square1::tickLength()
 {
     length.tick();
+
+    enabled &= length.isEnabled();
 }
 
 void Square1::tickEnvelope()
 {
     envelope.tick();
+    // Todo: is this necessary?
+    enabled &= envelope.isEnabled();
 }
 
 void Square1::updateTimer()
@@ -54,10 +72,12 @@ void Square1::updateSweep(bool writeback)
         {
             frequency    = value;
             sweep.shadow = value;
+
+            updateTimer();
         }
     }
     else
     {
-        enable = false;
+        enabled = false;
     }
 }

@@ -5,11 +5,14 @@
 class Length
 {
 public:
+    Length(uint base);
+
     void init();
     void tick();
+    bool isEnabled() const;
 
-    uint value   = 0;
-    uint initial = 0;
-    uint enable  = 0;
-    uint expire  = 0;
+    uint value  = 0;
+    uint expire = 0;
+    uint length = 0;
+    uint base   = 0;
 };

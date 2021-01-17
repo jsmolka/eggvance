@@ -7,6 +7,8 @@
 class Square2 : public Channel<0xFFC0, 0x0000, 0x4000>
 {
 public:
+    Square2();
+
     void tick();
 
     template<uint Index>
@@ -16,8 +18,8 @@ public:
 
         if (Index == 0)
         {
-            length.initial = bit::seq<0, 6>(byte);
-            wave_duty      = bit::seq<6, 2>(byte);
+            length.length = bit::seq<0, 6>(byte);
+            wave_duty     = bit::seq<6, 2>(byte);
         }
         if (Index == 1)
         {

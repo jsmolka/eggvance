@@ -36,7 +36,7 @@ void Envelope::write(u8 byte)
     volume_init = bit::seq<4, 4>(byte);
 }
 
-bool Envelope::enable() const
+bool Envelope::isEnabled() const
 {
     return volume || direction;
 }

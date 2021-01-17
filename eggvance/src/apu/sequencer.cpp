@@ -13,6 +13,14 @@ void Sequencer::tick()
 {
     constexpr auto kSequencerCycles = kCpuFrequency / 512;
 
+    noise.tick();
+    
+    if (square1.enabled)
+        square1.tick();
+    
+    square2.tick();
+    wave.tick();
+
     if (cycles == 0)
     {
         switch (step)
@@ -46,11 +54,6 @@ void Sequencer::tick()
 
         step = (step + 1) % 8;
     }
-
-    noise.tick();
-    square1.tick();
-    square2.tick();
-    wave.tick();
 
     cycles = (cycles + 1) % kSequencerCycles;
 }
