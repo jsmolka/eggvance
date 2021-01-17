@@ -7,6 +7,7 @@ class Sweep
 {
 public:
     void init();
+    void init(uint frequency);
     void write(u8 byte);
 
     uint shift  = 0;

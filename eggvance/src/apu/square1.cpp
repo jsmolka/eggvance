@@ -4,16 +4,15 @@
 
 void Square1::trigger()
 {
-    sweep.init();
-    sweep.shadow = frequency;
+    sweep.init(frequency);
     if (sweep.shift)
         updateSweep(false);
-    // Todo: should this always reset and not only if != 0?
+
     length.init();
     envelope.init();
     updateTimer();
 
-    enabled = true;
+    enabled = envelope.isEnabled();
 }
 
 void Square1::tick()
@@ -52,7 +51,7 @@ void Square1::tickLength()
 void Square1::tickEnvelope()
 {
     envelope.tick();
-    // Todo: is this necessary?
+
     enabled &= envelope.isEnabled();
 }
 
@@ -65,19 +64,16 @@ void Square1::updateTimer()
 
 void Square1::updateSweep(bool writeback)
 {
-    uint value = sweep.shadow + (sweep.negate ? -1 : 1) * (sweep.shadow >> sweep.shift);
-    if  (value < 2048)
-    {
-        if (writeback)
-        {
-            frequency    = value;
-            sweep.shadow = value;
-
-            updateTimer();
-        }
-    }
-    else
+    uint freq = sweep.shadow + (sweep.negate ? -1 : 1) * (sweep.shadow >> sweep.shift);
+    if  (freq > 2047)
     {
         enabled = false;
+    }
+    else if (writeback && sweep.shift)
+    {
+        frequency    = freq;
+        sweep.shadow = freq;
+
+        updateTimer();
     }
 }
