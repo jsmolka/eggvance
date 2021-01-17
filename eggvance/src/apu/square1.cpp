@@ -17,9 +17,47 @@ void Square1::tick()
     updateTimer();
 }
 
+void Square1::tickSweep()
+{
+    if (!(sweep.timer && --sweep.timer == 0))
+        return;
+
+    updateSweep(true);
+    updateSweep(false);
+
+    sweep.init();
+}
+
+void Square1::tickLength()
+{
+    length.tick();
+}
+
+void Square1::tickEnvelope()
+{
+    envelope.tick();
+}
+
 void Square1::updateTimer()
 {
     constexpr auto kWaveLength = 8;
 
     timer = (kCpuFrequency / kFrequency) * (2048 - frequency) / kWaveLength;
+}
+
+void Square1::updateSweep(bool writeback)
+{
+    uint value = sweep.shadow + (sweep.negate ? -1 : 1) * (sweep.shadow >> sweep.shift);
+    if  (value < 2048)
+    {
+        if (writeback)
+        {
+            frequency    = value;
+            sweep.shadow = value;
+        }
+    }
+    else
+    {
+        enable = false;
+    }
 }

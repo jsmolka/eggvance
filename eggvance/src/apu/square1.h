@@ -11,23 +11,30 @@ public:
     static constexpr auto kFrequency = 131072;
 
     void tick();
+    void tickSweep();
+    void tickLength();
+    void tickEnvelope();
 
     template<uint Index> void writeL(u8 byte);
     template<uint Index> void writeH(u8 byte);
     template<uint Index> void writeX(u8 byte);
 
+    s16 sample = 0;
+
+    bool enable = false;
+
+private:
+    void updateTimer();
+    void updateSweep(bool writeback);
+
     Sweep sweep;
-    Envelope envelope;
     Length length;
+    Envelope envelope;
+
     uint timer     = 0;
     uint step      = 0;
     uint pattern   = 0;
     uint frequency = 0;
-
-    s16 sample = 0;
-
-private:
-    void updateTimer();
 };
 
 template<uint Index>
@@ -37,9 +44,7 @@ void Square1::writeL(u8 byte)
 
     if (Index == 0)
     {
-        sweep.shift     = bit::seq<0, 3>(byte);
-        sweep.direction = bit::seq<3, 1>(byte);
-        sweep.time      = bit::seq<4, 3>(byte);
+        sweep.write(byte);
     }
 }
 
@@ -51,7 +56,7 @@ void Square1::writeH(u8 byte)
     if (Index == 0)
     {
         length.initial = bit::seq<0, 6>(byte);
-        pattern      = bit::seq<6, 2>(byte);
+        pattern        = bit::seq<6, 2>(byte);
     }
     if (Index == 1)
     {
@@ -72,6 +77,10 @@ void Square1::writeX(u8 byte)
 
         if (byte & 0x80)
         {
+            sweep.init();
+            sweep.shadow = frequency;
+            if (sweep.shift)
+                updateSweep(false);
             length.init();
             envelope.init();
             updateTimer();

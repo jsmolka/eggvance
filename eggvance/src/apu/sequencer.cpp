@@ -15,28 +15,8 @@ void Sequencer::tick()
 
     if (cycles == 0)
     {
-        auto tick_length = [&]() {
-            square1.length.tick();
-            square2.length.tick();
-        };
-
-        auto tick_envelope = [&]() {
-            noise.envelope.tick();
-            square1.envelope.tick();
-            square2.envelope.tick();
-        };
-
-        auto tick_sweep = [&]() {
-            square1.sweep.tick();
-        };
-
         switch (step)
         {
-        case 0:
-        case 4:
-            tick_length();
-            break;
-
         case 1:
         case 3:
         case 5:
@@ -44,12 +24,19 @@ void Sequencer::tick()
 
         case 2:
         case 6:
-            tick_length();
-            tick_sweep();
+            square1.tickSweep();
+            [[fallthrough]];
+
+        case 0:
+        case 4:
+            square1.tickLength();
+            square2.length.tick();
             break;
 
         case 7:
-            tick_envelope();
+            noise.envelope.tick();
+            square1.tickEnvelope();
+            square2.envelope.tick();
             break;
 
         default:
