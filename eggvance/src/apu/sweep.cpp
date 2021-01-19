@@ -1,14 +1,21 @@
 #include "sweep.h"
 
+#include "base/bit.h"
+
 void Sweep::init()
 {
     timer = period;
 }
 
-void Sweep::init(uint frequency)
+void Sweep::init(uint freq)
 {
     timer  = period;
-    shadow = frequency;
+    shadow = freq;
+}
+
+uint Sweep::calculate() const
+{
+    return shadow + (negate ? -1 : 1) * (shadow >> shift);
 }
 
 u8 Sweep::read() const

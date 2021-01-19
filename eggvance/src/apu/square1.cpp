@@ -64,7 +64,7 @@ void Square1::updateTimer()
 
 void Square1::updateSweep(bool writeback)
 {
-    uint freq = sweep.shadow + (sweep.negate ? -1 : 1) * (sweep.shadow >> sweep.shift);
+    uint freq = sweep.calculate();
     if  (freq > 2047)
     {
         enabled = false;

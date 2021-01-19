@@ -1,13 +1,13 @@
 #pragma once
 
-#include "base/bit.h"
 #include "base/int.h"
 
 class Sweep
 {
 public:
     void init();
-    void init(uint frequency);
+    void init(uint freq);
+    uint calculate() const;
 
     u8 read() const;
     void write(u8 byte);
