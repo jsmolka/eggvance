@@ -2,7 +2,7 @@
 
 #include "constants.h"
 
-void Square1::trigger()
+void Square1::init()
 {
     sweep.init(frequency);
     if (sweep.shift)

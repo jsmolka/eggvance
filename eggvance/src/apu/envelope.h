@@ -7,10 +7,8 @@ class Envelope
 public:
     void init();
     void tick();
-    bool isEnabled() const;
-
-    u8 read() const;
     void write(u8 byte);
+    bool isEnabled() const;
 
     uint period   = 0;
     uint increase = 0;

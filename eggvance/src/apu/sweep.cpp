@@ -13,19 +13,6 @@ void Sweep::init(uint freq)
     shadow = freq;
 }
 
-uint Sweep::calculate() const
-{
-    return shadow + (negate ? -1 : 1) * (shadow >> shift);
-}
-
-u8 Sweep::read() const
-{
-    return 0
-        | shift  << 0
-        | negate << 3
-        | period << 4;
-}
-
 void Sweep::write(u8 byte)
 {
     shift  = bit::seq<0, 3>(byte);
@@ -34,4 +21,9 @@ void Sweep::write(u8 byte)
     enable = period || shift;
 
     init();
+}
+
+uint Sweep::calculate() const
+{
+    return shadow + (negate ? -1 : 1) * (shadow >> shift);
 }

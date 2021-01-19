@@ -8,7 +8,7 @@
 class Square1 : public Channel<0x007F, 0xFFFF, 0xC7FF>
 {
 public:
-    void trigger();
+    void init();
     void tick();
     void tickSweep();
     void tickLength();
@@ -77,6 +77,6 @@ void Square1::writeX(u8 byte)
         length.expire = bit::seq<6, 1>(byte);
 
         if (byte & 0x80)
-            trigger();
+            init();
     }
 }

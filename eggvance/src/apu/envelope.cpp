@@ -27,14 +27,6 @@ void Envelope::tick()
     timer = period;
 }
 
-u8 Envelope::read() const
-{
-    return 0
-        | period   << 0
-        | increase << 3
-        | initial  << 4;
-}
-
 void Envelope::write(u8 byte)
 {
     period   = bit::seq<0, 3>(byte);

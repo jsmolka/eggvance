@@ -8,17 +8,17 @@ Length::Length(uint base)
 
 void Length::init()
 {
-    if (value == 0)
-        value = base - length;
+    if (timer == 0)
+        timer = base - length;
 }
 
 void Length::tick()
 {
-    if (value && --value == 0 && !expire)
-        value = base - length;
+    if (timer && --timer == 0 && !expire)
+        timer = base - length;
 }
 
 bool Length::isEnabled() const
 {
-    return value > 0;
+    return timer > 0;
 }

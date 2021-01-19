@@ -11,8 +11,8 @@ public:
     void tick();
     bool isEnabled() const;
 
-    uint value  = 0;
-    uint expire = 0;
     uint length = 0;
+    uint expire = 0;
+    uint timer  = 0;
     uint base   = 0;
 };

@@ -7,10 +7,8 @@ class Sweep
 public:
     void init();
     void init(uint freq);
-    uint calculate() const;
-
-    u8 read() const;
     void write(u8 byte);
+    uint calculate() const;
 
     uint shift  = 0;
     uint negate = 0;
