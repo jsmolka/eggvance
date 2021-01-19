@@ -4,39 +4,45 @@
 
 void Envelope::init()
 {
-    period = period_init;
-    volume = volume_init;
+    timer  = period;
+    volume = initial;
 }
 
 void Envelope::tick()
 {
-    if (period && --period)
+    if (timer && --timer)
         return;
 
-    period = period_init;
-
-    enum Direction { kDec, kInc };
-
-    if (direction == Direction::kDec)
-    {
-        if (volume > 0)
-            volume--;
-    }
-    else
+    if (increase)
     {
         if (volume < 15)
             volume++;
     }
+    else
+    {
+        if (volume > 0)
+            volume--;
+    }
+
+    timer = period;
+}
+
+u8 Envelope::read() const
+{
+    return 0
+        | period   << 0
+        | increase << 3
+        | initial  << 4;
 }
 
 void Envelope::write(u8 byte)
 {
-    period_init = bit::seq<0, 3>(byte);
-    direction   = bit::seq<3, 1>(byte);
-    volume_init = bit::seq<4, 4>(byte);
+    period   = bit::seq<0, 3>(byte);
+    increase = bit::seq<3, 1>(byte);
+    initial  = bit::seq<4, 4>(byte);
 }
 
 bool Envelope::isEnabled() const
 {
-    return volume || direction;
+    return volume || increase;
 }
