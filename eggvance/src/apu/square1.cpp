@@ -32,7 +32,7 @@ void Square1::tick()
 
 void Square1::tickSweep()
 {
-    if (!(sweep.timer && --sweep.timer == 0))
+    if (!(sweep.enable && sweep.timer && --sweep.timer == 0))
         return;
 
     updateSweep(true);

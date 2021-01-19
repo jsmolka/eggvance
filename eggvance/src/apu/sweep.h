@@ -8,6 +8,8 @@ class Sweep
 public:
     void init();
     void init(uint frequency);
+
+    u8 read() const;
     void write(u8 byte);
 
     uint shift  = 0;
@@ -15,4 +17,5 @@ public:
     uint period = 0;
     uint shadow = 0;
     uint timer  = 0;
+    uint enable = 0;
 };

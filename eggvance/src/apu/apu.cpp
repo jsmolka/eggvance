@@ -35,11 +35,11 @@ void Apu::sample()
     s16 sample_l = sound_bias.level - 0x200;
     s16 sample_r = sound_bias.level - 0x200;
 
-    sample_l += sequencer.square1.sample;
-    sample_r += sequencer.square1.sample;
-
     if (sound_enable.enable)
     {
+        if (psg_sound.enable_l[0]) sample_l += sequencer.square1.sample << 2;// << psg_sound.volume_l;
+        if (psg_sound.enable_r[0]) sample_r += sequencer.square1.sample << 2;// << psg_sound.volume_r;
+
         if (direct_sound.channels[0].enable_l) sample_l += fifo[0].sample << direct_sound.channels[0].volume;
         if (direct_sound.channels[1].enable_l) sample_l += fifo[1].sample << direct_sound.channels[1].volume;
         if (direct_sound.channels[0].enable_r) sample_r += fifo[0].sample << direct_sound.channels[0].volume;

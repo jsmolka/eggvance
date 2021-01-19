@@ -57,6 +57,38 @@ public:
     Channel channels[2];
 };
 
+class PsgSoundControl : public Register<u16, 0xFF77>
+{
+public:
+    template<uint Index>
+    void write(u8 byte)
+    {
+        Register::write<Index>(byte);
+
+        if (Index == 0)
+        {
+            volume_r = bit::seq<0, 3>(byte);
+            volume_l = bit::seq<4, 3>(byte);
+        }
+        if (Index == 1)
+        {
+            enable_r[0] = bit::seq<0, 1>(byte);
+            enable_r[1] = bit::seq<1, 1>(byte);
+            enable_r[2] = bit::seq<2, 1>(byte);
+            enable_r[3] = bit::seq<3, 1>(byte);
+            enable_l[0] = bit::seq<4, 1>(byte);
+            enable_l[1] = bit::seq<5, 1>(byte);
+            enable_l[2] = bit::seq<6, 1>(byte);
+            enable_l[3] = bit::seq<7, 1>(byte);
+        }
+    }
+
+    uint volume_r = 0;
+    uint volume_l = 0;
+    uint enable_r[4] = {};
+    uint enable_l[4] = {};
+};
+
 class SoundControl : public Register<u16, 0x0080>
 {
 public:
