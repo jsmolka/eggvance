@@ -41,7 +41,7 @@ Ppu::Ppu()
 
             double rd = std::pow(0.84 * rs + 0.18 * gs + 0.00 * bs, 1 / kGammaLcd + kDarken * 0.125);
             double gd = std::pow(0.09 * rs + 0.67 * gs + 0.26 * bs, 1 / kGammaLcd + kDarken * 0.125);
-            double bd = std::pow(0.15 * rs + 0.10 * gs + 0.73 * bs, 1 / kGammaLcd + kDarken * 0.125);
+            double bd = std::pow(0.15 * rs + 0.10 * gs + 0.75 * bs, 1 / kGammaLcd + kDarken * 0.125);
 
             r = static_cast<uint>(std::min(1.0, rd) * 255);
             g = static_cast<uint>(std::min(1.0, gd) * 255);
