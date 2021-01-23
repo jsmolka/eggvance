@@ -9,7 +9,9 @@ u8 SoundControl::read()
 
     if (Index == 0)
     {
-        value |= apu.sequencer.square1.enabled;
+        value |= apu.sequencer.square1.enabled << 0;
+        value |= apu.sequencer.square2.enabled << 1;
+        value |= apu.sequencer.noise.enabled   << 3;
     }
     return value;
 }

@@ -5,6 +5,7 @@
 #include "dma/dma.h"
 #include "base/config.h"
 #include "core/audiocontext.h"
+#include "constants.h"
 
 Apu::Apu()
 {
@@ -14,7 +15,6 @@ Apu::Apu()
 
 void Apu::run(int cycles_)
 {
-    constexpr auto kCpuFrequency = 16 * 1024 * 1024;
     constexpr auto kSampleRate   = 32 * 1024;
     constexpr auto kSampleCycles = kCpuFrequency / kSampleRate;
 
@@ -38,18 +38,29 @@ void Apu::sample()
     s16 sample_l = 0;
     s16 sample_r = 0;
 
-    if (psg_sound.enable_l[0] && sequencer.square1.enabled) sample_l += sequencer.square1.sample;
-    if (psg_sound.enable_l[1] && sequencer.square2.enabled) sample_l += sequencer.square2.sample;
+    if (sequencer.square1.enabled)
+    {
+        if (psg_sound.enable_l[0]) sample_l += sequencer.square1.sample;
+        if (psg_sound.enable_r[0]) sample_r += sequencer.square1.sample;
+    }
+    
+    if (sequencer.square2.enabled)
+    {
+        if (psg_sound.enable_l[1]) sample_l += sequencer.square2.sample;
+        if (psg_sound.enable_r[1]) sample_r += sequencer.square2.sample;
+    }
+
+    if (sequencer.noise.enabled)
+    {
+        if (psg_sound.enable_l[3]) sample_l += sequencer.noise.sample;
+        if (psg_sound.enable_r[3]) sample_r += sequencer.noise.sample;
+    }
 
     sample_l  *= psg_sound.volume_l + 1;
-    sample_l <<= 1;
-    sample_l >>= 3 - direct_sound.volume;
-
-    if (psg_sound.enable_r[0] && sequencer.square1.enabled) sample_r += sequencer.square1.sample;
-    if (psg_sound.enable_r[1] && sequencer.square2.enabled) sample_r += sequencer.square2.sample;
-
     sample_r  *= psg_sound.volume_r + 1;
+    sample_l <<= 1;
     sample_r <<= 1;
+    sample_l >>= 3 - direct_sound.volume;
     sample_r >>= 3 - direct_sound.volume;
 
     if (direct_sound.channels[0].enable_l) sample_l += fifo[0].sample << direct_sound.channels[0].volume;
