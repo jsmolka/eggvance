@@ -25,7 +25,7 @@ private:
 
     uint timer     = 0;
     uint shift     = 0;
-    uint frequency = 0;
+    uint frequency = 1;
     uint noise     = 0;
 };
 
@@ -57,7 +57,7 @@ void Noise::writeX(u8 byte)
         shift    = bit::seq<3, 1>(byte) * 8;
         double s = bit::seq<4, 4>(byte);
 
-        frequency = 524288.0 / std::max(r, 0.5) / std::pow(2, s + 1);
+        frequency = static_cast<uint>(524288.0 / std::max(r, 0.5) / std::pow(2, s + 1));
     }
     if (Index == 1)
     {

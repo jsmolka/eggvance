@@ -50,6 +50,12 @@ void Apu::sample()
         if (psg_sound.enable_r[1]) sample_r += sequencer.square2.sample;
     }
 
+    if (sequencer.wave.enabled)
+    {
+        if (psg_sound.enable_l[2]) sample_l += sequencer.wave.sample;
+        if (psg_sound.enable_r[2]) sample_r += sequencer.wave.sample;
+    }
+
     if (sequencer.noise.enabled)
     {
         if (psg_sound.enable_l[3]) sample_l += sequencer.noise.sample;
@@ -64,8 +70,8 @@ void Apu::sample()
     sample_r >>= 3 - direct_sound.volume;
 
     if (direct_sound.channels[0].enable_l) sample_l += fifo[0].sample << direct_sound.channels[0].volume;
-    if (direct_sound.channels[1].enable_l) sample_l += fifo[1].sample << direct_sound.channels[1].volume;
     if (direct_sound.channels[0].enable_r) sample_r += fifo[0].sample << direct_sound.channels[0].volume;
+    if (direct_sound.channels[1].enable_l) sample_l += fifo[1].sample << direct_sound.channels[1].volume;
     if (direct_sound.channels[1].enable_r) sample_r += fifo[1].sample << direct_sound.channels[1].volume;
 
     sample_l = sound_bias.finalize(sample_l);
