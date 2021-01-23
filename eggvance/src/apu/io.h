@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <limits>
 
 #include "base/config.h"
 #include "base/register.h"
@@ -129,6 +130,11 @@ public:
         {
             aplitude = bit::seq<6, 2>(byte);
         }
+    }
+
+    s16 finalize(s16 sample)
+    {
+        return std::clamp<s16>(sample + level - 0x200, -0x400, 0x3FF);
     }
 
     uint level    = 0;

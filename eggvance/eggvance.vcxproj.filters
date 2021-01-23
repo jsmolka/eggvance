@@ -159,6 +159,9 @@
     <ClCompile Include="src\apu\length.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\apu\fifo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\arm\psr.h">

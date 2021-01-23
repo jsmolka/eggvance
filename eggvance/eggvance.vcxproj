@@ -137,6 +137,7 @@
   <ItemGroup>
     <ClCompile Include="src\apu\apu.cpp" />
     <ClCompile Include="src\apu\envelope.cpp" />
+    <ClCompile Include="src\apu\fifo.cpp" />
     <ClCompile Include="src\apu\length.cpp" />
     <ClCompile Include="src\apu\noise.cpp" />
     <ClCompile Include="src\apu\sequencer.cpp" />

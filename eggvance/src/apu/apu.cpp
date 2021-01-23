@@ -32,22 +32,31 @@ void Apu::run(int cycles_)
 
 void Apu::sample()
 {
-    s16 sample_l = sound_bias.level - 0x200;
-    s16 sample_r = sound_bias.level - 0x200;
+    if (!sound_enable.enable)
+        return audio_ctx.write(0, 0);
 
-    if (sound_enable.enable)
-    {
-        if (psg_sound.enable_l[0]) sample_l += sequencer.square1.sample << 2;// << psg_sound.volume_l;
-        if (psg_sound.enable_r[0]) sample_r += sequencer.square1.sample << 2;// << psg_sound.volume_r;
+    s16 sample_l = 0;
+    s16 sample_r = 0;
 
-        if (direct_sound.channels[0].enable_l) sample_l += fifo[0].sample << direct_sound.channels[0].volume;
-        if (direct_sound.channels[1].enable_l) sample_l += fifo[1].sample << direct_sound.channels[1].volume;
-        if (direct_sound.channels[0].enable_r) sample_r += fifo[0].sample << direct_sound.channels[0].volume;
-        if (direct_sound.channels[1].enable_r) sample_r += fifo[1].sample << direct_sound.channels[1].volume;
-    }
+    if (psg_sound.enable_l[0]) sample_l += sequencer.square1.sample;
 
-    sample_l = std::clamp<s16>(sample_l, -0x400, 0x3FF);
-    sample_r = std::clamp<s16>(sample_r, -0x400, 0x3FF);
+    sample_l  *= psg_sound.volume_l + 1;
+    sample_l <<= 1;
+    sample_l >>= 3 - direct_sound.volume;
+
+    if (psg_sound.enable_r[0]) sample_r += sequencer.square1.sample;
+
+    sample_r  *= psg_sound.volume_r + 1;
+    sample_r <<= 1;
+    sample_r >>= 3 - direct_sound.volume;
+
+    if (direct_sound.channels[0].enable_l) sample_l += fifo[0].sample << direct_sound.channels[0].volume;
+    if (direct_sound.channels[1].enable_l) sample_l += fifo[1].sample << direct_sound.channels[1].volume;
+    if (direct_sound.channels[0].enable_r) sample_r += fifo[0].sample << direct_sound.channels[0].volume;
+    if (direct_sound.channels[1].enable_r) sample_r += fifo[1].sample << direct_sound.channels[1].volume;
+
+    sample_l = sound_bias.finalize(sample_l);
+    sample_r = sound_bias.finalize(sample_r);
 
     audio_ctx.write(sample_l << 5, sample_r << 5);
 }
@@ -57,25 +66,21 @@ void Apu::onTimerOverflow(uint id, uint times)
     if (!sound_enable.enable)
         return;
 
-    constexpr Dma::Timing kRefill[2] = { Dma::Timing::FifoA, Dma::Timing::FifoB };
+    constexpr Dma::Timing kEvent[2] = { Dma::Timing::FifoA, Dma::Timing::FifoB };
 
     for (auto [index, channel] : shell::enumerate(direct_sound.channels))
     {
         if (channel.timer != id)
             continue;
 
-        auto& fifo = this->fifo[index];
-
         for (uint x = 0; x < times; ++x)
         {
-            fifo.sample = fifo.size() > 0
-                ? fifo.read()
-                : 0;
+            fifo[index].tick();
         }
 
-        if (fifo.refillable())
+        if (fifo[index].refillable())
         {
-            dma.broadcast(kRefill[index]);
+            dma.broadcast(kEvent[index]);
         }
     }
 }
