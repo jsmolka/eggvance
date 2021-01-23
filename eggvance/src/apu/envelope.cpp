@@ -10,21 +10,25 @@ void Envelope::init()
 
 void Envelope::tick()
 {
-    if (timer && --timer)
+    if (!(timer && --timer == 0))
         return;
 
     if (increase)
     {
         if (volume < 15)
+        {
             volume++;
+            timer = period;
+        }
     }
     else
     {
         if (volume > 0)
+        {
             volume--;
+            timer = period;
+        }
     }
-
-    timer = period;
 }
 
 void Envelope::write(u8 byte)
@@ -36,5 +40,5 @@ void Envelope::write(u8 byte)
 
 bool Envelope::isEnabled() const
 {
-    return volume || increase;
+    return increase || volume;
 }

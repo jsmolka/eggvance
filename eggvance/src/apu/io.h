@@ -94,6 +94,9 @@ class SoundControl : public Register<u16, 0x0080>
 {
 public:
     template<uint Index>
+    u8 read();
+
+    template<uint Index>
     void write(u8 byte)
     {
         Register::write<Index>(byte);
@@ -112,11 +115,8 @@ class SoundBias : public Register<u16, 0xC3FF>
 public:
     SoundBias()
     {
-        if (config.bios_skip)
-        {
-            write<0>(0x00);
-            write<1>(0x02);
-        }
+        write<0>(0x00);
+        write<1>(0x02);
     }
 
     template<uint Index>

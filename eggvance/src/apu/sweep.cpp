@@ -10,6 +10,7 @@ void Sweep::init()
 void Sweep::init(uint freq)
 {
     timer  = period;
+    enable = period || shift;
     shadow = freq;
 }
 
@@ -18,7 +19,6 @@ void Sweep::write(u8 byte)
     shift  = bit::seq<0, 3>(byte);
     negate = bit::seq<3, 1>(byte);
     period = bit::seq<4, 3>(byte);
-    enable = period || shift;
 
     init();
 }

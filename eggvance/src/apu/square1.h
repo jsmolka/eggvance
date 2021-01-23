@@ -5,10 +5,11 @@
 #include "length.h"
 #include "sweep.h"
 
-class Square1 : public Channel<0x007F, 0xFFFF, 0xC7FF>
+class Square1 : public Channel<0x007F, 0xFFFF, 0x47FF>
 {
 public:
     void init();
+
     void tick();
     void tickSweep();
     void tickLength();
@@ -17,10 +18,6 @@ public:
     template<uint Index> void writeL(u8 byte);
     template<uint Index> void writeH(u8 byte);
     template<uint Index> void writeX(u8 byte);
-
-    s16 sample = 0;
-
-    bool enabled = false;
 
 private:
     static constexpr auto kFrequency = 131072;
@@ -62,6 +59,8 @@ void Square1::writeH(u8 byte)
     if (Index == 1)
     {
         envelope.write(byte);
+
+        enabled &= envelope.isEnabled();
     }
 }
 

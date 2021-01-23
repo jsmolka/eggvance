@@ -8,14 +8,14 @@ Length::Length(uint base)
 
 void Length::init()
 {
-    if (timer == 0)
-        timer = base - length;
+    // Todo: if timer != 0?
+    timer = base - length;
 }
 
 void Length::tick()
 {
     if (timer && --timer == 0 && !expire)
-        timer = base - length;
+        init();
 }
 
 bool Length::isEnabled() const
