@@ -4,15 +4,16 @@
 
 void Square1::init()
 {
+    length.init();
+    envelope.init();
     sweep.init(frequency);
+
+    enabled = envelope.enabled();
+    
     if (sweep.shift)
         updateSweep(false);
 
-    length.init();
-    envelope.init();
     updateTimer();
-
-    enabled = envelope.isEnabled();
 }
 
 void Square1::tick()
@@ -32,7 +33,7 @@ void Square1::tick()
 
 void Square1::tickSweep()
 {
-    if (!(sweep.enable && sweep.timer && --sweep.timer == 0))
+    if (!sweep.tick())
         return;
 
     updateSweep(true);
@@ -45,26 +46,27 @@ void Square1::tickLength()
 {
     length.tick();
 
-    enabled &= length.isEnabled();
+    enabled &= length.enabled();
 }
 
 void Square1::tickEnvelope()
 {
     envelope.tick();
 
-    enabled &= envelope.isEnabled();
+    enabled &= envelope.enabled();
 }
 
 void Square1::updateTimer()
 {
-    constexpr auto kWaveLength = 8;
+    constexpr auto kWaveBits  = 8;
+    constexpr auto kFrequency = 131072;
 
-    timer = (kCpuFrequency / kFrequency) * (2048 - frequency) / kWaveLength;
+    timer = (kCpuFrequency / kFrequency) * (2048 - frequency) / kWaveBits;
 }
 
 void Square1::updateSweep(bool writeback)
 {
-    uint freq = sweep.calculate();
+    uint freq = sweep.next();
     if  (freq > 2047)
     {
         enabled = false;

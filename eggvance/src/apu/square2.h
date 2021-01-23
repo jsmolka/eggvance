@@ -7,8 +7,6 @@
 class Square2 : public Channel<0xFFC0, 0x0000, 0x4000>
 {
 public:
-    Square2();
-
     void tick();
 
     template<uint Index>
@@ -45,7 +43,8 @@ public:
     }
 
     Envelope envelope;
-    Length length;
+    Length<64> length;
+
     uint step      = 0;
     uint wave_duty = 0;
     uint frequency = 0;

@@ -8,7 +8,7 @@ public:
     void init();
     void tick();
     void write(u8 byte);
-    bool isEnabled() const;
+    uint enabled() const;
 
     uint period   = 0;
     uint increase = 0;

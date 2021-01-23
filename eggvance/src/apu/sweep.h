@@ -7,13 +7,14 @@ class Sweep
 public:
     void init();
     void init(uint freq);
+    bool tick();
     void write(u8 byte);
-    uint calculate() const;
+    uint next() const;
 
-    uint shift  = 0;
-    uint negate = 0;
-    uint period = 0;
-    uint shadow = 0;
-    uint timer  = 0;
-    uint enable = 0;
+    uint shift   = 0;
+    uint negate  = 0;
+    uint period  = 0;
+    uint shadow  = 0;
+    uint timer   = 0;
+    uint enabled = 0;
 };

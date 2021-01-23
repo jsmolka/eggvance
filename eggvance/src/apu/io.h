@@ -1,7 +1,6 @@
 #pragma once
 
 #include <functional>
-#include <limits>
 
 #include "base/config.h"
 #include "base/register.h"

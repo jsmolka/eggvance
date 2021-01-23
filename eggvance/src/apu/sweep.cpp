@@ -9,9 +9,14 @@ void Sweep::init()
 
 void Sweep::init(uint freq)
 {
-    timer  = period;
-    enable = period || shift;
-    shadow = freq;
+    timer   = period;
+    enabled = period || shift;
+    shadow  = freq;
+}
+
+bool Sweep::tick()
+{
+    return enabled && timer && --timer == 0;
 }
 
 void Sweep::write(u8 byte)
@@ -23,7 +28,7 @@ void Sweep::write(u8 byte)
     init();
 }
 
-uint Sweep::calculate() const
+uint Sweep::next() const
 {
     return shadow + (negate ? -1 : 1) * (shadow >> shift);
 }

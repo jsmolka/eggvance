@@ -14,9 +14,8 @@ public:
     template<uint Index> void writeH(u8 byte) { h.template write<Index>(byte); }
     template<uint Index> void writeX(u8 byte) { x.template write<Index>(byte); }
 
-    s16 sample = 0;
-
-    bool enabled = false;
+    uint sample  = 0;
+    uint enabled = 0;
 
 protected:
     Register<u16, MaskL> l;

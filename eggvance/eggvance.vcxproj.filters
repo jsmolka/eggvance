@@ -156,9 +156,6 @@
     <ClCompile Include="src\apu\sweep.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\apu\length.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\apu\fifo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

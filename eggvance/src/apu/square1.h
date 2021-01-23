@@ -9,7 +9,6 @@ class Square1 : public Channel<0x007F, 0xFFFF, 0x47FF>
 {
 public:
     void init();
-
     void tick();
     void tickSweep();
     void tickLength();
@@ -20,14 +19,12 @@ public:
     template<uint Index> void writeX(u8 byte);
 
 private:
-    static constexpr auto kFrequency = 131072;
-
     void updateTimer();
     void updateSweep(bool writeback);
 
-    Sweep sweep;
-    Length length = 64;
+    Length<64> length;
     Envelope envelope;
+    Sweep sweep;
 
     uint timer     = 0;
     uint step      = 0;
@@ -60,7 +57,7 @@ void Square1::writeH(u8 byte)
     {
         envelope.write(byte);
 
-        enabled &= envelope.isEnabled();
+        enabled &= envelope.enabled();
     }
 }
 
