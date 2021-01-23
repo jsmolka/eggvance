@@ -38,13 +38,13 @@ void Sequencer::tick()
         case 0:
         case 4:
             square1.tickLength();
-            square2.length.tick();
+            square2.tickLength();
             break;
 
         case 7:
             noise.envelope.tick();
             square1.tickEnvelope();
-            square2.envelope.tick();
+            square2.tickEnvelope();
             break;
 
         default:
