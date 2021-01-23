@@ -5,7 +5,7 @@
 #include "length.h"
 #include "sweep.h"
 
-class Square1 : public Channel<0x007F, 0xFFFF, 0x47FF>
+class Square1 : public Channel<0x007F, 0xFFC0, 0x4000>
 {
 public:
     void init();
