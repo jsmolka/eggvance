@@ -4,10 +4,7 @@
 
 void Noise::init()
 {
-    if (small)
-        lfsr = 0x40;
-    else
-        lfsr = 0x4000;
+    noise = 0x4000 >> shift;
 
     length.init();
     envelope.init();
@@ -22,18 +19,12 @@ void Noise::tick()
     if (!(timer && --timer == 0))
         return;
 
-    sample = lfsr & 0x1;
-
-    lfsr >>= 1;
-    if (sample)
-    {
-        if (small)
-            lfsr ^= 0x60;
-        else 
-            lfsr ^= 0x6000;
-    }
-
+    sample = noise & 0x1;
     sample *= envelope.volume;
+
+    noise >>= 1;
+    if (sample)
+        noise ^= 0x6000 >> shift;
 
     updateTimer();
 }
@@ -52,17 +43,7 @@ void Noise::tickEnvelope()
     enabled &= envelope.enabled();
 }
 
-#include <cmath>
-
 void Noise::updateTimer()
 {
-    constexpr double kFrequency = 524288;
-
-    double r = divisor;
-    double s = shift;
-
-    if (r == 0)
-        r = 0.5;
-
-    timer = kCpuFrequency / (kFrequency / r / std::pow(2, s + 1));
+    timer = kCpuFrequency / frequency;
 }

@@ -1,8 +1,10 @@
 #pragma once
 
+#include <cmath>
+
 #include "channel.h"
-#include "length.h"
 #include "envelope.h"
+#include "length.h"
 
 class Noise : public Channel<0xFF00, 0x0000, 0x40FF>
 {
@@ -21,11 +23,10 @@ private:
     Length<64> length;
     Envelope envelope;
 
-    uint timer   = 0;
-    uint divisor = 0;
-    uint small   = 0;
-    uint shift   = 0;
-    uint lfsr    = 0;
+    uint timer     = 0;
+    uint shift     = 0;
+    uint frequency = 0;
+    uint noise     = 0;
 };
 
 template<uint Index>
@@ -52,11 +53,11 @@ void Noise::writeX(u8 byte)
 
     if (Index == 0)
     {
-        constexpr uint kDivisors[8] = { 8, 16, 32, 48, 64, 80, 96, 112 };
+        double r = bit::seq<0, 3>(byte);
+        shift    = bit::seq<3, 1>(byte) * 8;
+        double s = bit::seq<4, 4>(byte);
 
-        divisor = bit::seq<0, 3>(byte);
-        small   = bit::seq<3, 1>(byte);
-        shift   = bit::seq<4, 4>(byte);
+        frequency = 524288.0 / std::max(r, 0.5) / std::pow(2, s + 1);
     }
     if (Index == 1)
     {
