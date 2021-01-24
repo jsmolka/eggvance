@@ -84,7 +84,6 @@ void AudioContext::callback(void* data, u8* stream, int length)
 
 void AudioContext::deinit()
 {
-
     if (SDL_WasInit(SDL_INIT_AUDIO))
     {
         SDL_FreeAudioStream(stream);

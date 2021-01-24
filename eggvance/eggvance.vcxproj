@@ -27,7 +27,6 @@
     <ClCompile Include="src\apu\wave.cpp" />
     <ClCompile Include="src\arm\arm.cpp" />
     <ClCompile Include="src\arm\bios.cpp" />
-    <ClCompile Include="src\arm\disassemble.cpp" />
     <ClCompile Include="src\arm\instr_arm.cpp" />
     <ClCompile Include="src\arm\instr_thumb.cpp" />
     <ClCompile Include="src\arm\interrupt.cpp" />
@@ -82,7 +81,6 @@
     <ClInclude Include="src\arm\bios.h" />
     <ClInclude Include="src\arm\constants.h" />
     <ClInclude Include="src\arm\decode.h" />
-    <ClInclude Include="src\arm\disassemble.h" />
     <ClInclude Include="src\arm\io.h" />
     <ClInclude Include="src\arm\pipeline.h" />
     <ClInclude Include="src\arm\psr.h" />
@@ -201,6 +199,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <SupportJustMyCode>true</SupportJustMyCode>
       <BufferSecurityCheck>false</BufferSecurityCheck>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
     </ClCompile>
     <Link>
       <AdditionalDependencies>SDL2maind.lib;shell32.lib</AdditionalDependencies>

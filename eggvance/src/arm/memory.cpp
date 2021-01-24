@@ -303,8 +303,8 @@ void Arm::writeHalf(u32 addr, u16 half, Access access)
         break;
 
     case kRegionExternalWorkRam:
-        ewram.writeHalf(addr, half);
         tickRam(3);
+        ewram.writeHalf(addr, half);
         break;
 
     case kRegionInternalWorkRam:
