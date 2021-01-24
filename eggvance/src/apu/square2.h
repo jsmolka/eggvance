@@ -4,7 +4,7 @@
 #include "envelope.h"
 #include "length.h"
 
-class Square2 : public Channel<0xFFC0, 0x0000, 0x4000>
+class Square2 : public Channel<0xFFFF, 0x0000, 0x47FF>
 {
 public:
     void init();

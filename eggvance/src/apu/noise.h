@@ -1,12 +1,13 @@
 #pragma once
 
+#include <algorithm>
 #include <cmath>
 
 #include "channel.h"
 #include "envelope.h"
 #include "length.h"
 
-class Noise : public Channel<0xFF00, 0x0000, 0x40FF>
+class Noise : public Channel<0xFF3F, 0x0000, 0x40FF>
 {
 public:
     void init();
