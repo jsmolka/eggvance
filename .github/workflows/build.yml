@@ -26,13 +26,13 @@ jobs:
       - name: Build
         run: |
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-          msbuild /property:Configuration=Release eggvance.sln
+          msbuild /property:Configuration=ReleaseNoConsole eggvance.sln
 
       - name: Collect
         run: |
           mkdir upload
-          move bin\Release\eggvance.exe upload
-          move bin\Release\SDL2.dll upload
+          move bin\ReleaseNoConsole\eggvance.exe upload
+          move bin\ReleaseNoConsole\SDL2.dll upload
           move eggvance\eggvance.ini upload
 
       - name: Upload

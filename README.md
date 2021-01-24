@@ -1,9 +1,6 @@
 # eggvance
 A Game Boy Advance emulator.
 
-## State
-Most aspects of the GBA are emulated with high accuracy. The last remaining feature is audio, which being worked on.
-
 ## Usage
 ROM and save files can be passed as command line arguments or dropped in the emulator window. Even though the included [BIOS](https://github.com/Nebuleon/ReGBA/tree/master/bios) should be enough to run most games, it is recommended to download the original one. Its location and many other things are customizable in the [config](eggvance/eggvance.ini).
 
@@ -25,4 +22,4 @@ These projects were invaluable resources while creating the emulator:
 - [higan](https://github.com/higan-emu/higan) by byuu
 - [Tonc](https://www.coranac.com/tonc/text/toc.htm) by Jasper Vijn
 
-![mew](media/emerald_lcd.png)
+![screenshot](screenshot.png)
