@@ -20,8 +20,6 @@ public:
     DirectSoundControl direct_sound;
     Sequencer sequencer;
 
-    Register<u16> waveram[8];
-
     int cycles = 0;
 };
 
