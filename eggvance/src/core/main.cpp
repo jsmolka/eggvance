@@ -1,7 +1,3 @@
-#include <shell/predef.h>
-
-#if !SHELL_CC_EMSCRIPTEN
-
 #include "core.h"
 #include "audiocontext.h"
 #include "framecounter.h"
@@ -146,5 +142,3 @@ int main(int argc, char* argv[])
     }
     return 0;
 }
-
-#endif

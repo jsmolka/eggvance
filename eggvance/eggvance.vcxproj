@@ -158,8 +158,7 @@
     <ClCompile Include="src\core\audiocontext.cpp" />
     <ClCompile Include="src\core\core.cpp" />
     <ClCompile Include="src\core\inputcontext.cpp" />
-    <ClCompile Include="src\core\main_emscripten.cpp" />
-    <ClCompile Include="src\core\main_sdl.cpp" />
+    <ClCompile Include="src\core\main.cpp" />
     <ClCompile Include="src\core\videocontext.cpp" />
     <ClCompile Include="src\gamepak\eeprom.cpp" />
     <ClCompile Include="src\gamepak\flash.cpp" />

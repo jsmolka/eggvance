@@ -48,17 +48,6 @@ Install [SDL2](https://libsdl.org/download-2.0.php).
 $ brew install sdl2
 ```
 
-### Emscripten
-Install and setup [emscripten](https://emscripten.org/).
-
-```
-$ git clone https://github.com/emscripten-core/emsdk.git
-$ cd emsdk
-$ ./emsdk install latest
-$ ./emsdk activate latest
-$ source ./emsdk_env.sh
-```
-
 ## Build
 
 ### Windows
@@ -77,14 +66,4 @@ $ mkdir build
 $ cd build
 $ cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-march=native" ..
 $ make -j 4
-```
-
-### Emscripten
-Build with `emcmake` and `emmake`.
-
-```
-$ mkdir build
-$ cd build
-$ emcmake cmake -DCMAKE_BUILD_TYPE=Release ..
-$ emmake make -j 4
 ```
