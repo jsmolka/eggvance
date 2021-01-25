@@ -21,7 +21,7 @@ void Wave::tick()
     if (!(timer && --timer == 0))
         return;
 
-    sample = bit::nibble(ram[position / 2], position & 0x1);
+    sample = bit::nibble(ram[position / 2], (position & 0x1) ^ 0x1);
     sample = volume * sample / 4;
 
     if (dimension)
