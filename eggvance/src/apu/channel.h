@@ -14,6 +14,7 @@ public:
     template<uint Index> void writeH(u8 byte) { h.template write<Index>(byte); }
     template<uint Index> void writeX(u8 byte) { x.template write<Index>(byte); }
 
+    uint timer   = 0;
     uint sample  = 0;
     uint enabled = 0;
 

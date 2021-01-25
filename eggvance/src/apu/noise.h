@@ -24,7 +24,6 @@ private:
     Length<64> length;
     Envelope envelope;
 
-    uint timer     = 0;
     uint shift     = 0;
     uint frequency = 1;
     uint noise     = 0;

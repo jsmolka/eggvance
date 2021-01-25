@@ -21,7 +21,6 @@ private:
     Length<64> length;
     Envelope envelope;
 
-    uint timer     = 0;
     uint step      = 0;
     uint pattern   = 0;
     uint frequency = 0;

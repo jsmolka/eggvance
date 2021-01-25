@@ -26,7 +26,6 @@ private:
     Envelope envelope;
     Sweep sweep;
 
-    uint timer     = 0;
     uint step      = 0;
     uint pattern   = 0;
     uint frequency = 0;

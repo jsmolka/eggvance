@@ -22,7 +22,6 @@ private:
 
     Length<256> length;
 
-    uint timer     = 0;
     uint position  = 0;
     uint dimension = 0;
     uint bank      = 0;
