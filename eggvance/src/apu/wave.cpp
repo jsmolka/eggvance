@@ -4,31 +4,30 @@
 
 void Wave::init()
 {
-    if (two_banks)
-        nibble = 0;
+    if (dimension)
+        position = 0;
     else
-        nibble = 16 * bank;
+        position = 16 * bank;
 
     length.init();
 
-    // Todo: disable if zero volume
-    enabled = true;
+    enabled = active;
 
     updateTimer();
 }
 
 void Wave::tick()
 {
-    if (!(timer && --timer == 0 && active))
+    if (!(timer && --timer == 0))
         return;
 
-    // Todo: apply volume shift
-    sample = bit::nibble(ram[nibble / 2], nibble & 0x1);
+    sample = bit::nibble(ram[position / 2], position & 0x1);
+    sample = volume * sample / 4;
 
-    if (two_banks)
-        nibble = (nibble + 1) % 64;
+    if (dimension)
+        position = (position + 1) % 64;
     else
-        nibble = (nibble + 1) % 32 + 16 * bank;
+        position = (position + 1) % 32 + 16 * bank;
 
     updateTimer();
 }
@@ -40,12 +39,12 @@ void Wave::tickLength()
     enabled &= length.enabled();
 }
 
-u8 Wave::readBank(uint index) const
+u8 Wave::readRam(uint index) const
 {
     return ram[16 * (bank ^ 0x1) + index];
 }
 
-void Wave::writeBank(uint index, u8 byte)
+void Wave::writeRam(uint index, u8 byte)
 {
     ram[16 * (bank ^ 0x1) + index] = byte;
 }

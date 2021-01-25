@@ -10,8 +10,8 @@ public:
     void tick();
     void tickLength();
 
-    u8 readBank(uint index) const;
-    void writeBank(uint index, u8 byte);
+    u8 readRam(uint index) const;
+    void writeRam(uint index, u8 byte);
 
     template<uint Index> void writeL(u8 byte);
     template<uint Index> void writeH(u8 byte);
@@ -23,11 +23,11 @@ private:
     Length<256> length;
 
     uint timer     = 0;
-    uint nibble    = 0;
-    uint two_banks = 0;
+    uint position  = 0;
+    uint dimension = 0;
     uint bank      = 0;
     uint active    = 0;
-    uint volume    = 2;
+    uint volume    = 0;
     uint frequency = 0;
 
     u8 ram[32] = {};
@@ -40,9 +40,11 @@ void Wave::writeL(u8 byte)
 
     if (Index == 0)
     {
-        two_banks = bit::seq<5, 1>(byte);
+        dimension = bit::seq<5, 1>(byte);
         bank      = bit::seq<6, 1>(byte);
         active    = bit::seq<7, 1>(byte);
+
+        enabled &= active;
     }
 }
 
@@ -57,7 +59,9 @@ void Wave::writeH(u8 byte)
     }
     if (Index == 1)
     {
-        // Todo: set volume
+        constexpr uint kVolumes[8] = { 0, 4, 2, 1, 3, 3, 3, 3 };
+
+        volume = kVolumes[bit::seq<5, 3>(byte)];
     }
 }
 
