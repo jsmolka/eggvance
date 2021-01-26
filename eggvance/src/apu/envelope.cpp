@@ -10,7 +10,7 @@ void Envelope::init()
 
 void Envelope::tick()
 {
-    if (!(timer && --timer == 0))
+    if (timer == 0 || --timer)
         return;
 
     if (increase)
@@ -36,6 +36,7 @@ void Envelope::write(u8 byte)
     period   = bit::seq<0, 3>(byte);
     increase = bit::seq<3, 1>(byte);
     initial  = bit::seq<4, 4>(byte);
+    volume   = initial;
 }
 
 uint Envelope::enabled() const
