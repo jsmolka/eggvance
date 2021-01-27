@@ -18,7 +18,7 @@ void Wave::init()
 
 void Wave::tick()
 {
-    if (!(timer && --timer == 0))
+    if (!(enabled && timer && --timer == 0))
         return;
 
     sample = bit::nibble(ram[position / 2], (position & 0x1) ^ 0x1);
@@ -34,9 +34,12 @@ void Wave::tick()
 
 void Wave::tickLength()
 {
-    length.tick();
+    if (enabled)
+    {
+        length.tick();
 
-    enabled &= length.enabled();
+        enabled = length.enabled();
+    }
 }
 
 u8 Wave::readRam(uint index) const

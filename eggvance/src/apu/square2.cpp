@@ -14,7 +14,7 @@ void Square2::init()
 
 void Square2::tick()
 {
-    if (!(timer && --timer == 0))
+    if (!(enabled && timer && --timer == 0))
         return;
 
     constexpr auto kWaves = 0b00111111'00001111'00000011'00000001;
@@ -29,16 +29,22 @@ void Square2::tick()
 
 void Square2::tickLength()
 {
-    length.tick();
+    if (enabled)
+    {
+        length.tick();
 
-    enabled &= length.enabled();
+        enabled = length.enabled();
+    }
 }
 
 void Square2::tickEnvelope()
 {
-    envelope.tick();
+    if (enabled)
+    {
+        envelope.tick();
 
-    enabled &= envelope.enabled();
+        enabled = envelope.enabled();
+    }
 }
 
 void Square2::updateTimer()

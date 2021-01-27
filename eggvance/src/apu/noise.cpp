@@ -16,7 +16,7 @@ void Noise::init()
 
 void Noise::tick()
 {
-    if (!(timer && --timer == 0))
+    if (!(enabled && timer && --timer == 0))
         return;
 
     sample = noise & 0x1;
@@ -31,16 +31,22 @@ void Noise::tick()
 
 void Noise::tickLength()
 {
-    length.tick();
+    if (enabled)
+    {
+        length.tick();
 
-    enabled &= length.enabled();
+        enabled = length.enabled();
+    }
 }
 
 void Noise::tickEnvelope()
 {
-    envelope.tick();
+    if (enabled)
+    {
+        envelope.tick();
 
-    enabled &= envelope.enabled();
+        enabled = envelope.enabled();
+    }
 }
 
 void Noise::updateTimer()

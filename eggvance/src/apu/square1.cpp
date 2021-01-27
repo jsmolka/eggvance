@@ -18,7 +18,7 @@ void Square1::init()
 
 void Square1::tick()
 {
-    if (!(timer && --timer == 0))
+    if (!(enabled && timer && --timer == 0))
         return;
 
     constexpr auto kWaves = 0b00111111'00001111'00000011'00000001;
@@ -33,7 +33,7 @@ void Square1::tick()
 
 void Square1::tickSweep()
 {
-    if (!sweep.tick())
+    if (!(enabled || sweep.tick()))
         return;
 
     updateSweep(true);
@@ -44,16 +44,22 @@ void Square1::tickSweep()
 
 void Square1::tickLength()
 {
-    length.tick();
+    if (enabled)
+    {
+        length.tick();
 
-    enabled &= length.enabled();
+        enabled = length.enabled();
+    }
 }
 
 void Square1::tickEnvelope()
 {
-    envelope.tick();
+    if (enabled)
+    {
+        envelope.tick();
 
-    enabled &= envelope.enabled();
+        enabled = envelope.enabled();
+    }
 }
 
 void Square1::updateTimer()
