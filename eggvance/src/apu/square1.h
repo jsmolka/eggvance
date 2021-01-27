@@ -49,8 +49,8 @@ void Square1::writeH(u8 byte)
 
     if (Index == 0)
     {
-        length.length = bit::seq<0, 6>(byte);
-        pattern       = bit::seq<6, 2>(byte);
+        length  = bit::seq<0, 6>(byte);
+        pattern = bit::seq<6, 2>(byte);
     }
     if (Index == 1)
     {

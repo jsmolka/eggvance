@@ -54,7 +54,7 @@ void Wave::writeH(u8 byte)
 
     if (Index == 0)
     {
-        length.length = byte;
+        length = byte;
     }
     if (Index == 1)
     {

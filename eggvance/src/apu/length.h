@@ -6,30 +6,32 @@ template<uint Base>
 class Length
 {
 public:
-    void init();
-    void tick();
-    uint enabled() const;
+    Length& operator=(uint value)
+    {
+        length = value;
 
+        init();
+
+        return *this;
+    }
+
+    void init()
+    {
+        timer = Base - length;
+    }
+
+    void tick()
+    {
+        if (timer && --timer == 0 && !expire)
+            init();
+    }
+
+    uint enabled() const
+    {
+        return timer > 0;
+    }
+
+    uint timer  = 0;
     uint length = 0;
     uint expire = 0;
-    uint timer  = 0;
 };
-
-template<uint Base>
-void Length<Base>::init()
-{
-    timer = Base - length;
-}
-
-template<uint Base>
-void Length<Base>::tick()
-{
-    if (timer && --timer == 0 && !expire)
-        init();
-}
-
-template<uint Base>
-uint Length<Base>::enabled() const
-{
-    return timer > 0;
-}
