@@ -10,7 +10,7 @@ void Envelope::init()
 
 void Envelope::tick()
 {
-    if (timer == 0 || --timer)
+    if (!(timer && --timer == 0))
         return;
 
     if (increase)

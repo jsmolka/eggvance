@@ -4,14 +4,15 @@
 
 void Sweep::init()
 {
-    timer = period;
+    timer   = period;
+    enabled = period || shift;
 }
 
 void Sweep::init(uint freq)
 {
-    timer   = period;
-    enabled = period || shift;
-    shadow  = freq;
+    init();
+
+    shadow = freq;
 }
 
 bool Sweep::tick()
