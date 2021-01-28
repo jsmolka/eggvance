@@ -33,7 +33,7 @@ void Square1::tick()
 
 void Square1::tickSweep()
 {
-    if (!(enabled || sweep.tick()))
+    if (!(enabled && sweep.tick()))
         return;
 
     updateSweep(true);
