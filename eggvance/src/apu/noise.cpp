@@ -2,6 +2,11 @@
 
 #include "constants.h"
 
+Noise::Noise()
+{
+    mask = 0x0000'40FF'0000'FF00;
+}
+
 void Noise::init()
 {
     noise = 0x4000 >> shift;
@@ -46,6 +51,40 @@ void Noise::tickEnvelope()
         envelope.tick();
 
         enabled = envelope.enabled();
+    }
+}
+
+void Noise::write(std::size_t index, u8 byte)
+{
+    Channel::write(index, byte);
+
+    double r;
+    double s;
+
+    switch (index)
+    {
+    case NR::k41:
+        length.length = seq<0, 6>();
+        break;
+
+    case NR::k42:
+        envelope.write(byte);
+        enabled &= envelope.enabled();
+        break;
+
+    case NR::k43:
+        r         = seq<32, 3>();
+        shift     = seq<35, 1>() * 8;
+        s         = seq<36, 4>();
+        frequency = static_cast<uint>(524288.0 / std::max(r, 0.5) / std::pow(2, s + 1));
+        break;
+
+    case NR::k44:
+        length.expire = seq<46,  1>();
+
+        if (byte & 0x80)
+            init();
+        break;
     }
 }
 

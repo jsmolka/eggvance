@@ -25,6 +25,7 @@
     <ClCompile Include="src\apu\square2.cpp" />
     <ClCompile Include="src\apu\sweep.cpp" />
     <ClCompile Include="src\apu\wave.cpp" />
+    <ClCompile Include="src\apu\waveram.cpp" />
     <ClCompile Include="src\arm\arm.cpp" />
     <ClCompile Include="src\arm\bios.cpp" />
     <ClCompile Include="src\arm\instr_arm.cpp" />
@@ -77,6 +78,7 @@
     <ClInclude Include="src\apu\square2.h" />
     <ClInclude Include="src\apu\sweep.h" />
     <ClInclude Include="src\apu\wave.h" />
+    <ClInclude Include="src\apu\waveram.h" />
     <ClInclude Include="src\arm\arm.h" />
     <ClInclude Include="src\arm\bios.h" />
     <ClInclude Include="src\arm\constants.h" />

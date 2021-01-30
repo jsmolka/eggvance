@@ -156,6 +156,9 @@
     <ClCompile Include="src\timer\timerchannel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\apu\waveram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\apu\apu.h">
@@ -363,6 +366,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\timer\timerchannel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\apu\waveram.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,6 +2,11 @@
 
 #include "constants.h"
 
+Square1::Square1()
+{
+    mask = 0x0000'4000'FFC0'007F;
+}
+
 void Square1::init()
 {
     length.init();
@@ -59,6 +64,40 @@ void Square1::tickEnvelope()
         envelope.tick();
 
         enabled = envelope.enabled();
+    }
+}
+
+void Square1::write(std::size_t index, u8 byte)
+{
+    Channel::write(index, byte);
+
+    switch (index)
+    {
+    case NR::k10:
+        sweep.write(byte);
+        break;
+
+    case NR::k11:
+        length  = seq<16, 6>();
+        pattern = seq<22, 2>();
+        break;
+
+    case NR::k12:
+        envelope.write(byte);
+        enabled &= envelope.enabled();
+        break;
+
+    case NR::k13:
+        frequency = seq<32, 11>();
+        break;
+
+    case NR::k14:
+        frequency     = seq<32, 11>();
+        length.expire = seq<48,  1>();
+
+        if (byte & 0x80)
+            init();
+        break;
     }
 }
 
