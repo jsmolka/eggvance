@@ -16,11 +16,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\apu\apu.cpp" />
+    <ClCompile Include="src\apu\channel.cpp" />
     <ClCompile Include="src\apu\envelope.cpp" />
     <ClCompile Include="src\apu\fifo.cpp" />
     <ClCompile Include="src\apu\io.cpp" />
+    <ClCompile Include="src\apu\length.cpp" />
     <ClCompile Include="src\apu\noise.cpp" />
     <ClCompile Include="src\apu\sequencer.cpp" />
+    <ClCompile Include="src\apu\square.cpp" />
     <ClCompile Include="src\apu\square1.cpp" />
     <ClCompile Include="src\apu\square2.cpp" />
     <ClCompile Include="src\apu\sweep.cpp" />
@@ -74,6 +77,7 @@
     <ClInclude Include="src\apu\length.h" />
     <ClInclude Include="src\apu\noise.h" />
     <ClInclude Include="src\apu\sequencer.h" />
+    <ClInclude Include="src\apu\square.h" />
     <ClInclude Include="src\apu\square1.h" />
     <ClInclude Include="src\apu\square2.h" />
     <ClInclude Include="src\apu\sweep.h" />

@@ -3,8 +3,9 @@
 #include "constants.h"
 
 Wave::Wave()
+    : Channel(0x0000'4000'E000'00E0, 256)
 {
-    mask = 0x0000'4000'E000'00E0;
+
 }
 
 void Wave::init()
@@ -18,7 +19,7 @@ void Wave::init()
 
     enabled = active;
 
-    updateTimer();
+    timer = period();
 }
 
 void Wave::tick()
@@ -34,20 +35,10 @@ void Wave::tick()
     else
         position = (position + 1) % 32 + 16 * ram.bank;
 
-    updateTimer();
+    timer = period();
 }
 
-void Wave::tickLength()
-{
-    if (enabled)
-    {
-        length.tick();
-
-        enabled = length.enabled();
-    }
-}
-
-void Wave::write(std::size_t index, u8 byte)
+void Wave::write(uint index, u8 byte)
 {
     static constexpr uint kVolumes[8] = { 0, 4, 2, 1, 3, 3, 3, 3 };
 
@@ -84,9 +75,9 @@ void Wave::write(std::size_t index, u8 byte)
     }
 }
 
-void Wave::updateTimer()
+uint Wave::period() const
 {
     constexpr auto kFrequency = 2097152;
 
-    timer = (kCpuFrequency / kFrequency) * (2048 - frequency);
+    return (kCpuFrequency / kFrequency) * (2048 - frequency);
 }

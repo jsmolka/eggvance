@@ -3,56 +3,12 @@
 #include "constants.h"
 
 Square2::Square2()
+    : Square(0x0000'4000'0000'FFC0)
 {
-    mask = 0x0000'4000'0000'FFC0;
+
 }
 
-void Square2::init()
-{
-    length.init();
-    envelope.init();
-
-    enabled = envelope.enabled();
-
-    updateTimer();
-}
-
-void Square2::tick()
-{
-    if (!(enabled && timer && --timer == 0))
-        return;
-
-    constexpr auto kWaves = 0b00111111'00001111'00000011'00000001;
-
-    sample = (kWaves >> (8 * pattern + step)) & 0x1;
-    sample *= envelope.volume;
-
-    step = (step + 1) % 8;
-
-    updateTimer();
-}
-
-void Square2::tickLength()
-{
-    if (enabled)
-    {
-        length.tick();
-
-        enabled = length.enabled();
-    }
-}
-
-void Square2::tickEnvelope()
-{
-    if (enabled)
-    {
-        envelope.tick();
-
-        enabled = envelope.enabled();
-    }
-}
-
-void Square2::write(std::size_t index, u8 byte)
+void Square2::write(uint index, u8 byte)
 {
     Channel::write(index, byte);
 
@@ -80,12 +36,4 @@ void Square2::write(std::size_t index, u8 byte)
             init();
         break;
     }
-}
-
-void Square2::updateTimer()
-{
-    constexpr auto kWaveBits  = 8;
-    constexpr auto kFrequency = 131072;
-
-    timer = (kCpuFrequency / kFrequency) * (2048 - frequency) / kWaveBits;
 }

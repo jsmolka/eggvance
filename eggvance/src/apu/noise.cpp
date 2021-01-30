@@ -1,10 +1,14 @@
 #include "noise.h"
 
+#include <algorithm>
+#include <cmath>
+
 #include "constants.h"
 
 Noise::Noise()
+    : Channel(0x0000'40FF'0000'FF00, 64)
 {
-    mask = 0x0000'40FF'0000'FF00;
+    frequency = 1;
 }
 
 void Noise::init()
@@ -16,7 +20,7 @@ void Noise::init()
 
     enabled = envelope.enabled();
 
-    updateTimer();
+    timer = period();
 }
 
 void Noise::tick()
@@ -31,30 +35,15 @@ void Noise::tick()
     if (sample)
         noise ^= 0x6000 >> shift;
 
-    updateTimer();
+    timer = period();
 }
 
-void Noise::tickLength()
+uint Noise::period() const
 {
-    if (enabled)
-    {
-        length.tick();
-
-        enabled = length.enabled();
-    }
+    return kCpuFrequency / frequency;
 }
 
-void Noise::tickEnvelope()
-{
-    if (enabled)
-    {
-        envelope.tick();
-
-        enabled = envelope.enabled();
-    }
-}
-
-void Noise::write(std::size_t index, u8 byte)
+void Noise::write(uint index, u8 byte)
 {
     Channel::write(index, byte);
 
@@ -86,9 +75,4 @@ void Noise::write(std::size_t index, u8 byte)
             init();
         break;
     }
-}
-
-void Noise::updateTimer()
-{
-    timer = kCpuFrequency / frequency;
 }

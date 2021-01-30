@@ -98,7 +98,7 @@ protected:
     }
 };
 
-template<typename Integral, Integral Mask = -1>
+template<typename Integral, Integral Mask = ~static_cast<Integral>(0)>
 class XRegisterR : public XRegisterBase<Integral, Mask>
 {
 public:
@@ -106,7 +106,7 @@ public:
     using XRegisterBase<Integral, Mask>::read;
 };
 
-template<typename Integral, Integral Mask = -1>
+template<typename Integral, Integral Mask = ~static_cast<Integral>(0)>
 class XRegisterW : public XRegisterBase<Integral, Mask>
 {
 public:
@@ -114,7 +114,7 @@ public:
     using XRegisterBase<Integral, Mask>::write;
 };
 
-template<typename Integral, Integral Mask = -1>
+template<typename Integral, Integral Mask = ~static_cast<Integral>(0)>
 class XRegister : public XRegisterBase<Integral, Mask>
 {
 public:

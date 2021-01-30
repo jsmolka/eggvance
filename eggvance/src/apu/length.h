@@ -2,35 +2,18 @@
 
 #include "base/int.h"
 
-template<uint Base>
 class Length
 {
 public:
-    Length& operator=(uint value)
-    {
-        length = value;
+    Length(uint base);
 
-        init();
+    Length& operator=(uint value);
 
-        return *this;
-    }
+    void init();
+    void tick();
+    uint enabled() const;
 
-    void init()
-    {
-        timer = Base - length;
-    }
-
-    void tick()
-    {
-        if (timer && --timer == 0 && !expire)
-            init();
-    }
-
-    uint enabled() const
-    {
-        return timer > 0;
-    }
-
+    uint base   = 0;
     uint timer  = 0;
     uint length = 0;
     uint expire = 0;
