@@ -43,7 +43,7 @@ void Square1::write(uint index, u8 byte)
 
     case NR::k14:
         frequency     = seq<32, 11>();
-        length.expire = seq<48,  1>();
+        length.expire = seq<46,  1>();
 
         if (byte & 0x80)
             init();

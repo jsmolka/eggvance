@@ -22,8 +22,8 @@ void Length::init()
 
 void Length::tick()
 {
-    if (timer && --timer == 0 && !expire)
-        init();
+    if (expire && timer)
+        timer--;
 }
 
 uint Length::enabled() const
