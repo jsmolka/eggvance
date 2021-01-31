@@ -2,21 +2,22 @@
 
 #include "channel.h"
 
-class Noise : public Channel
+class Noise final : public Channel
 {
 public:
     Noise();
 
-    void init();
     void tick();
     void write(uint index, u8 byte);
 
 protected:
+    void init();
+
     uint period() const final;
 
 private:
-    enum NR { k41 = 0, k42 = 1, k43 = 4, k44 = 5 };
-
-    uint shift = 0;
-    uint noise = 0;
+    uint noise  = 0;
+    uint ratio  = 0;
+    uint narrow = 0;
+    uint shift  = 0;
 };
