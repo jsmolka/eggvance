@@ -12,25 +12,23 @@ void Square2::write(uint index, u8 byte)
 {
     Channel::write(index, byte);
 
-    enum NR { k21 = 0, k22 = 1, k23 = 4, k24 = 5 };
-
     switch (index)
     {
-    case NR::k21:
+    case 0:
         length = seq<0, 6>();
         form   = seq<6, 2>();
         break;
 
-    case NR::k22:
+    case 1:
         envelope.write(byte);
         enabled &= envelope.enabled();
         break;
 
-    case NR::k23:
+    case 4:
         frequency = seq<32, 11>();
         break;
 
-    case NR::k24:
+    case 5:
         frequency     = seq<32, 11>();
         length.expire = seq<46,  1>();
 

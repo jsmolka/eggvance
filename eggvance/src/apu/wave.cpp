@@ -8,32 +8,18 @@ Wave::Wave()
 
 }
 
-void Wave::init()
-{
-    if (dimension)
-        position = 0;
-    else
-        position = 16 * ram.bank;
-
-    length.init();
-
-    enabled = active;
-
-    timer = period();
-}
-
 void Wave::tick()
 {
     if (!(enabled && timer && --timer == 0))
         return;
 
-    sample = bit::nibble(ram[position / 2], (position & 0x1) ^ 0x1);
+    sample = bit::nibble(ram[step >> 1], (step ^ 0x1) & 0x1);
     sample = volume * sample / 4;
 
-    if (dimension)
-        position = (position + 1) % 64;
+    if (wide)
+        step = (step + 1) % 64;
     else
-        position = (position + 1) % 32 + 16 * ram.bank;
+        step = (step + 1) % 32 + 16 * ram.bank;
 
     timer = period();
 }
@@ -46,26 +32,26 @@ void Wave::write(uint index, u8 byte)
 
     switch (index)
     {
-    case NR::k30:
-        dimension = seq<5, 1>();
-        ram.bank  = seq<6, 1>();
-        active    = seq<7, 1>();
+    case 0:
+        wide     = seq<5, 1>();
+        ram.bank = seq<6, 1>();
+        active   = seq<7, 1>();
         enabled &= active;
         break;
 
-    case NR::k31:
+    case 2:
         length = byte;
         break;
 
-    case NR::k32:
+    case 3:
         volume = kVolumes[seq<29, 3>()];
         break;
 
-    case NR::k33:
+    case 4:
         frequency = seq<32, 11>();
         break;
 
-    case NR::k34:
+    case 5:
         frequency     = seq<32, 11>();
         length.expire = seq<46,  1>();
 
@@ -73,6 +59,16 @@ void Wave::write(uint index, u8 byte)
             init();
         break;
     }
+}
+
+void Wave::init()
+{
+    Channel::init(active);
+
+    if (wide)
+        step = 0;
+    else
+        step = 16 * ram.bank;
 }
 
 uint Wave::period() const

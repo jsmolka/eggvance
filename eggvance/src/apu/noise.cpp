@@ -1,5 +1,7 @@
 #include "noise.h"
 
+#include <algorithm>
+
 #include "constants.h"
 
 Noise::Noise()
@@ -27,26 +29,24 @@ void Noise::write(uint index, u8 byte)
 {
     Channel::write(index, byte);
 
-    enum NR { k41 = 0, k42 = 1, k43 = 4, k44 = 5 };
-
     switch (index)
     {
-    case NR::k41:
+    case 0:
         length = seq<0, 6>();
         break;
 
-    case NR::k42:
+    case 1:
         envelope.write(byte);
         enabled &= envelope.enabled();
         break;
 
-    case NR::k43:
+    case 4:
         ratio  = seq<32, 3>();
         narrow = seq<35, 1>() * 8;
         shift  = seq<36, 4>();
         break;
 
-    case NR::k44:
+    case 5:
         length.expire = seq<46, 1>();
 
         if (byte & 0x80)
@@ -66,10 +66,10 @@ void Noise::init()
 
 uint Noise::period() const
 {
-    constexpr auto kBaseFrequency = 524288;
+    constexpr auto kFrequency = 524288;
 
     uint r = std::max<uint>(2 * ratio, 1);
     uint s = 1 << shift;
 
-    return kCpuFrequency / (kBaseFrequency / r / s);
+    return kCpuFrequency / (kFrequency / r / s);
 }
