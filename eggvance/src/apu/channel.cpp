@@ -48,7 +48,5 @@ void Channel::doSweep(bool writeback)
     {
         frequency    = freq;
         sweep.shadow = freq;
-
-        timer = period();
     }
 }
