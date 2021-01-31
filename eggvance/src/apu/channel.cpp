@@ -37,6 +37,28 @@ void Channel::tickEnvelope()
     }
 }
 
+void Channel::init(bool enabled)
+{
+    this->enabled = enabled;
+
+    length.init();
+
+    timer = period();
+}
+
+void Channel::initSweep()
+{
+    sweep.init(frequency);
+    if (sweep.shift)
+        doSweep(false);
+}
+
+void Channel::initEnvelope()
+{
+    envelope.init();
+    enabled &= envelope.enabled();
+}
+
 void Channel::doSweep(bool writeback)
 {
     uint freq = sweep.next();

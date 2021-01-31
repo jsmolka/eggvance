@@ -20,11 +20,16 @@ public:
     uint frequency = 0;
 
 protected:
-    void doSweep(bool writeback);
+    void init(bool enabled);
+    void initSweep();
+    void initEnvelope();
 
     virtual uint period() const = 0;
 
     Sweep sweep;
     Length length;
     Envelope envelope;
+
+private:
+    void doSweep(bool writeback);
 };

@@ -8,29 +8,31 @@ Square::Square(u64 mask)
 
 }
 
-void Square::init()
-{
-    length.init();
-    envelope.init();
-
-    enabled = envelope.enabled();
-    step = 0;
-    timer = period();
-}
-
 void Square::tick()
 {
     if (!(enabled && timer && --timer == 0))
         return;
 
-    constexpr auto kWaves = 0b00111111'00001111'00000011'00000001;
+    constexpr u8 kWaves[4] = {
+        0b00000001,
+        0b00000011,
+        0b00001111,
+        0b00111111
+    };
 
-    sample = (kWaves >> (8 * pattern + step)) & 0x1;
+    sample = (kWaves[form] >> step) & 0x1;
     sample *= envelope.volume;
 
     step = (step + 1) % 8;
 
     timer = period();
+}
+
+void Square::init()
+{
+    Channel::init(true);
+
+    initEnvelope();
 }
 
 uint Square::period() const

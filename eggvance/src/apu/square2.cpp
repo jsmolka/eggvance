@@ -12,11 +12,13 @@ void Square2::write(uint index, u8 byte)
 {
     Channel::write(index, byte);
 
+    enum NR { k21 = 0, k22 = 1, k23 = 4, k24 = 5 };
+
     switch (index)
     {
     case NR::k21:
-        length  = seq<0, 6>();
-        pattern = seq<6, 2>();
+        length = seq<0, 6>();
+        form   = seq<6, 2>();
         break;
 
     case NR::k22:
