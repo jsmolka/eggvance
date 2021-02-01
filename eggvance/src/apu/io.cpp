@@ -37,14 +37,8 @@ void SoundControl::write(uint index, u8 byte)
         break;
 
     case 1:
-        enabled_r[0] = bit::seq<0, 1>(byte);
-        enabled_r[1] = bit::seq<1, 1>(byte);
-        enabled_r[2] = bit::seq<2, 1>(byte);
-        enabled_r[3] = bit::seq<3, 1>(byte);
-        enabled_l[0] = bit::seq<4, 1>(byte);
-        enabled_l[1] = bit::seq<5, 1>(byte);
-        enabled_l[2] = bit::seq<6, 1>(byte);
-        enabled_l[3] = bit::seq<7, 1>(byte);
+        enabled_r = bit::seq<0, 4>(byte);
+        enabled_l = bit::seq<4, 4>(byte);
         break;
 
     case 2:

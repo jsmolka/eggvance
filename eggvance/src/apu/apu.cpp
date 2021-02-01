@@ -45,8 +45,8 @@ void Apu::sample()
         if (!channel->enabled)
             continue;
 
-        if (control.enabled_l[index]) sample_l += channel->sample;
-        if (control.enabled_r[index]) sample_r += channel->sample;
+        if (control.enabled_l & (1 << index)) sample_l += channel->sample;
+        if (control.enabled_r & (1 << index)) sample_r += channel->sample;
     }
 
     sample_l  *= control.volume_l + 1;

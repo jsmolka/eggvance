@@ -10,12 +10,12 @@ public:
     u8 read(uint index) const;
     void write(uint index, u8 byte);
 
-    uint volume       = 0;
-    uint volume_r     = 0;
-    uint volume_l     = 0;
-    uint enabled      = 0;
-    uint enabled_r[4] = {};
-    uint enabled_l[4] = {};
+    uint volume    = 0;
+    uint volume_r  = 0;
+    uint volume_l  = 0;
+    uint enabled   = 0;
+    uint enabled_r = 0;
+    uint enabled_l = 0;
 };
 
 class SoundBias : public XRegister<u16, 0xC3FF>
