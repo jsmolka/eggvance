@@ -1,6 +1,5 @@
 #pragma once
 
-#include "constants.h"
 #include "noise.h"
 #include "square1.h"
 #include "square2.h"

@@ -17,8 +17,8 @@ void Square1::write(uint index, u8 byte)
         break;
 
     case 2:
-        length = seq<16, 6>();
-        form   = seq<22, 2>();
+        length = bit::seq<0, 6>(byte);
+        form   = bit::seq<6, 2>(byte);
         break;
 
     case 3:
@@ -27,12 +27,12 @@ void Square1::write(uint index, u8 byte)
         break;
 
     case 4:
-        frequency = seq<32, 11>();
+        frequency = bit::seq<32, 11>(data);
         break;
 
     case 5:
-        frequency     = seq<32, 11>();
-        length.expire = seq<46,  1>();
+        frequency     = bit::seq<32, 11>(data);
+        length.expire = bit::seq< 6,  1>(byte);
 
         if (byte & 0x80)
             init();

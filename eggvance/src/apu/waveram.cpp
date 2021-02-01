@@ -5,7 +5,7 @@ u8 WaveRam::operator[](uint index) const
     return data[16 * bank + index];    
 }
 
-u8 WaveRam::read(uint index)
+u8 WaveRam::read(uint index) const
 {
     return data[16 * (bank ^ 0x1) + index];
 }

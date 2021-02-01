@@ -1,7 +1,7 @@
 #include "sequencer.h"
 
-#include "base/macros.h"
 #include "constants.h"
+#include "base/macros.h"
 
 void Sequencer::run(int cycles)
 {

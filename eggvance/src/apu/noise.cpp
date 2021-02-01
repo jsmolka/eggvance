@@ -32,7 +32,7 @@ void Noise::write(uint index, u8 byte)
     switch (index)
     {
     case 0:
-        length = seq<0, 6>();
+        length = bit::seq<0, 6>(byte);
         break;
 
     case 1:
@@ -41,13 +41,13 @@ void Noise::write(uint index, u8 byte)
         break;
 
     case 4:
-        ratio  = seq<32, 3>();
-        narrow = seq<35, 1>() * 8;
-        shift  = seq<36, 4>();
+        ratio  = bit::seq<0, 3>(byte);
+        narrow = bit::seq<3, 1>(byte) * 8;
+        shift  = bit::seq<4, 4>(byte);
         break;
 
     case 5:
-        length.expire = seq<46, 1>();
+        length.expire = bit::seq<6, 1>(byte);
 
         if (byte & 0x80)
             init();

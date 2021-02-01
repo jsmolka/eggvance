@@ -70,17 +70,11 @@ public:
     XRegisterBase() = default;
     XRegisterBase(Integral mask) : mask(mask) {}
 
-    template<std::size_t Index, std::size_t Size>
-    Integral seq() const
-    {
-        return bit::seq<Index, Size>(data);
-    }
-
     Integral data = 0;
     Integral mask = Mask;
 
 protected:
-    u8 read(std::size_t index) const
+    u8 read(uint index) const
     {
         SHELL_ASSERT(index < sizeof(Integral));
 
@@ -90,7 +84,7 @@ protected:
         return data & mask;
     }
 
-    void write(std::size_t index, u8 byte)
+    void write(uint index, u8 byte)
     {
         SHELL_ASSERT(index < sizeof(Integral));
 
@@ -98,7 +92,7 @@ protected:
     }
 };
 
-template<typename Integral, Integral Mask = ~static_cast<Integral>(0)>
+template<typename Integral, Integral Mask = -1ULL>
 class XRegisterR : public XRegisterBase<Integral, Mask>
 {
 public:
@@ -106,7 +100,7 @@ public:
     using XRegisterBase<Integral, Mask>::read;
 };
 
-template<typename Integral, Integral Mask = ~static_cast<Integral>(0)>
+template<typename Integral, Integral Mask = -1ULL>
 class XRegisterW : public XRegisterBase<Integral, Mask>
 {
 public:
@@ -114,7 +108,7 @@ public:
     using XRegisterBase<Integral, Mask>::write;
 };
 
-template<typename Integral, Integral Mask = ~static_cast<Integral>(0)>
+template<typename Integral, Integral Mask = -1ULL>
 class XRegister : public XRegisterBase<Integral, Mask>
 {
 public:
