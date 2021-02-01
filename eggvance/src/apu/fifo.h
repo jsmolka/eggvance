@@ -4,11 +4,15 @@
 
 #include "base/int.h"
 
-class Fifo : public shell::RingBuffer<u8, 32>
+class Fifo : public shell::RingBuffer<s8, 32>
 {
 public:
     void tick();
     bool refillable() const;
 
-    s16 sample = 0;
+    s16  sample    = 0;
+    uint volume    = 0;
+    uint enabled_r = 0;
+    uint enabled_l = 0;
+    uint timer     = 0;
 };

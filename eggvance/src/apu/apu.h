@@ -7,17 +7,13 @@
 class Apu
 {
 public:
-    Apu();
-
     void run(int cycles);
     void sample();
-    void onTimerOverflow(uint id, uint times);
+    void onTimerOverflow(uint timer, uint times);
 
     Fifo fifo[2];
-    SoundBias sound_bias;
-    SoundControl sound_enable;
-    PsgSoundControl psg_sound;
-    DirectSoundControl direct_sound;
+    SoundBias bias;
+    SoundControl control;
     Sequencer sequencer;
 
     int cycles = 0;

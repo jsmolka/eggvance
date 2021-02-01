@@ -1,141 +1,32 @@
 #pragma once
 
-#include <functional>
-
-#include "base/config.h"
 #include "base/register.h"
 
-class DirectSoundControl : public Register<u16, 0x770F>
+class SoundControl : public XRegister<u64, 0x0000'0080'770F'FF77>
 {
 public:
-    struct Channel
-    {
-        uint volume   = 0;
-        uint enable_r = 0;
-        uint enable_l = 0;
-        uint timer    = 0;
+    SoundControl();
 
-        std::function<void(void)> clear_fifo;
-    };
+    u8 read(uint index) const;
+    void write(uint index, u8 byte);
 
-    DirectSoundControl()
-    {
-        if (config.bios_skip)
-        {
-            volume             = 2;
-            channels[0].volume = 1;
-            channels[1].volume = 1;
-        }
-    }
-
-    template<uint Index>
-    void write(u8 byte)
-    {
-        Register::write<Index>(byte);
-
-        if (Index == 0)
-        {
-            volume             = bit::seq<0, 2>(byte);
-            channels[0].volume = bit::seq<2, 1>(byte);
-            channels[1].volume = bit::seq<3, 1>(byte);
-        }
-        else
-        {
-            channels[0].enable_r = bit::seq<0, 1>(byte);
-            channels[0].enable_l = bit::seq<1, 1>(byte);
-            channels[0].timer    = bit::seq<2, 1>(byte);
-            channels[1].enable_r = bit::seq<4, 1>(byte);
-            channels[1].enable_l = bit::seq<5, 1>(byte);
-            channels[1].timer    = bit::seq<6, 1>(byte);
-
-            if (byte & (1 << 3)) channels[0].clear_fifo();
-            if (byte & (1 << 7)) channels[1].clear_fifo();
-        }
-    }
-
-    uint volume = 0;
-    Channel channels[2];
+    uint volume       = 0;
+    uint volume_r     = 0;
+    uint volume_l     = 0;
+    uint enabled      = 0;
+    uint enabled_r[4] = {};
+    uint enabled_l[4] = {};
 };
 
-class PsgSoundControl : public Register<u16, 0xFF77>
+class SoundBias : public XRegister<u16, 0xC3FF>
 {
 public:
-    template<uint Index>
-    void write(u8 byte)
-    {
-        Register::write<Index>(byte);
+    SoundBias();
 
-        if (Index == 0)
-        {
-            volume_r = bit::seq<0, 3>(byte);
-            volume_l = bit::seq<4, 3>(byte);
-        }
-        if (Index == 1)
-        {
-            enable_r[0] = bit::seq<0, 1>(byte);
-            enable_r[1] = bit::seq<1, 1>(byte);
-            enable_r[2] = bit::seq<2, 1>(byte);
-            enable_r[3] = bit::seq<3, 1>(byte);
-            enable_l[0] = bit::seq<4, 1>(byte);
-            enable_l[1] = bit::seq<5, 1>(byte);
-            enable_l[2] = bit::seq<6, 1>(byte);
-            enable_l[3] = bit::seq<7, 1>(byte);
-        }
-    }
+    operator uint() const;
 
-    uint volume_r = 0;
-    uint volume_l = 0;
-    uint enable_r[4] = {};
-    uint enable_l[4] = {};
-};
+    void write(uint index, u8 byte);
 
-class SoundControl : public Register<u16, 0x0080>
-{
-public:
-    template<uint Index>
-    u8 read();
-
-    template<uint Index>
-    void write(u8 byte)
-    {
-        Register::write<Index>(byte);
-
-        if (Index == 0)
-        {
-            enable = bit::seq<7, 1>(byte);
-        }
-    }
-
-    uint enable = 0;
-};
-
-class SoundBias : public Register<u16, 0xC3FF>
-{
-public:
-    SoundBias()
-    {
-        write<0>(0x00);
-        write<1>(0x02);
-    }
-
-    template<uint Index>
-    void write(u8 byte)
-    {
-        Register::write<Index>(byte);
-
-        level = bit::seq<0, 10>(value);
-
-        if (Index == 1)
-        {
-            aplitude = bit::seq<6, 2>(byte);
-        }
-    }
-
-    s16 finalize(s16 sample)
-    {
-        return std::clamp<s16>(sample + level - 0x200, -0x400, 0x3FF);
-    }
-
-    uint level    = 0;
-    uint aplitude = 0;
+private:
+    uint level = 0;
 };
