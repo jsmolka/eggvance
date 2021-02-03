@@ -25,7 +25,7 @@ void AudioContext::init()
     if (!(device = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0)))
         panic("Cannot init audio device {}", SDL_GetError());
 
-    if (!(stream = SDL_NewAudioStream(AUDIO_S16, 2, 32768, have.format, have.channels, have.freq)))
+    if (!(stream = SDL_NewAudioStream(AUDIO_S16, 2, 32 * 1024, have.format, have.channels, have.freq)))
         panic("Cannot init audio stream {}", SDL_GetError());
 }
 
@@ -68,18 +68,24 @@ void AudioContext::callback(void* data, u8* stream, int length)
             gotten = SDL_AudioStreamGet(self.stream, stream, length);
     }
 
-    if (gotten >= length)
+    if (gotten == -1)
+    {
+        std::memset(stream, 0, length);
         return;
+    }
 
-    auto f_sample = 0.0f;
-    auto f_stream = reinterpret_cast<float*>(stream);
-    auto f_gotten = gotten / sizeof(float);
-    auto f_length = length / sizeof(float);
+    if (gotten < length)
+    {
+        auto f_sample = 0.0f;
+        auto f_stream = reinterpret_cast<float*>(stream);
+        auto f_gotten = gotten / sizeof(float);
+        auto f_length = length / sizeof(float);
 
-    if (f_gotten)
-        f_sample = f_stream[f_gotten - 1];
+        if (f_gotten)
+            f_sample = f_stream[f_gotten - 1];
 
-    std::fill(f_stream + f_gotten, f_stream + f_length, f_sample);
+        std::fill(f_stream + f_gotten, f_stream + f_length, f_sample);
+    }
 }
 
 void AudioContext::deinit()
