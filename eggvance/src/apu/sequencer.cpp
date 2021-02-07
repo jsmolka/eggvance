@@ -3,12 +3,6 @@
 #include "constants.h"
 #include "base/macros.h"
 
-void Sequencer::run(int cycles)
-{
-    while (cycles--)
-        tick();
-}
-
 void Sequencer::tick()
 {
     constexpr auto kSequencerCycles = kCpuFrequency / 512;

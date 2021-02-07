@@ -8,7 +8,7 @@
 class Sequencer
 {
 public:
-    void run(int cycles);
+    void tick();
 
     Noise noise;
     Square1 square1;
@@ -16,7 +16,6 @@ public:
     Wave wave;
 
 private:
-    void tick();
 
     uint step   = 0;
     uint cycles = 0;
