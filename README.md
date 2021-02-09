@@ -19,7 +19,7 @@ These projects were invaluable resources while creating the emulator:
 - [GBATEK](https://problemkaputt.de/gbatek.htm) and [No$GBA](https://problemkaputt.de/gba.htm) by Martin Korth
 - [NanoboyAdvance](https://github.com/fleroviux/NanoboyAdvance) by fleroviux
 - [mGBA](https://github.com/mgba-emu/mgba) and [suite](https://github.com/mgba-emu/suite) by endrift
-- [higan](https://github.com/higan-emu/higan) by byuu
-- [Tonc](https://www.coranac.com/tonc/text/toc.htm) by Jasper Vijn
+- [higan](https://github.com/higan-emu/higan) by Near
+- [Tonc](https://www.coranac.com/tonc/text/toc.htm) by cearn
 
 ![screenshot](screenshot.png)
