@@ -8,6 +8,8 @@
 class Sequencer
 {
 public:
+    Sequencer();
+
     void tick();
 
     Noise noise;
@@ -16,7 +18,10 @@ public:
     Wave wave;
 
 private:
+    template<uint Step>
+    static void sequence(void* data, u64);
 
-    uint step   = 0;
-    uint cycles = 0;
+    void tickSweep();
+    void tickLength();
+    void tickEnvelope();
 };

@@ -168,6 +168,9 @@
     <ClCompile Include="src\apu\square.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\scheduler\scheduler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\apu\apu.h">
@@ -381,6 +384,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\apu\square.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scheduler\scheduler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scheduler\queue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scheduler\event.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

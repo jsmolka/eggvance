@@ -1,6 +1,7 @@
 #pragma once
 
 #include "apu/apu.h"
+#include "scheduler/scheduler.h"
 #include "timer/timer.h"
 
 SHELL_INLINE void Arm::tick(int cycles)
@@ -19,6 +20,7 @@ SHELL_INLINE void Arm::tick(int cycles)
     }
 
     apu.run(cycles);
+    scheduler.run(cycles);
 }
 
 SHELL_INLINE void Arm::idle(int cycles)
