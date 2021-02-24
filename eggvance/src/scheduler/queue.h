@@ -1,6 +1,9 @@
 #pragma once
 
+#include <algorithm>
+#include <functional>
 #include <queue>
+#include <vector>
 
 template<typename T>
 class Queue : public std::priority_queue<T, std::vector<T>, std::greater<T>>

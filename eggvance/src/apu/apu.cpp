@@ -3,19 +3,28 @@
 #include <algorithm>
 #include <shell/utility.h>
 
+#include "constants.h"
 #include "dma/dma.h"
 #include "base/config.h"
 #include "core/audiocontext.h"
-#include "constants.h"
+#include "scheduler/scheduler.h"
+
+inline constexpr auto kSampleCycles    = kCpuFrequency / 32 / 1024;
+inline constexpr auto kSequencerCycles = kCpuFrequency / 512;
+
+Apu::Apu()
+{
+    scheduler.add(kSequencerCycles, nullptr, &sequence<0>);
+}
 
 void Apu::run(int cycles_)
 {
-    constexpr auto kSampleRate   = 32 * 1024;
-    constexpr auto kSampleCycles = kCpuFrequency / kSampleRate;
-
     while (cycles_--)
     {
-        sequencer.tick();
+        noise.tick();
+        square1.tick();
+        square2.tick();
+        wave.tick();
 
         if (++cycles == kSampleCycles)
         {
@@ -34,12 +43,7 @@ void Apu::sample()
     s16 sample_l = 0;
     s16 sample_r = 0;
 
-    Channel* channels[4] = {
-        &sequencer.square1,
-        &sequencer.square2,
-        &sequencer.wave,
-        &sequencer.noise
-    };
+    Channel* channels[4] = { &square1, &square2, &wave, &noise };
 
     for (auto [index, channel] : shell::enumerate(channels))
     {
@@ -90,4 +94,44 @@ void Apu::onTimerOverflow(uint timer, uint times)
             dma.broadcast(kEvent[index]);
         }
     }
+}
+
+template<uint Step>
+void Apu::sequence(void*, u64)
+{
+    switch (Step)
+    {
+    case 1:
+    case 3:
+    case 5:
+        break;
+
+    case 2:
+    case 6:
+        apu.square1.tickSweep();
+        [[fallthrough]];
+
+    case 0:
+    case 4:
+        apu.noise.tickLength();
+        apu.square1.tickLength();
+        apu.square2.tickLength();
+        apu.wave.tickLength();
+        break;
+
+    case 7:
+        apu.noise.tickEnvelope();
+        apu.square1.tickEnvelope();
+        apu.square2.tickEnvelope();
+        break;
+
+    default:
+        SHELL_UNREACHABLE;
+        break;
+    }
+
+    if constexpr (Step == 0 || Step == 2 || Step == 4)
+        scheduler.add(2 * kSequencerCycles, nullptr, &sequence<(Step + 2) % 8>);
+    else
+        scheduler.add(1 * kSequencerCycles, nullptr, &sequence<(Step + 1) % 8>);
 }

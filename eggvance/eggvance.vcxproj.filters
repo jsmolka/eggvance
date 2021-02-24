@@ -30,9 +30,6 @@
     <ClCompile Include="src\apu\noise.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\apu\sequencer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\apu\square1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -195,9 +192,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\apu\noise.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\apu\sequencer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\apu\square1.h">

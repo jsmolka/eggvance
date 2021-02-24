@@ -17,10 +17,10 @@ u8 SoundControl::read(uint index) const
 
     if (index == 4)
     {
-        value |= apu.sequencer.square1.enabled << 0;
-        value |= apu.sequencer.square2.enabled << 1;
-        value |= apu.sequencer.wave.enabled    << 2;
-        value |= apu.sequencer.noise.enabled   << 3;
+        value |= apu.square1.enabled << 0;
+        value |= apu.square2.enabled << 1;
+        value |= apu.wave.enabled    << 2;
+        value |= apu.noise.enabled   << 3;
     }
     return value;
 }

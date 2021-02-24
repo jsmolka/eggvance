@@ -2,11 +2,16 @@
 
 #include "fifo.h"
 #include "io.h"
-#include "sequencer.h"
+#include "noise.h"
+#include "square1.h"
+#include "square2.h"
+#include "wave.h"
 
 class Apu
 {
 public:
+    Apu();
+
     void run(int cycles);
     void sample();
     void onTimerOverflow(uint timer, uint times);
@@ -14,7 +19,14 @@ public:
     Fifo fifo[2];
     SoundBias bias;
     SoundControl control;
-    Sequencer sequencer;
+    Noise noise;
+    Square1 square1;
+    Square2 square2;
+    Wave wave;
+
+private:
+    template<uint Step>
+    static void sequence(void*, u64);
 
     int cycles = 0;
 };
