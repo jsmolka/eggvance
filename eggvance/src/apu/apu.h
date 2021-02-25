@@ -13,7 +13,6 @@ public:
     Apu();
 
     void run(int cycles);
-    void sample();
     void onTimerOverflow(uint timer, uint times);
 
     Fifo fifo[2];
@@ -26,9 +25,8 @@ public:
 
 private:
     template<uint Step>
-    static void sequence(void*, u64);
-
-    int cycles = 0;
+    static void sequence(void*, u64 late);
+    static void sample(void*, u64 late);
 };
 
 inline Apu apu;
