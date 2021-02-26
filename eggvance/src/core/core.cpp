@@ -15,6 +15,7 @@
 #include "gamepad/gamepad.h"
 #include "gamepak/gamepak.h"
 #include "ppu/ppu.h"
+#include "scheduler/scheduler.h"
 #include "sio/sio.h"
 #include "timer/timer.h"
 
@@ -65,9 +66,11 @@ void core::reset()
     shell::reconstruct(ppu);
     shell::reconstruct(gamepad);
     shell::reconstruct(sio);
+    shell::reconstruct(scheduler);
     shell::reconstruct(timer);
 
     arm.init();
+    apu.init();
 }
 
 void core::frame()

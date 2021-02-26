@@ -10,8 +10,7 @@
 class Apu
 {
 public:
-    Apu();
-
+    void init();
     void run(int cycles);
     void onTimerOverflow(uint timer, uint times);
 
@@ -25,8 +24,8 @@ public:
 
 private:
     template<uint Step>
-    static void sequence(void*, u64 late);
-    static void sample(void*, u64 late);
+    static void sequence(void* data, u64 late);
+    static void sample(void* data, u64 late);
 };
 
 inline Apu apu;

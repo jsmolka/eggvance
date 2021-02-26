@@ -12,10 +12,10 @@
 inline constexpr auto kSampleCycles    = kCpuFrequency / 32 / 1024;
 inline constexpr auto kSequencerCycles = kCpuFrequency / 512;
 
-Apu::Apu()
+void Apu::init()
 {
-    scheduler.add(kSampleCycles, nullptr, sample);
-    scheduler.add(kSequencerCycles, nullptr, sequence<0>);
+    scheduler.add(kSampleCycles, this, sample);
+    scheduler.add(kSequencerCycles, this, sequence<0>);
 }
 
 void Apu::run(int cycles_)
@@ -53,8 +53,10 @@ void Apu::onTimerOverflow(uint timer, uint times)
     }
 }
 
-void Apu::sample(void*, u64 late)
+void Apu::sample(void* data, u64 late)
 {
+    auto& apu = *reinterpret_cast<Apu*>(data);
+
     s16 sample_l = 0;
     s16 sample_r = 0;
 
@@ -90,13 +92,15 @@ void Apu::sample(void*, u64 late)
 
     audio_ctx.write(sample_l << 5, sample_r << 5);
 
-    scheduler.add(kSampleCycles - late, nullptr, sample);
+    scheduler.add(kSampleCycles - late, data, sample);
 }
 
 template<uint Step>
-void Apu::sequence(void*, u64 late)
+void Apu::sequence(void* data, u64 late)
 {
     static_assert(!(Step == 1 || Step == 3 || Step == 5));
+
+    auto& apu = *reinterpret_cast<Apu*>(data);
 
     switch (Step)
     {
@@ -125,7 +129,7 @@ void Apu::sequence(void*, u64 late)
     }
 
     if constexpr (Step == 0 || Step == 2 || Step == 4)
-        scheduler.add(2 * kSequencerCycles - late, nullptr, &sequence<(Step + 2) % 8>);
+        scheduler.add(2 * kSequencerCycles - late, data, &sequence<(Step + 2) % 8>);
     else
-        scheduler.add(1 * kSequencerCycles - late, nullptr, &sequence<(Step + 1) % 8>);
+        scheduler.add(1 * kSequencerCycles - late, data, &sequence<(Step + 1) % 8>);
 }
