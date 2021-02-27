@@ -1,6 +1,6 @@
 #include "square.h"
 
-#include "constants.h"
+#include "base/constants.h"
 
 Square::Square(u64 mask)
     : Channel(mask, 64)

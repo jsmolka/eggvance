@@ -1,6 +1,6 @@
 #include "wave.h"
 
-#include "constants.h"
+#include "base/constants.h"
 
 Wave::Wave()
     : Channel(0x0000'4000'E000'00E0, 256)

@@ -3,12 +3,12 @@
 #include "channel.h"
 #include "waveram.h"
 
-class Wave : public Channel
+class Wave final : public Channel
 {
 public:
     Wave();
 
-    void tick();
+    void tick() final;
     void write(uint index, u8 byte);
 
     WaveRam ram;

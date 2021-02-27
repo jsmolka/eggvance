@@ -11,11 +11,11 @@ class Apu
 {
 public:
     void init();
-    void onTimerOverflow(uint timer, uint times);
+    void onOverflow(uint timer, uint times);
 
-    Fifo fifo[2];
-    SoundBias bias;
     SoundControl control;
+    SoundBias bias;
+    Fifo fifo[2];
     Noise noise;
     Square1 square1;
     Square2 square2;

@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include "constants.h"
+#include "base/constants.h"
 
 Noise::Noise()
     : Channel(0x0000'40FF'0000'FF00, 64)
@@ -19,12 +19,13 @@ void Noise::tick()
     while (ticks--)
     {
         sample = noise & 0x1;
-        sample *= envelope.volume;
 
         noise >>= 1;
         if (sample)
             noise ^= 0x6000 >> narrow;
     }
+
+    sample *= envelope.volume;
 }
 
 void Noise::write(uint index, u8 byte)
@@ -57,15 +58,6 @@ void Noise::write(uint index, u8 byte)
     }
 }
 
-void Noise::init()
-{
-    Channel::init(true);
-
-    initEnvelope();
-
-    noise = 0x4000 >> narrow;
-}
-
 uint Noise::period() const
 {
     constexpr auto kFrequency = 524288;
@@ -74,4 +66,13 @@ uint Noise::period() const
     uint s = 1 << shift;
 
     return kCpuFrequency / (kFrequency / r / s);
+}
+
+void Noise::init()
+{
+    Channel::init(true);
+
+    initEnvelope();
+
+    noise = 0x4000 >> narrow;
 }

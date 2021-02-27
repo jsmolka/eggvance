@@ -1,5 +1,6 @@
 #include "audiocontext.h"
 
+#include "base/constants.h"
 #include "base/panic.h"
 
 AudioContext::~AudioContext()
@@ -25,7 +26,7 @@ void AudioContext::init()
     if (!(device = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0)))
         panic("Cannot init audio device {}", SDL_GetError());
 
-    if (!(stream = SDL_NewAudioStream(AUDIO_S16, 2, 32 * 1024, have.format, have.channels, have.freq)))
+    if (!(stream = SDL_NewAudioStream(AUDIO_S16, 2, kSampleRate, have.format, have.channels, have.freq)))
         panic("Cannot init audio stream {}", SDL_GetError());
 }
 

@@ -7,13 +7,13 @@ class Noise final : public Channel
 public:
     Noise();
 
-    void tick();
+    void tick() final;
     void write(uint index, u8 byte);
 
 protected:
-    void init();
-
     uint period() const final;
+
+    void init();
 
 private:
     uint noise  = 0;

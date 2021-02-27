@@ -46,7 +46,7 @@ void TimerChannel::run(int cycles)
             next->run(counter / overflow);
 
         if (id <= 1)
-            apu.onTimerOverflow(id, counter / overflow);
+            apu.onOverflow(id, counter / overflow);
 
         counter %= overflow;
         initial  = count.initial;

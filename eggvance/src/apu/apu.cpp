@@ -1,31 +1,30 @@
 #include "apu.h"
 
 #include <algorithm>
-#include <shell/utility.h>
 
-#include "constants.h"
-#include "dma/dma.h"
 #include "base/config.h"
+#include "base/constants.h"
 #include "core/audiocontext.h"
+#include "dma/dma.h"
 #include "scheduler/scheduler.h"
 
-inline constexpr auto kSampleCycles    = kCpuFrequency / 32 / 1024;
-inline constexpr auto kSequencerCycles = kCpuFrequency / 512;
+inline constexpr auto kSampleCycles   = kCpuFrequency / kSampleRate;
+inline constexpr auto kSequenceCycles = kCpuFrequency / 512;
 
 void Apu::init()
 {
     scheduler.add(kSampleCycles, this, sample);
-    scheduler.add(kSequencerCycles, this, sequence<0>);
+    scheduler.add(kSequenceCycles, this, sequence<0>);
 }
 
-void Apu::onTimerOverflow(uint timer, uint times)
+void Apu::onOverflow(uint timer, uint times)
 {
     if (!control.enabled)
         return;
 
     constexpr Dma::Timing kEvent[2] = { Dma::Timing::FifoA, Dma::Timing::FifoB };
 
-    for (auto [index, fifo] : shell::enumerate(fifo))
+    for (auto [fifo, event] : shell::zip(fifo, kEvent))
     {
         if (fifo.timer != timer)
             continue;
@@ -36,9 +35,7 @@ void Apu::onTimerOverflow(uint timer, uint times)
         }
 
         if (fifo.refillable())
-        {
-            dma.broadcast(kEvent[index]);
-        }
+            dma.broadcast(event);
     }
 }
 
@@ -95,6 +92,11 @@ void Apu::sequence(void* data, u64 late)
 
     switch (Step)
     {
+    case 1:
+    case 3:
+    case 5:
+        break;
+
     case 2:
     case 6:
         apu.square1.tickSweep();
@@ -120,7 +122,7 @@ void Apu::sequence(void* data, u64 late)
     }
 
     if constexpr (Step == 0 || Step == 2 || Step == 4)
-        scheduler.add(2 * kSequencerCycles - late, data, &sequence<(Step + 2) % 8>);
+        scheduler.add(2 * kSequenceCycles - late, data, &sequence<(Step + 2) % 8>);
     else
-        scheduler.add(1 * kSequencerCycles - late, data, &sequence<(Step + 1) % 8>);
+        scheduler.add(1 * kSequenceCycles - late, data, &sequence<(Step + 1) % 8>);
 }

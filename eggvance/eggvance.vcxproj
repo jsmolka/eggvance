@@ -70,7 +70,6 @@
   <ItemGroup>
     <ClInclude Include="src\apu\apu.h" />
     <ClInclude Include="src\apu\channel.h" />
-    <ClInclude Include="src\apu\constants.h" />
     <ClInclude Include="src\apu\envelope.h" />
     <ClInclude Include="src\apu\fifo.h" />
     <ClInclude Include="src\apu\io.h" />
@@ -92,6 +91,7 @@
     <ClInclude Include="src\arm\registers.h" />
     <ClInclude Include="src\base\bit.h" />
     <ClInclude Include="src\base\config.h" />
+    <ClInclude Include="src\base\constants.h" />
     <ClInclude Include="src\base\filesystem.h" />
     <ClInclude Include="src\base\int.h" />
     <ClInclude Include="src\base\macros.h" />
