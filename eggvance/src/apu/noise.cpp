@@ -12,17 +12,17 @@ Noise::Noise()
 
 void Noise::tick()
 {
-    if (!(enabled && timer && --timer == 0))
-        return;
+    uint ticks = run();
 
-    sample = noise & 0x1;
-    sample *= envelope.volume;
+    while (ticks--)
+    {
+        sample = noise & 0x1;
+        sample *= envelope.volume;
 
-    noise >>= 1;
-    if (sample)
-        noise ^= 0x6000 >> narrow;
-
-    timer = period();
+        noise >>= 1;
+        if (sample)
+            noise ^= 0x6000 >> narrow;
+    }
 }
 
 void Noise::write(uint index, u8 byte)

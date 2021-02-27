@@ -7,12 +7,12 @@ class Square : public Channel
 public:
     Square(u64 mask);
 
-    void tick();
+    void tick() final;
 
 protected:
-    void init();
-
     uint period() const final;
+    
+    void init();
 
     uint step = 0;
     uint form = 0;

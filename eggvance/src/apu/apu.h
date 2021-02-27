@@ -11,7 +11,6 @@ class Apu
 {
 public:
     void init();
-    void run(int cycles);
     void onTimerOverflow(uint timer, uint times);
 
     Fifo fifo[2];

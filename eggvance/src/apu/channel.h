@@ -8,23 +8,27 @@
 class Channel : public XRegister<u64>
 {
 public:
-    Channel(u64 mask, uint base);
+    Channel(u64 mask, uint length);
+
+    virtual void tick() = 0;
 
     void tickSweep();
     void tickLength();
     void tickEnvelope();
 
-    uint timer     = 0;
     uint sample    = 0;
     uint enabled   = 0;
     uint frequency = 0;
 
 protected:
+    virtual uint period() const = 0;
+
     void init(bool enabled);
     void initSweep();
     void initEnvelope();
 
-    virtual uint period() const = 0;
+    uint run();
+    void write(uint index, u8 byte);
 
     Sweep sweep;
     Length length;
@@ -32,4 +36,7 @@ protected:
 
 private:
     void doSweep(bool writeback);
+
+    u64 timer = 0;
+    u64 since = 0;
 };

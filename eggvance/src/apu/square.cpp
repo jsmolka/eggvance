@@ -10,9 +10,6 @@ Square::Square(u64 mask)
 
 void Square::tick()
 {
-    if (!(enabled && timer && --timer == 0))
-        return;
-
     constexpr u8 kWaves[4] = {
         0b00000001,
         0b00000011,
@@ -20,12 +17,10 @@ void Square::tick()
         0b00111111
     };
 
+    step = (step + run()) % 8;
+    
     sample = (kWaves[form] >> step) & 0x1;
     sample *= envelope.volume;
-
-    step = (step + 1) % 8;
-
-    timer = period();
 }
 
 void Square::init()

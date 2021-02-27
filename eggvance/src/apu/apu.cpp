@@ -18,17 +18,6 @@ void Apu::init()
     scheduler.add(kSequencerCycles, this, sequence<0>);
 }
 
-void Apu::run(int cycles_)
-{
-    while (cycles_--)
-    {
-        noise.tick();
-        square1.tick();
-        square2.tick();
-        wave.tick();
-    }
-}
-
 void Apu::onTimerOverflow(uint timer, uint times)
 {
     if (!control.enabled)
@@ -68,6 +57,8 @@ void Apu::sample(void* data, u64 late)
         {
             if (!channel->enabled)
                 continue;
+
+            channel->tick();
 
             if (apu.control.enabled_l & (1 << index)) sample_l += channel->sample;
             if (apu.control.enabled_r & (1 << index)) sample_r += channel->sample;

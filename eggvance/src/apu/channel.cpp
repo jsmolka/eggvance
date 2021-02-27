@@ -1,7 +1,9 @@
 #include "channel.h"
 
-Channel::Channel(u64 mask, uint base)
-    : XRegister(mask), length(base)
+#include "scheduler/scheduler.h"
+
+Channel::Channel(u64 mask, uint length)
+    : XRegister(mask), length(length)
 {
 
 }
@@ -10,6 +12,8 @@ void Channel::tickSweep()
 {
     if (enabled && sweep.tick())
     {
+        tick();
+
         doSweep(true);
         doSweep(false);
 
@@ -22,7 +26,9 @@ void Channel::tickLength()
     if (enabled)
     {
         length.tick();
-        enabled = length.enabled();
+
+        if (!(enabled = length.enabled()))
+            tick();
     }
 }
 
@@ -31,7 +37,9 @@ void Channel::tickEnvelope()
     if (enabled)
     {
         envelope.tick();
-        enabled = envelope.enabled();
+
+        if (!(enabled = envelope.enabled()))
+            tick();
     }
 }
 
@@ -41,7 +49,8 @@ void Channel::init(bool enabled)
 
     length.init();
 
-    timer = period();
+    timer = 0;
+    since = scheduler.now;
 }
 
 void Channel::initSweep()
@@ -55,6 +64,27 @@ void Channel::initEnvelope()
 {
     envelope.init();
     enabled &= envelope.enabled();
+}
+
+uint Channel::run()
+{
+    timer += scheduler.now - since;
+
+    uint period = this->period();
+    uint ticks  = timer / period;
+
+    timer %= period;
+    since = scheduler.now;
+
+    return ticks;
+}
+
+void Channel::write(uint index, u8 byte)
+{
+    if (enabled)
+        tick();
+
+    XRegister::write(index, byte);
 }
 
 void Channel::doSweep(bool writeback)

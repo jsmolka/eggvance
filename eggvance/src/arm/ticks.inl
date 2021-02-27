@@ -19,7 +19,6 @@ SHELL_INLINE void Arm::tick(int cycles)
             irq.delay = 0;
     }
 
-    apu.run(cycles);
     scheduler.run(cycles);
 }
 

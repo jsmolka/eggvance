@@ -10,18 +10,13 @@ Wave::Wave()
 
 void Wave::tick()
 {
-    if (!(enabled && timer && --timer == 0))
-        return;
-
-    sample = bit::nibble(ram[step >> 1], (step ^ 0x1) & 0x1);
-    sample = volume * sample / 4;
-
     if (wide)
-        step = (step + 1) % 64;
+        step = (step + run()) % 64;
     else
-        step = (step + 1) % 32 + 16 * ram.bank;
+        step = (step + run()) % 32 + 16 * ram.bank;
 
-    timer = period();
+    sample = bit::nibble(ram[step >> 1], step & 0x1 ^ 0x1);
+    sample = volume * sample / 4;
 }
 
 void Wave::write(uint index, u8 byte)
