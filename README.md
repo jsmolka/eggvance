@@ -5,16 +5,24 @@ A Game Boy Advance emulator.
 ROM and save files can be passed as command line arguments or dropped in the emulator window. Even though the included [BIOS](https://github.com/Nebuleon/ReGBA/tree/master/bios) should be enough to run most games, it is recommended to download the original one. Its location and many other things are customizable in the [config](eggvance/eggvance.ini).
 
 ```
-Usage: eggvance [--help] [--save <file>] [<rom>]
+usage:
+  eggvance [--config <file>] [--save <file>] [<rom>]
+
+keyword arguments:
+  -c, --config    Config file (default: eggvance.ini)
+  -s, --save      Save file (optional)
+
+positional arguments:
+  rom    ROM file (optional)
 ```
 
 ## Binaries
 Binaries for Windows, Linux and macOS are available as [nightly](https://github.com/jsmolka/eggvance/actions) or [release](https://github.com/jsmolka/eggvance/releases) builds. Be aware that SDL2 needs to be installed on the latter two.
 
-## Building
-Detailed build instructions can be found [here](BUILDING.md).
+## Build
+Detailed build instructions can be found [here](BUILD.md).
 
-## Credits
+## Credit
 These projects were invaluable resources while creating the emulator:
 - [GBATEK](https://problemkaputt.de/gbatek.htm) and [No$GBA](https://problemkaputt.de/gba.htm) by Martin Korth
 - [NanoboyAdvance](https://github.com/fleroviux/NanoboyAdvance) by fleroviux

@@ -1,5 +1,5 @@
-# Building
-A C++17 compliant compiler is required on all platforms.
+# Build
+A C++17 compliant compiler is required.
 
 ## Clone
 Use [git](https://git-scm.com/) to clone the repository and its submodules.
