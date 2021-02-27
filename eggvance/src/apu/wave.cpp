@@ -10,13 +10,13 @@ Wave::Wave()
 
 void Wave::tick()
 {
-    if (wide)
-        step = (step + run()) % 64;
-    else
-        step = (step + run()) % 32 + 16 * ram.bank;
+    uint ticks = run();
+    if (!ticks)
+        return;
 
-    sample = bit::nibble(ram[step >> 1], step & 0x1 ^ 0x1);
-    sample = volume * sample / 4;
+    setStep(step + ticks);
+
+    sample = volume * ram[step] / 4;
 }
 
 void Wave::write(uint index, u8 byte)
@@ -56,19 +56,24 @@ void Wave::write(uint index, u8 byte)
     }
 }
 
-void Wave::init()
-{
-    Channel::init(active);
-
-    if (wide)
-        step = 0;
-    else
-        step = 16 * ram.bank;
-}
-
 uint Wave::period() const
 {
     constexpr auto kFrequency = 2097152;
 
     return (kCpuFrequency / kFrequency) * (2048 - frequency);
+}
+
+void Wave::init()
+{
+    Channel::init(active);
+
+    setStep(0);
+}
+
+void Wave::setStep(uint value)
+{
+    if (wide)
+        step = value % 64;
+    else
+        step = value % 32 + 32 * ram.bank;
 }

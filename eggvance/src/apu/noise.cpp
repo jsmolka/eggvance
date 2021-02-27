@@ -13,6 +13,8 @@ Noise::Noise()
 void Noise::tick()
 {
     uint ticks = run();
+    if (!ticks)
+        return;
 
     while (ticks--)
     {

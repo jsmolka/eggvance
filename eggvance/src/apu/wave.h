@@ -3,7 +3,7 @@
 #include "channel.h"
 #include "waveram.h"
 
-class Wave final : public Channel
+class Wave : public Channel
 {
 public:
     Wave();
@@ -14,11 +14,13 @@ public:
     WaveRam ram;
 
 protected:
-    void init();
-    
     uint period() const final;
+    
+    void init();
 
 private:
+    void setStep(uint value);
+
     uint step   = 0;
     uint wide   = 0;
     uint active = 0;
