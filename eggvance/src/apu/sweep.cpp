@@ -22,11 +22,14 @@ bool Sweep::tick()
 
 void Sweep::write(u8 byte)
 {
+    uint was_negate = negate;
+
     shift  = bit::seq<0, 3>(byte);
     negate = bit::seq<3, 1>(byte);
     period = bit::seq<4, 3>(byte);
 
-    init();
+    if (was_negate && !negate)
+        enabled = false;
 }
 
 uint Sweep::next() const

@@ -14,6 +14,7 @@ void Square1::write(uint index, u8 byte)
     {
     case 0:
         sweep.write(byte);
+        enabled &= sweep.enabled;
         break;
 
     case 2:
