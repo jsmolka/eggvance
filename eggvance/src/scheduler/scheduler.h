@@ -1,11 +1,14 @@
 #pragma once
 
+#include <vector>
+
 #include "event.h"
-#include "queue.h"
 
 class Scheduler
 {
 public:
+    Scheduler();
+
     u64 now = 0;
     u64 next = 0;
 
@@ -13,7 +16,7 @@ public:
     void add(u64 in, void* data, Event::Callback callback);
 
 private:
-    Queue<Event> queue;
+    std::vector<Event> events;
 };
 
 inline Scheduler scheduler;
