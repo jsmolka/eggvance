@@ -64,6 +64,7 @@
     <ClCompile Include="src\ppu\videoram.cpp" />
     <ClCompile Include="src\scheduler\scheduler.cpp" />
     <ClCompile Include="src\sio\sio.cpp" />
+    <ClCompile Include="src\timer\io.cpp" />
     <ClCompile Include="src\timer\timer.cpp" />
     <ClCompile Include="src\timer\timerchannel.cpp" />
   </ItemGroup>

@@ -1,5 +1,7 @@
 #include "scheduler.h"
 
+#include <limits>
+
 Scheduler::Scheduler()
 {
     events.reserve(64);

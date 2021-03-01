@@ -4,56 +4,23 @@
 
 #include "base/register.h"
 
-class TimerCount : public Register<u16>
+class TimerCount : public XRegister<u16>
 {
 public:
-    template<uint Index>
-    u8 read() const
-    {
-        run_channels();
-
-        return Register::read<Index>();
-    }
-
-    template<uint Index>
-    void write(u8 byte)
-    {
-        static_assert(Index < kSize);
-
-        reinterpret_cast<u8*>(&initial)[Index] = byte;
-    }
+    u8 read(uint index) const;
+    void write(uint index, u8 byte);
 
     u16 initial = 0;
 
     std::function<void(void)> run_channels;
 };
 
-class TimerControl : public Register<u16, 0x00C7>
+class TimerControl : public XRegister<u16>
 {
 public:
-    template<uint Index>
-    void write(u8 byte)
-    {
-        Register::write<Index>(byte);
+    TimerControl();
 
-        if (Index == 0)
-        {
-            static constexpr uint kPrescalers[8] = {
-                1, 64, 256, 1024, 1, 1, 1, 1
-            };
-
-            run_channels();
-
-            uint was_enabled = enable;
-
-            prescaler = kPrescalers[bit::seq<0, 3>(byte)];
-            cascade   = bit::seq<2, 1>(byte);
-            irq       = bit::seq<6, 1>(byte);
-            enable    = bit::seq<7, 1>(byte);
-
-            on_write(!was_enabled && enable);
-        }
-    }
+    void write(uint index, u8 byte);
 
     uint prescaler = 1;
     uint cascade   = 0;
