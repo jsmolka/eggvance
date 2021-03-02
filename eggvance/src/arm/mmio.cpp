@@ -179,11 +179,11 @@ u8 Arm::readIo(u32 addr)
     INDEXED_CASE4(kRegJoyTransmit,    return sio.joytrans.read<kIndex>());
     INDEXED_CASE2(kRegJoyStatus,      return sio.joystat.read<kIndex>());
     INDEXED_CASE2(kRegUnused15A,      return 0);
-    INDEXED_CASE2(kRegIrqEnable,      return irq.enable.read<kIndex>());
-    INDEXED_CASE2(kRegIrqRequest,     return irq.request.read<kIndex>());
-    INDEXED_CASE2(kRegWaitControl,    return waitcnt.read<kIndex>());
+    INDEXED_CASE2(kRegIrqEnable,      return irq.enable.read(kIndex));
+    INDEXED_CASE2(kRegIrqRequest,     return irq.request.read(kIndex));
+    INDEXED_CASE2(kRegWaitControl,    return waitcnt.read(kIndex));
     INDEXED_CASE2(kRegUnused206,      return 0);
-    INDEXED_CASE4(kRegIrqMaster,      return irq.master.read<kIndex>());
+    INDEXED_CASE4(kRegIrqMaster,      return irq.master.read(kIndex));
     INDEXED_CASE1(kRegPostFlag,       return postflg.read<kIndex>());
 
     default:
@@ -284,11 +284,11 @@ void Arm::writeIo(u32 addr, u8 byte)
     INDEXED_CASE4(kRegJoyReceive,     sio.joyrecv.write<kIndex>(byte));
     INDEXED_CASE4(kRegJoyTransmit,    sio.joytrans.write<kIndex>(byte));
     INDEXED_CASE2(kRegJoyStatus,      sio.joystat.write<kIndex>(byte));
-    INDEXED_CASE2(kRegIrqEnable,      irq.enable.write<kIndex>(byte));
-    INDEXED_CASE2(kRegIrqRequest,     irq.request.write<kIndex>(byte));
-    INDEXED_CASE2(kRegWaitControl,    waitcnt.write<kIndex>(byte));
-    INDEXED_CASE4(kRegIrqMaster,      irq.master.write<kIndex>(byte));
+    INDEXED_CASE2(kRegIrqEnable,      irq.enable.write(kIndex, byte));
+    INDEXED_CASE2(kRegIrqRequest,     irq.request.write(kIndex, byte));
+    INDEXED_CASE2(kRegWaitControl,    waitcnt.write(kIndex, byte));
+    INDEXED_CASE4(kRegIrqMaster,      irq.master.write(kIndex, byte));
     INDEXED_CASE1(kRegPostFlag,       postflg.write<kIndex>(byte));
-    INDEXED_CASE1(kRegHaltControl,    haltcnt.write<kIndex>(byte));
+    INDEXED_CASE1(kRegHaltControl,    haltcnt.write(kIndex, byte));
     }
 }

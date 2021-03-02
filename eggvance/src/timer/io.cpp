@@ -1,4 +1,5 @@
 #include "io.h"
+#include "..\arm\io.h"
 
 u8 TimerCount::read(uint index) const
 {

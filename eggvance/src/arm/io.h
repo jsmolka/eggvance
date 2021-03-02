@@ -5,39 +5,18 @@
 #include "constants.h"
 #include "base/register.h"
 
-class HaltControl : public RegisterW<u8>
+class HaltControl : public XRegisterW<u8>
 {
 public:
-    template<uint Index>
-    void write(u8 byte);
+    void write(uint index, u8 byte);
 };
 
-class WaitControl : public Register<u16>
+class WaitControl : public XRegister<u16>
 {
 public:
     WaitControl();
 
-    template<uint Index>
-    void write(u8 byte)
-    {
-        Register::write<Index>(byte);
-
-        if (Index == 0)
-        {
-            sram  = bit::seq<0, 2>(byte);
-            ws0_n = bit::seq<2, 2>(byte);
-            ws0_s = bit::seq<4, 1>(byte);
-            ws1_n = bit::seq<5, 2>(byte);
-            ws1_s = bit::seq<7, 1>(byte);
-        }
-        else
-        {
-            ws2_n    = bit::seq<0, 2>(byte);
-            ws2_s    = bit::seq<2, 1>(byte);
-            prefetch = bit::seq<6, 1>(byte);
-        }
-        update();
-    }
+    void write(uint index, u8 byte);
 
     int cyclesHalf(u32 addr, Access access) const { return cycles_half[(addr >> 25) & 0x3][static_cast<uint>(access)]; }
     int cyclesWord(u32 addr, Access access) const { return cycles_word[(addr >> 25) & 0x3][static_cast<uint>(access)]; }
@@ -58,46 +37,32 @@ private:
     int cycles_word[4][2];
 };
 
-class IrqMaster : public Register<u32, 0x0001>
+class IrqMaster : public XRegister<u32, 0x0001>
 {
 public:
-    template<uint Index>
-    void write(u8 byte)
-    {
-        Register::write<Index>(byte);
+    operator bool() const;
 
-        on_write();
-    }
+    void write(uint index, u8 byte);
 
     std::function<void(void)> on_write;
 };
 
-class IrqEnable : public Register<u16, 0x3FFF>
+class IrqEnable : public XRegister<u16, 0x3FFF>
 {
 public:
-    template<uint Index>
-    void write(u8 byte)
-    {
-        Register::write<Index>(byte);
+    operator u16() const;
 
-        on_write();
-    }
+    void write(uint index, u8 byte);
 
     std::function<void(void)> on_write;
 };
 
-class IrqRequest : public Register<u16, 0x3FFF>
+class IrqRequest : public XRegister<u16, 0x3FFF>
 {
 public:
-    template<uint Index>
-    void write(u8 byte)
-    {
-        static_assert(Index < kSize);
+    operator u16() const;
 
-        data[Index] &= ~(byte & bit::byte<Index>(kMask));
-
-        on_write();
-    }
+    void write(uint index, u8 byte);
 
     std::function<void(void)> on_write;
 };

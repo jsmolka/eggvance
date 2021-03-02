@@ -3,18 +3,36 @@
 #include "arm.h"
 #include "constants.h"
 
-template<uint Index>
-void HaltControl::write(u8 byte)
+void HaltControl::write(uint index, u8 byte)
 {
-    RegisterW::write<Index>(byte);
+    XRegisterW::write(index, byte);
 
     arm.state |= kStateHalt;
 }
 
-template void HaltControl::write<0>(u8);
-
 WaitControl::WaitControl()
 {
+    update();
+}
+
+void WaitControl::write(uint index, u8 byte)
+{
+    XRegister::write(index, byte);
+
+    if (index == 0)
+    {
+        sram  = bit::seq<0, 2>(byte);
+        ws0_n = bit::seq<2, 2>(byte);
+        ws0_s = bit::seq<4, 1>(byte);
+        ws1_n = bit::seq<5, 2>(byte);
+        ws1_s = bit::seq<7, 1>(byte);
+    }
+    else
+    {
+        ws2_n    = bit::seq<0, 2>(byte);
+        ws2_s    = bit::seq<2, 1>(byte);
+        prefetch = bit::seq<6, 1>(byte);
+    }
     update();
 }
 
@@ -45,4 +63,41 @@ void WaitControl::update()
     cycles_word[2][kS] = kWs2Seq[ws2_s] * 2;
     cycles_half[3][kS] = kNonSeq[sram];
     cycles_word[3][kS] = kNonSeq[sram];
+}
+
+IrqMaster::operator bool() const
+{
+    return data;
+}
+
+void IrqMaster::write(uint index, u8 byte)
+{
+    XRegister::write(index, byte);
+
+    on_write();
+
+}
+
+IrqEnable::operator u16() const
+{
+    return data;
+}
+
+void IrqEnable::write(uint index, u8 byte)
+{
+    XRegister::write(index, byte);
+
+    on_write();
+}
+
+IrqRequest::operator u16() const
+{
+    return data;
+}
+
+void IrqRequest::write(uint index, u8 byte)
+{
+    reinterpret_cast<u8*>(&data)[index] &= ~(byte & bit::byte(mask, index));
+
+    on_write();
 }
