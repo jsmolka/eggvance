@@ -16,7 +16,7 @@ enum ExceptionVector
 
 void Arm::raise(uint irq)
 {
-    this->irq.request.data |= irq;
+    this->irq.request.value |= irq;
 
     interruptProcess();
 }

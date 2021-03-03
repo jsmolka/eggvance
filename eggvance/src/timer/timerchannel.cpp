@@ -23,7 +23,7 @@ void TimerChannel::start()
 
 void TimerChannel::update()
 {
-    counter  = control.prescaler * (count.data - initial);
+    counter  = control.prescaler * (count.value - initial);
     overflow = control.prescaler * (kOverflow - initial);
 }
 
@@ -52,7 +52,7 @@ void TimerChannel::run(int cycles)
         initial  = count.initial;
         overflow = control.prescaler * (kOverflow - initial);
     }
-    count.data = counter / control.prescaler + initial;
+    count.value = counter / control.prescaler + initial;
 }
 
 uint TimerChannel::nextEvent() const

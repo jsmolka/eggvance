@@ -61,38 +61,54 @@ public:
     using RegisterBase<Integral, Mask>::write;
 };
 
+namespace
+{
+
+template<typename Integral>
+struct ones : std::integral_constant<Integral, static_cast<Integral>(~0ULL)>
+{
+    static_assert(std::is_integral_v<Integral>);
+};
+
+template<typename Integral>
+constexpr inline Integral ones_v = ones<Integral>::value;
+
+}  // namespace
+
 template<typename Integral, Integral Mask>
 class XRegisterBase
 {
 public:
     static_assert(std::is_integral_v<Integral>);
 
-    XRegisterBase() = default;
-    XRegisterBase(Integral mask) : mask(mask) {}
+    XRegisterBase(Integral mask = Mask)
+        : mask(mask) {}
 
-    Integral data = 0;
-    Integral mask = Mask;
+    union
+    {
+        Integral value = 0;
+        u8 bytes[sizeof(Integral)];
+    };
 
 protected:
     u8 read(uint index) const
     {
         SHELL_ASSERT(index < sizeof(Integral));
 
-        u8 data = bit::byte(this->data, index);
-        u8 mask = bit::byte(this->mask, index);
-
-        return data & mask;
+        return bit::byte(value & mask, index);
     }
 
     void write(uint index, u8 byte)
     {
         SHELL_ASSERT(index < sizeof(Integral));
 
-        reinterpret_cast<u8*>(&data)[index] = byte;
+        bytes[index] = byte;
     }
+
+    const Integral mask;
 };
 
-template<typename Integral, Integral Mask = ~static_cast<Integral>(0)>
+template<typename Integral, Integral Mask = ones_v<Integral>>
 class XRegisterR : public XRegisterBase<Integral, Mask>
 {
 public:
@@ -100,7 +116,7 @@ public:
     using XRegisterBase<Integral, Mask>::read;
 };
 
-template<typename Integral, Integral Mask = ~static_cast<Integral>(0)>
+template<typename Integral, Integral Mask = ones_v<Integral>>
 class XRegisterW : public XRegisterBase<Integral, Mask>
 {
 public:
@@ -108,7 +124,7 @@ public:
     using XRegisterBase<Integral, Mask>::write;
 };
 
-template<typename Integral, Integral Mask = ~static_cast<Integral>(0)>
+template<typename Integral, Integral Mask = ones_v<Integral>>
 class XRegister : public XRegisterBase<Integral, Mask>
 {
 public:
