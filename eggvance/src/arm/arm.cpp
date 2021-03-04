@@ -5,6 +5,7 @@
 #include "base/config.h"
 #include "base/macros.h"
 #include "dma/dma.h"
+#include "scheduler/scheduler.h"
 #include "timer/timer.h"
 
 Arm::Arm()
@@ -64,6 +65,10 @@ void Arm::dispatch()
             {
                 event = std::min(event, irq.delay);
             }
+
+            // Todo: ugly
+            if (scheduler.next != std::numeric_limits<u64>::max())
+                event = std::min<int>(event, scheduler.next - scheduler.now);
 
             tick(event);
 
