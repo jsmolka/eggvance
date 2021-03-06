@@ -25,8 +25,7 @@ public:
     static void eventRun(void* data, u64 late);
     static void eventStart(void* data, u64 late);
 
-    u64 delay    = 2;
-    u64 event     = 0;
+    u64 event    = 0;
     u64 since    = 0;
     u64 counter  = 0;
     u64 initial  = 0;

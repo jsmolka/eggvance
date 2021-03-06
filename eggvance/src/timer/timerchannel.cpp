@@ -15,13 +15,10 @@ TimerChannel::TimerChannel(uint id)
 
 void TimerChannel::start()
 {
-    delay    = 2;
-    since    = scheduler.now;
-    counter  = 0;
     initial  = count.initial;
     overflow = control.prescaler * (kOverflow - initial);
 
-    schedule();
+    scheduler.add(2, this, &eventStart);
 }
 
 void TimerChannel::update()
@@ -32,16 +29,9 @@ void TimerChannel::update()
     schedule();
 }
 
-// Todo: not cycles in cascading timers
 void TimerChannel::run(u64 times)
 {
-    SHELL_ASSERT(times < 0x20'000);
-
-    while (delay && times)
-    {
-        --delay;
-        --times;
-    }
+    SHELL_ASSERT(times < std::numeric_limits<u32>::max());
 
     counter += times;
     
@@ -60,8 +50,9 @@ void TimerChannel::run(u64 times)
         initial  = count.initial;
         overflow = control.prescaler * (kOverflow - initial);
     }
-    count.value = counter / control.prescaler + initial;
+
     since = scheduler.now;
+    count.value = counter / control.prescaler + initial;
 }
 
 void TimerChannel::run()
@@ -83,7 +74,7 @@ u64 TimerChannel::reschedule()
         return 0;
 
     if (!control.cascade)
-        return scheduler.add(overflow - counter + delay, this, &eventRun);
+        return scheduler.add(overflow - counter, this, &eventRun);
 
     if (!pred)
         return 0;
@@ -98,7 +89,7 @@ u64 TimerChannel::reschedule()
         count += channel->counter;
     }
 
-    return scheduler.add(event - count + delay, this, &eventRun);
+    return scheduler.add(event - count, this, &eventRun);
 }
 
 void TimerChannel::eventRun(void* data, u64 late)
@@ -111,5 +102,13 @@ void TimerChannel::eventRun(void* data, u64 late)
 
 void TimerChannel::eventStart(void* data, u64 late)
 {
-    // Todo
+    TimerChannel& channel = *reinterpret_cast<TimerChannel*>(data);
+
+    channel.counter = 0;
+    channel.since = scheduler.now - late;
+
+    if (!channel.control.cascade)
+        channel.run(late);
+
+    channel.schedule();
 }

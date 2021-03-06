@@ -16,6 +16,9 @@ void Scheduler::run(u64 cycles)
     while (now >= next)
     {
         auto& event = events.back();
+
+        SHELL_ASSERT(now - event.when < std::numeric_limits<u32>::max());
+
         event.callback(event.data, now - event.when);
 
         events.pop_back();
