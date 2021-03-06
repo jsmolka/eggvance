@@ -8,7 +8,7 @@ class Event
 public:
     using Callback = void(*)(void*, u64);
 
-    bool operator==(const Event& event) const { return when == event.when && callback == event.callback; }
+    bool operator==(const Event& event) const { return when == event.when && data == event.data && callback == event.callback; }
     bool operator> (const Event& event) const { return when >  event.when; }
     bool operator< (const Event& event) const { return when <  event.when; }
 

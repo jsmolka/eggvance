@@ -1,32 +1,40 @@
 #pragma once
 
-#include <functional>
-
 #include "base/register.h"
 
-class TimerCount : public XRegister<u16>
+class TimerChannel;
+
+class TimerRegister
 {
 public:
-    u8 read(uint index) const;
+    TimerRegister(TimerChannel& channel);
+
+protected:
+    void run();
+
+    TimerChannel& channel;
+};
+
+class TimerCount : public TimerRegister, public XRegister<u16>
+{
+public:
+    using TimerRegister::TimerRegister;
+
+    u8 read(uint index);
     void write(uint index, u8 byte);
 
     u16 initial = 0;
-
-    std::function<void(void)> run_channels;
 };
 
-class TimerControl : public XRegister<u16>
+class TimerControl : public TimerRegister, public XRegister<u16, 0x00C7>
 {
 public:
-    TimerControl();
+    using TimerRegister::TimerRegister;
 
     void write(uint index, u8 byte);
 
     uint prescaler = 1;
     uint cascade   = 0;
     uint irq       = 0;
-    uint enable    = 0;
-
-    std::function<void(bool)> on_write;
-    std::function<void(void)> run_channels;
+    uint enabled   = 0;
 };

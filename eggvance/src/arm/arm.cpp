@@ -56,11 +56,6 @@ void Arm::dispatch()
         {
             int event = cycles;
 
-            if (State & kStateTimer)
-            {
-                event = std::min(event, timer.cycles());
-            }
-
             if (State & kStateIrq && !cpsr.i && irq.delaying)
             {
                 event = std::min(event, irq.delay);

@@ -13,7 +13,10 @@ public:
     u64 next = 0;
 
     void run(u64 cycles);
-    void add(u64 in, void* data, Event::Callback callback);
+    
+    u64 add(u64 in, void* data, Event::Callback callback);
+
+    void remove(const Event& event);
 
 private:
     std::vector<Event> events;

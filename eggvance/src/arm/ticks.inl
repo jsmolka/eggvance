@@ -8,9 +8,6 @@ SHELL_INLINE void Arm::tick(int cycles)
 {
     this->cycles -= cycles;
 
-    if (state & kStateTimer)
-        timer.run(cycles);
-
     if (irq.delaying)
     {
         irq.delay -= cycles;

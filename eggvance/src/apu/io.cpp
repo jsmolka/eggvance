@@ -2,6 +2,7 @@
 
 #include "apu.h"
 #include "base/config.h"
+#include "..\timer\io.h"
 
 SoundControl::SoundControl()
 {

@@ -1,14 +1,14 @@
 #include "timerchannel.h"
 
-#include "constants.h"
 #include "apu/apu.h"
 #include "arm/arm.h"
 #include "arm/constants.h"
+#include "scheduler/scheduler.h"
 
-constexpr uint kOverflow = 0x1'0000;
+constexpr u64 kOverflow = 0x1'0000;
 
 TimerChannel::TimerChannel(uint id)
-    : id(id)
+    : id(id), count(*this), control(*this)
 {
 
 }
@@ -16,34 +16,42 @@ TimerChannel::TimerChannel(uint id)
 void TimerChannel::start()
 {
     delay    = 2;
+    since    = scheduler.now;
     counter  = 0;
     initial  = count.initial;
     overflow = control.prescaler * (kOverflow - initial);
+
+    schedule();
 }
 
 void TimerChannel::update()
 {
     counter  = control.prescaler * (count.value - initial);
     overflow = control.prescaler * (kOverflow - initial);
+
+    schedule();
 }
 
-void TimerChannel::run(int cycles)
+// Todo: not cycles in cascading timers
+void TimerChannel::run(u64 times)
 {
-    while (delay && cycles)
+    SHELL_ASSERT(times < 0x20'000);
+
+    while (delay && times)
     {
         --delay;
-        --cycles;
+        --times;
     }
 
-    counter += cycles;
+    counter += times;
     
     if (counter >= overflow)
     {
         if (control.irq)
             arm.raise(kIrqTimer0 << id);
 
-        if (next && next->control.cascade)
-            next->run(counter / overflow);
+        if (succ && succ->control.cascade)
+            succ->run(counter / overflow);
 
         if (id <= 1)
             apu.onOverflow(id, counter / overflow);
@@ -53,26 +61,55 @@ void TimerChannel::run(int cycles)
         overflow = control.prescaler * (kOverflow - initial);
     }
     count.value = counter / control.prescaler + initial;
+    since = scheduler.now;
 }
 
-uint TimerChannel::nextEvent() const
+void TimerChannel::run()
+{
+    run(scheduler.now - since);
+}
+
+void TimerChannel::schedule()
+{
+    if (event)
+        scheduler.remove({ event, this, &eventRun });
+
+    event = reschedule();
+}
+
+u64 TimerChannel::reschedule()
 {
     if (!control.irq && id > 1)
-        return kEventMax;
+        return 0;
 
     if (!control.cascade)
-        return overflow - counter + delay;
+        return scheduler.add(overflow - counter + delay, this, &eventRun);
 
-    if (!prev)
-        return kEventMax;
+    if (!pred)
+        return 0;
 
-    uint count = 0;
-    uint event = overflow - counter;
 
-    for (auto* channel = prev; channel; channel = channel->prev)
+    u64 count = 0;
+    u64 event = overflow - counter;
+
+    for (auto* channel = pred; channel; channel = channel->pred)
     {
         event *= channel->control.prescaler * (kOverflow - channel->initial);
         count += channel->counter;
     }
-    return event - count + delay;
+
+    return scheduler.add(event - count + delay, this, &eventRun);
+}
+
+void TimerChannel::eventRun(void* data, u64 late)
+{
+    TimerChannel& channel = *reinterpret_cast<TimerChannel*>(data);
+
+    channel.run(scheduler.now - channel.since + late);
+    channel.event = channel.reschedule();
+}
+
+void TimerChannel::eventStart(void* data, u64 late)
+{
+    // Todo
 }

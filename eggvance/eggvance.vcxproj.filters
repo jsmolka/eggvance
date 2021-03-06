@@ -362,9 +362,6 @@
     <ClInclude Include="src\sio\sio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\timer\constants.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\timer\io.h">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -27,7 +27,7 @@ void Scheduler::run(u64 cycles)
     }
 }
 
-void Scheduler::add(u64 in, void* data, Event::Callback callback)
+u64 Scheduler::add(u64 in, void* data, Event::Callback callback)
 {
     SHELL_ASSERT(in < std::numeric_limits<u32>::max());
 
@@ -51,4 +51,18 @@ void Scheduler::add(u64 in, void* data, Event::Callback callback)
         events.insert(iter.base(), event);
     }
     next = events.back().when;
+
+    return event.when;
+}
+
+void Scheduler::remove(const Event& event)
+{
+    for (auto iter = events.begin(); iter != events.end(); ++iter)
+    {
+        if (event == *iter)
+        {
+            events.erase(iter);
+            return;
+        }
+    }
 }

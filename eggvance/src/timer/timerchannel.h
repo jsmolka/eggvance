@@ -9,19 +9,26 @@ public:
 
     void start();
     void update();
-    void run(int cycles);
+    void run(u64 cycles);
+    void run();
 
-    uint nextEvent() const;
+    void schedule();
+    u64 reschedule();
 
     const uint id;
     TimerCount count;
     TimerControl control;
-    TimerChannel* prev = nullptr;
-    TimerChannel* next = nullptr;
+    TimerChannel* pred = nullptr;
+    TimerChannel* succ = nullptr;
 
-private:
-    uint delay    = 2;
-    uint counter  = 0;
-    uint initial  = 0;
-    uint overflow = 0;
+//private:
+    static void eventRun(void* data, u64 late);
+    static void eventStart(void* data, u64 late);
+
+    u64 delay    = 2;
+    u64 event     = 0;
+    u64 since    = 0;
+    u64 counter  = 0;
+    u64 initial  = 0;
+    u64 overflow = 0;
 };
