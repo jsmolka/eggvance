@@ -380,9 +380,6 @@
     <ClInclude Include="src\scheduler\scheduler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\scheduler\queue.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\scheduler\event.h">
       <Filter>Header Files</Filter>
     </ClInclude>

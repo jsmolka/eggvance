@@ -11,10 +11,19 @@
 inline constexpr auto kSampleCycles   = kCpuFrequency / kSampleRate;
 inline constexpr auto kSequenceCycles = kCpuFrequency / 512;
 
+Apu::Apu()
+{
+    events.sequence.data = this;
+    events.sequence.callback = &Events::doSequence<0>;
+
+    events.sample.data = this;
+    events.sample.callback = &Events::doSample;
+}
+
 void Apu::init()
 {
-    scheduler.add(kSampleCycles, this, sample);
-    scheduler.add(kSequenceCycles, this, sequence<0>);
+    scheduler.addIn(&events.sample, kSampleCycles);
+    scheduler.addIn(&events.sequence, kSequenceCycles);
 }
 
 void Apu::onOverflow(uint timer, uint times)
@@ -39,7 +48,57 @@ void Apu::onOverflow(uint timer, uint times)
     }
 }
 
-void Apu::sample(void* data, u64 late)
+template<uint Step>
+void Apu::Events::doSequence(void* data, u64 late)
+{
+    static_assert(!(Step == 1 || Step == 3 || Step == 5));
+
+    auto& apu = *reinterpret_cast<Apu*>(data);
+
+    switch (Step)
+    {
+    case 1:
+    case 3:
+    case 5:
+        break;
+
+    case 2:
+    case 6:
+        apu.square1.tickSweep();
+        [[fallthrough]];
+
+    case 0:
+    case 4:
+        apu.noise.tickLength();
+        apu.square1.tickLength();
+        apu.square2.tickLength();
+        apu.wave.tickLength();
+        break;
+
+    case 7:
+        apu.noise.tickEnvelope();
+        apu.square1.tickEnvelope();
+        apu.square2.tickEnvelope();
+        break;
+
+    default:
+        SHELL_UNREACHABLE;
+        break;
+    }
+
+    if constexpr (Step == 0 || Step == 2 || Step == 4)
+    {
+        apu.events.sequence.callback = &Events::doSequence<(Step + 2) % 8>;
+        scheduler.addIn(&apu.events.sequence, 2 * kSequenceCycles - late);
+    }
+    else
+    {
+        apu.events.sequence.callback = &Events::doSequence<(Step + 1) % 8>;
+        scheduler.addIn(&apu.events.sequence, 1 * kSequenceCycles - late);
+    }
+}
+
+void Apu::Events::doSample(void * data, u64 late)
 {
     auto& apu = *reinterpret_cast<Apu*>(data);
 
@@ -80,49 +139,5 @@ void Apu::sample(void* data, u64 late)
 
     audio_ctx.write(sample_l << 5, sample_r << 5);
 
-    scheduler.add(kSampleCycles - late, data, sample);
-}
-
-template<uint Step>
-void Apu::sequence(void* data, u64 late)
-{
-    static_assert(!(Step == 1 || Step == 3 || Step == 5));
-
-    auto& apu = *reinterpret_cast<Apu*>(data);
-
-    switch (Step)
-    {
-    case 1:
-    case 3:
-    case 5:
-        break;
-
-    case 2:
-    case 6:
-        apu.square1.tickSweep();
-        [[fallthrough]];
-
-    case 0:
-    case 4:
-        apu.noise.tickLength();
-        apu.square1.tickLength();
-        apu.square2.tickLength();
-        apu.wave.tickLength();
-        break;
-
-    case 7:
-        apu.noise.tickEnvelope();
-        apu.square1.tickEnvelope();
-        apu.square2.tickEnvelope();
-        break;
-
-    default:
-        SHELL_UNREACHABLE;
-        break;
-    }
-
-    if constexpr (Step == 0 || Step == 2 || Step == 4)
-        scheduler.add(2 * kSequenceCycles - late, data, &sequence<(Step + 2) % 8>);
-    else
-        scheduler.add(1 * kSequenceCycles - late, data, &sequence<(Step + 1) % 8>);
+    scheduler.addIn(&apu.events.sample, kSampleCycles - late);
 }

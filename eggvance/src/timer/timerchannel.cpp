@@ -19,8 +19,8 @@ TimerChannel::TimerChannel(uint id)
 
 void TimerChannel::start()
 {
-    scheduler.erase(events.run);
-    scheduler.addIn(events.start, 2);
+    scheduler.erase(&events.run);
+    scheduler.addIn(&events.start, 2);
 }
 
 void TimerChannel::update()
@@ -71,7 +71,7 @@ void TimerChannel::schedule()
         return;
 
     if (!control.cascade)
-        return scheduler.addIn(events.run, overflow - counter);
+        return scheduler.addIn(&events.run, overflow - counter);
 
     if (!pred)
         return;
@@ -85,14 +85,13 @@ void TimerChannel::schedule()
         count += channel->counter;
     }
 
-    scheduler.addIn(events.run, event - count);
+    scheduler.addIn(&events.run, event - count);
 }
 
 void TimerChannel::Events::doRun(void* data, u64 late)
 {
     TimerChannel& channel = *reinterpret_cast<TimerChannel*>(data);
 
-    channel.events.run.when = 0;
     channel.run(scheduler.now - channel.since + late);
     channel.schedule();
 }
@@ -101,7 +100,6 @@ void TimerChannel::Events::doStart(void* data, u64 late)
 {
     TimerChannel& channel = *reinterpret_cast<TimerChannel*>(data);
 
-    channel.events.start.when = 0;
     channel.since    = scheduler.now - late;
     channel.counter  = 0;
     channel.initial  = channel.count.initial;

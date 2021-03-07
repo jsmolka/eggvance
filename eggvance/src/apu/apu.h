@@ -6,10 +6,13 @@
 #include "square1.h"
 #include "square2.h"
 #include "wave.h"
+#include "scheduler/event.h"
 
 class Apu
 {
 public:
+    Apu();
+
     void init();
     void onOverflow(uint timer, uint times);
 
@@ -22,9 +25,15 @@ public:
     Wave wave;
 
 private:
-    template<uint Step>
-    static void sequence(void* data, u64 late);
-    static void sample(void* data, u64 late);
+    struct Events
+    {
+        template<uint Step>
+        static void doSequence(void* data, u64 late);
+        static void doSample(void* data, u64 late);
+
+        Event sequence;
+        Event sample;
+    } events;
 };
 
 inline Apu apu;
