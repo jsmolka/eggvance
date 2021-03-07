@@ -1,7 +1,5 @@
 #include "scheduler.h"
 
-#include <limits>
-
 Scheduler::Scheduler()
 {
     events.reserve(64);
@@ -17,7 +15,7 @@ void Scheduler::run(u64 cycles)
     {
         auto& event = events.back();
 
-        SHELL_ASSERT(now - event.when < std::numeric_limits<u32>::max());
+        SCHEDULER_ASSERT(now - event.when);
 
         event.callback(event.data, now - event.when);
 
@@ -32,7 +30,7 @@ void Scheduler::run(u64 cycles)
 
 u64 Scheduler::add(u64 in, void* data, Event::Callback callback)
 {
-    SHELL_ASSERT(in < std::numeric_limits<u32>::max());
+    SCHEDULER_ASSERT(in);
 
     Event event = { now + in, data, callback };
 
@@ -58,14 +56,49 @@ u64 Scheduler::add(u64 in, void* data, Event::Callback callback)
     return event.when;
 }
 
-void Scheduler::remove(const Event& event)
+void Scheduler::addIn(Event& event, u64 in)
 {
+    addAt(event, now + in);
+}
+
+void Scheduler::addAt(Event& event, u64 at)
+{
+    SCHEDULER_ASSERT(at);
+
+    erase(event);
+    event.when = at;
+
+    if (events.empty())
+    {
+        events.push_back(event);
+    }
+    else
+    {
+        auto iter = events.rbegin();
+
+        for (; iter != events.rend(); ++iter)
+        {
+            if (event < *iter)
+                break;
+        }
+        events.insert(iter.base(), event);
+    }
+    next = events.back().when;
+}
+
+void Scheduler::erase(Event& event)
+{
+    if (event.when == 0)
+        return;
+
     for (auto iter = events.begin(); iter != events.end(); ++iter)
     {
         if (event == *iter)
         {
             events.erase(iter);
+            event.when = 0;
             return;
         }
     }
+    SHELL_ASSERT(false);
 }

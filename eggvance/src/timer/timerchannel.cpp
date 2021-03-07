@@ -10,15 +10,17 @@ constexpr u64 kOverflow = 0x1'0000;
 TimerChannel::TimerChannel(uint id)
     : id(id), count(*this), control(*this)
 {
+    events.run.data = this;
+    events.run.callback = &Events::doRun;
 
+    events.start.data = this;
+    events.start.callback = &Events::doStart;
 }
 
 void TimerChannel::start()
 {
-    initial  = count.initial;
-    overflow = control.prescaler * (kOverflow - initial);
-
-    scheduler.add(2, this, &eventStart);
+    scheduler.erase(events.run);
+    scheduler.addIn(events.start, 2);
 }
 
 void TimerChannel::update()
@@ -29,11 +31,14 @@ void TimerChannel::update()
     schedule();
 }
 
-void TimerChannel::run(u64 times)
+void TimerChannel::run(u64 ticks)
 {
-    SHELL_ASSERT(times < std::numeric_limits<u32>::max());
+    if (events.start.when)
+        return;
 
-    counter += times;
+    SCHEDULER_ASSERT(ticks);
+
+    counter += ticks;
     
     if (counter >= overflow)
     {
@@ -62,23 +67,14 @@ void TimerChannel::run()
 
 void TimerChannel::schedule()
 {
-    if (event)
-        scheduler.remove({ event, this, &eventRun });
-
-    event = reschedule();
-}
-
-u64 TimerChannel::reschedule()
-{
     if (!control.irq && id > 1)
-        return 0;
+        return;
 
     if (!control.cascade)
-        return scheduler.add(overflow - counter, this, &eventRun);
+        return scheduler.addIn(events.run, overflow - counter);
 
     if (!pred)
-        return 0;
-
+        return;
 
     u64 count = 0;
     u64 event = overflow - counter;
@@ -89,25 +85,29 @@ u64 TimerChannel::reschedule()
         count += channel->counter;
     }
 
-    return scheduler.add(event - count, this, &eventRun);
+    scheduler.addIn(events.run, event - count);
 }
 
-void TimerChannel::eventRun(void* data, u64 late)
+void TimerChannel::Events::doRun(void* data, u64 late)
 {
     TimerChannel& channel = *reinterpret_cast<TimerChannel*>(data);
 
+    channel.events.run.when = 0;
     channel.run(scheduler.now - channel.since + late);
-    channel.event = channel.reschedule();
+    channel.schedule();
 }
 
-void TimerChannel::eventStart(void* data, u64 late)
+void TimerChannel::Events::doStart(void* data, u64 late)
 {
     TimerChannel& channel = *reinterpret_cast<TimerChannel*>(data);
 
-    channel.counter = 0;
-    channel.since = scheduler.now - late;
+    channel.events.start.when = 0;
+    channel.since    = scheduler.now - late;
+    channel.counter  = 0;
+    channel.initial  = channel.count.initial;
+    channel.overflow = channel.control.prescaler * (kOverflow - channel.initial);
 
-    if (!channel.control.cascade)
+    if (channel.control.cascade == 0)
         channel.run(late);
 
     channel.schedule();

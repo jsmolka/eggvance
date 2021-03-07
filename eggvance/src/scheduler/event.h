@@ -12,7 +12,7 @@ public:
     bool operator> (const Event& event) const { return when >  event.when; }
     bool operator< (const Event& event) const { return when <  event.when; }
 
-    u64 when;
-    void* data;
-    Callback callback;
+    u64 when = 0;
+    void* data = nullptr;
+    Callback callback = nullptr;
 };

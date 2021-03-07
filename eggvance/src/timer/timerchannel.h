@@ -1,6 +1,7 @@
 #pragma once
 
 #include "io.h"
+#include "scheduler/event.h"
 
 class TimerChannel
 {
@@ -9,11 +10,8 @@ public:
 
     void start();
     void update();
-    void run(u64 cycles);
+    void run(u64 ticks);
     void run();
-
-    void schedule();
-    u64 reschedule();
 
     const uint id;
     TimerCount count;
@@ -21,11 +19,18 @@ public:
     TimerChannel* pred = nullptr;
     TimerChannel* succ = nullptr;
 
-//private:
-    static void eventRun(void* data, u64 late);
-    static void eventStart(void* data, u64 late);
+private:
+    struct Events
+    {
+        static void doRun(void* data, u64 late);
+        static void doStart(void* data, u64 late);
 
-    u64 event    = 0;
+        Event run;
+        Event start;
+    } events;
+
+    void schedule();
+
     u64 since    = 0;
     u64 counter  = 0;
     u64 initial  = 0;
