@@ -4,32 +4,24 @@
 
 class TimerChannel;
 
-class TimerRegister
+class TimerCount : public XRegister<u16>
 {
 public:
-    TimerRegister(TimerChannel& channel);
-
-protected:
-    void run();
-
-    TimerChannel& channel;
-};
-
-class TimerCount : public TimerRegister, public XRegister<u16>
-{
-public:
-    using TimerRegister::TimerRegister;
+    TimerCount(TimerChannel& channel);
 
     u8 read(uint index);
     void write(uint index, u8 byte);
 
     u16 initial = 0;
+
+private:
+    TimerChannel& channel;
 };
 
-class TimerControl : public TimerRegister, public XRegister<u16, 0x00C7>
+class TimerControl : public XRegister<u16, 0x00C7>
 {
 public:
-    using TimerRegister::TimerRegister;
+    TimerControl(TimerChannel& channel);
 
     void write(uint index, u8 byte);
 
@@ -37,4 +29,7 @@ public:
     uint cascade   = 0;
     uint irq       = 0;
     uint enabled   = 0;
+
+private:
+    TimerChannel& channel;
 };

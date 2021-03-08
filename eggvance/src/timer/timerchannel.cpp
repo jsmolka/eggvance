@@ -23,14 +23,6 @@ void TimerChannel::start()
     scheduler.addIn(events.start, 2);
 }
 
-void TimerChannel::update()
-{
-    counter  = control.prescaler * (count.value - initial);
-    overflow = control.prescaler * (kOverflow - initial);
-
-    schedule();
-}
-
 void TimerChannel::run(u64 ticks)
 {
     SHELL_ASSERT(ticks < 0xFFFF'FFFF);
@@ -52,12 +44,13 @@ void TimerChannel::run(u64 ticks)
         counter %= overflow;
         initial  = count.initial;
         overflow = control.prescaler * (kOverflow - initial);
-
-        schedule();
     }
 
-    since = scheduler.now;
     count.value = counter / control.prescaler + initial;
+
+    schedule();
+
+    since = scheduler.now;
 }
 
 void TimerChannel::run()
@@ -69,22 +62,10 @@ void TimerChannel::schedule()
 {
     scheduler.erase(events.run);
 
-    if (!control.cascade)
-        return scheduler.addIn(events.run, overflow - counter);
-
-    if (!pred)
+    if (control.cascade)
         return;
-
-    u64 count = 0;
-    u64 event = overflow - counter;
-
-    for (auto* channel = pred; channel; channel = channel->pred)
-    {
-        event *= channel->control.prescaler * (kOverflow - channel->initial);
-        count += channel->counter;
-    }
-
-    scheduler.addIn(events.run, event - count);
+    
+    scheduler.addIn(events.run, overflow - counter);
 }
 
 void TimerChannel::Events::doRun(void* data, u64 late)
@@ -92,7 +73,6 @@ void TimerChannel::Events::doRun(void* data, u64 late)
     TimerChannel& channel = *reinterpret_cast<TimerChannel*>(data);
 
     channel.run(scheduler.now - channel.since + late);
-    channel.schedule();
 }
 
 void TimerChannel::Events::doStart(void* data, u64 late)
@@ -106,6 +86,4 @@ void TimerChannel::Events::doStart(void* data, u64 late)
 
     if (channel.control.cascade == 0)
         channel.run(late);
-
-    channel.schedule();
 }
