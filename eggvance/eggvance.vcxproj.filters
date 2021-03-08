@@ -386,6 +386,9 @@
     <ClInclude Include="src\base\constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\scheduler\list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\arm\arithmetic.inl">

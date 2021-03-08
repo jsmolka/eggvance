@@ -10,6 +10,7 @@ public:
 
     void start();
     void update();
+    void schedule();
     void run(u64 ticks);
     void run();
 
@@ -28,8 +29,6 @@ private:
         Event run;
         Event start;
     } events;
-
-    void schedule();
 
     u64 since    = 0;
     u64 counter  = 0;

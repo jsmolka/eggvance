@@ -19,8 +19,8 @@ TimerChannel::TimerChannel(uint id)
 
 void TimerChannel::start()
 {
-    scheduler.erase(&events.run);
-    scheduler.addIn(&events.start, 2);
+    scheduler.erase(events.run);
+    scheduler.addIn(events.start, 2);
 }
 
 void TimerChannel::update()
@@ -33,10 +33,8 @@ void TimerChannel::update()
 
 void TimerChannel::run(u64 ticks)
 {
-    if (events.start.when)
-        return;
-
-    SCHEDULER_ASSERT(ticks);
+    SHELL_ASSERT(ticks < 0xFFFF'FFFF);
+    SHELL_ASSERT(events.start.when == 0);
 
     counter += ticks;
     
@@ -54,6 +52,8 @@ void TimerChannel::run(u64 ticks)
         counter %= overflow;
         initial  = count.initial;
         overflow = control.prescaler * (kOverflow - initial);
+
+        schedule();
     }
 
     since = scheduler.now;
@@ -67,11 +67,10 @@ void TimerChannel::run()
 
 void TimerChannel::schedule()
 {
-    if (!control.irq && id > 1)
-        return;
+    scheduler.erase(events.run);
 
     if (!control.cascade)
-        return scheduler.addIn(&events.run, overflow - counter);
+        return scheduler.addIn(events.run, overflow - counter);
 
     if (!pred)
         return;
@@ -85,7 +84,7 @@ void TimerChannel::schedule()
         count += channel->counter;
     }
 
-    scheduler.addIn(&events.run, event - count);
+    scheduler.addIn(events.run, event - count);
 }
 
 void TimerChannel::Events::doRun(void* data, u64 late)

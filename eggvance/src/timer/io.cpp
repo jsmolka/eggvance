@@ -26,6 +26,7 @@ void TimerRegister::run()
     }
 
     timer->run();
+    timer->schedule();
 }
 
 u8 TimerCount::read(uint index)

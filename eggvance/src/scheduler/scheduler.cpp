@@ -13,14 +13,13 @@ void Scheduler::run(u64 cycles)
 
     while (now >= next && list.head)
     {
-        Event* event = list.head;
+        Event& event = list.pop();
 
-        u64 late = now - event->when;
+        u64 late = now - event.when;
         SCHEDULER_ASSERT(late);
-        
-        erase(event);
 
-        event->callback(event->data, late);
+        event.when = 0;
+        event.callback(event.data, late);
 
         if (list.head)
             next = list.head->when;
@@ -29,28 +28,28 @@ void Scheduler::run(u64 cycles)
     }
 }
 
-void Scheduler::addIn(Event* event, u64 in)
+void Scheduler::addIn(Event& event, u64 in)
 {
     addAt(event, now + in);
 }
 
-void Scheduler::addAt(Event* event, u64 at)
+void Scheduler::addAt(Event& event, u64 at)
 {
     SCHEDULER_ASSERT(at);
+    SHELL_ASSERT(event.when == 0);
 
-    if (event->when)
-        erase(event);
-
-    event->when = at;
+    event.when = at;
 
     list.insert(event);
 
     next = list.head->when;
 }
 
-void Scheduler::erase(Event* event)
+void Scheduler::erase(Event& event)
 {
-    list.remove(event);
-
-    event->when = 0;
+    if (event.when)
+    {
+        list.erase(event);
+        event.when = 0;
+    }
 }

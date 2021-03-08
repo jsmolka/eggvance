@@ -11,15 +11,15 @@ public:
 
     void run(u64 cycles);
 
-    void addIn(Event* event, u64 in);
-    void addAt(Event* event, u64 at);
-    void erase(Event* event);
+    void addIn(Event& event, u64 in);
+    void addAt(Event& event, u64 at);
+    void erase(Event& event);
 
     u64 now  = 0;
     u64 next = 0;
 
 private:
-    List list;
+    List<Event> list;
 };
 
 inline Scheduler scheduler;
