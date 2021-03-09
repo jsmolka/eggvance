@@ -17,14 +17,14 @@ u8 TimerCount::read(uint index)
         channel.run();
         channel.schedule();
     }
-    return reinterpret_cast<const u8*>(&value)[index];
+    return reinterpret_cast<const u8*>(&counter)[index];
 }
 
 void TimerCount::write(uint index, u8 byte)
 {
     SHELL_ASSERT(index < sizeof(u16));
 
-    reinterpret_cast<u8*>(&reload)[index] = byte;
+    reinterpret_cast<u8*>(&initial)[index] = byte;
 }
 
 TimerControl::TimerControl(TimerChannel& channel)
@@ -55,8 +55,5 @@ void TimerControl::write(uint index, u8 byte)
     if (!was_enabled && enabled)
         channel.start();
     else
-    {
-        SHELL_ASSERT(false);
         channel.update();
-    }
 }

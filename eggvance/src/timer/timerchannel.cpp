@@ -28,8 +28,8 @@ void TimerChannel::start()
 
 void TimerChannel::update()
 {
-    counter  = control.prescaler * (count.value - reload);
-    overflow = control.prescaler * (kOverflow - reload);
+    counter  = control.prescaler * (count.counter - initial);
+    overflow = control.prescaler * (kOverflow - initial);
 
     schedule();
 }
@@ -44,20 +44,20 @@ void TimerChannel::run(u64 ticks)
     if (counter >= overflow)
     {
         if (control.irq)
-            arm.raise(kIrqTimer0 << id);
+            arm.raise(Irq::kTimer0 << id);
 
-        if (succ && succ->control.cascade)
-            succ->run(counter / overflow);
+        if (next && next->control.cascade)
+            next->run(counter / overflow);
 
         if (id <= 1)
             apu.onOverflow(id, counter / overflow);
 
         counter %= overflow;
-        reload   = count.reload;
-        overflow = control.prescaler * (kOverflow - reload);
+        initial  = count.initial;
+        overflow = control.prescaler * (kOverflow - initial);
     }
 
-    count.value = counter / control.prescaler + reload;
+    count.counter = counter / control.prescaler + initial;
     since = scheduler.now;
 }
 
@@ -90,8 +90,8 @@ void TimerChannel::Events::doStart(void* data, u64 late)
 
     channel.since    = scheduler.now - late;
     channel.counter  = 0;
-    channel.reload   = channel.count.reload;
-    channel.overflow = channel.control.prescaler * (kOverflow - channel.reload);
+    channel.initial  = channel.count.initial;
+    channel.overflow = channel.control.prescaler * (kOverflow - channel.initial);
 
     if (channel.control.cascade == 0)
         channel.run(late);

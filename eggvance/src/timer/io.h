@@ -12,8 +12,8 @@ public:
     u8 read(uint index);
     void write(uint index, u8 byte);
 
-    u16 value  = 0;
-    u16 reload = 0;
+    u16 counter = 0;
+    u16 initial = 0;
 
 private:
     TimerChannel& channel;
