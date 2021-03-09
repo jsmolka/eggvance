@@ -10,17 +10,21 @@ TimerCount::TimerCount(TimerChannel& channel)
 
 u8 TimerCount::read(uint index)
 {
-    if (channel.control.cascade == 0)
-        channel.run();
+    SHELL_ASSERT(index < sizeof(u16));
 
-    return XRegister::read(index);
+    if (channel.control.cascade == 0)
+    {
+        channel.run();
+        channel.schedule();
+    }
+    return reinterpret_cast<const u8*>(&value)[index];
 }
 
 void TimerCount::write(uint index, u8 byte)
 {
-    SHELL_ASSERT(index < sizeof(initial));
+    SHELL_ASSERT(index < sizeof(u16));
 
-    reinterpret_cast<u8*>(&initial)[index] = byte;
+    reinterpret_cast<u8*>(&reload)[index] = byte;
 }
 
 TimerControl::TimerControl(TimerChannel& channel)
@@ -50,4 +54,9 @@ void TimerControl::write(uint index, u8 byte)
 
     if (!was_enabled && enabled)
         channel.start();
+    else
+    {
+        SHELL_ASSERT(false);
+        channel.update();
+    }
 }

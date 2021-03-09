@@ -9,6 +9,7 @@ public:
     TimerChannel(uint id);
 
     void start();
+    void update();
     void schedule();
     void run(u64 ticks);
     void run();
@@ -31,6 +32,6 @@ private:
 
     u64 since    = 0;
     u64 counter  = 0;
-    u64 initial  = 0;
+    u64 reload   = 0;
     u64 overflow = 1;
 };

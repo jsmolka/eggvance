@@ -5,7 +5,7 @@
 #include "arm/constants.h"
 #include "scheduler/scheduler.h"
 
-constexpr u64 kOverflow = 0x1'0000;
+inline constexpr u64 kOverflow = 0x1'0000;
 
 TimerChannel::TimerChannel(uint id)
     : id(id), count(*this), control(*this)
@@ -19,14 +19,25 @@ TimerChannel::TimerChannel(uint id)
 
 void TimerChannel::start()
 {
+    if (events.start.when)
+        return;
+
     scheduler.erase(events.run);
     scheduler.addIn(events.start, 2);
 }
 
+void TimerChannel::update()
+{
+    counter  = control.prescaler * (count.value - reload);
+    overflow = control.prescaler * (kOverflow - reload);
+
+    schedule();
+}
+
 void TimerChannel::run(u64 ticks)
 {
-    SHELL_ASSERT(ticks < 0xFFFF'FFFF);
-    SHELL_ASSERT(events.start.when == 0);
+    if (!control.enabled || events.start.when)
+        return;
 
     counter += ticks;
     
@@ -42,14 +53,11 @@ void TimerChannel::run(u64 ticks)
             apu.onOverflow(id, counter / overflow);
 
         counter %= overflow;
-        initial  = count.initial;
-        overflow = control.prescaler * (kOverflow - initial);
+        reload   = count.reload;
+        overflow = control.prescaler * (kOverflow - reload);
     }
 
-    count.value = counter / control.prescaler + initial;
-
-    schedule();
-
+    count.value = counter / control.prescaler + reload;
     since = scheduler.now;
 }
 
@@ -73,6 +81,7 @@ void TimerChannel::Events::doRun(void* data, u64 late)
     TimerChannel& channel = *reinterpret_cast<TimerChannel*>(data);
 
     channel.run(scheduler.now - channel.since + late);
+    channel.schedule();
 }
 
 void TimerChannel::Events::doStart(void* data, u64 late)
@@ -81,9 +90,11 @@ void TimerChannel::Events::doStart(void* data, u64 late)
 
     channel.since    = scheduler.now - late;
     channel.counter  = 0;
-    channel.initial  = channel.count.initial;
-    channel.overflow = channel.control.prescaler * (kOverflow - channel.initial);
+    channel.reload   = channel.count.reload;
+    channel.overflow = channel.control.prescaler * (kOverflow - channel.reload);
 
     if (channel.control.cascade == 0)
         channel.run(late);
+
+    channel.schedule();
 }
