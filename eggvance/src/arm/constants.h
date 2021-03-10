@@ -23,8 +23,7 @@ enum State
     kStateThumb = 1 << 0,
     kStateHalt  = 1 << 1,
     kStateIrq   = 1 << 2,
-    kStateDma   = 1 << 3,
-    kStateTimer = 1 << 4
+    kStateDma   = 1 << 3
 };
 
 enum class Access

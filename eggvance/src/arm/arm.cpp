@@ -31,10 +31,8 @@ void Arm::run(int cycles)
     {
         switch (state)
         {
-        INDEXED_CASE8( 0, dispatch<kLabel>());
-        INDEXED_CASE8( 8, dispatch<kLabel>());
-        INDEXED_CASE8(16, dispatch<kLabel>());
-        INDEXED_CASE8(24, dispatch<kLabel>());
+        INDEXED_CASE8(0, dispatch<kLabel>());
+        INDEXED_CASE8(8, dispatch<kLabel>());
 
         default:
             SHELL_UNREACHABLE;
