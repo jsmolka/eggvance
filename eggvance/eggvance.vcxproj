@@ -209,6 +209,7 @@
       <SupportJustMyCode>true</SupportJustMyCode>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <DisableSpecificWarnings>26812</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <AdditionalDependencies>SDL2maind.lib;shell32.lib</AdditionalDependencies>
@@ -227,6 +228,7 @@
       <PreprocessorDefinitions>NDEBUG</PreprocessorDefinitions>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <DisableSpecificWarnings>26812</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -250,6 +252,7 @@
       <PreprocessorDefinitions>NDEBUG</PreprocessorDefinitions>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <DisableSpecificWarnings>26812</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
