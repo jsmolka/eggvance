@@ -60,17 +60,24 @@ void Arm::interruptProcess()
 
     if (servable && irq.master)
     {
-        if (!irq.delaying)
+        if (!irq.delayed && events.interrupt.when == 0)
         {
-            irq.delay = 4;
-            irq.delaying = true;
+            irq.delayed = false;
+            scheduler.queueIn(events.interrupt, 3);
         }
         state |= kStateIrq;
     }
     else
     {
-        irq.delay = 0;
-        irq.delaying = false;
+        scheduler.dequeue(events.interrupt);
+        irq.delayed = false;
         state &= ~kStateIrq;
     }
+}
+
+void Arm::Events::doInterrupt(void* data, u64 late)
+{
+    Arm& arm = *reinterpret_cast<Arm*>(data);
+
+    arm.irq.delayed = true;
 }

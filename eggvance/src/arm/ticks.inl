@@ -8,14 +8,6 @@ SHELL_INLINE void Arm::tick(int cycles)
 {
     this->cycles -= cycles;
 
-    if (irq.delaying)
-    {
-        irq.delay -= cycles;
-
-        if (irq.delay < 0)
-            irq.delay = 0;
-    }
-
     scheduler.run(cycles);
 }
 

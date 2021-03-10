@@ -4,6 +4,7 @@
 #include "io.h"
 #include "pipeline.h"
 #include "registers.h"
+#include "scheduler/event.h"
 
 class Arm : public Registers
 {
@@ -122,10 +123,16 @@ private:
     Pipeline pipe;
     int cycles = 0;
 
+    struct Events
+    {
+        static void doInterrupt(void* data, u64 late);
+
+        Event interrupt;
+    } events;
+
     struct Irq
     {
-        int delay = 0;
-        int delaying = false;
+        bool delayed = false;
 
         IrqMaster  master;
         IrqEnable  enable;

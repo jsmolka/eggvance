@@ -10,6 +10,9 @@
 
 Arm::Arm()
 {
+    events.interrupt.data = this;
+    events.interrupt.callback = &Events::doInterrupt;
+
     irq.master.on_write  = std::bind(&Arm::interruptProcess, this);
     irq.enable.on_write  = std::bind(&Arm::interruptProcess, this);
     irq.request.on_write = std::bind(&Arm::interruptProcess, this);
@@ -54,20 +57,15 @@ void Arm::dispatch()
         {
             int event = cycles;
 
-            if (State & kStateIrq && !cpsr.i && irq.delaying)
-            {
-                event = std::min(event, irq.delay);
-            }
-
-            // Todo: ugly
+            // Todo: ugly, fix with u64 cycle counting
             if (scheduler.next != std::numeric_limits<u64>::max())
                 event = std::min<int>(event, scheduler.next - scheduler.now);
 
             tick(event);
 
-            if (State & kStateIrq && !cpsr.i && irq.delay == 0)
+            if (State & kStateIrq && !cpsr.i && irq.delayed)
             {
-                irq.delaying = false;
+                irq.delayed = false;
 
                 interruptHw();
 
@@ -76,9 +74,9 @@ void Arm::dispatch()
         }
         else
         {
-            if (State & kStateIrq && !cpsr.i && irq.delay == 0)
+            if (State & kStateIrq && !cpsr.i && irq.delayed)
             {
-                irq.delaying = false;
+                irq.delayed = false;
 
                 interruptHw();
             }
