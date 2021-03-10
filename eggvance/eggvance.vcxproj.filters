@@ -386,7 +386,10 @@
     <ClInclude Include="src\base\constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\scheduler\list.h">
+    <ClInclude Include="src\scheduler\circularlist.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scheduler\node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

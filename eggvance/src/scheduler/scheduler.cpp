@@ -4,14 +4,20 @@
 
 Scheduler::Scheduler()
 {
-    next = std::numeric_limits<u64>::max();
+    events.tombstone.data = this;
+    events.tombstone.callback = &Events::die;
+    events.tombstone.when = std::numeric_limits<u64>::max();
+
+    list.setTombstone(events.tombstone);
+
+    next = events.tombstone.when;
 }
 
 void Scheduler::run(u64 cycles)
 {
     now += cycles;
 
-    while (now >= next && list.head)
+    while (now >= next)
     {
         Event& event = list.pop();
 
@@ -21,10 +27,7 @@ void Scheduler::run(u64 cycles)
         event.when = 0;
         event.callback(event.data, late);
 
-        if (list.head)
-            next = list.head->when;
-        else
-            next = std::numeric_limits<u64>::max();
+        next = list.head->when;
     }
 }
 
@@ -52,4 +55,9 @@ void Scheduler::erase(Event& event)
         list.erase(event);
         event.when = 0;
     }
+}
+
+void Scheduler::Events::die(void* data, u64 late)
+{
+    SHELL_UNREACHABLE;
 }

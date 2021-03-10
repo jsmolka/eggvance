@@ -135,8 +135,9 @@
     <ClInclude Include="src\ppu\ppu.h" />
     <ClInclude Include="src\ppu\videoram.h" />
     <ClInclude Include="src\scheduler\event.h" />
-    <ClInclude Include="src\scheduler\list.h" />
+    <ClInclude Include="src\scheduler\node.h" />
     <ClInclude Include="src\scheduler\scheduler.h" />
+    <ClInclude Include="src\scheduler\circularlist.h" />
     <ClInclude Include="src\sio\sio.h" />
     <ClInclude Include="src\timer\io.h" />
     <ClInclude Include="src\timer\timer.h" />

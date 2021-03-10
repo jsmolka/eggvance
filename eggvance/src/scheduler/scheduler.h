@@ -1,5 +1,6 @@
 #pragma once
 
+#include "circularlist.h"
 #include "event.h"
 
 #define SCHEDULER_ASSERT(value) SHELL_ASSERT(value < 0xFFFF'FFFF)
@@ -19,7 +20,14 @@ public:
     u64 next = 0;
 
 private:
-    List<Event> list;
+    struct Events
+    {
+        static void die(void* data, u64 late);
+
+        Event tombstone;
+    } events;
+
+    CircularList<Event> list;
 };
 
 inline Scheduler scheduler;

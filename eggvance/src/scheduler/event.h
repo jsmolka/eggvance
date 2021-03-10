@@ -1,6 +1,6 @@
 #pragma once
 
-#include "list.h"
+#include "node.h"
 #include "base/int.h"
 
 class Event : public Node<Event>
