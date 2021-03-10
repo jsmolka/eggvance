@@ -22,8 +22,8 @@ void TimerChannel::start()
     if (events.start.when)
         return;
 
-    scheduler.erase(events.run);
-    scheduler.addIn(events.start, 2);
+    scheduler.dequeue(events.run);
+    scheduler.queueIn(events.start, 2);
 }
 
 void TimerChannel::update()
@@ -68,12 +68,12 @@ void TimerChannel::run()
 
 void TimerChannel::schedule()
 {
-    scheduler.erase(events.run);
+    scheduler.dequeue(events.run);
 
     if (control.cascade)
         return;
     
-    scheduler.addIn(events.run, overflow - counter);
+    scheduler.queueIn(events.run, overflow - counter);
 }
 
 void TimerChannel::Events::doRun(void* data, u64 late)
