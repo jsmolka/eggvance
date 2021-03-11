@@ -132,7 +132,8 @@ private:
 
     struct Irq
     {
-        bool delayed = false;
+        bool servable() const;
+        bool interrupted() const;
 
         IrqMaster  master;
         IrqEnable  enable;

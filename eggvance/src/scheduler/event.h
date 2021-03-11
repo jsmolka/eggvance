@@ -8,23 +8,10 @@ class Event : public Node<Event>
 public:
     using Callback = void(*)(void*, u64);
 
-    void operator()(u64 now)
-    {
-        u64 late = now - when;
-
-        when = 0;
-        callback(data, late);
-    }
-    
-    bool operator<(const Event& other) const
-    {
-        return when < other.when;
-    }
-
-    bool operator>(const Event& other) const
-    {
-        return when > other.when;
-    }
+    void operator()(u64 now);
+    bool operator<(const Event& other) const;
+    bool operator>(const Event& other) const;
+    bool scheduled() const;
 
     u64 when = 0;
     void* data = nullptr;

@@ -53,31 +53,32 @@ void Arm::interruptSw()
 
 void Arm::interruptProcess()
 {
-    bool servable = irq.enable & irq.request;
-
-    if (servable)
+    if (irq.servable())
         state &= ~kStateHalt;
 
-    if (servable && irq.master)
+    if (irq.interrupted())
     {
-        if (!irq.delayed && events.interrupt.when == 0)
-        {
-            irq.delayed = false;
+        if (!events.interrupt.scheduled() && !(state & kStateIrq))
             scheduler.queueIn(events.interrupt, 3);
-        }
-        state |= kStateIrq;
     }
     else
     {
-        scheduler.dequeue(events.interrupt);
-        irq.delayed = false;
         state &= ~kStateIrq;
+        scheduler.dequeue(events.interrupt);
     }
 }
 
 void Arm::Events::doInterrupt(void* data, u64 late)
 {
-    Arm& arm = *reinterpret_cast<Arm*>(data);
+    reinterpret_cast<Arm*>(data)->state |= kStateIrq;
+}
 
-    arm.irq.delayed = true;
+bool Arm::Irq::servable() const
+{
+    return enable & request;
+}
+
+bool Arm::Irq::interrupted() const
+{
+    return servable() && master;
 }

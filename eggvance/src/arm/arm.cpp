@@ -62,22 +62,11 @@ void Arm::dispatch()
                 event = std::min<int>(event, scheduler.next - scheduler.now);
 
             tick(event);
-
-            if (State & kStateIrq && !cpsr.i && irq.delayed)
-            {
-                irq.delayed = false;
-
-                interruptHw();
-
-                pc += cpsr.size();
-            }
         }
         else
         {
-            if (State & kStateIrq && !cpsr.i && irq.delayed)
+            if (State & kStateIrq && !cpsr.i)
             {
-                irq.delayed = false;
-
                 interruptHw();
             }
             else
