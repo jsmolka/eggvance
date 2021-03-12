@@ -125,8 +125,6 @@ private:
 
     struct Events
     {
-        static void doInterrupt(void* data, u64 late);
-
         Event interrupt;
     } events;
 

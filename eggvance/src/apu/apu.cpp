@@ -13,11 +13,15 @@ inline constexpr auto kSequenceCycles = kCpuFrequency / 512;
 
 Apu::Apu()
 {
-    events.sequence.data = this;
-    events.sequence.callback = &Events::doSequence<0>;
+    events.sequence = [this](u64 late)
+    {
+        sequence<0>(late);
+    };
 
-    events.sample.data = this;
-    events.sample.callback = &Events::doSample;
+    events.sample = [this](u64 late)
+    {
+        sample(late);
+    };
 }
 
 void Apu::init()
@@ -49,11 +53,9 @@ void Apu::onOverflow(uint timer, uint times)
 }
 
 template<uint Step>
-void Apu::Events::doSequence(void* data, u64 late)
+void Apu::sequence(u64 late)
 {
     static_assert(!(Step == 1 || Step == 3 || Step == 5));
-
-    auto& apu = *reinterpret_cast<Apu*>(data);
 
     switch (Step)
     {
@@ -64,21 +66,21 @@ void Apu::Events::doSequence(void* data, u64 late)
 
     case 2:
     case 6:
-        apu.square1.tickSweep();
+        square1.tickSweep();
         [[fallthrough]];
 
     case 0:
     case 4:
-        apu.noise.tickLength();
-        apu.square1.tickLength();
-        apu.square2.tickLength();
-        apu.wave.tickLength();
+        noise.tickLength();
+        square1.tickLength();
+        square2.tickLength();
+        wave.tickLength();
         break;
 
     case 7:
-        apu.noise.tickEnvelope();
-        apu.square1.tickEnvelope();
-        apu.square2.tickEnvelope();
+        noise.tickEnvelope();
+        square1.tickEnvelope();
+        square2.tickEnvelope();
         break;
 
     default:
@@ -88,26 +90,30 @@ void Apu::Events::doSequence(void* data, u64 late)
 
     if constexpr (Step == 0 || Step == 2 || Step == 4)
     {
-        apu.events.sequence.callback = &Events::doSequence<(Step + 2) % 8>;
-        scheduler.queueIn(apu.events.sequence, 2 * kSequenceCycles - late);
+        events.sequence = [this](u64 late)
+        {
+            sequence<(Step + 2) % 8>(late);
+        };
+        scheduler.queueIn(events.sequence, 2 * kSequenceCycles - late);
     }
     else
     {
-        apu.events.sequence.callback = &Events::doSequence<(Step + 1) % 8>;
-        scheduler.queueIn(apu.events.sequence, 1 * kSequenceCycles - late);
+        events.sequence = [this](u64 late)
+        {
+            sequence<(Step + 1) % 8>(late);
+        };
+        scheduler.queueIn(events.sequence, 1 * kSequenceCycles - late);
     }
 }
 
-void Apu::Events::doSample(void * data, u64 late)
+void Apu::sample(u64 late)
 {
-    auto& apu = *reinterpret_cast<Apu*>(data);
-
     s16 sample_l = 0;
     s16 sample_r = 0;
 
-    if (apu.control.enabled)
+    if (control.enabled)
     {
-        Channel* channels[4] = { &apu.square1, &apu.square2, &apu.wave, &apu.noise };
+        Channel* channels[4] = { &square1, &square2, &wave, &noise };
 
         for (auto [index, channel] : shell::enumerate(channels))
         {
@@ -116,18 +122,18 @@ void Apu::Events::doSample(void * data, u64 late)
 
             channel->tick();
 
-            if (apu.control.enabled_l & (1 << index)) sample_l += channel->sample;
-            if (apu.control.enabled_r & (1 << index)) sample_r += channel->sample;
+            if (control.enabled_l & (1 << index)) sample_l += channel->sample;
+            if (control.enabled_r & (1 << index)) sample_r += channel->sample;
         }
 
-        sample_l  *= apu.control.volume_l + 1;
-        sample_r  *= apu.control.volume_r + 1;
+        sample_l  *= control.volume_l + 1;
+        sample_r  *= control.volume_r + 1;
         sample_l <<= 1;
         sample_r <<= 1;
-        sample_l >>= 3 - apu.control.volume;
-        sample_r >>= 3 - apu.control.volume;
+        sample_l >>= 3 - control.volume;
+        sample_r >>= 3 - control.volume;
 
-        for (const auto& fifo : apu.fifo)
+        for (const auto& fifo : fifo)
         {
             if (fifo.enabled_l) sample_l += fifo.sample << fifo.volume;
             if (fifo.enabled_r) sample_r += fifo.sample << fifo.volume;
@@ -139,5 +145,5 @@ void Apu::Events::doSample(void * data, u64 late)
 
     audio_ctx.write(sample_l << 5, sample_r << 5);
 
-    scheduler.queueIn(apu.events.sample, kSampleCycles - late);
+    scheduler.queueIn(events.sample, kSampleCycles - late);
 }

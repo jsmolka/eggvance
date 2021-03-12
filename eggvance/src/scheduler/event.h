@@ -8,7 +8,12 @@
 class Event : public Node<Event>
 {
 public:
-    using Callback = void(*)(void*, u64);
+    template<typename Function>
+    Event& operator=(Function&& func)
+    {
+        callback = std::forward<Function>(func);
+        return *this;
+    }
 
     void operator()(u64 now);
     bool operator<(const Event& other) const;
@@ -16,7 +21,7 @@ public:
     bool scheduled() const;
 
     u64 when = 0;
-    void* data = nullptr;
-    Callback callback = nullptr;
-    std::function<void(u64)> cb;
+
+private:
+    std::function<void(u64)> callback;
 };

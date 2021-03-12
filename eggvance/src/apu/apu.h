@@ -27,13 +27,13 @@ public:
 private:
     struct Events
     {
-        template<uint Step>
-        static void doSequence(void* data, u64 late);
-        static void doSample(void* data, u64 late);
-
         Event sequence;
         Event sample;
     } events;
+
+    template<uint Step>
+    void sequence(u64 late);
+    void sample(u64 late);
 };
 
 inline Apu apu;

@@ -4,8 +4,11 @@
 
 Scheduler::Scheduler()
 {
-    events.tombstone.data = this;
-    events.tombstone.callback = &Events::doTombstone;
+    events.tombstone = [this](u64 late)
+    {
+        SHELL_UNREACHABLE;
+    };
+
     events.tombstone.when = std::numeric_limits<u64>::max();
 
     list.setTombstone(events.tombstone);
@@ -44,9 +47,4 @@ void Scheduler::dequeue(Event& event)
         event.when = 0;
         list.erase(event);
     }
-}
-
-void Scheduler::Events::doTombstone(void* data, u64 late)
-{
-    SHELL_UNREACHABLE;
 }

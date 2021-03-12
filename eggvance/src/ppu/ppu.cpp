@@ -54,7 +54,7 @@ Ppu::Ppu()
 
 void Ppu::init()
 {
-    events.hblank.cb = [this](u64 late)
+    events.hblank = [this](u64 late)
     {
         if (vcount.value < 160)
             scanline();
@@ -64,7 +64,7 @@ void Ppu::init()
         scheduler.queueIn(events.hblank_end, 272 - late);
     };
 
-    events.hblank_end.cb = [this](u64 late)
+    events.hblank_end = [this](u64 late)
     {
         next();
 

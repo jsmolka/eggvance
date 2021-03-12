@@ -68,11 +68,6 @@ void Arm::interruptProcess()
     }
 }
 
-void Arm::Events::doInterrupt(void* data, u64 late)
-{
-    reinterpret_cast<Arm*>(data)->state |= kStateIrq;
-}
-
 bool Arm::Irq::servable() const
 {
     return enable & request;

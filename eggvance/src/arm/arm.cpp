@@ -10,8 +10,10 @@
 
 Arm::Arm()
 {
-    events.interrupt.data = this;
-    events.interrupt.callback = &Events::doInterrupt;
+    events.interrupt = [this](u64 late)
+    {
+        state |= kStateIrq;
+    };
 
     irq.master.on_write  = std::bind(&Arm::interruptProcess, this);
     irq.enable.on_write  = std::bind(&Arm::interruptProcess, this);

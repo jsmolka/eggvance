@@ -10,11 +10,24 @@ inline constexpr u64 kOverflow = 0x1'0000;
 TimerChannel::TimerChannel(uint id)
     : id(id), count(*this), control(*this)
 {
-    events.run.data = this;
-    events.run.callback = &Events::doRun;
+    events.run = [this](u64 late)
+    {
+        run(scheduler.now - since + late);
+        schedule();
+    };
 
-    events.start.data = this;
-    events.start.callback = &Events::doStart;
+    events.start = [this](u64 late)
+    {
+        since    = scheduler.now - late;
+        counter  = 0;
+        initial  = count.initial;
+        overflow = control.prescaler * (kOverflow - initial);
+
+        if (control.cascade == 0)
+            run(late);
+
+        schedule();
+    };
 }
 
 void TimerChannel::start()
@@ -74,27 +87,4 @@ void TimerChannel::schedule()
         return;
     
     scheduler.queueIn(events.run, overflow - counter);
-}
-
-void TimerChannel::Events::doRun(void* data, u64 late)
-{
-    TimerChannel& channel = *reinterpret_cast<TimerChannel*>(data);
-
-    channel.run(scheduler.now - channel.since + late);
-    channel.schedule();
-}
-
-void TimerChannel::Events::doStart(void* data, u64 late)
-{
-    TimerChannel& channel = *reinterpret_cast<TimerChannel*>(data);
-
-    channel.since    = scheduler.now - late;
-    channel.counter  = 0;
-    channel.initial  = channel.count.initial;
-    channel.overflow = channel.control.prescaler * (kOverflow - channel.initial);
-
-    if (channel.control.cascade == 0)
-        channel.run(late);
-
-    channel.schedule();
 }

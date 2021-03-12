@@ -22,9 +22,6 @@ public:
 private:
     struct Events
     {
-        static void doRun(void* data, u64 late);
-        static void doStart(void* data, u64 late);
-
         Event run;
         Event start;
     } events;
