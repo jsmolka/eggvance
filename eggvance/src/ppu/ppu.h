@@ -8,6 +8,7 @@
 #include "oam.h"
 #include "paletteram.h"
 #include "videoram.h"
+#include "scheduler/event.h"
 
 class Ppu
 {
@@ -16,6 +17,7 @@ public:
 
     Ppu();
 
+    void init();
     void scanline();
     void hblank();
     void vblank();
@@ -51,6 +53,15 @@ private:
         kWindow1   = 1 << 1,
         kWindowObj = 1 << 2
     };
+
+    struct Events
+    {
+        static void doHBlank(void* data, u64 late);
+        static void doHBlankEnd(void* data, u64 late);
+
+        Event hblank;
+        Event hblank_end;
+    } events;
 
     using BgLayers = shell::FixedBuffer<BgLayer, 4>;
     using RenderFunc = void(Ppu::*)(uint);

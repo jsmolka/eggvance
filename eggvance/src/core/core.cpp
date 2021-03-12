@@ -10,6 +10,7 @@
 #include "apu/apu.h"
 #include "arm/arm.h"
 #include "base/config.h"
+#include "base/constants.h"
 #include "base/panic.h"
 #include "dma/dma.h"
 #include "gamepad/gamepad.h"
@@ -71,32 +72,19 @@ void core::reset()
 
     arm.init();
     apu.init();
+    ppu.init();
 }
 
 void core::frame()
 {
+    constexpr auto kPixelsHor   = 240 + 68;
+    constexpr auto kPixelsVer   = 160 + 68;
+    constexpr auto kPixelCycles = 4;
+    constexpr auto kFrameCycles = kPixelCycles * kPixelsHor * kPixelsVer;
+
     gamepad.poll();
 
-    uint visible = 160;
-    while (visible--)
-    {
-        arm.run(960);
-        ppu.scanline();
-        ppu.hblank();
-        arm.run(272);
-        ppu.next();
-    }
-
-    ppu.vblank();
-
-    uint invisible = 68;
-    while (invisible--)
-    {
-        arm.run(960);
-        ppu.hblank();
-        arm.run(272);
-        ppu.next();
-    }
+    arm.run(kFrameCycles);
 
     ppu.present();
 }

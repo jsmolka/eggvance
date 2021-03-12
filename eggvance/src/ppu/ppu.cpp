@@ -13,6 +13,12 @@
 
 Ppu::Ppu()
 {
+    events.hblank.data = this;
+    events.hblank.callback = &Events::doHBlank;
+
+    events.hblank_end.data = this;
+    events.hblank_end.callback = &Events::doHBlankEnd;
+
     backgrounds[0].fill(kTransparent);
     backgrounds[1].fill(kTransparent);
     backgrounds[2].fill(kTransparent);
@@ -50,6 +56,11 @@ Ppu::Ppu()
 
         argb[color] = 0xFF00'0000 | (r << 16) | (g << 8) | b;
     }
+}
+
+void Ppu::init()
+{
+    scheduler.queueIn(ppu.events.hblank, 960);
 }
 
 void Ppu::scanline()
@@ -180,4 +191,24 @@ void Ppu::present()
         video_ctx.renderCopyTexture();
         video_ctx.renderPresent();
     }
+}
+
+void Ppu::Events::doHBlank(void* data, u64 late)
+{
+    if (ppu.vcount.value < 160)
+        ppu.scanline();
+
+    ppu.hblank();
+
+    scheduler.queueIn(ppu.events.hblank_end, 272 - late);
+}
+
+void Ppu::Events::doHBlankEnd(void* data, u64 late)
+{
+    ppu.next();
+
+    if (ppu.vcount.value == 160)
+        ppu.vblank();
+
+    scheduler.queueIn(ppu.events.hblank, 960 - late);
 }
