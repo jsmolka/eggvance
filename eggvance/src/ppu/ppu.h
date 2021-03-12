@@ -56,9 +56,6 @@ private:
 
     struct Events
     {
-        static void doHBlank(void* data, u64 late);
-        static void doHBlankEnd(void* data, u64 late);
-
         Event hblank;
         Event hblank_end;
     } events;

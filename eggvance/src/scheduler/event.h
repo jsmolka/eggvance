@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 #include "node.h"
 #include "base/int.h"
 
@@ -16,4 +18,5 @@ public:
     u64 when = 0;
     void* data = nullptr;
     Callback callback = nullptr;
+    std::function<void(u64)> cb;
 };

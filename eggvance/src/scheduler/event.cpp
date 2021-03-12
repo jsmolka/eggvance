@@ -5,7 +5,10 @@ void Event::operator()(u64 now)
     u64 late = now - when;
 
     when = 0;
-    callback(data, late);
+    if (cb)
+        cb(late);
+    else
+        callback(data, late);
 }
 
 bool Event::operator<(const Event& other) const
