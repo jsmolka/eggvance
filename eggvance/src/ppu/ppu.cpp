@@ -188,12 +188,13 @@ void Ppu::next()
 {
     dispstat.hblank = false;
 
+    vcount.next();
+
     dispstat.vmatch = vcount.value == dispstat.vcompare;
     if (dispstat.vmatch && dispstat.vmatch_irq)
     {
         arm.raise(kIrqVMatch);
     }
-    vcount.next();
 }
 
 void Ppu::present()
