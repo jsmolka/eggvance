@@ -93,7 +93,7 @@
     <ClCompile Include="src\dma\dmachannel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\gamepad\gamepad.cpp">
+    <ClCompile Include="src\keypad\keypad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\gamepak\eeprom.cpp">
@@ -177,7 +177,7 @@
     <ClCompile Include="src\sio\io.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\gamepad\io.cpp">
+    <ClCompile Include="src\keypad\io.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -293,10 +293,10 @@
     <ClInclude Include="src\dma\io.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\gamepad\gamepad.h">
+    <ClInclude Include="src\keypad\keypad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\gamepad\io.h">
+    <ClInclude Include="src\keypad\io.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\gamepak\eeprom.h">

@@ -13,8 +13,8 @@
 #include "base/constants.h"
 #include "base/panic.h"
 #include "dma/dma.h"
-#include "gamepad/gamepad.h"
 #include "gamepak/gamepak.h"
+#include "keypad/keypad.h"
 #include "ppu/ppu.h"
 #include "scheduler/scheduler.h"
 #include "sio/sio.h"
@@ -65,7 +65,7 @@ void core::reset()
     shell::reconstruct(arm);
     shell::reconstruct(dma);
     shell::reconstruct(ppu);
-    shell::reconstruct(gamepad);
+    shell::reconstruct(keypad);
     shell::reconstruct(sio);
     shell::reconstruct(scheduler);
     shell::reconstruct(timer);
@@ -82,7 +82,7 @@ void core::frame()
     constexpr auto kPixelCycles = 4;
     constexpr auto kFrameCycles = kPixelCycles * kPixelsHor * kPixelsVer;
 
-    gamepad.update();
+    keypad.update();
 
     arm.run(kFrameCycles);
 

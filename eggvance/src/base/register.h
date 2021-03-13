@@ -90,6 +90,8 @@ public:
         u8 bytes[sizeof(Integral)];
     };
 
+    const Integral mask;
+
 protected:
     u8 read(uint index) const
     {
@@ -104,8 +106,6 @@ protected:
 
         bytes[index] = byte;
     }
-
-    const Integral mask;
 };
 
 template<typename Integral, Integral Mask = ones_v<Integral>>

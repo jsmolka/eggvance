@@ -14,7 +14,7 @@ enum Irq
     kIrqDma1    = 1 << 9,
     kIrqDma2    = 1 << 10,
     kIrqDma3    = 1 << 11,
-    kIrqGamepad = 1 << 12,
+    kIrqKeypad = 1 << 12,
     kIrqGamePak = 1 << 13
 };
 

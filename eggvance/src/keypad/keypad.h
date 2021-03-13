@@ -2,14 +2,14 @@
 
 #include "io.h"
 
-class Gamepad
+class Keypad
 {
 public:
     void update();
-    void tryRaise();
+    void checkInterrupt();
 
     KeyInput input;
     KeyControl control;
 };
 
-inline Gamepad gamepad;
+inline Keypad keypad;

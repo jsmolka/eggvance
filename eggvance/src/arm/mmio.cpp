@@ -3,7 +3,7 @@
 #include "apu/apu.h"
 #include "base/macros.h"
 #include "dma/dma.h"
-#include "gamepad/gamepad.h"
+#include "keypad/keypad.h"
 #include "ppu/ppu.h"
 #include "sio/sio.h"
 #include "timer/timer.h"
@@ -169,8 +169,8 @@ u8 Arm::readIo(u32 addr)
     INDEXED_CASE2(kRegSioMulti3,      return sio.siomulti[3].read<kIndex>());
     INDEXED_CASE2(kRegSioControl,     return sio.siocnt.read(kIndex));
     INDEXED_CASE2(kRegSioSend,        return sio.siosend.read<kIndex>());
-    INDEXED_CASE2(kRegKeyInput,       return gamepad.input.read<kIndex>());
-    INDEXED_CASE2(kRegKeyControl,     return gamepad.control.read<kIndex>());
+    INDEXED_CASE2(kRegKeyInput,       return keypad.input.read(kIndex));
+    INDEXED_CASE2(kRegKeyControl,     return keypad.control.read(kIndex));
     INDEXED_CASE2(kRegRemoteControl,  return sio.rcnt.read<kIndex>());
     INDEXED_CASE2(kRegUnused136,      return 0);
     INDEXED_CASE2(kRegJoyControl,     return sio.joycnt.read<kIndex>());
@@ -278,7 +278,7 @@ void Arm::writeIo(u32 addr, u8 byte)
     INDEXED_CASE2(kRegSioMulti3,      sio.siomulti[3].write<kIndex>(byte));
     INDEXED_CASE2(kRegSioControl,     sio.siocnt.write(kIndex, byte));
     INDEXED_CASE2(kRegSioSend,        sio.siosend.write<kIndex>(byte));
-    INDEXED_CASE2(kRegKeyControl,     gamepad.control.write<kIndex>(byte));
+    INDEXED_CASE2(kRegKeyControl,     keypad.control.write(kIndex, byte));
     INDEXED_CASE2(kRegRemoteControl,  sio.rcnt.write<kIndex>(byte));
     INDEXED_CASE2(kRegJoyControl,     sio.joycnt.write<kIndex>(byte));
     INDEXED_CASE4(kRegJoyReceive,     sio.joyrecv.write<kIndex>(byte));

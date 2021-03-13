@@ -45,8 +45,8 @@
     <ClCompile Include="src\core\videocontext.cpp" />
     <ClCompile Include="src\dma\dma.cpp" />
     <ClCompile Include="src\dma\dmachannel.cpp" />
-    <ClCompile Include="src\gamepad\gamepad.cpp" />
-    <ClCompile Include="src\gamepad\io.cpp" />
+    <ClCompile Include="src\keypad\keypad.cpp" />
+    <ClCompile Include="src\keypad\io.cpp" />
     <ClCompile Include="src\gamepak\eeprom.cpp" />
     <ClCompile Include="src\gamepak\flash.cpp" />
     <ClCompile Include="src\gamepak\gamepak.cpp" />
@@ -112,8 +112,8 @@
     <ClInclude Include="src\dma\dma.h" />
     <ClInclude Include="src\dma\dmachannel.h" />
     <ClInclude Include="src\dma\io.h" />
-    <ClInclude Include="src\gamepad\gamepad.h" />
-    <ClInclude Include="src\gamepad\io.h" />
+    <ClInclude Include="src\keypad\keypad.h" />
+    <ClInclude Include="src\keypad\io.h" />
     <ClInclude Include="src\gamepak\eeprom.h" />
     <ClInclude Include="src\gamepak\flash.h" />
     <ClInclude Include="src\gamepak\gamepak.h" />
