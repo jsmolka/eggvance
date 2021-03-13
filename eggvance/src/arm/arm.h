@@ -15,7 +15,7 @@ public:
     Arm();
 
     void init();
-    void run(int cycles);
+    void run(u64 cycles);
     void raise(uint irq);
 
     u8  readByte(u32 addr, Access access = Access::NonSequential);
@@ -71,10 +71,9 @@ private:
     void flushHalf();
     void flushWord();
 
-    SHELL_INLINE void tick(int cycles);
-    SHELL_INLINE void idle(int cycles = 1);
-    SHELL_INLINE void tickRam(int cycles);
-    SHELL_INLINE void tickRom(u32 addr, int cycles);
+    SHELL_INLINE void idle(u64 cycles = 1);
+    SHELL_INLINE void tickRam(u64 cycles);
+    SHELL_INLINE void tickRom(u32 addr, u64 cycles);
     template<bool Signed>
     SHELL_INLINE void tickMultiply(u32 multiplier);
 
@@ -121,7 +120,7 @@ private:
     template<u16 Instr> void Thumb_Undefined(u16 instr);
 
     Pipeline pipe;
-    int cycles = 0;
+    u64 target = 0;
 
     struct Events
     {
@@ -140,8 +139,8 @@ private:
 
     struct Prefetch
     {
-        int active = 0;
-        int cycles = 0;
+        u64 active = 0;
+        u64 cycles = 0;
     } prefetch;
 
     WaitControl  waitcnt;

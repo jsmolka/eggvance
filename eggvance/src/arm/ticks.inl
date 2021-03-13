@@ -1,45 +1,36 @@
 #pragma once
 
-#include "apu/apu.h"
 #include "scheduler/scheduler.h"
-#include "timer/timer.h"
 
-SHELL_INLINE void Arm::tick(int cycles)
-{
-    this->cycles -= cycles;
-
-    scheduler.run(cycles);
-}
-
-SHELL_INLINE void Arm::idle(int cycles)
+SHELL_INLINE void Arm::idle(u64 cycles)
 {
     pipe.access = Access::NonSequential;
 
     tickRam(cycles);
 }
 
-SHELL_INLINE void Arm::tickRam(int cycles)
+SHELL_INLINE void Arm::tickRam(u64 cycles)
 {
-    if (waitcnt.prefetch && !(state & kStateDma) && prefetch.active)
+    if (prefetch.active && !(state & kStateDma) && waitcnt.prefetch)
         prefetch.cycles += cycles;
 
-    tick(cycles);
+    scheduler.run(cycles);
 }
 
-SHELL_INLINE void Arm::tickRom(u32 addr, int cycles)
+SHELL_INLINE void Arm::tickRom(u32 addr, u64 cycles)
 {
-    if (waitcnt.prefetch && !(state & kStateDma))
+    if (!(state & kStateDma) && waitcnt.prefetch)
     {
         prefetch.active = addr == pc;
 
         if (prefetch.active && prefetch.cycles)
         {
-            int non = waitcnt.cyclesHalf(addr, Access::NonSequential);
-            int seq = waitcnt.cyclesHalf(addr, Access::Sequential);
+            u64 non = waitcnt.waitHalf(addr, Access::NonSequential);
+            u64 seq = waitcnt.waitHalf(addr, Access::Sequential);
 
             cycles -= non - seq + std::min(8 * seq, prefetch.cycles);
 
-            if (cycles <= 0)
+            if (static_cast<s64>(cycles) <= 0)
             {
                 prefetch.cycles = 0;
                 return;
@@ -47,13 +38,13 @@ SHELL_INLINE void Arm::tickRom(u32 addr, int cycles)
         }
         prefetch.cycles = 0;
     }
-    tick(cycles);
+    scheduler.run(cycles);
 }
 
 template<bool Signed>
 SHELL_INLINE void Arm::tickMultiply(u32 multiplier)
 {
-    int cycles = 1;
+    u64 cycles = 1;
 
     if (Signed)
     {

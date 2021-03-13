@@ -18,8 +18,8 @@ public:
 
     void write(uint index, u8 byte);
 
-    int cyclesHalf(u32 addr, Access access) const { return cycles_half[(addr >> 25) & 0x3][static_cast<uint>(access)]; }
-    int cyclesWord(u32 addr, Access access) const { return cycles_word[(addr >> 25) & 0x3][static_cast<uint>(access)]; }
+    u64 waitHalf(u32 addr, Access access) const { return wait.half[(addr >> 25) & 0x3][static_cast<uint>(access)]; }
+    u64 waitWord(u32 addr, Access access) const { return wait.word[(addr >> 25) & 0x3][static_cast<uint>(access)]; }
 
     uint sram     = 0;
     uint ws0_n    = 0;
@@ -33,8 +33,11 @@ public:
 private:
     void update();
 
-    int cycles_half[4][2];
-    int cycles_word[4][2];
+    struct WaitStates
+    {
+        u64 half[4][2];
+        u64 word[4][2];
+    } wait;
 };
 
 class IrqMaster : public XRegister<u32, 0x0001>

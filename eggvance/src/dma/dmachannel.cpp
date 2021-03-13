@@ -75,7 +75,7 @@ void DmaChannel::run()
         internal.src_addr += delta_src;
         internal.dst_addr += delta_dst;
 
-        if (arm.cycles <= 0 && pending > 0)
+        if (arm.target >= scheduler.now && pending > 0)
             return;
     }
 

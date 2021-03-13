@@ -71,12 +71,12 @@ u8 Arm::readByte(u32 addr, Access access)
     case kRegionGamePak1H:
     case kRegionGamePak2L:
     case kRegionGamePak2H:
-        tickRom(addr, waitcnt.cyclesHalf(addr, access));
+        tickRom(addr, waitcnt.waitHalf(addr, access));
         return gamepak.read<u8>(addr);
 
     case kRegionSaveL:
     case kRegionSaveH:
-        tickRom(addr, waitcnt.cyclesHalf(addr, access));
+        tickRom(addr, waitcnt.waitHalf(addr, access));
         return gamepak.readSave(addr);
 
     default:
@@ -132,7 +132,7 @@ u16 Arm::readHalf(u32 addr, Access access)
     case kRegionGamePak2H:
         if (gamepak.isEepromAccess(addr))
         {
-            tickRom(addr, waitcnt.cyclesHalf(addr, access));
+            tickRom(addr, waitcnt.waitHalf(addr, access));
             return 1;
         }
         [[fallthrough]];
@@ -142,12 +142,12 @@ u16 Arm::readHalf(u32 addr, Access access)
     case kRegionGamePak1L:
     case kRegionGamePak1H:
     case kRegionGamePak2L:
-        tickRom(addr, waitcnt.cyclesHalf(addr, access));
+        tickRom(addr, waitcnt.waitHalf(addr, access));
         return gamepak.read<u16>(addr);
 
     case kRegionSaveL:
     case kRegionSaveH:
-        tickRom(addr, waitcnt.cyclesHalf(addr, access));
+        tickRom(addr, waitcnt.waitHalf(addr, access));
         return gamepak.readSave(addr) * 0x0101;
 
     default:
@@ -205,7 +205,7 @@ u32 Arm::readWord(u32 addr, Access access)
     case kRegionGamePak2H:
         if (gamepak.isEepromAccess(addr))
         {
-            tickRom(addr, waitcnt.cyclesWord(addr, access));
+            tickRom(addr, waitcnt.waitWord(addr, access));
             return 1;
         }
         [[fallthrough]];
@@ -215,12 +215,12 @@ u32 Arm::readWord(u32 addr, Access access)
     case kRegionGamePak1L:
     case kRegionGamePak1H:
     case kRegionGamePak2L:
-        tickRom(addr, waitcnt.cyclesWord(addr, access));
+        tickRom(addr, waitcnt.waitWord(addr, access));
         return gamepak.read<u32>(addr);
 
     case kRegionSaveL:
     case kRegionSaveH:
-        tickRom(addr, waitcnt.cyclesWord(addr, access));
+        tickRom(addr, waitcnt.waitWord(addr, access));
         return gamepak.readSave(addr) * 0x0101'0101;
 
     default:
@@ -275,13 +275,13 @@ void Arm::writeByte(u32 addr, u8 byte, Access access)
     case kRegionGamePak1H:
     case kRegionGamePak2L:
     case kRegionGamePak2H:
-        tickRom(addr, waitcnt.cyclesHalf(addr, access));
+        tickRom(addr, waitcnt.waitHalf(addr, access));
         gamepak.write<u8>(addr, byte);
         break;
 
     case kRegionSaveL:
     case kRegionSaveH:
-        tickRom(addr, waitcnt.cyclesHalf(addr, access));
+        tickRom(addr, waitcnt.waitHalf(addr, access));
         gamepak.writeSave(addr, byte);
         break;
 
@@ -340,13 +340,13 @@ void Arm::writeHalf(u32 addr, u16 half, Access access)
     case kRegionGamePak1H:
     case kRegionGamePak2L:
     case kRegionGamePak2H:
-        tickRom(addr, waitcnt.cyclesHalf(addr, access));
+        tickRom(addr, waitcnt.waitHalf(addr, access));
         gamepak.write<u16>(addr, half);
         break;
 
     case kRegionSaveL:
     case kRegionSaveH:
-        tickRom(addr, waitcnt.cyclesHalf(addr, access));
+        tickRom(addr, waitcnt.waitHalf(addr, access));
         gamepak.writeSave(addr, half >> (8 * (addr & 0x1)));
         break;
 
@@ -407,13 +407,13 @@ void Arm::writeWord(u32 addr, u32 word, Access access)
     case kRegionGamePak1H:
     case kRegionGamePak2L:
     case kRegionGamePak2H:
-        tickRom(addr, waitcnt.cyclesWord(addr, access));
+        tickRom(addr, waitcnt.waitWord(addr, access));
         gamepak.write<u32>(addr, word);
         break;
 
     case kRegionSaveL:
     case kRegionSaveH:
-        tickRom(addr, waitcnt.cyclesWord(addr, access));
+        tickRom(addr, waitcnt.waitWord(addr, access));
         gamepak.writeSave(addr, word >> (8 * (addr & 0x3)));
         break;
 

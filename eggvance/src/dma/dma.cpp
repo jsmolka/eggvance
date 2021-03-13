@@ -18,7 +18,7 @@ Dma::Dma()
 
 void Dma::run()
 {
-    while (active && arm.cycles > 0)
+    while (active && scheduler.now < arm.target)
     {
         active->run();
 

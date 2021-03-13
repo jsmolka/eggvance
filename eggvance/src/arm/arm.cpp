@@ -28,11 +28,11 @@ void Arm::init()
     pc += 4;
 }
 
-void Arm::run(int cycles)
+void Arm::run(u64 cycles)
 {
-    this->cycles += cycles;
+    target += cycles;
 
-    while (this->cycles > 0)
+    while (scheduler.now < target)
     {
         switch (state)
         {
@@ -49,7 +49,7 @@ void Arm::run(int cycles)
 template<uint State>
 void Arm::dispatch()
 {
-    while (cycles > 0 && state == State)
+    while (scheduler.now < target && state == State)
     {
         if (State & kStateDma)
         {
@@ -57,13 +57,7 @@ void Arm::dispatch()
         }
         else if (State & kStateHalt)
         {
-            int event = cycles;
-
-            // Todo: ugly, fix with u64 cycle counting
-            if (scheduler.next != std::numeric_limits<u64>::max())
-                event = std::min<int>(event, scheduler.next - scheduler.now);
-
-            tick(event);
+            scheduler.run(std::min(target - scheduler.now, scheduler.next - scheduler.now));
         }
         else
         {
