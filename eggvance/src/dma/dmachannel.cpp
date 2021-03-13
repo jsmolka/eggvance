@@ -4,6 +4,7 @@
 #include "arm/arm.h"
 #include "gamepak/eeprom.h"
 #include "gamepak/gamepak.h"
+#include "ppu/ppu.h"
 
 DmaChannel::DmaChannel(uint id)
     : id(id)
@@ -84,7 +85,8 @@ void DmaChannel::run()
         arm.raise(kIrqDma0 << id);
 
     control.enable = control.repeat
-        && control.timing != DmaControl::Timing::kImmediate;
+        && !(control.timing == DmaControl::Timing::kImmediate)
+        && !(control.timing == DmaControl::Timing::kSpecial && id == 3 && ppu.vcount.value == 161);
 
     if (!control.enable)
         control.value &= ~(1 << 15);
