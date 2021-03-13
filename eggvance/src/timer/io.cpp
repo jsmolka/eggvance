@@ -52,6 +52,9 @@ void TimerControl::write(uint index, u8 byte)
     irq       = bit::seq<6, 1>(byte);
     enabled   = bit::seq<7, 1>(byte);
 
+    if (channel.id == 0)
+        cascade = 0;
+
     if (!was_enabled && enabled)
         channel.start();
     else
