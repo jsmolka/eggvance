@@ -64,6 +64,7 @@
     <ClCompile Include="src\ppu\videoram.cpp" />
     <ClCompile Include="src\scheduler\event.cpp" />
     <ClCompile Include="src\scheduler\scheduler.cpp" />
+    <ClCompile Include="src\sio\io.cpp" />
     <ClCompile Include="src\sio\sio.cpp" />
     <ClCompile Include="src\timer\io.cpp" />
     <ClCompile Include="src\timer\timer.cpp" />
@@ -139,6 +140,7 @@
     <ClInclude Include="src\scheduler\node.h" />
     <ClInclude Include="src\scheduler\scheduler.h" />
     <ClInclude Include="src\scheduler\circularlist.h" />
+    <ClInclude Include="src\sio\io.h" />
     <ClInclude Include="src\sio\sio.h" />
     <ClInclude Include="src\timer\io.h" />
     <ClInclude Include="src\timer\timer.h" />

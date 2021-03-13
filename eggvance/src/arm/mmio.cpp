@@ -167,7 +167,7 @@ u8 Arm::readIo(u32 addr)
     INDEXED_CASE2(kRegSioMulti1,      return sio.siomulti[1].read<kIndex>());
     INDEXED_CASE2(kRegSioMulti2,      return sio.siomulti[2].read<kIndex>());
     INDEXED_CASE2(kRegSioMulti3,      return sio.siomulti[3].read<kIndex>());
-    INDEXED_CASE2(kRegSioControl,     return sio.siocnt.read<kIndex>());
+    INDEXED_CASE2(kRegSioControl,     return sio.siocnt.read(kIndex));
     INDEXED_CASE2(kRegSioSend,        return sio.siosend.read<kIndex>());
     INDEXED_CASE2(kRegKeyInput,       return gamepad.input.read<kIndex>());
     INDEXED_CASE2(kRegKeyControl,     return gamepad.control.read<kIndex>());
@@ -276,7 +276,7 @@ void Arm::writeIo(u32 addr, u8 byte)
     INDEXED_CASE2(kRegSioMulti1,      sio.siomulti[1].write<kIndex>(byte));
     INDEXED_CASE2(kRegSioMulti2,      sio.siomulti[2].write<kIndex>(byte));
     INDEXED_CASE2(kRegSioMulti3,      sio.siomulti[3].write<kIndex>(byte));
-    INDEXED_CASE2(kRegSioControl,     sio.siocnt.write<kIndex>(byte));
+    INDEXED_CASE2(kRegSioControl,     sio.siocnt.write(kIndex, byte));
     INDEXED_CASE2(kRegSioSend,        sio.siosend.write<kIndex>(byte));
     INDEXED_CASE2(kRegKeyControl,     gamepad.control.write<kIndex>(byte));
     INDEXED_CASE2(kRegRemoteControl,  sio.rcnt.write<kIndex>(byte));
