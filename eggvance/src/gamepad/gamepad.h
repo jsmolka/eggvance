@@ -5,7 +5,8 @@
 class Gamepad
 {
 public:
-    void poll();
+    void update();
+    void tryRaise();
 
     KeyInput input;
     KeyControl control;

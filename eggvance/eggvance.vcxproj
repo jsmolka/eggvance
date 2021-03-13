@@ -46,6 +46,7 @@
     <ClCompile Include="src\dma\dma.cpp" />
     <ClCompile Include="src\dma\dmachannel.cpp" />
     <ClCompile Include="src\gamepad\gamepad.cpp" />
+    <ClCompile Include="src\gamepad\io.cpp" />
     <ClCompile Include="src\gamepak\eeprom.cpp" />
     <ClCompile Include="src\gamepak\flash.cpp" />
     <ClCompile Include="src\gamepak\gamepak.cpp" />

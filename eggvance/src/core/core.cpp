@@ -82,7 +82,7 @@ void core::frame()
     constexpr auto kPixelCycles = 4;
     constexpr auto kFrameCycles = kPixelCycles * kPixelsHor * kPixelsVer;
 
-    gamepad.poll();
+    gamepad.update();
 
     arm.run(kFrameCycles);
 

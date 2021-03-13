@@ -4,13 +4,15 @@
 #include "arm/constants.h"
 #include "core/inputcontext.h"
 
-void Gamepad::poll()
+void Gamepad::update()
 {
-    u16 previous = input.value;
     input.value = ~input_ctx.state() & KeyInput::kMask;
 
-    if (previous != input.value
-            && control.irq
-            && control.raisesIrq(input))
+    tryRaise();
+}
+
+void Gamepad::tryRaise()
+{
+    if (control.irq && control.raisesIrq(input))
         arm.raise(kIrqGamepad);
 }
