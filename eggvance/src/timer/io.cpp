@@ -35,10 +35,8 @@ TimerControl::TimerControl(TimerChannel& channel)
 
 void TimerControl::write(uint index, u8 byte)
 {
-    if (index == 1 || bytes[index] == byte)
+    if (!XRegister::write(index, byte))
         return;
-
-    XRegister::write(index, byte);
 
     constexpr uint kPrescalers[8] = { 1, 64, 256, 1024, 1, 1, 1, 1 };
 

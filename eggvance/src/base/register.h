@@ -100,11 +100,14 @@ protected:
         return bit::byte(value & mask, index);
     }
 
-    void write(uint index, u8 byte)
+    bool write(uint index, u8 byte)
     {
         SHELL_ASSERT(index < sizeof(Integral));
 
+        bool changed = byte != bytes[index];
         bytes[index] = byte;
+
+        return changed;
     }
 };
 
