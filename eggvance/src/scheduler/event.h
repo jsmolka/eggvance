@@ -15,13 +15,10 @@ public:
         return *this;
     }
 
-    void operator()(u64 now);
     bool operator<(const Event& other) const;
     bool operator>(const Event& other) const;
     bool scheduled() const;
 
     u64 when = 0;
-
-private:
     std::function<void(u64)> callback;
 };

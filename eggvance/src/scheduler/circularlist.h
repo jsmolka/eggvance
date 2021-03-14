@@ -11,7 +11,7 @@ class CircularList
 public:
     static_assert(std::is_base_of_v<Node<T>, T>);
 
-    void setTombstone(T& item)
+    void setHead(T& item)
     {
         head = &item;
         head->prev = head;

@@ -4,16 +4,15 @@
 
 Scheduler::Scheduler()
 {
-    events.tombstone = [this](u64 late)
+    next = std::numeric_limits<u64>::max();
+
+    infinity.when = next;
+    infinity = [this](u64 late)
     {
         SHELL_UNREACHABLE;
     };
 
-    events.tombstone.when = std::numeric_limits<u64>::max();
-
-    list.setTombstone(events.tombstone);
-
-    next = events.tombstone.when;
+    list.setHead(infinity);
 }
 
 void Scheduler::run(u64 cycles)
@@ -22,7 +21,9 @@ void Scheduler::run(u64 cycles)
 
     while (now >= next)
     {
-        list.pop()(now);
+        Event& event = list.pop();
+        event.when = 0;
+        event.callback(now - next);
 
         next = list.head->when;
     }
@@ -34,9 +35,7 @@ void Scheduler::queueIn(Event& event, u64 in)
     SHELL_ASSERT(static_cast<s64>(in) > 0);
 
     event.when = now + in;
-
     list.insert(event);
-
     next = list.head->when;
 }
 
@@ -46,5 +45,6 @@ void Scheduler::dequeue(Event& event)
     {
         event.when = 0;
         list.erase(event);
+        next = list.head->when;
     }
 }

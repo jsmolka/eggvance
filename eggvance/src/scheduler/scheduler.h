@@ -16,13 +16,7 @@ public:
     u64 next = 0;
 
 private:
-    struct Events
-    {
-        static void doTombstone(void* data, u64 late);
-
-        Event tombstone;
-    } events;
-
+    Event infinity;
     CircularList<Event> list;
 };
 
