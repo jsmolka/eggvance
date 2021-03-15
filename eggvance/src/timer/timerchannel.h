@@ -20,13 +20,15 @@ public:
     TimerChannel* next = nullptr;
 
 private:
+    void run(u64 ticks);
+    void doRun(u64 late);
+    void doStart(u64 late);
+
     struct Events
     {
         Event run;
         Event start;
     } events;
-
-    void run(u64 ticks);
 
     u64 since    = 0;
     u64 counter  = 0;

@@ -19,7 +19,7 @@ private:
     TimerChannel& channel;
 };
 
-class TimerControl : public XRegister<u16, 0x00C7>
+class TimerControl : public XRegister<u16>
 {
 public:
     TimerControl(TimerChannel& channel);

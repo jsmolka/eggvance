@@ -8,31 +8,26 @@
 inline constexpr u64 kOverflow = 0x1'0000;
 
 TimerChannel::TimerChannel(uint id)
-    : id(id), count(*this), control(*this)
+    : id(id)
+    , count(*this)
+    , control(*this)
 {
     events.run = [this](u64 late)
     {
-        run(scheduler.now - since + late);
-        schedule();
+        doRun(late);
     };
 
     events.start = [this](u64 late)
     {
-        since    = scheduler.now - late;
-        counter  = 0;
-        initial  = count.initial;
-        overflow = control.prescaler * (kOverflow - initial);
-
-        if (control.cascade == 0)
-            run(late);
-
-        schedule();
+        doStart(late);
     };
 }
 
 void TimerChannel::start()
 {
-    if (events.start.when)
+    SHELL_ASSERT(!events.start.scheduled());
+
+    if (events.start.scheduled())
         return;
 
     scheduler.dequeue(events.run);
@@ -49,7 +44,9 @@ void TimerChannel::update()
 
 void TimerChannel::run(u64 ticks)
 {
-    if (!control.enabled || events.start.when)
+    SHELL_ASSERT(!events.start.scheduled());
+
+    if (events.start.scheduled())
         return;
 
     counter += ticks;
@@ -57,7 +54,7 @@ void TimerChannel::run(u64 ticks)
     if (counter >= overflow)
     {
         if (control.irq)
-            arm.raise(Irq::kTimer0 << id);
+            arm.raise(kIrqTimer0 << id);
 
         if (next && next->control.cascade)
             next->run(counter / overflow);
@@ -79,11 +76,37 @@ void TimerChannel::run()
     run(scheduler.now - since);
 }
 
+void TimerChannel::doRun(u64 late)
+{
+    run();
+    schedule();
+}
+
+void TimerChannel::doStart(u64 late)
+{
+    SHELL_ASSERT(control.enabled);
+
+    if (!control.enabled)
+        return;
+
+    since    = scheduler.now - late;
+    counter  = 0;
+    initial  = count.initial;
+    overflow = control.prescaler * (kOverflow - initial);
+
+    if (control.enabled && !control.cascade)
+        run(late);
+
+    schedule();
+}
+
 void TimerChannel::schedule()
 {
+    SHELL_ASSERT(!events.start.scheduled());
+
     scheduler.dequeue(events.run);
 
-    if (control.cascade)
+    if (!control.enabled || control.cascade)
         return;
     
     scheduler.queueIn(events.run, overflow - counter);
