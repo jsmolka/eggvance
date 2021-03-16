@@ -40,5 +40,5 @@ void Envelope::write(u8 byte)
 
 uint Envelope::enabled() const
 {
-    return increase || volume;
+    return increase || initial;
 }
