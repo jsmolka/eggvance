@@ -2,24 +2,32 @@
 
 #include "arm/arm.h"
 #include "arm/constants.h"
+#include "base/config.h"
+
+RemoteControl::RemoteControl()
+{
+    if (config.bios_skip)
+    {
+        write(0, 0x00);
+        write(1, 0x80);
+    }
+}
 
 void SioControl::write(uint index, u8 byte)
 {
-    XRegister::write(index, byte);
+    if (!XRegister::write(index, byte))
+        return;
 
     if (index == 0)
     {
-        uint was_enabled = enabled;
+        constexpr auto kEnabled = 1 << 7;
 
-        enabled = bit::seq<7, 1>(byte);
-
-        if (!was_enabled && enabled)
+        if (value & kEnabled)
         {
             if (irq)
                 arm.raise(kIrqSerial);
 
-            enabled = false;
-            value &= ~(1 << 7);
+            value &= ~kEnabled;
         }
     }
     else

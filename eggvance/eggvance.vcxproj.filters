@@ -144,9 +144,6 @@
     <ClCompile Include="src\ppu\videoram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\sio\sio.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\timer\timer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
