@@ -9,6 +9,7 @@ class Save
 public:
     enum class Type
     {
+        Detect,
         None,
         Sram,
         Eeprom,

@@ -11,7 +11,7 @@ class Overwrite
 public:
     static std::optional<Overwrite> find(const std::string& game_code);
 
-    Save::Type save = Save::Type::None;
+    Save::Type save = Save::Type::Detect;
     Gpio::Type gpio = Gpio::Type::None;
     bool mirror     = false;
 };

@@ -28,7 +28,7 @@ std::optional<Save::Type> shell::parse(const std::string& data)
 {
     const auto type = shell::toLowerCopy(data);
 
-    if (type == "auto")      return Save::Type::None;
+    if (type == "auto")      return Save::Type::Detect;
     if (type == "sram")      return Save::Type::Sram;
     if (type == "flash512")  return Save::Type::Flash512;
     if (type == "flash1024") return Save::Type::Flash1024;
@@ -82,7 +82,7 @@ void Config::init(const fs::path& file)
         bios_file = fs::absolute(bios_file);
     }
     
-    save = ini.findOr("cartridge", "save_type", Save::Type::None);
+    save = ini.findOr("cartridge", "save_type", Save::Type::Detect);
     gpio = ini.findOr("cartridge", "gpio_type", Gpio::Type::None);
 
     framerate[0] = ini.findOr("framerate", "custom_1", 2.0 * kRefreshRate);

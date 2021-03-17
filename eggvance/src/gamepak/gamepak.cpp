@@ -38,8 +38,8 @@ void GamePak::load(fs::path gba, fs::path sav)
 
     if (sav.extension() == ".sav")
     {
-        if (save_type == Save::Type::None)
-            save_type =  Save::parse(rom);
+        if (save_type == Save::Type::Detect)
+            save_type = Save::parse(rom);
 
         switch (save_type)
         {
