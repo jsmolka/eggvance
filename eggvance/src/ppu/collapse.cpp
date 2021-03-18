@@ -219,7 +219,7 @@ void Ppu::collapseBW(const BgLayers& layers)
                 break;
             }
         }
-        else if (!(Objects && object.alpha))
+        else
         {
             upper = upperLayer<Objects>(layers, x, window.flags);
         }
