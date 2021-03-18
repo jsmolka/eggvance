@@ -110,9 +110,10 @@ void Ppu::collapseBN(const BgLayers& layers)
 
         const auto& object = objects[x];
 
-        if (Objects && object.alpha && findBlendLayers<Objects>(layers, x, kFlags, upper, lower))
+        if (Objects && object.alpha)
         {
-            upper = bldalpha.blendAlpha(upper, lower);
+            if (findBlendLayers<Objects>(layers, x, kFlags, upper, lower))
+                upper = bldalpha.blendAlpha(upper, lower);
         }
         else
         {
@@ -185,9 +186,10 @@ void Ppu::collapseBW(const BgLayers& layers)
         const auto& object = objects[x];
         const auto& window = activeWindow<Windows>(x);
 
-        if (Objects && object.alpha && findBlendLayers<Objects>(layers, x, window.flags, upper, lower))
+        if (Objects && object.alpha)
         {
-            upper = bldalpha.blendAlpha(upper, lower);
+            if (findBlendLayers<Objects>(layers, x, window.flags, upper, lower))
+                upper = bldalpha.blendAlpha(upper, lower);
         }
         else if (window.blend)
         {
