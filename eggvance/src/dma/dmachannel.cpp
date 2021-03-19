@@ -8,6 +8,10 @@
 
 DmaChannel::DmaChannel(uint id)
     : id(id)
+    , sad(id)
+    , dad(id)
+    , count(id)
+    , control(id)
 {
 
 }
@@ -16,12 +20,12 @@ void DmaChannel::reload()
 {
     fifo = control.timing == DmaControl::Timing::kSpecial
         && control.repeat
-        && (dad.value == 0x400'00A0 || dad.value == 0x400'00A4)
+        && (dad == 0x400'00A0 || dad == 0x400'00A4)
         && (id == 1 || id == 2);
 
-    internal.count    = fifo ? 4 : count.count(id);
-    internal.src_addr = sad.value;
-    internal.dst_addr = dad.value;
+    internal.count    = fifo ? 4 : count;
+    internal.src_addr = sad;
+    internal.dst_addr = dad;
 }
 
 bool DmaChannel::start()
@@ -31,10 +35,10 @@ bool DmaChannel::start()
 
     if (control.repeat)
     {
-        internal.count = fifo ? 4 : count.count(id);
+        internal.count = fifo ? 4 : count;
 
         if (control.dadcnt == DmaControl::Control::kReload)
-            internal.dst_addr = dad.value;
+            internal.dst_addr = dad;
     }
 
     internal.src_addr &= ~((2 << control.word) - 1);
@@ -86,7 +90,7 @@ void DmaChannel::run()
 
     control.enable = control.repeat
         && !(control.timing == DmaControl::Timing::kImmediate)
-        && !(control.timing == DmaControl::Timing::kSpecial && id == 3 && ppu.vcount.value == 161);
+        && !(control.timing == DmaControl::Timing::kSpecial && id == 3 && ppu.vcount == 161);
 
     if (!control.enable)
         control.value &= ~(1 << 15);

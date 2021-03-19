@@ -15,10 +15,10 @@ public:
     void run();
 
     const uint id;
+    DmaSource sad;
+    DmaDestination dad;
     DmaCount count;
     DmaControl control;
-    RegisterW<u32> sad;
-    RegisterW<u32> dad;
 
 private:
     void initTransfer();

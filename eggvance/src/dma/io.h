@@ -4,19 +4,76 @@
 
 #include "base/register.h"
 
-class DmaCount : public RegisterW<u16>
+class DmaSource : public XRegisterW<u32>
 {
 public:
-    uint count(uint id) const
+    DmaSource(uint id)
+        : XRegisterW(id == 0 ? 0x07FF'FFFF : 0x0FFF'FFFF)
+    {
+
+    }
+
+    operator u32() const
+    {
+        return value;
+    }
+
+    void write(uint index, u8 byte)
+    {
+        XRegisterW::write(index, byte);
+
+        value &= mask;
+    }
+};
+
+class DmaDestination : public XRegisterW<u32>
+{
+public:
+    DmaDestination(uint id)
+        : XRegisterW(id == 3 ? 0x0FFF'FFFF : 0x07FF'FFFF)
+    {
+
+    }
+
+    operator u32() const
+    {
+        return value;
+    }
+
+    void write(uint index, u8 byte)
+    {
+        XRegisterW::write(index, byte);
+
+        value &= mask;
+    }
+};
+
+class DmaCount : public XRegisterW<u16>
+{
+public:
+    DmaCount(uint id)
+        : XRegisterW(id == 3 ? 0xFFFF : 0x3FFF)
+    {
+
+    }
+
+    void write(uint index, u8 byte)
+    {
+        XRegisterW::write(index, byte);
+
+        value &= mask;
+    }
+
+    operator uint() const
     {
         if (value == 0)
-            return id < 3 ? 0x4000 : 0x1'0000;
+            return mask + 1;
         else
             return value;
     }
 };
 
-class DmaControl : public Register<u16>
+class DmaControl : public XRegister<u16>
 {
 public:
     enum Control
@@ -35,14 +92,22 @@ public:
         kSpecial
     };
 
-    template<uint Index, uint Mask>
-    void write(u8 byte)
+    DmaControl(uint id)
+        : XRegister(id == 3 ? 0xFFE0 : 0xF7E0)
     {
-        Register::write<Index, Mask>(byte);
+
+    }
+
+    void write(uint index, u8 byte)
+    {
+        // Todo: return here?, use something better than value?
+        XRegister::write(index, byte);
+
+        value &= mask;
 
         sadcnt = bit::seq<7, 2>(value);
 
-        if (Index == 0)
+        if (index == 0)
         {
             dadcnt = bit::seq<5, 2>(byte);
         }
@@ -50,12 +115,12 @@ public:
         {
             uint was_enable = enable;
 
-            repeat = bit::seq<1, 1>(byte);
-            word   = bit::seq<2, 1>(byte);
-            drq    = bit::seq<3, 1>(byte);
-            timing = bit::seq<4, 2>(byte);
-            irq    = bit::seq<6, 1>(byte);
-            enable = bit::seq<7, 1>(byte);
+            repeat = bit::seq< 9, 1>(value);
+            word   = bit::seq<10, 1>(value);
+            drq    = bit::seq<11, 1>(value);
+            timing = bit::seq<12, 2>(value);
+            irq    = bit::seq<14, 1>(value);
+            enable = bit::seq<15, 1>(value);
 
             on_write(!was_enable && enable);
         }
