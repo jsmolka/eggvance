@@ -133,131 +133,52 @@ public:
     class Block
     {
     public:
-        void write(u8 byte)
-        {
-            x = bit::seq<0, 4>(byte) + 1;
-            y = bit::seq<4, 4>(byte) + 1;
-        }
+        void write(u8 byte);
 
-        bool isDominantX(uint value) const { return value % x == 0; }
-        bool isDominantY(uint value) const { return value % y == 0; }
+        uint mosaicX(uint value) const;
+        uint mosaicY(uint value) const;
 
-        uint mosaicX(uint value) const { return x * (value / x); }
-        uint mosaicY(uint value) const { return y * (value / y); }
+        bool isDominantX(uint value) const;
+        bool isDominantY(uint value) const;
 
         uint x = 1;
         uint y = 1;
     };
 
-    template<uint Index>
-    void write(u8 byte)
-    {
-        static_assert(Index < 2);
-
-        if (Index == 0) bgs.write(byte);
-        if (Index == 1) obj.write(byte);
-    }
+    void write(uint index, u8 byte);
 
     Block bgs;
     Block obj;
 };
 
-class BlendControl : public Register<u16, 0x3FFF>
+class BlendControl : public XRegister<u16, 0x3FFF>
 {
 public:
-    template<uint Index>
-    void write(u8 byte)
-    {
-        Register::write<Index>(byte);
-
-        if (Index == 0)
-        {
-            upper = bit::seq<0, 6>(byte);
-            mode  = bit::seq<6, 2>(byte);
-        }
-        else
-        {
-            lower = bit::seq<0, 6>(byte);
-        }
-    }
+    void write(uint index, u8 byte);
 
     uint mode  = 0;
     uint upper = 0;
     uint lower = 0;
 };
 
-class BlendAlpha : public Register<u16, 0x1F1F>
+class BlendAlpha : public XRegister<u16, 0x1F1F>
 {
 public:
-    static constexpr uint kMaskR = 0x1F <<  0;
-    static constexpr uint kMaskG = 0x1F <<  5;
-    static constexpr uint kMaskB = 0x1F << 10;
+    void write(uint index, u8 byte);
 
-    template<uint Index>
-    void write(u8 byte)
-    {
-        Register::write<Index>(byte);
-
-        if (Index == 0)
-            eva = std::min<uint>(16, bit::seq<0, 5>(byte));
-        else
-            evb = std::min<uint>(16, bit::seq<0, 5>(byte));
-    }
-
-    u16 blendAlpha(u16 a, u16 b) const
-    {
-        uint rr = std::min(kMaskR, ((a & kMaskR) * eva + (b & kMaskR) * evb) >> 4);
-        uint gg = std::min(kMaskG, ((a & kMaskG) * eva + (b & kMaskG) * evb) >> 4);
-        uint bb = std::min(kMaskB, ((a & kMaskB) * eva + (b & kMaskB) * evb) >> 4);
-
-        return (rr & kMaskR) | (gg & kMaskG) | (bb & kMaskB);
-    }
+    u16 blendAlpha(u16 a, u16 b) const;
 
     uint eva = 0;
     uint evb = 0;
 };
 
-class BlendFade : public RegisterW<u16, 0x001F>
+class BlendFade : public XRegisterW<u16, 0x001F>
 {
 public:
-    static constexpr uint kMaskR = 0x1F <<  0;
-    static constexpr uint kMaskG = 0x1F <<  5;
-    static constexpr uint kMaskB = 0x1F << 10;
+    void write(uint index, u8 byte);
 
-    template<uint Index>
-    void write(u8 byte)
-    {
-        RegisterW::write<Index>(byte);
-
-        if (Index == 0)
-            evy = std::min<uint>(16, bit::seq<0, 5>(byte));
-    }
-
-    u16 blendWhite(u16 a) const
-    {
-        uint r = a & kMaskR;
-        uint g = a & kMaskG;
-        uint b = a & kMaskB;
-
-        r += ((kMaskR - r) * evy) >> 4;
-        g += ((kMaskG - g) * evy) >> 4;
-        b += ((kMaskB - b) * evy) >> 4;
-
-        return (r & kMaskR) | (g & kMaskG) | (b & kMaskB);
-    }
-
-    u16 blendBlack(u16 a) const
-    {
-        uint r = a & kMaskR;
-        uint g = a & kMaskG;
-        uint b = a & kMaskB;
-
-        r -= (r * evy) >> 4;
-        g -= (g * evy) >> 4;
-        b -= (b * evy) >> 4;
-
-        return (r & kMaskR) | (g & kMaskG) | (b & kMaskB);
-    }
+    u16 blendWhite(u16 a) const;
+    u16 blendBlack(u16 a) const;
 
     uint evy = 0;
 };

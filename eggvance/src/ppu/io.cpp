@@ -2,6 +2,10 @@
 
 #include "base/config.h"
 
+inline constexpr uint kMaskR = 0x1F <<  0;
+inline constexpr uint kMaskG = 0x1F <<  5;
+inline constexpr uint kMaskB = 0x1F << 10;
+
 DisplayControl::DisplayControl()
 {
     if (config.bios_skip)
@@ -213,4 +217,110 @@ void WindowRange::write(uint index, u8 byte)
 bool WindowRange::contains(uint value) const
 {
     return value >= min && value < max;
+}
+
+void Mosaic::Block::write(u8 byte)
+{
+    x = bit::seq<0, 4>(byte) + 1;
+    y = bit::seq<4, 4>(byte) + 1;
+}
+
+uint Mosaic::Block::mosaicX(uint value) const
+{
+    return x * (value / x);
+}
+
+uint Mosaic::Block::mosaicY(uint value) const
+{
+    return y * (value / y);
+}
+
+bool Mosaic::Block::isDominantX(uint value) const
+{
+    return value % x == 0;
+}
+
+bool Mosaic::Block::isDominantY(uint value) const
+{
+    return value % y == 0;
+}
+
+void Mosaic::write(uint index, u8 byte)
+{
+    SHELL_ASSERT(index < 2);
+
+    if (index == 0)
+        bgs.write(byte);
+    else
+        obj.write(byte);
+}
+
+void BlendControl::write(uint index, u8 byte)
+{
+    if (!XRegister::write(index, byte))
+        return;
+
+    if (index == 0)
+    {
+        upper = bit::seq<0, 6>(byte);
+        mode  = bit::seq<6, 2>(byte);
+    }
+    else
+    {
+        lower = bit::seq<0, 6>(byte);
+    }
+}
+
+void BlendAlpha::write(uint index, u8 byte)
+{
+    if (!XRegister::write(index, byte))
+        return;
+
+    if (index == 0)
+        eva = std::min<uint>(16, bit::seq<0, 5>(byte));
+    else
+        evb = std::min<uint>(16, bit::seq<0, 5>(byte));
+}
+
+u16 BlendAlpha::blendAlpha(u16 a, u16 b) const
+{
+    uint rr = std::min(kMaskR, ((a & kMaskR) * eva + (b & kMaskR) * evb) >> 4);
+    uint gg = std::min(kMaskG, ((a & kMaskG) * eva + (b & kMaskG) * evb) >> 4);
+    uint bb = std::min(kMaskB, ((a & kMaskB) * eva + (b & kMaskB) * evb) >> 4);
+
+    return (rr & kMaskR) | (gg & kMaskG) | (bb & kMaskB);
+}
+
+void BlendFade::write(uint index, u8 byte)
+{
+    if (index == 1 || !XRegisterW::write(index, byte))
+        return;
+
+    evy = std::min<uint>(16, bit::seq<0, 5>(byte));
+}
+
+u16 BlendFade::blendWhite(u16 a) const
+{
+    uint r = a & kMaskR;
+    uint g = a & kMaskG;
+    uint b = a & kMaskB;
+
+    r += ((kMaskR - r) * evy) >> 4;
+    g += ((kMaskG - g) * evy) >> 4;
+    b += ((kMaskB - b) * evy) >> 4;
+
+    return (r & kMaskR) | (g & kMaskG) | (b & kMaskB);
+}
+
+u16 BlendFade::blendBlack(u16 a) const
+{
+    uint r = a & kMaskR;
+    uint g = a & kMaskG;
+    uint b = a & kMaskB;
+
+    r -= (r * evy) >> 4;
+    g -= (g * evy) >> 4;
+    b -= (b * evy) >> 4;
+
+    return (r & kMaskR) | (g & kMaskG) | (b & kMaskB);
 }
