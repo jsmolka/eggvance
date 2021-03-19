@@ -28,10 +28,6 @@ Rom::Rom(const fs::path& file)
     if (data.size() < kHeaderSize || data.size() > kMaxSize)
         panic("Bad ROM size");
 
-    size = bit::ceilPowTwo(data.size());
-
-    data.resize(size, 0);
-
     for (auto x = data.size(); x < data.capacity(); ++x)
     {
         data.push_back(bit::byte(x >> 1, x & 0x1));
