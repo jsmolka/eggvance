@@ -9,8 +9,8 @@ Point Ppu::transform(uint x, uint bg)
     bg -= 2;
 
     return Point(
-        bgpa[bg].value * static_cast<int>(x) + bgx[bg].current,
-        bgpc[bg].value * static_cast<int>(x) + bgy[bg].current);
+        bgpa[bg].value * static_cast<int>(x) + bgx[bg],
+        bgpc[bg].value * static_cast<int>(x) + bgy[bg]);
 }
 
 void Ppu::renderBg(RenderFunc render, uint bg)

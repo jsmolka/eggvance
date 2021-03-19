@@ -57,6 +57,7 @@
     <ClCompile Include="src\gamepak\save.cpp" />
     <ClCompile Include="src\gamepak\sram.cpp" />
     <ClCompile Include="src\ppu\collapse.cpp" />
+    <ClCompile Include="src\ppu\io.cpp" />
     <ClCompile Include="src\ppu\oam.cpp" />
     <ClCompile Include="src\ppu\oamentry.cpp" />
     <ClCompile Include="src\ppu\paletteram.cpp" />

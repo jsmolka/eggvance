@@ -4,98 +4,34 @@
 
 #include "layer.h"
 #include "point.h"
-#include "base/config.h"
 #include "base/register.h"
 
-class DisplayControl : public Register<u16, 0xFFF7>
+class DisplayControl : public XRegister<u16, 0xFFF7>
 {
 public:
-    template<uint Index>
-    void write(u8 byte)
-    {
-        Register::write<Index>(byte);
+    DisplayControl();
 
-        if (Index == 0)
-        {
-            mode     = bit::seq<0, 3>(byte);
-            frame    = bit::seq<4, 1>(byte) * kFrameBytes;
-            oam_free = bit::seq<5, 1>(byte);
-            layout   = bit::seq<6, 1>(byte);
-            blank    = bit::seq<7, 1>(byte);
-        }
-        else
-        {
-            layers = bit::seq<0, 5>(byte);
-            win0   = bit::seq<5, 1>(byte);
-            win1   = bit::seq<6, 1>(byte);
-            winobj = bit::seq<7, 1>(byte);
-        }
-    }
+    void write(uint index, u8 byte);
 
-    bool isActive() const
-    {
-        static constexpr uint kLayers[8] =
-        {
-            kLayerBg0 | kLayerBg1 | kLayerBg2 | kLayerBg3 | kLayerObj,
-            kLayerBg0 | kLayerBg1 | kLayerBg2 | kLayerObj,
-            kLayerBg2 | kLayerBg3 | kLayerObj,
-            kLayerBg2 | kLayerObj,
-            kLayerBg2 | kLayerObj,
-            kLayerBg2 | kLayerObj,
-            0, 0
-        };
-        return kLayers[mode] & layers;
-    }
-
-    bool isBitmap() const
-    {
-        return mode > 2;
-    }
+    bool isActive() const;
+    bool isBitmap() const;
 
     uint mode     = 0;
     uint frame    = 0;
     uint oam_free = 0;
     uint layout   = 0;
-    uint blank    = config.bios_skip;
+    uint blank    = 0;
     uint layers   = 0;
     uint win0     = 0;
     uint win1     = 0;
     uint winobj   = 0;
 };
 
-class DisplayStatus : public Register<u16, 0xFF38>
+class DisplayStatus : public XRegister<u16, 0xFF38>
 {
 public:
-    template<uint Index>
-    u8 read() const
-    {
-        u8 value = Register::read<Index>();
-
-        if (Index == 0)
-        {
-            value |= vblank << 0;
-            value |= hblank << 1;
-            value |= vmatch << 2;
-        }
-        return value;
-    }
-
-    template<uint Index>
-    void write(u8 byte)
-    {
-        Register::write<Index>(byte);
-
-        if (Index == 0)
-        {
-            vblank_irq = bit::seq<3, 1>(byte);
-            hblank_irq = bit::seq<4, 1>(byte);
-            vmatch_irq = bit::seq<5, 1>(byte);
-        }
-        else
-        {
-            vcompare = byte;
-        }
-    }
+    u8 read(uint index) const;
+    void write(uint index, u8 byte);
 
     uint vblank     = 0;
     uint hblank     = 0;
@@ -106,51 +42,22 @@ public:
     uint vcompare   = 0;
 };
 
-class VCount : public RegisterR<u16>
+class VCount : public XRegisterR<u16>
 {
 public:
-    void next()
-    {
-        value = (value + 1) % 228;
-    }
+    VCount& operator++();
+    operator u16() const;
 };
 
-class BgControl : public Register<u16>
+class BgControl : public XRegister<u16>
 {
 public:
-    template<uint Index, uint Mask>
-    void write(u8 byte)
-    {
-        Register::write<Index, Mask>(byte);
+    BgControl(uint id);
 
-        if (Index == 0)
-        {
-            priority   = bit::seq<0, 2>(byte);
-            tile_block = bit::seq<2, 2>(byte) * kTileBlockBytes;
-            mosaic     = bit::seq<6, 1>(byte);
-            color_mode = bit::seq<7, 1>(byte);
-        }
-        else
-        {
-            map_block  = bit::seq<0, 5>(byte) * kMapBlockBytes;
-            wraparound = bit::seq<5, 1>(byte);
-            dimensions = bit::seq<6, 2>(byte);
-        }
-    }
+    void write(uint index, u8 byte);
 
-    Point sizeReg() const
-    {
-        return Point(
-            256 << bit::seq<0, 1>(dimensions),
-            256 << bit::seq<1, 1>(dimensions));
-    }
-
-    Point sizeAff() const
-    {
-        return Point(
-            128 << dimensions,
-            128 << dimensions);
-    }
+    Point sizeReg() const;
+    Point sizeAff() const;
 
     uint priority   = 0;
     uint tile_block = 0;
@@ -161,100 +68,63 @@ public:
     uint dimensions = 0;
 };
 
-class BgReference : public RegisterW<u32, 0x0FFF'FFFF>
+class BgReference : public XRegisterW<u32, 0x0FFF'FFFF>
 {
 public:
-    template<uint Index>
-    void write(u8 byte)
-    {
-        RegisterW::write<Index>(byte);
+    operator s32() const;
 
-        vblank();
-    }
+    void write(uint index, u8 byte);
 
-    void hblank(s16 value)
-    {
-        current += value;
-    }
+    void hblank(s16 value);
+    void vblank();
 
-    void vblank()
-    {
-        current = bit::signEx<28>(value);
-    }
-
+private:
     s32 current = 0;
 };
 
 class Window
 {
 public:
-    void write(u8 byte)
-    {
-        flags = bit::seq<0, 5>(byte) | kLayerBdp;
-        blend = bit::seq<5, 1>(byte);
-    }
+    Window();
 
-    uint flags = kLayerBdp;
+    void write(u8 byte);
+
+    uint flags = 0;
     uint blend = 0;
 };
 
-class WindowInside : public Register<u16, 0x3F3F>
+class WindowInside : public XRegister<u16, 0x3F3F>
 {
 public:
-    template<uint Index>
-    void write(u8 byte)
-    {
-        Register::write<Index>(byte);
-
-        if (Index == 0) win0.write(byte);
-        if (Index == 1) win1.write(byte);
-    }
+    void write(uint index, u8 byte);
 
     Window win0;
     Window win1;
 };
 
-class WindowOutside : public Register<u16, 0x3F3F>
+class WindowOutside : public XRegister<u16, 0x3F3F>
 {
 public:
-    template<uint Index>
-    void write(u8 byte)
-    {
-        Register::write<Index>(byte);
-
-        if (Index == 0) winout.write(byte);
-        if (Index == 1) winobj.write(byte);
-    }
+    void write(uint index, u8 byte);
 
     Window winout;
     Window winobj;
 };
 
-template<uint Max>
-class WindowRange : public RegisterW<u16>
+class WindowRange : public XRegisterW<u16>
 {
 public:
-    static constexpr uint kMax = Max;
+    WindowRange(uint limit);
 
-    template<uint Index>
-    void write(u8 byte)
-    {
-        RegisterW::write<Index>(byte);
+    void write(uint index, u8 byte);
 
-        max = data[0];
-        min = data[1];
-
-        if (max > Max || max < min)
-            max = Max;
-    }
-
-    bool contains(uint value) const
-    {
-        return value >= min && value < max;
-    }
+    bool contains(uint value) const;
 
     uint min = 0;
     uint max = 0;
+
+private:
+    uint limit = 0;
 };
 
 class Mosaic

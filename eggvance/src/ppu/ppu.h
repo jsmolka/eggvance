@@ -28,7 +28,7 @@ public:
     Register<u16> greenswap;
     DisplayStatus dispstat;
     VCount vcount;
-    BgControl bgcnt[4];
+    BgControl bgcnt[4] = { 0, 1, 2, 3 };
     RegisterW<u16, 0x01FF> bghofs[4];
     RegisterW<u16, 0x01FF> bgvofs[4];
     RegisterW<s16> bgpa[2];
@@ -39,8 +39,8 @@ public:
     BgReference bgy[2];
     WindowInside winin;
     WindowOutside winout;
-    WindowRange<kScreen.x> winh[2];
-    WindowRange<kScreen.y> winv[2];
+    WindowRange winh[2] = { kScreen.x, kScreen.x };
+    WindowRange winv[2] = { kScreen.y, kScreen.y };
     Mosaic mosaic;
     BlendControl bldcnt;
     BlendAlpha bldalpha;

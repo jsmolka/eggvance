@@ -56,7 +56,7 @@ void Ppu::init()
 {
     events.hblank = [this](u64 late)
     {
-        if (vcount.value < 160)
+        if (vcount < 160)
             scanline();
 
         ppu.hblank();
@@ -68,7 +68,7 @@ void Ppu::init()
     {
         next();
 
-        if (vcount.value == 160)
+        if (vcount == 160)
             vblank();
 
         scheduler.queueIn(events.hblank, 1006 - late);
@@ -81,7 +81,7 @@ void Ppu::scanline()
 {
     if (dispcnt.blank)
     {
-        u32* scanline = video_ctx.scanline(vcount.value);
+        u32* scanline = video_ctx.scanline(vcount);
         std::fill_n(scanline, kScreen.x, 0xFFFF'FFFF);
         return;
     }
@@ -152,7 +152,7 @@ void Ppu::hblank()
         arm.raise(kIrqHBlank);
     }
 
-    if (vcount.value < 160)
+    if (vcount < 160)
     {
         bgx[0].hblank(bgpb[0].value);
         bgx[1].hblank(bgpb[1].value);
@@ -162,7 +162,7 @@ void Ppu::hblank()
         dma.broadcast(Dma::Timing::HBlank);
     }
 
-    if (vcount.value > 1 && vcount.value < 162)
+    if (vcount > 1 && vcount < 162)
     {
         dma.broadcast(Dma::Timing::Video);
     }
@@ -188,9 +188,9 @@ void Ppu::next()
 {
     dispstat.hblank = false;
 
-    vcount.next();
+    ++vcount;
 
-    dispstat.vmatch = vcount.value == dispstat.vcompare;
+    dispstat.vmatch = vcount == dispstat.vcompare;
     if (dispstat.vmatch && dispstat.vmatch_irq)
     {
         arm.raise(kIrqVMatch);
