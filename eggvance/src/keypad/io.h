@@ -2,7 +2,7 @@
 
 #include "base/register.h"
 
-class KeyInput : public XRegisterR<u16, 0x03FF>
+class KeyInput : public RegisterR<u16, 0x03FF>
 {
 public:
     KeyInput();
@@ -11,7 +11,7 @@ public:
     operator u16() const;
 };
 
-class KeyControl : public XRegister<u16, 0xC3FF>
+class KeyControl : public Register<u16, 0xC3FF>
 {
 public:
     void write(uint index, u8 byte);

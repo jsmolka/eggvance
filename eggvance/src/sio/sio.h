@@ -8,12 +8,12 @@ public:
     SioControl siocnt;
     RemoteControl rcnt;
 
-    XRegister<u16> joycnt;
-    XRegister<u32> joyrecv;
-    XRegister<u32> joytrans;
-    XRegister<u16> joystat;
-    XRegister<u16> siomulti[4];
-    XRegister<u16> siosend;
+    Register<u16> joycnt;
+    Register<u32> joyrecv;
+    Register<u32> joytrans;
+    Register<u16> joystat;
+    Register<u16> siomulti[4];
+    Register<u16> siosend;
 };
 
 inline Sio sio;

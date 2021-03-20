@@ -21,7 +21,7 @@ KeyInput::operator u16() const
 
 void KeyControl::write(uint index, u8 byte)
 {
-    XRegister::write(index, byte);
+    Register::write(index, byte);
 
     mask = bit::seq<0, 10>(value);
 

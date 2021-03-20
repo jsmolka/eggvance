@@ -5,7 +5,7 @@
 #include "sweep.h"
 #include "base/register.h"
 
-class Channel : public XRegister<u64>
+class Channel : public Register<u64>
 {
 public:
     Channel(u64 mask, uint length);

@@ -29,12 +29,12 @@ public:
     DisplayStatus dispstat;
     VCount vcount;
     BgControl bgcnt[4] = { 0, 1, 2, 3 };
-    XRegisterW<u16, 0x01FF> bghofs[4];
-    XRegisterW<u16, 0x01FF> bgvofs[4];
-    XRegisterW<s16> bgpa[2];
-    XRegisterW<s16> bgpb[2];
-    XRegisterW<s16> bgpc[2];
-    XRegisterW<s16> bgpd[2];
+    RegisterW<u16, 0x01FF> bghofs[4];
+    RegisterW<u16, 0x01FF> bgvofs[4];
+    RegisterW<s16> bgpa[2];
+    RegisterW<s16> bgpb[2];
+    RegisterW<s16> bgpc[2];
+    RegisterW<s16> bgpd[2];
     BgReference bgx[2];
     BgReference bgy[2];
     WindowInside winin;

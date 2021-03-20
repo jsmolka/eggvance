@@ -15,7 +15,7 @@ RemoteControl::RemoteControl()
 
 void SioControl::write(uint index, u8 byte)
 {
-    if (!XRegister::write(index, byte))
+    if (!Register::write(index, byte))
         return;
 
     if (index == 0)

@@ -121,7 +121,7 @@ u8 Arm::readIo(u32 addr)
     switch (addr & 0x3FF'FFFF)
     {
     INDEXED_CASE2(kRegDisplayControl, return ppu.dispcnt.read(kIndex));
-    INDEXED_CASE2(kRegGreenSwap,      return ppu.greenswap.read<kIndex>());
+    INDEXED_CASE2(kRegGreenSwap,      return ppu.greenswap.read(kIndex));
     INDEXED_CASE2(kRegDisplayStatus,  return ppu.dispstat.read(kIndex));
     INDEXED_CASE2(kRegVerticalCount,  return ppu.vcount.read(kIndex));
     INDEXED_CASE2(kRegBg0Control,     return ppu.bgcnt[0].read(kIndex));
@@ -184,7 +184,7 @@ u8 Arm::readIo(u32 addr)
     INDEXED_CASE2(kRegWaitControl,    return waitcnt.read(kIndex));
     INDEXED_CASE2(kRegUnused206,      return 0);
     INDEXED_CASE4(kRegIrqMaster,      return irq.master.read(kIndex));
-    INDEXED_CASE1(kRegPostFlag,       return postflg.read<kIndex>());
+    INDEXED_CASE1(kRegPostFlag,       return postflg.read(kIndex));
 
     default:
         return readUnused() >> (8 * (addr & 0x3));
@@ -196,7 +196,7 @@ void Arm::writeIo(u32 addr, u8 byte)
     switch (addr & 0x3FF'FFFF)
     {
     INDEXED_CASE2(kRegDisplayControl, ppu.dispcnt.write(kIndex, byte));
-    INDEXED_CASE2(kRegGreenSwap,      ppu.greenswap.write<kIndex>(byte));
+    INDEXED_CASE2(kRegGreenSwap,      ppu.greenswap.write(kIndex, byte));
     INDEXED_CASE2(kRegDisplayStatus,  ppu.dispstat.write(kIndex, byte));
     INDEXED_CASE2(kRegBg0Control,     ppu.bgcnt[0].write(kIndex, byte));
     INDEXED_CASE2(kRegBg1Control,     ppu.bgcnt[1].write(kIndex, byte));
@@ -288,7 +288,7 @@ void Arm::writeIo(u32 addr, u8 byte)
     INDEXED_CASE2(kRegIrqRequest,     irq.request.write(kIndex, byte));
     INDEXED_CASE2(kRegWaitControl,    waitcnt.write(kIndex, byte));
     INDEXED_CASE4(kRegIrqMaster,      irq.master.write(kIndex, byte));
-    INDEXED_CASE1(kRegPostFlag,       postflg.write<kIndex>(byte));
+    INDEXED_CASE1(kRegPostFlag,       postflg.write(kIndex, byte));
     INDEXED_CASE1(kRegHaltControl,    haltcnt.write(kIndex, byte));
     }
 }

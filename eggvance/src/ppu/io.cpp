@@ -17,7 +17,7 @@ DisplayControl::DisplayControl()
 
 void DisplayControl::write(uint index, u8 byte)
 {
-    if (!XRegister::write(index, byte))
+    if (!Register::write(index, byte))
         return;
 
     if (index == 0)
@@ -59,7 +59,7 @@ bool DisplayControl::isBitmap() const
 
 u8 DisplayStatus::read(uint index) const
 {
-    u8 value = XRegister::read(index);
+    u8 value = Register::read(index);
 
     if (index == 0)
     {
@@ -72,7 +72,7 @@ u8 DisplayStatus::read(uint index) const
 
 void DisplayStatus::write(uint index, u8 byte)
 {
-    if (!XRegister::write(index, byte))
+    if (!Register::write(index, byte))
         return;
 
     if (index == 0)
@@ -100,14 +100,14 @@ VCount::operator u16() const
 }
 
 BgControl::BgControl(uint id)
-    : XRegister(id <= 1 ? 0xDFFF : 0xFFFF)
+    : Register(id <= 1 ? 0xDFFF : 0xFFFF)
 {
 
 }
 
 void BgControl::write(uint index, u8 byte)
 {
-    if (!XRegister::write(index, byte))
+    if (!Register::write(index, byte))
         return;
 
     if (index == 0)
@@ -146,7 +146,7 @@ BgReference::operator s32() const
 
 void BgReference::write(uint index, u8 byte)
 {
-    XRegisterW::write(index, byte);
+    RegisterW::write(index, byte);
 
     value &= mask;
 
@@ -176,7 +176,7 @@ void Window::write(u8 byte)
 
 void WindowInside::write(uint index, u8 byte)
 {
-    if (!XRegister::write(index, byte))
+    if (!Register::write(index, byte))
         return;
 
     if (index == 0)
@@ -187,7 +187,7 @@ void WindowInside::write(uint index, u8 byte)
 
 void WindowOutside::write(uint index, u8 byte)
 {
-    if (!XRegister::write(index, byte))
+    if (!Register::write(index, byte))
         return;
 
     if (index == 0)
@@ -204,7 +204,7 @@ WindowRange::WindowRange(uint limit)
 
 void WindowRange::write(uint index, u8 byte)
 {
-    if (!XRegisterW::write(index, byte))
+    if (!RegisterW::write(index, byte))
         return;
     
     max = bytes[0];
@@ -257,7 +257,7 @@ void Mosaic::write(uint index, u8 byte)
 
 void BlendControl::write(uint index, u8 byte)
 {
-    if (!XRegister::write(index, byte))
+    if (!Register::write(index, byte))
         return;
 
     if (index == 0)
@@ -273,7 +273,7 @@ void BlendControl::write(uint index, u8 byte)
 
 void BlendAlpha::write(uint index, u8 byte)
 {
-    if (!XRegister::write(index, byte))
+    if (!Register::write(index, byte))
         return;
 
     if (index == 0)
@@ -293,7 +293,7 @@ u16 BlendAlpha::blendAlpha(u16 a, u16 b) const
 
 void BlendFade::write(uint index, u8 byte)
 {
-    if (index == 1 || !XRegisterW::write(index, byte))
+    if (index == 1 || !RegisterW::write(index, byte))
         return;
 
     evy = std::min<uint>(16, bit::seq<0, 5>(byte));

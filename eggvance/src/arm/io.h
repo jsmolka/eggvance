@@ -5,13 +5,13 @@
 #include "constants.h"
 #include "base/register.h"
 
-class HaltControl : public XRegisterW<u8>
+class HaltControl : public RegisterW<u8>
 {
 public:
     void write(uint index, u8 byte);
 };
 
-class WaitControl : public XRegister<u16>
+class WaitControl : public Register<u16>
 {
 public:
     WaitControl();
@@ -40,7 +40,7 @@ private:
     } wait;
 };
 
-class IrqMaster : public XRegister<u32, 0x0001>
+class IrqMaster : public Register<u32, 0x0001>
 {
 public:
     operator bool() const;
@@ -50,7 +50,7 @@ public:
     std::function<void(void)> on_write;
 };
 
-class IrqEnable : public XRegister<u16, 0x3FFF>
+class IrqEnable : public Register<u16, 0x3FFF>
 {
 public:
     operator u16() const;
@@ -60,7 +60,7 @@ public:
     std::function<void(void)> on_write;
 };
 
-class IrqRequest : public XRegister<u16, 0x3FFF>
+class IrqRequest : public Register<u16, 0x3FFF>
 {
 public:
     operator u16() const;

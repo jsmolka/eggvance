@@ -4,7 +4,7 @@
 
 #include "base/register.h"
 
-class DmaSource : public XRegisterW<u32>
+class DmaSource : public RegisterW<u32>
 {
 public:
     DmaSource(uint id);
@@ -14,7 +14,7 @@ public:
     void write(uint index, u8 byte);
 };
 
-class DmaDestination : public XRegisterW<u32>
+class DmaDestination : public RegisterW<u32>
 {
 public:
     DmaDestination(uint id);
@@ -24,7 +24,7 @@ public:
     void write(uint index, u8 byte);
 };
 
-class DmaCount : public XRegisterW<u16>
+class DmaCount : public RegisterW<u16>
 {
 public:
     DmaCount(uint id);
@@ -34,7 +34,7 @@ public:
     void write(uint index, u8 byte);
 };
 
-class DmaControl : public XRegister<u16>
+class DmaControl : public Register<u16>
 {
 public:
     enum Control

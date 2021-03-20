@@ -13,7 +13,7 @@ SoundControl::SoundControl()
 
 u8 SoundControl::read(uint index) const
 {
-    u8 value = XRegister::read(index);
+    u8 value = Register::read(index);
 
     if (index == 4)
     {
@@ -27,7 +27,7 @@ u8 SoundControl::read(uint index) const
 
 void SoundControl::write(uint index, u8 byte)
 {
-    XRegister::write(index, byte);
+    Register::write(index, byte);
 
     switch (index)
     {
@@ -80,7 +80,7 @@ SoundBias::operator uint() const
 
 void SoundBias::write(uint index, u8 byte)
 {
-    XRegister::write(index, byte);
+    Register::write(index, byte);
 
     level = bit::seq<0, 10>(value);
 }

@@ -5,7 +5,7 @@
 
 void HaltControl::write(uint index, u8 byte)
 {
-    XRegisterW::write(index, byte);
+    RegisterW::write(index, byte);
 
     arm.state |= kStateHalt;
 }
@@ -17,7 +17,7 @@ WaitControl::WaitControl()
 
 void WaitControl::write(uint index, u8 byte)
 {
-    XRegister::write(index, byte);
+    Register::write(index, byte);
 
     if (index == 0)
     {
@@ -72,7 +72,7 @@ IrqMaster::operator bool() const
 
 void IrqMaster::write(uint index, u8 byte)
 {
-    XRegister::write(index, byte);
+    Register::write(index, byte);
 
     on_write();
 
@@ -85,7 +85,7 @@ IrqEnable::operator u16() const
 
 void IrqEnable::write(uint index, u8 byte)
 {
-    XRegister::write(index, byte);
+    Register::write(index, byte);
 
     on_write();
 }

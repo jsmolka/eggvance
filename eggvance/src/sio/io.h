@@ -2,13 +2,13 @@
 
 #include "base/register.h"
 
-class RemoteControl : public XRegister<u16>
+class RemoteControl : public Register<u16>
 {
 public:
     RemoteControl();
 };
 
-class SioControl : public XRegister<u16>
+class SioControl : public Register<u16>
 {
 public:
     void write(uint index, u8 byte);

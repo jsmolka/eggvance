@@ -3,7 +3,7 @@
 #include "scheduler/scheduler.h"
 
 Channel::Channel(u64 mask, uint length)
-    : XRegister(mask), length(length)
+    : Register(mask), length(length)
 {
 
 }
@@ -84,7 +84,7 @@ void Channel::write(uint index, u8 byte)
     if (enabled)
         tick();
 
-    XRegister::write(index, byte);
+    Register::write(index, byte);
 }
 
 void Channel::doSweep(bool writeback)

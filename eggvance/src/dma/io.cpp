@@ -1,7 +1,7 @@
 #include "io.h"
 
 DmaSource::DmaSource(uint id)
-    : XRegisterW(id == 0 ? 0x07FF'FFFF : 0x0FFF'FFFF)
+    : RegisterW(id == 0 ? 0x07FF'FFFF : 0x0FFF'FFFF)
 {
 
 }
@@ -13,13 +13,13 @@ DmaSource::operator u32() const
 
 void DmaSource::write(uint index, u8 byte)
 {
-    XRegisterW::write(index, byte);
+    RegisterW::write(index, byte);
 
     value &= mask;
 }
 
 DmaDestination::DmaDestination(uint id)
-    : XRegisterW(id == 3 ? 0x0FFF'FFFF : 0x07FF'FFFF)
+    : RegisterW(id == 3 ? 0x0FFF'FFFF : 0x07FF'FFFF)
 {
 
 }
@@ -31,13 +31,13 @@ DmaDestination::operator u32() const
 
 void DmaDestination::write(uint index, u8 byte)
 {
-    XRegisterW::write(index, byte);
+    RegisterW::write(index, byte);
 
     value &= mask;
 }
 
 DmaCount::DmaCount(uint id)
-    : XRegisterW(id == 3 ? 0xFFFF : 0x3FFF)
+    : RegisterW(id == 3 ? 0xFFFF : 0x3FFF)
 {
 
 }
@@ -52,13 +52,13 @@ DmaCount::operator uint() const
 
 void DmaCount::write(uint index, u8 byte)
 {
-    XRegisterW::write(index, byte);
+    RegisterW::write(index, byte);
 
     value &= mask;
 }
 
 DmaControl::DmaControl(uint id)
-    : XRegister(id == 3 ? 0xFFE0 : 0xF7E0)
+    : Register(id == 3 ? 0xFFE0 : 0xF7E0)
 {
 
 }
@@ -66,7 +66,7 @@ DmaControl::DmaControl(uint id)
 void DmaControl::write(uint index, u8 byte)
 {
     // Todo: return here?, use something better than value?
-    XRegister::write(index, byte);
+    Register::write(index, byte);
 
     value &= mask;
 

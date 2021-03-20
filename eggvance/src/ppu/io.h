@@ -6,7 +6,7 @@
 #include "point.h"
 #include "base/register.h"
 
-class DisplayControl : public XRegister<u16, 0xFFF7>
+class DisplayControl : public Register<u16, 0xFFF7>
 {
 public:
     DisplayControl();
@@ -27,7 +27,7 @@ public:
     uint winobj   = 0;
 };
 
-class DisplayStatus : public XRegister<u16, 0xFF38>
+class DisplayStatus : public Register<u16, 0xFF38>
 {
 public:
     u8 read(uint index) const;
@@ -42,14 +42,14 @@ public:
     uint vcompare   = 0;
 };
 
-class VCount : public XRegisterR<u16>
+class VCount : public RegisterR<u16>
 {
 public:
     VCount& operator++();
     operator u16() const;
 };
 
-class BgControl : public XRegister<u16>
+class BgControl : public Register<u16>
 {
 public:
     BgControl(uint id);
@@ -68,7 +68,7 @@ public:
     uint dimensions = 0;
 };
 
-class BgReference : public XRegisterW<u32, 0x0FFF'FFFF>
+class BgReference : public RegisterW<u32, 0x0FFF'FFFF>
 {
 public:
     operator s32() const;
@@ -93,7 +93,7 @@ public:
     uint blend = 0;
 };
 
-class WindowInside : public XRegister<u16, 0x3F3F>
+class WindowInside : public Register<u16, 0x3F3F>
 {
 public:
     void write(uint index, u8 byte);
@@ -102,7 +102,7 @@ public:
     Window win1;
 };
 
-class WindowOutside : public XRegister<u16, 0x3F3F>
+class WindowOutside : public Register<u16, 0x3F3F>
 {
 public:
     void write(uint index, u8 byte);
@@ -111,7 +111,7 @@ public:
     Window winobj;
 };
 
-class WindowRange : public XRegisterW<u16>
+class WindowRange : public RegisterW<u16>
 {
 public:
     WindowRange(uint limit);
@@ -151,7 +151,7 @@ public:
     Block obj;
 };
 
-class BlendControl : public XRegister<u16, 0x3FFF>
+class BlendControl : public Register<u16, 0x3FFF>
 {
 public:
     void write(uint index, u8 byte);
@@ -161,7 +161,7 @@ public:
     uint lower = 0;
 };
 
-class BlendAlpha : public XRegister<u16, 0x1F1F>
+class BlendAlpha : public Register<u16, 0x1F1F>
 {
 public:
     void write(uint index, u8 byte);
@@ -172,7 +172,7 @@ public:
     uint evb = 0;
 };
 
-class BlendFade : public XRegisterW<u16, 0x001F>
+class BlendFade : public RegisterW<u16, 0x001F>
 {
 public:
     void write(uint index, u8 byte);

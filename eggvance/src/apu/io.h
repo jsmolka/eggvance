@@ -2,7 +2,7 @@
 
 #include "base/register.h"
 
-class SoundControl : public XRegister<u64, 0x0000'0080'770F'FF77>
+class SoundControl : public Register<u64, 0x0000'0080'770F'FF77>
 {
 public:
     SoundControl();
@@ -18,7 +18,7 @@ public:
     uint enabled_l = 0;
 };
 
-class SoundBias : public XRegister<u16, 0xC3FF>
+class SoundBias : public Register<u16, 0xC3FF>
 {
 public:
     SoundBias();
