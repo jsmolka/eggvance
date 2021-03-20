@@ -59,15 +59,15 @@ void DmaControl::write(uint index, u8 byte)
     }
     else
     {
-        uint was_enable = enable;
+        uint was_enable = enabled;
 
         repeat = bit::seq<1, 1>(byte);
         word   = bit::seq<2, 1>(byte);
         timing = bit::seq<4, 2>(byte);
         irq    = bit::seq<6, 1>(byte);
-        enable = bit::seq<7, 1>(byte);
+        enabled = bit::seq<7, 1>(byte);
 
-        on_write(!was_enable && enable);
+        on_write(!was_enable && enabled);
     }
 }
 
@@ -75,7 +75,7 @@ void DmaControl::setEnabled(bool enabled)
 {
     constexpr auto kEnabled = 1 << 15;
 
-    this->enable = enabled;
+    this->enabled = enabled;
 
     if (enabled)
         data |=  kEnabled;

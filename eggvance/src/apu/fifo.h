@@ -8,7 +8,6 @@ class Fifo : public shell::RingBuffer<s8, 32>
 {
 public:
     void tick();
-    bool refillable() const;
 
     s16  sample    = 0;
     uint volume    = 0;

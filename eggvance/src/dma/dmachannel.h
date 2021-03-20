@@ -10,10 +10,6 @@ public:
 
     DmaChannel(uint id);
 
-    void reload();
-    bool start();
-    void run();
-
     const uint id;
     DmaSource sad;
     DmaDestination dad;
@@ -21,20 +17,24 @@ public:
     DmaControl control;
 
 private:
-    void initTransfer();
+    void init();
     void initEeprom();
+    void initTransfer();
 
-    uint running = false;
-    uint fifo    = false;
+    bool start();
+    void run();
+
+    uint running = 0;
+    uint fifo    = 0;
     uint pending = 0;
     uint bus     = 0;
 
-    struct Internal
+    struct Latch
     {
         uint sad   = 0;
         uint dad   = 0;
         uint count = 0;
-    } internal;
+    } latch;
 
     std::function<void(Access)> transfer;
 };

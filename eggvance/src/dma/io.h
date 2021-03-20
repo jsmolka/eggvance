@@ -35,18 +35,18 @@ class DmaControl : public Register<u16>
 public:
     enum Control
     {
-        kIncrement,
-        kDecrement,
-        kFixed,
-        kReload
+        kControlIncrement,
+        kControlDecrement,
+        kControlFixed,
+        kControlReload
     };
 
     enum Timing
     {
-        kImmediate,
-        kVBlank,
-        kHBlank,
-        kSpecial
+        kTimingImmediate,
+        kTimingVBlank,
+        kTimingHBlank,
+        kTimingSpecial
     };
 
     DmaControl(uint id);
@@ -60,7 +60,7 @@ public:
     uint word   = 0;
     uint timing = 0;
     uint irq    = 0;
-    uint enable = 0;
+    uint enabled = 0;
 
     std::function<void(bool)> on_write;
 };

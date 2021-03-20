@@ -16,141 +16,16 @@ DmaChannel::DmaChannel(uint id)
 
 }
 
-void DmaChannel::reload()
+void DmaChannel::init()
 {
     fifo = (id == 1 || id == 2)
-        && control.timing == DmaControl::Timing::kSpecial
+        && control.timing == DmaControl::kTimingSpecial
         && control.repeat
         && dad.isFifo();
 
-    internal.sad   = sad;
-    internal.dad   = dad;
-    internal.count = fifo ? 4 : static_cast<uint>(count);
-}
-
-bool DmaChannel::start()
-{
-    if (fifo && !apu.fifo[internal.dad == 0x400'00A4].refillable())
-        return false;
-
-    if (control.repeat)
-    {
-        internal.count = fifo ? 4 : static_cast<int>(count);
-
-        if (control.dadcnt == DmaControl::Control::kReload)
-            internal.dad = dad;
-    }
-
-    uint mask = ~((2 << control.word) - 1);
-
-    internal.sad &= mask;
-    internal.dad &= mask;
-
-    running = true;
-    pending = internal.count;
-
-    initTransfer();
-
-    return true;
-}
-
-void DmaChannel::run()
-{
-    static constexpr int kDeltas[2][4] =
-    {
-        { 2, -2, 0, 2 },
-        { 4, -4, 0, 4 }
-    };
-
-    int sad_delta = kDeltas[control.word | fifo][control.sadcnt];
-    int dad_delta = kDeltas[control.word | fifo][fifo ? DmaControl::Control::kFixed : control.dadcnt];
-
-    while (pending--)
-    {
-        if (pending == internal.count - 1)
-        {
-            if (!(internal.sad & internal.dad & 0x800'0000))
-                arm.idle(2);
-
-            transfer(Access::NonSequential);
-        }
-        else
-        {
-            transfer(Access::Sequential);
-        }
-
-        internal.sad += sad_delta;
-        internal.dad += dad_delta;
-
-        if (arm.target >= scheduler.now && pending)
-            return;
-    }
-
-    running = false;
-
-    if (control.irq)
-        arm.raise(kIrqDma0 << id);
-
-    control.setEnabled(control.repeat
-        && !(control.timing == DmaControl::Timing::kImmediate)
-        && !(control.timing == DmaControl::Timing::kSpecial && id == 3 && ppu.vcount == 161));
-}
-
-void DmaChannel::initTransfer()
-{
-    bool eeprom_r = gamepak.isEepromAccess(internal.sad);
-    bool eeprom_w = gamepak.isEepromAccess(internal.dad);
-
-    if ((eeprom_r || eeprom_w) && id == 3)
-    {
-        initEeprom();
-
-        if (eeprom_r)
-        {
-            transfer = [this](Access access)
-            {
-                if (internal.sad >= 0x200'0000) bus = gamepak.save->read(internal.sad);
-                if (internal.dad >= 0x200'0000) arm.writeHalf(internal.dad, bus, access);
-            };
-        }
-        else
-        {
-            transfer = [this](Access access)
-            {
-                if (internal.sad >= 0x200'0000) 
-                {
-                    bus = arm.readHalf(internal.sad, access);
-                    bus |= bus << 16;
-                }
-                if (internal.dad >= 0x200'0000) 
-                    gamepak.save->write(internal.dad, bus);
-            };
-        }
-    }
-    else
-    {
-        if (control.word | fifo)
-        {
-            transfer = [this](Access access)
-            {
-                if (internal.sad >= 0x200'0000) bus = arm.readWord(internal.sad, access);
-                if (internal.dad >= 0x200'0000) arm.writeWord(internal.dad, bus, access);
-            };
-        }
-        else
-        {
-            transfer = [this](Access access)
-            {
-                if (internal.sad >= 0x200'0000)
-                {
-                    bus = arm.readHalf(internal.sad, access);
-                    bus |= bus << 16;
-                }
-                if (internal.dad >= 0x200'0000)
-                    arm.writeHalf(internal.dad, bus, access);
-            };
-        }
-    }
+    latch.sad   = sad;
+    latch.dad   = dad;
+    latch.count = fifo ? 4 : static_cast<uint>(count);
 }
 
 void DmaChannel::initEeprom()
@@ -175,4 +50,129 @@ void DmaChannel::initEeprom()
         gamepak.save->data.resize(Eeprom::kSize64, 0xFF);
         break;
     }
+}
+
+void DmaChannel::initTransfer()
+{
+    bool eeprom_r = gamepak.isEepromAccess(latch.sad);
+    bool eeprom_w = gamepak.isEepromAccess(latch.dad);
+
+    if ((eeprom_r || eeprom_w) && id == 3)
+    {
+        initEeprom();
+
+        if (eeprom_r)
+        {
+            transfer = [this](Access access)
+            {
+                if (latch.sad >= 0x200'0000) bus = gamepak.save->read(latch.sad);
+                if (latch.dad >= 0x200'0000) arm.writeHalf(latch.dad, bus, access);
+            };
+        }
+        else
+        {
+            transfer = [this](Access access)
+            {
+                if (latch.sad >= 0x200'0000) 
+                {
+                    bus = arm.readHalf(latch.sad, access);
+                    bus |= bus << 16;
+                }
+                if (latch.dad >= 0x200'0000) 
+                    gamepak.save->write(latch.dad, bus);
+            };
+        }
+    }
+    else
+    {
+        if (control.word || fifo)
+        {
+            transfer = [this](Access access)
+            {
+                if (latch.sad >= 0x200'0000) bus = arm.readWord(latch.sad, access);
+                if (latch.dad >= 0x200'0000) arm.writeWord(latch.dad, bus, access);
+            };
+        }
+        else
+        {
+            transfer = [this](Access access)
+            {
+                if (latch.sad >= 0x200'0000)
+                {
+                    bus = arm.readHalf(latch.sad, access);
+                    bus |= bus << 16;
+                }
+                if (latch.dad >= 0x200'0000)
+                    arm.writeHalf(latch.dad, bus, access);
+            };
+        }
+    }
+}
+
+bool DmaChannel::start()
+{
+    if (fifo)
+    {
+        if (apu.fifo[latch.dad == 0x400'00A4].size() > 16)
+            return false;
+    }
+    else if (control.repeat)
+    {
+        latch.count = count;
+
+        if (control.dadcnt == DmaControl::Control::kControlReload)
+            latch.dad = dad;
+    }
+
+    latch.sad &= ~((2 << control.word) - 1);
+    latch.dad &= ~((2 << control.word) - 1);
+
+    running = true;
+    pending = latch.count;
+
+    initTransfer();
+
+    return true;
+}
+
+void DmaChannel::run()
+{
+    static constexpr int kDeltas[2][4] =
+    {
+        { 2, -2, 0, 2 },
+        { 4, -4, 0, 4 }
+    };
+
+    int sad_delta = kDeltas[control.word | fifo][control.sadcnt];
+    int dad_delta = kDeltas[control.word | fifo][fifo ? DmaControl::Control::kControlFixed : control.dadcnt];
+
+    while (pending--)
+    {
+        if (pending == latch.count - 1)
+        {
+            if (!(latch.sad & latch.dad & 0x800'0000))
+                arm.idle(2);
+
+            transfer(Access::NonSequential);
+        }
+        else
+        {
+            transfer(Access::Sequential);
+        }
+
+        latch.sad += sad_delta;
+        latch.dad += dad_delta;
+
+        if (arm.target >= scheduler.now && pending)
+            return;
+    }
+
+    running = false;
+
+    if (control.irq)
+        arm.raise(kIrqDma0 << id);
+
+    control.setEnabled(control.repeat
+        && !(control.timing == DmaControl::Timing::kTimingImmediate)
+        && !(control.timing == DmaControl::Timing::kTimingSpecial && id == 3 && ppu.vcount == 161));
 }

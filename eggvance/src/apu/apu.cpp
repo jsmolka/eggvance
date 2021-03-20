@@ -35,7 +35,7 @@ void Apu::onOverflow(uint timer, uint times)
     if (!control.enabled)
         return;
 
-    constexpr Dma::Timing kEvent[2] = { Dma::Timing::FifoA, Dma::Timing::FifoB };
+    constexpr Dma::Event kEvent[2] = { Dma::Event::FifoA, Dma::Event::FifoB };
 
     for (auto [fifo, event] : shell::zip(fifo, kEvent))
     {
@@ -47,7 +47,7 @@ void Apu::onOverflow(uint timer, uint times)
             fifo.tick();
         }
 
-        if (fifo.refillable())
+        if (fifo.size() <= 16)
             dma.broadcast(event);
     }
 }
