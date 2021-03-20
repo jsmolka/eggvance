@@ -35,7 +35,7 @@ bool DmaChannel::start()
 
     if (control.repeat)
     {
-        internal.count = fifo ? 4 : count;
+        internal.count = fifo ? 4 : static_cast<int>(count);
 
         if (control.dadcnt == DmaControl::Control::kReload)
             internal.dst_addr = dad;
