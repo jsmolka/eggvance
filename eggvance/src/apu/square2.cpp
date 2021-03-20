@@ -25,11 +25,11 @@ void Square2::write(uint index, u8 byte)
         break;
 
     case 4:
-        frequency = bit::seq<32, 11>(value);
+        frequency = bit::seq<32, 11>(raw);
         break;
 
     case 5:
-        frequency     = bit::seq<32, 11>(value);
+        frequency     = bit::seq<32, 11>(raw);
         length.expire = bit::seq< 6,  1>(byte);
 
         if (byte & 0x80)

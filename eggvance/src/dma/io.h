@@ -10,8 +10,6 @@ public:
     DmaSource(uint id);
 
     operator u32() const;
-
-    void write(uint index, u8 byte);
 };
 
 class DmaDestination : public RegisterW<u32>
@@ -20,8 +18,6 @@ public:
     DmaDestination(uint id);
 
     operator u32() const;
-
-    void write(uint index, u8 byte);
 };
 
 class DmaCount : public RegisterW<u16>
@@ -30,8 +26,6 @@ public:
     DmaCount(uint id);
 
     operator uint() const;
-
-    void write(uint index, u8 byte);
 };
 
 class DmaControl : public Register<u16>
@@ -62,7 +56,6 @@ public:
     uint sadcnt = 0;
     uint repeat = 0;
     uint word   = 0;
-    uint drq    = 0;
     uint timing = 0;
     uint irq    = 0;
     uint enable = 0;

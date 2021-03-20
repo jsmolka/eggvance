@@ -4,26 +4,26 @@
 
 KeyInput::KeyInput()
 {
-    value = mask;
+    data = mask;
 }
 
 KeyInput& KeyInput::operator=(u16 value)
 {
-    this->value = value & mask;
+    data = value & mask;
 
     return *this;
 }
 
 KeyInput::operator u16() const
 {
-    return value;
+    return data;
 }
 
 void KeyControl::write(uint index, u8 byte)
 {
     Register::write(index, byte);
 
-    mask = bit::seq<0, 10>(value);
+    mask = bit::seq<0, 10>(data);
 
     if (index == 1)
     {

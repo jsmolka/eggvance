@@ -76,7 +76,7 @@ void WaitControl::update()
 
 IrqMaster::operator bool() const
 {
-    return value & mask;
+    return data;
 }
 
 void IrqMaster::write(uint index, u8 byte)
@@ -89,7 +89,7 @@ void IrqMaster::write(uint index, u8 byte)
 
 IrqEnable::operator u16() const
 {
-    return value & mask;
+    return data;
 }
 
 void IrqEnable::write(uint index, u8 byte)
@@ -101,19 +101,19 @@ void IrqEnable::write(uint index, u8 byte)
 
 IrqRequest& IrqRequest::operator|=(u16 value)
 {
-    this->value |= value;
+    data |= value;
 
     return *this;
 }
 
 IrqRequest::operator u16() const
 {
-    return value & mask;
+    return data;
 }
 
 void IrqRequest::write(uint index, u8 byte)
 {
-    bytes[index] &= ~(byte & bit::byte(mask, index));
+    bit::byteRef(data, index) &= ~(byte & bit::byte(mask, index));
 
     on_write();
 }

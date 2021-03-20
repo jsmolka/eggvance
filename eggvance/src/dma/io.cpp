@@ -8,14 +8,7 @@ DmaSource::DmaSource(uint id)
 
 DmaSource::operator u32() const
 {
-    return value;
-}
-
-void DmaSource::write(uint index, u8 byte)
-{
-    RegisterW::write(index, byte);
-
-    value &= mask;
+    return data;
 }
 
 DmaDestination::DmaDestination(uint id)
@@ -26,14 +19,7 @@ DmaDestination::DmaDestination(uint id)
 
 DmaDestination::operator u32() const
 {
-    return value;
-}
-
-void DmaDestination::write(uint index, u8 byte)
-{
-    RegisterW::write(index, byte);
-
-    value &= mask;
+    return data;
 }
 
 DmaCount::DmaCount(uint id)
@@ -44,17 +30,10 @@ DmaCount::DmaCount(uint id)
 
 DmaCount::operator uint() const
 {
-    if (value == 0)
+    if (data == 0)
         return mask + 1;
     else
-        return value;
-}
-
-void DmaCount::write(uint index, u8 byte)
-{
-    RegisterW::write(index, byte);
-
-    value &= mask;
+        return data;
 }
 
 DmaControl::DmaControl(uint id)
@@ -65,12 +44,9 @@ DmaControl::DmaControl(uint id)
 
 void DmaControl::write(uint index, u8 byte)
 {
-    // Todo: return here?, use something better than value?
     Register::write(index, byte);
 
-    value &= mask;
-
-    sadcnt = bit::seq<7, 2>(value);
+    sadcnt = bit::seq<7, 2>(data);
 
     if (index == 0)
     {
@@ -80,12 +56,11 @@ void DmaControl::write(uint index, u8 byte)
     {
         uint was_enable = enable;
 
-        repeat = bit::seq< 9, 1>(value);
-        word   = bit::seq<10, 1>(value);
-        drq    = bit::seq<11, 1>(value);
-        timing = bit::seq<12, 2>(value);
-        irq    = bit::seq<14, 1>(value);
-        enable = bit::seq<15, 1>(value);
+        repeat = bit::seq<1, 1>(byte);
+        word   = bit::seq<2, 1>(byte);
+        timing = bit::seq<4, 2>(byte);
+        irq    = bit::seq<6, 1>(byte);
+        enable = bit::seq<7, 1>(byte);
 
         on_write(!was_enable && enable);
     }
@@ -93,10 +68,12 @@ void DmaControl::write(uint index, u8 byte)
 
 void DmaControl::setEnabled(bool enabled)
 {
+    constexpr auto kEnabled = 1 << 15;
+
     this->enable = enabled;
 
     if (enabled)
-        value |=  (1 << 15);
+        data |=  kEnabled;
     else
-        value &= ~(1 << 15);
+        data &= ~kEnabled;
 }

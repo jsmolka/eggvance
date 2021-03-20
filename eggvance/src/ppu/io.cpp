@@ -17,8 +17,7 @@ DisplayControl::DisplayControl()
 
 void DisplayControl::write(uint index, u8 byte)
 {
-    if (!Register::write(index, byte))
-        return;
+    Register::write(index, byte);
 
     if (index == 0)
     {
@@ -72,8 +71,7 @@ u8 DisplayStatus::read(uint index) const
 
 void DisplayStatus::write(uint index, u8 byte)
 {
-    if (!Register::write(index, byte))
-        return;
+    Register::write(index, byte);
 
     if (index == 0)
     {
@@ -89,14 +87,14 @@ void DisplayStatus::write(uint index, u8 byte)
 
 VCount& VCount::operator++()
 {
-    value = (value + 1) % 228;
+    data = (data + 1) % 228;
 
     return *this;
 }
 
 VCount::operator u16() const
 {
-    return value;
+    return data;
 }
 
 BgControl::BgControl(uint id)
@@ -107,8 +105,7 @@ BgControl::BgControl(uint id)
 
 void BgControl::write(uint index, u8 byte)
 {
-    if (!Register::write(index, byte))
-        return;
+    Register::write(index, byte);
 
     if (index == 0)
     {
@@ -148,8 +145,6 @@ void BgReference::write(uint index, u8 byte)
 {
     RegisterW::write(index, byte);
 
-    value &= mask;
-
     vblank();
 }
 
@@ -160,7 +155,7 @@ void BgReference::hblank(s16 value)
 
 void BgReference::vblank()
 {
-    current = bit::signEx<28>(value);
+    current = bit::signEx<28>(data);
 }
 
 BgParameter::BgParameter()
@@ -171,19 +166,12 @@ BgParameter::BgParameter()
 
 BgParameter::operator s16() const
 {
-    return value;
+    return data;
 }
 
 BgOffset::operator u16() const
 {
-    return value;
-}
-
-void BgOffset::write(uint index, u8 byte)
-{
-    RegisterW::write(index, byte);
-
-    value &= mask;
+    return data;
 }
 
 Window::Window()
@@ -199,8 +187,7 @@ void Window::write(u8 byte)
 
 void WindowInside::write(uint index, u8 byte)
 {
-    if (!Register::write(index, byte))
-        return;
+    Register::write(index, byte);
 
     if (index == 0)
         win0.write(byte);
@@ -210,8 +197,7 @@ void WindowInside::write(uint index, u8 byte)
 
 void WindowOutside::write(uint index, u8 byte)
 {
-    if (!Register::write(index, byte))
-        return;
+    Register::write(index, byte);
 
     if (index == 0)
         winout.write(byte);
@@ -227,11 +213,10 @@ WindowRange::WindowRange(uint limit)
 
 void WindowRange::write(uint index, u8 byte)
 {
-    if (!RegisterW::write(index, byte))
-        return;
-    
-    max = bytes[0];
-    min = bytes[1];
+    RegisterW::write(index, byte);
+
+    max = bit::byte(data, 0);
+    min = bit::byte(data, 1);
 
     if (max > limit || max < min)
         max = limit;
@@ -280,8 +265,7 @@ void Mosaic::write(uint index, u8 byte)
 
 void BlendControl::write(uint index, u8 byte)
 {
-    if (!Register::write(index, byte))
-        return;
+    Register::write(index, byte);
 
     if (index == 0)
     {
@@ -296,8 +280,7 @@ void BlendControl::write(uint index, u8 byte)
 
 void BlendAlpha::write(uint index, u8 byte)
 {
-    if (!Register::write(index, byte))
-        return;
+    Register::write(index, byte);
 
     if (index == 0)
         eva = std::min<uint>(16, bit::seq<0, 5>(byte));
@@ -316,8 +299,10 @@ u16 BlendAlpha::blendAlpha(u16 a, u16 b) const
 
 void BlendFade::write(uint index, u8 byte)
 {
-    if (index == 1 || !RegisterW::write(index, byte))
+    if (index == 1)
         return;
+
+    RegisterW::write(index, byte);
 
     evy = std::min<uint>(16, bit::seq<0, 5>(byte));
 }

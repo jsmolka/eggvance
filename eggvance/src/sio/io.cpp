@@ -15,19 +15,18 @@ RemoteControl::RemoteControl()
 
 void SioControl::write(uint index, u8 byte)
 {
-    if (!Register::write(index, byte))
-        return;
+    Register::write(index, byte);
 
     if (index == 0)
     {
         constexpr auto kEnabled = 1 << 7;
 
-        if (value & kEnabled)
+        if (data & kEnabled)
         {
             if (irq)
                 arm.raise(kIrqSerial);
 
-            value &= ~kEnabled;
+            data &= ~kEnabled;
         }
     }
     else

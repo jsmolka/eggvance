@@ -32,22 +32,22 @@ TimerControl::TimerControl(TimerChannel& channel)
 
 void TimerControl::write(uint index, u8 byte)
 {
-    if (index == 1 || !Register::write(index, byte))
+    if (index == 1)
         return;
 
-    constexpr uint kPrescalers[8] = { 1, 64, 256, 1024, 1, 1, 1, 1 };
+    Register::write(index, byte);
 
-    value &= mask;
+    constexpr uint kPrescalers[8] = { 1, 64, 256, 1024, 1, 1, 1, 1 };
 
     if (enabled && !cascade)
         channel.run();
 
     uint was_enabled = enabled;
 
-    prescaler = kPrescalers[bit::seq<0, 3>(value)];
-    cascade   = bit::seq<2, 1>(value);
-    irq       = bit::seq<6, 1>(value);
-    enabled   = bit::seq<7, 1>(value);
+    prescaler = kPrescalers[bit::seq<0, 3>(data)];
+    cascade   = bit::seq<2, 1>(data);
+    irq       = bit::seq<6, 1>(data);
+    enabled   = bit::seq<7, 1>(data);
 
     if (!was_enabled && enabled)
         channel.start();

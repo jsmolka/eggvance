@@ -82,5 +82,5 @@ void SoundBias::write(uint index, u8 byte)
 {
     Register::write(index, byte);
 
-    level = bit::seq<0, 10>(value);
+    level = bit::seq<0, 10>(data);
 }

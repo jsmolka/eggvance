@@ -13,7 +13,7 @@ struct ones : std::integral_constant<Integral, static_cast<Integral>(~0ULL)>
 };
 
 template<typename Integral>
-constexpr inline Integral ones_v = ones<Integral>::value;
+inline constexpr Integral ones_v = ones<Integral>::value;
 
 }  // namespace
 
@@ -31,26 +31,19 @@ public:
 protected:
     u8 read(uint index) const
     {
-        SHELL_ASSERT(index < sizeof(Integral));
-
-        return bit::byte(value & mask, index);
+        return bit::byte(data, index);
     }
 
-    bool write(uint index, u8 byte)
+    void write(uint index, u8 byte)
     {
-        SHELL_ASSERT(index < sizeof(Integral));
+        bit::byteRef(raw,  index) = byte;
+        bit::byteRef(data, index) = byte;
 
-        bool changed = byte != bytes[index];
-        bytes[index] = byte;
-
-        return changed;
+        data &= mask;
     }
 
-    union
-    {
-        Integral value = 0;
-        u8 bytes[sizeof(Integral)];
-    };
+    Integral raw  = 0;
+    Integral data = 0;
 };
 
 template<typename Integral, Integral Mask = ones_v<Integral>>

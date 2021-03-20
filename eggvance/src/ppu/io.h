@@ -94,8 +94,6 @@ class BgOffset : public RegisterW<u16, 0x01FF>
 {
 public:
     operator u16() const;
-
-    void write(uint index, u8 byte);
 };
 
 class Window
