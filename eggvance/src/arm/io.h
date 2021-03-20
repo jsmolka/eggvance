@@ -5,6 +5,12 @@
 #include "constants.h"
 #include "base/register.h"
 
+class PostFlag : public Register<u8, 0x01>
+{
+public:
+    PostFlag();
+};
+
 class HaltControl : public RegisterW<u8>
 {
 public:
@@ -63,6 +69,7 @@ public:
 class IrqRequest : public Register<u16, 0x3FFF>
 {
 public:
+    IrqRequest& operator|=(u16 value);
     operator u16() const;
 
     void write(uint index, u8 byte);

@@ -2,6 +2,15 @@
 
 #include "arm.h"
 #include "constants.h"
+#include "base/config.h"
+
+PostFlag::PostFlag()
+{
+    if (config.bios_skip)
+    {
+        write(0, 0x01);
+    }
+}
 
 void HaltControl::write(uint index, u8 byte)
 {
@@ -88,6 +97,13 @@ void IrqEnable::write(uint index, u8 byte)
     Register::write(index, byte);
 
     on_write();
+}
+
+IrqRequest& IrqRequest::operator|=(u16 value)
+{
+    this->value |= value;
+
+    return *this;
 }
 
 IrqRequest::operator u16() const

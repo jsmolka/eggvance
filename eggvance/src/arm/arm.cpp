@@ -18,8 +18,6 @@ Arm::Arm()
     irq.master.on_write  = std::bind(&Arm::interruptProcess, this);
     irq.enable.on_write  = std::bind(&Arm::interruptProcess, this);
     irq.request.on_write = std::bind(&Arm::interruptProcess, this);
-
-    postflg.value = config.bios_skip;
 }
 
 void Arm::init()

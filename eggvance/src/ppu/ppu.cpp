@@ -18,11 +18,6 @@ Ppu::Ppu()
     backgrounds[2].fill(kTransparent);
     backgrounds[3].fill(kTransparent);
 
-    bgpa[0].value = 1 << kDecimalBits;
-    bgpa[1].value = 1 << kDecimalBits;
-    bgpd[0].value = 1 << kDecimalBits;
-    bgpd[1].value = 1 << kDecimalBits;
-
     for (u32 color = 0; color < argb.size(); ++color)
     {
         uint r = bit::seq< 0, 5>(color) << 3 | 0x7;
@@ -154,10 +149,10 @@ void Ppu::hblank()
 
     if (vcount < 160)
     {
-        bgx[0].hblank(bgpb[0].value);
-        bgx[1].hblank(bgpb[1].value);
-        bgy[0].hblank(bgpd[0].value);
-        bgy[1].hblank(bgpd[1].value);
+        bgx[0].hblank(bgpb[0]);
+        bgx[1].hblank(bgpb[1]);
+        bgy[0].hblank(bgpd[0]);
+        bgy[1].hblank(bgpd[1]);
 
         dma.broadcast(Dma::Timing::HBlank);
     }

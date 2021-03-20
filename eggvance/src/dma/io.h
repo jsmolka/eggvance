@@ -56,6 +56,7 @@ public:
     DmaControl(uint id);
 
     void write(uint index, u8 byte);
+    void setEnabled(bool enabled);
 
     uint dadcnt = 0;
     uint sadcnt = 0;

@@ -49,7 +49,7 @@ void Ppu::collapse(const BgLayers& layers)
 template<bool Objects>
 void Ppu::collapseNN(const BgLayers& layers)
 {
-    u32* scanline = video_ctx.scanline(vcount.value);
+    u32* scanline = video_ctx.scanline(vcount);
 
     for (uint x = 0; x < kScreen.x; ++x)
     {
@@ -73,7 +73,7 @@ void Ppu::collapseNW(const BgLayers& layers)
 template<bool Objects, uint Windows>
 void Ppu::collapseNW(const BgLayers& layers)
 {
-    u32* scanline = video_ctx.scanline(vcount.value);
+    u32* scanline = video_ctx.scanline(vcount);
 
     for (uint x = 0; x < kScreen.x; ++x)
     {
@@ -101,7 +101,7 @@ void Ppu::collapseBN(const BgLayers& layers)
 {
     constexpr uint kFlags = 0xFFFF;
 
-    u32* scanline = video_ctx.scanline(vcount.value);
+    u32* scanline = video_ctx.scanline(vcount);
 
     for (uint x = 0; x < kScreen.x; ++x)
     {
@@ -176,7 +176,7 @@ void Ppu::collapseBW(const BgLayers& layers)
 template<bool Objects, uint BlendMode, uint Windows>
 void Ppu::collapseBW(const BgLayers& layers)
 {
-    u32* scanline = video_ctx.scanline(vcount.value);
+    u32* scanline = video_ctx.scanline(vcount);
 
     for (uint x = 0; x < kScreen.x; ++x)
     {
@@ -232,9 +232,9 @@ uint Ppu::possibleWindows() const
 {
     uint windows = 0;
 
-    if (dispcnt.win0 && winv[0].contains(vcount.value))
+    if (dispcnt.win0 && winv[0].contains(vcount))
         windows |= kWindow0;
-    if (dispcnt.win1 && winv[1].contains(vcount.value))
+    if (dispcnt.win1 && winv[1].contains(vcount))
         windows |= kWindow1;
     if (dispcnt.winobj && Objects)
         windows |= kWindowObj;

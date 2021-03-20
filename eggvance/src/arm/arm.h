@@ -143,9 +143,9 @@ private:
         u64 cycles = 0;
     } prefetch;
 
-    WaitControl  waitcnt;
-    HaltControl  haltcnt;
-    Register<u8> postflg;
+    WaitControl waitcnt;
+    HaltControl haltcnt;
+    PostFlag    postflg;
 
     Bios bios;
     Ram<0x40000> ewram{};

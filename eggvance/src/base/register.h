@@ -26,12 +26,6 @@ public:
     RegisterBase(Integral mask = Mask)
         : mask(mask) {}
 
-    union
-    {
-        Integral value = 0;
-        u8 bytes[sizeof(Integral)];
-    };
-
     const Integral mask;
 
 protected:
@@ -51,6 +45,12 @@ protected:
 
         return changed;
     }
+
+    union
+    {
+        Integral value = 0;
+        u8 bytes[sizeof(Integral)];
+    };
 };
 
 template<typename Integral, Integral Mask = ones_v<Integral>>

@@ -9,8 +9,8 @@ Point Ppu::transform(uint x, uint bg)
     bg -= 2;
 
     return Point(
-        bgpa[bg].value * static_cast<int>(x) + bgx[bg],
-        bgpc[bg].value * static_cast<int>(x) + bgy[bg]);
+        bgpa[bg] * static_cast<int>(x) + bgx[bg],
+        bgpc[bg] * static_cast<int>(x) + bgy[bg]);
 }
 
 void Ppu::renderBg(RenderFunc render, uint bg)
@@ -21,7 +21,7 @@ void Ppu::renderBg(RenderFunc render, uint bg)
     auto& bgcnt = this->bgcnt[bg];
     auto& background = backgrounds[bg];
 
-    if (bgcnt.mosaic && mosaic.bgs.y > 1 && !mosaic.bgs.isDominantY(vcount.value))
+    if (bgcnt.mosaic && mosaic.bgs.y > 1 && !mosaic.bgs.isDominantY(vcount))
     {
         background.flip();
     }
@@ -60,9 +60,7 @@ void Ppu::renderBgMode0Impl(uint bg)
     const auto& bgcnt = this->bgcnt[bg];
     const auto& size  = this->bgcnt[bg].sizeReg();
 
-    Point origin(
-        bghofs[bg].value,
-        bgvofs[bg].value + vcount.value);
+    Point origin(bghofs[bg], bgvofs[bg] + vcount);
 
     origin %= size;
 
@@ -216,7 +214,7 @@ void Ppu::renderObjects()
 
     for (const auto& entry : oam.entries)
     {
-        if (entry.disabled || !entry.isVisible(vcount.value))
+        if (entry.disabled || !entry.isVisible(vcount))
             continue;
 
         const auto& origin      = entry.origin;
@@ -231,7 +229,7 @@ void Ppu::renderObjects()
 
         Point offset(
             -center.x + origin.x - std::min(origin.x, 0),
-            -center.y + vcount.value);
+            -center.y + vcount);
 
         uint end = std::min(origin.x + screen_size.x, kScreen.x);
 

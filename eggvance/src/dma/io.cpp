@@ -90,3 +90,13 @@ void DmaControl::write(uint index, u8 byte)
         on_write(!was_enable && enable);
     }
 }
+
+void DmaControl::setEnabled(bool enabled)
+{
+    this->enable = enabled;
+
+    if (enabled)
+        value |=  (1 << 15);
+    else
+        value &= ~(1 << 15);
+}

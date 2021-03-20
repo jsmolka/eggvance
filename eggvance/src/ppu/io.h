@@ -82,6 +82,22 @@ private:
     s32 current = 0;
 };
 
+class BgParameter : public RegisterW<u16>
+{
+public:
+    BgParameter();
+
+    operator s16() const;
+};
+
+class BgOffset : public RegisterW<u16, 0x01FF>
+{
+public:
+    operator u16() const;
+
+    void write(uint index, u8 byte);
+};
+
 class Window
 {
 public:

@@ -23,7 +23,7 @@ void DmaChannel::reload()
         && (dad == 0x400'00A0 || dad == 0x400'00A4)
         && (id == 1 || id == 2);
 
-    internal.count    = fifo ? 4 : count;
+    internal.count    = fifo ? 4 : static_cast<int>(count);
     internal.src_addr = sad;
     internal.dst_addr = dad;
 }
@@ -88,12 +88,9 @@ void DmaChannel::run()
     if (control.irq)
         arm.raise(kIrqDma0 << id);
 
-    control.enable = control.repeat
+    control.setEnabled(control.repeat
         && !(control.timing == DmaControl::Timing::kImmediate)
-        && !(control.timing == DmaControl::Timing::kSpecial && id == 3 && ppu.vcount == 161);
-
-    if (!control.enable)
-        control.value &= ~(1 << 15);
+        && !(control.timing == DmaControl::Timing::kSpecial && id == 3 && ppu.vcount == 161));
 }
 
 void DmaChannel::initTransfer()

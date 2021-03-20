@@ -163,6 +163,29 @@ void BgReference::vblank()
     current = bit::signEx<28>(value);
 }
 
+BgParameter::BgParameter()
+{
+    write(0, 0x00);
+    write(1, 0x01);
+}
+
+BgParameter::operator s16() const
+{
+    return value;
+}
+
+BgOffset::operator u16() const
+{
+    return value;
+}
+
+void BgOffset::write(uint index, u8 byte)
+{
+    RegisterW::write(index, byte);
+
+    value &= mask;
+}
+
 Window::Window()
 {
     write(0);
