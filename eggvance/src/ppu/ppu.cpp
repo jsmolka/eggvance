@@ -13,6 +13,11 @@
 
 Ppu::Ppu()
 {
+    bgpa[0].write(1, 0x01);
+    bgpa[1].write(1, 0x01);
+    bgpd[0].write(1, 0x01);
+    bgpd[1].write(1, 0x01);
+
     backgrounds[0].fill(kTransparent);
     backgrounds[1].fill(kTransparent);
     backgrounds[2].fill(kTransparent);

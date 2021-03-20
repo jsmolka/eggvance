@@ -158,12 +158,6 @@ void BgReference::vblank()
     current = bit::signEx<28>(data);
 }
 
-BgParameter::BgParameter()
-{
-    write(0, 0x00);
-    write(1, 0x01);
-}
-
 BgParameter::operator s16() const
 {
     return data;

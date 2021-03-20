@@ -85,8 +85,6 @@ private:
 class BgParameter : public RegisterW<u16>
 {
 public:
-    BgParameter();
-
     operator s16() const;
 };
 
