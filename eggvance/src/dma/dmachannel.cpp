@@ -18,19 +18,19 @@ DmaChannel::DmaChannel(uint id)
 
 void DmaChannel::reload()
 {
-    fifo = control.timing == DmaControl::Timing::kSpecial
+    fifo = (id == 1 || id == 2)
+        && control.timing == DmaControl::Timing::kSpecial
         && control.repeat
-        && (dad == 0x400'00A0 || dad == 0x400'00A4)
-        && (id == 1 || id == 2);
+        && dad.isFifo();
 
-    internal.count    = fifo ? 4 : static_cast<int>(count);
-    internal.src_addr = sad;
-    internal.dst_addr = dad;
+    internal.sad   = sad;
+    internal.dad   = dad;
+    internal.count = fifo ? 4 : static_cast<uint>(count);
 }
 
 bool DmaChannel::start()
 {
-    if (fifo && !apu.fifo[internal.dst_addr == 0x400'00A4].refillable())
+    if (fifo && !apu.fifo[internal.dad == 0x400'00A4].refillable())
         return false;
 
     if (control.repeat)
@@ -38,11 +38,13 @@ bool DmaChannel::start()
         internal.count = fifo ? 4 : static_cast<int>(count);
 
         if (control.dadcnt == DmaControl::Control::kReload)
-            internal.dst_addr = dad;
+            internal.dad = dad;
     }
 
-    internal.src_addr &= ~((2 << control.word) - 1);
-    internal.dst_addr &= ~((2 << control.word) - 1);
+    uint mask = ~((2 << control.word) - 1);
+
+    internal.sad &= mask;
+    internal.dad &= mask;
 
     running = true;
     pending = internal.count;
@@ -54,19 +56,20 @@ bool DmaChannel::start()
 
 void DmaChannel::run()
 {
-    static constexpr int kDeltas[2][4] = {
+    static constexpr int kDeltas[2][4] =
+    {
         { 2, -2, 0, 2 },
         { 4, -4, 0, 4 }
     };
 
-    int delta_src = kDeltas[control.word | fifo][control.sadcnt];
-    int delta_dst = kDeltas[control.word | fifo][fifo ? DmaControl::Control::kFixed : control.dadcnt];
+    int sad_delta = kDeltas[control.word | fifo][control.sadcnt];
+    int dad_delta = kDeltas[control.word | fifo][fifo ? DmaControl::Control::kFixed : control.dadcnt];
 
-    while (pending-- > 0)
+    while (pending--)
     {
         if (pending == internal.count - 1)
         {
-            if (!(internal.src_addr & internal.dst_addr & 0x800'0000))
+            if (!(internal.sad & internal.dad & 0x800'0000))
                 arm.idle(2);
 
             transfer(Access::NonSequential);
@@ -76,10 +79,10 @@ void DmaChannel::run()
             transfer(Access::Sequential);
         }
 
-        internal.src_addr += delta_src;
-        internal.dst_addr += delta_dst;
+        internal.sad += sad_delta;
+        internal.dad += dad_delta;
 
-        if (arm.target >= scheduler.now && pending > 0)
+        if (arm.target >= scheduler.now && pending)
             return;
     }
 
@@ -95,8 +98,8 @@ void DmaChannel::run()
 
 void DmaChannel::initTransfer()
 {
-    bool eeprom_r = gamepak.isEepromAccess(internal.src_addr);
-    bool eeprom_w = gamepak.isEepromAccess(internal.dst_addr);
+    bool eeprom_r = gamepak.isEepromAccess(internal.sad);
+    bool eeprom_w = gamepak.isEepromAccess(internal.dad);
 
     if ((eeprom_r || eeprom_w) && id == 3)
     {
@@ -104,21 +107,23 @@ void DmaChannel::initTransfer()
 
         if (eeprom_r)
         {
-            transfer = [&](Access access) {
-                if (internal.src_addr >= 0x200'0000) bus = gamepak.save->read(internal.src_addr);
-                if (internal.dst_addr >= 0x200'0000) arm.writeHalf(internal.dst_addr, bus, access);
+            transfer = [this](Access access)
+            {
+                if (internal.sad >= 0x200'0000) bus = gamepak.save->read(internal.sad);
+                if (internal.dad >= 0x200'0000) arm.writeHalf(internal.dad, bus, access);
             };
         }
         else
         {
-            transfer = [&](Access access) {
-                if (internal.src_addr >= 0x200'0000) 
+            transfer = [this](Access access)
+            {
+                if (internal.sad >= 0x200'0000) 
                 {
-                    bus = arm.readHalf(internal.src_addr, access);
+                    bus = arm.readHalf(internal.sad, access);
                     bus |= bus << 16;
                 }
-                if (internal.dst_addr >= 0x200'0000) 
-                    gamepak.save->write(internal.dst_addr, bus);
+                if (internal.dad >= 0x200'0000) 
+                    gamepak.save->write(internal.dad, bus);
             };
         }
     }
@@ -126,21 +131,23 @@ void DmaChannel::initTransfer()
     {
         if (control.word | fifo)
         {
-            transfer = [&](Access access) {
-                if (internal.src_addr >= 0x200'0000) bus = arm.readWord(internal.src_addr, access);
-                if (internal.dst_addr >= 0x200'0000) arm.writeWord(internal.dst_addr, bus, access);
+            transfer = [this](Access access)
+            {
+                if (internal.sad >= 0x200'0000) bus = arm.readWord(internal.sad, access);
+                if (internal.dad >= 0x200'0000) arm.writeWord(internal.dad, bus, access);
             };
         }
         else
         {
-            transfer = [&](Access access) {
-                if (internal.src_addr >= 0x200'0000)
+            transfer = [this](Access access)
+            {
+                if (internal.sad >= 0x200'0000)
                 {
-                    bus = arm.readHalf(internal.src_addr, access);
+                    bus = arm.readHalf(internal.sad, access);
                     bus |= bus << 16;
                 }
-                if (internal.dst_addr >= 0x200'0000)
-                    arm.writeHalf(internal.dst_addr, bus, access);
+                if (internal.dad >= 0x200'0000)
+                    arm.writeHalf(internal.dad, bus, access);
             };
         }
     }
@@ -151,10 +158,10 @@ void DmaChannel::initEeprom()
     if (!gamepak.save->data.empty())
         return;
 
-    constexpr uint kBus6Write = 73;
-    constexpr uint kBus6ReadSetAddress = 9;
-    constexpr uint kBus14Write = 81;
-    constexpr uint kBus14ReadSetAddress = 17;
+    constexpr auto kBus6Write = 73;
+    constexpr auto kBus6ReadSetAddress = 9;
+    constexpr auto kBus14Write = 81;
+    constexpr auto kBus14ReadSetAddress = 17;
 
     switch (pending)
     {

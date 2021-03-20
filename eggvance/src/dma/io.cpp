@@ -22,6 +22,11 @@ DmaDestination::operator u32() const
     return data;
 }
 
+bool DmaDestination::isFifo() const
+{
+    return data == 0x400'00A0 || data == 0x400'00A4;
+}
+
 DmaCount::DmaCount(uint id)
     : RegisterW(id == 3 ? 0xFFFF : 0x3FFF)
 {

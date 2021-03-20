@@ -18,6 +18,8 @@ public:
     DmaDestination(uint id);
 
     operator u32() const;
+
+    bool isFifo() const;
 };
 
 class DmaCount : public RegisterW<u16>

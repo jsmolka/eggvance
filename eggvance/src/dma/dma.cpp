@@ -57,8 +57,8 @@ void Dma::emit(DmaChannel& channel, Timing timing)
         case Dma::Timing::VBlank:    return channel.control.timing == DmaControl::Timing::kVBlank;
         case Dma::Timing::HBlank:    return channel.control.timing == DmaControl::Timing::kHBlank;
         case Dma::Timing::Video:     return channel.control.timing == DmaControl::Timing::kSpecial && (channel.id == 3);
-        case Dma::Timing::FifoA:     return channel.fifo && channel.internal.dst_addr == 0x400'00A0;
-        case Dma::Timing::FifoB:     return channel.fifo && channel.internal.dst_addr == 0x400'00A4;
+        case Dma::Timing::FifoA:     return channel.fifo && channel.internal.dad == 0x400'00A0;
+        case Dma::Timing::FifoB:     return channel.fifo && channel.internal.dad == 0x400'00A4;
         }
         return false;
     };

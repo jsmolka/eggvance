@@ -24,16 +24,16 @@ private:
     void initTransfer();
     void initEeprom();
 
-    int running = false;
-    int fifo    = false;
-    int pending = 0;
-    u32 bus     = 0;
+    uint running = false;
+    uint fifo    = false;
+    uint pending = 0;
+    uint bus     = 0;
 
     struct Internal
     {
-        u32 count    = 0;
-        u32 src_addr = 0;
-        u32 dst_addr = 0;
+        uint sad   = 0;
+        uint dad   = 0;
+        uint count = 0;
     } internal;
 
     std::function<void(Access)> transfer;
