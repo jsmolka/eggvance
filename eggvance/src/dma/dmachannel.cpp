@@ -174,5 +174,5 @@ void DmaChannel::run()
 
     control.setEnabled(control.repeat
         && !(control.timing == DmaControl::Timing::kTimingImmediate)
-        && !(control.timing == DmaControl::Timing::kTimingSpecial && id == 3 && ppu.vcount == 161));
+        && !(control.timing == DmaControl::Timing::kTimingSpecial && id == 3 && ppu.vcount >= 161));
 }
