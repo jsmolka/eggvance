@@ -23,9 +23,78 @@ void DmaChannel::init()
         && control.repeat
         && dad.isFifo();
 
-    latch.sad   = sad;
-    latch.dad   = dad;
+    latch.sad   = sad & ~((2 << control.word) - 1);
+    latch.dad   = dad & ~((2 << control.word) - 1);
     latch.count = fifo ? 4 : static_cast<uint>(count);
+
+    initTransfer();
+}
+
+bool DmaChannel::start()
+{
+    if (fifo)
+    {
+        if (apu.fifo[latch.dad == 0x400'00A4].size() > 16)
+            return false;
+    }
+    else if (control.repeat)
+    {
+        latch.count = count;
+
+        if (control.dadcnt == DmaControl::kControlReload)
+        {
+            latch.dad = dad & ~((2 << control.word) - 1);
+
+            initTransfer();
+        }
+    }
+
+    running = true;
+    pending = latch.count;
+
+    return true;
+}
+
+void DmaChannel::run()
+{
+    static constexpr int kDeltas[2][4] =
+    {
+        { 2, -2, 0, 2 },
+        { 4, -4, 0, 4 }
+    };
+
+    int sad_delta = kDeltas[control.word | fifo][control.sadcnt];
+    int dad_delta = kDeltas[control.word | fifo][fifo ? DmaControl::kControlFixed : control.dadcnt];
+
+    while (pending--)
+    {
+        if (pending == latch.count - 1)
+        {
+            if (!(latch.sad & latch.dad & 0x800'0000))
+                arm.idle(2);
+
+            transfer(Access::NonSequential);
+        }
+        else
+        {
+            transfer(Access::Sequential);
+        }
+
+        latch.sad += sad_delta;
+        latch.dad += dad_delta;
+
+        if (arm.target >= scheduler.now && pending)
+            return;
+    }
+
+    running = false;
+
+    if (control.irq)
+        arm.raise(kIrqDma0 << id);
+
+    control.setEnabled(control.repeat
+        && !(control.timing == DmaControl::kTimingImmediate)
+        && !(control.timing == DmaControl::kTimingSpecial && id == 3 && ppu.vcount >= 161));
 }
 
 void DmaChannel::initEeprom()
@@ -107,72 +176,4 @@ void DmaChannel::initTransfer()
             };
         }
     }
-}
-
-bool DmaChannel::start()
-{
-    if (fifo)
-    {
-        if (apu.fifo[latch.dad == 0x400'00A4].size() > 16)
-            return false;
-    }
-    else if (control.repeat)
-    {
-        latch.count = count;
-
-        if (control.dadcnt == DmaControl::Control::kControlReload)
-            latch.dad = dad;
-    }
-
-    latch.sad &= ~((2 << control.word) - 1);
-    latch.dad &= ~((2 << control.word) - 1);
-
-    running = true;
-    pending = latch.count;
-
-    initTransfer();
-
-    return true;
-}
-
-void DmaChannel::run()
-{
-    static constexpr int kDeltas[2][4] =
-    {
-        { 2, -2, 0, 2 },
-        { 4, -4, 0, 4 }
-    };
-
-    int sad_delta = kDeltas[control.word | fifo][control.sadcnt];
-    int dad_delta = kDeltas[control.word | fifo][fifo ? DmaControl::Control::kControlFixed : control.dadcnt];
-
-    while (pending--)
-    {
-        if (pending == latch.count - 1)
-        {
-            if (!(latch.sad & latch.dad & 0x800'0000))
-                arm.idle(2);
-
-            transfer(Access::NonSequential);
-        }
-        else
-        {
-            transfer(Access::Sequential);
-        }
-
-        latch.sad += sad_delta;
-        latch.dad += dad_delta;
-
-        if (arm.target >= scheduler.now && pending)
-            return;
-    }
-
-    running = false;
-
-    if (control.irq)
-        arm.raise(kIrqDma0 << id);
-
-    control.setEnabled(control.repeat
-        && !(control.timing == DmaControl::Timing::kTimingImmediate)
-        && !(control.timing == DmaControl::Timing::kTimingSpecial && id == 3 && ppu.vcount >= 161));
 }

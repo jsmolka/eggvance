@@ -54,13 +54,14 @@ public:
     void write(uint index, u8 byte);
     void setEnabled(bool enabled);
 
-    uint dadcnt = 0;
-    uint sadcnt = 0;
-    uint repeat = 0;
-    uint word   = 0;
-    uint timing = 0;
-    uint irq    = 0;
+    uint dadcnt  = 0;
+    uint sadcnt  = 0;
+    uint repeat  = 0;
+    uint word    = 0;
+    uint timing  = 0;
+    uint irq     = 0;
     uint enabled = 0;
 
-    std::function<void(bool)> on_write;
+private:
+    const uint id;
 };

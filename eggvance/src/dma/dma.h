@@ -5,18 +5,15 @@
 class Dma
 {
 public:
-    enum class Event { Immediate, HBlank, VBlank, FifoA, FifoB, Hdma };
-
-    Dma();
+    enum class Event { Immediate, HBlank, VBlank, Hdma, FifoA, FifoB };
 
     void run();
+    void emit(DmaChannel& channel, Event event);
     void broadcast(Event event);
 
     DmaChannel channels[4] = { 0, 1, 2, 3 };
 
 private:
-    void emit(DmaChannel& channel, Event event);
-
     DmaChannel* active = nullptr;
 };
 

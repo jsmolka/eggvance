@@ -10,6 +10,10 @@ public:
 
     DmaChannel(uint id);
 
+    void init();
+    bool start();
+    void run();
+
     const uint id;
     DmaSource sad;
     DmaDestination dad;
@@ -17,12 +21,8 @@ public:
     DmaControl control;
 
 private:
-    void init();
     void initEeprom();
     void initTransfer();
-
-    bool start();
-    void run();
 
     uint running = 0;
     uint fifo    = 0;

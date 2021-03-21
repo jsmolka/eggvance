@@ -1,5 +1,7 @@
 #include "io.h"
 
+#include "dma.h"
+
 DmaSource::DmaSource(uint id)
     : RegisterW(id == 0 ? 0x07FF'FFFF : 0x0FFF'FFFF)
 {
@@ -43,6 +45,7 @@ DmaCount::operator uint() const
 
 DmaControl::DmaControl(uint id)
     : Register(id == 3 ? 0xFFE0 : 0xF7E0)
+    , id(id)
 {
 
 }
@@ -59,15 +62,20 @@ void DmaControl::write(uint index, u8 byte)
     }
     else
     {
-        uint was_enable = enabled;
+        uint was_enabled = enabled;
 
-        repeat = bit::seq<1, 1>(byte);
-        word   = bit::seq<2, 1>(byte);
-        timing = bit::seq<4, 2>(byte);
-        irq    = bit::seq<6, 1>(byte);
+        repeat  = bit::seq<1, 1>(byte);
+        word    = bit::seq<2, 1>(byte);
+        timing  = bit::seq<4, 2>(byte);
+        irq     = bit::seq<6, 1>(byte);
         enabled = bit::seq<7, 1>(byte);
 
-        on_write(!was_enable && enabled);
+        DmaChannel& channel = dma.channels[id];
+
+        channel.init();
+
+        if (!was_enabled && enabled)
+            dma.emit(channel, Dma::Event::Immediate);
     }
 }
 
@@ -75,10 +83,10 @@ void DmaControl::setEnabled(bool enabled)
 {
     constexpr auto kEnabled = 1 << 15;
 
-    this->enabled = enabled;
-
     if (enabled)
         data |=  kEnabled;
     else
         data &= ~kEnabled;
+
+    this->enabled = enabled;
 }

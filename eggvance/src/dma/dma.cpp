@@ -3,20 +3,6 @@
 #include "arm/arm.h"
 #include "arm/constants.h"
 
-Dma::Dma()
-{
-    for (auto& channel : channels)
-    {
-        channel.control.on_write = [&](bool init)
-        {
-            if (init)
-                channel.init();
-
-            emit(channel, Dma::Event::Immediate);
-        };
-    }
-}
-
 void Dma::run()
 {
     while (active && scheduler.now < arm.target)
