@@ -70,12 +70,15 @@ void DmaControl::write(uint index, u8 byte)
         irq     = bit::seq<6, 1>(byte);
         enabled = bit::seq<7, 1>(byte);
 
-        DmaChannel& channel = dma.channels[id];
+        if (enabled)
+        {
+            DmaChannel& channel = dma.channels[id];
 
-        channel.init();
+            channel.init();
 
-        if (!was_enabled && enabled)
-            dma.emit(channel, Dma::Event::Immediate);
+            if (!was_enabled && timing == kTimingImmediate)
+                dma.emit(channel, Dma::Event::Immediate);
+        }
     }
 }
 
