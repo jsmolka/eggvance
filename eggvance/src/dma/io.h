@@ -1,7 +1,5 @@
 #pragma once
 
-#include <functional>
-
 #include "base/register.h"
 
 class DmaSource : public RegisterW<u32>

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 #include "io.h"
 #include "arm/constants.h"
 
