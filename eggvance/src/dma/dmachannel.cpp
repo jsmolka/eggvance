@@ -42,11 +42,7 @@ bool DmaChannel::start()
         latch.count = count;
 
         if (control.dadcnt == DmaControl::kControlReload)
-        {
             latch.dad = dad & ~((2 << control.word) - 1);
-
-            initTransfer();
-        }
     }
 
     running = true;
@@ -107,7 +103,7 @@ void DmaChannel::initEeprom()
     constexpr auto kBus14Write = 81;
     constexpr auto kBus14ReadSetAddress = 17;
 
-    switch (pending)
+    switch (latch.count)
     {
     case kBus6Write:
     case kBus6ReadSetAddress:
