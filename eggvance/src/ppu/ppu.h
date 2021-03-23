@@ -25,7 +25,7 @@ public:
     void present();
 
     DisplayControl dispcnt;
-    Register<u16> greenswap;
+    Register<u16, 0x0001> greenswap;
     DisplayStatus dispstat;
     VCount vcount;
     BgControl bgcnt[4] = { 0, 1, 2, 3 };
