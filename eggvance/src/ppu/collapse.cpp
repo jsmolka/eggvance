@@ -4,7 +4,7 @@
 
 #include "constants.h"
 #include "base/macros.h"
-#include "core/videocontext.h"
+#include "frontend/videocontext.h"
 
 void Ppu::collapse(uint bgs)
 {

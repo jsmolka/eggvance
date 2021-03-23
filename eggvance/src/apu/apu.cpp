@@ -4,8 +4,8 @@
 
 #include "base/config.h"
 #include "base/constants.h"
-#include "core/audiocontext.h"
 #include "dma/dma.h"
+#include "frontend/audiocontext.h"
 #include "scheduler/scheduler.h"
 
 inline constexpr auto kSampleCycles   = kCpuFrequency / kSampleRate;

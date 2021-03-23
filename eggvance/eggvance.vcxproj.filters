@@ -72,19 +72,19 @@
     <ClCompile Include="src\base\config.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\audiocontext.cpp">
+    <ClCompile Include="src\frontend\audiocontext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\core.cpp">
+    <ClCompile Include="src\frontend\core.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\inputcontext.cpp">
+    <ClCompile Include="src\frontend\inputcontext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\main.cpp">
+    <ClCompile Include="src\frontend\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\videocontext.cpp">
+    <ClCompile Include="src\frontend\videocontext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\dma\dma.cpp">
@@ -269,22 +269,22 @@
     <ClInclude Include="src\base\sdl2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\audiocontext.h">
+    <ClInclude Include="src\frontend\audiocontext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\core.h">
+    <ClInclude Include="src\frontend\core.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\framecounter.h">
+    <ClInclude Include="src\frontend\framecounter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\inputcontext.h">
+    <ClInclude Include="src\frontend\inputcontext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\frameratelimiter.h">
+    <ClInclude Include="src\frontend\frameratelimiter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\videocontext.h">
+    <ClInclude Include="src\frontend\videocontext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\dma\dma.h">

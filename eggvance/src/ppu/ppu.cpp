@@ -8,8 +8,8 @@
 #include "arm/constants.h"
 #include "base/bit.h"
 #include "base/config.h"
-#include "core/videocontext.h"
 #include "dma/dma.h"
+#include "frontend/videocontext.h"
 
 Ppu::Ppu()
 {
