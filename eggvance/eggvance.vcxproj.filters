@@ -281,7 +281,7 @@
     <ClInclude Include="src\core\inputcontext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\synchronizer.h">
+    <ClInclude Include="src\core\frameratelimiter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\core\videocontext.h">

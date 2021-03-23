@@ -108,7 +108,7 @@
     <ClInclude Include="src\core\core.h" />
     <ClInclude Include="src\core\framecounter.h" />
     <ClInclude Include="src\core\inputcontext.h" />
-    <ClInclude Include="src\core\synchronizer.h" />
+    <ClInclude Include="src\core\frameratelimiter.h" />
     <ClInclude Include="src\core\videocontext.h" />
     <ClInclude Include="src\dma\dma.h" />
     <ClInclude Include="src\dma\dmachannel.h" />

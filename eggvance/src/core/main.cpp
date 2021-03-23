@@ -1,8 +1,8 @@
 #include "core.h"
 #include "audiocontext.h"
 #include "framecounter.h"
+#include "frameratelimiter.h"
 #include "inputcontext.h"
-#include "synchronizer.h"
 #include "videocontext.h"
 #include "base/config.h"
 #include "base/panic.h"
@@ -10,7 +10,7 @@
 
 bool running = true;
 FrameCounter counter;
-Synchronizer synchronizer(kRefreshRate);
+FrameRateLimiter limiter(kRefreshRate);
 
 void reset()
 {
@@ -55,12 +55,12 @@ void processInputEvent(const Shortcuts<Input>& shortcuts, Input input)
 {
     if      (input == shortcuts.reset)       core::reset();
     else if (input == shortcuts.fullscreen)  video_ctx.fullscreen();
-    else if (input == shortcuts.fr_hardware) synchronizer = Synchronizer(kRefreshRate);
-    else if (input == shortcuts.fr_custom_1) synchronizer = Synchronizer(config.framerate[0]);
-    else if (input == shortcuts.fr_custom_2) synchronizer = Synchronizer(config.framerate[1]);
-    else if (input == shortcuts.fr_custom_3) synchronizer = Synchronizer(config.framerate[2]);
-    else if (input == shortcuts.fr_custom_4) synchronizer = Synchronizer(config.framerate[3]);
-    else if (input == shortcuts.fr_unbound)  synchronizer = Synchronizer(6000);
+    else if (input == shortcuts.fr_hardware) limiter = FrameRateLimiter(kRefreshRate);
+    else if (input == shortcuts.fr_custom_1) limiter = FrameRateLimiter(config.framerate[0]);
+    else if (input == shortcuts.fr_custom_2) limiter = FrameRateLimiter(config.framerate[1]);
+    else if (input == shortcuts.fr_custom_3) limiter = FrameRateLimiter(config.framerate[2]);
+    else if (input == shortcuts.fr_custom_4) limiter = FrameRateLimiter(config.framerate[3]);
+    else if (input == shortcuts.fr_unbound)  limiter = FrameRateLimiter(6000);
 }
 
 void processEvents()
@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
 
         while (running)
         {
-            synchronizer.sync([]() {
+            limiter.run([]() {
                 processEvents();
                 core::frame();
             });
