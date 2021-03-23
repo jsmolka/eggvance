@@ -26,8 +26,8 @@ Apu::Apu()
 
 void Apu::init()
 {
-    scheduler.queueIn(events.sample, kSampleCycles);
-    scheduler.queueIn(events.sequence, kSequenceCycles);
+    scheduler.add(events.sample, kSampleCycles);
+    scheduler.add(events.sequence, kSequenceCycles);
 }
 
 void Apu::onOverflow(uint timer, uint times)
@@ -94,7 +94,7 @@ void Apu::sequence(u64 late)
         {
             sequence<(Step + 2) % 8>(late);
         };
-        scheduler.queueIn(events.sequence, 2 * kSequenceCycles - late);
+        scheduler.add(events.sequence, 2 * kSequenceCycles - late);
     }
     else
     {
@@ -102,7 +102,7 @@ void Apu::sequence(u64 late)
         {
             sequence<(Step + 1) % 8>(late);
         };
-        scheduler.queueIn(events.sequence, 1 * kSequenceCycles - late);
+        scheduler.add(events.sequence, 1 * kSequenceCycles - late);
     }
 }
 
@@ -145,5 +145,5 @@ void Apu::sample(u64 late)
 
     audio_ctx.write(sample_l << 5, sample_r << 5);
 
-    scheduler.queueIn(events.sample, kSampleCycles - late);
+    scheduler.add(events.sample, kSampleCycles - late);
 }

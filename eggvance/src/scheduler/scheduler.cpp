@@ -29,7 +29,7 @@ void Scheduler::run(u64 cycles)
     }
 }
 
-void Scheduler::queueIn(Event& event, u64 in)
+void Scheduler::add(Event& event, u64 in)
 {
     SHELL_ASSERT(event.when == 0);
     SHELL_ASSERT(static_cast<s64>(in) > 0);
@@ -39,7 +39,7 @@ void Scheduler::queueIn(Event& event, u64 in)
     next = list.head->when;
 }
 
-void Scheduler::dequeue(Event& event)
+void Scheduler::remove(Event& event)
 {
     if (event.when)
     {

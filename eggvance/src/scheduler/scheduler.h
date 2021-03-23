@@ -9,8 +9,8 @@ public:
     Scheduler();
 
     void run(u64 cycles);
-    void queueIn(Event& event, u64 in);
-    void dequeue(Event& event);
+    void add(Event& event, u64 in);
+    void remove(Event& event);
 
     u64 now  = 0;
     u64 next = 0;

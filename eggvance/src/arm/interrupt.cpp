@@ -59,12 +59,12 @@ void Arm::interruptProcess()
     if (irq.interrupted())
     {
         if (!events.interrupt.scheduled() && !(state & kStateIrq))
-            scheduler.queueIn(events.interrupt, 3);
+            scheduler.add(events.interrupt, 3);
     }
     else
     {
         state &= ~kStateIrq;
-        scheduler.dequeue(events.interrupt);
+        scheduler.remove(events.interrupt);
     }
 }
 

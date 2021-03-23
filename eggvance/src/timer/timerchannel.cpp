@@ -30,8 +30,8 @@ void TimerChannel::start()
     if (events.start.scheduled())
         return;
 
-    scheduler.dequeue(events.run);
-    scheduler.queueIn(events.start, 2);
+    scheduler.remove(events.run);
+    scheduler.add(events.start, 2);
 }
 
 void TimerChannel::update()
@@ -104,10 +104,10 @@ void TimerChannel::schedule()
 {
     SHELL_ASSERT(!events.start.scheduled());
 
-    scheduler.dequeue(events.run);
+    scheduler.remove(events.run);
 
     if (!control.enabled || control.cascade)
         return;
     
-    scheduler.queueIn(events.run, overflow - counter);
+    scheduler.add(events.run, overflow - counter);
 }
