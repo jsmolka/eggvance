@@ -4,6 +4,7 @@
 #include <functional>
 #include <thread>
 
+template<typename Clock = std::chrono::high_resolution_clock>
 class FrameRateLimiter
 {
 public:
@@ -29,8 +30,7 @@ public:
     }
 
 private:
-    using Clock    = std::chrono::high_resolution_clock;
-    using Duration = std::chrono::high_resolution_clock::duration;
+    using Duration = typename Clock::duration;
 
     template<typename Callback>
     static Duration measure(Callback callback)
