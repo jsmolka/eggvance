@@ -75,9 +75,6 @@
     <ClCompile Include="src\frontend\audiocontext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\frontend\core.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\frontend\inputcontext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -270,9 +267,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\frontend\audiocontext.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\frontend\core.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\frontend\framecounter.h">

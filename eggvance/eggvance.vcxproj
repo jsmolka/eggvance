@@ -39,7 +39,6 @@
     <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\base\config.cpp" />
     <ClCompile Include="src\frontend\audiocontext.cpp" />
-    <ClCompile Include="src\frontend\core.cpp" />
     <ClCompile Include="src\frontend\inputcontext.cpp" />
     <ClCompile Include="src\frontend\main.cpp" />
     <ClCompile Include="src\frontend\videocontext.cpp" />
@@ -105,7 +104,6 @@
     <ClInclude Include="src\base\register.h" />
     <ClInclude Include="src\base\sdl2.h" />
     <ClInclude Include="src\frontend\audiocontext.h" />
-    <ClInclude Include="src\frontend\core.h" />
     <ClInclude Include="src\frontend\framecounter.h" />
     <ClInclude Include="src\frontend\inputcontext.h" />
     <ClInclude Include="src\frontend\frameratelimiter.h" />

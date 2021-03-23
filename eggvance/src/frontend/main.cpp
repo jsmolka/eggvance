@@ -1,22 +1,70 @@
-#include "core.h"
+#include <shell/fmt.h>
+#include <shell/options.h>
+#include <shell/utility.h>
+
 #include "audiocontext.h"
 #include "framecounter.h"
 #include "frameratelimiter.h"
 #include "inputcontext.h"
 #include "videocontext.h"
+#include "apu/apu.h"
+#include "arm/arm.h"
 #include "base/config.h"
+#include "base/constants.h"
 #include "base/panic.h"
+#include "dma/dma.h"
 #include "gamepak/gamepak.h"
+#include "keypad/keypad.h"
+#include "ppu/ppu.h"
+#include "scheduler/scheduler.h"
+#include "sio/sio.h"
+#include "timer/timer.h"
 
 bool running = true;
 FrameCounter counter;
 FrameRateLimiter limiter(kRefreshRate);
 
+void updateTitle()
+{
+    const auto title = fmt::format(
+        gamepak.rom.title.empty()
+            ? "eggvance"
+            : "eggvance - {0}",
+        gamepak.rom.title);
+
+    video_ctx.title(title);
+}
+
+void updateTitle(double fps)
+{
+    const auto title = fmt::format(
+        gamepak.rom.title.empty()
+            ? "eggvance - {1:.1f} fps"
+            : "eggvance - {0} - {1:.1f} fps",
+        gamepak.rom.title, fps);
+
+    video_ctx.title(title);
+}
+
 void reset()
 {
-    core::reset();
-    core::updateTitle();
-    counter = FrameCounter();
+    gamepak.gpio->reset();
+    gamepak.save->reset();
+
+    shell::reconstruct(apu);
+    shell::reconstruct(arm);
+    shell::reconstruct(dma);
+    shell::reconstruct(ppu);
+    shell::reconstruct(keypad);
+    shell::reconstruct(sio);
+    shell::reconstruct(scheduler);
+    shell::reconstruct(timer);
+
+    arm.init();
+    apu.init();
+    ppu.init();
+
+    updateTitle();
 }
 
 void processDropEvent(const SDL_DropEvent& event)
@@ -53,7 +101,7 @@ void processDropEvent(const SDL_DropEvent& event)
 template<typename Input>
 void processInputEvent(const Shortcuts<Input>& shortcuts, Input input)
 {
-    if      (input == shortcuts.reset)       core::reset();
+    if      (input == shortcuts.reset)       reset();
     else if (input == shortcuts.fullscreen)  video_ctx.fullscreen();
     else if (input == shortcuts.fr_hardware) limiter = FrameRateLimiter(kRefreshRate);
     else if (input == shortcuts.fr_custom_1) limiter = FrameRateLimiter(config.framerate[0]);
@@ -98,11 +146,47 @@ void processEvents()
     }
 }
 
+void init(int argc, char* argv[])
+{
+    using namespace shell;
+
+    Options options("eggvance");
+    options.add({ "-c,--config", "config file", "file" }, Options::value<fs::path>("eggvance.ini"));
+    options.add({ "-s,--save",   "save file",   "file" }, Options::value<fs::path>()->optional());
+    options.add({       "rom",   "ROM file"            }, Options::value<fs::path>()->positional()->optional());
+
+    try
+    {
+        OptionsResult result = options.parse(argc, argv);
+
+        const auto cfg = result.find<fs::path>("--config");
+        const auto sav = result.find<fs::path>("--save");
+        const auto gba = result.find<fs::path>("rom");
+
+        config.init(fs::absolute(*cfg));
+
+        Bios::init(config.bios_file);
+
+        audio_ctx.init();
+        input_ctx.init();
+        video_ctx.init();
+
+        gamepak.load(
+            gba.value_or(fs::path()),
+            sav.value_or(fs::path()));
+    }
+    catch (const ParseError& error)
+    {
+        fmt::print(options.help());
+        panic("Cannot parse command line\n{}", error.what());
+    }
+}
+
 int main(int argc, char* argv[])
 {
     try
     {
-        core::init(argc, argv);
+        init(argc, argv);
 
         while (running && gamepak.rom.size == 0)
         {
@@ -120,17 +204,29 @@ int main(int argc, char* argv[])
 
         reset();
 
+        counter = FrameCounter();
+
         audio_ctx.unpause();
 
         while (running)
         {
-            limiter.run([]() {
+            limiter.run([]() 
+            {
+                constexpr auto kPixelsHor   = 240 + 68;
+                constexpr auto kPixelsVer   = 160 + 68;
+                constexpr auto kPixelCycles = 4;
+                constexpr auto kFrameCycles = kPixelCycles * kPixelsHor * kPixelsVer;
+
                 processEvents();
-                core::frame();
+                keypad.update();
+
+                arm.run(kFrameCycles);
+
+                ppu.present();
             });
 
             if (const auto fps = (++counter).fps())
-                core::updateTitle(*fps);
+                updateTitle(*fps);
         }
 
         audio_ctx.pause();
