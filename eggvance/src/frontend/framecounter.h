@@ -5,7 +5,6 @@
 
 #include "base/int.h"
 
-template<typename Clock = std::chrono::high_resolution_clock>
 class FrameCounter
 {
 public:
@@ -38,7 +37,8 @@ public:
     }
 
 private:
-    using Time = typename Clock::time_point;
+    using Clock = std::chrono::high_resolution_clock;
+    using Time  = std::chrono::high_resolution_clock::time_point;
 
     Time begin;
     uint count;
