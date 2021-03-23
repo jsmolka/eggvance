@@ -2,7 +2,7 @@
 
 #include "arm/arm.h"
 #include "arm/constants.h"
-#include "core/inputcontext.h"
+#include "frontend/inputcontext.h"
 
 void Keypad::update()
 {
