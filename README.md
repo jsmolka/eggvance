@@ -9,8 +9,8 @@ usage:
   eggvance [--config <file>] [--save <file>] [<rom>]
 
 keyword arguments:
-  -c, --config    Config file (default: eggvance.ini)
-  -s, --save      Save file (optional)
+  -c, --config    config file (default: eggvance.ini)
+  -s, --save      save file (optional)
 
 positional arguments:
   rom    ROM file (optional)
