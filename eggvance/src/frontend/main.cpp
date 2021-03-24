@@ -67,7 +67,7 @@ void reset()
     updateTitle();
 }
 
-void processDropEvent(const SDL_DropEvent& event)
+void handleDropEvent(const SDL_DropEvent& event)
 {
     const fs::path file = fs::u8path(event.file);
 
@@ -99,7 +99,7 @@ void processDropEvent(const SDL_DropEvent& event)
 }
 
 template<typename Input>
-void processInputEvent(const Shortcuts<Input>& shortcuts, Input input)
+void handleInputEvent(const Shortcuts<Input>& shortcuts, Input input)
 {
     if      (input == shortcuts.reset)       reset();
     else if (input == shortcuts.fullscreen)  video_ctx.fullscreen();
@@ -111,7 +111,7 @@ void processInputEvent(const Shortcuts<Input>& shortcuts, Input input)
     else if (input == shortcuts.fr_unbound)  limiter = FrameRateLimiter(6000);
 }
 
-void processEvents()
+void handleEvents()
 {
     SDL_Event event;
     while (SDL_PollEvent(&event))
@@ -123,13 +123,13 @@ void processEvents()
             break;
 
         case SDL_KEYDOWN:
-            processInputEvent(
+            handleInputEvent(
                 config.shortcuts.keyboard,
                 event.key.keysym.scancode);
             break;
 
         case SDL_CONTROLLERBUTTONDOWN:
-            processInputEvent(
+            handleInputEvent(
                 config.shortcuts.controller,
                 static_cast<SDL_GameControllerButton>(event.cbutton.button));
             break;
@@ -140,10 +140,30 @@ void processEvents()
             break;
 
         case SDL_DROPFILE:
-            processDropEvent(event.drop);
+            handleDropEvent(event.drop);
             break;
         }
     }
+}
+
+int eventFilter(void*, SDL_Event* event)
+{
+    if (event->type == SDL_WINDOWEVENT && event->window.event == SDL_WINDOWEVENT_RESIZED)
+    {
+        if (gamepak.rom.size == 0)
+        {
+            video_ctx.renderClear(0xFF3E'4750);
+            video_ctx.renderIcon();
+            video_ctx.renderPresent();
+        }
+        else
+        {
+            video_ctx.renderCopyTexture();
+            video_ctx.renderPresent();
+        }
+        return 0;
+    }
+    return 1;
 }
 
 void init(int argc, char* argv[])
@@ -171,6 +191,8 @@ void init(int argc, char* argv[])
         input_ctx.init();
         video_ctx.init();
 
+        SDL_SetEventFilter(eventFilter, NULL);
+
         gamepak.load(
             gba.value_or(fs::path()),
             sav.value_or(fs::path()));
@@ -190,7 +212,7 @@ int main(int argc, char* argv[])
 
         while (running && gamepak.rom.size == 0)
         {
-            processEvents();
+            handleEvents();
 
             video_ctx.renderClear(0xFF3E'4750);
             video_ctx.renderIcon();
@@ -217,7 +239,7 @@ int main(int argc, char* argv[])
                 constexpr auto kPixelCycles = 4;
                 constexpr auto kFrameCycles = kPixelCycles * kPixelsHor * kPixelsVer;
 
-                processEvents();
+                handleEvents();
                 keypad.update();
 
                 arm.run(kFrameCycles);

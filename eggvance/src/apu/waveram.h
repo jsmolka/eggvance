@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 #include "base/int.h"
 
 class WaveRam
@@ -13,5 +15,5 @@ public:
     uint bank = 0;
 
 private:
-    u8 data[32] = {};
+    std::array<u8, 32> ram = {};
 };
