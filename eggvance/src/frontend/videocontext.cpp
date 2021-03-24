@@ -104,12 +104,17 @@ void VideoContext::deinit()
 
 bool VideoContext::initWindow()
 {
-    return window = SDL_CreateWindow(
+    window = SDL_CreateWindow(
         "eggvance",
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
         2 * kScreen.x, 2 * kScreen.y,
         SDL_WINDOW_RESIZABLE);
+
+    if (window)
+        SDL_SetWindowMinimumSize(window, kScreen.x, kScreen.y);
+
+    return window;
 }
 
 bool VideoContext::initRenderer()
