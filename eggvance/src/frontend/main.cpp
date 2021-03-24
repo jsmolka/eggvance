@@ -1,4 +1,4 @@
-#include <shell/fmt.h>
+#include <shell/format.h>
 #include <shell/options.h>
 #include <shell/utility.h>
 
@@ -26,7 +26,7 @@ FrameRateLimiter limiter(kRefreshRate);
 
 void updateTitle()
 {
-    const auto title = fmt::format(
+    const auto title = shell::format(
         gamepak.rom.title.empty()
             ? "eggvance"
             : "eggvance - {0}",
@@ -37,7 +37,7 @@ void updateTitle()
 
 void updateTitle(double fps)
 {
-    const auto title = fmt::format(
+    const auto title = shell::format(
         gamepak.rom.title.empty()
             ? "eggvance - {1:.1f} fps"
             : "eggvance - {0} - {1:.1f} fps",
@@ -199,7 +199,7 @@ void init(int argc, char* argv[])
     }
     catch (const ParseError& error)
     {
-        fmt::print(options.help());
+        shell::print(options.help());
         panic("Cannot parse command line\n{}", error.what());
     }
 }
@@ -243,7 +243,6 @@ int main(int argc, char* argv[])
                 keypad.update();
 
                 arm.run(kFrameCycles);
-
                 ppu.present();
             });
 
