@@ -10,14 +10,19 @@ class FrameCounter
 public:
     FrameCounter()
     {
-        count = 0;
-        begin = Clock::now();
+        reset();
     }
 
     FrameCounter& operator++()
     {
         count++;
         return *this;
+    }
+
+    void reset()
+    {
+        count = 0;
+        begin = Clock::now();
     }
 
     std::optional<double> fps()

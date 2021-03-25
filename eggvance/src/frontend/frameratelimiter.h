@@ -13,6 +13,11 @@ public:
         frame_delta = Duration(Duration::rep(Duration::period::den / fps));
     }
 
+    void reset()
+    {
+        accumulated = Duration(0);
+    }
+
     template<typename Frame>
     void run(Frame frame)
     {

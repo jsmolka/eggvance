@@ -21,6 +21,7 @@
 #include "timer/timer.h"
 
 bool running = true;
+bool changed = false;
 FrameCounter counter;
 FrameRateLimiter limiter(kRefreshRate);
 
@@ -163,6 +164,14 @@ int eventFilter(void*, SDL_Event* event)
         }
         return 0;
     }
+    #if SHELL_OS_WINDOWS
+    else if (event->type == SDL_SYSWMEVENT && event->syswm.msg->msg.win.msg == WM_EXITSIZEMOVE)
+    {
+        changed = true;
+        return 0;
+    }
+    #endif
+
     return 1;
 }
 
@@ -191,6 +200,9 @@ void init(int argc, char* argv[])
         input_ctx.init();
         video_ctx.init();
 
+        #if SHELL_OS_WINDOWS
+        SDL_EventState(SDL_SYSWMEVENT, SDL_ENABLE);
+        #endif
         SDL_SetEventFilter(eventFilter, NULL);
 
         gamepak.load(
@@ -226,7 +238,7 @@ int main(int argc, char* argv[])
 
         reset();
 
-        counter = FrameCounter();
+        counter.reset();
 
         audio_ctx.unpause();
 
@@ -246,12 +258,20 @@ int main(int argc, char* argv[])
                 ppu.present();
             });
 
-            if (const auto fps = (++counter).fps())
-                updateTitle(*fps);
+            if (changed)
+            {
+                counter.reset();
+                limiter.reset();
+                changed = false;
+            }
+            else
+            {
+                if (const auto fps = (++counter).fps())
+                    updateTitle(*fps);
+            }
         }
 
         audio_ctx.pause();
-        audio_ctx.clear();
     }
     catch (const std::exception& ex)
     {
