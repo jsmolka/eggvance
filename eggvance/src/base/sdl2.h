@@ -7,5 +7,4 @@
 #  include <SDL2/SDL_syswm.h>
 #else
 #  include "SDL.h"
-#  include "SDL_syswm.h"
 #endif
