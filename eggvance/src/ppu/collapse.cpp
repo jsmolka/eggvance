@@ -1,9 +1,9 @@
 #include "ppu.h"
 
 #include <algorithm>
+#include <shell/macros.h>
 
 #include "constants.h"
-#include "base/macros.h"
 #include "frontend/videocontext.h"
 
 void Ppu::collapse(uint bgs)
@@ -62,7 +62,7 @@ void Ppu::collapseNW(const BgLayers& layers)
 {
     switch (possibleWindows<Objects>())
     {
-    INDEXED_CASE8(0, collapseNW<Objects, kLabel>(layers));
+    SHELL_CASE08(0, collapseNW<Objects, kLabel>(layers));
 
     default:
         SHELL_UNREACHABLE;
@@ -88,7 +88,7 @@ void Ppu::collapseBN(const BgLayers& layers)
 {
     switch (bldcnt.mode)
     {
-    INDEXED_CASE4(0, collapseBN<Objects, kLabel>(layers));
+    SHELL_CASE04(0, collapseBN<Objects, kLabel>(layers));
 
     default:
         SHELL_UNREACHABLE;
@@ -152,7 +152,7 @@ void Ppu::collapseBW(const BgLayers& layers)
 {
     switch (bldcnt.mode)
     {
-    INDEXED_CASE4(0, collapseBW<Objects, kLabel>(layers));
+    SHELL_CASE04(0, collapseBW<Objects, kLabel>(layers));
 
     default:
         SHELL_UNREACHABLE;
@@ -165,7 +165,7 @@ void Ppu::collapseBW(const BgLayers& layers)
 {
     switch (possibleWindows<Objects>())
     {
-    INDEXED_CASE8(0, collapseBW<Objects, BlendMode, kLabel>(layers));
+    SHELL_CASE08(0, collapseBW<Objects, BlendMode, kLabel>(layers));
 
     default:
         SHELL_UNREACHABLE;

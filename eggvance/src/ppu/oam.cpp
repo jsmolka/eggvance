@@ -1,7 +1,8 @@
 #include "oam.h"
 
+#include <shell/macros.h>
+
 #include "base/bit.h"
-#include "base/macros.h"
 
 void Oam::writeHalf(u32 addr, u16 half)
 {

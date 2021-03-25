@@ -1,9 +1,10 @@
 #include "arm.h"
 
+#include <shell/macros.h>
+
 #include "constants.h"
 #include "decode.h"
 #include "base/config.h"
-#include "base/macros.h"
 #include "dma/dma.h"
 #include "scheduler/scheduler.h"
 #include "timer/timer.h"
@@ -34,8 +35,7 @@ void Arm::run(u64 cycles)
     {
         switch (state)
         {
-        INDEXED_CASE8(0, dispatch<kLabel>());
-        INDEXED_CASE8(8, dispatch<kLabel>());
+        SHELL_CASE16(0, dispatch<kLabel>())
 
         default:
             SHELL_UNREACHABLE;

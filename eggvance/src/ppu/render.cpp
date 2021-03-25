@@ -1,8 +1,9 @@
 #include "ppu.h"
 
+#include <shell/macros.h>
+
 #include "mapentry.h"
 #include "matrix.h"
-#include "base/macros.h"
 
 Point Ppu::transform(uint x, uint bg)
 {

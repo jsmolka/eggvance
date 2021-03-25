@@ -1,9 +1,9 @@
 #include "gpio.h"
 
+#include <shell/macros.h>
 #include <shell/utility.h>
 
 #include "base/bit.h"
-#include "base/macros.h"
 
 Gpio::Gpio()
     : type(Type::None)

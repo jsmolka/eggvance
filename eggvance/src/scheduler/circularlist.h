@@ -1,9 +1,9 @@
 #pragma once
 
 #include <type_traits>
+#include <shell/macros.h>
 
 #include "node.h"
-#include "base/macros.h"
 
 template<typename T>
 class CircularList

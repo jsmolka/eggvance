@@ -1,9 +1,9 @@
 #include "flash.h"
 
 #include <algorithm>
+#include <shell/macros.h>
 
 #include "base/bit.h"
-#include "base/macros.h"
 
 Flash::Flash(uint size)
     : Save(size == kSize512 ? Type::Flash512 : Type::Flash1024)

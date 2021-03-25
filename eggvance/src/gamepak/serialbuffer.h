@@ -1,9 +1,9 @@
 #pragma once
 
 #include <type_traits>
+#include <shell/macros.h>
 
 #include "base/bit.h"
-#include "base/macros.h"
 
 template<typename Integral>
 class SerialBuffer
