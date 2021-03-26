@@ -14,26 +14,26 @@ public:
     Apu();
 
     void init();
-    void onOverflow(uint timer, uint times);
+    void onOverflow(uint timer, uint ticks);
 
-    SoundControl control;
-    SoundBias bias;
-    Fifo fifo[2];
-    Noise noise;
     Square1 square1;
     Square2 square2;
     Wave wave;
+    Noise noise;
+    std::array<Fifo, 2> fifo;
+    SoundControl control;
+    SoundBias bias;
 
 private:
+    template<uint Step>
+    void sequence(u64 late);
+    void sample(u64 late);
+
     struct Events
     {
         Event sequence;
         Event sample;
     } events;
-
-    template<uint Step>
-    void sequence(u64 late);
-    void sample(u64 late);
 };
 
 inline Apu apu;

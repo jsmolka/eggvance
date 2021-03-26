@@ -30,19 +30,19 @@ void Apu::init()
     scheduler.add(events.sequence, kSequenceCycles);
 }
 
-void Apu::onOverflow(uint timer, uint times)
+void Apu::onOverflow(uint timer, uint ticks)
 {
     if (!control.enabled)
         return;
 
-    constexpr Dma::Event kEvent[2] = { Dma::Event::FifoA, Dma::Event::FifoB };
+    constexpr Dma::Event kEvents[2] = { Dma::Event::FifoA, Dma::Event::FifoB };
 
-    for (auto [fifo, event] : shell::zip(fifo, kEvent))
+    for (auto [fifo, event] : shell::zip(fifo, kEvents))
     {
         if (fifo.timer != timer)
             continue;
 
-        for (uint x = 0; x < times; ++x)
+        for (uint x = 0; x < ticks; ++x)
         {
             fifo.tick();
         }
@@ -71,16 +71,16 @@ void Apu::sequence(u64 late)
 
     case 0:
     case 4:
-        noise.tickLength();
         square1.tickLength();
         square2.tickLength();
         wave.tickLength();
+        noise.tickLength();
         break;
 
     case 7:
-        noise.tickEnvelope();
         square1.tickEnvelope();
         square2.tickEnvelope();
+        noise.tickEnvelope();
         break;
 
     default:
@@ -126,8 +126,8 @@ void Apu::sample(u64 late)
             if (control.enabled_r & (1 << index)) sample_r += channel->sample;
         }
 
-        sample_l  *= control.volume_l + 1;
-        sample_r  *= control.volume_r + 1;
+        sample_l *= control.volume_l + 1;
+        sample_r *= control.volume_r + 1;
         sample_l <<= 1;
         sample_r <<= 1;
         sample_l >>= 3 - control.volume;
@@ -139,11 +139,11 @@ void Apu::sample(u64 late)
             if (fifo.enabled_r) sample_r += fifo.sample << fifo.volume;
         }
 
-        sample_l = std::clamp<s16>(sample_l + apu.bias - 0x200, -0x400, 0x3FF);
-        sample_r = std::clamp<s16>(sample_r + apu.bias - 0x200, -0x400, 0x3FF);
+        sample_l = std::clamp<s16>(sample_l + apu.bias - 0x200, -0x400, 0x3FF) << 5;
+        sample_r = std::clamp<s16>(sample_r + apu.bias - 0x200, -0x400, 0x3FF) << 5;
     }
 
-    audio_ctx.write(sample_l << 5, sample_r << 5);
+    audio_ctx.write(sample_l, sample_r);
 
     scheduler.add(events.sample, kSampleCycles - late);
 }
