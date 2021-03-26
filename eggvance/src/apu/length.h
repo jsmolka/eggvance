@@ -6,7 +6,6 @@ class Length
 {
 public:
     Length(uint base);
-
     Length& operator=(uint value);
 
     void init();

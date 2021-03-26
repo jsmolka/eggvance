@@ -13,16 +13,16 @@ SoundControl::SoundControl()
 
 u8 SoundControl::read(uint index) const
 {
-    u8 value = Register::read(index);
+    u8 byte = Register::read(index);
 
     if (index == 4)
     {
-        value |= apu.square1.enabled << 0;
-        value |= apu.square2.enabled << 1;
-        value |= apu.wave.enabled    << 2;
-        value |= apu.noise.enabled   << 3;
+        byte |= apu.square1.enabled << 0;
+        byte |= apu.square2.enabled << 1;
+        byte |= apu.wave.enabled    << 2;
+        byte |= apu.noise.enabled   << 3;
     }
-    return value;
+    return byte;
 }
 
 void SoundControl::write(uint index, u8 byte)

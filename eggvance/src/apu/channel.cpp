@@ -27,7 +27,9 @@ void Channel::tickLength()
     {
         length.tick();
 
-        if (!(enabled = length.enabled()))
+        enabled = length.enabled();
+
+        if (!enabled)
             tick();
     }
 }
@@ -38,7 +40,9 @@ void Channel::tickEnvelope()
     {
         envelope.tick();
 
-        if (!(enabled = envelope.enabled()))
+        enabled = envelope.enabled();
+
+        if (!enabled)
             tick();
     }
 }

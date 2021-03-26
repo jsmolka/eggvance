@@ -1,7 +1,5 @@
 #include "square2.h"
 
-#include "base/constants.h"
-
 Square2::Square2()
     : Square(0x0000'4000'0000'FFC0)
 {

@@ -2,7 +2,6 @@
 
 #include <algorithm>
 
-#include "base/config.h"
 #include "base/constants.h"
 #include "dma/dma.h"
 #include "frontend/audiocontext.h"
