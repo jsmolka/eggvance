@@ -19,9 +19,9 @@ public:
 
     void init();
     void scanline();
-    void hblank();
-    void vblank();
-    void next();
+    void hblank(u64 late = 0);
+    void vblank(u64 late = 0);
+    void next(u64 late = 0);
     void present();
 
     DisplayControl dispcnt;

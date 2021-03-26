@@ -83,7 +83,7 @@ void IrqMaster::write(uint index, u8 byte)
 {
     Register::write(index, byte);
 
-    on_write();
+    arm.interruptProcess();
 
 }
 
@@ -96,7 +96,7 @@ void IrqEnable::write(uint index, u8 byte)
 {
     Register::write(index, byte);
 
-    on_write();
+    arm.interruptProcess();
 }
 
 IrqRequest& IrqRequest::operator|=(u16 value)
@@ -115,5 +115,5 @@ void IrqRequest::write(uint index, u8 byte)
 {
     bit::byteRef(data, index) &= ~(byte & bit::byte(mask, index));
 
-    on_write();
+    arm.interruptProcess();
 }

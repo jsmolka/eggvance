@@ -52,8 +52,6 @@ public:
     operator bool() const;
 
     void write(uint index, u8 byte);
-
-    std::function<void(void)> on_write;
 };
 
 class IrqEnable : public Register<u16, 0x3FFF>
@@ -62,8 +60,6 @@ public:
     operator u16() const;
 
     void write(uint index, u8 byte);
-
-    std::function<void(void)> on_write;
 };
 
 class IrqRequest : public Register<u16, 0x3FFF>
@@ -73,7 +69,5 @@ public:
     operator u16() const;
 
     void write(uint index, u8 byte);
-
-    std::function<void(void)> on_write;
 };
 

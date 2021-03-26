@@ -59,17 +59,17 @@ void Ppu::init()
         if (vcount < 160)
             scanline();
 
-        ppu.hblank();
+        ppu.hblank(late);
 
         scheduler.add(events.hblank_end, 226 - late);
     };
 
     events.hblank_end = [this](u64 late)
     {
-        next();
+        next(late);
 
         if (vcount == 160)
-            vblank();
+            vblank(late);
 
         scheduler.add(events.hblank, 1006 - late);
     };
@@ -143,13 +143,13 @@ void Ppu::scanline()
     }
 }
 
-void Ppu::hblank()
+void Ppu::hblank(u64 late)
 {
     dispstat.hblank = true;
 
     if (dispstat.hblank_irq)
     {
-        arm.raise(kIrqHBlank);
+        arm.raise(kIrqHBlank, late);
     }
 
     if (vcount < 160)
@@ -168,7 +168,7 @@ void Ppu::hblank()
     }
 }
 
-void Ppu::vblank()
+void Ppu::vblank(u64 late)
 {
     dispstat.vblank = true;
     
@@ -179,12 +179,12 @@ void Ppu::vblank()
 
     if (dispstat.vblank_irq)
     {
-        arm.raise(kIrqVBlank);
+        arm.raise(kIrqVBlank, late);
     }
     dma.broadcast(Dma::Event::VBlank);
 }
 
-void Ppu::next()
+void Ppu::next(u64 late)
 {
     dispstat.hblank = false;
 
@@ -193,7 +193,7 @@ void Ppu::next()
     dispstat.vmatch = vcount == dispstat.vcompare;
     if (dispstat.vmatch && dispstat.vmatch_irq)
     {
-        arm.raise(kIrqVMatch);
+        arm.raise(kIrqVMatch, late);
     }
 }
 

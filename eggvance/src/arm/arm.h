@@ -16,7 +16,8 @@ public:
 
     void init();
     void run(u64 cycles);
-    void raise(uint irq);
+    void raise(uint irq, u64 late = 0);
+    void interruptProcess(u64 late = 0);
 
     u8  readByte(u32 addr, Access access = Access::NonSequential);
     u16 readHalf(u32 addr, Access access = Access::NonSequential);
@@ -80,7 +81,6 @@ private:
     void interrupt(u32 pc, u32 lr, Psr::Mode mode);
     void interruptHw();
     void interruptSw();
-    void interruptProcess();
 
     template<u32 Instr> void Arm_BranchExchange(u32 instr);
     template<u32 Instr> void Arm_BranchLink(u32 instr);

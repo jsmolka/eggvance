@@ -15,10 +15,6 @@ Arm::Arm()
     {
         state |= kStateIrq;
     };
-
-    irq.master.on_write  = std::bind(&Arm::interruptProcess, this);
-    irq.enable.on_write  = std::bind(&Arm::interruptProcess, this);
-    irq.request.on_write = std::bind(&Arm::interruptProcess, this);
 }
 
 void Arm::init()
