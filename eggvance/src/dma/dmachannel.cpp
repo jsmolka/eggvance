@@ -130,8 +130,10 @@ void DmaChannel::initTransfer()
         {
             transfer = [this](Access access)
             {
-                if (latch.sad >= 0x200'0000) bus = gamepak.save->read(latch.sad);
-                if (latch.dad >= 0x200'0000) arm.writeHalf(latch.dad, bus, access);
+                if (latch.sad >= 0x200'0000)
+                    latch.bus = gamepak.save->read(latch.sad);
+                
+                arm.writeHalf(latch.dad, latch.bus, access);
             };
         }
         else
@@ -139,12 +141,9 @@ void DmaChannel::initTransfer()
             transfer = [this](Access access)
             {
                 if (latch.sad >= 0x200'0000) 
-                {
-                    bus = arm.readHalf(latch.sad, access);
-                    bus |= bus << 16;
-                }
-                if (latch.dad >= 0x200'0000) 
-                    gamepak.save->write(latch.dad, bus);
+                    latch.bus = arm.readHalf(latch.sad, access) * 0x0001'0001;
+
+                gamepak.save->write(latch.dad, latch.bus);
             };
         }
     }
@@ -154,8 +153,10 @@ void DmaChannel::initTransfer()
         {
             transfer = [this](Access access)
             {
-                if (latch.sad >= 0x200'0000) bus = arm.readWord(latch.sad, access);
-                if (latch.dad >= 0x200'0000) arm.writeWord(latch.dad, bus, access);
+                if (latch.sad >= 0x200'0000)
+                    latch.bus = arm.readWord(latch.sad, access);
+                
+                arm.writeWord(latch.dad, latch.bus, access);
             };
         }
         else
@@ -163,12 +164,9 @@ void DmaChannel::initTransfer()
             transfer = [this](Access access)
             {
                 if (latch.sad >= 0x200'0000)
-                {
-                    bus = arm.readHalf(latch.sad, access);
-                    bus |= bus << 16;
-                }
-                if (latch.dad >= 0x200'0000)
-                    arm.writeHalf(latch.dad, bus, access);
+                    latch.bus = arm.readHalf(latch.sad, access) * 0x0001'0001;
+
+                arm.writeHalf(latch.dad, latch.bus, access);
             };
         }
     }

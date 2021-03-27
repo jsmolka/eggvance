@@ -1,6 +1,7 @@
 #pragma once
 
 #include "dmachannel.h"
+#include "base/array.h"
 
 class Dma
 {
@@ -11,7 +12,7 @@ public:
     void emit(DmaChannel& channel, Event event);
     void broadcast(Event event);
 
-    DmaChannel channels[4] = { 0, 1, 2, 3 };
+    array<DmaChannel, 4> channels = { 0, 1, 2, 3 };
 
 private:
     DmaChannel* active = nullptr;

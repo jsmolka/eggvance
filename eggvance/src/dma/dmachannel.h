@@ -29,10 +29,10 @@ private:
     uint running = 0;
     uint fifo    = 0;
     uint pending = 0;
-    uint bus     = 0;
 
     struct Latch
     {
+        uint bus   = 0;
         uint sad   = 0;
         uint dad   = 0;
         uint count = 0;
