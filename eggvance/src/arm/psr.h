@@ -1,123 +1,60 @@
 #pragma once
 
-#include "base/bit.h"
+#include <shell/macros.h>
+
 #include "base/int.h"
 
 class Psr
 {
 public:
-    enum Mode
+    enum class Mode
     {
-        kModeUsr = 0b10000,
-        kModeFiq = 0b10001,
-        kModeIrq = 0b10010,
-        kModeSvc = 0b10011,
-        kModeAbt = 0b10111,
-        kModeSys = 0b11111,
-        kModeUnd = 0b11011
+        Usr = 0b10000,
+        Fiq = 0b10001,
+        Irq = 0b10010,
+        Svc = 0b10011,
+        Abt = 0b10111,
+        Sys = 0b11111,
+        Und = 0b11011
     };
 
-    Psr& operator=(u32 value)
-    {
-        m = bit::seq< 0, 5>(value);
-        t = bit::seq< 5, 1>(value);
-        f = bit::seq< 6, 1>(value);
-        i = bit::seq< 7, 1>(value);
-        v = bit::seq<28, 1>(value);
-        c = bit::seq<29, 1>(value);
-        z = bit::seq<30, 1>(value);
-        n = bit::seq<31, 1>(value);
+    Psr& operator=(u32 value);
+    operator u32() const;
 
-        return *this;
-    }
-
-    operator u32() const
-    {
-        return (m <<  0)
-             | (t <<  5)
-             | (f <<  6)
-             | (i <<  7)
-             | (v << 28)
-             | (c << 29)
-             | (z << 30)
-             | (n << 31);
-    }
-
-    void setZ(u32 value)
-    {
-        z = value == 0;
-    }
-
-    void setN(u32 value)
-    {
-        n = bit::msb(value);
-    }
-
-    void setCAdd(u64 op1, u64 op2)
-    {
-        c = op1 + op2 > 0xFFFF'FFFF;
-    }
-
-    void setCSub(u64 op1, u64 op2)
-    {
-        c = op2 <= op1;
-    }
-
-    void setVAdd(u32 op1, u32 op2, u32 res)
-    {
-        v = bit::msb((op1 ^ res) & (~op1 ^ op2));
-    }
-
-    void setVSub(u32 op1, u32 op2, u32 res)
-    {
-        v = bit::msb((op1 ^ op2) & (~op2 ^ res));
-    }
-
-    uint size() const
-    {
-        return 4 >> t;
-    }
+    uint size() const;
+    void setZ(u32 value);
+    void setN(u32 value);
+    void setCAdd(u64 op1, u64 op2);
+    void setCSub(u64 op1, u64 op2);
+    void setVAdd(u32 op1, u32 op2, u32 res);
+    void setVSub(u32 op1, u32 op2, u32 res);
 
     SHELL_INLINE bool check(uint condition) const
     {
-        enum Condition
-        {
-            kConditionEQ,
-            kConditionNE,
-            kConditionCS,
-            kConditionCC,
-            kConditionMI,
-            kConditionPL,
-            kConditionVS,
-            kConditionVC,
-            kConditionHI,
-            kConditionLS,
-            kConditionGE,
-            kConditionLT,
-            kConditionGT,
-            kConditionLE,
-            kConditionAL,
-            kConditionNV
+        enum class Condition
+        { 
+            EQ, NE, CS, CC, MI, PL, VS, VC,
+            HI, LS, GE, LT, GT, LE, AL, NV
         };
 
-        switch (condition)
+        switch (Condition(condition))
         {
-        case kConditionEQ: return z;
-        case kConditionNE: return !z;
-        case kConditionCS: return c;
-        case kConditionCC: return !c;
-        case kConditionMI: return n;
-        case kConditionPL: return !n;
-        case kConditionVS: return v;
-        case kConditionVC: return !v;
-        case kConditionHI: return c && !z;
-        case kConditionLS: return !c || z;
-        case kConditionGE: return n == v;
-        case kConditionLT: return n != v;
-        case kConditionGT: return !z && (n == v);
-        case kConditionLE: return z || (n != v);
-        case kConditionAL: return true;
-        case kConditionNV: return false;
+        case Condition::EQ: return z;
+        case Condition::NE: return !z;
+        case Condition::CS: return c;
+        case Condition::CC: return !c;
+        case Condition::MI: return n;
+        case Condition::PL: return !n;
+        case Condition::VS: return v;
+        case Condition::VC: return !v;
+        case Condition::HI: return c && !z;
+        case Condition::LS: return !c || z;
+        case Condition::GE: return n == v;
+        case Condition::LT: return n != v;
+        case Condition::GT: return !z && (n == v);
+        case Condition::LE: return z || (n != v);
+        case Condition::AL: return true;
+        case Condition::NV: return false;
 
         default:
             SHELL_UNREACHABLE;
@@ -125,7 +62,7 @@ public:
         }
     }
 
-    uint m = kModeSys;
+    Mode m = Mode::Svc;
     uint t = 0;
     uint f = 0;
     uint i = 0;

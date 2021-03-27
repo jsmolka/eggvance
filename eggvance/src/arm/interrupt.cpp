@@ -39,14 +39,14 @@ void Arm::interruptHw()
 {
     u32 lr = pc - 2 * cpsr.size() + 4;
 
-    interrupt(kVectorIrq, lr, Psr::kModeIrq);
+    interrupt(kVectorIrq, lr, Psr::Mode::Irq);
 }
 
 void Arm::interruptSw()
 {
     u32 lr = pc - cpsr.size();
 
-    interrupt(kVectorSwi, lr, Psr::kModeSvc);
+    interrupt(kVectorSwi, lr, Psr::Mode::Svc);
 }
 
 void Arm::interruptProcess(u64 late)

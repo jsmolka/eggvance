@@ -23,21 +23,16 @@ public:
     Psr spsr;
 
 protected:
-    void switchMode(uint mode);
+    void switchMode(Psr::Mode mode);
 
 private:
-    enum Bank
+    enum class Bank { Def, Fiq, Irq, Svc, Abt, Und };
+
+    static Bank modeToBank(Psr::Mode mode);
+
+    struct
     {
-        kBankDef,
-        kBankFiq,
-        kBankIrq,
-        kBankSvc,
-        kBankAbt,
-        kBankUnd
-    };
-
-    static Bank modeToBank(uint mode);
-
-    u32 bank_def[6][3] = {};
-    u32 bank_fiq[2][5] = {};
+        u32 def[6][3] = {};
+        u32 fiq[2][5] = {};
+    } banks;
 };

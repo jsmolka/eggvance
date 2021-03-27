@@ -20,7 +20,7 @@ public:
     Square2 square2;
     Wave wave;
     Noise noise;
-    std::array<Fifo, 2> fifo;
+    Fifo fifo[2];
     SoundControl control;
     SoundBias bias;
 
@@ -29,7 +29,7 @@ private:
     void sequence(u64 late);
     void sample(u64 late);
 
-    struct Events
+    struct
     {
         Event sequence;
         Event sample;

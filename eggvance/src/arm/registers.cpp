@@ -12,10 +12,10 @@ Registers::Registers()
         spsr = 0x0000'0000;
         cpsr = 0x0000'001F;
 
-        bank_def[kBankDef][0] = 0x0300'7F00;
-        bank_def[kBankDef][1] = 0x0000'00C0;
-        bank_def[kBankIrq][0] = 0x0300'7FA0;
-        bank_def[kBankSvc][0] = 0x0300'7FE0;
+        banks.def[uint(Bank::Def)][0] = 0x0300'7F00;
+        banks.def[uint(Bank::Def)][1] = 0x0000'00C0;
+        banks.def[uint(Bank::Irq)][0] = 0x0300'7FA0;
+        banks.def[uint(Bank::Svc)][0] = 0x0300'7FE0;
     }
     else 
     {
@@ -24,53 +24,53 @@ Registers::Registers()
     }
 }
 
-void Registers::switchMode(uint mode)
+void Registers::switchMode(Psr::Mode mode)
 {
     Bank bank_old = modeToBank(cpsr.m);
     Bank bank_new = modeToBank(mode);
 
     if (bank_old != bank_new)
     {
-        bank_def[bank_old][0] = sp;
-        bank_def[bank_old][1] = lr;
-        bank_def[bank_old][2] = spsr;
+        banks.def[uint(bank_old)][0] = sp;
+        banks.def[uint(bank_old)][1] = lr;
+        banks.def[uint(bank_old)][2] = spsr;
 
-        sp   = bank_def[bank_new][0];
-        lr   = bank_def[bank_new][1];
-        spsr = bank_def[bank_new][2];
+        sp   = banks.def[uint(bank_new)][0];
+        lr   = banks.def[uint(bank_new)][1];
+        spsr = banks.def[uint(bank_new)][2];
 
-        if (bank_old == kBankFiq || bank_new == kBankFiq)
+        if (bank_old == Bank::Fiq || bank_new == Bank::Fiq)
         {
-            uint fiq_old = bank_old == kBankFiq;
-            uint fiq_new = bank_new == kBankFiq;
+            uint fiq_old = bank_old == Bank::Fiq;
+            uint fiq_new = bank_new == Bank::Fiq;
 
-            bank_fiq[fiq_old][0] = regs[ 8];
-            bank_fiq[fiq_old][1] = regs[ 9];
-            bank_fiq[fiq_old][2] = regs[10];
-            bank_fiq[fiq_old][3] = regs[11];
-            bank_fiq[fiq_old][4] = regs[12];
+            banks.fiq[fiq_old][0] = regs[ 8];
+            banks.fiq[fiq_old][1] = regs[ 9];
+            banks.fiq[fiq_old][2] = regs[10];
+            banks.fiq[fiq_old][3] = regs[11];
+            banks.fiq[fiq_old][4] = regs[12];
 
-            regs[ 8] = bank_fiq[fiq_new][0];
-            regs[ 9] = bank_fiq[fiq_new][1];
-            regs[10] = bank_fiq[fiq_new][2];
-            regs[11] = bank_fiq[fiq_new][3];
-            regs[12] = bank_fiq[fiq_new][4];
+            regs[ 8] = banks.fiq[fiq_new][0];
+            regs[ 9] = banks.fiq[fiq_new][1];
+            regs[10] = banks.fiq[fiq_new][2];
+            regs[11] = banks.fiq[fiq_new][3];
+            regs[12] = banks.fiq[fiq_new][4];
         }
     }
     cpsr.m = mode;
 }
 
-Registers::Bank Registers::modeToBank(uint mode)
+Registers::Bank Registers::modeToBank(Psr::Mode mode)
 {
     switch (mode)
     {
-    case Psr::kModeUsr: return kBankDef;
-    case Psr::kModeSys: return kBankDef;
-    case Psr::kModeFiq: return kBankFiq;
-    case Psr::kModeIrq: return kBankIrq;
-    case Psr::kModeSvc: return kBankSvc;
-    case Psr::kModeAbt: return kBankAbt;
-    case Psr::kModeUnd: return kBankUnd;
+    case Psr::Mode::Usr: return Bank::Def;
+    case Psr::Mode::Sys: return Bank::Def;
+    case Psr::Mode::Fiq: return Bank::Fiq;
+    case Psr::Mode::Irq: return Bank::Irq;
+    case Psr::Mode::Svc: return Bank::Svc;
+    case Psr::Mode::Abt: return Bank::Abt;
+    case Psr::Mode::Und: return Bank::Und;
     }
-    return kBankDef;
+    return Bank::Def;
 }

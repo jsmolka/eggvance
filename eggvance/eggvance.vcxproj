@@ -36,6 +36,8 @@
     <ClCompile Include="src\arm\io.cpp" />
     <ClCompile Include="src\arm\memory.cpp" />
     <ClCompile Include="src\arm\mmio.cpp" />
+    <ClCompile Include="src\arm\pipeline.cpp" />
+    <ClCompile Include="src\arm\psr.cpp" />
     <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\base\config.cpp" />
     <ClCompile Include="src\frontend\audiocontext.cpp" />

@@ -232,7 +232,7 @@ void Arm::Arm_StatusTransfer(u32 instr)
         else
         {
             if (instr & kBitC)
-                switchMode(op & 0x1F);
+                switchMode(Psr::Mode(op & 0x1F));
 
             cpsr = (cpsr & ~mask) | (op & mask);
         }
@@ -497,11 +497,11 @@ void Arm::Arm_BlockDataTransfer(u32 instr)
     u32 addr = regs[rn];
     u32 base = regs[rn];
 
-    uint mode;
+    Psr::Mode mode;
     if (kUserMode)
     {
         mode = cpsr.m;
-        switchMode(Psr::kModeUsr);
+        switchMode(Psr::Mode::Usr);
     }
 
     if (rlist != 0)
