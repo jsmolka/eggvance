@@ -1,6 +1,7 @@
 #pragma once
 
 #include "enums.h"
+#include "base/array.h"
 #include "base/register.h"
 
 class PostFlag : public Register<u8, 0x01>
@@ -22,8 +23,8 @@ public:
 
     void write(uint index, u8 byte);
 
-    u64 waitHalf(u32 addr, Access access) const { return wait.half[(addr >> 25) & 0x3][static_cast<uint>(access)]; }
-    u64 waitWord(u32 addr, Access access) const { return wait.word[(addr >> 25) & 0x3][static_cast<uint>(access)]; }
+    u64 waitHalf(u32 addr, Access access) const;
+    u64 waitWord(u32 addr, Access access) const;
 
     uint sram     = 0;
     uint ws0_n    = 0;
@@ -37,10 +38,10 @@ public:
 private:
     void update();
 
-    struct WaitStates
+    struct
     {
-        u64 half[4][2];
-        u64 word[4][2];
+        array<u64, 4, 2> half = {};
+        array<u64, 4, 2> word = {};
     } wait;
 };
 

@@ -3,33 +3,33 @@
 #include "gamepak/gamepak.h"
 #include "ppu/ppu.h"
 
-enum Region
+enum class Region
 {
-    kRegionBios,
-    kRegionUnused,
-    kRegionExternalWorkRam,
-    kRegionInternalWorkRam,
-    kRegionIo,
-    kRegionPaletteRam,
-    kRegionVideoRam,
-    kRegionOam,
-    kRegionGamePak0L,
-    kRegionGamePak0H,
-    kRegionGamePak1L,
-    kRegionGamePak1H,
-    kRegionGamePak2L,
-    kRegionGamePak2H,
-    kRegionSaveL,
-    kRegionSaveH
+    Bios,
+    Unused,
+    ExternalWorkRam,
+    InternalWorkRam,
+    Io,
+    PaletteRam,
+    VideoRam,
+    Oam,
+    GamePak0L,
+    GamePak0H,
+    GamePak1L,
+    GamePak1H,
+    GamePak2L,
+    GamePak2H,
+    SaveL,
+    SaveH
 };
 
 u8 Arm::readByte(u32 addr, Access access)
 {
     pipe.access = Access::NonSequential;
 
-    switch (addr >> 24)
+    switch (Region(addr >> 24))
     {
-    case kRegionBios:
+    case Region::Bios:
         if (addr < Bios::kSize)
         {
             tickRam(1);
@@ -37,45 +37,45 @@ u8 Arm::readByte(u32 addr, Access access)
         }
         [[fallthrough]];
 
-    case kRegionUnused:
+    case Region::Unused:
         tickRam(1);
         return readUnused() >> (8 * (addr & 0x3));
 
-    case kRegionExternalWorkRam:
+    case Region::ExternalWorkRam:
         tickRam(3);
         return ewram.readByte(addr);
 
-    case kRegionInternalWorkRam:
+    case Region::InternalWorkRam:
         tickRam(1);
         return iwram.readByte(addr);
 
-    case kRegionIo:
+    case Region::Io:
         tickRam(1);
         return readIo(addr);
 
-    case kRegionPaletteRam:
+    case Region::PaletteRam:
         tickRam(1);
         return ppu.pram.readByte(addr);
 
-    case kRegionVideoRam:
+    case Region::VideoRam:
         tickRam(1);
         return ppu.vram.readByte(addr);
 
-    case kRegionOam:
+    case Region::Oam:
         tickRam(1);
         return ppu.oam.readByte(addr);
 
-    case kRegionGamePak0L:
-    case kRegionGamePak0H:
-    case kRegionGamePak1L:
-    case kRegionGamePak1H:
-    case kRegionGamePak2L:
-    case kRegionGamePak2H:
+    case Region::GamePak0L:
+    case Region::GamePak0H:
+    case Region::GamePak1L:
+    case Region::GamePak1H:
+    case Region::GamePak2L:
+    case Region::GamePak2H:
         tickRom(addr, waitcnt.waitHalf(addr, access));
         return gamepak.read<u8>(addr);
 
-    case kRegionSaveL:
-    case kRegionSaveH:
+    case Region::SaveL:
+    case Region::SaveH:
         tickRom(addr, waitcnt.waitHalf(addr, access));
         return gamepak.readSave(addr);
 
@@ -89,9 +89,9 @@ u16 Arm::readHalf(u32 addr, Access access)
 {
     pipe.access = Access::NonSequential;
 
-    switch (addr >> 24)
+    switch (Region(addr >> 24))
     {
-    case kRegionBios:
+    case Region::Bios:
         if (addr < Bios::kSize)
         {
             tickRam(1);
@@ -99,37 +99,37 @@ u16 Arm::readHalf(u32 addr, Access access)
         }
         [[fallthrough]];
 
-    case kRegionUnused:
+    case Region::Unused:
         tickRam(1);
         return readUnused() >> (8 * (addr & 0x2));
 
-    case kRegionExternalWorkRam:
+    case Region::ExternalWorkRam:
         tickRam(3);
         return ewram.readHalf(addr);
 
-    case kRegionInternalWorkRam:
+    case Region::InternalWorkRam:
         tickRam(1);
         return iwram.readHalf(addr);
 
-    case kRegionIo:
+    case Region::Io:
         tickRam(1);
         addr &= ~0x1;
         return readIo(addr + 0) << 0
              | readIo(addr + 1) << 8;
 
-    case kRegionPaletteRam:
+    case Region::PaletteRam:
         tickRam(1);
         return ppu.pram.readHalf(addr);
 
-    case kRegionVideoRam:
+    case Region::VideoRam:
         tickRam(1);
         return ppu.vram.readHalf(addr);
 
-    case kRegionOam:
+    case Region::Oam:
         tickRam(1);
         return ppu.oam.readHalf(addr);
 
-    case kRegionGamePak2H:
+    case Region::GamePak2H:
         if (gamepak.isEepromAccess(addr))
         {
             tickRom(addr, waitcnt.waitHalf(addr, access));
@@ -137,16 +137,16 @@ u16 Arm::readHalf(u32 addr, Access access)
         }
         [[fallthrough]];
 
-    case kRegionGamePak0L:
-    case kRegionGamePak0H:
-    case kRegionGamePak1L:
-    case kRegionGamePak1H:
-    case kRegionGamePak2L:
+    case Region::GamePak0L:
+    case Region::GamePak0H:
+    case Region::GamePak1L:
+    case Region::GamePak1H:
+    case Region::GamePak2L:
         tickRom(addr, waitcnt.waitHalf(addr, access));
         return gamepak.read<u16>(addr);
 
-    case kRegionSaveL:
-    case kRegionSaveH:
+    case Region::SaveL:
+    case Region::SaveH:
         tickRom(addr, waitcnt.waitHalf(addr, access));
         return gamepak.readSave(addr) * 0x0101;
 
@@ -160,9 +160,9 @@ u32 Arm::readWord(u32 addr, Access access)
 {
     pipe.access = Access::NonSequential;
 
-    switch (addr >> 24)
+    switch (Region(addr >> 24))
     {
-    case kRegionBios:
+    case Region::Bios:
         if (addr < Bios::kSize)
         {
             tickRam(1);
@@ -170,19 +170,19 @@ u32 Arm::readWord(u32 addr, Access access)
         }
         [[fallthrough]];
 
-    case kRegionUnused:
+    case Region::Unused:
         tickRam(1);
         return readUnused();
 
-    case kRegionExternalWorkRam:
+    case Region::ExternalWorkRam:
         tickRam(6);
         return ewram.readWord(addr);
 
-    case kRegionInternalWorkRam:
+    case Region::InternalWorkRam:
         tickRam(1);
         return iwram.readWord(addr);
 
-    case kRegionIo:
+    case Region::Io:
         tickRam(1);
         addr &= ~0x3;
         return readIo(addr + 0) <<  0
@@ -190,19 +190,19 @@ u32 Arm::readWord(u32 addr, Access access)
              | readIo(addr + 2) << 16
              | readIo(addr + 3) << 24;
 
-    case kRegionPaletteRam:
+    case Region::PaletteRam:
         tickRam(2);
         return ppu.pram.readWord(addr);
 
-    case kRegionVideoRam:
+    case Region::VideoRam:
         tickRam(2);
         return ppu.vram.readWord(addr);
 
-    case kRegionOam:
+    case Region::Oam:
         tickRam(1);
         return ppu.oam.readWord(addr);
 
-    case kRegionGamePak2H:
+    case Region::GamePak2H:
         if (gamepak.isEepromAccess(addr))
         {
             tickRom(addr, waitcnt.waitWord(addr, access));
@@ -210,16 +210,16 @@ u32 Arm::readWord(u32 addr, Access access)
         }
         [[fallthrough]];
 
-    case kRegionGamePak0L:
-    case kRegionGamePak0H:
-    case kRegionGamePak1L:
-    case kRegionGamePak1H:
-    case kRegionGamePak2L:
+    case Region::GamePak0L:
+    case Region::GamePak0H:
+    case Region::GamePak1L:
+    case Region::GamePak1H:
+    case Region::GamePak2L:
         tickRom(addr, waitcnt.waitWord(addr, access));
         return gamepak.read<u32>(addr);
 
-    case kRegionSaveL:
-    case kRegionSaveH:
+    case Region::SaveL:
+    case Region::SaveH:
         tickRom(addr, waitcnt.waitWord(addr, access));
         return gamepak.readSave(addr) * 0x0101'0101;
 
@@ -233,54 +233,54 @@ void Arm::writeByte(u32 addr, u8 byte, Access access)
 {
     pipe.access = Access::NonSequential;
 
-    switch (addr >> 24)
+    switch (Region(addr >> 24))
     {
-    case kRegionBios:
-    case kRegionUnused:
+    case Region::Bios:
+    case Region::Unused:
         tickRam(1);
         break;
 
-    case kRegionExternalWorkRam:
+    case Region::ExternalWorkRam:
         tickRam(3);
         ewram.writeByte(addr, byte);
         break;
 
-    case kRegionInternalWorkRam:
+    case Region::InternalWorkRam:
         tickRam(1);
         iwram.writeByte(addr, byte);
         break;
 
-    case kRegionIo:
+    case Region::Io:
         tickRam(1);
         writeIo(addr, byte);
         break;
 
-    case kRegionPaletteRam:
+    case Region::PaletteRam:
         tickRam(1);
         ppu.pram.writeByte(addr, byte);
         break;
 
-    case kRegionVideoRam:
+    case Region::VideoRam:
         tickRam(1);
         ppu.vram.writeByte(addr, byte);
         break;
 
-    case kRegionOam:
+    case Region::Oam:
         tickRam(1);
         break;
 
-    case kRegionGamePak0L:
-    case kRegionGamePak0H:
-    case kRegionGamePak1L:
-    case kRegionGamePak1H:
-    case kRegionGamePak2L:
-    case kRegionGamePak2H:
+    case Region::GamePak0L:
+    case Region::GamePak0H:
+    case Region::GamePak1L:
+    case Region::GamePak1H:
+    case Region::GamePak2L:
+    case Region::GamePak2H:
         tickRom(addr, waitcnt.waitHalf(addr, access));
         gamepak.write<u8>(addr, byte);
         break;
 
-    case kRegionSaveL:
-    case kRegionSaveH:
+    case Region::SaveL:
+    case Region::SaveH:
         tickRom(addr, waitcnt.waitHalf(addr, access));
         gamepak.writeSave(addr, byte);
         break;
@@ -295,57 +295,57 @@ void Arm::writeHalf(u32 addr, u16 half, Access access)
 {
     pipe.access = Access::NonSequential;
     
-    switch (addr >> 24)
+    switch (Region(addr >> 24))
     {
-    case kRegionBios:
-    case kRegionUnused:
+    case Region::Bios:
+    case Region::Unused:
         tickRam(1);
         break;
 
-    case kRegionExternalWorkRam:
+    case Region::ExternalWorkRam:
         tickRam(3);
         ewram.writeHalf(addr, half);
         break;
 
-    case kRegionInternalWorkRam:
+    case Region::InternalWorkRam:
         tickRam(1);
         iwram.writeHalf(addr, half);
         break;
 
-    case kRegionIo:
+    case Region::Io:
         tickRam(1);
         addr &= ~0x1;
         writeIo(addr + 0, bit::seq<0, 8>(half));
         writeIo(addr + 1, bit::seq<8, 8>(half));
         break;
 
-    case kRegionPaletteRam:
+    case Region::PaletteRam:
         tickRam(1);
         ppu.pram.writeHalf(addr, half);
         break;
 
-    case kRegionVideoRam:
+    case Region::VideoRam:
         tickRam(1);
         ppu.vram.writeHalf(addr, half);
         break;
 
-    case kRegionOam:
+    case Region::Oam:
         tickRam(1);
         ppu.oam.writeHalf(addr, half);
         break;
 
-    case kRegionGamePak0L:
-    case kRegionGamePak0H:
-    case kRegionGamePak1L:
-    case kRegionGamePak1H:
-    case kRegionGamePak2L:
-    case kRegionGamePak2H:
+    case Region::GamePak0L:
+    case Region::GamePak0H:
+    case Region::GamePak1L:
+    case Region::GamePak1H:
+    case Region::GamePak2L:
+    case Region::GamePak2H:
         tickRom(addr, waitcnt.waitHalf(addr, access));
         gamepak.write<u16>(addr, half);
         break;
 
-    case kRegionSaveL:
-    case kRegionSaveH:
+    case Region::SaveL:
+    case Region::SaveH:
         tickRom(addr, waitcnt.waitHalf(addr, access));
         gamepak.writeSave(addr, half >> (8 * (addr & 0x1)));
         break;
@@ -360,24 +360,24 @@ void Arm::writeWord(u32 addr, u32 word, Access access)
 {
     pipe.access = Access::NonSequential;
     
-    switch (addr >> 24)
+    switch (Region(addr >> 24))
     {
-    case kRegionBios:
-    case kRegionUnused:
+    case Region::Bios:
+    case Region::Unused:
         tickRam(1);
         break;
 
-    case kRegionExternalWorkRam:
+    case Region::ExternalWorkRam:
         tickRam(6);
         ewram.writeWord(addr, word);
         break;
 
-    case kRegionInternalWorkRam:
+    case Region::InternalWorkRam:
         tickRam(1);
         iwram.writeWord(addr, word);
         break;
 
-    case kRegionIo:
+    case Region::Io:
         tickRam(1);
         addr &= ~0x3;
         writeIo(addr + 0, bit::seq< 0, 8>(word));
@@ -386,33 +386,33 @@ void Arm::writeWord(u32 addr, u32 word, Access access)
         writeIo(addr + 3, bit::seq<24, 8>(word));
         break;
 
-    case kRegionPaletteRam:
+    case Region::PaletteRam:
         tickRam(2);
         ppu.pram.writeWord(addr, word);
         break;
 
-    case kRegionVideoRam:
+    case Region::VideoRam:
         tickRam(2);
         ppu.vram.writeWord(addr, word);
         break;
 
-    case kRegionOam:
+    case Region::Oam:
         tickRam(1);
         ppu.oam.writeWord(addr, word);
         break;
 
-    case kRegionGamePak0L:
-    case kRegionGamePak0H:
-    case kRegionGamePak1L:
-    case kRegionGamePak1H:
-    case kRegionGamePak2L:
-    case kRegionGamePak2H:
+    case Region::GamePak0L:
+    case Region::GamePak0H:
+    case Region::GamePak1L:
+    case Region::GamePak1H:
+    case Region::GamePak2L:
+    case Region::GamePak2H:
         tickRom(addr, waitcnt.waitWord(addr, access));
         gamepak.write<u32>(addr, word);
         break;
 
-    case kRegionSaveL:
-    case kRegionSaveH:
+    case Region::SaveL:
+    case Region::SaveH:
         tickRom(addr, waitcnt.waitWord(addr, access));
         gamepak.writeSave(addr, word >> (8 * (addr & 0x3)));
         break;
@@ -428,13 +428,13 @@ u32 Arm::readUnused() const
     if (cpsr.t == 0)
         return pipe[1];
 
-    switch (pc >> 24)
+    switch (Region(pc >> 24))
     {
-    case kRegionBios:
-    case kRegionOam:
+    case Region::Bios:
+    case Region::Oam:
         return pipe[1] << 16 | pipe[0];
 
-    case kRegionInternalWorkRam:
+    case Region::InternalWorkRam:
         return pc & 0x2
             ? pipe[1] << 16 | pipe[0]
             : pipe[0] << 16 | pipe[1];

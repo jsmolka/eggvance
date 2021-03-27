@@ -183,9 +183,6 @@
     <ClCompile Include="src\arm\psr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\arm\pipeline.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\apu\apu.h">
@@ -402,6 +399,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\sio\io.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\array.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

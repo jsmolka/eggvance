@@ -44,6 +44,16 @@ void WaitControl::write(uint index, u8 byte)
     update();
 }
 
+u64 WaitControl::waitHalf(u32 addr, Access access) const
+{
+    return wait.half[(addr >> 25) & 0x3][uint(access)];
+}
+
+u64 WaitControl::waitWord(u32 addr, Access access) const
+{
+    return wait.word[(addr >> 25) & 0x3][uint(access)];
+}
+
 void WaitControl::update()
 {
     static constexpr u64 kNonSeq[4] = { 5, 4, 3, 9 };
@@ -51,8 +61,8 @@ void WaitControl::update()
     static constexpr u64 kWs1Seq[2] = { 5, 2 };
     static constexpr u64 kWs2Seq[2] = { 9, 2 };
 
-    constexpr uint kN = static_cast<uint>(Access::NonSequential);
-    constexpr uint kS = static_cast<uint>(Access::Sequential);
+    constexpr uint kN = uint(Access::NonSequential);
+    constexpr uint kS = uint(Access::Sequential);
 
     wait.half[0][kN] = kNonSeq[ws0_n];
     wait.word[0][kN] = kNonSeq[ws0_n] + kWs0Seq[ws0_s];

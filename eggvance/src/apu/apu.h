@@ -6,6 +6,7 @@
 #include "square1.h"
 #include "square2.h"
 #include "wave.h"
+#include "base/array.h"
 #include "scheduler/event.h"
 
 class Apu
@@ -20,7 +21,7 @@ public:
     Square2 square2;
     Wave wave;
     Noise noise;
-    Fifo fifo[2];
+    array<Fifo, 2> fifo;
     SoundControl control;
     SoundBias bias;
 

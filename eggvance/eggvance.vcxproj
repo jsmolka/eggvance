@@ -36,7 +36,6 @@
     <ClCompile Include="src\arm\io.cpp" />
     <ClCompile Include="src\arm\memory.cpp" />
     <ClCompile Include="src\arm\mmio.cpp" />
-    <ClCompile Include="src\arm\pipeline.cpp" />
     <ClCompile Include="src\arm\psr.cpp" />
     <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\base\config.cpp" />
@@ -95,6 +94,7 @@
     <ClInclude Include="src\arm\pipeline.h" />
     <ClInclude Include="src\arm\psr.h" />
     <ClInclude Include="src\arm\registers.h" />
+    <ClInclude Include="src\base\array.h" />
     <ClInclude Include="src\base\bit.h" />
     <ClInclude Include="src\base\config.h" />
     <ClInclude Include="src\base\constants.h" />
@@ -214,6 +214,7 @@
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <DisableSpecificWarnings>26812</DisableSpecificWarnings>
+      <PreprocessorDefinitions>_CONTAINER_DEBUG_LEVEL=1</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>SDL2maind.lib;shell32.lib</AdditionalDependencies>

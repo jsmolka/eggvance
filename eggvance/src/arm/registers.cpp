@@ -12,10 +12,10 @@ Registers::Registers()
         spsr = 0x0000'0000;
         cpsr = 0x0000'001F;
 
-        banks.def[uint(Bank::Def)][0] = 0x0300'7F00;
-        banks.def[uint(Bank::Def)][1] = 0x0000'00C0;
-        banks.def[uint(Bank::Irq)][0] = 0x0300'7FA0;
-        banks.def[uint(Bank::Svc)][0] = 0x0300'7FE0;
+        bank.def[uint(Bank::Def)][0] = 0x0300'7F00;
+        bank.def[uint(Bank::Def)][1] = 0x0000'00C0;
+        bank.def[uint(Bank::Irq)][0] = 0x0300'7FA0;
+        bank.def[uint(Bank::Svc)][0] = 0x0300'7FE0;
     }
     else 
     {
@@ -31,30 +31,30 @@ void Registers::switchMode(Psr::Mode mode)
 
     if (bank_old != bank_new)
     {
-        banks.def[uint(bank_old)][0] = sp;
-        banks.def[uint(bank_old)][1] = lr;
-        banks.def[uint(bank_old)][2] = spsr;
+        bank.def[uint(bank_old)][0] = sp;
+        bank.def[uint(bank_old)][1] = lr;
+        bank.def[uint(bank_old)][2] = spsr;
 
-        sp   = banks.def[uint(bank_new)][0];
-        lr   = banks.def[uint(bank_new)][1];
-        spsr = banks.def[uint(bank_new)][2];
+        sp   = bank.def[uint(bank_new)][0];
+        lr   = bank.def[uint(bank_new)][1];
+        spsr = bank.def[uint(bank_new)][2];
 
         if (bank_old == Bank::Fiq || bank_new == Bank::Fiq)
         {
             uint fiq_old = bank_old == Bank::Fiq;
             uint fiq_new = bank_new == Bank::Fiq;
 
-            banks.fiq[fiq_old][0] = regs[ 8];
-            banks.fiq[fiq_old][1] = regs[ 9];
-            banks.fiq[fiq_old][2] = regs[10];
-            banks.fiq[fiq_old][3] = regs[11];
-            banks.fiq[fiq_old][4] = regs[12];
+            bank.fiq[fiq_old][0] = regs[ 8];
+            bank.fiq[fiq_old][1] = regs[ 9];
+            bank.fiq[fiq_old][2] = regs[10];
+            bank.fiq[fiq_old][3] = regs[11];
+            bank.fiq[fiq_old][4] = regs[12];
 
-            regs[ 8] = banks.fiq[fiq_new][0];
-            regs[ 9] = banks.fiq[fiq_new][1];
-            regs[10] = banks.fiq[fiq_new][2];
-            regs[11] = banks.fiq[fiq_new][3];
-            regs[12] = banks.fiq[fiq_new][4];
+            regs[ 8] = bank.fiq[fiq_new][0];
+            regs[ 9] = bank.fiq[fiq_new][1];
+            regs[10] = bank.fiq[fiq_new][2];
+            regs[11] = bank.fiq[fiq_new][3];
+            regs[12] = bank.fiq[fiq_new][4];
         }
     }
     cpsr.m = mode;

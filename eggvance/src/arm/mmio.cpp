@@ -1,7 +1,5 @@
 #include "arm.h"
 
-#include <shell/macros.h>
-
 #include "apu/apu.h"
 #include "dma/dma.h"
 #include "keypad/keypad.h"
@@ -83,14 +81,9 @@ enum Io
     kTimer2Control  = 0x10A,
     kTimer3Count    = 0x10C,
     kTimer3Control  = 0x10E,
-    kSioData32      = 0x120,
-    kSioMulti0      = 0x120,
-    kSioMulti1      = 0x122,
-    kSioMulti2      = 0x124,
-    kSioMulti3      = 0x126,
+    kSioMulti       = 0x120,
     kSioControl     = 0x128,
     kSioSend        = 0x12A,
-    kSioData8       = 0x12A,
     kKeyInput       = 0x130,
     kKeyControl     = 0x132,
     kRemoteControl  = 0x134,
@@ -126,14 +119,14 @@ u8 Arm::readIo(u32 addr)
     SHELL_CASE02(Io::kWindowOutside,  return ppu.winout.read(kIndex));
     SHELL_CASE02(Io::kBlendControl,   return ppu.bldcnt.read(kIndex));
     SHELL_CASE02(Io::kBlendAlpha,     return ppu.bldalpha.read(kIndex));
-    SHELL_CASE08(Io::kSoundSquare1, return apu.square1.read(kIndex));
-    SHELL_CASE08(Io::kSoundSquare2, return apu.square2.read(kIndex));
-    SHELL_CASE08(Io::kSoundWave, return apu.wave.read(kIndex));
-    SHELL_CASE08(Io::kSoundNoise, return apu.noise.read(kIndex));
-    SHELL_CASE08(Io::kSoundControl,  return apu.control.read(kIndex));
+    SHELL_CASE08(Io::kSoundSquare1,   return apu.square1.read(kIndex));
+    SHELL_CASE08(Io::kSoundSquare2,   return apu.square2.read(kIndex));
+    SHELL_CASE08(Io::kSoundWave,      return apu.wave.read(kIndex));
+    SHELL_CASE08(Io::kSoundNoise,     return apu.noise.read(kIndex));
+    SHELL_CASE08(Io::kSoundControl,   return apu.control.read(kIndex));
     SHELL_CASE02(Io::kSoundBias,      return apu.bias.read(kIndex));
     SHELL_CASE02(Io::kUnused08A,      return 0);
-    SHELL_CASE16(Io::kWaveRam,       return apu.wave.ram.read(kIndex));
+    SHELL_CASE16(Io::kWaveRam,        return apu.wave.ram.read(kIndex));
     SHELL_CASE02(Io::kDma0Count,      return 0);
     SHELL_CASE02(Io::kDma0Control,    return dma.channels[0].control.read(kIndex));
     SHELL_CASE02(Io::kDma1Count,      return 0);
@@ -150,10 +143,7 @@ u8 Arm::readIo(u32 addr)
     SHELL_CASE02(Io::kTimer2Control,  return timer.channels[2].control.read(kIndex));
     SHELL_CASE02(Io::kTimer3Count,    return timer.channels[3].count.read(kIndex));
     SHELL_CASE02(Io::kTimer3Control,  return timer.channels[3].control.read(kIndex));
-    SHELL_CASE02(Io::kSioMulti0,      return sio.siomulti[0].read(kIndex));
-    SHELL_CASE02(Io::kSioMulti1,      return sio.siomulti[1].read(kIndex));
-    SHELL_CASE02(Io::kSioMulti2,      return sio.siomulti[2].read(kIndex));
-    SHELL_CASE02(Io::kSioMulti3,      return sio.siomulti[3].read(kIndex));
+    SHELL_CASE02(Io::kSioMulti,       return sio.siomulti.read(kIndex));
     SHELL_CASE02(Io::kSioControl,     return sio.siocnt.read(kIndex));
     SHELL_CASE02(Io::kSioSend,        return sio.siosend.read(kIndex));
     SHELL_CASE02(Io::kKeyInput,       return keypad.input.read(kIndex));
@@ -219,13 +209,13 @@ void Arm::writeIo(u32 addr, u8 byte)
     SHELL_CASE02(Io::kBlendControl,   ppu.bldcnt.write(kIndex, byte));
     SHELL_CASE02(Io::kBlendAlpha,     ppu.bldalpha.write(kIndex, byte));
     SHELL_CASE02(Io::kBlendFade,      ppu.bldfade.write(kIndex, byte));
-    SHELL_CASE08(Io::kSoundSquare1, apu.square1.write(kIndex, byte));
-    SHELL_CASE08(Io::kSoundSquare2, apu.square2.write(kIndex, byte));
-    SHELL_CASE08(Io::kSoundWave, apu.wave.write(kIndex, byte));
-    SHELL_CASE08(Io::kSoundNoise, apu.noise.write(kIndex, byte));
-    SHELL_CASE08(Io::kSoundControl,  apu.control.write(kIndex, byte));
+    SHELL_CASE08(Io::kSoundSquare1,   apu.square1.write(kIndex, byte));
+    SHELL_CASE08(Io::kSoundSquare2,   apu.square2.write(kIndex, byte));
+    SHELL_CASE08(Io::kSoundWave,      apu.wave.write(kIndex, byte));
+    SHELL_CASE08(Io::kSoundNoise,     apu.noise.write(kIndex, byte));
+    SHELL_CASE08(Io::kSoundControl,   apu.control.write(kIndex, byte));
     SHELL_CASE02(Io::kSoundBias,      apu.bias.write(kIndex, byte));
-    SHELL_CASE16(Io::kWaveRam,       apu.wave.ram.write(kIndex, byte));
+    SHELL_CASE16(Io::kWaveRam,        apu.wave.ram.write(kIndex, byte));
     SHELL_CASE04(Io::kFifoA,          apu.fifo[0].write(byte));
     SHELL_CASE04(Io::kFifoB,          apu.fifo[1].write(byte));
     SHELL_CASE04(Io::kDma0Sad,        dma.channels[0].sad.write(kIndex, byte));
@@ -252,10 +242,7 @@ void Arm::writeIo(u32 addr, u8 byte)
     SHELL_CASE01(Io::kTimer2Control,  timer.channels[2].control.write(kIndex, byte));
     SHELL_CASE02(Io::kTimer3Count,    timer.channels[3].count.write(kIndex, byte));
     SHELL_CASE01(Io::kTimer3Control,  timer.channels[3].control.write(kIndex, byte));
-    SHELL_CASE02(Io::kSioMulti0,      sio.siomulti[0].write(kIndex, byte));
-    SHELL_CASE02(Io::kSioMulti1,      sio.siomulti[1].write(kIndex, byte));
-    SHELL_CASE02(Io::kSioMulti2,      sio.siomulti[2].write(kIndex, byte));
-    SHELL_CASE02(Io::kSioMulti3,      sio.siomulti[3].write(kIndex, byte));
+    SHELL_CASE08(Io::kSioMulti,       sio.siomulti.write(kIndex, byte));
     SHELL_CASE02(Io::kSioControl,     sio.siocnt.write(kIndex, byte));
     SHELL_CASE02(Io::kSioSend,        sio.siosend.write(kIndex, byte));
     SHELL_CASE02(Io::kKeyControl,     keypad.control.write(kIndex, byte));
