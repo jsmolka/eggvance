@@ -2,27 +2,20 @@
 
 #include "base/register.h"
 
-class DmaAddress : public RegisterW<u32>
+class DmaSrcAddress : public RegisterW<u32>
 {
 public:
-    using RegisterW::RegisterW;
+    DmaSrcAddress(uint id);
 
     operator u32() const;
-
-    bool isFifo() const;
-    bool isGamePak() const;
 };
 
-class DmaSource : public DmaAddress
+class DmaDstAddress : public RegisterW<u32>
 {
 public:
-    DmaSource(uint id);
-};
+    DmaDstAddress(uint id);
 
-class DmaDestination : public DmaAddress
-{
-public:
-    DmaDestination(uint id);
+    operator u32() const;
 };
 
 class DmaCount : public RegisterW<u16>

@@ -2,6 +2,7 @@
 
 #include <functional>
 
+#include "dmaaddress.h"
 #include "io.h"
 #include "arm/enums.h"
 
@@ -17,8 +18,8 @@ public:
     void run();
 
     const uint id;
-    DmaSource sad;
-    DmaDestination dad;
+    DmaSrcAddress sad;
+    DmaDstAddress dad;
     DmaCount count;
     DmaControl control;
 
@@ -33,9 +34,9 @@ private:
     struct Latch
     {
         uint bus   = 0;
-        uint sad   = 0;
-        uint dad   = 0;
         uint count = 0;
+        DmaAddress sad;
+        DmaAddress dad;
     } latch;
 
     std::function<void(Access)> transfer;
