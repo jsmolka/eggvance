@@ -432,8 +432,6 @@ u32 Arm::readUnused() const
     {
     case Region::Bios:
     case Region::Oam:
-        return pipe[1] << 16 | pipe[0];
-
     case Region::InternalWorkRam:
         return pc & 0x2
             ? pipe[1] << 16 | pipe[0]

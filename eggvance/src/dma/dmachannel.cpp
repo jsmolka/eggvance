@@ -27,6 +27,9 @@ void DmaChannel::init()
     latch.dad   = dad & ~((2 << control.word) - 1);
     latch.count = fifo ? 4 : static_cast<uint>(count);
 
+    if (sad.isGamePak())
+        control.sadcnt = DmaControl::kControlIncrement;
+
     initTransfer();
 }
 

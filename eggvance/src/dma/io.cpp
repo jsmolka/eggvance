@@ -2,31 +2,31 @@
 
 #include "dma.h"
 
-DmaSource::DmaSource(uint id)
-    : RegisterW(id == 0 ? 0x07FF'FFFF : 0x0FFF'FFFF)
-{
-
-}
-
-DmaSource::operator u32() const
+DmaAddress::operator u32() const
 {
     return data;
+}
+
+bool DmaAddress::isFifo() const
+{
+    return data == 0x400'00A0 || data == 0x400'00A4;
+}
+
+bool DmaAddress::isGamePak() const
+{
+    return data >= 0x800'0000 && data < 0xE00'0000;
+}
+
+DmaSource::DmaSource(uint id)
+    : DmaAddress(id == 0 ? 0x07FF'FFFF : 0x0FFF'FFFF)
+{
+
 }
 
 DmaDestination::DmaDestination(uint id)
-    : RegisterW(id == 3 ? 0x0FFF'FFFF : 0x07FF'FFFF)
+    : DmaAddress(id == 3 ? 0x0FFF'FFFF : 0x07FF'FFFF)
 {
 
-}
-
-DmaDestination::operator u32() const
-{
-    return data;
-}
-
-bool DmaDestination::isFifo() const
-{
-    return data == 0x400'00A0 || data == 0x400'00A4;
 }
 
 DmaCount::DmaCount(uint id)
