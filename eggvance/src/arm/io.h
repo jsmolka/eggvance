@@ -1,7 +1,5 @@
 #pragma once
 
-#include <functional>
-
 #include "enums.h"
 #include "base/register.h"
 
@@ -65,7 +63,7 @@ public:
 class IrqRequest : public Register<u16, 0x3FFF>
 {
 public:
-    IrqRequest& operator|=(u16 value);
+    IrqRequest& operator|=(Irq irq);
     operator u16() const;
 
     void write(uint index, u8 byte);

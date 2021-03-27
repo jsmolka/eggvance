@@ -12,7 +12,7 @@ Arm::Arm()
 {
     events.interrupt = [this](u64 late)
     {
-        state |= kStateIrq;
+        state |= State::Irq;
     };
 }
 
@@ -44,23 +44,23 @@ void Arm::dispatch()
 {
     while (scheduler.now < target && state == State)
     {
-        if (State & kStateDma)
+        if (State & State::Dma)
         {
             dma.run();
         }
-        else if (State & kStateHalt)
+        else if (State & State::Halt)
         {
             scheduler.run(std::min(target - scheduler.now, scheduler.next - scheduler.now));
         }
         else
         {
-            if (State & kStateIrq && !cpsr.i)
+            if (State & State::Irq && !cpsr.i)
             {
                 interruptHw();
             }
             else
             {
-                if (State & kStateThumb)
+                if (State & State::Thumb)
                 {
                     u16 instr = pipe[0];
 

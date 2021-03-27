@@ -1,29 +1,25 @@
 #pragma once
 
-enum Irq
+#include <shell/operators.h>
+
+enum class Irq
 {
-    kIrqVBlank  = 1 << 0,
-    kIrqHBlank  = 1 << 1,
-    kIrqVMatch  = 1 << 2,
-    kIrqTimer0  = 1 << 3,
-    kIrqTimer1  = 1 << 4,
-    kIrqTimer2  = 1 << 5,
-    kIrqTimer3  = 1 << 6,
-    kIrqSerial  = 1 << 7,
-    kIrqDma0    = 1 << 8,
-    kIrqDma1    = 1 << 9,
-    kIrqDma2    = 1 << 10,
-    kIrqDma3    = 1 << 11,
-    kIrqKeypad  = 1 << 12,
-    kIrqGamePak = 1 << 13
+    VBlank  = 1 << 0,
+    HBlank  = 1 << 1,
+    VMatch  = 1 << 2,
+    Timer   = 1 << 3,
+    Serial  = 1 << 7,
+    Dma     = 1 << 8,
+    Keypad  = 1 << 12,
+    GamePak = 1 << 13
 };
 
-enum State
+enum class State
 {
-    kStateThumb = 1 << 0,
-    kStateHalt  = 1 << 1,
-    kStateIrq   = 1 << 2,
-    kStateDma   = 1 << 3
+    Thumb = 1 << 0,
+    Halt  = 1 << 1,
+    Irq   = 1 << 2,
+    Dma   = 1 << 3
 };
 
 enum class Access

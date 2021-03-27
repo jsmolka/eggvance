@@ -22,7 +22,7 @@ void SioControl::write(uint index, u8 byte)
         if (data & kEnabled)
         {
             if (irq)
-                arm.raise(kIrqSerial);
+                arm.raise(Irq::Serial);
 
             data &= ~kEnabled;
         }

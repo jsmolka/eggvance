@@ -16,7 +16,7 @@ public:
 
     void init();
     void run(u64 cycles);
-    void raise(uint irq, u64 late = 0);
+    void raise(Irq irq, u64 late = 0);
     void interruptProcess(u64 late = 0);
 
     u8  readByte(u32 addr, Access access = Access::NonSequential);
@@ -127,11 +127,8 @@ private:
         Event interrupt;
     } events;
 
-    struct Irq
+    struct
     {
-        bool servable() const;
-        bool interrupted() const;
-
         IrqMaster  master;
         IrqEnable  enable;
         IrqRequest request;

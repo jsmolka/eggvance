@@ -86,7 +86,7 @@ void DmaChannel::run()
     running = false;
 
     if (control.irq)
-        arm.raise(kIrqDma0 << id);
+        arm.raise(Irq::Dma << id);
 
     control.setEnabled(control.repeat
         && !(control.timing == DmaControl::kTimingImmediate)

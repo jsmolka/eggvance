@@ -12,17 +12,13 @@ void Keypad::update()
 
 void Keypad::checkInterrupt()
 {
-    enum Condition
-    {
-        kConditionAny,
-        kConditionAll
-    };
+    enum class Condition { Any, All };
 
     if (!control.irq)
         return;
 
     uint mask = ~input & input.mask;
 
-    if (control.cond == kConditionAny ? (mask & control.mask) : (mask == control.mask))
-        arm.raise(kIrqKeypad);
+    if (control.cond == Condition::Any ? (mask & control.mask) : (mask == control.mask))
+        arm.raise(Irq::Keypad);
 }

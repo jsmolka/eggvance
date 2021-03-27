@@ -203,7 +203,7 @@ void Arm::Thumb_HighRegisterOperations(u16 instr)
         else
         {
             flushWord();
-            state &= ~kStateThumb;
+            state &= ~State::Thumb;
         }
         break;
 

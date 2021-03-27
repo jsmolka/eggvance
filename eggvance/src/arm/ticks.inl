@@ -11,7 +11,7 @@ SHELL_INLINE void Arm::idle(u64 cycles)
 
 SHELL_INLINE void Arm::tickRam(u64 cycles)
 {
-    if (prefetch.active && !(state & kStateDma) && waitcnt.prefetch)
+    if (prefetch.active && !(state & State::Dma) && waitcnt.prefetch)
         prefetch.cycles += cycles;
 
     scheduler.run(cycles);
@@ -19,7 +19,7 @@ SHELL_INLINE void Arm::tickRam(u64 cycles)
 
 SHELL_INLINE void Arm::tickRom(u32 addr, u64 cycles)
 {
-    if (!(state & kStateDma) && waitcnt.prefetch)
+    if (!(state & State::Dma) && waitcnt.prefetch)
     {
         prefetch.active = addr == pc;
 

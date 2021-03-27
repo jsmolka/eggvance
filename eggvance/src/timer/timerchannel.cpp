@@ -51,7 +51,7 @@ void TimerChannel::run(u64 ticks)
     if (counter >= overflow)
     {
         if (control.irq)
-            arm.raise(kIrqTimer0 << id, counter - overflow);
+            arm.raise(Irq::Timer << id, counter - overflow);
 
         if (next && next->control.cascade)
             next->run(counter / overflow);

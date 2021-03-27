@@ -202,7 +202,7 @@ void Rtc::writeRegister()
         break;
 
     case kRegForceIrq:
-        arm.raise(kIrqGamePak);
+        arm.raise(Irq::GamePak);
         break;
     }
 }

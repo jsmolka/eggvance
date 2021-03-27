@@ -12,7 +12,7 @@ void Arm::Arm_BranchExchange(u32 instr)
     if ((cpsr.t = pc & 0x1))
     {
         flushHalf();
-        state |= kStateThumb;
+        state |= State::Thumb;
     }
     else
     {
@@ -179,7 +179,7 @@ void Arm::Arm_DataProcessing(u32 instr)
             if (cpsr.t)
             {
                 flushHalf();
-                state |= kStateThumb;
+                state |= State::Thumb;
             }
             else
             {

@@ -15,7 +15,7 @@ void HaltControl::write(uint index, u8 byte)
 {
     RegisterW::write(index, byte);
 
-    arm.state |= kStateHalt;
+    arm.state |= State::Halt;
 }
 
 WaitControl::WaitControl()
@@ -98,9 +98,9 @@ void IrqEnable::write(uint index, u8 byte)
     arm.interruptProcess();
 }
 
-IrqRequest& IrqRequest::operator|=(u16 value)
+IrqRequest& IrqRequest::operator|=(Irq irq)
 {
-    data |= value;
+    data |= irq;
 
     return *this;
 }

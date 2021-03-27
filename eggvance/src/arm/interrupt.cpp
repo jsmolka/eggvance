@@ -12,7 +12,7 @@ enum ExceptionVector
     kVectorFiq           = 0x1C
 };
 
-void Arm::raise(uint irq, u64 late)
+void Arm::raise(Irq irq, u64 late)
 {
     this->irq.request |= irq;
 
@@ -32,7 +32,7 @@ void Arm::interrupt(u32 pc, u32 lr, Psr::Mode mode)
     this->pc = pc;
 
     flushWord();
-    state &= ~kStateThumb;
+    state &= ~State::Thumb;
 }
 
 void Arm::interruptHw()
@@ -51,32 +51,22 @@ void Arm::interruptSw()
 
 void Arm::interruptProcess(u64 late)
 {
-    if (irq.servable())
-        state &= ~kStateHalt;
+    if (irq.enable & irq.request)
+        state &= ~State::Halt;
 
-    if (irq.interrupted())
+    if (irq.enable & irq.request && irq.master)
     {
-        if (!events.interrupt.scheduled() && !(state & kStateIrq))
+        if (!events.interrupt.scheduled() && !(state & State::Irq))
         {
             if (late < 3)
                 scheduler.add(events.interrupt, 3 - late);
             else
-                state |= kStateIrq;
+                state |= State::Irq;
         }
     }
     else
     {
-        state &= ~kStateIrq;
+        state &= ~State::Irq;
         scheduler.remove(events.interrupt);
     }
-}
-
-bool Arm::Irq::servable() const
-{
-    return enable & request;
-}
-
-bool Arm::Irq::interrupted() const
-{
-    return servable() && master;
 }

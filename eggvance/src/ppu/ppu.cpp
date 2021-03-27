@@ -148,7 +148,7 @@ void Ppu::hblank(u64 late)
 
     if (dispstat.hblank_irq)
     {
-        arm.raise(kIrqHBlank, late);
+        arm.raise(Irq::HBlank, late);
     }
 
     if (vcount < 160)
@@ -178,7 +178,7 @@ void Ppu::vblank(u64 late)
 
     if (dispstat.vblank_irq)
     {
-        arm.raise(kIrqVBlank, late);
+        arm.raise(Irq::VBlank, late);
     }
     dma.broadcast(Dma::Event::VBlank);
 }
@@ -192,7 +192,7 @@ void Ppu::next(u64 late)
     dispstat.vmatch = vcount == dispstat.vcompare;
     if (dispstat.vmatch && dispstat.vmatch_irq)
     {
-        arm.raise(kIrqVMatch, late);
+        arm.raise(Irq::VMatch, late);
     }
 }
 
