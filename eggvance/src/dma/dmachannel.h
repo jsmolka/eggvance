@@ -3,7 +3,7 @@
 #include <functional>
 
 #include "io.h"
-#include "arm/constants.h"
+#include "arm/enums.h"
 
 class DmaChannel
 {

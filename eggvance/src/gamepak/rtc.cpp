@@ -5,7 +5,6 @@
 #include <shell/utility.h>
 
 #include "arm/arm.h"
-#include "arm/constants.h"
 #include "base/bit.h"
 
 Rtc::Rtc()

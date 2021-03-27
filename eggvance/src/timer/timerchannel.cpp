@@ -2,15 +2,12 @@
 
 #include "apu/apu.h"
 #include "arm/arm.h"
-#include "arm/constants.h"
 #include "scheduler/scheduler.h"
 
 inline constexpr u64 kOverflow = 0x1'0000;
 
 TimerChannel::TimerChannel(uint id)
-    : id(id)
-    , count(*this)
-    , control(*this)
+    : id(id), count(*this), control(*this)
 {
     events.run = [this](u64 late)
     {

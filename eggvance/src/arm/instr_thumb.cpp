@@ -1,6 +1,5 @@
 #include "arm.h"
 
-#include "constants.h"
 #include "decode.h"
 
 template<u16 Instr>

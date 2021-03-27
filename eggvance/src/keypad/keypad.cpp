@@ -1,7 +1,6 @@
 #include "keypad.h"
 
 #include "arm/arm.h"
-#include "arm/constants.h"
 #include "frontend/inputcontext.h"
 
 void Keypad::update()

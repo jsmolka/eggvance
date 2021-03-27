@@ -2,7 +2,7 @@
 
 #include <functional>
 
-#include "constants.h"
+#include "enums.h"
 #include "base/register.h"
 
 class PostFlag : public Register<u8, 0x01>

@@ -1,7 +1,6 @@
 #include "io.h"
 
 #include "arm.h"
-#include "constants.h"
 #include "base/config.h"
 
 PostFlag::PostFlag()

@@ -2,7 +2,6 @@
 
 #include <shell/macros.h>
 
-#include "constants.h"
 #include "decode.h"
 #include "base/config.h"
 #include "dma/dma.h"

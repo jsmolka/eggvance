@@ -5,7 +5,6 @@
 
 #include "constants.h"
 #include "arm/arm.h"
-#include "arm/constants.h"
 #include "base/bit.h"
 #include "base/config.h"
 #include "dma/dma.h"

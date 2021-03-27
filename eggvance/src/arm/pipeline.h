@@ -1,6 +1,6 @@
 #pragma once
 
-#include "constants.h"
+#include "enums.h"
 #include "base/int.h"
 
 class Pipeline

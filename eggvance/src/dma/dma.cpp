@@ -1,7 +1,6 @@
 #include "dma.h"
 
 #include "arm/arm.h"
-#include "arm/constants.h"
 
 void Dma::run()
 {

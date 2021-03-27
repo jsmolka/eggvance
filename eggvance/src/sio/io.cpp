@@ -1,14 +1,12 @@
 #include "io.h"
 
 #include "arm/arm.h"
-#include "arm/constants.h"
 #include "base/config.h"
 
 RemoteControl::RemoteControl()
 {
     if (config.bios_skip)
     {
-        write(0, 0x00);
         write(1, 0x80);
     }
 }
