@@ -15,5 +15,5 @@ public:
     uint bank = 0;
 
 private:
-    std::array<u8, 32> ram = {};
+    std::array<u8, 32> data = {};
 };

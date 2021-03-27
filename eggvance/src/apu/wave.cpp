@@ -21,9 +21,9 @@ void Wave::tick()
 
 void Wave::write(uint index, u8 byte)
 {
-    Channel::write(index, byte);
-
     static constexpr uint kVolumes[8] = { 0, 4, 2, 1, 3, 3, 3, 3 };
+
+    Channel::write(index, byte);
 
     switch (index)
     {
