@@ -5,24 +5,15 @@
 class Pin
 {
 public:
-    Pin& operator=(uint data)
-    {
-        this->prev = this->data;
-        this->data = data;
+    Pin& operator=(uint data);
+    operator uint() const;
 
-        return *this;
-    }
+    bool low() const;
+    bool high() const;
+    bool rising() const;
+    bool falling() const;
 
-    operator uint() const
-    {
-        return data;
-    }
-
-    bool low()     const { return data == 0; }
-    bool high()    const { return data == 1; }
-    bool rising()  const { return prev == 0 && data == 1; }
-    bool falling() const { return prev == 1 && data == 0; }
-
+private:
     uint data = 0;
     uint prev = 0;
 };

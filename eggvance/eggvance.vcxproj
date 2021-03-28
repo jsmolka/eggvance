@@ -47,6 +47,7 @@
     <ClCompile Include="src\dma\dma.cpp" />
     <ClCompile Include="src\dma\dmachannel.cpp" />
     <ClCompile Include="src\dma\io.cpp" />
+    <ClCompile Include="src\gamepak\pin.cpp" />
     <ClCompile Include="src\keypad\keypad.cpp" />
     <ClCompile Include="src\keypad\io.cpp" />
     <ClCompile Include="src\gamepak\eeprom.cpp" />
