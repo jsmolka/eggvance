@@ -38,7 +38,7 @@ void TimerChannel::start()
         return;
 
     scheduler.remove(events.run);
-    scheduler.add(events.start, 2);
+    scheduler.insert(events.start, 2);
 }
 
 void TimerChannel::update()
@@ -88,5 +88,5 @@ void TimerChannel::schedule()
     if (!control.enabled || control.cascade || events.start.scheduled())
         return;
     
-    scheduler.add(events.run, overflow - counter);
+    scheduler.insert(events.run, overflow - counter);
 }

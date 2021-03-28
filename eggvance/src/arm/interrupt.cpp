@@ -59,7 +59,7 @@ void Arm::interruptProcess(u64 late)
         if (!events.interrupt.scheduled() && !(state & State::Irq))
         {
             if (late < 3)
-                scheduler.add(events.interrupt, 3 - late);
+                scheduler.insert(events.interrupt, 3 - late);
             else
                 state |= State::Irq;
         }

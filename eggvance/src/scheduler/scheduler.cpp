@@ -29,7 +29,7 @@ void Scheduler::run(u64 cycles)
     }
 }
 
-void Scheduler::add(Event& event, u64 in)
+void Scheduler::insert(Event& event, u64 in)
 {
     SHELL_ASSERT(event.when == 0);
     SHELL_ASSERT(static_cast<s64>(in) > 0);
@@ -44,7 +44,7 @@ void Scheduler::remove(Event& event)
     if (event.when)
     {
         event.when = 0;
-        list.erase(event);
+        list.remove(event);
         next = list.head->when;
     }
 }

@@ -9,7 +9,7 @@ public:
     Scheduler();
 
     void run(u64 cycles);
-    void add(Event& event, u64 in);
+    void insert(Event& event, u64 in);
     void remove(Event& event);
 
     u64 now  = 0;

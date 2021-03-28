@@ -34,7 +34,7 @@ public:
         (*iter) = node;
     }
 
-    void erase(T& item)
+    void remove(T& item)
     {
         SHELL_ASSERT(item.prev);
         SHELL_ASSERT(item.next);

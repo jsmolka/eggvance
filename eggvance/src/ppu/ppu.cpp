@@ -60,7 +60,7 @@ void Ppu::init()
 
         ppu.hblank(late);
 
-        scheduler.add(events.hblank_end, 226 - late);
+        scheduler.insert(events.hblank_end, 226 - late);
     };
 
     events.hblank_end = [this](u64 late)
@@ -70,10 +70,10 @@ void Ppu::init()
         if (vcount == 160)
             vblank(late);
 
-        scheduler.add(events.hblank, 1006 - late);
+        scheduler.insert(events.hblank, 1006 - late);
     };
 
-    scheduler.add(events.hblank, 1006);
+    scheduler.insert(events.hblank, 1006);
 }
 
 void Ppu::scanline()
