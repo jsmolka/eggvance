@@ -7,46 +7,57 @@
 #include "ppu/ppu.h"
 
 DmaChannel::DmaChannel(uint id)
-    : id(id)
-    , sad(id)
-    , dad(id)
-    , count(id)
-    , control(id)
+    : id(id), sad(id), dad(id), count(id), control(*this)
 {
 
 }
 
 void DmaChannel::init()
 {
-    latch.sad = sad & ~((2 << control.word) - 1);
-    latch.dad = dad & ~((2 << control.word) - 1);
+    latch.sad = sad;
+    latch.dad = dad;
 
-    fifo = (id == 1 || id == 2)
-        && control.timing == DmaControl::kTimingSpecial
-        && control.repeat
-        && latch.dad.isFifo();
+    latch.fifo = (id == 1 || id == 2)
+        && (latch.dad.fifoA() || latch.dad.fifoB())
+        && control.timing == DmaControl::Timing::Special
+        && control.repeat;
 
-    latch.count = fifo ? 4 : static_cast<uint>(count);
+    if (latch.fifo)
+    {
+        latch.word   = 1;
+        latch.count  = 4;
+        latch.sadcnt = control.sadcnt;
+        latch.dadcnt = uint(DmaControl::Control::Fixed);
+    }
+    else
+    {
+        latch.word   = control.word;
+        latch.count  = static_cast<uint>(count);
+        latch.sadcnt = control.sadcnt;
+        latch.dadcnt = control.dadcnt;
 
-    if (latch.sad.isGamePak())
-        control.sadcnt = DmaControl::kControlIncrement;
+        if (latch.sad.gamepak())
+            latch.sadcnt = uint(DmaControl::Control::Increment);
+    }
+    latch.sad = latch.sad & ~((2 << latch.word) - 1);
+    latch.dad = latch.dad & ~((2 << latch.word) - 1);
 
     initTransfer();
 }
 
 bool DmaChannel::start()
 {
-    if (fifo)
+    if (latch.fifo)
     {
-        if (apu.fifo[latch.dad.isFifoB()].size() > 16)
+        if (apu.fifo[latch.dad.fifoB()].size() > 16)
             return false;
     }
     else if (control.repeat)
     {
         latch.count = count;
 
-        if (control.dadcnt == DmaControl::kControlReload)
-            latch.dad = dad & ~((2 << control.word) - 1);
+        if (latch.dadcnt == DmaControl::Control::Reload)
+            latch.dad = dad & ~((2 << latch.word) - 1);
     }
 
     running = true;
@@ -63,14 +74,11 @@ void DmaChannel::run()
         { 4, -4, 0, 4 }
     };
 
-    int sad_delta = kDeltas[control.word | fifo][control.sadcnt];
-    int dad_delta = kDeltas[control.word | fifo][fifo ? DmaControl::kControlFixed : control.dadcnt];
-
     while (pending--)
     {
         if (pending == latch.count - 1)
         {
-            if (!(latch.sad.isGamePak() && latch.dad.isGamePak()))
+            if (!(latch.sad.gamepak() && latch.dad.gamepak()))
                 arm.idle(2);
 
             transfer(Access::NonSequential);
@@ -80,8 +88,8 @@ void DmaChannel::run()
             transfer(Access::Sequential);
         }
 
-        latch.sad = latch.sad + sad_delta;
-        latch.dad = latch.dad + dad_delta;
+        latch.sad = latch.sad + kDeltas[latch.word][latch.sadcnt];
+        latch.dad = latch.dad + kDeltas[latch.word][latch.dadcnt];
 
         if (arm.target >= scheduler.now && pending)
             return;
@@ -93,8 +101,8 @@ void DmaChannel::run()
         arm.raise(Irq::Dma << id);
 
     control.setEnabled(control.repeat
-        && !(control.timing == DmaControl::kTimingImmediate)
-        && !(control.timing == DmaControl::kTimingSpecial && id == 3 && ppu.vcount >= 161));
+        && !(control.timing == DmaControl::Timing::Immediate)
+        && !(control.timing == DmaControl::Timing::Special && id == 3 && ppu.vcount >= 161));
 }
 
 void DmaChannel::initEeprom()
@@ -153,7 +161,7 @@ void DmaChannel::initTransfer()
     }
     else
     {
-        if (control.word || fifo)
+        if (latch.word)
         {
             transfer = [this](Access access)
             {

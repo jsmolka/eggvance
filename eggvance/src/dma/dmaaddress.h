@@ -5,14 +5,13 @@
 class DmaAddress
 {
 public:
-    DmaAddress& operator=(u32 value);
-    operator u32() const;
+    DmaAddress& operator=(uint value);
+    operator uint() const;
 
-    bool isFifo() const;
-    bool isFifoA() const;
-    bool isFifoB() const;
-    bool isGamePak() const;
+    bool fifoA() const;
+    bool fifoB() const;
+    bool gamepak() const;
 
 private:
-    u32 data = 0;
+    uint data = 0;
 };

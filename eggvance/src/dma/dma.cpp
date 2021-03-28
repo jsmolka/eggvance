@@ -40,12 +40,12 @@ void Dma::emit(DmaChannel& channel, Event event)
     {
         switch (event)
         {
-        case Dma::Event::Immediate: return channel.control.timing == DmaControl::kTimingImmediate;
-        case Dma::Event::HBlank:    return channel.control.timing == DmaControl::kTimingHBlank;
-        case Dma::Event::VBlank:    return channel.control.timing == DmaControl::kTimingVBlank;
-        case Dma::Event::Hdma:      return channel.control.timing == DmaControl::kTimingSpecial && channel.control.repeat && channel.id == 3;
-        case Dma::Event::FifoA:     return channel.fifo && channel.latch.dad == 0x400'00A0;
-        case Dma::Event::FifoB:     return channel.fifo && channel.latch.dad == 0x400'00A4;
+        case Dma::Event::Immediate: return channel.control.timing == DmaControl::Timing::Immediate;
+        case Dma::Event::HBlank:    return channel.control.timing == DmaControl::Timing::HBlank;
+        case Dma::Event::VBlank:    return channel.control.timing == DmaControl::Timing::VBlank;
+        case Dma::Event::Hdma:      return channel.control.timing == DmaControl::Timing::Special && channel.control.repeat && channel.id == 3;
+        case Dma::Event::FifoA:     return channel.latch.fifo && channel.latch.dad.fifoA();
+        case Dma::Event::FifoB:     return channel.latch.fifo && channel.latch.dad.fifoB();
         }
         return false;
     };

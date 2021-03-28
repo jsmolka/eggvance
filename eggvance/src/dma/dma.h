@@ -6,7 +6,15 @@
 class Dma
 {
 public:
-    enum class Event { Immediate, HBlank, VBlank, Hdma, FifoA, FifoB };
+    enum class Event
+    {
+        Immediate,
+        HBlank,
+        VBlank,
+        Hdma,
+        FifoA,
+        FifoB
+    };
 
     void run();
     void emit(DmaChannel& channel, Event event);

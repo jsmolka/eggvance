@@ -8,7 +8,7 @@ DmaSrcAddress::DmaSrcAddress(uint id)
 
 }
 
-DmaSrcAddress::operator u32() const
+DmaSrcAddress::operator uint() const
 {
     return data;
 }
@@ -19,7 +19,7 @@ DmaDstAddress::DmaDstAddress(uint id)
 
 }
 
-DmaDstAddress::operator u32() const
+DmaDstAddress::operator uint() const
 {
     return data;
 }
@@ -38,9 +38,8 @@ DmaCount::operator uint() const
         return data;
 }
 
-DmaControl::DmaControl(uint id)
-    : Register(id == 3 ? 0xFFE0 : 0xF7E0)
-    , id(id)
+DmaControl::DmaControl(DmaChannel& channel)
+    : Register(channel.id == 3 ? 0xFFE0 : 0xF7E0), channel(channel)
 {
 
 }
@@ -49,31 +48,26 @@ void DmaControl::write(uint index, u8 byte)
 {
     Register::write(index, byte);
 
+    dadcnt = bit::seq<5, 2>(data);
     sadcnt = bit::seq<7, 2>(data);
 
     if (index == 0)
+        return;
+
+    uint was_enabled = enabled;
+
+    repeat  = bit::seq<1, 1>(byte);
+    word    = bit::seq<2, 1>(byte);
+    timing  = bit::seq<4, 2>(byte);
+    irq     = bit::seq<6, 1>(byte);
+    enabled = bit::seq<7, 1>(byte);
+
+    if (enabled)
     {
-        dadcnt = bit::seq<5, 2>(byte);
-    }
-    else
-    {
-        uint was_enabled = enabled;
+        channel.init();
 
-        repeat  = bit::seq<1, 1>(byte);
-        word    = bit::seq<2, 1>(byte);
-        timing  = bit::seq<4, 2>(byte);
-        irq     = bit::seq<6, 1>(byte);
-        enabled = bit::seq<7, 1>(byte);
-
-        if (enabled)
-        {
-            DmaChannel& channel = dma.channels[id];
-
-            channel.init();
-
-            if (!was_enabled && timing == kTimingImmediate)
-                dma.emit(channel, Dma::Event::Immediate);
-        }
+        if (!was_enabled && timing == Timing::Immediate)
+            dma.emit(channel, Dma::Event::Immediate);
     }
 }
 

@@ -28,13 +28,16 @@ private:
     void initTransfer();
 
     uint running = 0;
-    uint fifo    = 0;
     uint pending = 0;
 
-    struct Latch
+    struct
     {
-        uint bus   = 0;
-        uint count = 0;
+        uint bus    = 0;
+        uint fifo   = 0;
+        uint word   = 0;
+        uint count  = 0;
+        uint sadcnt = 0;
+        uint dadcnt = 0;
         DmaAddress sad;
         DmaAddress dad;
     } latch;

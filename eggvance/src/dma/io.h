@@ -7,7 +7,7 @@ class DmaSrcAddress : public RegisterW<u32>
 public:
     DmaSrcAddress(uint id);
 
-    operator u32() const;
+    operator uint() const;
 };
 
 class DmaDstAddress : public RegisterW<u32>
@@ -15,7 +15,7 @@ class DmaDstAddress : public RegisterW<u32>
 public:
     DmaDstAddress(uint id);
 
-    operator u32() const;
+    operator uint() const;
 };
 
 class DmaCount : public RegisterW<u16>
@@ -26,26 +26,28 @@ public:
     operator uint() const;
 };
 
+class DmaChannel;
+
 class DmaControl : public Register<u16>
 {
 public:
-    enum Control
+    enum class Control
     {
-        kControlIncrement,
-        kControlDecrement,
-        kControlFixed,
-        kControlReload
+        Increment,
+        Decrement,
+        Fixed,
+        Reload
     };
 
-    enum Timing
+    enum class Timing
     {
-        kTimingImmediate,
-        kTimingVBlank,
-        kTimingHBlank,
-        kTimingSpecial
+        Immediate,
+        VBlank,
+        HBlank,
+        Special
     };
 
-    DmaControl(uint id);
+    DmaControl(DmaChannel& channel);
 
     void write(uint index, u8 byte);
     void setEnabled(bool enabled);
@@ -59,5 +61,5 @@ public:
     uint enabled = 0;
 
 private:
-    const uint id;
+    DmaChannel& channel;
 };
