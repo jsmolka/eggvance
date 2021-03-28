@@ -27,8 +27,8 @@ void KeyControl::write(uint index, u8 byte)
 
     if (index == 1)
     {
-        irq  = bit::seq<6, 1>(byte);
-        cond = bit::seq<7, 1>(byte);
+        irq   = bit::seq<6, 1>(byte);
+        logic = bit::seq<7, 1>(byte);
     }
 
     keypad.checkInterrupt();
