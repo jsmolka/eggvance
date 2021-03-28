@@ -16,15 +16,12 @@ public:
     const uint id;
     TimerCount count;
     TimerControl control;
-    TimerChannel* prev = nullptr;
     TimerChannel* next = nullptr;
 
 private:
     void run(u64 ticks);
-    void doRun(u64 late);
-    void doStart(u64 late);
 
-    struct Events
+    struct
     {
         Event run;
         Event start;

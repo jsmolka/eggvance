@@ -24,8 +24,7 @@ void TimerCount::write(uint index, u8 byte)
 }
 
 TimerControl::TimerControl(TimerChannel& channel)
-    : Register(channel.id == 0 ? 0x00C3 : 0x00C7)
-    , channel(channel)
+    : Register(channel.id == 0 ? 0x00C3 : 0x00C7), channel(channel)
 {
 
 }
@@ -37,7 +36,7 @@ void TimerControl::write(uint index, u8 byte)
 
     Register::write(index, byte);
 
-    constexpr uint kPrescalers[8] = { 1, 64, 256, 1024, 1, 1, 1, 1 };
+    static constexpr uint kPrescalers[8] = { 1, 64, 256, 1024, 1, 1, 1, 1 };
 
     if (enabled && !cascade)
         channel.run();

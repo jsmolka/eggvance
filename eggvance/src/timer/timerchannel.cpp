@@ -4,26 +4,36 @@
 #include "arm/arm.h"
 #include "scheduler/scheduler.h"
 
-inline constexpr u64 kOverflow = 0x1'0000;
+inline constexpr auto kOverflow = 0x1'0000;
 
 TimerChannel::TimerChannel(uint id)
     : id(id), count(*this), control(*this)
 {
     events.run = [this](u64 late)
     {
-        doRun(late);
+        run();
+        schedule();
     };
 
     events.start = [this](u64 late)
     {
-        doStart(late);
+        if (!control.enabled)
+            return;
+
+        since    = scheduler.now - late;
+        counter  = 0;
+        initial  = count.initial;
+        overflow = control.prescaler * (kOverflow - initial);
+
+        if (control.enabled && !control.cascade)
+            run(late);
+
+        schedule();
     };
 }
 
 void TimerChannel::start()
 {
-    SHELL_ASSERT(!events.start.scheduled());
-
     if (events.start.scheduled())
         return;
 
@@ -41,8 +51,6 @@ void TimerChannel::update()
 
 void TimerChannel::run(u64 ticks)
 {
-    SHELL_ASSERT(!events.start.scheduled());
-
     if (events.start.scheduled())
         return;
 
@@ -73,37 +81,11 @@ void TimerChannel::run()
     run(scheduler.now - since);
 }
 
-void TimerChannel::doRun(u64 late)
-{
-    run();
-    schedule();
-}
-
-void TimerChannel::doStart(u64 late)
-{
-    SHELL_ASSERT(control.enabled);
-
-    if (!control.enabled)
-        return;
-
-    since    = scheduler.now - late;
-    counter  = 0;
-    initial  = count.initial;
-    overflow = control.prescaler * (kOverflow - initial);
-
-    if (control.enabled && !control.cascade)
-        run(late);
-
-    schedule();
-}
-
 void TimerChannel::schedule()
 {
-    SHELL_ASSERT(!events.start.scheduled());
-
     scheduler.remove(events.run);
 
-    if (!control.enabled || control.cascade)
+    if (!control.enabled || control.cascade || events.start.scheduled())
         return;
     
     scheduler.add(events.run, overflow - counter);
