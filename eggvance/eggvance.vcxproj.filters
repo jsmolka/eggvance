@@ -266,9 +266,6 @@
     <ClInclude Include="src\base\int.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\base\panic.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\base\ram.h">
       <Filter>Header Files</Filter>
     </ClInclude>

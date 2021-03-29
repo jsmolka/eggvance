@@ -104,7 +104,6 @@
     <ClInclude Include="src\base\constants.h" />
     <ClInclude Include="src\base\filesystem.h" />
     <ClInclude Include="src\base\int.h" />
-    <ClInclude Include="src\base\panic.h" />
     <ClInclude Include="src\base\ram.h" />
     <ClInclude Include="src\base\register.h" />
     <ClInclude Include="src\base\sdl2.h" />

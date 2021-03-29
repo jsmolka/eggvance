@@ -272,8 +272,7 @@ int main(int argc, char* argv[])
     }
     catch (const std::exception& ex)
     {
-        shell::print("{}\n", ex.what());
-        SDL_ShowSimpleMessageBox(0, "Exception", ex.what(), NULL);
+        showMessageBox("Exception", ex.what());
     }
     return 0;
 }

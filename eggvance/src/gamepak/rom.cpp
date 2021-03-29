@@ -3,10 +3,10 @@
 #include <numeric>
 
 #include <shell/algorithm.h>
+#include <shell/errors.h>
 #include <shell/utility.h>
 
 #include "base/bit.h"
-#include "base/panic.h"
 
 template<uint N>
 std::string makeAscii(const u8 (&data)[N])
@@ -23,12 +23,12 @@ Rom::Rom(const fs::path& file)
     data.reserve(kMaxSize);
 
     if (fs::read(file, data) != fs::Status::Ok)
-        panic("Cannot read ROM {}", file);
+        throw shell::Error("Cannot read ROM: {}", file);
 
     size = data.size();
 
     if (size < kHeaderSize || size > kMaxSize)
-        panic("Bad ROM size");
+        throw shell::Error("Bad ROM size: {}", size);
 
     for (auto x = size; x < data.capacity(); ++x)
     {

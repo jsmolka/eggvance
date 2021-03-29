@@ -1,27 +1,25 @@
 #include "bios.h"
 
+#include <shell/errors.h>
 #include <shell/hash.h>
 
 #include "arm/arm.h"
 #include "base/config.h"
-#include "base/panic.h"
 
 void Bios::init(const fs::path& path)
 {
     if (path.empty())
         return;
 
-    fs::Status status = fs::read(path, data);
-
-    switch (status)
+    switch (fs::read(path, data))
     {
     case fs::Status::BadSize:
-        panic("Bad BIOS size");
+        throw shell::Error("Bad BIOS size");
         break;
 
     case fs::Status::BadFile:
     case fs::Status::BadStream:
-        panic("Cannot read BIOS {}", path);
+        throw shell::Error("Cannot read BIOS: {}", path);
         break;
     }
 
@@ -30,7 +28,7 @@ void Bios::init(const fs::path& path)
         constexpr std::size_t kExpected = 0x5EA9'5B6E'9C23'90E5;
 
         if (shell::hash(data.data(), data.size()) != kExpected)
-            panic("Bad BIOS hash");
+            throw shell::Error("Bad BIOS hash");
     }
 }
 

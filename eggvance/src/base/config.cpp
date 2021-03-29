@@ -1,8 +1,8 @@
 #include "config.h"
 
+#include <shell/errors.h>
 #include <shell/ini.h>
 
-#include "panic.h"
 #include "ppu/constants.h"
 
 constexpr std::string_view kConfig = R"(
@@ -169,7 +169,7 @@ void Config::init(const fs::path& file)
     }
     catch (const shell::ParseError& error)
     {
-        panic("Cannot parse config {}\n{}", file, error.what());
+        throw shell::Error("Cannot parse config: {}", error.what());
     }
 
     bios_file     = find<fs::path>("general", "bios_file");
@@ -191,7 +191,7 @@ void Config::init(const fs::path& file)
         if (!fs::is_directory(save_path))
         {
             if (!fs::create_directories(save_path))
-                panic("Cannot create save path {}", save_path);
+                throw shell::Error("Cannot create save path: {}", save_path);
         }
     }
 
@@ -255,9 +255,7 @@ T Config::find(const std::string& section, const std::string& key) const
         if (const auto value = shell::parse<T>(*data))
             return *value;
 
-        panic("Cannot parse config value {} of key {}.{}", *data, section, key);
+        throw shell::Error("Cannot parse config value '{}' of key '{}.{}'", *data, section, key);
     }
-    panic("Cannot find config key {}.{}", section, key);
-
-    return T();
+    throw shell::Error("Cannot find config key '{}.{}'", section, key);
 }

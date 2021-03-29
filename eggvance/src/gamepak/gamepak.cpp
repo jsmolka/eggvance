@@ -6,7 +6,6 @@
 #include "rtc.h"
 #include "sram.h"
 #include "base/config.h"
-#include "base/panic.h"
 
 void GamePak::load(fs::path gba, fs::path sav)
 {

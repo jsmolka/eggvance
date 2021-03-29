@@ -3,8 +3,9 @@
 #include <algorithm>
 #include <string_view>
 #include <utility>
+#include <shell/errors.h>
 
-#include "base/panic.h"
+#include "base/sdl2.h"
 
 Save::Save()
     : type(Type::None)
@@ -26,7 +27,7 @@ Save::~Save()
         && type != Type::None)
     {
         if (fs::write(file, data) != fs::Status::Ok)
-            panic("Cannot write save {}", file);
+            showMessageBox("Warning", shell::format("Cannot write save: {}", file));
     }
 }
 
@@ -63,10 +64,10 @@ void Save::init(const fs::path& file)
     if (fs::is_regular_file(file))
     {
         if (fs::read(file, data) != fs::Status::Ok)
-            panic("Cannot read save {}", file);
+            throw shell::Error("Cannot read save: {}", file);
 
         if (!isValid(data.size()))
-            panic("Bad save size {}", data.size());
+            throw shell::Error("Bad save size: {}", data.size());
     }
 }
 
