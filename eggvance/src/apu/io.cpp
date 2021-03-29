@@ -5,7 +5,7 @@
 
 SoundControl::SoundControl()
 {
-    if (config.bios_skip)
+    if (config.skip_bios)
     {
         write(2, 0x0E);
     }
@@ -67,7 +67,7 @@ void SoundControl::write(uint index, u8 byte)
 
 SoundBias::SoundBias()
 {
-    if (config.bios_skip)
+    if (config.skip_bios)
     {
         write(1, 0x02);
     }

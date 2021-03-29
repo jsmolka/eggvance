@@ -1,5 +1,6 @@
 #include "audiocontext.h"
 
+#include "base/config.h"
 #include "base/constants.h"
 #include "base/panic.h"
 
@@ -47,7 +48,11 @@ void AudioContext::write(s16 left, s16 right)
     std::lock_guard lock(mutex);
     if (SDL_AudioStreamAvailable(stream) < kSecond / 8)
     {
-        s16 sample[] = { left, right };
+        s16 sample[] =
+        {
+            static_cast<s16>(config.volume * static_cast<double>(left)),
+            static_cast<s16>(config.volume * static_cast<double>(right))
+        };
         SDL_AudioStreamPut(stream, &sample, sizeof(sample));
     }
 }

@@ -5,7 +5,7 @@
 
 RemoteControl::RemoteControl()
 {
-    if (config.bios_skip)
+    if (config.skip_bios)
     {
         write(1, 0x80);
     }

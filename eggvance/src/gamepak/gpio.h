@@ -7,6 +7,7 @@ class Gpio
 public:
     enum class Type
     {
+        Detect,
         None,
         Rtc
     };

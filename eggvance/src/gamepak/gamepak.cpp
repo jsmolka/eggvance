@@ -22,8 +22,8 @@ void GamePak::load(fs::path gba, fs::path sav)
         }
     }
 
-    Gpio::Type gpio_type = config.gpio;
-    Save::Type save_type = config.save;
+    Gpio::Type gpio_type = config.gpio_type;
+    Save::Type save_type = config.save_type;
 
     if (const auto overwrite = Overwrite::find(rom.code))
     {
@@ -32,9 +32,9 @@ void GamePak::load(fs::path gba, fs::path sav)
         rom.mask  = overwrite->mirror ? rom.size : Rom::kMaxSize;
     }
 
-    gpio = gpio_type == Gpio::Type::None
-        ? std::make_unique<Gpio>()
-        : std::make_unique<Rtc>();
+    gpio = gpio_type == Gpio::Type::Rtc
+        ? std::make_unique<Rtc>()
+        : std::make_unique<Gpio>();
 
     if (sav.extension() == ".sav")
     {

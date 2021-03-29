@@ -8,7 +8,7 @@ inline constexpr uint kMaskB = 0x1F << 10;
 
 DisplayControl::DisplayControl()
 {
-    if (config.bios_skip)
+    if (config.skip_bios)
     {
         write(0, 0x80);
         write(1, 0x00);

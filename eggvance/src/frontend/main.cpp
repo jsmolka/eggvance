@@ -21,6 +21,7 @@
 #include "timer/timer.h"
 
 bool running = true;
+bool paused  = false;
 bool changed = false;
 FrameCounter counter;
 FrameRateLimiter limiter(kRefreshRate);
@@ -102,14 +103,17 @@ void handleDropEvent(const SDL_DropEvent& event)
 template<typename Input>
 void handleInputEvent(const Shortcuts<Input>& shortcuts, Input input)
 {
-    if      (input == shortcuts.reset)       reset();
-    else if (input == shortcuts.fullscreen)  video_ctx.fullscreen();
-    else if (input == shortcuts.fr_hardware) limiter = FrameRateLimiter(kRefreshRate);
-    else if (input == shortcuts.fr_custom_1) limiter = FrameRateLimiter(config.framerate[0]);
-    else if (input == shortcuts.fr_custom_2) limiter = FrameRateLimiter(config.framerate[1]);
-    else if (input == shortcuts.fr_custom_3) limiter = FrameRateLimiter(config.framerate[2]);
-    else if (input == shortcuts.fr_custom_4) limiter = FrameRateLimiter(config.framerate[3]);
-    else if (input == shortcuts.fr_unbound)  limiter = FrameRateLimiter(6000);
+    if      (input == shortcuts.reset)          reset();
+    else if (input == shortcuts.pause)          paused ^= true;
+    else if (input == shortcuts.fullscreen)     video_ctx.fullscreen();
+    else if (input == shortcuts.volume_up)      config.volume = std::clamp(config.volume + config.volume_step, 0.0, 1.0);
+    else if (input == shortcuts.volume_down)    config.volume = std::clamp(config.volume - config.volume_step, 0.0, 1.0);
+    else if (input == shortcuts.speed_hardware) limiter = FrameRateLimiter(kRefreshRate);
+    else if (input == shortcuts.speed_2x)       limiter = FrameRateLimiter(kRefreshRate * 2);
+    else if (input == shortcuts.speed_4x)       limiter = FrameRateLimiter(kRefreshRate * 4);
+    else if (input == shortcuts.speed_6x)       limiter = FrameRateLimiter(kRefreshRate * 6);
+    else if (input == shortcuts.speed_8x)       limiter = FrameRateLimiter(kRefreshRate * 8);
+    else if (input == shortcuts.speed_unbound)  limiter = FrameRateLimiter(10000);
 }
 
 void handleEvents()
@@ -234,7 +238,10 @@ int main(int argc, char* argv[])
         }
 
         if (!running)
+        {
+            config.deinit();
             return 0;
+        }
 
         reset();
 
@@ -246,15 +253,18 @@ int main(int argc, char* argv[])
         {
             limiter.run([]() 
             {
-                constexpr auto kPixelsHor   = 240 + 68;
-                constexpr auto kPixelsVer   = 160 + 68;
-                constexpr auto kPixelCycles = 4;
-                constexpr auto kFrameCycles = kPixelCycles * kPixelsHor * kPixelsVer;
-
                 handleEvents();
-                keypad.update();
 
-                arm.run(kFrameCycles);
+                if (!paused)
+                {
+                    constexpr auto kPixelsHor   = 240 + 68;
+                    constexpr auto kPixelsVer   = 160 + 68;
+                    constexpr auto kPixelCycles = 4;
+                    constexpr auto kFrameCycles = kPixelCycles * kPixelsHor * kPixelsVer;
+
+                    keypad.update();
+                    arm.run(kFrameCycles);
+                }
                 ppu.present();
             });
 
@@ -277,5 +287,7 @@ int main(int argc, char* argv[])
     {
         panic(ex.what());
     }
+    config.deinit();
+
     return 0;
 }

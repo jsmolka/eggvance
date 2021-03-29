@@ -1,5 +1,7 @@
 #pragma once
 
+#include <shell/ini.h>
+
 #include "filesystem.h"
 #include "sdl2.h"
 #include "gamepak/gpio.h"
@@ -26,29 +28,35 @@ class Shortcuts
 {
 public:
     Input reset;
+    Input pause;
     Input fullscreen;
-    Input fr_hardware;
-    Input fr_custom_1;
-    Input fr_custom_2;
-    Input fr_custom_3;
-    Input fr_custom_4;
-    Input fr_unbound;
+    Input volume_up;
+    Input volume_down;
+    Input speed_hardware;
+    Input speed_2x;
+    Input speed_4x;
+    Input speed_6x;
+    Input speed_8x;
+    Input speed_unbound;
 };
 
 class Config
 {
 public:
     void init(const fs::path& file);
+    void deinit();
+
+    fs::path bios_file;
+    bool skip_bios;
+    bool validate_bios;
+    bool emulate_lcd;
+    double volume;
+    double volume_step;
 
     fs::path save_path;
-    fs::path bios_file;
-    bool bios_skip;
-    bool bios_hash;
-    bool lcd_color;
-
-    Save::Type save;
-    Gpio::Type gpio;
-    double framerate[4];
+    bool sync_save;
+    Save::Type save_type;
+    Gpio::Type gpio_type;
 
     struct
     {
@@ -61,6 +69,13 @@ public:
         Shortcuts<SDL_Scancode> keyboard;
         Shortcuts<SDL_GameControllerButton> controller;
     } shortcuts;
+
+private:
+    template<typename T>
+    T find(const std::string& section, const std::string& key) const;
+
+    fs::path file;
+    shell::Ini ini;
 };
 
 inline Config config;
