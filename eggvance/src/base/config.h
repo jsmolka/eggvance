@@ -43,8 +43,9 @@ public:
 class Config
 {
 public:
+    ~Config();
+
     void init(const fs::path& file);
-    void deinit();
 
     fs::path bios_file;
     bool skip_bios;

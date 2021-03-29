@@ -7,16 +7,9 @@
 class FrameRateLimiter
 {
 public:
-    FrameRateLimiter(double fps)
-    {
-        accumulated = Duration(0);
-        frame_delta = Duration(Duration::rep(Duration::period::den / fps));
-    }
+    FrameRateLimiter(double fps);
 
-    void reset()
-    {
-        accumulated = Duration(0);
-    }
+    void reset();
 
     template<typename Frame>
     void run(Frame frame)

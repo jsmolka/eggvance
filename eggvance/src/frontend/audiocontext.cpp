@@ -1,38 +1,49 @@
 #include "audiocontext.h"
 
+#include <shell/errors.h>
+
 #include "base/config.h"
 #include "base/constants.h"
-#include "base/panic.h"
+
+inline constexpr auto kWantFrequency = 44100;
+inline constexpr auto kWantChannels  = 2;
 
 AudioContext::~AudioContext()
 {
-    deinit();
+    if (SDL_WasInit(SDL_INIT_AUDIO))
+    {
+        SDL_FreeAudioStream(stream);
+        SDL_CloseAudioDevice(device);
+        SDL_QuitSubSystem(SDL_INIT_AUDIO);
+    }
 }
 
 void AudioContext::init()
 {
     if (SDL_InitSubSystem(SDL_INIT_AUDIO))
-        panic("Cannot init audio context {}", SDL_GetError());
+        throw shell::Error("Cannot init audio context: {}", SDL_GetError());
 
     SDL_AudioSpec want = {};
     SDL_AudioSpec have = {};
 
-    want.freq     = 44100;
+    want.freq     = kWantFrequency;
     want.samples  = 1024;
     want.format   = AUDIO_F32SYS;
-    want.channels = 2;
+    want.channels = kWantChannels;
     want.userdata = this;
     want.callback = callback;
 
     if (!(device = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0)))
-        panic("Cannot init audio device {}", SDL_GetError());
+        throw shell::Error("Cannot init audio device: {}", SDL_GetError());
 
     if (!(stream = SDL_NewAudioStream(AUDIO_S16, 2, kSampleRate, have.format, have.channels, have.freq)))
-        panic("Cannot init audio stream {}", SDL_GetError());
+        throw shell::Error("Cannot init audio stream: {}", SDL_GetError());
 }
 
 void AudioContext::pause()
 {
+    std::lock_guard lock(mutex);
+    SDL_AudioStreamClear(stream);
     SDL_PauseAudioDevice(device, true);
 }
 
@@ -41,26 +52,18 @@ void AudioContext::unpause()
     SDL_PauseAudioDevice(device, false);
 }
 
-void AudioContext::write(s16 left, s16 right)
+void AudioContext::write(Samples samples)
 {
-    constexpr std::size_t kSecond = 44100 * 2 * sizeof(float);
+    constexpr auto kSecond = kWantFrequency * kWantChannels * sizeof(float);
 
     std::lock_guard lock(mutex);
     if (SDL_AudioStreamAvailable(stream) < kSecond / 8)
     {
-        s16 sample[] =
-        {
-            static_cast<s16>(config.volume * static_cast<double>(left)),
-            static_cast<s16>(config.volume * static_cast<double>(right))
-        };
-        SDL_AudioStreamPut(stream, &sample, sizeof(sample));
-    }
-}
+        samples[0] = static_cast<s16>(config.volume * static_cast<double>(samples[0]));
+        samples[1] = static_cast<s16>(config.volume * static_cast<double>(samples[1]));
 
-void AudioContext::clear()
-{
-    std::lock_guard lock(mutex);
-    SDL_AudioStreamClear(stream);
+        SDL_AudioStreamPut(stream, samples.data(), sizeof(Samples));
+    }
 }
 
 void AudioContext::callback(void* data, u8* stream, int length)
@@ -91,16 +94,5 @@ void AudioContext::callback(void* data, u8* stream, int length)
             f_sample = f_stream[f_gotten - 1];
 
         std::fill(f_stream + f_gotten, f_stream + f_length, f_sample);
-    }
-}
-
-void AudioContext::deinit()
-{
-    if (SDL_WasInit(SDL_INIT_AUDIO))
-    {
-        SDL_FreeAudioStream(stream);
-        SDL_CloseAudioDevice(device);
-
-        SDL_QuitSubSystem(SDL_INIT_AUDIO);
     }
 }

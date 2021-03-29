@@ -9,27 +9,23 @@ public:
     ~InputContext();
 
     void init();
-
     uint state() const;
-
-    void processDeviceEvent(const SDL_ControllerDeviceEvent& event);
+    void handleDeviceEvent(const SDL_ControllerDeviceEvent& event);
 
 private:
-    enum Bit
+    enum class Bit
     { 
-        kBitA, 
-        kBitB, 
-        kBitSelect, 
-        kBitStart, 
-        kBitRight,
-        kBitLeft,
-        kBitUp,
-        kBitDown,
-        kBitR,
-        kBitL
+        A,
+        B,
+        Select,
+        Start,
+        Right,
+        Left,
+        Up,
+        Down,
+        R,
+        L
     };
-
-    void deinit();
 
     uint keyboardState() const;
     uint controllerState() const;

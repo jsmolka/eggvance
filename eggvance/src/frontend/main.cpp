@@ -1,4 +1,3 @@
-#include <shell/format.h>
 #include <shell/options.h>
 #include <shell/utility.h>
 
@@ -11,7 +10,6 @@
 #include "arm/arm.h"
 #include "base/config.h"
 #include "base/constants.h"
-#include "base/panic.h"
 #include "dma/dma.h"
 #include "gamepak/gamepak.h"
 #include "keypad/keypad.h"
@@ -71,32 +69,24 @@ void reset()
 
 void handleDropEvent(const SDL_DropEvent& event)
 {
-    const fs::path file = fs::u8path(event.file);
+    const auto file = fs::u8path(event.file);
 
     SDL_free(event.file);
 
+    audio_ctx.pause();
+
     if (file.extension() == ".gba")
     {
-        audio_ctx.pause();
-        audio_ctx.clear();
-
         gamepak.load(file, fs::path());
         reset();
-
-        audio_ctx.unpause();
     }
-    
     if (file.extension() == ".sav")
     {
-        audio_ctx.pause();
-        audio_ctx.clear();
-
         gamepak.load(fs::path(), file);
         reset();
-
-        audio_ctx.unpause();
     }
 
+    audio_ctx.unpause();
     video_ctx.raise();
 }
 
@@ -113,7 +103,7 @@ void handleInputEvent(const Shortcuts<Input>& shortcuts, Input input)
     else if (input == shortcuts.speed_4x)       limiter = FrameRateLimiter(kRefreshRate * 4);
     else if (input == shortcuts.speed_6x)       limiter = FrameRateLimiter(kRefreshRate * 6);
     else if (input == shortcuts.speed_8x)       limiter = FrameRateLimiter(kRefreshRate * 8);
-    else if (input == shortcuts.speed_unbound)  limiter = FrameRateLimiter(10000);
+    else if (input == shortcuts.speed_unbound)  limiter = FrameRateLimiter(1'000'000);
 }
 
 void handleEvents()
@@ -136,12 +126,12 @@ void handleEvents()
         case SDL_CONTROLLERBUTTONDOWN:
             handleInputEvent(
                 config.shortcuts.controller,
-                static_cast<SDL_GameControllerButton>(event.cbutton.button));
+                SDL_GameControllerButton(event.cbutton.button));
             break;
 
         case SDL_CONTROLLERDEVICEADDED:
         case SDL_CONTROLLERDEVICEREMOVED:
-            input_ctx.processDeviceEvent(event.cdevice);
+            input_ctx.handleDeviceEvent(event.cdevice);
             break;
 
         case SDL_DROPFILE:
@@ -151,6 +141,7 @@ void handleEvents()
     }
 }
 
+#if SHELL_OS_WINDOWS
 int eventFilter(void*, SDL_Event* event)
 {
     if (event->type == SDL_WINDOWEVENT && event->window.event == SDL_WINDOWEVENT_RESIZED)
@@ -168,16 +159,14 @@ int eventFilter(void*, SDL_Event* event)
         }
         return 0;
     }
-    #if SHELL_OS_WINDOWS
     else if (event->type == SDL_SYSWMEVENT && event->syswm.msg->msg.win.msg == WM_EXITSIZEMOVE)
     {
         changed = true;
         return 0;
     }
-    #endif
-
     return 1;
 }
+#endif
 
 void init(int argc, char* argv[])
 {
@@ -188,36 +177,37 @@ void init(int argc, char* argv[])
     options.add({ "-s,--save",   "save file",   "file" }, Options::value<fs::path>()->optional());
     options.add({       "rom",   "ROM file"            }, Options::value<fs::path>()->positional()->optional());
 
+    OptionsResult result;
+
     try
     {
-        OptionsResult result = options.parse(argc, argv);
-
-        const auto cfg = result.find<fs::path>("--config");
-        const auto sav = result.find<fs::path>("--save");
-        const auto gba = result.find<fs::path>("rom");
-
-        config.init(fs::absolute(*cfg));
-
-        Bios::init(config.bios_file);
-
-        audio_ctx.init();
-        input_ctx.init();
-        video_ctx.init();
-
-        #if SHELL_OS_WINDOWS
-        SDL_EventState(SDL_SYSWMEVENT, SDL_ENABLE);
-        #endif
-        SDL_SetEventFilter(eventFilter, NULL);
-
-        gamepak.load(
-            gba.value_or(fs::path()),
-            sav.value_or(fs::path()));
+        result = options.parse(argc, argv);
     }
     catch (const ParseError& error)
     {
-        shell::print(options.help());
-        panic("Cannot parse command line\n{}", error.what());
+        throw shell::Error("Cannot parse command line: {}", error.what());
     }
+
+    const auto cfg = result.find<fs::path>("--config");
+    const auto sav = result.find<fs::path>("--save");
+    const auto gba = result.find<fs::path>("rom");
+
+    config.init(fs::absolute(*cfg));
+
+    audio_ctx.init();
+    input_ctx.init();
+    video_ctx.init();
+
+    Bios::init(config.bios_file);
+
+    #if SHELL_OS_WINDOWS
+    SDL_EventState(SDL_SYSWMEVENT, SDL_ENABLE);
+    SDL_SetEventFilter(eventFilter, NULL);
+    #endif
+
+    gamepak.load(
+        gba.value_or(fs::path()),
+        sav.value_or(fs::path()));
 }
 
 int main(int argc, char* argv[])
@@ -238,10 +228,7 @@ int main(int argc, char* argv[])
         }
 
         if (!running)
-        {
-            config.deinit();
             return 0;
-        }
 
         reset();
 
@@ -264,8 +251,8 @@ int main(int argc, char* argv[])
 
                     keypad.update();
                     arm.run(kFrameCycles);
+                    ppu.present();
                 }
-                ppu.present();
             });
 
             if (changed)
@@ -285,9 +272,8 @@ int main(int argc, char* argv[])
     }
     catch (const std::exception& ex)
     {
-        panic(ex.what());
+        shell::print("{}\n", ex.what());
+        SDL_ShowSimpleMessageBox(0, "Exception", ex.what(), NULL);
     }
-    config.deinit();
-
     return 0;
 }

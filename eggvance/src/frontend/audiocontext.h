@@ -2,24 +2,24 @@
 
 #include <mutex>
 
+#include "base/array.h"
 #include "base/int.h"
 #include "base/sdl2.h"
 
 class AudioContext
 {
 public:
+    using Samples = array<s16, 2>;
+
     ~AudioContext();
 
     void init();
     void pause();
     void unpause();
-    void write(s16 left, s16 right);
-    void clear();
+    void write(Samples samples);
 
 private:
     static void callback(void* data, u8* stream, int length);
-
-    void deinit();
 
     std::mutex mutex;
     SDL_AudioDeviceID device = 0;

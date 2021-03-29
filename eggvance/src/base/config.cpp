@@ -140,6 +140,21 @@ std::optional<Gpio::Type> shell::parse(const std::string& data)
     return std::nullopt;
 }
 
+Config::~Config()
+{
+    if (file.empty())
+        return;
+
+    fs::create_directories(file.parent_path());
+
+    std::string volume = std::to_string(this->volume);
+    volume.erase(volume.find_last_not_of('0') + 1, std::string::npos);
+    volume.erase(volume.find_last_not_of('.') + 1, std::string::npos);
+
+    ini.set("general", "volume", volume);
+    ini.save(file);
+}
+
 void Config::init(const fs::path& file)
 {
     this->file = file;
@@ -230,19 +245,6 @@ void Config::init(const fs::path& file)
     shortcuts.controller.speed_6x       = find<SDL_GameControllerButton>("controller_shortcuts", "speed_6x");
     shortcuts.controller.speed_8x       = find<SDL_GameControllerButton>("controller_shortcuts", "speed_8x");
     shortcuts.controller.speed_unbound  = find<SDL_GameControllerButton>("controller_shortcuts", "speed_unbound");
-}
-
-void Config::deinit()
-{
-    if (!file.empty())
-    {
-        std::string volume = std::to_string(this->volume);
-        volume.erase(volume.find_last_not_of('0') + 1, std::string::npos);
-        volume.erase(volume.find_last_not_of('.') + 1, std::string::npos);
-
-        ini.set("general", "volume", volume);
-        ini.save(file);
-    }
 }
 
 template<typename T>

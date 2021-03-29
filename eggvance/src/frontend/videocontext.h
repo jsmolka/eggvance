@@ -1,8 +1,8 @@
 #pragma once
 
-#include <array>
 #include <string>
 
+#include "base/array.h"
 #include "base/int.h"
 #include "base/sdl2.h"
 #include "ppu/constants.h"
@@ -13,7 +13,6 @@ public:
     ~VideoContext();
 
     void init();
-
     void raise();
     void fullscreen();
     void title(const std::string& title);
@@ -26,17 +25,15 @@ public:
     u32* scanline(uint line);
 
 private:
-    void deinit();
-
     bool initWindow();
     bool initRenderer();
     bool initTexture();
 
-    SDL_Window* window = nullptr;
-    SDL_Texture* texture = nullptr;
+    SDL_Window* window     = nullptr;
+    SDL_Texture* texture   = nullptr;
     SDL_Renderer* renderer = nullptr;
 
-    std::array<u32, kScreen.x * kScreen.y> buffer;
+    array<u32, kScreen.y, kScreen.x> buffer = {};
 };
 
 inline VideoContext video_ctx;

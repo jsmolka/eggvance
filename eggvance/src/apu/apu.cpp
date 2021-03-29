@@ -107,8 +107,7 @@ void Apu::sequence(u64 late)
 
 void Apu::sample(u64 late)
 {
-    s16 sample_l = 0;
-    s16 sample_r = 0;
+    AudioContext::Samples samples = {};
 
     if (control.enabled)
     {
@@ -121,28 +120,28 @@ void Apu::sample(u64 late)
 
             channel->tick();
 
-            if (control.enabled_l & (1 << index)) sample_l += channel->sample;
-            if (control.enabled_r & (1 << index)) sample_r += channel->sample;
+            if (control.enabled_l & (1 << index)) samples[0] += channel->sample;
+            if (control.enabled_r & (1 << index)) samples[1] += channel->sample;
         }
 
-        sample_l *= control.volume_l + 1;
-        sample_r *= control.volume_r + 1;
-        sample_l <<= 1;
-        sample_r <<= 1;
-        sample_l >>= 3 - control.volume;
-        sample_r >>= 3 - control.volume;
+        samples[0] *= control.volume_l + 1;
+        samples[1] *= control.volume_r + 1;
+        samples[0] <<= 1;
+        samples[1] <<= 1;
+        samples[0] >>= 3 - control.volume;
+        samples[1] >>= 3 - control.volume;
 
         for (const auto& fifo : fifo)
         {
-            if (fifo.enabled_l) sample_l += fifo.sample << fifo.volume;
-            if (fifo.enabled_r) sample_r += fifo.sample << fifo.volume;
+            if (fifo.enabled_l) samples[0] += fifo.sample << fifo.volume;
+            if (fifo.enabled_r) samples[1] += fifo.sample << fifo.volume;
         }
 
-        sample_l = std::clamp<s16>(sample_l + apu.bias - 0x200, -0x400, 0x3FF) << 5;
-        sample_r = std::clamp<s16>(sample_r + apu.bias - 0x200, -0x400, 0x3FF) << 5;
+        samples[0] = std::clamp<s16>(samples[0] + apu.bias - 0x200, -0x400, 0x3FF) << 5;
+        samples[1] = std::clamp<s16>(samples[1] + apu.bias - 0x200, -0x400, 0x3FF) << 5;
     }
 
-    audio_ctx.write(sample_l, sample_r);
+    audio_ctx.write(samples);
 
     scheduler.insert(events.sample, kSampleCycles - late);
 }

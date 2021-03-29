@@ -41,6 +41,8 @@
     <ClCompile Include="src\base\config.cpp" />
     <ClCompile Include="src\dma\dmaaddress.cpp" />
     <ClCompile Include="src\frontend\audiocontext.cpp" />
+    <ClCompile Include="src\frontend\framecounter.cpp" />
+    <ClCompile Include="src\frontend\frameratelimiter.cpp" />
     <ClCompile Include="src\frontend\inputcontext.cpp" />
     <ClCompile Include="src\frontend\main.cpp" />
     <ClCompile Include="src\frontend\videocontext.cpp" />

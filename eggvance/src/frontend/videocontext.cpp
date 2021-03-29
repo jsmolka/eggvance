@@ -1,23 +1,29 @@
 #include "videocontext.h"
 
+#include <shell/errors.h>
 #include <shell/icon.h>
 
 #include "base/bit.h"
-#include "base/panic.h"
 
 VideoContext::~VideoContext()
 {
-    deinit();
+    if (SDL_WasInit(SDL_INIT_VIDEO))
+    {
+        SDL_DestroyTexture(texture);
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_QuitSubSystem(SDL_INIT_VIDEO);
+    }
 }
 
 void VideoContext::init()
 {
     if (SDL_InitSubSystem(SDL_INIT_VIDEO))
-        panic("Cannot init video context {}", SDL_GetError());
+        throw shell::Error("Cannot init video context: {}", SDL_GetError());
 
-    if (!initWindow())   panic("Cannot init window {}",   SDL_GetError());
-    if (!initRenderer()) panic("Cannot init renderer {}", SDL_GetError());
-    if (!initTexture())  panic("Cannot init texture {}",  SDL_GetError());
+    if (!initWindow())   throw shell::Error("Cannot init window: {}",   SDL_GetError());
+    if (!initRenderer()) throw shell::Error("Cannot init renderer: {}", SDL_GetError());
+    if (!initTexture())  throw shell::Error("Cannot init texture: {}",  SDL_GetError());
 }
 
 void VideoContext::raise()
@@ -74,9 +80,7 @@ void VideoContext::renderIcon()
 
 u32* VideoContext::scanline(uint line)
 {
-    SHELL_ASSERT(line < kScreen.y);
-
-    return buffer.data() + (kScreen.x * line);
+    return buffer[line].data();
 }
 
 void VideoContext::renderClear(u32 color)
@@ -89,17 +93,6 @@ void VideoContext::renderClear(u32 color)
         SDL_ALPHA_OPAQUE);
 
     SDL_RenderClear(renderer);
-}
-
-void VideoContext::deinit()
-{
-    if (SDL_WasInit(SDL_INIT_VIDEO))
-    {
-        SDL_DestroyTexture(texture);
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        SDL_QuitSubSystem(SDL_INIT_VIDEO);
-    }
 }
 
 bool VideoContext::initWindow()
