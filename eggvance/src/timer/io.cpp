@@ -33,7 +33,7 @@ void TimerControl::write(uint index, u8 byte)
 {
     static constexpr uint kPrescalers[8] = { 1, 64, 256, 1024, 1, 1, 1, 1 };
 
-    if (index == 1 || Register::read(index) == byte)
+    if (index == 1 || read(index) == byte)
         return;
 
     Register::write(index, byte);

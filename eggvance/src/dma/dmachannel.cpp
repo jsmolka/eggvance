@@ -24,17 +24,17 @@ void DmaChannel::init()
 
     if (latch.fifo)
     {
-        latch.word   = 1;
-        latch.count  = 4;
         latch.sadcnt = control.sadcnt;
         latch.dadcnt = uint(DmaControl::Control::Fixed);
+        latch.word   = 1;
+        latch.count  = 4;
     }
     else
     {
-        latch.word   = control.word;
-        latch.count  = static_cast<uint>(count);
         latch.sadcnt = control.sadcnt;
         latch.dadcnt = control.dadcnt;
+        latch.word   = control.word;
+        latch.count  = count;
 
         if (latch.sad.gamepak())
             latch.sadcnt = uint(DmaControl::Control::Increment);
@@ -68,11 +68,8 @@ bool DmaChannel::start()
 
 void DmaChannel::run()
 {
-    static constexpr int kDeltas[2][4] =
-    {
-        { 2, -2, 0, 2 },
-        { 4, -4, 0, 4 }
-    };
+    static constexpr int kSadDeltas[2][4] = { { 2, -2, 0, 0 }, { 4, -4, 0, 0 } };
+    static constexpr int kDadDeltas[2][4] = { { 2, -2, 0, 2 }, { 4, -4, 0, 4 } };
 
     while (pending--)
     {
@@ -88,10 +85,10 @@ void DmaChannel::run()
             transfer(Access::Sequential);
         }
 
-        latch.sad = latch.sad + kDeltas[latch.word][latch.sadcnt];
-        latch.dad = latch.dad + kDeltas[latch.word][latch.dadcnt];
+        latch.sad = latch.sad + kSadDeltas[latch.word][latch.sadcnt];
+        latch.dad = latch.dad + kDadDeltas[latch.word][latch.dadcnt];
 
-        if (arm.target >= scheduler.now && pending)
+        if (pending && arm.target >= scheduler.now)
             return;
     }
 
@@ -142,20 +139,24 @@ void DmaChannel::initTransfer()
         {
             transfer = [this](Access access)
             {
-                if (latch.sad >= 0x200'0000)
-                    latch.bus = gamepak.save->read(latch.sad);
+                if (latch.sad < 0x200'0000)
+                    arm.idle();
+                else
+                    bus = gamepak.save->read(latch.sad);
                 
-                arm.writeHalf(latch.dad, latch.bus, access);
+                arm.writeHalf(latch.dad, bus, access);
             };
         }
         else
         {
             transfer = [this](Access access)
             {
-                if (latch.sad >= 0x200'0000) 
-                    latch.bus = arm.readHalf(latch.sad, access) * 0x0001'0001;
+                if (latch.sad < 0x200'0000) 
+                    arm.idle();
+                else
+                    bus = arm.readHalf(latch.sad, access) * 0x0001'0001;
 
-                gamepak.save->write(latch.dad, latch.bus);
+                gamepak.save->write(latch.dad, bus);
             };
         }
     }
@@ -165,20 +166,24 @@ void DmaChannel::initTransfer()
         {
             transfer = [this](Access access)
             {
-                if (latch.sad >= 0x200'0000)
-                    latch.bus = arm.readWord(latch.sad, access);
+                if (latch.sad < 0x200'0000)
+                    arm.idle();
+                else
+                    bus = arm.readWord(latch.sad, access);
                 
-                arm.writeWord(latch.dad, latch.bus, access);
+                arm.writeWord(latch.dad, bus, access);
             };
         }
         else
         {
             transfer = [this](Access access)
             {
-                if (latch.sad >= 0x200'0000)
-                    latch.bus = arm.readHalf(latch.sad, access) * 0x0001'0001;
+                if (latch.sad < 0x200'0000)
+                    arm.idle();
+                else
+                    bus = arm.readHalf(latch.sad, access) * 0x0001'0001;
 
-                arm.writeHalf(latch.dad, latch.bus, access);
+                arm.writeHalf(latch.dad, bus, access);
             };
         }
     }

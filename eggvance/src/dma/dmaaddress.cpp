@@ -3,7 +3,6 @@
 DmaAddress& DmaAddress::operator=(uint value)
 {
     data = value;
-
     return *this;
 }
 

@@ -36,21 +36,7 @@ void Dma::broadcast(Event event)
 
 void Dma::emit(DmaChannel& channel, Event event)
 {
-    auto matches = [](const DmaChannel& channel, Event event) -> bool
-    {
-        switch (event)
-        {
-        case Dma::Event::Immediate: return channel.control.timing == DmaControl::Timing::Immediate;
-        case Dma::Event::HBlank:    return channel.control.timing == DmaControl::Timing::HBlank;
-        case Dma::Event::VBlank:    return channel.control.timing == DmaControl::Timing::VBlank;
-        case Dma::Event::Hdma:      return channel.control.timing == DmaControl::Timing::Special && channel.control.repeat && channel.id == 3;
-        case Dma::Event::FifoA:     return channel.latch.fifo && channel.latch.dad.fifoA();
-        case Dma::Event::FifoB:     return channel.latch.fifo && channel.latch.dad.fifoB();
-        }
-        return false;
-    };
-
-    if (channel.running || !channel.control.enabled || !matches(channel, event))
+    if (!channel.control.enabled || channel.running || !triggers(channel, event))
         return;
 
     if (!channel.start())
@@ -61,4 +47,18 @@ void Dma::emit(DmaChannel& channel, Event event)
         active = &channel;
         arm.state |= State::Dma;
     }
+}
+
+bool Dma::triggers(const DmaChannel& channel, Event event)
+{
+    switch (event)
+    {
+    case Dma::Event::Immediate: return channel.control.timing == DmaControl::Timing::Immediate;
+    case Dma::Event::HBlank:    return channel.control.timing == DmaControl::Timing::HBlank;
+    case Dma::Event::VBlank:    return channel.control.timing == DmaControl::Timing::VBlank;
+    case Dma::Event::FifoA:     return channel.control.timing == DmaControl::Timing::Special && channel.latch.fifo && channel.latch.dad.fifoA();
+    case Dma::Event::FifoB:     return channel.control.timing == DmaControl::Timing::Special && channel.latch.fifo && channel.latch.dad.fifoB();
+    case Dma::Event::Hdma:      return channel.control.timing == DmaControl::Timing::Special && channel.id == 3 && channel.control.repeat;
+    }
+    return false;
 }

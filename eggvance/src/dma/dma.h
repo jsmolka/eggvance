@@ -11,9 +11,9 @@ public:
         Immediate,
         HBlank,
         VBlank,
-        Hdma,
         FifoA,
-        FifoB
+        FifoB,
+        Hdma
     };
 
     void run();
@@ -23,6 +23,8 @@ public:
     array<DmaChannel, 4> channels = { 0, 1, 2, 3 };
 
 private:
+    static bool triggers(const DmaChannel& channel, Event event);
+
     DmaChannel* active = nullptr;
 };
 

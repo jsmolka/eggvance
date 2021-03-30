@@ -46,6 +46,9 @@ DmaControl::DmaControl(DmaChannel& channel)
 
 void DmaControl::write(uint index, u8 byte)
 {
+    if (read(index) == byte)
+        return;
+
     Register::write(index, byte);
 
     dadcnt = bit::seq<5, 2>(data);
@@ -62,11 +65,11 @@ void DmaControl::write(uint index, u8 byte)
     irq     = bit::seq<6, 1>(byte);
     enabled = bit::seq<7, 1>(byte);
 
-    if (enabled)
+    if (!was_enabled && enabled)
     {
         channel.init();
 
-        if (!was_enabled && timing == Timing::Immediate)
+        if (timing == Timing::Immediate)
             dma.emit(channel, Dma::Event::Immediate);
     }
 }
