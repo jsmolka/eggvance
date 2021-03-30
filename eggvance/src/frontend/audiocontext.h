@@ -1,15 +1,15 @@
 #pragma once
 
 #include <mutex>
+#include <shell/array.h>
 
-#include "base/array.h"
 #include "base/int.h"
 #include "base/sdl2.h"
 
 class AudioContext
 {
 public:
-    using Samples = array<s16, 2>;
+    using Samples = shell::array<s16, 2>;
 
     ~AudioContext();
 

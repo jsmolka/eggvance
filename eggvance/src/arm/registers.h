@@ -1,7 +1,8 @@
 #pragma once
 
+#include <shell/array.h>
+
 #include "psr.h"
-#include "base/array.h"
 
 class Registers
 {
@@ -12,12 +13,12 @@ public:
     {
         struct
         {
-            array<u32, 13> gprs;
+            shell::array<u32, 13> gprs;
             u32 sp;
             u32 lr;
             u32 pc;
         };
-        array<u32, 16> regs = {};
+        shell::array<u32, 16> regs = {};
     };
 
     Psr cpsr;
@@ -33,7 +34,7 @@ private:
 
     struct
     {
-        array<u32, 6, 3> def = {};
-        array<u32, 2, 5> fiq = {};
+        shell::array<u32, 6, 3> def = {};
+        shell::array<u32, 2, 5> fiq = {};
     } bank;
 };

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "base/array.h"
+#include <shell/array.h>
+
 #include "base/int.h"
 #include "base/sdl2.h"
 #include "ppu/constants.h"
@@ -31,7 +32,7 @@ private:
     SDL_Texture* texture   = nullptr;
     SDL_Renderer* renderer = nullptr;
 
-    array<u32, kScreen.y, kScreen.x> buffer = {};
+    shell::array<u32, kScreen.y, kScreen.x> buffer = {};
 };
 
 inline VideoContext video_ctx;

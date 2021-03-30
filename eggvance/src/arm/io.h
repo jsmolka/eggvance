@@ -1,7 +1,8 @@
 #pragma once
 
+#include <shell/array.h>
+
 #include "enums.h"
-#include "base/array.h"
 #include "base/register.h"
 
 class PostFlag : public Register<u8, 0x01>
@@ -40,8 +41,8 @@ private:
 
     struct
     {
-        array<u64, 4, 2> half = {};
-        array<u64, 4, 2> word = {};
+        shell::array<u64, 4, 2> half = {};
+        shell::array<u64, 4, 2> word = {};
     } wait;
 };
 

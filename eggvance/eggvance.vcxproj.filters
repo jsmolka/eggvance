@@ -410,9 +410,6 @@
     <ClInclude Include="src\sio\io.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\base\array.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\dma\dmaaddress.h">
       <Filter>Header Files</Filter>
     </ClInclude>

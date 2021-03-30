@@ -1,12 +1,13 @@
 #pragma once
 
+#include <shell/array.h>
+
 #include "fifo.h"
 #include "io.h"
 #include "noise.h"
 #include "square1.h"
 #include "square2.h"
 #include "wave.h"
-#include "base/array.h"
 #include "scheduler/event.h"
 
 class Apu
@@ -21,7 +22,7 @@ public:
     Square2 square2;
     Wave wave;
     Noise noise;
-    array<Fifo, 2> fifo;
+    shell::array<Fifo, 2> fifo;
     SoundControl control;
     SoundBias bias;
 
