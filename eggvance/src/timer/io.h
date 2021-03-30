@@ -25,6 +25,7 @@ public:
     TimerControl(TimerChannel& channel);
 
     void write(uint index, u8 byte);
+    bool runnable() const;
 
     uint prescaler = 1;
     uint cascade   = 0;

@@ -25,7 +25,7 @@ TimerChannel::TimerChannel(uint id)
         initial  = count.initial;
         overflow = control.prescaler * (kOverflow - initial);
 
-        if (control.enabled && !control.cascade)
+        if (control.runnable())
             run(late);
 
         schedule();
@@ -34,9 +34,6 @@ TimerChannel::TimerChannel(uint id)
 
 void TimerChannel::start()
 {
-    if (events.start.scheduled())
-        return;
-
     scheduler.remove(events.run);
     scheduler.insert(events.start, 2);
 }
@@ -85,7 +82,7 @@ void TimerChannel::schedule()
 {
     scheduler.remove(events.run);
 
-    if (!control.enabled || control.cascade || events.start.scheduled())
+    if (!control.runnable() || events.start.scheduled())
         return;
     
     scheduler.insert(events.run, overflow - counter);

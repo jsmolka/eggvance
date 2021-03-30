@@ -10,7 +10,7 @@ TimerCount::TimerCount(TimerChannel& channel)
 
 u8 TimerCount::read(uint index)
 {
-    if (channel.control.enabled && !channel.control.cascade)
+    if (channel.control.runnable())
     {
         channel.run();
         channel.schedule();
@@ -31,14 +31,14 @@ TimerControl::TimerControl(TimerChannel& channel)
 
 void TimerControl::write(uint index, u8 byte)
 {
-    if (index == 1)
+    static constexpr uint kPrescalers[8] = { 1, 64, 256, 1024, 1, 1, 1, 1 };
+
+    if (index == 1 || Register::read(index) == byte)
         return;
 
     Register::write(index, byte);
 
-    static constexpr uint kPrescalers[8] = { 1, 64, 256, 1024, 1, 1, 1, 1 };
-
-    if (enabled && !cascade)
+    if (runnable())
         channel.run();
 
     uint was_enabled = enabled;
@@ -52,4 +52,9 @@ void TimerControl::write(uint index, u8 byte)
         channel.start();
     else
         channel.update();
+}
+
+bool TimerControl::runnable() const
+{
+    return enabled && !cascade;
 }
