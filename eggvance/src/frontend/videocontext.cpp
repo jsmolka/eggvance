@@ -44,7 +44,7 @@ void VideoContext::title(const std::string& title)
 
 void VideoContext::renderCopyTexture()
 {
-    SDL_UpdateTexture(texture, NULL, buffer.data(), sizeof(u32) * kScreen.x);
+    SDL_UpdateTexture(texture, NULL, buffer.data(), sizeof(buffer.front()));
     SDL_RenderCopy(renderer, texture, NULL, NULL);
 }
 
@@ -99,8 +99,8 @@ bool VideoContext::initWindow()
 {
     window = SDL_CreateWindow(
         "eggvance",
-        SDL_WINDOWPOS_UNDEFINED,
-        SDL_WINDOWPOS_UNDEFINED,
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
         2 * kScreen.x, 2 * kScreen.y,
         SDL_WINDOW_RESIZABLE);
 
@@ -123,9 +123,11 @@ bool VideoContext::initRenderer()
 
 bool VideoContext::initTexture()
 {
-    return texture = SDL_CreateTexture(
+    texture = SDL_CreateTexture(
         renderer,
         SDL_PIXELFORMAT_ARGB8888,
         SDL_TEXTUREACCESS_STREAMING,
         kScreen.x, kScreen.y);
+
+    return texture;
 }

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <string>
-
 #include "base/array.h"
 #include "base/int.h"
 #include "base/sdl2.h"

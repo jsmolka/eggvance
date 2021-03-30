@@ -9,7 +9,6 @@
 #include "apu/apu.h"
 #include "arm/arm.h"
 #include "base/config.h"
-#include "base/constants.h"
 #include "dma/dma.h"
 #include "gamepak/gamepak.h"
 #include "keypad/keypad.h"
@@ -48,8 +47,8 @@ void updateTitle(double fps)
 
 void reset()
 {
-    gamepak.gpio->reset();
     gamepak.save->reset();
+    gamepak.gpio->reset();
 
     shell::reconstruct(apu);
     shell::reconstruct(arm);
@@ -60,8 +59,8 @@ void reset()
     shell::reconstruct(scheduler);
     shell::reconstruct(timer);
 
-    arm.init();
     apu.init();
+    arm.init();
     ppu.init();
 
     updateTitle();
@@ -178,7 +177,6 @@ void init(int argc, char* argv[])
     options.add({       "rom",   "ROM file"            }, Options::value<fs::path>()->positional()->optional());
 
     OptionsResult result;
-
     try
     {
         result = options.parse(argc, argv);
@@ -242,17 +240,17 @@ int main(int argc, char* argv[])
             {
                 handleEvents();
 
-                if (!paused)
-                {
-                    constexpr auto kPixelsHor   = 240 + 68;
-                    constexpr auto kPixelsVer   = 160 + 68;
-                    constexpr auto kPixelCycles = 4;
-                    constexpr auto kFrameCycles = kPixelCycles * kPixelsHor * kPixelsVer;
+                if (paused)
+                    return;
 
-                    keypad.update();
-                    arm.run(kFrameCycles);
-                    ppu.present();
-                }
+                constexpr auto kPixelsHor   = 240 + 68;
+                constexpr auto kPixelsVer   = 160 + 68;
+                constexpr auto kPixelCycles = 4;
+                constexpr auto kFrameCycles = kPixelCycles * kPixelsHor * kPixelsVer;
+
+                keypad.update();
+                arm.run(kFrameCycles);
+                ppu.present();
             });
 
             if (changed)
@@ -261,10 +259,13 @@ int main(int argc, char* argv[])
                 limiter.reset();
                 changed = false;
             }
-            else
+            else if (paused)
             {
-                if (const auto fps = (++counter).fps())
-                    updateTitle(*fps);
+                counter.reset();
+            }
+            else if (const auto fps = (++counter).fps())
+            {
+                updateTitle(*fps);
             }
         }
 
