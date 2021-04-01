@@ -28,7 +28,7 @@ Ppu::Ppu()
         uint g = bit::seq< 5, 5>(color) << 3 | 0x7;
         uint b = bit::seq<10, 5>(color) << 3 | 0x7;
 
-        if (config.emulate_lcd)
+        if (config.lcd_color)
         {
             constexpr double kDarken   = 0.5;
             constexpr double kGammaOut = 2.2;

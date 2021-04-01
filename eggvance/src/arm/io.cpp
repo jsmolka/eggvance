@@ -5,7 +5,7 @@
 
 PostFlag::PostFlag()
 {
-    if (config.skip_bios)
+    if (config.bios_skip)
     {
         write(0, 0x01);
     }

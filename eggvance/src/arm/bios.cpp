@@ -23,7 +23,7 @@ void Bios::init(const fs::path& path)
         break;
     }
 
-    if (config.validate_bios)
+    if (config.bios_hash)
     {
         constexpr std::size_t kExpected = 0x5EA9'5B6E'9C23'90E5;
 

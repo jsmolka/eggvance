@@ -39,6 +39,7 @@
     <ClCompile Include="src\arm\psr.cpp" />
     <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\base\config.cpp" />
+    <ClCompile Include="src\base\sdl2.cpp" />
     <ClCompile Include="src\dma\dmaaddress.cpp" />
     <ClCompile Include="src\frontend\audiocontext.cpp" />
     <ClCompile Include="src\frontend\framecounter.cpp" />
@@ -216,7 +217,7 @@
       <SupportJustMyCode>true</SupportJustMyCode>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
-      <DisableSpecificWarnings>26812</DisableSpecificWarnings>
+      <DisableSpecificWarnings>26812;26495</DisableSpecificWarnings>
       <PreprocessorDefinitions>_CONTAINER_DEBUG_LEVEL=1</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -236,7 +237,7 @@
       <PreprocessorDefinitions>NDEBUG</PreprocessorDefinitions>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
-      <DisableSpecificWarnings>26812</DisableSpecificWarnings>
+      <DisableSpecificWarnings>26812;26495</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -260,7 +261,7 @@
       <PreprocessorDefinitions>NDEBUG;SHELL_NO_CONSOLE</PreprocessorDefinitions>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
-      <DisableSpecificWarnings>26812</DisableSpecificWarnings>
+      <DisableSpecificWarnings>26812;26495</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

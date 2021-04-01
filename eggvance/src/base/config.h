@@ -40,22 +40,37 @@ public:
     Input speed_unbound;
 };
 
-class Config
+class Ini
+{
+public:
+    ~Ini();
+
+    void init(const fs::path& file);
+
+    template<typename T>
+    T    get(const std::string& section, const std::string& key) const;
+    void set(const std::string& section, const std::string& key, const std::string& value);
+
+private:
+    shell::Ini ini;
+    shell::filesystem::path file;
+    bool changed = false;
+};
+
+class Config : private Ini
 {
 public:
     ~Config();
 
     void init(const fs::path& file);
 
-    fs::path bios_file;
-    bool skip_bios;
-    bool validate_bios;
-    bool emulate_lcd;
-    double volume;
-    double volume_step;
-
-    fs::path save_path;
-    bool sync_save;
+    fs::path   save_path;
+    fs::path   bios_file;
+    bool       bios_skip;
+    bool       bios_hash;
+    bool       lcd_color;
+    double     volume;
+    double     volume_step;
     Save::Type save_type;
     Gpio::Type gpio_type;
 
@@ -70,13 +85,6 @@ public:
         Shortcuts<SDL_Scancode> keyboard;
         Shortcuts<SDL_GameControllerButton> controller;
     } shortcuts;
-
-private:
-    template<typename T>
-    T find(const std::string& section, const std::string& key) const;
-
-    fs::path file;
-    shell::Ini ini;
 };
 
 inline Config config;

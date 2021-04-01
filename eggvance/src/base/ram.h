@@ -1,6 +1,7 @@
 #pragma once
 
-#include <array>
+#include <shell/array.h>
+#include <shell/macros.h>
 
 #include "base/int.h"
 
@@ -15,18 +16,22 @@ public:
 };
 
 template<uint N, typename Mirror = BasicMirror<N>>
-class Ram : public std::array<u8, N>
+class Ram : public shell::array<u8, N>
 {
 public:
     template<typename Integral>
     Integral readFast(u32 addr) const
     {
+        SHELL_ASSERT(addr + sizeof(Integral) <= N);
+
         return *reinterpret_cast<const Integral*>(this->data() + addr);
     }
 
     template<typename Integral>
     void writeFast(u32 addr, Integral value)
     {
+        SHELL_ASSERT(addr + sizeof(Integral) <= N);
+
         *reinterpret_cast<Integral*>(this->data() + addr) = value;
     }
 

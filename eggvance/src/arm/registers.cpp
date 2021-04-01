@@ -4,7 +4,7 @@
 
 Registers::Registers()
 {
-    if (config.skip_bios)
+    if (config.bios_skip)
     {
         sp   = 0x0300'7F00;
         lr   = 0x0800'0000;
