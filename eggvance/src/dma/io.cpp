@@ -46,9 +46,6 @@ DmaControl::DmaControl(DmaChannel& channel)
 
 void DmaControl::write(uint index, u8 byte)
 {
-    if (read(index) == byte)
-        return;
-
     Register::write(index, byte);
 
     dadcnt = bit::seq<5, 2>(data);
