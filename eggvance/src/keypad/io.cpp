@@ -10,7 +10,6 @@ KeyInput::KeyInput()
 KeyInput& KeyInput::operator=(u16 value)
 {
     data = value & mask;
-
     return *this;
 }
 

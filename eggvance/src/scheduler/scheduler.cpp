@@ -7,10 +7,7 @@ Scheduler::Scheduler()
     next = std::numeric_limits<u64>::max();
 
     infinity.when = next;
-    infinity = [](u64 late) 
-    {
-        SHELL_UNREACHABLE;
-    };
+    infinity = [](u64 late) { SHELL_UNREACHABLE; };
 
     list.setHead(infinity);
 }
