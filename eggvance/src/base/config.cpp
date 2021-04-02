@@ -143,12 +143,8 @@ Ini::~Ini()
     if (file.empty() || !changed)
         return;
 
-    auto parent = file.parent_path();
-    if (!parent.empty())
-    {
-        std::error_code ec;
-        fs::create_directories(parent, ec);
-    }
+    std::error_code ec;
+    fs::create_directories(file.parent_path(), ec);
     
     if (ini.save(file) != fs::Status::Ok)
         showMessageBox("Warning", shell::format("Cannot save config: {}", file));
