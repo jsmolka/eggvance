@@ -147,7 +147,7 @@ Ini::~Ini()
     fs::create_directories(file.parent_path(), ec);
     
     if (ini.save(file) != fs::Status::Ok)
-        showMessageBox("Warning", shell::format("Cannot save config: {}", file));
+        showMessageBox("Warning", shell::format("Cannot write config: {}", file));
 }
 
 void Ini::init(const fs::path& file)

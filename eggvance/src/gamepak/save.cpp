@@ -43,7 +43,7 @@ Save::Type Save::parse(const Rom& rom)
         { "FLASH1M_V" , Save::Type::Flash1024 }
     };
 
-    for (uint x = Rom::kHeaderSize; x < rom.size; x += 4)
+    for (uint x = Rom::kSizeHeader; x < rom.size; x += 4)
     {
         for (const auto& [signature, type] : kSignatures)
         {

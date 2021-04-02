@@ -12,10 +12,9 @@ public:
     static_assert(std::is_integral_v<Integral>);
     static_assert(std::is_unsigned_v<Integral>);
 
-    SerialBuffer& operator=(Integral data)
+    SerialBuffer& operator=(Integral value)
     {
-        this->data = data;
-        
+        data = value;
         return *this;
     }
 

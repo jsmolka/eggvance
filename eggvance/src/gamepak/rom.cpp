@@ -1,7 +1,6 @@
 #include "rom.h"
 
 #include <numeric>
-
 #include <shell/algorithm.h>
 #include <shell/errors.h>
 #include <shell/utility.h>
@@ -18,16 +17,20 @@ std::string makeAscii(const u8 (&data)[N])
     return ascii;
 }
 
-Rom::Rom(const fs::path& file)
+Rom::Rom()
 {
-    data.reserve(kMaxSize);
+    data.reserve(kSizeMax);
+}
 
+void Rom::init(const fs::path& file)
+{
     if (fs::read(file, data) != fs::Status::Ok)
         throw shell::Error("Cannot read ROM: {}", file);
 
     size = data.size();
+    mask = kSizeMax;
 
-    if (size < kHeaderSize || size > kMaxSize)
+    if (size < kSizeHeader || size > kSizeMax)
         throw shell::Error("Bad ROM size: {}", size);
 
     for (auto x = size; x < data.capacity(); ++x)

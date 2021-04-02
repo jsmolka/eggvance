@@ -26,20 +26,23 @@ private:
     };
 
 public:
-    static constexpr uint kMaxSize = 0x200'0000;
-    static constexpr uint kHeaderSize = sizeof(Header);
+    static constexpr auto kSizeMax = 32 * 1024 * 1024;
+    static constexpr auto kSizeHeader = sizeof(Header);
 
-    Rom() = default;
-    explicit Rom(const fs::path& file);
+    Rom();
+
+    void init(const fs::path& file);
 
     template<typename Integral>
     Integral read(u32 addr) const
     {
+        static_assert(std::is_integral_v<Integral>);
+
         return *reinterpret_cast<const Integral*>(data.data() + addr);
     }
 
     uint size = 0;
-    uint mask = kMaxSize;
+    uint mask = kSizeMax;
     std::string code;
     std::string title;
     std::vector<u8> data;

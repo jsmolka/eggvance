@@ -5,7 +5,7 @@
 class Pin
 {
 public:
-    Pin& operator=(uint data);
+    Pin& operator=(uint value);
     operator uint() const;
 
     bool low() const;

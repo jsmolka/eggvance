@@ -2,15 +2,14 @@
 
 #include <shell/macros.h>
 
-Pin& Pin::operator=(uint data)
+Pin& Pin::operator=(uint value)
 {
-    SHELL_ASSERT(data == 0 || data == 1);
+    SHELL_ASSERT(value == 0 || value == 1);
 
-    this->prev = this->data;
-    this->data = data;
+    prev = data;
+    data = value;
 
     return *this;
-
 }
 
 Pin::operator uint() const
