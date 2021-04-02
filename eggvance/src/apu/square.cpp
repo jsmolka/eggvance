@@ -14,7 +14,8 @@ void Square::tick()
     if (!ticks)
         return;
 
-    constexpr u8 kWaves[4] = {
+    static constexpr uint kWaves[4] =
+    {
         0b00000001,
         0b00000011,
         0b00001111,

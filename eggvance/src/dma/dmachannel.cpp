@@ -49,7 +49,7 @@ bool DmaChannel::start()
 {
     if (latch.fifo)
     {
-        if (apu.fifo[latch.dad.fifoB()].size() > 16)
+        if (apu.fifos[latch.dad.fifoB()].size() > 16)
             return false;
     }
     else if (control.repeat)

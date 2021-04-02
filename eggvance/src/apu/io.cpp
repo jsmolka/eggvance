@@ -42,21 +42,21 @@ void SoundControl::write(uint index, u8 byte)
         break;
 
     case 2:
-        volume             = bit::seq<0, 2>(byte);
-        apu.fifo[0].volume = bit::seq<2, 1>(byte);
-        apu.fifo[1].volume = bit::seq<3, 1>(byte);
+        volume              = bit::seq<0, 2>(byte);
+        apu.fifos[0].volume = bit::seq<2, 1>(byte);
+        apu.fifos[1].volume = bit::seq<3, 1>(byte);
         break;
 
     case 3:
-        apu.fifo[0].enabled_r = bit::seq<0, 1>(byte);
-        apu.fifo[0].enabled_l = bit::seq<1, 1>(byte);
-        apu.fifo[0].timer     = bit::seq<2, 1>(byte);
-        apu.fifo[1].enabled_r = bit::seq<4, 1>(byte);
-        apu.fifo[1].enabled_l = bit::seq<5, 1>(byte);
-        apu.fifo[1].timer     = bit::seq<6, 1>(byte);
+        apu.fifos[0].enabled_r = bit::seq<0, 1>(byte);
+        apu.fifos[0].enabled_l = bit::seq<1, 1>(byte);
+        apu.fifos[0].timer     = bit::seq<2, 1>(byte);
+        apu.fifos[1].enabled_r = bit::seq<4, 1>(byte);
+        apu.fifos[1].enabled_l = bit::seq<5, 1>(byte);
+        apu.fifos[1].timer     = bit::seq<6, 1>(byte);
         
-        if (byte & (1 << 3)) apu.fifo[0].clear();
-        if (byte & (1 << 7)) apu.fifo[1].clear();
+        if (byte & (1 << 3)) apu.fifos[0].clear();
+        if (byte & (1 << 7)) apu.fifos[1].clear();
         break;
 
     case 4:
@@ -75,12 +75,5 @@ SoundBias::SoundBias()
 
 SoundBias::operator uint() const
 {
-    return level;
-}
-
-void SoundBias::write(uint index, u8 byte)
-{
-    Register::write(index, byte);
-
-    level = bit::seq<0, 10>(data);
+    return bit::seq<0, 10>(data) - 0x200;
 }

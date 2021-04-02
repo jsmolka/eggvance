@@ -216,8 +216,8 @@ void Arm::writeIo(u32 addr, u8 byte)
     SHELL_CASE08(Io::kSoundControl,   apu.control.write(kIndex, byte));
     SHELL_CASE02(Io::kSoundBias,      apu.bias.write(kIndex, byte));
     SHELL_CASE16(Io::kWaveRam,        apu.wave.ram.write(kIndex, byte));
-    SHELL_CASE04(Io::kFifoA,          apu.fifo[0].write(byte));
-    SHELL_CASE04(Io::kFifoB,          apu.fifo[1].write(byte));
+    SHELL_CASE04(Io::kFifoA,          apu.fifos[0].write(byte));
+    SHELL_CASE04(Io::kFifoB,          apu.fifos[1].write(byte));
     SHELL_CASE04(Io::kDma0Sad,        dma.channels[0].sad.write(kIndex, byte));
     SHELL_CASE04(Io::kDma0Dad,        dma.channels[0].dad.write(kIndex, byte));
     SHELL_CASE02(Io::kDma0Count,      dma.channels[0].count.write(kIndex, byte));

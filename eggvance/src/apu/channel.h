@@ -8,7 +8,7 @@
 class Channel : public Register<u64>
 {
 public:
-    Channel(u64 mask, uint length);
+    Channel(u64 mask, uint base);
 
     virtual void tick() = 0;
 

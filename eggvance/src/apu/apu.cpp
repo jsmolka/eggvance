@@ -29,14 +29,14 @@ void Apu::init()
     scheduler.insert(events.sequence, kSequenceCycles);
 }
 
-void Apu::onOverflow(uint timer, uint ticks)
+void Apu::onTimerOverflow(uint timer, uint ticks)
 {
     if (!control.enabled)
         return;
 
     constexpr Dma::Event kEvents[2] = { Dma::Event::FifoA, Dma::Event::FifoB };
 
-    for (auto [fifo, event] : shell::zip(fifo, kEvents))
+    for (auto [fifo, event] : shell::zip(fifos, kEvents))
     {
         if (fifo.timer != timer)
             continue;
@@ -131,14 +131,14 @@ void Apu::sample(u64 late)
         samples[0] >>= 3 - control.volume;
         samples[1] >>= 3 - control.volume;
 
-        for (const auto& fifo : fifo)
+        for (const auto& fifo : fifos)
         {
             if (fifo.enabled_l) samples[0] += fifo.sample << fifo.volume;
             if (fifo.enabled_r) samples[1] += fifo.sample << fifo.volume;
         }
 
-        samples[0] = std::clamp<s16>(samples[0] + apu.bias - 0x200, -0x400, 0x3FF) << 5;
-        samples[1] = std::clamp<s16>(samples[1] + apu.bias - 0x200, -0x400, 0x3FF) << 5;
+        samples[0] = std::clamp<s16>(samples[0] + apu.bias, -0x400, 0x3FF) << 5;
+        samples[1] = std::clamp<s16>(samples[1] + apu.bias, -0x400, 0x3FF) << 5;
     }
 
     audio_ctx.write(samples);

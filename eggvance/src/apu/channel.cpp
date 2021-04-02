@@ -2,8 +2,8 @@
 
 #include "scheduler/scheduler.h"
 
-Channel::Channel(u64 mask, uint length)
-    : Register(mask), length(length)
+Channel::Channel(u64 mask, uint base)
+    : Register(mask), length(base)
 {
 
 }

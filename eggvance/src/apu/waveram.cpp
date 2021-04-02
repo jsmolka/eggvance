@@ -11,14 +11,10 @@ u8 WaveRam::operator[](uint index) const
 
 u8 WaveRam::read(uint index) const
 {
-    SHELL_ASSERT(index < 16);
-
-    return data[16 * (bank ^ 0x1) + index];
+    return banks[bank ^ 0x1][index];
 }
 
 void WaveRam::write(uint index, u8 byte)
 {
-    SHELL_ASSERT(index < 16);
-
-    data[16 * (bank ^ 0x1) + index] = byte;
+    banks[bank ^ 0x1][index] = byte;
 }

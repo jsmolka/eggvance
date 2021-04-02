@@ -1,6 +1,6 @@
 #pragma once
 
-#include <array>
+#include <shell/array.h>
 
 #include "base/int.h"
 
@@ -15,5 +15,9 @@ public:
     uint bank = 0;
 
 private:
-    std::array<u8, 32> data = {};
+    union
+    {
+        shell::array<u8, 32> data = {};
+        shell::array<u8, 2, 16> banks;
+    };
 };

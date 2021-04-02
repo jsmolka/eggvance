@@ -16,13 +16,13 @@ public:
     Apu();
 
     void init();
-    void onOverflow(uint timer, uint ticks);
+    void onTimerOverflow(uint timer, uint ticks);
 
     Square1 square1;
     Square2 square2;
     Wave wave;
     Noise noise;
-    shell::array<Fifo, 2> fifo;
+    shell::array<Fifo, 2> fifos;
     SoundControl control;
     SoundBias bias;
 

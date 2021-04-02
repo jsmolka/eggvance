@@ -24,9 +24,4 @@ public:
     SoundBias();
 
     operator uint() const;
-
-    void write(uint index, u8 byte);
-
-private:
-    uint level = 0;
 };
