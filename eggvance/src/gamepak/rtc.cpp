@@ -1,7 +1,6 @@
 #include "rtc.h"
 
 #include <ctime>
-
 #include <shell/utility.h>
 
 #include "arm/arm.h"
@@ -27,9 +26,9 @@ u16 Rtc::readPort()
 
 void Rtc::writePort(u16 half)
 {
-    if (isGbaToGpio(Port::kSck)) port.sck = bit::seq<Port::kSck, 1>(half);
-    if (isGbaToGpio(Port::kSio)) port.sio = bit::seq<Port::kSio, 1>(half);
-    if (isGbaToGpio(Port::kCs))  port.cs  = bit::seq<Port::kCs,  1>(half);
+    if (isGbaToGpio(uint(Port::Bit::Sck))) port.sck = bit::seq<uint(Port::Bit::Sck), 1>(half);
+    if (isGbaToGpio(uint(Port::Bit::Sio))) port.sio = bit::seq<uint(Port::Bit::Sio), 1>(half);
+    if (isGbaToGpio(uint(Port::Bit::Cs)))  port.cs  = bit::seq<uint(Port::Bit::Cs),  1>(half);
 
     switch (state)
     {
@@ -88,7 +87,7 @@ void Rtc::receiveCommandBit()
     if (buffer.size < 8)
         return;
 
-    constexpr uint kFixedBits = 0b0110;
+    constexpr auto kFixedBits = 0b0110;
 
     if (bit::seq<0, 4>(buffer.data) != kFixedBits &&
         bit::seq<4, 4>(buffer.data) == kFixedBits)
@@ -148,16 +147,17 @@ void Rtc::transmitDataBit()
 
 void Rtc::readRegister()
 {
-    auto bcd = [](auto value) {
+    auto bcd = [](auto value)
+    {
         return ((value / 10) << 4) | (value % 10);
     };
 
     auto stamp = std::time(NULL);
     auto time = *std::localtime(&stamp);
 
-    switch (reg)
+    switch (Register(reg))
     {
-    case kRegControl:
+    case Register::Control:
         data[0] = 0;
         data[0] |= control.unknown1   << 1;
         data[0] |= control.minute_irq << 3;
@@ -166,7 +166,7 @@ void Rtc::readRegister()
         data.size = 8;
         break;
 
-    case kRegDateTime:
+    case Register::DateTime:
         data[0] = bcd(time.tm_year - 100);
         data[1] = bcd(time.tm_mon + 1);
         data[2] = bcd(time.tm_mday);
@@ -177,7 +177,7 @@ void Rtc::readRegister()
         data.size = 56;
         break;
 
-    case kRegTime:
+    case Register::Time:
         data[0] = bcd(time.tm_hour % (control.format_24h ? 24 : 12));
         data[1] = bcd(time.tm_min);
         data[2] = bcd(time.tm_sec);
@@ -188,20 +188,20 @@ void Rtc::readRegister()
 
 void Rtc::writeRegister()
 {
-    switch (reg)
+    switch (Register(reg))
     {
-    case kRegControl:
+    case Register::Control:
         control.unknown1   = bit::seq<1, 1>(buffer.data);
         control.minute_irq = bit::seq<3, 1>(buffer.data);
         control.unknown2   = bit::seq<5, 1>(buffer.data);
         control.format_24h = bit::seq<6, 1>(buffer.data);
         break;
 
-    case kRegForceReset:
+    case Register::ForceReset:
         control = Control();
         break;
 
-    case kRegForceIrq:
+    case Register::ForceIrq:
         arm.raise(Irq::GamePak);
         break;
     }

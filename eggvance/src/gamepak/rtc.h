@@ -16,17 +16,15 @@ protected:
     void writePort(u16 half) final;
 
 private:
-    static constexpr uint kDataBits[8] = {
-        0, 0, 56, 0, 8, 0, 24, 0
-    };
+    static constexpr uint kDataBits[8] = { 0, 0, 56, 0, 8, 0, 24, 0 };
 
-    enum Register
+    enum class Register
     {
-        kRegForceReset = 0,
-        kRegDateTime   = 2,
-        kRegForceIrq   = 3,
-        kRegControl    = 4,
-        kRegTime       = 6
+        ForceReset = 0,
+        DateTime   = 2,
+        ForceIrq   = 3,
+        Control    = 4,
+        Time       = 6
     };
 
     enum class State
@@ -49,7 +47,7 @@ private:
 
     struct Port
     {
-        enum Bit { kSck, kSio, kCs };
+        enum class Bit { Sck, Sio, Cs };
 
         Pin sck;
         Pin sio;
