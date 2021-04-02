@@ -145,7 +145,7 @@ int eventFilter(void*, SDL_Event* event)
 {
     if (event->type == SDL_WINDOWEVENT && event->window.event == SDL_WINDOWEVENT_RESIZED)
     {
-        if (gamepak.rom.size == 0)
+        if (gamepak.rom.size() == 0)
         {
             video_ctx.renderClear(0xFF3E'4750);
             video_ctx.renderIcon();
@@ -214,7 +214,7 @@ int main(int argc, char* argv[])
     {
         init(argc, argv);
 
-        while (running && gamepak.rom.size == 0)
+        while (running && gamepak.rom.size() == 0)
         {
             handleEvents();
 

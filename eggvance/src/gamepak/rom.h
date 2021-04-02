@@ -6,7 +6,7 @@
 #include "base/int.h"
 #include "base/filesystem.h"
 
-class Rom
+class Rom : public std::vector<u8>
 {
 private:
     struct Header
@@ -38,14 +38,12 @@ public:
     {
         static_assert(std::is_integral_v<Integral>);
 
-        return *reinterpret_cast<const Integral*>(data.data() + addr);
+        return *reinterpret_cast<const Integral*>(this->data() + addr);
     }
 
-    uint size = 0;
-    uint mask = kSizeMax;
+    std::size_t mask = 0;
     std::string code;
     std::string title;
-    std::vector<u8> data;
 
 private:
     static u8 complement(const Header& header);

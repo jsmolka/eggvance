@@ -3,11 +3,10 @@
 #include <numeric>
 #include <shell/algorithm.h>
 #include <shell/errors.h>
-#include <shell/utility.h>
 
 #include "base/bit.h"
 
-template<uint N>
+template<std::size_t N>
 std::string makeAscii(const u8 (&data)[N])
 {
     std::string ascii(reinterpret_cast<const char*>(data), N);
@@ -19,26 +18,25 @@ std::string makeAscii(const u8 (&data)[N])
 
 Rom::Rom()
 {
-    data.reserve(kSizeMax);
+    reserve(kSizeMax);
 }
 
 void Rom::init(const fs::path& file)
 {
-    if (fs::read(file, data) != fs::Status::Ok)
+    if (fs::read(file, *this) != fs::Status::Ok)
         throw shell::Error("Cannot read ROM: {}", file);
 
-    size = data.size();
     mask = kSizeMax;
 
-    if (size < kSizeHeader || size > kSizeMax)
-        throw shell::Error("Bad ROM size: {}", size);
+    if (size() < kSizeHeader || size() > kSizeMax)
+        throw shell::Error("Bad ROM size: {}", size());
 
-    for (auto x = size; x < data.capacity(); ++x)
+    for (std::size_t addr = size(); addr < capacity(); ++addr)
     {
-        data.push_back(bit::byte(x >> 1, x & 0x1));
+        data()[addr] = bit::byte(addr >> 1, addr & 0x1);
     }
 
-    const Header& header = *reinterpret_cast<const Header*>(data.data());
+    const Header& header = *reinterpret_cast<const Header*>(data());
 
     if (header.fixed_96h == 0x96 && header.complement == complement(header))
     {

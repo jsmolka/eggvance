@@ -43,14 +43,11 @@ Save::Type Save::parse(const Rom& rom)
         { "FLASH1M_V" , Save::Type::Flash1024 }
     };
 
-    for (uint x = Rom::kSizeHeader; x < rom.size; x += 4)
+    for (std::size_t addr = Rom::kSizeHeader; addr < rom.size(); addr += 4)
     {
         for (const auto& [signature, type] : kSignatures)
         {
-            if (x + signature.size() >= rom.size)
-                continue;
-
-            if (std::equal(signature.begin(), signature.end(), rom.data.begin() + x))
+            if (std::equal(signature.begin(), signature.end(), rom.begin() + addr, rom.end()))
                 return type;
         }
     }

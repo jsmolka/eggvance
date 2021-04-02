@@ -28,7 +28,7 @@ void GamePak::load(fs::path gba, fs::path sav)
     {
         gpio_type = overwrite->gpio;
         save_type = overwrite->save;
-        rom.mask  = overwrite->mirror ? rom.size : Rom::kSizeMax;
+        rom.mask  = overwrite->mirror ? rom.size() : Rom::kSizeMax;
     }
 
     gpio = gpio_type == Gpio::Type::Rtc
@@ -54,7 +54,7 @@ void GamePak::load(fs::path gba, fs::path sav)
 
 bool GamePak::isEepromAccess(u32 addr) const
 {
-    return save->type == Save::Type::Eeprom && rom.size < Rom::kSizeMax
+    return save->type == Save::Type::Eeprom && rom.size() < Rom::kSizeMax
         ? addr >= 0xD00'0000 && addr < 0xE00'0000
         : addr >= 0xDFF'FF00 && addr < 0xE00'0000;
 }
