@@ -21,7 +21,10 @@ u8 Eeprom::read(u32 addr)
         if (++buffer.size == 4)
         {
             setState(State::Read);
-            buffer = *reinterpret_cast<u64*>(data.data() + address);
+            if (address < data.size())
+                buffer = *reinterpret_cast<u64*>(data.data() + address);
+            else
+                buffer = std::numeric_limits<u64>::max();
             buffer.size = 64;
         }
         break;
@@ -83,7 +86,8 @@ void Eeprom::write(u32 addr, u8 byte)
         if (buffer.size == 64)
         {
             changed = true;
-            *reinterpret_cast<u64*>(data.data() + address) = buffer;
+            if (address < data.size())
+                *reinterpret_cast<u64*>(data.data() + address) = buffer;
             setState(State::WriteEnd);
         }
         break;
@@ -94,15 +98,15 @@ void Eeprom::write(u32 addr, u8 byte)
     }
 }
 
-bool Eeprom::isValid(uint size) const
+bool Eeprom::valid(uint size) const
 {
-    return size == kSize4
-        || size == kSize64;
+    return size == kSize4KBit
+        || size == kSize64KBit;
 }
 
 uint Eeprom::bus() const
 {
-    return data.size() == kSize4 ? 6 : 14;
+    return data.size() == kSize4KBit ? 6 : 14;
 }
 
 void Eeprom::setState(State state)

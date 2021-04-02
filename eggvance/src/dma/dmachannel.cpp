@@ -116,12 +116,12 @@ void DmaChannel::initEeprom()
     {
     case kBus6Write:
     case kBus6ReadSetAddress:
-        gamepak.save->data.resize(Eeprom::kSize4, 0xFF);
+        gamepak.save->data.resize(Eeprom::kSize4KBit, 0xFF);
         break;
 
     case kBus14Write:
     case kBus14ReadSetAddress:
-        gamepak.save->data.resize(Eeprom::kSize64, 0xFF);
+        gamepak.save->data.resize(Eeprom::kSize64KBit, 0xFF);
         break;
     }
 }

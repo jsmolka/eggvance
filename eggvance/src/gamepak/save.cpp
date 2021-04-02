@@ -27,27 +27,28 @@ Save::~Save()
         && type != Type::None)
     {
         if (fs::write(file, data) != fs::Status::Ok)
-            showMessageBox("Warning", shell::format("Cannot write save: {}", file));
+            showMessageBox("Warning", "Cannot write save: {}", file);
     }
 }
 
 Save::Type Save::parse(const Rom& rom)
 {
-    static constexpr std::pair<std::string_view, Save::Type> kSignatures[] =
+    static constexpr std::tuple<std::string_view, Save::Type> kSignatures[6] =
     {
-        { "SRAM_V"    , Save::Type::Sram      },
-        { "SRAM_F_V"  , Save::Type::Sram      },
-        { "EEPROM_V"  , Save::Type::Eeprom    },
-        { "FLASH_V"   , Save::Type::Flash512  },
+        { "SRAM_V",     Save::Type::Sram      },
+        { "SRAM_F_V",   Save::Type::Sram      },
+        { "EEPROM_V",   Save::Type::Eeprom    },
+        { "FLASH_V",    Save::Type::Flash512  },
         { "FLASH512_V", Save::Type::Flash512  },
-        { "FLASH1M_V" , Save::Type::Flash1024 }
+        { "FLASH1M_V",  Save::Type::Flash1024 }
     };
 
     for (std::size_t addr = Rom::kSizeHeader; addr < rom.size(); addr += 4)
     {
         for (const auto& [signature, type] : kSignatures)
         {
-            if (std::equal(signature.begin(), signature.end(), rom.begin() + addr, rom.end()))
+            if (addr + signature.size() < rom.size()
+                    && std::equal(signature.begin(), signature.end(), rom.begin() + addr))
                 return type;
         }
     }
@@ -56,16 +57,15 @@ Save::Type Save::parse(const Rom& rom)
 
 void Save::init(const fs::path& file)
 {
-    this->file = file;
-
     if (fs::is_regular_file(file))
     {
         if (fs::read(file, data) != fs::Status::Ok)
             throw shell::Error("Cannot read save: {}", file);
 
-        if (!isValid(data.size()))
+        if (!valid(data.size()))
             throw shell::Error("Bad save size: {}", data.size());
     }
+    this->file = file;
 }
 
 void Save::reset()
@@ -83,7 +83,7 @@ void Save::write(u32 addr, u8 byte)
 
 }
 
-bool Save::isValid(uint size) const
+bool Save::valid(uint size) const
 {
-    return true;
+    return size == 0;
 }

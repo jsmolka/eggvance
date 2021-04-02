@@ -22,7 +22,7 @@ void Sram::write(u32 addr, u8 byte)
     data[addr] = byte;
 }
 
-bool Sram::isValid(uint size) const
+bool Sram::valid(uint size) const
 {
     return size == kSize;
 }

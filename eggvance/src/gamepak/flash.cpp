@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <shell/macros.h>
+#include <shell/operators.h>
 
 #include "base/bit.h"
 
@@ -29,8 +30,8 @@ u8 Flash::read(u32 addr)
     if (chip && addr <= 1)
     {
         uint macronix = size == kSize512
-            ? kChipMacronix512
-            : kChipMacronix1024;
+            ? uint(Chip::Macronix512)
+            : uint(Chip::Macronix1024);
 
         return bit::byte(macronix, addr);
     }
@@ -39,15 +40,15 @@ u8 Flash::read(u32 addr)
 
 void Flash::write(u32 addr, u8 byte)
 {
-    switch (command)
+    switch (Command(command))
     {
-    case kCommandWriteByte:
+    case Command::WriteByte:
         changed = true;
         bank[addr] = byte;
         command = 0;
         return;
 
-    case kCommandSwitchBank:
+    case Command::SwitchBank:
         if (size == kSize1024)
             bank = data.data() + kSize512 * (byte & 0x1);
         command = 0;
@@ -64,13 +65,13 @@ void Flash::write(u32 addr, u8 byte)
     case 0x2AAA:
         command = (command << 8) | byte;
 
-        switch (command)
+        switch (Command(command))
         {
-        case kCommandErase:
+        case Command::Erase:
             erase = true;
             break;
 
-        case kCommandEraseChip:
+        case Command::EraseChip:
             if (erase)
             {
                 changed = true;
@@ -79,9 +80,9 @@ void Flash::write(u32 addr, u8 byte)
             }
             break;
 
-        case kCommandChipEnter:
-        case kCommandChipExit:
-            chip = command == kCommandChipEnter;
+        case Command::ChipEnter:
+        case Command::ChipExit:
+            chip = command == Command::ChipEnter;
             break;
         }
         break;
@@ -91,7 +92,7 @@ void Flash::write(u32 addr, u8 byte)
         {
             command = (command << 8) | byte;
 
-            if (erase && command == kCommandEraseSector)
+            if (erase && command == Command::EraseSector)
             {
                 changed = true;
                 u8* sector = bank + (addr & 0xF000);
@@ -103,7 +104,7 @@ void Flash::write(u32 addr, u8 byte)
     }
 }
 
-bool Flash::isValid(uint size) const
+bool Flash::valid(uint size) const
 {
     return this->size == size;
 }

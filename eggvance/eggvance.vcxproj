@@ -39,7 +39,6 @@
     <ClCompile Include="src\arm\psr.cpp" />
     <ClCompile Include="src\arm\registers.cpp" />
     <ClCompile Include="src\base\config.cpp" />
-    <ClCompile Include="src\base\sdl2.cpp" />
     <ClCompile Include="src\dma\dmaaddress.cpp" />
     <ClCompile Include="src\frontend\audiocontext.cpp" />
     <ClCompile Include="src\frontend\framecounter.cpp" />

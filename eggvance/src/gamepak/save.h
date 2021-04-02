@@ -1,8 +1,8 @@
 #pragma once
 
 #include "rom.h"
-#include "base/int.h"
 #include "base/filesystem.h"
+#include "base/int.h"
 
 class Save
 {
@@ -18,7 +18,7 @@ public:
     };
 
     Save();
-    explicit Save(Type type);
+    Save(Type type);
     virtual ~Save();
 
     static Type parse(const Rom& rom);
@@ -26,7 +26,6 @@ public:
     void init(const fs::path& file);
 
     virtual void reset();
-
     virtual u8 read(u32 addr);
     virtual void write(u32 addr, u8 byte);
 
@@ -34,7 +33,7 @@ public:
     std::vector<u8> data;
 
 protected:
-    virtual bool isValid(uint size) const;
+    virtual bool valid(uint size) const;
 
     bool changed = false;
 

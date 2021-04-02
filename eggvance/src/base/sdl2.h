@@ -2,6 +2,7 @@
 
 #include <string>
 #include <shell/predef.h>
+#include <shell/format.h>
 
 #if SHELL_CC_MSVC || SHELL_CC_EMSCRIPTEN
 #  include <SDL2/SDL.h>
@@ -10,4 +11,10 @@
 #  include "SDL.h"
 #endif
 
-void showMessageBox(const std::string& title, const std::string& message);
+template<typename... Args>
+void showMessageBox(const std::string& title, const std::string& format, Args&&... args)
+{
+    std::string message = shell::format(format, std::forward<Args>(args)...);
+
+    SDL_ShowSimpleMessageBox(0, title.c_str(), message.c_str(), NULL);
+}

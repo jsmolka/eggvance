@@ -1,7 +1,6 @@
 #include "config.h"
 
 #include <shell/errors.h>
-#include <shell/format.h>
 
 #include "ppu/constants.h"
 
@@ -147,7 +146,7 @@ Ini::~Ini()
     fs::create_directories(file.parent_path(), ec);
     
     if (ini.save(file) != fs::Status::Ok)
-        showMessageBox("Warning", shell::format("Cannot write config: {}", file));
+        showMessageBox("Warning", "Cannot write config: {}", file);
 }
 
 void Ini::init(const fs::path& file)
