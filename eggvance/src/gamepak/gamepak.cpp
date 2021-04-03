@@ -50,8 +50,8 @@ void GamePak::init(fs::path gba, fs::path sav)
         case Save::Type::None:      save = std::make_unique<Save>(); break;
         case Save::Type::Sram:      save = std::make_unique<Sram>(); break;
         case Save::Type::Eeprom:    save = std::make_unique<Eeprom>(); break;
-        case Save::Type::Flash512:  save = std::make_unique<Flash>(Flash::kSize512); break;
-        case Save::Type::Flash1024: save = std::make_unique<Flash>(Flash::kSize1024); break;
+        case Save::Type::Flash512:  save = std::make_unique<Flash512>(); break;
+        case Save::Type::Flash1024: save = std::make_unique<Flash1024>(); break;
         }
         save->init(sav);
     }

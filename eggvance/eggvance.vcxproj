@@ -53,7 +53,6 @@
     <ClCompile Include="src\keypad\keypad.cpp" />
     <ClCompile Include="src\keypad\io.cpp" />
     <ClCompile Include="src\gamepak\eeprom.cpp" />
-    <ClCompile Include="src\gamepak\flash.cpp" />
     <ClCompile Include="src\gamepak\gamepak.cpp" />
     <ClCompile Include="src\gamepak\gpio.cpp" />
     <ClCompile Include="src\gamepak\overwrites.cpp" />

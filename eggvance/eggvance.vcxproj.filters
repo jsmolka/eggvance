@@ -96,9 +96,6 @@
     <ClCompile Include="src\gamepak\eeprom.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\gamepak\flash.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\gamepak\gamepak.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
