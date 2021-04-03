@@ -18,7 +18,7 @@ std::string makeAscii(const u8 (&data)[N])
 
 Rom::Rom()
 {
-    reserve(kSizeMax);
+    reserve(kMaxSize);
 }
 
 void Rom::init(const fs::path& file)
@@ -26,9 +26,9 @@ void Rom::init(const fs::path& file)
     if (fs::read(file, *this) != fs::Status::Ok)
         throw shell::Error("Cannot read ROM: {}", file);
 
-    mask = kSizeMax;
+    mask = kMaxSize;
 
-    if (size() < kSizeHeader || size() > kSizeMax)
+    if (size() <= sizeof(Header) || size() > kMaxSize)
         throw shell::Error("Bad ROM size: {}", size());
 
     for (std::size_t addr = size(); addr < capacity(); ++addr)

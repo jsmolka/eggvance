@@ -17,11 +17,6 @@ Gpio::Gpio(Type type)
 
 }
 
-void Gpio::reset()
-{
-    shell::reconstruct(*this, type);
-}
-
 bool Gpio::isReadable() const
 {
     return readable;
@@ -32,6 +27,11 @@ bool Gpio::isAccess(u32 addr) const
     return addr <= uint(Gpio::Register::Control)
         && addr >= uint(Gpio::Register::Data)
         && type != Type::None;
+}
+
+void Gpio::reset()
+{
+    shell::reconstruct(*this, type);
 }
 
 u16 Gpio::read(u32 addr)

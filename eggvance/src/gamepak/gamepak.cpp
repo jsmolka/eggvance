@@ -17,26 +17,27 @@ void GamePak::init(fs::path gba, fs::path sav)
         {
             sav = gba;
             sav.replace_extension("sav");
+
             if (!config.save_path.empty())
                 sav = config.save_path / sav.filename();
         }
     }
 
-    Gpio::Type gpio_type = config.gpio_type;
     Save::Type save_type = config.save_type;
+    Gpio::Type gpio_type = config.gpio_type;
 
     if (const auto overwrite = Overwrite::find(rom.code))
     {
-        gpio_type = overwrite->gpio_type;
         save_type = overwrite->save_type;
-        rom.mask  = overwrite->mirror ? rom.size() : Rom::kSizeMax;
+        gpio_type = overwrite->gpio_type;
+        rom.mask  = overwrite->mirror ? rom.size() : Rom::kMaxSize;
     }
 
     switch (gpio_type)
     {
     case Gpio::Type::Detect: [[fallthrough]];
-    case Gpio::Type::None:   gpio = std::make_unique<Gpio>(); break;
-    case Gpio::Type::Rtc:    gpio = std::make_unique<Rtc>(); break;
+    case Gpio::Type::None:   gpio = std::make_shared<Gpio>(); break;
+    case Gpio::Type::Rtc:    gpio = std::make_shared<Rtc>(); break;
     }
 
     if (!sav.empty() && rom.size())
@@ -47,11 +48,11 @@ void GamePak::init(fs::path gba, fs::path sav)
         switch (save_type)
         {
         case Save::Type::Detect:    [[fallthrough]];
-        case Save::Type::None:      save = std::make_unique<Save>(); break;
-        case Save::Type::Sram:      save = std::make_unique<Sram>(); break;
-        case Save::Type::Eeprom:    save = std::make_unique<Eeprom>(); break;
-        case Save::Type::Flash512:  save = std::make_unique<Flash512>(); break;
-        case Save::Type::Flash1024: save = std::make_unique<Flash1024>(); break;
+        case Save::Type::None:      save = std::make_shared<Save>(); break;
+        case Save::Type::Sram:      save = std::make_shared<Sram>(); break;
+        case Save::Type::Eeprom:    save = std::make_shared<Eeprom>(); break;
+        case Save::Type::Flash512:  save = std::make_shared<Flash512>(); break;
+        case Save::Type::Flash1024: save = std::make_shared<Flash1024>(); break;
         }
         save->init(sav);
     }
@@ -59,9 +60,10 @@ void GamePak::init(fs::path gba, fs::path sav)
 
 bool GamePak::isEepromAccess(u32 addr) const
 {
-    return save->type == Save::Type::Eeprom && rom.size() < Rom::kSizeMax
-        ? addr >= 0xD00'0000 && addr < 0xE00'0000
-        : addr >= 0xDFF'FF00 && addr < 0xE00'0000;
+    return rom.size() == Rom::kMaxSize
+            ? addr >= 0xDFF'FF00 && addr < 0xE00'0000
+            : addr >= 0xD00'0000 && addr < 0xE00'0000
+        && save->type == Save::Type::Eeprom;
 }
 
 u8 GamePak::readSave(u32 addr)

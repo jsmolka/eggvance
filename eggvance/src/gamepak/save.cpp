@@ -2,7 +2,7 @@
 
 #include <algorithm>
 #include <string_view>
-#include <utility>
+#include <tuple>
 #include <shell/errors.h>
 
 #include "base/sdl2.h"
@@ -43,7 +43,7 @@ Save::Type Save::parse(const Rom& rom)
         { "FLASH1M_V",  Save::Type::Flash1024 }
     };
 
-    for (std::size_t addr = Rom::kSizeHeader; addr < rom.size(); addr += 4)
+    for (std::size_t addr = sizeof(Rom::Header); addr < rom.size(); addr += 4)
     {
         for (const auto& [signature, type] : kSignatures)
         {
@@ -62,7 +62,7 @@ void Save::init(const fs::path& file)
         if (fs::read(file, data) != fs::Status::Ok)
             throw shell::Error("Cannot read save: {}", file);
 
-        if (!valid(data.size()))
+        if (!isValidSize(data.size()))
             throw shell::Error("Bad save size: {}", data.size());
     }
     this->file = file;
@@ -83,7 +83,7 @@ void Save::write(u32 addr, u8 byte)
 
 }
 
-bool Save::valid(uint size) const
+bool Save::isValidSize(uint size) const
 {
     return size == 0;
 }

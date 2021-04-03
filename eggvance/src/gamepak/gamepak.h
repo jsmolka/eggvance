@@ -37,8 +37,8 @@ public:
     void writeSave(u32 addr, u8 byte);
 
     Rom rom;
-    std::unique_ptr<Gpio> gpio;
-    std::unique_ptr<Save> save;
+    std::shared_ptr<Save> save;
+    std::shared_ptr<Gpio> gpio;
 };
 
 inline GamePak gamepak;

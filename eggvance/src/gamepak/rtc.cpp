@@ -33,38 +33,38 @@ void Rtc::writePort(u16 half)
     switch (state)
     {
     case State::InitOne:
-        if (port.cs.low())
+        if (port.cs.isLow())
             setState(State::InitTwo);
         break;
 
     case State::InitTwo:
-        if (port.cs.rising())
+        if (port.cs.isRising())
             setState(State::Command);
         break;
 
     case State::Command:
-        if (port.cs.low())
+        if (port.cs.isLow())
             setState(State::InitOne);
-        else if (port.sck.rising())
+        else if (port.sck.isRising())
             receiveCommandBit();
         break;
 
     case State::Receive:
-        if (port.cs.low())
+        if (port.cs.isLow())
             setState(State::InitOne);
-        else if (port.sck.rising())
+        else if (port.sck.isRising())
             receiveDataBit();
         break;
 
     case State::Transmit:
-        if (port.cs.low())
+        if (port.cs.isLow())
             setState(State::InitOne);
-        else if (port.sck.rising())
+        else if (port.sck.isRising())
             transmitDataBit();
         break;
 
     case State::Finalize:
-        if (port.cs.falling())
+        if (port.cs.isFalling())
             setState(State::InitOne);
         break;
 
@@ -92,9 +92,7 @@ void Rtc::receiveCommandBit()
     if (bit::seq<0, 4>(buffer.data) != kFixedBits &&
         bit::seq<4, 4>(buffer.data) == kFixedBits)
     {
-        buffer = (buffer & 0xF0) >> 4 | (buffer & 0x0F) << 4;
-        buffer = (buffer & 0xCC) >> 2 | (buffer & 0x33) << 2;
-        buffer = (buffer & 0xAA) >> 1 | (buffer & 0x55) << 1;
+        buffer = bit::bitSwap(buffer.data);
     }
 
     if (bit::seq<0, 4>(buffer.data) != kFixedBits)

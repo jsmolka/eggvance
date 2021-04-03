@@ -1,6 +1,5 @@
 #pragma once
 
-#include <type_traits>
 #include <shell/macros.h>
 
 #include "base/bit.h"
@@ -25,16 +24,12 @@ public:
 
     u8& operator[](std::size_t index)
     {
-        SHELL_ASSERT(index < sizeof(Integral));
-
-        return *(reinterpret_cast<u8*>(&data) + index);
+        return bit::byteRef(data, index);
     }
 
     u8 operator[](std::size_t index) const
     {
-        SHELL_ASSERT(index < sizeof(Integral));
-
-        return *(reinterpret_cast<const u8*>(&data) + index);
+        return bit::byte(data, index);
     }
 
     void clear()

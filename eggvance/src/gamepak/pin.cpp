@@ -4,10 +4,8 @@
 
 Pin& Pin::operator=(uint value)
 {
-    SHELL_ASSERT(value == 0 || value == 1);
-
     prev = data;
-    data = value;
+    data = value & 0x1;
 
     return *this;
 }
@@ -17,22 +15,22 @@ Pin::operator uint() const
     return data;
 }
 
-bool Pin::low() const
+bool Pin::isLow() const
 {
     return data == 0;
 }
 
-bool Pin::high() const
+bool Pin::isHigh() const
 {
     return data == 1;
 }
 
-bool Pin::rising() const
+bool Pin::isRising() const
 {
     return prev == 0 && data == 1;
 }
 
-bool Pin::falling() const
+bool Pin::isFalling() const
 {
     return prev == 1 && data == 0;
 }

@@ -6,17 +6,18 @@
 class Eeprom final : public Save
 {
 public:
-    static constexpr auto kSize4KBit  = 0x0200;
-    static constexpr auto kSize64KBit = 0x2000;
-
     Eeprom();
+
+    void initBus6();
+    void initBus14();
+    bool isInitialized() const;
 
     void reset() final;
     u8 read(u32 addr) final;
     void write(u32 addr, u8 byte) final;
 
 protected:
-    bool valid(uint size) const final;
+    bool isValidSize(uint size) const final;
 
 private:
     enum class State

@@ -16,14 +16,9 @@ public:
     Flash()
         : Save(Kind)
     {
-        data.resize(size(), 0xFF);
+        data.resize(kSize, 0xFF);
 
         reset();
-    }
-
-    constexpr auto size() const
-    {
-        return (Kind == Type::Flash512 ? 64 : 128) * 1024;
     }
 
     void reset() final
@@ -38,11 +33,11 @@ public:
     {
         if (chip && addr <= 1)
         {
-            uint macronix = Kind == Type::Flash512
+            constexpr auto kMacronix = Kind == Type::Flash512
                 ? 0x1CC2
                 : 0x09C2;
 
-            return bit::byte(macronix, addr);
+            return bit::byte(kMacronix, addr);
         }
         return bank[addr];
     }
@@ -59,7 +54,7 @@ public:
 
         case Command::SwitchBank:
             if (Kind == Type::Flash1024)
-                bank = data.data() + (size() / 2) * (byte & 0x1);
+                bank = data.data() + (kSize / 2) * (byte & 0x1);
             command = 0;
             return;
         }
@@ -114,12 +109,14 @@ public:
     }
 
 protected:
-    bool valid(uint size) const final
+    bool isValidSize(uint size) const final
     {
-        return this->size() == size;
+        return size == kSize;
     }
 
 private:
+    static constexpr auto kSize = (Kind == Type::Flash512 ? 64 : 128) * 1024;
+
     enum class Command
     {
         Erase       = 0xAA5580,

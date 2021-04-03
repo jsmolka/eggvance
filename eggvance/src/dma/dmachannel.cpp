@@ -104,7 +104,8 @@ void DmaChannel::run()
 
 void DmaChannel::initEeprom()
 {
-    if (!gamepak.save->data.empty())
+    auto eeprom = std::static_pointer_cast<Eeprom>(gamepak.save);
+    if ( eeprom->isInitialized())
         return;
 
     constexpr auto kBus6Write = 73;
@@ -116,12 +117,12 @@ void DmaChannel::initEeprom()
     {
     case kBus6Write:
     case kBus6ReadSetAddress:
-        gamepak.save->data.resize(Eeprom::kSize4KBit, 0xFF);
+        eeprom->initBus6();
         break;
 
     case kBus14Write:
     case kBus14ReadSetAddress:
-        gamepak.save->data.resize(Eeprom::kSize64KBit, 0xFF);
+        eeprom->initBus14();
         break;
     }
 }

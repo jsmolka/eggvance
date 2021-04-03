@@ -30,12 +30,12 @@ public:
     virtual void write(u32 addr, u8 byte);
 
     const Type type;
-    std::vector<u8> data;
 
 protected:
-    virtual bool valid(uint size) const;
+    virtual bool isValidSize(uint size) const;
 
     bool changed = false;
+    std::vector<u8> data;
 
 private:
     fs::path file;

@@ -5,8 +5,6 @@
 class Sram final : public Save
 {
 public:
-    static constexpr auto kSize = 32 * 1024;
-
     Sram();
 
     void reset() final;
@@ -14,5 +12,5 @@ public:
     void write(u32 addr, u8 byte) final;
 
 protected:
-    bool valid(uint size) const final;
+    bool isValidSize(uint size) const final;
 };

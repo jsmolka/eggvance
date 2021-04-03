@@ -15,4 +15,3 @@ public:
     Gpio::Type gpio_type = Gpio::Type::Detect;
     bool mirror = false;
 };
-

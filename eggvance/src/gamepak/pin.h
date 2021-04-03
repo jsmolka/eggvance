@@ -8,10 +8,10 @@ public:
     Pin& operator=(uint value);
     operator uint() const;
 
-    bool low() const;
-    bool high() const;
-    bool rising() const;
-    bool falling() const;
+    bool isLow() const;
+    bool isHigh() const;
+    bool isRising() const;
+    bool isFalling() const;
 
 private:
     uint data = 0;

@@ -1,5 +1,7 @@
 #include "sram.h"
 
+inline constexpr auto kSize = 32 * 1024;
+
 Sram::Sram()
     : Save(Type::Sram)
 {
@@ -22,7 +24,7 @@ void Sram::write(u32 addr, u8 byte)
     data[addr] = byte;
 }
 
-bool Sram::valid(uint size) const
+bool Sram::isValidSize(uint size) const
 {
     return size == kSize;
 }

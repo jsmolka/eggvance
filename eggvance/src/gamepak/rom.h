@@ -3,12 +3,14 @@
 #include <string>
 #include <vector>
 
-#include "base/int.h"
 #include "base/filesystem.h"
+#include "base/int.h"
 
 class Rom : public std::vector<u8>
 {
-private:
+public:
+    static constexpr auto kMaxSize = 32 * 1024 * 1024;
+
     struct Header
     {
         u8 entry_point[4];
@@ -24,10 +26,6 @@ private:
         u8 complement;
         u8 checksum[2];
     };
-
-public:
-    static constexpr auto kSizeMax = 32 * 1024 * 1024;
-    static constexpr auto kSizeHeader = sizeof(Header);
 
     Rom();
 
