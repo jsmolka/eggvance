@@ -9,13 +9,14 @@
 
 void GamePak::init(fs::path gba, fs::path sav)
 {
-    if (gba.extension() == ".gba")
+    if (!gba.empty())
     {
         rom.init(gba);
 
         if (sav.empty())
         {
-            sav = gba.replace_extension("sav");
+            sav = gba;
+            sav.replace_extension("sav");
             if (!config.save_path.empty())
                 sav = config.save_path / sav.filename();
         }
@@ -26,27 +27,31 @@ void GamePak::init(fs::path gba, fs::path sav)
 
     if (const auto overwrite = Overwrite::find(rom.code))
     {
-        gpio_type = overwrite->gpio;
-        save_type = overwrite->save;
+        gpio_type = overwrite->gpio_type;
+        save_type = overwrite->save_type;
         rom.mask  = overwrite->mirror ? rom.size() : Rom::kSizeMax;
     }
 
-    gpio = gpio_type == Gpio::Type::Rtc
-        ? std::make_unique<Rtc>()
-        : std::make_unique<Gpio>();
+    switch (gpio_type)
+    {
+    case Gpio::Type::Detect: [[fallthrough]];
+    case Gpio::Type::None:   gpio = std::make_unique<Gpio>(); break;
+    case Gpio::Type::Rtc:    gpio = std::make_unique<Rtc>(); break;
+    }
 
-    if (sav.extension() == ".sav")
+    if (!sav.empty() && rom.size())
     {
         if (save_type == Save::Type::Detect)
-            save_type = Save::parse(rom);
+            save_type =  Save::parse(rom);
 
         switch (save_type)
         {
+        case Save::Type::Detect:    [[fallthrough]];
+        case Save::Type::None:      save = std::make_unique<Save>(); break;
         case Save::Type::Sram:      save = std::make_unique<Sram>(); break;
         case Save::Type::Eeprom:    save = std::make_unique<Eeprom>(); break;
         case Save::Type::Flash512:  save = std::make_unique<Flash>(Flash::kSize512); break;
         case Save::Type::Flash1024: save = std::make_unique<Flash>(Flash::kSize1024); break;
-        default:                    save = std::make_unique<Save>(); break;
         }
         save->init(sav);
     }

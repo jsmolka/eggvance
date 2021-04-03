@@ -4,7 +4,7 @@
 #include "pin.h"
 #include "serialbuffer.h"
 
-class Rtc : public Gpio
+class Rtc final : public Gpio
 {
 public:
     Rtc();

@@ -31,7 +31,7 @@ bool Gpio::isAccess(u32 addr) const
 {
     return addr <= uint(Gpio::Register::Control)
         && addr >= uint(Gpio::Register::Data)
-        && type != Gpio::Type::None;
+        && type != Type::None;
 }
 
 u16 Gpio::read(u32 addr)

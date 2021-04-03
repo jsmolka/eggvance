@@ -1,12 +1,12 @@
 #include "overwrites.h"
 
-#include <array>
+#include <optional>
 #include <string_view>
-#include <utility>
+#include <tuple>
 
 std::optional<Overwrite> Overwrite::find(const std::string& game_code)
 {
-    static constexpr std::pair<std::string_view, Overwrite> kOverwrites[] =
+    static constexpr std::tuple<std::string_view, Overwrite> kOverwrites[] =
     {
         { "AWRE", { Save::Type::Flash512,  Gpio::Type::None, false } },  // Advance Wars
         { "AWRP", { Save::Type::Flash512,  Gpio::Type::None, false } },  // Advance Wars

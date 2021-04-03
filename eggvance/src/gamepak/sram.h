@@ -2,7 +2,7 @@
 
 #include "save.h"
 
-class Sram : public Save
+class Sram final : public Save
 {
 public:
     static constexpr auto kSize = 32 * 1024;

@@ -3,7 +3,7 @@
 #include "save.h"
 #include "serialbuffer.h"
 
-class Eeprom : public Save
+class Eeprom final : public Save
 {
 public:
     static constexpr auto kSize4KBit  = 0x0200;

@@ -2,7 +2,7 @@
 
 #include "save.h"
 
-class Flash : public Save
+class Flash final : public Save
 {
 public:
     static constexpr auto kSize512  =  64 * 1024;
