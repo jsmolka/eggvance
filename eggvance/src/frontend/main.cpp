@@ -76,12 +76,12 @@ void handleDropEvent(const SDL_DropEvent& event)
 
     if (file.extension() == ".gba")
     {
-        gamepak.load(file, fs::path());
+        gamepak.init(file, fs::path());
         reset();
     }
     if (file.extension() == ".sav")
     {
-        gamepak.load(fs::path(), file);
+        gamepak.init(fs::path(), file);
         reset();
     }
 
@@ -203,7 +203,7 @@ void init(int argc, char* argv[])
     SDL_SetEventFilter(eventFilter, NULL);
     #endif
 
-    gamepak.load(
+    gamepak.init(
         gba.value_or(fs::path()),
         sav.value_or(fs::path()));
 }

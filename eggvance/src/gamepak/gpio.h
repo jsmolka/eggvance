@@ -12,20 +12,14 @@ public:
         Rtc
     };
 
-    enum Register
-    {
-        kRegData      = 0xC4,
-        kRegDirection = 0xC6,
-        kRegControl   = 0xC8
-    };
-
     Gpio();
-    explicit Gpio(Type type);
+    Gpio(Type type);
     virtual ~Gpio() = default;
 
     virtual void reset();
 
     bool isReadable() const;
+    bool isAccess(u32 addr) const;
 
     u16 read(u32 addr);
     void write(u32 addr, u16 half);
@@ -40,6 +34,13 @@ protected:
     bool isGbaToGpio(uint port) const;
 
 private:
+    enum class Register
+    {
+        Data      = 0xC4,
+        Direction = 0xC6,
+        Control   = 0xC8
+    };
+
     u16 maskGpioToGba() const;
     u16 maskGbaToGpio() const;
 

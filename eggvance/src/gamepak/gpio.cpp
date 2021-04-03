@@ -27,24 +27,29 @@ bool Gpio::isReadable() const
     return readable;
 }
 
+bool Gpio::isAccess(u32 addr) const
+{
+    return addr <= uint(Gpio::Register::Control)
+        && addr >= uint(Gpio::Register::Data)
+        && type != Gpio::Type::None;
+}
+
 u16 Gpio::read(u32 addr)
 {
     u16 value = 0;
-
-    switch (addr)
+    switch (Register(addr))
     {
-    case kRegData:
+    case Register::Data:
         value = readPort() & maskGpioToGba();
-
         data &= maskGbaToGpio();
         data |= value;
         break;
 
-    case kRegDirection:
+    case Register::Direction:
         value = direction;
         break;
 
-    case kRegControl:
+    case Register::Control:
         value = readable;
         break;
     }
@@ -53,20 +58,19 @@ u16 Gpio::read(u32 addr)
 
 void Gpio::write(u32 addr, u16 half)
 {
-    switch (addr)
+    switch (Register(addr))
     {
-    case kRegData:
+    case Register::Data:
         data &= maskGpioToGba();
         data |= maskGbaToGpio() & half;
-
         writePort(data);
         break;
 
-    case kRegDirection:
+    case Register::Direction:
         direction = bit::seq<0, 4>(half);
         break;
 
-    case kRegControl:
+    case Register::Control:
         readable = bit::seq<0, 1>(half);
         break;
     }

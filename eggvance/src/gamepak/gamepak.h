@@ -9,7 +9,7 @@
 class GamePak
 {
 public:
-    void load(fs::path gba, fs::path sav);
+    void init(fs::path gba, fs::path sav);
 
     bool isEepromAccess(u32 addr) const;
 
@@ -18,11 +18,7 @@ public:
     {
         addr &= rom.mask - sizeof(Integral);
 
-        if (sizeof(Integral) > 1 
-                && addr <= Gpio::kRegControl 
-                && addr >= Gpio::kRegData
-                && gpio->type != Gpio::Type::None
-                && gpio->isReadable())
+        if (sizeof(Integral) > 1 && gpio->isAccess(addr) && gpio->isReadable())
             return gpio->read(addr);
 
         return rom.read<Integral>(addr);
@@ -33,10 +29,7 @@ public:
     {
         addr &= rom.mask - sizeof(Integral);
 
-        if (sizeof(Integral) > 1
-                && addr <= Gpio::kRegControl 
-                && addr >= Gpio::kRegData
-                && gpio->type != Gpio::Type::None)
+        if (sizeof(Integral) > 1 && gpio->isAccess(addr))
             gpio->write(addr, value);
     }
 
