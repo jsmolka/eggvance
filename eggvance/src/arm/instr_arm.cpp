@@ -30,7 +30,8 @@ void Arm::Arm_BranchLink(u32 instr)
     offset = bit::signEx<24>(offset);
     offset <<= 2;
 
-    if (kLink) lr = pc - 4;
+    if (kLink)
+        lr = pc - 4;
 
     pc += offset;
     flushWord();
@@ -39,24 +40,12 @@ void Arm::Arm_BranchLink(u32 instr)
 template<u32 Instr>
 void Arm::Arm_DataProcessing(u32 instr)
 {
-    enum Opcode
+    enum class Opcode
     {
-        kOpcodeAnd,
-        kOpcodeEor,
-        kOpcodeSub,
-        kOpcodeRsb,
-        kOpcodeAdd,
-        kOpcodeAdc,
-        kOpcodeSbc,
-        kOpcodeRsc,
-        kOpcodeTst,
-        kOpcodeTeq,
-        kOpcodeCmp,
-        kOpcodeCmn,
-        kOpcodeOrr,
-        kOpcodeMov,
-        kOpcodeBic,
-        kOpcodeMvn
+        And, Eor, Sub, Rsb,
+        Add, Adc, Sbc, Rsc,
+        Tst, Teq, Cmp, Cmn,
+        Orr, Mov, Bic, Mvn
     };
 
     constexpr uint kFlags  = bit::seq<20, 1>(Instr);
@@ -72,14 +61,14 @@ void Arm::Arm_DataProcessing(u32 instr)
     u32  op2;
 
     constexpr bool kLogical = 
-           kOpcode == kOpcodeAnd 
-        || kOpcode == kOpcodeEor
-        || kOpcode == kOpcodeOrr
-        || kOpcode == kOpcodeMov
-        || kOpcode == kOpcodeBic
-        || kOpcode == kOpcodeMvn
-        || kOpcode == kOpcodeTst
-        || kOpcode == kOpcodeTeq;
+           kOpcode == Opcode::And 
+        || kOpcode == Opcode::Eor
+        || kOpcode == Opcode::Orr
+        || kOpcode == Opcode::Mov
+        || kOpcode == Opcode::Bic
+        || kOpcode == Opcode::Mvn
+        || kOpcode == Opcode::Tst
+        || kOpcode == Opcode::Teq;
 
     if (kImmOp)
     {
@@ -104,12 +93,12 @@ void Arm::Arm_DataProcessing(u32 instr)
 
             uint amount = regs[rs] & 0xFF;
 
-            switch (shift)
+            switch (Shift(shift))
             {
-            case kShiftLsl: op2 = lsl<false>(op2, amount, flags && kLogical); break;
-            case kShiftLsr: op2 = lsr<false>(op2, amount, flags && kLogical); break;
-            case kShiftAsr: op2 = asr<false>(op2, amount, flags && kLogical); break;
-            case kShiftRor: op2 = ror<false>(op2, amount, flags && kLogical); break;
+            case Shift::Lsl: op2 = lsl<false>(op2, amount, flags && kLogical); break;
+            case Shift::Lsr: op2 = lsr<false>(op2, amount, flags && kLogical); break;
+            case Shift::Asr: op2 = asr<false>(op2, amount, flags && kLogical); break;
+            case Shift::Ror: op2 = ror<false>(op2, amount, flags && kLogical); break;
 
             default:
                 SHELL_UNREACHABLE;
@@ -121,12 +110,12 @@ void Arm::Arm_DataProcessing(u32 instr)
         {
             uint amount = bit::seq<7, 5>(instr);
 
-            switch (shift)
+            switch (Shift(shift))
             {
-            case kShiftLsl: op2 = lsl<true>(op2, amount, flags && kLogical); break;
-            case kShiftLsr: op2 = lsr<true>(op2, amount, flags && kLogical); break;
-            case kShiftAsr: op2 = asr<true>(op2, amount, flags && kLogical); break;
-            case kShiftRor: op2 = ror<true>(op2, amount, flags && kLogical); break;
+            case Shift::Lsl: op2 = lsl<true>(op2, amount, flags && kLogical); break;
+            case Shift::Lsr: op2 = lsr<true>(op2, amount, flags && kLogical); break;
+            case Shift::Asr: op2 = asr<true>(op2, amount, flags && kLogical); break;
+            case Shift::Ror: op2 = ror<true>(op2, amount, flags && kLogical); break;
 
             default:
                 SHELL_UNREACHABLE;
@@ -135,24 +124,24 @@ void Arm::Arm_DataProcessing(u32 instr)
         }
     }
 
-    switch (kOpcode)
+    switch (Opcode(kOpcode))
     {
-    case kOpcodeAnd: dst = log(op1 &  op2, flags); break;
-    case kOpcodeEor: dst = log(op1 ^  op2, flags); break;
-    case kOpcodeOrr: dst = log(op1 |  op2, flags); break;
-    case kOpcodeMov: dst = log(       op2, flags); break;
-    case kOpcodeBic: dst = log(op1 & ~op2, flags); break;
-    case kOpcodeMvn: dst = log(      ~op2, flags); break;
-    case kOpcodeTst:       log(op1 &  op2, true ); break;
-    case kOpcodeTeq:       log(op1 ^  op2, true ); break;
-    case kOpcodeCmn:       add(op1,   op2, true ); break;
-    case kOpcodeCmp:       sub(op1,   op2, true ); break;
-    case kOpcodeAdd: dst = add(op1,   op2, flags); break;
-    case kOpcodeAdc: dst = adc(op1,   op2, flags); break;
-    case kOpcodeSub: dst = sub(op1,   op2, flags); break;
-    case kOpcodeSbc: dst = sbc(op1,   op2, flags); break;
-    case kOpcodeRsb: dst = sub(op2,   op1, flags); break;
-    case kOpcodeRsc: dst = sbc(op2,   op1, flags); break;
+    case Opcode::And: dst = log(op1 &  op2, flags); break;
+    case Opcode::Eor: dst = log(op1 ^  op2, flags); break;
+    case Opcode::Orr: dst = log(op1 |  op2, flags); break;
+    case Opcode::Mov: dst = log(       op2, flags); break;
+    case Opcode::Bic: dst = log(op1 & ~op2, flags); break;
+    case Opcode::Mvn: dst = log(      ~op2, flags); break;
+    case Opcode::Tst:       log(op1 &  op2, true ); break;
+    case Opcode::Teq:       log(op1 ^  op2, true ); break;
+    case Opcode::Cmn:       add(op1,   op2, true ); break;
+    case Opcode::Cmp:       sub(op1,   op2, true ); break;
+    case Opcode::Add: dst = add(op1,   op2, flags); break;
+    case Opcode::Adc: dst = adc(op1,   op2, flags); break;
+    case Opcode::Sub: dst = sub(op1,   op2, flags); break;
+    case Opcode::Sbc: dst = sbc(op1,   op2, flags); break;
+    case Opcode::Rsb: dst = sub(op2,   op1, flags); break;
+    case Opcode::Rsc: dst = sbc(op2,   op1, flags); break;
 
     default:
         SHELL_UNREACHABLE;
@@ -169,10 +158,10 @@ void Arm::Arm_DataProcessing(u32 instr)
         }
 
         constexpr bool kNoWriteback =
-               kOpcode == kOpcodeCmp
-            || kOpcode == kOpcodeCmn
-            || kOpcode == kOpcodeTst
-            || kOpcode == kOpcodeTeq;
+               kOpcode == Opcode::Cmp
+            || kOpcode == Opcode::Cmn
+            || kOpcode == Opcode::Tst
+            || kOpcode == Opcode::Teq;
 
         if (!kNoWriteback)
         {
@@ -192,12 +181,12 @@ void Arm::Arm_DataProcessing(u32 instr)
 template<u32 Instr>
 void Arm::Arm_StatusTransfer(u32 instr)
 {
-    enum Bit
+    enum class Bit
     {
-        kBitC = 1 << 16,
-        kBitX = 1 << 17,
-        kBitS = 1 << 18,
-        kBitF = 1 << 19
+        C = 1 << 16,
+        X = 1 << 17,
+        S = 1 << 18,
+        F = 1 << 19
     };
 
     constexpr uint kWrite = bit::seq<21, 1>(Instr);
@@ -220,10 +209,10 @@ void Arm::Arm_StatusTransfer(u32 instr)
         }
 
         u32 mask = 0;
-        if (instr & kBitC) mask |= 0x0000'00FF;
-        if (instr & kBitX) mask |= 0x0000'FF00;
-        if (instr & kBitS) mask |= 0x00FF'0000;
-        if (instr & kBitF) mask |= 0xFF00'0000;
+        if (instr & Bit::C) mask |= 0x0000'00FF;
+        if (instr & Bit::X) mask |= 0x0000'FF00;
+        if (instr & Bit::S) mask |= 0x00FF'0000;
+        if (instr & Bit::F) mask |= 0xFF00'0000;
 
         if (kSpsr)
         {
@@ -231,7 +220,7 @@ void Arm::Arm_StatusTransfer(u32 instr)
         }
         else
         {
-            if (instr & kBitC)
+            if (instr & Bit::C)
                 switchMode(Psr::Mode(op & 0x1F));
 
             cpsr = (cpsr & ~mask) | (op & mask);
@@ -350,12 +339,12 @@ void Arm::Arm_SingleDataTransfer(u32 instr)
             amount = bit::seq<7, 5>(instr);
         }
 
-        switch (shift)
+        switch (Shift(shift))
         {
-        case kShiftLsl: offset = lsl<true>(regs[rm], amount, false); break;
-        case kShiftLsr: offset = lsr<true>(regs[rm], amount, false); break;
-        case kShiftAsr: offset = asr<true>(regs[rm], amount, false); break;
-        case kShiftRor: offset = ror<true>(regs[rm], amount, false); break;
+        case Shift::Lsl: offset = lsl<true>(regs[rm], amount, false); break;
+        case Shift::Lsr: offset = lsr<true>(regs[rm], amount, false); break;
+        case Shift::Asr: offset = asr<true>(regs[rm], amount, false); break;
+        case Shift::Ror: offset = ror<true>(regs[rm], amount, false); break;
 
         default:
             SHELL_UNREACHABLE;
@@ -375,9 +364,10 @@ void Arm::Arm_SingleDataTransfer(u32 instr)
 
     if (kLoad)
     {
-        dst = kByte
-            ? readByte(addr)
-            : readWordRotate(addr);
+        if (kByte)
+            dst = readByte(addr);
+        else
+            dst = readWordRotate(addr);
 
         idle();
 
@@ -406,13 +396,7 @@ void Arm::Arm_SingleDataTransfer(u32 instr)
 template<u32 Instr>
 void Arm::Arm_HalfSignedDataTransfer(u32 instr)
 {
-    enum Opcode
-    {
-        kOpcodeSwap,
-        kOpcodeLdrh,
-        kOpcodeLdrsb,
-        kOpcodeLdrsh
-    };
+    enum class Opcode { Swap, Ldrh, Ldrsb, Ldrsh };
 
     constexpr uint kOpcode    = bit::seq< 5, 2>(Instr);
     constexpr uint kLoad      = bit::seq<20, 1>(Instr);
@@ -448,13 +432,13 @@ void Arm::Arm_HalfSignedDataTransfer(u32 instr)
 
     if (kLoad)
     {
-        static_assert(kOpcode != kOpcodeSwap);
+        static_assert(kOpcode != Opcode::Swap);
 
-        switch (kOpcode)
+        switch (Opcode(kOpcode))
         {
-        case kOpcodeLdrh:  dst = readHalfRotate(addr); break;
-        case kOpcodeLdrsb: dst = readByteSignEx(addr); break;
-        case kOpcodeLdrsh: dst = readHalfSignEx(addr); break;
+        case Opcode::Ldrh:  dst = readHalfRotate(addr); break;
+        case Opcode::Ldrsb: dst = readByteSignEx(addr); break;
+        case Opcode::Ldrsh: dst = readHalfSignEx(addr); break;
 
         default:
             SHELL_UNREACHABLE;
@@ -566,20 +550,14 @@ void Arm::Arm_BlockDataTransfer(u32 instr)
         }
         else
         {
-            enum Suffix
-            {
-                kSuffixDA,
-                kSuffixDB,
-                kSuffixIA,
-                kSuffixIB
-            };
+            enum class Suffix { DA, DB, IA, IB };
 
-            switch ((kIncrement << 1) | pre_index)
+            switch (Suffix((kIncrement << 1) | pre_index))
             {
-            case kSuffixDA: writeWord(addr - 0x3C, pc + 4); break;
-            case kSuffixDB: writeWord(addr - 0x40, pc + 4); break;
-            case kSuffixIA: writeWord(addr + 0x00, pc + 4); break;
-            case kSuffixIB: writeWord(addr + 0x04, pc + 4); break;
+            case Suffix::DA: writeWord(addr - 0x3C, pc + 4); break;
+            case Suffix::DB: writeWord(addr - 0x40, pc + 4); break;
+            case Suffix::IA: writeWord(addr + 0x00, pc + 4); break;
+            case Suffix::IB: writeWord(addr + 0x04, pc + 4); break;
 
             default:
                 SHELL_UNREACHABLE;

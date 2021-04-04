@@ -17,7 +17,6 @@ public:
 
     Arm();
 
-    void init();
     void run(u64 cycles);
     void raise(Irq irq, u64 late = 0);
 
@@ -32,16 +31,10 @@ public:
     uint state = 0;
 
 private:
+    enum class Shift { Lsl, Lsr, Asr, Ror };
+
     using Instruction32 = void(Arm::*)(u32);
     using Instruction16 = void(Arm::*)(u16);
-
-    enum Shift
-    {
-        kShiftLsl,
-        kShiftLsr,
-        kShiftAsr,
-        kShiftRor
-    };
 
     static const std::array<Instruction32, 4096> instr_arm;
     static const std::array<Instruction16, 1024> instr_thumb;

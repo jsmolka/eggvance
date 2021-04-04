@@ -1,9 +1,6 @@
 #include "arm.h"
 
-#include <shell/macros.h>
-
 #include "decode.h"
-#include "base/config.h"
 #include "dma/dma.h"
 #include "scheduler/scheduler.h"
 #include "timer/timer.h"
@@ -14,12 +11,9 @@ Arm::Arm()
     {
         state |= State::Irq;
     };
-}
 
-void Arm::init()
-{
-    flushWord();
-    pc += 4;
+    pipe[0] = 0xF000'0000;
+    pipe[1] = 0xF000'0000;
 }
 
 void Arm::run(u64 cycles)

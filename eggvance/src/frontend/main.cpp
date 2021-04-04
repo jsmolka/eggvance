@@ -60,7 +60,6 @@ void reset()
     shell::reconstruct(timer);
 
     apu.init();
-    arm.init();
     ppu.init();
 
     updateTitle();

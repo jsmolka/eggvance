@@ -8,7 +8,7 @@ void Arm::Thumb_MoveShiftedRegister(u16 instr)
     constexpr uint kAmount = bit::seq< 6, 5>(Instr);
     constexpr uint kOpcode = bit::seq<11, 2>(Instr);
 
-    static_assert(kOpcode != kShiftRor);
+    static_assert(kOpcode != Shift::Ror);
 
     uint rd = bit::seq<0, 3>(instr);
     uint rs = bit::seq<3, 3>(instr);
@@ -16,11 +16,11 @@ void Arm::Thumb_MoveShiftedRegister(u16 instr)
     u32& dst = regs[rd];
     u32  src = regs[rs];
 
-    switch (kOpcode)
+    switch (Shift(kOpcode))
     {
-    case kShiftLsl: dst = log(lsl<true>(src, kAmount)); break;
-    case kShiftLsr: dst = log(lsr<true>(src, kAmount)); break;
-    case kShiftAsr: dst = log(asr<true>(src, kAmount)); break;
+    case Shift::Lsl: dst = log(lsl<true>(src, kAmount)); break;
+    case Shift::Lsr: dst = log(lsr<true>(src, kAmount)); break;
+    case Shift::Asr: dst = log(asr<true>(src, kAmount)); break;
 
     default:
         SHELL_UNREACHABLE;
@@ -31,13 +31,7 @@ void Arm::Thumb_MoveShiftedRegister(u16 instr)
 template<u16 Instr>
 void Arm::Thumb_AddSubtract(u16 instr)
 {
-    enum Opcode
-    {
-        kOpcodeAddReg,
-        kOpcodeSubReg,
-        kOpcodeAddImm,
-        kOpcodeSubImm
-    };
+    enum class Opcode { AddReg, SubReg, AddImm, SubImm };
 
     constexpr uint kRn     = bit::seq<6, 3>(Instr);
     constexpr uint kOpcode = bit::seq<9, 2>(Instr);
@@ -48,12 +42,12 @@ void Arm::Thumb_AddSubtract(u16 instr)
     u32& dst = regs[rd];
     u32  src = regs[rs];
 
-    switch (kOpcode)
+    switch (Opcode(kOpcode))
     {
-    case kOpcodeAddReg: dst = add(src, regs[kRn]); break;
-    case kOpcodeSubReg: dst = sub(src, regs[kRn]); break;
-    case kOpcodeAddImm: dst = add(src,      kRn ); break;
-    case kOpcodeSubImm: dst = sub(src,      kRn ); break;
+    case Opcode::AddReg: dst = add(src, regs[kRn]); break;
+    case Opcode::SubReg: dst = sub(src, regs[kRn]); break;
+    case Opcode::AddImm: dst = add(src,      kRn ); break;
+    case Opcode::SubImm: dst = sub(src,      kRn ); break;
 
     default:
         SHELL_UNREACHABLE;
@@ -64,13 +58,7 @@ void Arm::Thumb_AddSubtract(u16 instr)
 template<u16 Instr>
 void Arm::Thumb_ImmediateOperations(u16 instr)
 {
-    enum Opcode
-    {
-        kOpcodeMov,
-        kOpcodeCmp,
-        kOpcodeAdd,
-        kOpcodeSub
-    };
+    enum class Opcode { Mov, Cmp, Add, Sub };
 
     constexpr uint kRd     = bit::seq< 8, 3>(Instr);
     constexpr uint kOpcode = bit::seq<11, 2>(Instr);
@@ -80,12 +68,12 @@ void Arm::Thumb_ImmediateOperations(u16 instr)
     u32& dst = regs[kRd];
     u32  src = regs[kRd];
 
-    switch (kOpcode)
+    switch (Opcode(kOpcode))
     {
-    case kOpcodeMov: dst = log(     amount); break;
-    case kOpcodeCmp:       sub(src, amount); break;
-    case kOpcodeAdd: dst = add(src, amount); break;
-    case kOpcodeSub: dst = sub(src, amount); break;
+    case Opcode::Mov: dst = log(     amount); break;
+    case Opcode::Cmp:       sub(src, amount); break;
+    case Opcode::Add: dst = add(src, amount); break;
+    case Opcode::Sub: dst = sub(src, amount); break;
 
     default:
         SHELL_UNREACHABLE;
@@ -96,24 +84,12 @@ void Arm::Thumb_ImmediateOperations(u16 instr)
 template<u16 Instr>
 void Arm::Thumb_AluOperations(u16 instr)
 {
-    enum Opcode
+    enum class Opcode
     {
-        kOpcodeAnd,
-        kOpcodeEor,
-        kOpcodeLsl,
-        kOpcodeLsr,
-        kOpcodeAsr,
-        kOpcodeAdc,
-        kOpcodeSbc,
-        kOpcodeRor,
-        kOpcodeTst,
-        kOpcodeNeg,
-        kOpcodeCmp,
-        kOpcodeCmn,
-        kOpcodeOrr,
-        kOpcodeMul,
-        kOpcodeBic,
-        kOpcodeMvn
+        And, Eor, Lsl, Lsr,
+        Asr, Adc, Sbc, Ror,
+        Tst, Neg, Cmp, Cmn,
+        Orr, Mul, Bic, Mvn
     };
 
     constexpr uint kOpcode = bit::seq<6, 4>(Instr);
@@ -124,24 +100,24 @@ void Arm::Thumb_AluOperations(u16 instr)
     u32& dst = regs[rd];
     u32  src = regs[rs];
 
-    switch (kOpcode)
+    switch (Opcode(kOpcode))
     {
-    case kOpcodeLsl: dst = log(lsl<false>(dst, src)); idle(); break;
-    case kOpcodeLsr: dst = log(lsr<false>(dst, src)); idle(); break;
-    case kOpcodeAsr: dst = log(asr<false>(dst, src)); idle(); break;
-    case kOpcodeRor: dst = log(ror<false>(dst, src)); idle(); break;
-    case kOpcodeAnd: dst = log(dst &  src); break;
-    case kOpcodeEor: dst = log(dst ^  src); break;
-    case kOpcodeOrr: dst = log(dst |  src); break;
-    case kOpcodeBic: dst = log(dst & ~src); break;
-    case kOpcodeMvn: dst = log(      ~src); break;
-    case kOpcodeTst:       log(dst &  src); break;
-    case kOpcodeCmn:       add(dst,   src); break;
-    case kOpcodeCmp:       sub(dst,   src); break;
-    case kOpcodeAdc: dst = adc(dst,   src); break;
-    case kOpcodeSbc: dst = sbc(dst,   src); break;
-    case kOpcodeNeg: dst = sub(  0,   src); break;
-    case kOpcodeMul:
+    case Opcode::Lsl: dst = log(lsl<false>(dst, src)); idle(); break;
+    case Opcode::Lsr: dst = log(lsr<false>(dst, src)); idle(); break;
+    case Opcode::Asr: dst = log(asr<false>(dst, src)); idle(); break;
+    case Opcode::Ror: dst = log(ror<false>(dst, src)); idle(); break;
+    case Opcode::And: dst = log(dst &  src); break;
+    case Opcode::Eor: dst = log(dst ^  src); break;
+    case Opcode::Orr: dst = log(dst |  src); break;
+    case Opcode::Bic: dst = log(dst & ~src); break;
+    case Opcode::Mvn: dst = log(      ~src); break;
+    case Opcode::Tst:       log(dst &  src); break;
+    case Opcode::Cmn:       add(dst,   src); break;
+    case Opcode::Cmp:       sub(dst,   src); break;
+    case Opcode::Adc: dst = adc(dst,   src); break;
+    case Opcode::Sbc: dst = sbc(dst,   src); break;
+    case Opcode::Neg: dst = sub(  0,   src); break;
+    case Opcode::Mul:
         tickMultiply(dst, true);
         dst = log(dst * src);
         break;
@@ -155,13 +131,7 @@ void Arm::Thumb_AluOperations(u16 instr)
 template<u16 Instr>
 void Arm::Thumb_HighRegisterOperations(u16 instr)
 {
-    enum Opcode
-    {
-        kOpcodeAdd,
-        kOpcodeCmp,
-        kOpcodeMov,
-        kOpcodeBx
-    };
+    enum class Opcode { Add, Cmp, Mov, Bx };
 
     constexpr uint kHs     = bit::seq<6, 1>(Instr);
     constexpr uint kHd     = bit::seq<7, 1>(Instr);
@@ -176,25 +146,25 @@ void Arm::Thumb_HighRegisterOperations(u16 instr)
     u32& dst = regs[rd];
     u32  src = regs[rs];
 
-    switch (kOpcode)
+    switch (Opcode(kOpcode))
     {
-    case kOpcodeAdd:
+    case Opcode::Add:
         dst += src;
         if (rd == 15 && kHd)
             flushHalf();
         break;
 
-    case kOpcodeMov:
+    case Opcode::Mov:
         dst = src;
         if (rd == 15 && kHd)
             flushHalf();
         break;
 
-    case kOpcodeCmp:
+    case Opcode::Cmp:
         sub(dst, src);
         break;
 
-    case kOpcodeBx:
+    case Opcode::Bx:
         pc = src;
         if ((cpsr.t = src & 0x1))
         {
@@ -228,13 +198,7 @@ void Arm::Thumb_LoadPcRelative(u16 instr)
 template<u16 Instr>
 void Arm::Thumb_LoadStoreRegisterOffset(u16 instr)
 {
-    enum Opcode
-    {
-        kOpcodeStr,
-        kOpcodeStrb,
-        kOpcodeLdr,
-        kOpcodeLdrb
-    };
+    enum class Opcode { Str, Strb, Ldr, Ldrb };
 
     constexpr uint kRo     = bit::seq< 6, 3>(Instr);
     constexpr uint kOpcode = bit::seq<10, 2>(Instr);
@@ -245,22 +209,22 @@ void Arm::Thumb_LoadStoreRegisterOffset(u16 instr)
     u32& dst = regs[rd];
     u32 addr = regs[rb] + regs[kRo];
 
-    switch (kOpcode)
+    switch (Opcode(kOpcode))
     {
-    case kOpcodeStr:
+    case Opcode::Str:
         writeWord(addr, dst);
         break;
 
-    case kOpcodeStrb:
+    case Opcode::Strb:
         writeByte(addr, dst);
         break;
 
-    case kOpcodeLdr:
+    case Opcode::Ldr:
         dst = readWordRotate(addr);
         idle();
         break;
 
-    case kOpcodeLdrb:
+    case Opcode::Ldrb:
         dst = readByte(addr);
         idle();
         break;
@@ -274,13 +238,7 @@ void Arm::Thumb_LoadStoreRegisterOffset(u16 instr)
 template<u16 Instr>
 void Arm::Thumb_LoadStoreByteHalf(u16 instr)
 {
-    enum Opcode
-    {
-        kOpcodeStrh,
-        kOpcodeLdrsb,
-        kOpcodeLdrh,
-        kOpcodeLdrsh
-    };
+    enum class Opcode { Strh, Ldrsb, Ldrh, Ldrsh };
 
     constexpr uint kRo     = bit::seq< 6, 3>(Instr);
     constexpr uint kOpcode = bit::seq<10, 2>(Instr);
@@ -291,23 +249,23 @@ void Arm::Thumb_LoadStoreByteHalf(u16 instr)
     u32& dst = regs[rd];
     u32 addr = regs[rb] + regs[kRo];
 
-    switch (kOpcode)
+    switch (Opcode(kOpcode))
     {
-    case kOpcodeStrh:
+    case Opcode::Strh:
         writeHalf(addr, dst);
         break;
 
-    case kOpcodeLdrsb:
+    case Opcode::Ldrsb:
         dst = readByteSignEx(addr);
         idle();
         break;
 
-    case kOpcodeLdrh:
+    case Opcode::Ldrh:
         dst = readHalfRotate(addr);
         idle();
         break;
 
-    case kOpcodeLdrsh:
+    case Opcode::Ldrsh:
         dst = readHalfSignEx(addr);
         idle();
         break;
@@ -321,13 +279,7 @@ void Arm::Thumb_LoadStoreByteHalf(u16 instr)
 template<u16 Instr>
 void Arm::Thumb_LoadStoreImmediateOffset(u16 instr)
 {
-    enum Opcode
-    {
-        kOpcodeStr,
-        kOpcodeLdr,
-        kOpcodeStrb,
-        kOpcodeLdrb
-    };
+    enum class Opcode { Str, Ldr, Strb, Ldrb };
 
     constexpr uint kOffset = bit::seq< 6, 5>(Instr);
     constexpr uint kOpcode = bit::seq<11, 2>(Instr);
@@ -338,22 +290,22 @@ void Arm::Thumb_LoadStoreImmediateOffset(u16 instr)
     u32& dst = regs[rd];
     u32 addr = regs[rb] + (kOffset << (~kOpcode & 0x2));
 
-    switch (kOpcode)
+    switch (Opcode(kOpcode))
     {
-    case kOpcodeStr:
+    case Opcode::Str:
         writeWord(addr, dst);
         break;
 
-    case kOpcodeStrb:
+    case Opcode::Strb:
         writeByte(addr, dst);
         break;
 
-    case kOpcodeLdr:
+    case Opcode::Ldr:
         dst = readWordRotate(addr);
         idle();
         break;
 
-    case kOpcodeLdrb:
+    case Opcode::Ldrb:
         dst = readByte(addr);
         idle();
         break;
@@ -440,12 +392,12 @@ void Arm::Thumb_AddOffsetSp(u16 instr)
 template<u16 Instr>
 void Arm::Thumb_PushPopRegisters(u16 instr)
 {
-    constexpr uint kRbit = bit::seq< 8, 1>(Instr);
+    constexpr uint kRBit = bit::seq< 8, 1>(Instr);
     constexpr uint kPop  = bit::seq<11, 1>(Instr);
 
     uint rlist = bit::seq<0, 8>(instr);
 
-    rlist |= kRbit << (kPop ? 15 : 14);
+    rlist |= kRBit << (kPop ? 15 : 14);
 
     Access access = Access::NonSequential;
 
@@ -460,7 +412,7 @@ void Arm::Thumb_PushPopRegisters(u16 instr)
 
         idle();
 
-        if (kRbit)
+        if (kRBit)
             flushHalf();
     }
     else
