@@ -41,22 +41,17 @@ SHELL_INLINE void Arm::tickRom(u32 addr, u64 cycles)
     scheduler.run(cycles);
 }
 
-template<bool Signed>
-SHELL_INLINE void Arm::tickMultiply(u32 multiplier)
+SHELL_INLINE void Arm::tickMultiply(u32 multiplier, bool sign)
 {
     u64 cycles = 1;
+    
+    for (uint mask = 0xFFFF'FF00; mask; mask <<= 8)
+    {
+        multiplier &= mask;
+        if (multiplier == 0 || (sign && multiplier == mask))
+            break;
 
-    if (Signed)
-    {
-        cycles += (multiplier >>  8) != 0 && (multiplier >>  8) != 0xFF'FFFF;
-        cycles += (multiplier >> 16) != 0 && (multiplier >> 16) != 0x00'FFFF;
-        cycles += (multiplier >> 24) != 0 && (multiplier >> 24) != 0x00'00FF;
-    }
-    else
-    {
-        cycles += (multiplier >>  8) != 0;
-        cycles += (multiplier >> 16) != 0;
-        cycles += (multiplier >> 24) != 0;
+        cycles++;
     }
     idle(cycles);
 }

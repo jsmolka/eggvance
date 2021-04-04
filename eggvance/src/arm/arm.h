@@ -75,8 +75,7 @@ private:
     SHELL_INLINE void idle(u64 cycles = 1);
     SHELL_INLINE void tickRam(u64 cycles);
     SHELL_INLINE void tickRom(u32 addr, u64 cycles);
-    template<bool Signed>
-    SHELL_INLINE void tickMultiply(u32 multiplier);
+    SHELL_INLINE void tickMul(u32 multiplier, bool sign);
 
     void interrupt(u32 pc, u32 lr, Psr::Mode mode);
     void interruptHw();
@@ -122,10 +121,16 @@ private:
     Pipeline pipe;
     u64 target = 0;
 
-    struct Events
+    struct
     {
         Event interrupt;
     } events;
+
+    struct
+    {
+        u64 active = 0;
+        u64 cycles = 0;
+    } prefetch;
 
     struct
     {
@@ -134,19 +139,13 @@ private:
         IrqRequest request;
     } irq;
 
-    struct Prefetch
-    {
-        u64 active = 0;
-        u64 cycles = 0;
-    } prefetch;
-
     WaitControl waitcnt;
     HaltControl haltcnt;
     PostFlag    postflg;
 
     Bios bios;
-    Ram<0x40000> ewram{};
-    Ram<0x08000> iwram{};
+    Ram< 32 * 1024> iwram{};
+    Ram<256 * 1024> ewram{};
 };
 
 inline Arm arm;
