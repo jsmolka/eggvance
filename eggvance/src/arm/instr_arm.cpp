@@ -405,6 +405,8 @@ void Arm::Arm_HalfSignedDataTransfer(u32 instr)
     constexpr uint kIncrement = bit::seq<23, 1>(Instr);
     constexpr uint kPreIndex  = bit::seq<24, 1>(Instr);
 
+    static_assert(kOpcode != Opcode::Swap);
+
     uint rd = bit::seq<12, 4>(instr);
     uint rn = bit::seq<16, 4>(instr);
 
@@ -432,8 +434,6 @@ void Arm::Arm_HalfSignedDataTransfer(u32 instr)
 
     if (kLoad)
     {
-        static_assert(kOpcode != Opcode::Swap);
-
         switch (Opcode(kOpcode))
         {
         case Opcode::Ldrh:  dst = readHalfRotate(addr); break;

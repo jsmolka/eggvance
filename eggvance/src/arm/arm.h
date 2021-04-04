@@ -17,16 +17,9 @@ public:
 
     Arm();
 
+    void init();
     void run(u64 cycles);
     void raise(Irq irq, u64 late = 0);
-
-    u8  readByte(u32 addr, Access access = Access::NonSequential);
-    u16 readHalf(u32 addr, Access access = Access::NonSequential);
-    u32 readWord(u32 addr, Access access = Access::NonSequential);
-
-    void writeByte(u32 addr, u8  byte, Access access = Access::NonSequential);
-    void writeHalf(u32 addr, u16 half, Access access = Access::NonSequential);
-    void writeWord(u32 addr, u32 word, Access access = Access::NonSequential);
 
     uint state = 0;
 
@@ -52,6 +45,14 @@ private:
     SHELL_INLINE u32 sub(u32 op1, u32 op2, bool flags = true);
     SHELL_INLINE u32 adc(u32 op1, u32 op2, bool flags = true);
     SHELL_INLINE u32 sbc(u32 op1, u32 op2, bool flags = true);
+
+    u8  readByte(u32 addr, Access access = Access::NonSequential);
+    u16 readHalf(u32 addr, Access access = Access::NonSequential);
+    u32 readWord(u32 addr, Access access = Access::NonSequential);
+
+    void writeByte(u32 addr, u8  byte, Access access = Access::NonSequential);
+    void writeHalf(u32 addr, u16 half, Access access = Access::NonSequential);
+    void writeWord(u32 addr, u32 word, Access access = Access::NonSequential);
 
     u8 readIo(u32 addr);
     void writeIo(u32 addr, u8 byte);
@@ -125,19 +126,19 @@ private:
 
     struct
     {
-        IrqMaster  master;
-        IrqEnable  enable;
+        Event delay;
+        IrqMaster master;
+        IrqEnable enable;
         IrqRequest request;
-        Event      delay;
     } irq;
 
     WaitControl waitcnt;
     HaltControl haltcnt;
-    PostFlag    postflg;
+    PostFlag postflg;
 
     Bios bios;
-    Ram<256 * 1024> ewram{};
-    Ram< 32 * 1024> iwram{};
+    Ram<256 * 1024> ewram = {};
+    Ram< 32 * 1024> iwram = {};
 };
 
 inline Arm arm;

@@ -11,9 +11,12 @@ Arm::Arm()
     {
         state |= State::Irq;
     };
+}
 
-    pipe[0] = 0xF000'0000;
-    pipe[1] = 0xF000'0000;
+void Arm::init()
+{
+    flushWord();
+    pc += 4;
 }
 
 void Arm::run(u64 cycles)
@@ -86,17 +89,17 @@ void Arm::dispatch()
 void Arm::flushHalf()
 {
     pc &= ~0x1;
-    pipe[0] = readHalf(pc, Access::NonSequential);
-    pc += 2;
-    pipe[1] = readHalf(pc, Access::Sequential);
+    pipe[0] = readHalf(pc + 0, Access::NonSequential);
+    pipe[1] = readHalf(pc + 2, Access::Sequential);
     pipe.access = Access::Sequential;
+    pc += 2;
 }
 
 void Arm::flushWord()
 {
     pc &= ~0x3;
-    pipe[0] = readWord(pc, Access::NonSequential);
-    pc += 4;
-    pipe[1] = readWord(pc, Access::Sequential);
+    pipe[0] = readWord(pc + 0, Access::NonSequential);
+    pipe[1] = readWord(pc + 4, Access::Sequential);
     pipe.access = Access::Sequential;
+    pc += 4;
 }
