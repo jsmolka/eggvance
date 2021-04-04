@@ -1,5 +1,7 @@
 #pragma once
 
+#include <shell/operators.h>
+
 #include "scheduler/scheduler.h"
 
 SHELL_INLINE void Arm::idle(u64 cycles)

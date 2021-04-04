@@ -1,5 +1,7 @@
 #include "io.h"
 
+#include <shell/operators.h>
+
 #include "dma.h"
 
 DmaSrcAddress::DmaSrcAddress(uint id)

@@ -11,13 +11,15 @@ class Arm : public Registers
 public:
     friend class Dma;
     friend class DmaChannel;
+    friend class IrqEnable;
+    friend class IrqRequest;
+    friend class IrqMaster;
 
     Arm();
 
     void init();
     void run(u64 cycles);
     void raise(Irq irq, u64 late = 0);
-    void interruptProcess(u64 late = 0);
 
     u8  readByte(u32 addr, Access access = Access::NonSequential);
     u16 readHalf(u32 addr, Access access = Access::NonSequential);
@@ -75,11 +77,12 @@ private:
     SHELL_INLINE void idle(u64 cycles = 1);
     SHELL_INLINE void tickRam(u64 cycles);
     SHELL_INLINE void tickRom(u32 addr, u64 cycles);
-    SHELL_INLINE void tickMul(u32 multiplier, bool sign);
+    SHELL_INLINE void tickMultiply(u32 multiplier, bool sign);
 
     void interrupt(u32 pc, u32 lr, Psr::Mode mode);
     void interruptHw();
     void interruptSw();
+    void interruptHandle(u64 late = 0);
 
     template<u32 Instr> void Arm_BranchExchange(u32 instr);
     template<u32 Instr> void Arm_BranchLink(u32 instr);
@@ -123,11 +126,6 @@ private:
 
     struct
     {
-        Event interrupt;
-    } events;
-
-    struct
-    {
         u64 active = 0;
         u64 cycles = 0;
     } prefetch;
@@ -137,6 +135,7 @@ private:
         IrqMaster  master;
         IrqEnable  enable;
         IrqRequest request;
+        Event      delay;
     } irq;
 
     WaitControl waitcnt;
@@ -144,8 +143,8 @@ private:
     PostFlag    postflg;
 
     Bios bios;
-    Ram< 32 * 1024> iwram{};
     Ram<256 * 1024> ewram{};
+    Ram< 32 * 1024> iwram{};
 };
 
 inline Arm arm;

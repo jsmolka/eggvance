@@ -92,8 +92,7 @@ void IrqMaster::write(uint index, u8 byte)
 {
     Register::write(index, byte);
 
-    arm.interruptProcess();
-
+    arm.interruptHandle();
 }
 
 IrqEnable::operator u16() const
@@ -105,13 +104,12 @@ void IrqEnable::write(uint index, u8 byte)
 {
     Register::write(index, byte);
 
-    arm.interruptProcess();
+    arm.interruptHandle();
 }
 
 IrqRequest& IrqRequest::operator|=(Irq irq)
 {
     data |= irq;
-
     return *this;
 }
 
@@ -124,5 +122,5 @@ void IrqRequest::write(uint index, u8 byte)
 {
     bit::byteRef(data, index) &= ~(byte & bit::byte(mask, index));
 
-    arm.interruptProcess();
+    arm.interruptHandle();
 }

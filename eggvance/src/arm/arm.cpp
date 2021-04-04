@@ -10,7 +10,7 @@
 
 Arm::Arm()
 {
-    events.interrupt = [this](u64 late)
+    irq.delay = [this](u64 late)
     {
         state |= State::Irq;
     };

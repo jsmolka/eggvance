@@ -6,7 +6,7 @@
 class Bios
 {
 public:
-    static constexpr uint kSize = 0x4000;
+    static constexpr auto kSize = 0x4000;
 
     static void init(const fs::path& path);
 
@@ -20,5 +20,5 @@ private:
     template<typename Integral>
     Integral read(u32 addr);
 
-    u32 previous = 0xE129'F000;
+    u32 latch = 0xE129'F000;
 };

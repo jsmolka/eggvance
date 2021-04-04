@@ -1,7 +1,5 @@
 #pragma once
 
-#include <shell/operators.h>
-
 enum class Irq
 {
     VBlank  = 1 << 0,
