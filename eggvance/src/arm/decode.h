@@ -1,5 +1,7 @@
 #pragma once
 
+#include <shell/operators.h>
+
 #include "base/bit.h"
 #include "base/int.h"
 
@@ -48,17 +50,11 @@ constexpr InstructionArm decodeArm(uint hash)
     if ((hash & 0b1111'1011'1111) == 0b0001'0000'1001) return InstructionArm::SingleDataSwap;
     if ((hash & 0b1110'0000'1001) == 0b0000'0000'1001)
     {
-        enum Opcode
-        {
-            kOpcodeSwap,
-            kOpcodeLdrh,
-            kOpcodeLdrsb,
-            kOpcodeLdrsh
-        };
+        enum class Opcode { Swap, Ldrh, Ldrsb, Ldrsh };
 
         uint opcode = bit::seq<1, 2>(hash);
 
-        if (opcode == kOpcodeSwap)
+        if (opcode == Opcode::Swap)
             return InstructionArm::Undefined;
 
         return InstructionArm::HalfSignedDataTransfer;
@@ -66,30 +62,18 @@ constexpr InstructionArm decodeArm(uint hash)
     if ((hash & 0b1101'1001'0000) == 0b0001'0000'0000) return InstructionArm::StatusTransfer;
     if ((hash & 0b1100'0000'0000) == 0b0000'0000'0000)
     {
-        enum Opcode
+        enum class Opcode
         {
-            kOpcodeAnd,
-            kOpcodeEor,
-            kOpcodeSub,
-            kOpcodeRsb,
-            kOpcodeAdd,
-            kOpcodeAdc,
-            kOpcodeSbc,
-            kOpcodeRsc,
-            kOpcodeTst,
-            kOpcodeTeq,
-            kOpcodeCmp,
-            kOpcodeCmn,
-            kOpcodeOrr,
-            kOpcodeMov,
-            kOpcodeBic,
-            kOpcodeMvn
-        };
+            And, Eor, Sub, Rsb,
+            Add, Adc, Sbc, Rsc,
+            Tst, Teq, Cmp, Cmn,
+            Orr, Mov, Bic, Mvn
+        }; 
 
         uint flags  = bit::seq<4, 1>(hash);
         uint opcode = bit::seq<5, 4>(hash);
 
-        if ((opcode == kOpcodeTst || opcode == kOpcodeTeq || opcode == kOpcodeCmp || opcode == kOpcodeCmn) && !flags)
+        if (!flags && (opcode == Opcode::Tst || opcode == Opcode::Teq || opcode == Opcode::Cmp || opcode == Opcode::Cmn))
             return InstructionArm::Undefined;
 
         return InstructionArm::DataProcessing;
@@ -139,21 +123,15 @@ constexpr InstructionThumb decodeThumb(uint hash)
     if ((hash & 0b11'1111'0000) == 0b01'0000'0000) return InstructionThumb::AluOperations;
     if ((hash & 0b11'1111'0000) == 0b01'0001'0000)
     {
-        enum Opcode
-        {
-            kOpcodeAdd,
-            kOpcodeCmp,
-            kOpcodeMov,
-            kOpcodeBx
-        };
+        enum class Opcode { Add, Cmp, Mov, Bx };
 
         uint hs     = bit::seq<0, 1>(hash);
         uint hd     = bit::seq<1, 1>(hash);
         uint opcode = bit::seq<2, 2>(hash);
 
-        if (opcode != kOpcodeBx && hs == 0 && hd == 0)
+        if (opcode != Opcode::Bx && hs == 0 && hd == 0)
             return InstructionThumb::Undefined;
-        if (opcode == kOpcodeBx && hd == 1)
+        if (opcode == Opcode::Bx && hd == 1)
             return InstructionThumb::Undefined;
 
         return InstructionThumb::HighRegisterOperations;
@@ -171,31 +149,19 @@ constexpr InstructionThumb decodeThumb(uint hash)
     if ((hash & 0b11'1111'1100) == 0b11'0111'1100) return InstructionThumb::SoftwareInterrupt;
     if ((hash & 0b11'1100'0000) == 0b11'0100'0000)
     {
-        enum Condition
+        enum class Condition
         {
-            kConditionEQ,
-            kConditionNE,
-            kConditionCS,
-            kConditionCC,
-            kConditionMI,
-            kConditionPL,
-            kConditionVS,
-            kConditionVC,
-            kConditionHI,
-            kConditionLS,
-            kConditionGE,
-            kConditionLT,
-            kConditionGT,
-            kConditionLE,
-            kConditionAL,
-            kConditionNV
+            EQ, NE, CS, CC,
+            MI, PL, VS, VC,
+            HI, LS, GE, LT,
+            GT, LE, AL, NV
         };
 
         uint condition = bit::seq<2, 4>(hash);
 
-        if (condition == kConditionAL)
+        if (condition == Condition::AL)
             return InstructionThumb::Undefined;
-        if (condition == kConditionNV)
+        if (condition == Condition::NV)
             return InstructionThumb::Undefined;
 
         return InstructionThumb::ConditionalBranch;
