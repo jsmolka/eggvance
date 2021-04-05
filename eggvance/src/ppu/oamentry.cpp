@@ -56,14 +56,10 @@ uint OamEntry::tileBytes() const
     return kTileBytes[color_mode];
 }
 
-uint OamEntry::tilesInRow(uint layout) const
+uint OamEntry::tilesPerRow(uint layout) const
 {
-    static constexpr Point kTileLayout2d[2] = {
-        Point(32, 32), Point(16, 32)
-    };
-
     return layout == ObjectLayout::TwoDim
-        ? kTileLayout2d[color_mode].x
+        ? 32 >> color_mode
         : sprite_size.x / kTileSize;
 }
 
@@ -74,7 +70,7 @@ uint OamEntry::paletteBank() const
         : 0;
 }
 
-int OamEntry::cycles() const
+u64 OamEntry::cycles() const
 {
     return affine
         ? screen_size.x * 2 + 10

@@ -21,11 +21,6 @@ void VideoRam::writeByte(u32 addr, u8 byte)
     }
 }
 
-uint VideoRam::index256x1(u32 addr, const Point& pixel) const
-{
-    return readFast<u8>(addr + pixel.index2d(kTileSize));
-}
-
 uint VideoRam::index16x16(u32 addr, const Point& pixel) const
 {
     u8 data = readFast<u8>(addr + pixel.index2d(kTileSize) / 2);
@@ -33,9 +28,14 @@ uint VideoRam::index16x16(u32 addr, const Point& pixel) const
     return bit::nibble(data, pixel.x & 0x1);
 }
 
-uint VideoRam::index(u32 addr, const Point& pixel, uint mode) const
+uint VideoRam::index256x1(u32 addr, const Point& pixel) const
 {
-    return mode == ColorMode::C16x16
+    return readFast<u8>(addr + pixel.index2d(kTileSize));
+}
+
+uint VideoRam::index(u32 addr, const Point& pixel, uint color_mode) const
+{
+    return color_mode == ColorMode::C16x16
         ? index16x16(addr, pixel)
         : index256x1(addr, pixel);
 }

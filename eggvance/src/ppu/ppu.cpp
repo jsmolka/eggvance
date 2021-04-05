@@ -17,11 +17,6 @@ Ppu::Ppu()
     bgpd[0].write(1, 0x01);
     bgpd[1].write(1, 0x01);
 
-    backgrounds[0].fill(kTransparent);
-    backgrounds[1].fill(kTransparent);
-    backgrounds[2].fill(kTransparent);
-    backgrounds[3].fill(kTransparent);
-
     for (u32 color = 0; color < argb.size(); ++color)
     {
         uint r = bit::seq< 0, 5>(color) << 3 | 0x7;

@@ -2,8 +2,8 @@
 
 #include "constants.h"
 
-constexpr uint kBankBytes = 0x20;
-constexpr uint kPaletteFg = 0x200;
+inline constexpr auto kBankBytes = 0x20;
+inline constexpr auto kPaletteFg = 0x200;
 
 void PaletteRam::writeByte(u32 addr, u8 byte)
 {

@@ -8,11 +8,9 @@
 
 Point Ppu::transform(uint x, uint bg)
 {
-    bg -= 2;
-
     return Point(
-        bgpa[bg] * static_cast<int>(x) + bgx[bg],
-        bgpc[bg] * static_cast<int>(x) + bgy[bg]);
+        bgpa[bg - 2] * static_cast<int>(x) + bgx[bg - 2],
+        bgpc[bg - 2] * static_cast<int>(x) + bgy[bg - 2]);
 }
 
 void Ppu::renderBg(RenderFunc render, uint bg)
@@ -33,9 +31,9 @@ void Ppu::renderBg(RenderFunc render, uint bg)
 
         if (bgcnt.mosaic && mosaic.bgs.x > 1)
         {
-            for (uint x = 0; x < kScreen.x; ++x)
+            for (auto [x, color] : shell::enumerate(background))
             {
-                background[x] = background[mosaic.bgs.mosaicX(x)];
+                color = background[mosaic.bgs.mosaicX(x)];
             }
         }
     }
@@ -43,7 +41,7 @@ void Ppu::renderBg(RenderFunc render, uint bg)
 
 void Ppu::renderBgMode0(uint bg)
 {
-    switch (bgcnt[bg].color_mode)
+    switch (ColorMode(bgcnt[bg].color_mode))
     {
     case ColorMode::C16x16: renderBgMode0Impl<ColorMode::C16x16>(bg); break;
     case ColorMode::C256x1: renderBgMode0Impl<ColorMode::C256x1>(bg); break;
@@ -68,7 +66,7 @@ void Ppu::renderBgMode0Impl(uint bg)
     auto tile  = origin / kTileSize % kMapBlockTiles;
     auto block = origin / kMapBlockSize;
 
-    for (uint x = 0; ; block.x ^= (size.x == 2 * kMapBlockSize) ? 1 : 0)
+    for (uint x = 0; ; block.x ^= size.x > kMapBlockSize)
     {
         u32 map = bgcnt.map_block
             + kMapBlockBytes * block.index2d(size.x / kMapBlockSize)
@@ -116,7 +114,7 @@ void Ppu::renderBgMode2(uint bg)
     const auto& bgcnt = this->bgcnt[bg];
     const auto& size  = this->bgcnt[bg].sizeAff();
 
-    for (uint x = 0; x < kScreen.x; ++x)
+    for (auto [x, color] : shell::enumerate(backgrounds[bg]))
     {
         auto texel = transform(x, bg) >> kDecimalBits;
 
@@ -124,15 +122,14 @@ void Ppu::renderBgMode2(uint bg)
         {
             if (bgcnt.wraparound)
             {
-                texel.x %= size.x;
-                texel.y %= size.y;
+                texel %= size;
 
                 if (texel.x < 0) texel.x += size.x;
                 if (texel.y < 0) texel.y += size.y;
             }
             else
             {
-                backgrounds[bg][x] = kTransparent;
+                color = kTransparent;
                 continue;
             }
         }
@@ -143,13 +140,13 @@ void Ppu::renderBgMode2(uint bg)
         uint entry = vram.readFast<u8>(bgcnt.map_block + tile.index2d(size.x / kTileSize));
         uint index = vram.index256x1(bgcnt.tile_block + kTileBytes[uint(ColorMode::C256x1)] * entry, pixel);
 
-        backgrounds[bg][x] = pram.colorBg(index);
+        color = pram.colorBg(index);
     }
 }
 
 void Ppu::renderBgMode3(uint bg)
 {
-    for (uint x = 0; x < kScreen.x; ++x)
+    for (auto [x, color] : shell::enumerate(backgrounds[bg]))
     {
         const auto texel = transform(x, bg) >> kDecimalBits;
 
@@ -157,18 +154,18 @@ void Ppu::renderBgMode3(uint bg)
         {
             u32 addr = kColorBytes * texel.index2d(kScreen.x);
 
-            backgrounds[bg][x] = vram.readFast<u16>(addr) & kColorMask;
+            color = vram.readFast<u16>(addr) & kColorMask;
         }
         else
         {
-            backgrounds[bg][x] = kTransparent;
+            color = kTransparent;
         }
     }
 }
 
 void Ppu::renderBgMode4(uint bg)
 {
-    for (uint x = 0; x < kScreen.x; ++x)
+    for (auto [x, color] : shell::enumerate(backgrounds[bg]))
     {
         const auto texel = transform(x, bg) >> kDecimalBits;
 
@@ -176,11 +173,11 @@ void Ppu::renderBgMode4(uint bg)
         {
             uint index = vram.readFast<u8>(dispcnt.frame + texel.index2d(kScreen.x));
 
-            backgrounds[bg][x] = pram.colorBg(index);
+            color = pram.colorBg(index);
         }
         else
         {
-            backgrounds[bg][x] = kTransparent;
+            color = kTransparent;
         }
     }
 }
@@ -189,7 +186,7 @@ void Ppu::renderBgMode5(uint bg)
 {
     constexpr Point kBitmap(160, 128);
 
-    for (uint x = 0; x < kScreen.x; ++x)
+    for (auto [x, color] : shell::enumerate(backgrounds[bg]))
     {
         const auto texel = transform(x, bg) >> kDecimalBits;
 
@@ -197,11 +194,11 @@ void Ppu::renderBgMode5(uint bg)
         {
             u32 addr = dispcnt.frame + kColorBytes * texel.index2d(kBitmap.x);
 
-            backgrounds[bg][x] = vram.readFast<u16>(addr) & kColorMask;
+            color = vram.readFast<u16>(addr) & kColorMask;
         }
         else
         {
-            backgrounds[bg][x] = kTransparent;
+            color = kTransparent;
         }
     }
 }
@@ -210,7 +207,7 @@ void Ppu::renderObjects()
 {
     constexpr Matrix kIdentity(1 << kDecimalBits, 0, 0, 1 << kDecimalBits);
 
-    int cycles = dispcnt.oam_free ? 954 : 1210;
+    s64 cycles = dispcnt.oam_free ? 954 : 1210;
 
     for (const auto& entry : oam.entries)
     {
@@ -224,7 +221,7 @@ void Ppu::renderObjects()
         const auto& matrix      = entry.affine ? oam.matrices[entry.matrix] : kIdentity;
 
         uint tile_bytes = entry.tileBytes();
-        uint tiles_row  = entry.tilesInRow(dispcnt.layout);
+        uint tiles_row  = entry.tilesPerRow(dispcnt.layout);
         uint bank       = entry.paletteBank();
 
         Point offset(

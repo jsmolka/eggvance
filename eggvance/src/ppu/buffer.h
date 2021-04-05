@@ -1,25 +1,31 @@
 #pragma once
 
-#include <array>
+#include <shell/array.h>
+#include <shell/ranges.h>
 
 #include "constants.h"
 #include "base/int.h"
 
 template<typename T>
-using ScanlineBuffer = std::array<T, kScreen.x>;
+using ScanlineBuffer = shell::array<T, kScreen.x>;
 
 template<typename T>
 class ScanlineDoubleBuffer
 {
 public:
+    using iterator               = typename shell::array<T, kScreen.x>::iterator;
+    using const_iterator         = typename shell::array<T, kScreen.x>::const_iterator;
+    using reverse_iterator       = typename shell::array<T, kScreen.x>::reverse_iterator;
+    using const_reverse_iterator = typename shell::array<T, kScreen.x>::const_reverse_iterator;
+
     T* data()
     {
-        return buffers[page].data();
+        return pages[page].data();
     }
 
     const T* data() const
     {
-        return buffers[page].data();
+        return pages[page].data();
     }
 
     void flip()
@@ -27,23 +33,20 @@ public:
         page ^= 0x1;
     }
 
-    void fill(const T& value)
-    {
-        buffers[0].fill(value);
-        buffers[1].fill(value);
-    }
-
     T& operator[](uint index)
     {
-        return buffers[page][index];
+        return pages[page][index];
     }
 
     const T& operator[](uint index) const
     {
-        return buffers[page][index];
+        return pages[page][index];
     }
 
+    SHELL_FORWARD_ITERATORS(pages[page].begin(), pages[page].end())
+    SHELL_REVERSE_ITERATORS(pages[page].end(), pages[page].begin())
+
 private:
-    uint page = 0;
-    ScanlineBuffer<T> buffers[2];
+    shell::uint page = 0;
+    shell::array<T, 2, kScreen.x> pages = {};
 };

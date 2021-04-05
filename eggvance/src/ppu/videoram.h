@@ -1,5 +1,5 @@
 #pragma once
-
+ 
 #include "point.h"
 #include "base/ram.h"
 
@@ -14,7 +14,7 @@ class VideoRam : public Ram<96 * 1024, VideoRamMirror>
 public:
     void writeByte(u32 addr, u8 byte);
 
-    uint index256x1(u32 addr, const Point& pixel) const;
     uint index16x16(u32 addr, const Point& pixel) const;
-    uint index(u32 addr, const Point& pixel, uint mode) const;
+    uint index256x1(u32 addr, const Point& pixel) const;
+    uint index(u32 addr, const Point& pixel, uint color_mode) const;
 };

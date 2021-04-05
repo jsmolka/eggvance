@@ -14,9 +14,9 @@ public:
 
     bool isVisible(uint line) const;
     uint tileBytes() const;
-    uint tilesInRow(uint layout) const;
+    uint tilesPerRow(uint layout) const;
     uint paletteBank() const;
-    int  cycles() const;
+    u64  cycles() const;
 
     uint affine      = 0;
     uint disabled    = 0;

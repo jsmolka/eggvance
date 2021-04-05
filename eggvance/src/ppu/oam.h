@@ -1,5 +1,7 @@
 #pragma once
 
+#include <shell/array.h>
+
 #include "matrix.h"
 #include "oamentry.h"
 #include "base/ram.h"
@@ -11,6 +13,6 @@ public:
     void writeHalf(u32 addr, u16 half);
     void writeWord(u32 addr, u32 word);
 
-    Matrix matrices[32];
-    OamEntry entries[128];
+    shell::array<Matrix, 32> matrices = {};
+    shell::array<OamEntry, 128> entries = {};
 };
