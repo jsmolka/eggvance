@@ -1,5 +1,7 @@
 #include "videoram.h"
 
+#include <shell/operators.h>
+
 #include "constants.h"
 #include "ppu.h"
 #include "base/bit.h"
@@ -33,7 +35,7 @@ uint VideoRam::index16x16(u32 addr, const Point& pixel) const
 
 uint VideoRam::index(u32 addr, const Point& pixel, uint mode) const
 {
-    return mode == kColorMode16x16
+    return mode == ColorMode::C16x16
         ? index16x16(addr, pixel)
         : index256x1(addr, pixel);
 }

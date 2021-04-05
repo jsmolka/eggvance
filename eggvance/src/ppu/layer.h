@@ -3,19 +3,20 @@
 #include "constants.h"
 #include "base/int.h"
 
-enum LayerFlag
-{
-    kLayerBg0 = 1 << 0,
-    kLayerBg1 = 1 << 1,
-    kLayerBg2 = 1 << 2,
-    kLayerBg3 = 1 << 3,
-    kLayerObj = 1 << 4,
-    kLayerBdp = 1 << 5
-};
-
 class Layer
 {
 public:
+    enum class Flag
+    {
+        Non = 0,
+        Bg0 = 1 << 0,
+        Bg1 = 1 << 1,
+        Bg2 = 1 << 2,
+        Bg3 = 1 << 3,
+        Obj = 1 << 4,
+        Bdp = 1 << 5
+    };
+
     bool operator<=(const Layer& other) const { return priority <= other.priority; }
     bool operator< (const Layer& other) const { return priority <  other.priority; }
 

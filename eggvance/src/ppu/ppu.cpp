@@ -97,7 +97,7 @@ void Ppu::scanline()
         objects_alpha = false;
     }
 
-    if (dispcnt.layers & kLayerObj)
+    if (dispcnt.layers & Layer::Flag::Obj)
     {
         renderObjects();
     }
@@ -109,35 +109,35 @@ void Ppu::scanline()
         renderBg(&Ppu::renderBgMode0, 1);
         renderBg(&Ppu::renderBgMode0, 2);
         renderBg(&Ppu::renderBgMode0, 3);
-        collapse(kLayerBg0 | kLayerBg1 | kLayerBg2 | kLayerBg3);
+        collapse(uint(Layer::Flag::Bg0 | Layer::Flag::Bg1 | Layer::Flag::Bg2 | Layer::Flag::Bg3));
         break;
 
     case 1:
         renderBg(&Ppu::renderBgMode0, 0);
         renderBg(&Ppu::renderBgMode0, 1);
         renderBg(&Ppu::renderBgMode2, 2);
-        collapse(kLayerBg0 | kLayerBg1 | kLayerBg2);
+        collapse(uint(Layer::Flag::Bg0 | Layer::Flag::Bg1 | Layer::Flag::Bg2));
         break;
 
     case 2:
         renderBg(&Ppu::renderBgMode2, 2);
         renderBg(&Ppu::renderBgMode2, 3);
-        collapse(kLayerBg2 | kLayerBg3);
+        collapse(uint(Layer::Flag::Bg2 | Layer::Flag::Bg3));
         break;
 
     case 3:
         renderBg(&Ppu::renderBgMode3, 2);
-        collapse(kLayerBg2);
+        collapse(uint(Layer::Flag::Bg2));
         break;
 
     case 4:
         renderBg(&Ppu::renderBgMode4, 2);
-        collapse(kLayerBg2);
+        collapse(uint(Layer::Flag::Bg2));
         break;
 
     case 5:
         renderBg(&Ppu::renderBgMode5, 2);
-        collapse(kLayerBg2);
+        collapse(uint(Layer::Flag::Bg2));
         break;
     }
 }

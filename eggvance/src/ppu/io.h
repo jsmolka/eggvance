@@ -97,6 +97,13 @@ public:
 class Window
 {
 public:
+    enum Flag
+    {
+        Zero = 1 << 0,
+        One  = 1 << 1,
+        Obj  = 1 << 2
+    };
+
     Window();
 
     void write(u8 byte);

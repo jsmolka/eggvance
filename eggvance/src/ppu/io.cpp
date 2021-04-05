@@ -1,5 +1,7 @@
 #include "io.h"
 
+#include <shell/operators.h>
+
 #include "base/config.h"
 
 inline constexpr uint kMaskR = 0x1F <<  0;
@@ -40,13 +42,14 @@ bool DisplayControl::isActive() const
 {
     static constexpr uint kLayers[8] =
     {
-        kLayerBg0 | kLayerBg1 | kLayerBg2 | kLayerBg3 | kLayerObj,
-        kLayerBg0 | kLayerBg1 | kLayerBg2 | kLayerObj,
-        kLayerBg2 | kLayerBg3 | kLayerObj,
-        kLayerBg2 | kLayerObj,
-        kLayerBg2 | kLayerObj,
-        kLayerBg2 | kLayerObj,
-        0, 0
+        uint(Layer::Flag::Bg0 | Layer::Flag::Bg1 | Layer::Flag::Bg2 | Layer::Flag::Bg3 | Layer::Flag::Obj),
+        uint(Layer::Flag::Bg0 | Layer::Flag::Bg1 | Layer::Flag::Bg2 | Layer::Flag::Obj),
+        uint(Layer::Flag::Bg2 | Layer::Flag::Bg3 | Layer::Flag::Obj),
+        uint(Layer::Flag::Bg2 | Layer::Flag::Obj),
+        uint(Layer::Flag::Bg2 | Layer::Flag::Obj),
+        uint(Layer::Flag::Bg2 | Layer::Flag::Obj),
+        uint(Layer::Flag::Non),
+        uint(Layer::Flag::Non)
     };
     return kLayers[mode] & layers;
 }
@@ -175,7 +178,7 @@ Window::Window()
 
 void Window::write(u8 byte)
 {
-    flags = bit::seq<0, 5>(byte) | kLayerBdp;
+    flags = bit::seq<0, 5>(byte) | Layer::Flag::Bdp;
     blend = bit::seq<5, 1>(byte);
 }
 

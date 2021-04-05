@@ -47,19 +47,6 @@ public:
     BlendFade bldfade;
 
 private:
-    enum WindowFlag
-    {
-        kWindow0   = 1 << 0,
-        kWindow1   = 1 << 1,
-        kWindowObj = 1 << 2
-    };
-
-    struct Events
-    {
-        Event hblank;
-        Event hblank_end;
-    } events;
-
     using BgLayers = shell::FixedBuffer<BgLayer, 4>;
     using RenderFunc = void(Ppu::*)(uint);
 
@@ -73,7 +60,7 @@ private:
     void renderBgMode5(uint bg);
     void renderObjects();
 
-    template<uint ColorMode>
+    template<ColorMode kColorMode>
     void renderBgMode0Impl(uint bg);
 
     void collapse(uint bgs);
@@ -87,13 +74,13 @@ private:
     void collapseNW(const BgLayers& layers);
     template<bool Objects>
     void collapseBN(const BgLayers& layers);
-    template<bool Objects, uint BlendMode>
+    template<bool Objects, BlendMode kBlendMode>
     void collapseBN(const BgLayers& layers);
     template<bool Objects>
     void collapseBW(const BgLayers& layers);
-    template<bool Objects, uint BlendMode>
+    template<bool Objects, BlendMode kBlendMode>
     void collapseBW(const BgLayers& layers);
-    template<bool Objects, uint BlendMode, uint Windows>
+    template<bool Objects, BlendMode kBlendMode, uint Windows>
     void collapseBW(const BgLayers& layers);
 
     template<bool Objects>
@@ -109,6 +96,12 @@ private:
     bool findBlendLayers(const BgLayers& layers, uint x, uint flags, u16& upper);
     template<bool Objects>
     bool findBlendLayers(const BgLayers& layers, uint x, uint flags, u16& upper, u16& lower);
+
+    struct
+    {
+        Event hblank;
+        Event hblank_end;
+    } events;
 
     ScanlineDoubleBuffer<u16> backgrounds[4];
     ScanlineBuffer<ObjectLayer> objects;
