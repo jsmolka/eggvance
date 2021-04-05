@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <shell/macros.h>
+#include <shell/operators.h>
 
 #include "constants.h"
 #include "frontend/videocontext.h"
@@ -31,7 +32,7 @@ template<bool Objects>
 void Ppu::collapse(const BgLayers& layers)
 {
     uint window = dispcnt.win0 || dispcnt.win1 || dispcnt.winobj;
-    uint blend  = bldcnt.mode != kBlendModeDisabled || objects_alpha;
+    uint blend  = bldcnt.mode != BlendMode::Disabled || objects_alpha;
 
     switch ((blend << 1) | window)
     {
@@ -88,7 +89,7 @@ void Ppu::collapseBN(const BgLayers& layers)
 {
     switch (bldcnt.mode)
     {
-    SHELL_CASE04(0, collapseBN<Objects, kLabel>(layers));
+    SHELL_CASE04(0, collapseBN<Objects, BlendMode(kLabel)>(layers));
 
     default:
         SHELL_UNREACHABLE;
@@ -96,7 +97,7 @@ void Ppu::collapseBN(const BgLayers& layers)
     }
 }
 
-template<bool Objects, uint BlendMode>
+template<bool Objects, BlendMode kBlendMode>
 void Ppu::collapseBN(const BgLayers& layers)
 {
     constexpr uint kFlags = 0xFFFF;
@@ -117,24 +118,24 @@ void Ppu::collapseBN(const BgLayers& layers)
         }
         else
         {
-            switch (BlendMode)
+            switch (kBlendMode)
             {
-            case kBlendModeAlpha:
+            case BlendMode::Alpha:
                 if (findBlendLayers<Objects>(layers, x, kFlags, upper, lower))
                     upper = bldalpha.blendAlpha(upper, lower);
                 break;
 
-            case kBlendModeWhite:
+            case BlendMode::White:
                 if (findBlendLayers<Objects>(layers, x, kFlags, upper))
                     upper = bldfade.blendWhite(upper);
                 break;
 
-            case kBlendModeBlack:
+            case BlendMode::Black:
                 if (findBlendLayers<Objects>(layers, x, kFlags, upper))
                     upper = bldfade.blendBlack(upper);
                 break;
 
-            case kBlendModeDisabled:
+            case BlendMode::Disabled:
                 upper = upperLayer<Objects>(layers, x);
                 break;
 
@@ -152,7 +153,7 @@ void Ppu::collapseBW(const BgLayers& layers)
 {
     switch (bldcnt.mode)
     {
-    SHELL_CASE04(0, collapseBW<Objects, kLabel>(layers));
+    SHELL_CASE04(0, collapseBW<Objects, BlendMode(kLabel)>(layers));
 
     default:
         SHELL_UNREACHABLE;
@@ -160,12 +161,12 @@ void Ppu::collapseBW(const BgLayers& layers)
     }
 }
 
-template<bool Objects, uint BlendMode>
+template<bool Objects, BlendMode kBlendMode>
 void Ppu::collapseBW(const BgLayers& layers)
 {
     switch (possibleWindows<Objects>())
     {
-    SHELL_CASE08(0, collapseBW<Objects, BlendMode, kLabel>(layers));
+    SHELL_CASE08(0, collapseBW<Objects, kBlendMode, kLabel>(layers));
 
     default:
         SHELL_UNREACHABLE;
@@ -173,7 +174,7 @@ void Ppu::collapseBW(const BgLayers& layers)
     }
 }
 
-template<bool Objects, uint BlendMode, uint Windows>
+template<bool Objects, BlendMode kBlendMode, uint Windows>
 void Ppu::collapseBW(const BgLayers& layers)
 {
     u32* scanline = video_ctx.scanline(vcount);
@@ -193,24 +194,24 @@ void Ppu::collapseBW(const BgLayers& layers)
         }
         else if (window.blend)
         {
-            switch (BlendMode)
+            switch (kBlendMode)
             {
-            case kBlendModeAlpha:
+            case BlendMode::Alpha:
                 if (findBlendLayers<Objects>(layers, x, window.flags, upper, lower))
                     upper = bldalpha.blendAlpha(upper, lower);
                 break;
 
-            case kBlendModeWhite:
+            case BlendMode::White:
                 if (findBlendLayers<Objects>(layers, x, window.flags, upper))
                     upper = bldfade.blendWhite(upper);
                 break;
 
-            case kBlendModeBlack:
+            case BlendMode::Black:
                 if (findBlendLayers<Objects>(layers, x, window.flags, upper))
                     upper = bldfade.blendBlack(upper);
                 break;
 
-            case kBlendModeDisabled:
+            case BlendMode::Disabled:
                 upper = upperLayer<Objects>(layers, x, window.flags);
                 break;
 
@@ -233,11 +234,11 @@ uint Ppu::possibleWindows() const
     uint windows = 0;
 
     if (dispcnt.win0 && winv[0].contains(vcount))
-        windows |= kWindow0;
+        windows |= Window::Flag::Zero;
     if (dispcnt.win1 && winv[1].contains(vcount))
-        windows |= kWindow1;
+        windows |= Window::Flag::One;
     if (dispcnt.winobj && Objects)
-        windows |= kWindowObj;
+        windows |= Window::Flag::Obj;
 
     return windows;
 }
@@ -245,13 +246,13 @@ uint Ppu::possibleWindows() const
 template<uint Windows>
 const Window& Ppu::activeWindow(uint x) const
 {
-    if (Windows & kWindow0 && winh[0].contains(x))
+    if (Windows & Window::Flag::Zero && winh[0].contains(x))
         return winin.win0;
 
-    if (Windows & kWindow1 && winh[1].contains(x))
+    if (Windows & Window::Flag::One && winh[1].contains(x))
         return winin.win1;
 
-    if (Windows & kWindowObj && objects[x].window)
+    if (Windows & Window::Flag::Obj && objects[x].window)
         return winout.winobj;
 
     return winout.winout;

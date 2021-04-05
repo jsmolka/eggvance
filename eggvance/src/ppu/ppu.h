@@ -47,13 +47,6 @@ public:
     BlendFade bldfade;
 
 private:
-    enum WindowFlag
-    {
-        kWindow0   = 1 << 0,
-        kWindow1   = 1 << 1,
-        kWindowObj = 1 << 2
-    };
-
     struct Events
     {
         Event hblank;
@@ -73,7 +66,7 @@ private:
     void renderBgMode5(uint bg);
     void renderObjects();
 
-    template<uint ColorMode>
+    template<ColorMode kColorMode>
     void renderBgMode0Impl(uint bg);
 
     void collapse(uint bgs);
@@ -87,13 +80,13 @@ private:
     void collapseNW(const BgLayers& layers);
     template<bool Objects>
     void collapseBN(const BgLayers& layers);
-    template<bool Objects, uint BlendMode>
+    template<bool Objects, BlendMode kBlendMode>
     void collapseBN(const BgLayers& layers);
     template<bool Objects>
     void collapseBW(const BgLayers& layers);
-    template<bool Objects, uint BlendMode>
+    template<bool Objects, BlendMode kBlendMode>
     void collapseBW(const BgLayers& layers);
-    template<bool Objects, uint BlendMode, uint Windows>
+    template<bool Objects, BlendMode kBlendMode, uint Windows>
     void collapseBW(const BgLayers& layers);
 
     template<bool Objects>
