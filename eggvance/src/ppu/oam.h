@@ -4,7 +4,7 @@
 #include "oamentry.h"
 #include "base/ram.h"
 
-class Oam : public Ram<0x400>
+class Oam : public Ram<1024>
 {
 public:
     void writeByte(u32 addr, u8  byte) = delete;

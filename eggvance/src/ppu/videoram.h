@@ -9,7 +9,7 @@ public:
     u32 operator()(u32 addr) const;
 };
 
-class VideoRam : public Ram<0x1'8000, VideoRamMirror>
+class VideoRam : public Ram<96 * 1024, VideoRamMirror>
 {
 public:
     void writeByte(u32 addr, u8 byte);

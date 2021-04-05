@@ -2,7 +2,7 @@
 
 #include "base/ram.h"
 
-class PaletteRam : public Ram<0x400>
+class PaletteRam : public Ram<1024>
 {
 public:
     void writeByte(u32 addr, u8 byte);
