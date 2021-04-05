@@ -1,7 +1,6 @@
 #include "ppu.h"
 
 #include <shell/macros.h>
-#include <shell/operators.h>
 
 #include "mapentry.h"
 #include "matrix.h"
@@ -43,10 +42,10 @@ void Ppu::renderBg(RenderFunc render, uint bg)
 
 void Ppu::renderBgMode0(uint bg)
 {
-    switch (ColorMode(bgcnt[bg].color_mode))
+    switch (bgcnt[bg].color_mode)
     {
-    case ColorMode::C16x16: renderBgMode0Impl<ColorMode::C16x16>(bg); break;
-    case ColorMode::C256x1: renderBgMode0Impl<ColorMode::C256x1>(bg); break;
+    case kColorMode16x16: renderBgMode0Impl<kColorMode16x16>(bg); break;
+    case kColorMode256x1: renderBgMode0Impl<kColorMode256x1>(bg); break;
 
     default:
         SHELL_UNREACHABLE;
@@ -54,9 +53,11 @@ void Ppu::renderBgMode0(uint bg)
     }
 }
 
-template<ColorMode kColorMode>
+template<uint ColorMode>
 void Ppu::renderBgMode0Impl(uint bg)
 {
+    static_assert(ColorMode == kColorMode16x16 || ColorMode == kColorMode256x1);
+
     const auto& bgcnt = this->bgcnt[bg];
     const auto& size  = this->bgcnt[bg].sizeReg();
 
@@ -78,16 +79,16 @@ void Ppu::renderBgMode0Impl(uint bg)
         {
             MapEntry entry(vram.readFast<u16>(map));
 
-            u32 addr = bgcnt.tile_block + kTileBytes[uint(kColorMode)] * entry.tile;
+            u32 addr = bgcnt.tile_block + kTileBytes[ColorMode] * entry.tile;
             if (addr < kObjectBase)
             {
                 for (; pixel.x < kTileSize; ++pixel.x)
                 {
-                    uint index = kColorMode == ColorMode::C16x16
+                    uint index = ColorMode == kColorMode16x16
                         ? vram.index16x16(addr, pixel ^ entry.flip)
                         : vram.index256x1(addr, pixel ^ entry.flip);
 
-                    backgrounds[bg][x] = kColorMode == ColorMode::C16x16
+                    backgrounds[bg][x] = ColorMode == kColorMode16x16
                         ? pram.colorBg(index, entry.bank)
                         : pram.colorBg(index);
 
@@ -141,7 +142,7 @@ void Ppu::renderBgMode2(uint bg)
         const auto tile  = texel / kTileSize;
 
         uint entry = vram.readFast<u8>(bgcnt.map_block + tile.index2d(size.x / kTileSize));
-        uint index = vram.index256x1(bgcnt.tile_block + kTileBytes[uint(ColorMode::C256x1)] * entry, pixel);
+        uint index = vram.index256x1(bgcnt.tile_block + kTileBytes[kColorMode256x1] * entry, pixel);
 
         backgrounds[bg][x] = pram.colorBg(index);
     }
@@ -261,23 +262,23 @@ void Ppu::renderObjects()
             uint index = vram.index(addr, pixel, entry.color_mode);
             if ( index != 0)
             {
-                switch (ObjectMode(entry.object_mode))
+                switch (entry.object_mode)
                 {
-                case ObjectMode::Normal:
-                case ObjectMode::Alpha:
+                case kObjectModeNormal:
+                case kObjectModeAlpha:
                     if (entry.priority < object.priority || !object.opaque())
                     {
                         object.color    = pram.colorFgOpaque(index, bank);
                         object.priority = entry.priority;
-                        object.alpha    = entry.object_mode == ObjectMode::Alpha;
+                        object.alpha    = entry.object_mode == kObjectModeAlpha;
                     }
                     break;
 
-                case ObjectMode::Window:
+                case kObjectModeWindow:
                     object.window = true;
                     break;
 
-                case ObjectMode::Invalid:
+                case kObjectModeInvalid:
                     break;
 
                 default:

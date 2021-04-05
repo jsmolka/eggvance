@@ -21,30 +21,30 @@ inline constexpr uint kFrameBytes       = 0xA000;
 inline constexpr uint kObjectBase       = 0x1'0000;
 inline constexpr uint kObjectBaseBitmap = 0x1'4000;
 
-enum class ColorMode
+enum ColorMode
 {
-    C16x16,
-    C256x1
+    kColorMode16x16,
+    kColorMode256x1
 };
 
-enum class BlendMode
+enum BlendMode
 {
-    Disabled,
-    Alpha,
-    White,
-    Black
+    kBlendModeDisabled,
+    kBlendModeAlpha,
+    kBlendModeWhite,
+    kBlendModeBlack
 };
 
-enum class ObjectMode
+enum ObjectMode
 {
-    Normal,
-    Alpha,
-    Window,
-    Invalid
+    kObjectModeNormal,
+    kObjectModeAlpha,
+    kObjectModeWindow,
+    kObjectModeInvalid
 };
 
-enum class ObjectLayout
+enum ObjectLayout
 {
-    TwoDim,
-    OneDim
+    kObjectLayout2d,
+    kObjectLayout1d
 };

@@ -1,7 +1,5 @@
 #include "oamentry.h"
 
-#include <shell/operators.h>
-
 #include "constants.h"
 #include "base/bit.h"
 
@@ -62,14 +60,14 @@ uint OamEntry::tilesInRow(uint layout) const
         Point(32, 32), Point(16, 32)
     };
 
-    return layout == ObjectLayout::TwoDim
+    return layout == kObjectLayout2d
         ? kTileLayout2d[color_mode].x
         : sprite_size.x / kTileSize;
 }
 
 uint OamEntry::paletteBank() const
 {
-    return color_mode == ColorMode::C16x16
+    return color_mode == kColorMode16x16
         ? bank
         : 0;
 }
@@ -91,7 +89,7 @@ void OamEntry::compute()
         { {  8,  8 }, {  8,  8 }, {  8,  8 }, {  8,  8 }  }
     };
 
-    base_addr = kObjectBase + kTileBytes[uint(ColorMode::C16x16)] * base_tile;
+    base_addr = kObjectBase + kTileBytes[kColorMode16x16] * base_tile;
 
     if (origin.x >= kScreen.x) origin.x -= 512;
     if (origin.y >= kScreen.y) origin.y -= 256;
