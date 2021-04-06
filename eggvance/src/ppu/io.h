@@ -105,8 +105,8 @@ public:
 
     void write(u8 byte);
 
-    uint flags = 0;
-    uint blend = 0;
+    uint layers = 0;
+    uint blend  = 0;
 };
 
 class WindowInside : public Register<u16, 0x3F3F>

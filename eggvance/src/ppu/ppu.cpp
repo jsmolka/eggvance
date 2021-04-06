@@ -50,22 +50,12 @@ void Ppu::init()
 {
     events.hblank = [this](u64 late)
     {
-        if (vcount < 160)
-            scanline();
-
-        ppu.hblank(late);
-
-        scheduler.insert(events.hblank_end, 226 - late);
+        hblank(late);
     };
 
     events.hblank_end = [this](u64 late)
     {
-        next(late);
-
-        if (vcount == 160)
-            vblank(late);
-
-        scheduler.insert(events.hblank, 1006 - late);
+        hblankEnd(late);
     };
 
     scheduler.insert(events.hblank, 1006);
@@ -148,6 +138,8 @@ void Ppu::hblank(u64 late)
 
     if (vcount < 160)
     {
+        scanline();
+
         bgx[0].hblank(bgpb[0]);
         bgx[1].hblank(bgpb[1]);
         bgy[0].hblank(bgpd[0]);
@@ -160,41 +152,42 @@ void Ppu::hblank(u64 late)
     {
         dma.broadcast(Dma::Event::Hdma);
     }
+
+    scheduler.insert(events.hblank_end, 226 - late);
 }
 
-void Ppu::vblank(u64 late)
+void Ppu::hblankEnd(u64 late)
 {
-    dispstat.vblank = true;
-    
-    bgx[0].vblank();
-    bgx[1].vblank();
-    bgy[0].vblank();
-    bgy[1].vblank();
-
-    if (dispstat.vblank_irq)
-    {
-        arm.raise(Irq::VBlank, late);
-    }
-    dma.broadcast(Dma::Event::VBlank);
-}
-
-void Ppu::next(u64 late)
-{
-    dispstat.hblank = false;
-
     ++vcount;
+
+    dispstat.hblank = false;
+    dispstat.vblank = vcount >= 160 && vcount < 227;
 
     dispstat.vmatch = vcount == dispstat.vcompare;
     if (dispstat.vmatch && dispstat.vmatch_irq)
     {
         arm.raise(Irq::VMatch, late);
     }
+
+    if (vcount == 160)
+    {
+        bgx[0].vblank();
+        bgx[1].vblank();
+        bgy[0].vblank();
+        bgy[1].vblank();
+
+        if (dispstat.vblank_irq)
+        {
+            arm.raise(Irq::VBlank, late);
+        }
+        dma.broadcast(Dma::Event::VBlank);
+    }
+
+    scheduler.insert(events.hblank, 1006 - late);
 }
 
 void Ppu::present()
 {
-    dispstat.vblank = false;
-
     if (dispcnt.isActive())
     {
         video_ctx.renderCopyTexture();

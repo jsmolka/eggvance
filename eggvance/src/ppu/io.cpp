@@ -178,8 +178,8 @@ Window::Window()
 
 void Window::write(u8 byte)
 {
-    flags = bit::seq<0, 5>(byte) | Layer::Flag::Bdp;
-    blend = bit::seq<5, 1>(byte);
+    layers = bit::seq<0, 5>(byte) | Layer::Flag::Bdp;
+    blend  = bit::seq<5, 1>(byte);
 }
 
 void WindowInside::write(uint index, u8 byte)

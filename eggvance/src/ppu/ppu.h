@@ -18,10 +18,6 @@ public:
     Ppu();
 
     void init();
-    void scanline();
-    void hblank(u64 late = 0);
-    void vblank(u64 late = 0);
-    void next(u64 late = 0);
     void present();
 
     DisplayControl dispcnt;
@@ -47,8 +43,12 @@ public:
     BlendFade bldfade;
 
 private:
-    using BgLayers = shell::FixedBuffer<BgLayer, 4>;
     using RenderFunc = void(Ppu::*)(uint);
+    using BackgroundLayers = shell::FixedBuffer<BgLayer, 4>;
+
+    void scanline();
+    void hblank(u64 late);
+    void hblankEnd(u64 late);
 
     Point transform(uint x, uint bg);
 
@@ -64,38 +64,23 @@ private:
     void renderBgMode0Impl(uint bg);
 
     void collapse(uint bgs);
-    template<bool Objects>
-    void collapse(const BgLayers& layers);
-    template<bool Objects>
-    void collapseNN(const BgLayers& layers);
-    template<bool Objects>
-    void collapseNW(const BgLayers& layers);
-    template<bool Objects, uint Windows>
-    void collapseNW(const BgLayers& layers);
-    template<bool Objects>
-    void collapseBN(const BgLayers& layers);
-    template<bool Objects, BlendMode kBlendMode>
-    void collapseBN(const BgLayers& layers);
-    template<bool Objects>
-    void collapseBW(const BgLayers& layers);
-    template<bool Objects, BlendMode kBlendMode>
-    void collapseBW(const BgLayers& layers);
-    template<bool Objects, BlendMode kBlendMode, uint Windows>
-    void collapseBW(const BgLayers& layers);
+    template<bool kObjects> void collapse(const BackgroundLayers& backgrounds);
+    template<bool kObjects> void collapseNN(const BackgroundLayers& backgrounds);
+    template<bool kObjects> void collapseNW(const BackgroundLayers& backgrounds);
+    template<bool kObjects, uint kWindows> void collapseNW(const BackgroundLayers& backgrounds);
+    template<bool kObjects> void collapseBN(const BackgroundLayers& backgrounds);
+    template<bool kObjects, BlendMode kBlendMode> void collapseBN(const BackgroundLayers& backgrounds);
+    template<bool kObjects> void collapseBW(const BackgroundLayers& backgrounds);
+    template<bool kObjects, BlendMode kBlendMode> void collapseBW(const BackgroundLayers& backgrounds);
+    template<bool kObjects, BlendMode kBlendMode, uint kWindows> void collapseBW(const BackgroundLayers& backgrounds);
 
-    template<bool Objects>
-    uint possibleWindows() const;
-    template<uint Windows>
-    const Window& activeWindow(uint x) const;
+    template<bool kObjects> uint possibleWindows() const;
+    template<uint kWindows> const Window& activeWindow(uint x) const;
 
-    template<bool Objects>
-    u16 upperLayer(const BgLayers& layers, uint x);
-    template<bool Objects>
-    u16 upperLayer(const BgLayers& layers, uint x, uint flags);
-    template<bool Objects>
-    bool findBlendLayers(const BgLayers& layers, uint x, uint flags, u16& upper);
-    template<bool Objects>
-    bool findBlendLayers(const BgLayers& layers, uint x, uint flags, u16& upper, u16& lower);
+    template<bool kObjects> u16 upperLayer(const BackgroundLayers& backgrounds, uint x);
+    template<bool kObjects> u16 upperLayer(const BackgroundLayers& backgrounds, uint x, uint enabled);
+    template<bool kObjects> bool findBlendLayers(const BackgroundLayers& backgrounds, uint x, uint enabled, u16& upper);
+    template<bool kObjects> bool findBlendLayers(const BackgroundLayers& backgrounds, uint x, uint enabled, u16& upper, u16& lower);
 
     struct
     {
@@ -103,15 +88,15 @@ private:
         Event hblank_end;
     } events;
 
-    ScanlineDoubleBuffer<u16> backgrounds[4];
     ScanlineBuffer<ObjectLayer> objects;
+    ScanlineDoubleBuffer<u16> backgrounds[4];
     bool objects_exist = false;
     bool objects_alpha = false;
-    std::array<u32, 0x8000> argb;
 
-    PaletteRam pram{};
-    VideoRam vram{};
-    Oam oam{};
+    PaletteRam pram = {};
+    VideoRam vram = {};
+    Oam oam = {};
+    shell::array<u32, 0x8000> argb;
 };
 
 inline Ppu ppu;

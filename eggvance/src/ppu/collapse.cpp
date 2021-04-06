@@ -4,42 +4,37 @@
 #include <shell/macros.h>
 #include <shell/operators.h>
 
-#include "constants.h"
 #include "frontend/videocontext.h"
 
 void Ppu::collapse(uint bgs)
 {
-    BgLayers layers;
+    BackgroundLayers backgrounds;
 
     for (uint bg : bit::iterate(bgs & dispcnt.layers))
     {
-        layers.push_back({
-            bgcnt[bg].priority,
-            backgrounds[bg].data(),
-            1U << bg
-        });
+        backgrounds.push_back({ bgcnt[bg].priority, this->backgrounds[bg].data(), 1U << bg });
     }
 
-    std::sort(layers.begin(), layers.end());
+    std::sort(backgrounds.begin(), backgrounds.end());
 
     if (objects_exist)
-        collapse<1>(layers);
+        collapse<1>(backgrounds);
     else
-        collapse<0>(layers);
+        collapse<0>(backgrounds);
 }
 
-template<bool Objects>
-void Ppu::collapse(const BgLayers& layers)
+template<bool kObjects>
+void Ppu::collapse(const BackgroundLayers& backgrounds)
 {
     uint window = dispcnt.win0 || dispcnt.win1 || dispcnt.winobj;
     uint blend  = bldcnt.mode != BlendMode::Disabled || objects_alpha;
 
     switch ((blend << 1) | window)
     {
-    case 0b00: collapseNN<Objects>(layers); break;
-    case 0b01: collapseNW<Objects>(layers); break;
-    case 0b10: collapseBN<Objects>(layers); break;
-    case 0b11: collapseBW<Objects>(layers); break;
+    case 0b00: collapseNN<kObjects>(backgrounds); break;
+    case 0b01: collapseNW<kObjects>(backgrounds); break;
+    case 0b10: collapseBN<kObjects>(backgrounds); break;
+    case 0b11: collapseBW<kObjects>(backgrounds); break;
 
     default:
         SHELL_UNREACHABLE;
@@ -47,23 +42,21 @@ void Ppu::collapse(const BgLayers& layers)
     }
 }
 
-template<bool Objects>
-void Ppu::collapseNN(const BgLayers& layers)
+template<bool kObjects>
+void Ppu::collapseNN(const BackgroundLayers& backgrounds)
 {
-    auto& scanline = video_ctx.scanline(vcount);
-
-    for (uint x = 0; x < kScreen.x; ++x)
+    for (auto [x, color] : shell::enumerate(video_ctx.scanline(vcount)))
     {
-        scanline[x] = argb[upperLayer<Objects>(layers, x)];
+        color = argb[upperLayer<kObjects>(backgrounds, x)];
     }
 }
 
-template<bool Objects>
-void Ppu::collapseNW(const BgLayers& layers)
+template<bool kObjects>
+void Ppu::collapseNW(const BackgroundLayers& backgrounds)
 {
-    switch (possibleWindows<Objects>())
+    switch (possibleWindows<kObjects>())
     {
-    SHELL_CASE08(0, collapseNW<Objects, kLabel>(layers));
+    SHELL_CASE08(0, collapseNW<kObjects, kLabel>(backgrounds));
 
     default:
         SHELL_UNREACHABLE;
@@ -71,25 +64,23 @@ void Ppu::collapseNW(const BgLayers& layers)
     }
 }
 
-template<bool Objects, uint Windows>
-void Ppu::collapseNW(const BgLayers& layers)
+template<bool kObjects, uint kWindows>
+void Ppu::collapseNW(const BackgroundLayers& backgrounds)
 {
-    auto& scanline = video_ctx.scanline(vcount);
-
-    for (uint x = 0; x < kScreen.x; ++x)
+    for (auto [x, color] : shell::enumerate(video_ctx.scanline(vcount)))
     {
-        const auto& window = activeWindow<Windows>(x);
+        const auto& window = activeWindow<kWindows>(x);
 
-        scanline[x] = argb[upperLayer<Objects>(layers, x, window.flags)];
+        color = argb[upperLayer<kObjects>(backgrounds, x, window.layers)];
     }
 }
 
-template<bool Objects>
-void Ppu::collapseBN(const BgLayers& layers)
+template<bool kObjects>
+void Ppu::collapseBN(const BackgroundLayers& backgrounds)
 {
     switch (bldcnt.mode)
     {
-    SHELL_CASE04(0, collapseBN<Objects, BlendMode(kLabel)>(layers));
+    SHELL_CASE04(0, collapseBN<kObjects, BlendMode(kLabel)>(backgrounds));
 
     default:
         SHELL_UNREACHABLE;
@@ -97,23 +88,21 @@ void Ppu::collapseBN(const BgLayers& layers)
     }
 }
 
-template<bool Objects, BlendMode kBlendMode>
-void Ppu::collapseBN(const BgLayers& layers)
+template<bool kObjects, BlendMode kBlendMode>
+void Ppu::collapseBN(const BackgroundLayers& backgrounds)
 {
-    constexpr uint kFlags = 0xFFFF;
+    constexpr auto kEnabled = 0xFFFF;
 
-    auto& scanline = video_ctx.scanline(vcount);
-
-    for (uint x = 0; x < kScreen.x; ++x)
+    for (auto [x, color] : shell::enumerate(video_ctx.scanline(vcount)))
     {
         u16 upper = 0;
         u16 lower = 0;
 
         const auto& object = objects[x];
 
-        if (Objects && object.alpha)
+        if (kObjects && object.alpha)
         {
-            if (findBlendLayers<Objects>(layers, x, kFlags, upper, lower))
+            if (findBlendLayers<kObjects>(backgrounds, x, kEnabled, upper, lower))
                 upper = bldalpha.blendAlpha(upper, lower);
         }
         else
@@ -121,22 +110,22 @@ void Ppu::collapseBN(const BgLayers& layers)
             switch (kBlendMode)
             {
             case BlendMode::Alpha:
-                if (findBlendLayers<Objects>(layers, x, kFlags, upper, lower))
+                if (findBlendLayers<kObjects>(backgrounds, x, kEnabled, upper, lower))
                     upper = bldalpha.blendAlpha(upper, lower);
                 break;
 
             case BlendMode::White:
-                if (findBlendLayers<Objects>(layers, x, kFlags, upper))
+                if (findBlendLayers<kObjects>(backgrounds, x, kEnabled, upper))
                     upper = bldfade.blendWhite(upper);
                 break;
 
             case BlendMode::Black:
-                if (findBlendLayers<Objects>(layers, x, kFlags, upper))
+                if (findBlendLayers<kObjects>(backgrounds, x, kEnabled, upper))
                     upper = bldfade.blendBlack(upper);
                 break;
 
             case BlendMode::Disabled:
-                upper = upperLayer<Objects>(layers, x);
+                upper = upperLayer<kObjects>(backgrounds, x);
                 break;
 
             default:
@@ -144,16 +133,16 @@ void Ppu::collapseBN(const BgLayers& layers)
                 break;
             }
         }
-        scanline[x] = argb[upper];
+        color = argb[upper];
     }
 }
 
-template<bool Objects>
-void Ppu::collapseBW(const BgLayers& layers)
+template<bool kObjects>
+void Ppu::collapseBW(const BackgroundLayers& backgrounds)
 {
     switch (bldcnt.mode)
     {
-    SHELL_CASE04(0, collapseBW<Objects, BlendMode(kLabel)>(layers));
+    SHELL_CASE04(0, collapseBW<kObjects, BlendMode(kLabel)>(backgrounds));
 
     default:
         SHELL_UNREACHABLE;
@@ -161,12 +150,12 @@ void Ppu::collapseBW(const BgLayers& layers)
     }
 }
 
-template<bool Objects, BlendMode kBlendMode>
-void Ppu::collapseBW(const BgLayers& layers)
+template<bool kObjects, BlendMode kBlendMode>
+void Ppu::collapseBW(const BackgroundLayers& backgrounds)
 {
-    switch (possibleWindows<Objects>())
+    switch (possibleWindows<kObjects>())
     {
-    SHELL_CASE08(0, collapseBW<Objects, kBlendMode, kLabel>(layers));
+    SHELL_CASE08(0, collapseBW<kObjects, kBlendMode, kLabel>(backgrounds));
 
     default:
         SHELL_UNREACHABLE;
@@ -174,12 +163,10 @@ void Ppu::collapseBW(const BgLayers& layers)
     }
 }
 
-template<bool Objects, BlendMode kBlendMode, uint Windows>
-void Ppu::collapseBW(const BgLayers& layers)
+template<bool kObjects, BlendMode kBlendMode, uint Windows>
+void Ppu::collapseBW(const BackgroundLayers& backgrounds)
 {
-    auto& scanline = video_ctx.scanline(vcount);
-
-    for (uint x = 0; x < kScreen.x; ++x)
+    for (auto [x, color] : shell::enumerate(video_ctx.scanline(vcount)))
     {
         u16 upper = 0;
         u16 lower = 0;
@@ -187,9 +174,9 @@ void Ppu::collapseBW(const BgLayers& layers)
         const auto& object = objects[x];
         const auto& window = activeWindow<Windows>(x);
 
-        if (Objects && object.alpha)
+        if (kObjects && object.alpha)
         {
-            if (findBlendLayers<Objects>(layers, x, window.flags, upper, lower))
+            if (findBlendLayers<kObjects>(backgrounds, x, window.layers, upper, lower))
                 upper = bldalpha.blendAlpha(upper, lower);
         }
         else if (window.blend)
@@ -197,22 +184,22 @@ void Ppu::collapseBW(const BgLayers& layers)
             switch (kBlendMode)
             {
             case BlendMode::Alpha:
-                if (findBlendLayers<Objects>(layers, x, window.flags, upper, lower))
+                if (findBlendLayers<kObjects>(backgrounds, x, window.layers, upper, lower))
                     upper = bldalpha.blendAlpha(upper, lower);
                 break;
 
             case BlendMode::White:
-                if (findBlendLayers<Objects>(layers, x, window.flags, upper))
+                if (findBlendLayers<kObjects>(backgrounds, x, window.layers, upper))
                     upper = bldfade.blendWhite(upper);
                 break;
 
             case BlendMode::Black:
-                if (findBlendLayers<Objects>(layers, x, window.flags, upper))
+                if (findBlendLayers<kObjects>(backgrounds, x, window.layers, upper))
                     upper = bldfade.blendBlack(upper);
                 break;
 
             case BlendMode::Disabled:
-                upper = upperLayer<Objects>(layers, x, window.flags);
+                upper = upperLayer<kObjects>(backgrounds, x, window.layers);
                 break;
 
             default:
@@ -222,164 +209,163 @@ void Ppu::collapseBW(const BgLayers& layers)
         }
         else
         {
-            upper = upperLayer<Objects>(layers, x, window.flags);
+            upper = upperLayer<kObjects>(backgrounds, x, window.layers);
         }
-        scanline[x] = argb[upper];
+        color = argb[upper];
     }
 }
 
-template<bool Objects>
+template<bool kObjects>
 uint Ppu::possibleWindows() const
 {
     uint windows = 0;
 
     if (dispcnt.win0 && winv[0].contains(vcount))
         windows |= Window::Flag::Zero;
+    
     if (dispcnt.win1 && winv[1].contains(vcount))
         windows |= Window::Flag::One;
-    if (dispcnt.winobj && Objects)
+    
+    if (dispcnt.winobj && kObjects)
         windows |= Window::Flag::Obj;
 
     return windows;
 }
 
-template<uint Windows>
+template<uint kWindows>
 const Window& Ppu::activeWindow(uint x) const
 {
-    if (Windows & Window::Flag::Zero && winh[0].contains(x))
+    if ((kWindows & Window::Flag::Zero) && winh[0].contains(x))
         return winin.win0;
 
-    if (Windows & Window::Flag::One && winh[1].contains(x))
+    if ((kWindows & Window::Flag::One) && winh[1].contains(x))
         return winin.win1;
 
-    if (Windows & Window::Flag::Obj && objects[x].window)
+    if ((kWindows & Window::Flag::Obj) && objects[x].window)
         return winout.winobj;
 
     return winout.winout;
 }
 
-template<bool Objects>
-u16 Ppu::upperLayer(const BgLayers& layers, uint x)
+template<bool kObjects>
+u16 Ppu::upperLayer(const BackgroundLayers& backgrounds, uint x)
 {
     const auto& object = objects[x];
+    const auto  object_visible = kObjects && object.opaque();
 
-    for (const auto& layer : layers)
+    for (const auto& layer : backgrounds)
     {
-        if (Objects && object.opaque() && object <= layer)
+        if (object_visible && object <= layer)
             return object.color;
 
         if (layer.opaque(x))
             return layer.color(x);
     }
 
-    if (Objects && object.opaque())
+    if (object_visible)
         return object.color;
 
     return pram.backdrop();
 }
 
-template<bool Objects>
-u16 Ppu::upperLayer(const BgLayers& layers, uint x, uint flags)
+template<bool kObjects>
+u16 Ppu::upperLayer(const BackgroundLayers& backgrounds, uint x, uint enabled)
 {    
     const auto& object = objects[x];
+    const auto  object_visible = kObjects && (enabled & Layer::Flag::Obj) && object.opaque();
 
-    for (const auto& layer : layers)
+    for (const auto& background : backgrounds)
     {
-        if (Objects && flags & Layer::Flag::Obj && object.opaque() && object <= layer)
+        if (object_visible && object <= background)
             return object.color;
 
-        if (flags & layer.flag && layer.opaque(x))
-            return layer.color(x);
+        if ((enabled & background.flag) && background.opaque(x))
+            return background.color(x);
     }
     
-    if (Objects && flags & Layer::Flag::Obj && object.opaque())
+    if (object_visible)
         return object.color;
 
     return pram.backdrop();
 }
 
-template<bool Objects>
-bool Ppu::findBlendLayers(const BgLayers& layers, uint x, uint flags, u16& upper)
+template<bool kObjects>
+bool Ppu::findBlendLayers(const BackgroundLayers& backgrounds, uint x, uint enabled, u16& upper)
 {
     const auto& object = objects[x];
+    const auto  object_visible = kObjects && (enabled & Layer::Flag::Obj) && object.opaque();
 
-    uint flags_upper = object.alpha ? uint(Layer::Flag::Obj) : bldcnt.upper;
+    uint blend_upper = object.alpha ? uint(Layer::Flag::Obj) : bldcnt.upper;
 
-    for (const auto& layer : layers)
+    for (const auto& background : backgrounds)
     {
-        if (Objects && flags & Layer::Flag::Obj && object.opaque() && object <= layer)
+        if (object_visible && object <= background)
         {
             upper = object.color;
-            return flags_upper & Layer::Flag::Obj;
+            return blend_upper & Layer::Flag::Obj;
         }
         
-        if (flags & layer.flag && layer.opaque(x))
+        if ((enabled & background.flag) && background.opaque(x))
         {
-            upper = layer.color(x);
-            return flags_upper & layer.flag;
+            upper = background.color(x);
+            return blend_upper & background.flag;
         }
     }
     
-    if (Objects && flags & Layer::Flag::Obj && object.opaque())
+    if (object_visible)
     {
         upper = object.color;
-        return flags_upper & Layer::Flag::Obj;
+        return blend_upper & Layer::Flag::Obj;
     }
     
     upper = pram.backdrop();
-    return flags_upper & Layer::Flag::Bdp;
+    return blend_upper & Layer::Flag::Bdp;
 }
 
-#define PROCESS_LAYER(color, flag)      \
-    if (upper_found)                    \
-    {                                   \
-        lower = color;                  \
-        return flags_lower & flag;      \
-    }                                   \
-    else                                \
-    {                                   \
-        upper = color;                  \
-        upper_found = true;             \
-        if ((flags_upper & flag) == 0)  \
-            return false;               \
-    }
-
-template<bool Objects>
-bool Ppu::findBlendLayers(const BgLayers& layers, uint x, uint flags, u16& upper, u16& lower)
+template<bool kObjects>
+bool Ppu::findBlendLayers(const BackgroundLayers& backgrounds, uint x, uint enabled, u16& upper, u16& lower)
 {
-    const auto& object = objects[x];
+    #define PROCESS_LAYER(color, flag)      \
+        if (upper_found)                    \
+        {                                   \
+            lower = color;                  \
+            return blend_lower & flag;      \
+        }                                   \
+        else                                \
+        {                                   \
+            upper = color;                  \
+            upper_found = true;             \
+            if ((blend_upper & flag) == 0)  \
+                return false;               \
+        }
 
-    uint flags_upper = object.alpha ? uint(Layer::Flag::Obj) : bldcnt.upper;
-    uint flags_lower = bldcnt.lower;
+    const auto& object = objects[x];
+    const auto  object_visible = kObjects && (enabled & Layer::Flag::Obj) && object.opaque();
+
+    uint blend_upper = object.alpha ? uint(Layer::Flag::Obj) : bldcnt.upper;
+    uint blend_lower = bldcnt.lower;
 
     bool upper_found = false;
     bool object_used = false;
 
-    for (const auto& layer : layers)
+    for (const auto& background : backgrounds)
     {
-        if (Objects && flags & Layer::Flag::Obj && !object_used && object.opaque() && object <= layer)
+        if (object_visible && !object_used && object <= background)
         {
             PROCESS_LAYER(object.color, Layer::Flag::Obj);
             object_used = true;
         }
         
-        if (flags & layer.flag && layer.opaque(x))
-            PROCESS_LAYER(layer.color(x), layer.flag);
+        if ((enabled & background.flag) && background.opaque(x))
+            PROCESS_LAYER(background.color(x), background.flag);
     }
     
-    if (Objects && flags & Layer::Flag::Obj && !object_used && object.opaque())
+    if (object_visible && !object_used)
         PROCESS_LAYER(object.color, Layer::Flag::Obj);
     
-    if (upper_found)
-    {
-        lower = pram.backdrop();
-        return flags_lower & Layer::Flag::Bdp;
-    }
-    else
-    {
-        upper = pram.backdrop();
-        return false;
-    }
-}
+    PROCESS_LAYER(pram.backdrop(), Layer::Flag::Bdp);
+    
+    return false;
 
-#undef PROCESS_LAYER
+    #undef PROCESS_LAYER
+}
