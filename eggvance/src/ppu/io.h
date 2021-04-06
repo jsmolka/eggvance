@@ -1,8 +1,5 @@
 #pragma once
 
-#include <algorithm>
-
-#include "layer.h"
 #include "point.h"
 #include "base/register.h"
 

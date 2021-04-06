@@ -62,6 +62,8 @@
     <ClCompile Include="src\gamepak\sram.cpp" />
     <ClCompile Include="src\ppu\collapse.cpp" />
     <ClCompile Include="src\ppu\io.cpp" />
+    <ClCompile Include="src\ppu\layers.cpp" />
+    <ClCompile Include="src\ppu\mapentry.cpp" />
     <ClCompile Include="src\ppu\oam.cpp" />
     <ClCompile Include="src\ppu\oamentry.cpp" />
     <ClCompile Include="src\ppu\paletteram.cpp" />
@@ -130,7 +132,7 @@
     <ClInclude Include="src\ppu\buffer.h" />
     <ClInclude Include="src\ppu\constants.h" />
     <ClInclude Include="src\ppu\io.h" />
-    <ClInclude Include="src\ppu\layer.h" />
+    <ClInclude Include="src\ppu\layers.h" />
     <ClInclude Include="src\ppu\mapentry.h" />
     <ClInclude Include="src\ppu\matrix.h" />
     <ClInclude Include="src\ppu\oam.h" />

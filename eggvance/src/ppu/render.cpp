@@ -205,7 +205,7 @@ void Ppu::renderBgMode5(uint bg)
 
 void Ppu::renderObjects()
 {
-    constexpr Matrix kIdentity(1 << kDecimalBits, 0, 0, 1 << kDecimalBits);
+    constexpr Matrix kIdentity = { 1 << kDecimalBits, 0, 0, 1 << kDecimalBits };
 
     s64 cycles = dispcnt.oam_free ? 954 : 1210;
 

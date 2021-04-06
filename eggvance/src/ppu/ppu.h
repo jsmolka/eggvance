@@ -4,7 +4,7 @@
 
 #include "buffer.h"
 #include "io.h"
-#include "layer.h"
+#include "layers.h"
 #include "oam.h"
 #include "paletteram.h"
 #include "videoram.h"

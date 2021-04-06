@@ -78,9 +78,9 @@ void VideoContext::renderIcon()
     SDL_RenderSetLogicalSize(renderer, w, h);
 }
 
-u32* VideoContext::scanline(uint line)
+shell::array<u32, kScreen.x>& VideoContext::scanline(uint line)
 {
-    return buffer[line].data();
+    return buffer[line];
 }
 
 void VideoContext::renderClear(u32 color)

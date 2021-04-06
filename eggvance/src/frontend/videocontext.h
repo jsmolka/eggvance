@@ -21,7 +21,7 @@ public:
     void renderPresent();
     void renderIcon();
 
-    u32* scanline(uint line);
+    shell::array<u32, kScreen.x>& scanline(uint line);
 
 private:
     bool initWindow();

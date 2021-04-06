@@ -50,7 +50,7 @@ void Ppu::collapse(const BgLayers& layers)
 template<bool Objects>
 void Ppu::collapseNN(const BgLayers& layers)
 {
-    u32* scanline = video_ctx.scanline(vcount);
+    auto& scanline = video_ctx.scanline(vcount);
 
     for (uint x = 0; x < kScreen.x; ++x)
     {
@@ -74,7 +74,7 @@ void Ppu::collapseNW(const BgLayers& layers)
 template<bool Objects, uint Windows>
 void Ppu::collapseNW(const BgLayers& layers)
 {
-    u32* scanline = video_ctx.scanline(vcount);
+    auto& scanline = video_ctx.scanline(vcount);
 
     for (uint x = 0; x < kScreen.x; ++x)
     {
@@ -102,7 +102,7 @@ void Ppu::collapseBN(const BgLayers& layers)
 {
     constexpr uint kFlags = 0xFFFF;
 
-    u32* scanline = video_ctx.scanline(vcount);
+    auto& scanline = video_ctx.scanline(vcount);
 
     for (uint x = 0; x < kScreen.x; ++x)
     {
@@ -177,7 +177,7 @@ void Ppu::collapseBW(const BgLayers& layers)
 template<bool Objects, BlendMode kBlendMode, uint Windows>
 void Ppu::collapseBW(const BgLayers& layers)
 {
-    u32* scanline = video_ctx.scanline(vcount);
+    auto& scanline = video_ctx.scanline(vcount);
 
     for (uint x = 0; x < kScreen.x; ++x)
     {

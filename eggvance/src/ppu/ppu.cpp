@@ -75,8 +75,8 @@ void Ppu::scanline()
 {
     if (dispcnt.blank)
     {
-        u32* scanline = video_ctx.scanline(vcount);
-        std::fill_n(scanline, kScreen.x, 0xFFFF'FFFF);
+        auto& scanline = video_ctx.scanline(vcount);
+        std::fill(scanline.begin(), scanline.end(), 0xFFFF'FFFF);
         return;
     }
 

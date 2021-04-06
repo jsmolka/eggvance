@@ -1,19 +1,20 @@
 #include "io.h"
 
+#include <algorithm>
 #include <shell/operators.h>
 
+#include "layers.h"
 #include "base/config.h"
 
-inline constexpr uint kMaskR = 0x1F <<  0;
-inline constexpr uint kMaskG = 0x1F <<  5;
-inline constexpr uint kMaskB = 0x1F << 10;
+inline constexpr auto kMaskR = 0x1F <<  0;
+inline constexpr auto kMaskG = 0x1F <<  5;
+inline constexpr auto kMaskB = 0x1F << 10;
 
 DisplayControl::DisplayControl()
 {
     if (config.bios_skip)
     {
         write(0, 0x80);
-        write(1, 0x00);
     }
 }
 
@@ -48,8 +49,8 @@ bool DisplayControl::isActive() const
         uint(Layer::Flag::Bg2 | Layer::Flag::Obj),
         uint(Layer::Flag::Bg2 | Layer::Flag::Obj),
         uint(Layer::Flag::Bg2 | Layer::Flag::Obj),
-        uint(Layer::Flag::Non),
-        uint(Layer::Flag::Non)
+        uint(0),
+        uint(0)
     };
     return kLayers[mode] & layers;
 }
@@ -91,7 +92,6 @@ void DisplayStatus::write(uint index, u8 byte)
 VCount& VCount::operator++()
 {
     data = (data + 1) % 228;
-
     return *this;
 }
 
@@ -287,9 +287,9 @@ void BlendAlpha::write(uint index, u8 byte)
 
 u16 BlendAlpha::blendAlpha(u16 a, u16 b) const
 {
-    uint rr = std::min(kMaskR, ((a & kMaskR) * eva + (b & kMaskR) * evb) >> 4);
-    uint gg = std::min(kMaskG, ((a & kMaskG) * eva + (b & kMaskG) * evb) >> 4);
-    uint bb = std::min(kMaskB, ((a & kMaskB) * eva + (b & kMaskB) * evb) >> 4);
+    uint rr = std::min<uint>(kMaskR, ((a & kMaskR) * eva + (b & kMaskR) * evb) >> 4);
+    uint gg = std::min<uint>(kMaskG, ((a & kMaskG) * eva + (b & kMaskG) * evb) >> 4);
+    uint bb = std::min<uint>(kMaskB, ((a & kMaskB) * eva + (b & kMaskB) * evb) >> 4);
 
     return (rr & kMaskR) | (gg & kMaskG) | (bb & kMaskB);
 }
