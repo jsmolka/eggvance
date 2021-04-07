@@ -13,6 +13,6 @@ public:
     void writeHalf(u32 addr, u16 half);
     void writeWord(u32 addr, u32 word);
 
-    shell::array<Matrix, 32> matrices = {};
+    shell::array<RotationScalingMatrix, 32> matrices = {};
     shell::array<OamEntry, 128> entries = {};
 };

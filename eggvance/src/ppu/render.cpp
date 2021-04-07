@@ -205,8 +205,6 @@ void Ppu::renderBgMode5(uint bg)
 
 void Ppu::renderObjects()
 {
-    constexpr Matrix kIdentity = { 1 << kDecimalBits, 0, 0, 1 << kDecimalBits };
-
     s64 cycles = dispcnt.oam_free ? 954 : 1210;
 
     for (const auto& entry : oam.entries)
@@ -218,7 +216,7 @@ void Ppu::renderObjects()
         const auto& center      = entry.center;
         const auto& sprite_size = entry.sprite_size;
         const auto& screen_size = entry.screen_size;
-        const auto& matrix      = entry.affine ? oam.matrices[entry.matrix] : kIdentity;
+        const auto& matrix      = entry.affine ? oam.matrices[entry.matrix] : kIdentityMatrix;
 
         uint tile_bytes = entry.tileBytes();
         uint tiles_row  = entry.tilesPerRow(dispcnt.layout);

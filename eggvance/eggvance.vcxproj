@@ -64,6 +64,7 @@
     <ClCompile Include="src\ppu\io.cpp" />
     <ClCompile Include="src\ppu\layers.cpp" />
     <ClCompile Include="src\ppu\mapentry.cpp" />
+    <ClCompile Include="src\ppu\matrix.cpp" />
     <ClCompile Include="src\ppu\oam.cpp" />
     <ClCompile Include="src\ppu\oamentry.cpp" />
     <ClCompile Include="src\ppu\paletteram.cpp" />
