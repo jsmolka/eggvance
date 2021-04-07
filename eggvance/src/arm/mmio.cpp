@@ -187,7 +187,7 @@ void Arm::writeIo(u32 addr, u8 byte)
     SHELL_CASE02(uint(Io::Bg2VerOffset),   ppu.backgrounds[2].offset.writeY(kIndex, byte));
     SHELL_CASE02(uint(Io::Bg3HorOffset),   ppu.backgrounds[3].offset.writeX(kIndex, byte));
     SHELL_CASE02(uint(Io::Bg3VerOffset),   ppu.backgrounds[3].offset.writeY(kIndex, byte));
-    SHELL_CASE02(uint(Io::Bg2ParameterA),  ppu.backgrounds[0].matrix.writeA(kIndex, byte));
+    SHELL_CASE02(uint(Io::Bg2ParameterA),  ppu.backgrounds[2].matrix.writeA(kIndex, byte));
     SHELL_CASE02(uint(Io::Bg2ParameterB),  ppu.backgrounds[2].matrix.writeB(kIndex, byte));
     SHELL_CASE02(uint(Io::Bg2ParameterC),  ppu.backgrounds[2].matrix.writeC(kIndex, byte));
     SHELL_CASE02(uint(Io::Bg2ParameterD),  ppu.backgrounds[2].matrix.writeD(kIndex, byte));
