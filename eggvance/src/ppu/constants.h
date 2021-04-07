@@ -3,7 +3,6 @@
 #include "point.h"
 #include "base/int.h"
 
-inline constexpr auto kOrigin           = Point(0, 0);
 inline constexpr auto kScreen           = Point(240, 160);
 inline constexpr auto kRefreshRate      = 59.737;
 inline constexpr uint kDecimalBits      = 8;

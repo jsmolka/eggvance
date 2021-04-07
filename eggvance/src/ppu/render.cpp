@@ -137,8 +137,8 @@ void Ppu::renderBgMode3(Background& background)
     {
         const auto texel = background.matrix * x;
 
-        if (static_cast<uint>(texel.x) >= kScreen.x ||
-            static_cast<uint>(texel.y) >= kScreen.y)
+        if (static_cast<uint>(texel.x) < kScreen.x &&
+            static_cast<uint>(texel.y) < kScreen.y)
         {
             u32 addr = kColorBytes * texel.index2d(kScreen.x);
 
@@ -157,8 +157,8 @@ void Ppu::renderBgMode4(Background& background)
     {
         const auto texel = background.matrix * x;
 
-        if (static_cast<uint>(texel.x) >= kScreen.x ||
-            static_cast<uint>(texel.y) >= kScreen.y)
+        if (static_cast<uint>(texel.x) < kScreen.x &&
+            static_cast<uint>(texel.y) < kScreen.y)
         {
             uint index = vram.readFast<u8>(dispcnt.frame + texel.index2d(kScreen.x));
 
@@ -179,8 +179,8 @@ void Ppu::renderBgMode5(Background& background)
     {
         const auto texel = background.matrix * x;
 
-        if (static_cast<uint>(texel.x) >= kBitmap.x ||
-            static_cast<uint>(texel.y) >= kBitmap.y)
+        if (static_cast<uint>(texel.x) < kBitmap.x &&
+            static_cast<uint>(texel.y) < kBitmap.y)
         {
             u32 addr = dispcnt.frame + kColorBytes * texel.index2d(kBitmap.x);
 
@@ -222,7 +222,8 @@ void Ppu::renderObjects()
         {
             auto texel = (matrix * offset) + (sprite_size / 2);
 
-            if (!(texel >= kOrigin && texel < sprite_size))
+            if (static_cast<uint>(texel.x) >= sprite_size.x ||
+                static_cast<uint>(texel.y) >= sprite_size.y)
                 continue;
 
             if (!entry.affine)
