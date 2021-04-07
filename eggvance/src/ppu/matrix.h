@@ -47,6 +47,14 @@ public:
 
         (*this)[x][y] = value;
     }
+
+    void fill(const T& value)
+    {
+        for (auto& column : *this)
+        {
+            column.fill(value);
+        }
+    }
 };
 
 class RotationScalingMatrix : public Matrix<s16, 2, 2>
@@ -58,3 +66,25 @@ public:
 };
 
 inline constexpr RotationScalingMatrix kIdentityMatrix = { 1 << kDecimalBits, 0, 0, 1 << kDecimalBits };
+
+class TransformationMatrix : public Matrix<s32, 2, 3>
+{
+public:
+    TransformationMatrix();
+
+    Point operator*(s32 x) const;
+
+    void writeA(uint index, u8 byte);
+    void writeB(uint index, u8 byte);
+    void writeC(uint index, u8 byte);
+    void writeD(uint index, u8 byte);
+    void writeX(uint index, u8 byte);
+    void writeY(uint index, u8 byte);
+
+    void hblank();
+    void vblank();
+
+private:
+    s32 yx = 0;
+    s32 yy = 0;
+};

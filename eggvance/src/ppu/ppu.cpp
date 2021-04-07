@@ -12,11 +12,6 @@
 
 Ppu::Ppu()
 {
-    bgpa[0].write(1, 0x01);
-    bgpa[1].write(1, 0x01);
-    bgpd[0].write(1, 0x01);
-    bgpd[1].write(1, 0x01);
-
     for (u32 color = 0; color < argb.size(); ++color)
     {
         uint r = bit::seq< 0, 5>(color) << 3 | 0x7;
@@ -140,10 +135,8 @@ void Ppu::hblank(u64 late)
     {
         scanline();
 
-        bgx[0].hblank(bgpb[0]);
-        bgx[1].hblank(bgpb[1]);
-        bgy[0].hblank(bgpd[0]);
-        bgy[1].hblank(bgpd[1]);
+        matrix[0].hblank();
+        matrix[1].hblank();
 
         dma.broadcast(Dma::Event::HBlank);
     }
@@ -171,10 +164,8 @@ void Ppu::hblankEnd(u64 late)
 
     if (vcount == 160)
     {
-        bgx[0].vblank();
-        bgx[1].vblank();
-        bgy[0].vblank();
-        bgy[1].vblank();
+        matrix[0].vblank();
+        matrix[1].vblank();
 
         if (dispstat.vblank_irq)
         {

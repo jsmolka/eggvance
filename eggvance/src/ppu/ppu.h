@@ -27,12 +27,7 @@ public:
     BgControl bgcnt[4] = { 0, 1, 2, 3 };
     BgOffset bghofs[4];
     BgOffset bgvofs[4];
-    BgParameter bgpa[2];
-    BgParameter bgpb[2];
-    BgParameter bgpc[2];
-    BgParameter bgpd[2];
-    BgReference bgx[2];
-    BgReference bgy[2];
+    TransformationMatrix matrix[2];
     WindowInside winin;
     WindowOutside winout;
     WindowRange winh[2] = { kScreen.x, kScreen.x };
@@ -49,8 +44,6 @@ private:
     void scanline();
     void hblank(u64 late);
     void hblankEnd(u64 late);
-
-    Point transform(uint x, uint bg);
 
     void renderBg(RenderFunc render, uint bg);
     void renderBgMode0(uint bg);

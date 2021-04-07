@@ -139,33 +139,6 @@ Point BgControl::sizeAff() const
         128 << dimensions);
 }
 
-BgReference::operator s32() const
-{
-    return current;
-}
-
-void BgReference::write(uint index, u8 byte)
-{
-    RegisterW::write(index, byte);
-
-    vblank();
-}
-
-void BgReference::hblank(s16 value)
-{
-    current += value;
-}
-
-void BgReference::vblank()
-{
-    current = bit::signEx<28>(data);
-}
-
-BgParameter::operator s16() const
-{
-    return data;
-}
-
 BgOffset::operator u16() const
 {
     return data;

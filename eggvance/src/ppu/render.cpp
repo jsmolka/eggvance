@@ -6,13 +6,6 @@
 #include "mapentry.h"
 #include "matrix.h"
 
-Point Ppu::transform(uint x, uint bg)
-{
-    return Point(
-        bgpa[bg - 2] * static_cast<int>(x) + bgx[bg - 2],
-        bgpc[bg - 2] * static_cast<int>(x) + bgy[bg - 2]);
-}
-
 void Ppu::renderBg(RenderFunc render, uint bg)
 {
     if ((dispcnt.layers & (1 << bg)) == 0)
@@ -116,7 +109,7 @@ void Ppu::renderBgMode2(uint bg)
 
     for (auto [x, color] : shell::enumerate(backgrounds[bg]))
     {
-        auto texel = transform(x, bg) >> kDecimalBits;
+        auto texel = matrix[bg - 2] * x;
 
         if (!(texel >= kOrigin && texel < size))
         {
@@ -148,7 +141,7 @@ void Ppu::renderBgMode3(uint bg)
 {
     for (auto [x, color] : shell::enumerate(backgrounds[bg]))
     {
-        const auto texel = transform(x, bg) >> kDecimalBits;
+        auto texel = matrix[bg - 2] * x;
 
         if (texel >= kOrigin && texel < kScreen)
         {
@@ -167,7 +160,7 @@ void Ppu::renderBgMode4(uint bg)
 {
     for (auto [x, color] : shell::enumerate(backgrounds[bg]))
     {
-        const auto texel = transform(x, bg) >> kDecimalBits;
+        auto texel = matrix[bg - 2] * x;
 
         if (texel >= kOrigin && texel < kScreen)
         {
@@ -188,7 +181,7 @@ void Ppu::renderBgMode5(uint bg)
 
     for (auto [x, color] : shell::enumerate(backgrounds[bg]))
     {
-        const auto texel = transform(x, bg) >> kDecimalBits;
+        auto texel = matrix[bg - 2] * x;
 
         if (texel >= kOrigin && texel < kBitmap)
         {

@@ -65,26 +65,6 @@ public:
     uint dimensions = 0;
 };
 
-class BgReference : public RegisterW<u32, 0x0FFF'FFFF>
-{
-public:
-    operator s32() const;
-
-    void write(uint index, u8 byte);
-
-    void hblank(s16 value);
-    void vblank();
-
-private:
-    s32 current = 0;
-};
-
-class BgParameter : public RegisterW<u16>
-{
-public:
-    operator s16() const;
-};
-
 class BgOffset : public RegisterW<u16, 0x01FF>
 {
 public:
