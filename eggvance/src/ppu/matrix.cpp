@@ -8,3 +8,8 @@ Point RotationScalingMatrix::operator*(const Point& point) const
 
     return result >> kDecimalBits;
 }
+
+void RotationScalingMatrix::write(uint index, s16 half)
+{
+    set((index >> 1) & 0x1, index & 0x1, half);
+}

@@ -17,7 +17,7 @@ void Oam::writeHalf(u32 addr, u16 half)
     case 0: entry.writeAttr0(half); break;
     case 2: entry.writeAttr1(half); break;
     case 4: entry.writeAttr2(half); break;
-    case 6: matrix[(addr >> 3) & 0x1][(addr >> 2) & 0x1] = half; break;
+    case 6: matrix.write(addr >> 3, half); break;
 
     default:
         SHELL_UNREACHABLE;

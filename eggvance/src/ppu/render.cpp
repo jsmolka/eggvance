@@ -230,7 +230,7 @@ void Ppu::renderObjects()
 
         for (uint x = center.x + offset.x; x < end; ++x, ++offset.x)
         {
-            auto texel = (matrix * offset >> kDecimalBits) + (sprite_size / 2);
+            auto texel = (matrix * offset) + (sprite_size / 2);
 
             if (!(texel >= kOrigin && texel < sprite_size))
                 continue;

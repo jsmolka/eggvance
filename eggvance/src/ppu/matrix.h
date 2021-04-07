@@ -53,6 +53,8 @@ class RotationScalingMatrix : public Matrix<s16, 2, 2>
 {
 public:
     Point operator*(const Point& point) const;
+
+    void write(uint index, s16 half);
 };
 
 inline constexpr RotationScalingMatrix kIdentityMatrix = { 1 << kDecimalBits, 0, 0, 1 << kDecimalBits };
