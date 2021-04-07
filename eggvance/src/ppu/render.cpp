@@ -6,38 +6,35 @@
 #include "mapentry.h"
 #include "matrix.h"
 
-void Ppu::renderBg(RenderFunc render, uint bg)
+void Ppu::renderBg(RenderFunc render, Background& background)
 {
-    if ((dispcnt.layers & (1 << bg)) == 0)
+    if ((dispcnt.layers & (1 << background.id)) == 0)
         return;
 
-    auto& bgcnt = this->bgcnt[bg];
-    auto& background = backgrounds[bg];
-
-    if (bgcnt.mosaic && mosaic.bgs.y > 1 && !mosaic.bgs.isDominantY(vcount))
+    if (background.control.mosaic && mosaic.bgs.y > 1 && !mosaic.bgs.isDominantY(vcount))
     {
-        background.flip();
+        background.buffer.flip();
     }
     else
     {
-        std::invoke(render, this, bg);
+        std::invoke(render, this, background);
 
-        if (bgcnt.mosaic && mosaic.bgs.x > 1)
+        if (background.control.mosaic && mosaic.bgs.x > 1)
         {
-            for (auto [x, color] : shell::enumerate(background))
+            for (auto [x, color] : shell::enumerate(background.buffer))
             {
-                color = background[mosaic.bgs.mosaicX(x)];
+                color = background.buffer[mosaic.bgs.mosaicX(x)];
             }
         }
     }
 }
 
-void Ppu::renderBgMode0(uint bg)
+void Ppu::renderBgMode0(Background& background)
 {
-    switch (ColorMode(bgcnt[bg].color_mode))
+    switch (ColorMode(background.control.color_mode))
     {
-    case ColorMode::C16x16: renderBgMode0Impl<ColorMode::C16x16>(bg); break;
-    case ColorMode::C256x1: renderBgMode0Impl<ColorMode::C256x1>(bg); break;
+    case ColorMode::C16x16: renderBgMode0Impl<ColorMode::C16x16>(background); break;
+    case ColorMode::C256x1: renderBgMode0Impl<ColorMode::C256x1>(background); break;
 
     default:
         SHELL_UNREACHABLE;
@@ -46,14 +43,11 @@ void Ppu::renderBgMode0(uint bg)
 }
 
 template<ColorMode kColorMode>
-void Ppu::renderBgMode0Impl(uint bg)
+void Ppu::renderBgMode0Impl(Background& background)
 {
-    const auto& bgcnt = this->bgcnt[bg];
-    const auto& size  = this->bgcnt[bg].sizeReg();
+    const auto size = background.control.sizeRegular();
 
-    Point origin(bghofs[bg], bgvofs[bg] + vcount);
-
-    origin %= size;
+    Point origin = (background.offset + Point(0, vcount)) % size;
 
     auto pixel = origin % kTileSize;
     auto tile  = origin / kTileSize % kMapBlockTiles;
@@ -61,7 +55,7 @@ void Ppu::renderBgMode0Impl(uint bg)
 
     for (uint x = 0; ; block.x ^= size.x > kMapBlockSize)
     {
-        u32 map = bgcnt.map_block
+        u32 map = background.control.map_block
             + kMapBlockBytes * block.index2d(size.x / kMapBlockSize)
             + kMapEntryBytes * tile.index2d(kMapBlockTiles);
 
@@ -69,7 +63,7 @@ void Ppu::renderBgMode0Impl(uint bg)
         {
             MapEntry entry(vram.readFast<u16>(map));
 
-            u32 addr = bgcnt.tile_block + kTileBytes[uint(kColorMode)] * entry.tile;
+            u32 addr = background.control.tile_block + kTileBytes[uint(kColorMode)] * entry.tile;
             if (addr < kObjectBase)
             {
                 for (; pixel.x < kTileSize; ++pixel.x)
@@ -78,7 +72,7 @@ void Ppu::renderBgMode0Impl(uint bg)
                         ? vram.index16x16(addr, pixel ^ entry.flip)
                         : vram.index256x1(addr, pixel ^ entry.flip);
 
-                    backgrounds[bg][x] = kColorMode == ColorMode::C16x16
+                    background.buffer[x] = kColorMode == ColorMode::C16x16
                         ? pram.colorBg(index, entry.bank)
                         : pram.colorBg(index);
 
@@ -90,7 +84,7 @@ void Ppu::renderBgMode0Impl(uint bg)
             {
                 for (; pixel.x < kTileSize; ++pixel.x)
                 {
-                    backgrounds[bg][x] = kTransparent;
+                    background.buffer[x] = kTransparent;
 
                     if (++x == kScreen.x)
                         return;
@@ -102,18 +96,18 @@ void Ppu::renderBgMode0Impl(uint bg)
     }
 }
 
-void Ppu::renderBgMode2(uint bg)
+void Ppu::renderBgMode2(Background& background)
 {
-    const auto& bgcnt = this->bgcnt[bg];
-    const auto& size  = this->bgcnt[bg].sizeAff();
+    const auto size = background.control.sizeAffine();
 
-    for (auto [x, color] : shell::enumerate(backgrounds[bg]))
+    for (auto [x, color] : shell::enumerate(background.buffer))
     {
-        auto texel = matrix[bg - 2] * x;
+        auto texel = background.matrix * x;
 
-        if (!(texel >= kOrigin && texel < size))
+        if (static_cast<uint>(texel.x) >= size.x ||
+            static_cast<uint>(texel.y) >= size.y)
         {
-            if (bgcnt.wraparound)
+            if (background.control.wraparound)
             {
                 texel %= size;
 
@@ -130,20 +124,21 @@ void Ppu::renderBgMode2(uint bg)
         const auto pixel = texel % kTileSize;
         const auto tile  = texel / kTileSize;
 
-        uint entry = vram.readFast<u8>(bgcnt.map_block + tile.index2d(size.x / kTileSize));
-        uint index = vram.index256x1(bgcnt.tile_block + kTileBytes[uint(ColorMode::C256x1)] * entry, pixel);
+        uint entry = vram.readFast<u8>(background.control.map_block + tile.index2d(size.x / kTileSize));
+        uint index = vram.index256x1(background.control.tile_block + kTileBytes[uint(ColorMode::C256x1)] * entry, pixel);
 
         color = pram.colorBg(index);
     }
 }
 
-void Ppu::renderBgMode3(uint bg)
+void Ppu::renderBgMode3(Background& background)
 {
-    for (auto [x, color] : shell::enumerate(backgrounds[bg]))
+    for (auto [x, color] : shell::enumerate(background.buffer))
     {
-        auto texel = matrix[bg - 2] * x;
+        const auto texel = background.matrix * x;
 
-        if (texel >= kOrigin && texel < kScreen)
+        if (static_cast<uint>(texel.x) >= kScreen.x ||
+            static_cast<uint>(texel.y) >= kScreen.y)
         {
             u32 addr = kColorBytes * texel.index2d(kScreen.x);
 
@@ -156,13 +151,14 @@ void Ppu::renderBgMode3(uint bg)
     }
 }
 
-void Ppu::renderBgMode4(uint bg)
+void Ppu::renderBgMode4(Background& background)
 {
-    for (auto [x, color] : shell::enumerate(backgrounds[bg]))
+    for (auto [x, color] : shell::enumerate(background.buffer))
     {
-        auto texel = matrix[bg - 2] * x;
+        const auto texel = background.matrix * x;
 
-        if (texel >= kOrigin && texel < kScreen)
+        if (static_cast<uint>(texel.x) >= kScreen.x ||
+            static_cast<uint>(texel.y) >= kScreen.y)
         {
             uint index = vram.readFast<u8>(dispcnt.frame + texel.index2d(kScreen.x));
 
@@ -175,15 +171,16 @@ void Ppu::renderBgMode4(uint bg)
     }
 }
 
-void Ppu::renderBgMode5(uint bg)
+void Ppu::renderBgMode5(Background& background)
 {
     constexpr Point kBitmap(160, 128);
 
-    for (auto [x, color] : shell::enumerate(backgrounds[bg]))
+    for (auto [x, color] : shell::enumerate(background.buffer))
     {
-        auto texel = matrix[bg - 2] * x;
+        const auto texel = background.matrix * x;
 
-        if (texel >= kOrigin && texel < kBitmap)
+        if (static_cast<uint>(texel.x) >= kBitmap.x ||
+            static_cast<uint>(texel.y) >= kBitmap.y)
         {
             u32 addr = dispcnt.frame + kColorBytes * texel.index2d(kBitmap.x);
 

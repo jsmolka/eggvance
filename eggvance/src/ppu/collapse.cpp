@@ -12,7 +12,7 @@ void Ppu::collapse(uint bgs)
 
     for (uint bg : bit::iterate(bgs & dispcnt.layers))
     {
-        backgrounds.push_back({ bgcnt[bg].priority, this->backgrounds[bg].data(), 1U << bg });
+        backgrounds.push_back({ this->backgrounds[bg].control.priority, this->backgrounds[bg].buffer.data(), 1U << bg });
     }
 
     std::sort(backgrounds.begin(), backgrounds.end());

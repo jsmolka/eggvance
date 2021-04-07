@@ -60,6 +60,7 @@
     <ClCompile Include="src\gamepak\rtc.cpp" />
     <ClCompile Include="src\gamepak\save.cpp" />
     <ClCompile Include="src\gamepak\sram.cpp" />
+    <ClCompile Include="src\ppu\background.cpp" />
     <ClCompile Include="src\ppu\collapse.cpp" />
     <ClCompile Include="src\ppu\io.cpp" />
     <ClCompile Include="src\ppu\layers.cpp" />
@@ -130,6 +131,7 @@
     <ClInclude Include="src\gamepak\save.h" />
     <ClInclude Include="src\gamepak\serialbuffer.h" />
     <ClInclude Include="src\gamepak\sram.h" />
+    <ClInclude Include="src\ppu\background.h" />
     <ClInclude Include="src\ppu\buffer.h" />
     <ClInclude Include="src\ppu\constants.h" />
     <ClInclude Include="src\ppu\io.h" />

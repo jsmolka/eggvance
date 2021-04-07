@@ -100,13 +100,13 @@ VCount::operator u16() const
     return data;
 }
 
-BgControl::BgControl(uint id)
+BackgroundControl::BackgroundControl(uint id)
     : Register(id <= 1 ? 0xDFFF : 0xFFFF)
 {
 
 }
 
-void BgControl::write(uint index, u8 byte)
+void BackgroundControl::write(uint index, u8 byte)
 {
     Register::write(index, byte);
 
@@ -125,23 +125,30 @@ void BgControl::write(uint index, u8 byte)
     }
 }
 
-Point BgControl::sizeReg() const
+Point BackgroundControl::sizeRegular() const
 {
     return Point(
         256 << bit::seq<0, 1>(dimensions),
         256 << bit::seq<1, 1>(dimensions));
 }
 
-Point BgControl::sizeAff() const
+Point BackgroundControl::sizeAffine() const
 {
     return Point(
         128 << dimensions,
         128 << dimensions);
 }
 
-BgOffset::operator u16() const
+void BackgroundOffset::writeX(uint index, u8 byte)
 {
-    return data;
+    bit::byteRef(x, index) = byte;
+    x &= 0x1FF;
+}
+
+void BackgroundOffset::writeY(uint index, u8 byte)
+{
+    bit::byteRef(y, index) = byte;
+    y &= 0x1FF;
 }
 
 Window::Window()

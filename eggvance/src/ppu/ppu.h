@@ -2,8 +2,7 @@
 
 #include <shell/buffer.h>
 
-#include "buffer.h"
-#include "io.h"
+#include "background.h"
 #include "layers.h"
 #include "oam.h"
 #include "paletteram.h"
@@ -24,10 +23,8 @@ public:
     Register<u16, 0x0001> greenswap;
     DisplayStatus dispstat;
     VCount vcount;
-    BgControl bgcnt[4] = { 0, 1, 2, 3 };
-    BgOffset bghofs[4];
-    BgOffset bgvofs[4];
-    TransformationMatrix matrix[2];
+
+    shell::array<Background, 4> backgrounds = { 0, 1, 2, 3 };
     WindowInside winin;
     WindowOutside winout;
     WindowRange winh[2] = { kScreen.x, kScreen.x };
@@ -38,23 +35,23 @@ public:
     BlendFade bldfade;
 
 private:
-    using RenderFunc = void(Ppu::*)(uint);
+    using RenderFunc = void(Ppu::*)(Background&);
     using BackgroundLayers = shell::FixedBuffer<BgLayer, 4>;
 
     void scanline();
     void hblank(u64 late);
     void hblankEnd(u64 late);
 
-    void renderBg(RenderFunc render, uint bg);
-    void renderBgMode0(uint bg);
-    void renderBgMode2(uint bg);
-    void renderBgMode3(uint bg);
-    void renderBgMode4(uint bg);
-    void renderBgMode5(uint bg);
+    void renderBg(RenderFunc render, Background& background);
+    void renderBgMode0(Background& background);
+    void renderBgMode2(Background& background);
+    void renderBgMode3(Background& background);
+    void renderBgMode4(Background& background);
+    void renderBgMode5(Background& background);
     void renderObjects();
 
     template<ColorMode kColorMode>
-    void renderBgMode0Impl(uint bg);
+    void renderBgMode0Impl(Background& background);
 
     void collapse(uint bgs);
     template<bool kObjects> void collapse(const BackgroundLayers& backgrounds);
@@ -82,7 +79,6 @@ private:
     } events;
 
     ScanlineBuffer<ObjectLayer> objects;
-    ScanlineDoubleBuffer<u16> backgrounds[4];
     bool objects_exist = false;
     bool objects_alpha = false;
 

@@ -65,10 +65,8 @@ void Ppu::scanline()
         return;
     }
 
-    backgrounds[0].flip();
-    backgrounds[1].flip();
-    backgrounds[2].flip();
-    backgrounds[3].flip();
+    for (auto& background : backgrounds)
+        background.buffer.flip();
 
     if (objects_exist)
     {
@@ -85,38 +83,38 @@ void Ppu::scanline()
     switch (dispcnt.mode)
     {
     case 0:
-        renderBg(&Ppu::renderBgMode0, 0);
-        renderBg(&Ppu::renderBgMode0, 1);
-        renderBg(&Ppu::renderBgMode0, 2);
-        renderBg(&Ppu::renderBgMode0, 3);
+        renderBg(&Ppu::renderBgMode0, backgrounds[0]);
+        renderBg(&Ppu::renderBgMode0, backgrounds[1]);
+        renderBg(&Ppu::renderBgMode0, backgrounds[2]);
+        renderBg(&Ppu::renderBgMode0, backgrounds[3]);
         collapse(uint(Layer::Flag::Bg0 | Layer::Flag::Bg1 | Layer::Flag::Bg2 | Layer::Flag::Bg3));
         break;
 
     case 1:
-        renderBg(&Ppu::renderBgMode0, 0);
-        renderBg(&Ppu::renderBgMode0, 1);
-        renderBg(&Ppu::renderBgMode2, 2);
+        renderBg(&Ppu::renderBgMode0, backgrounds[0]);
+        renderBg(&Ppu::renderBgMode0, backgrounds[1]);
+        renderBg(&Ppu::renderBgMode2, backgrounds[2]);
         collapse(uint(Layer::Flag::Bg0 | Layer::Flag::Bg1 | Layer::Flag::Bg2));
         break;
 
     case 2:
-        renderBg(&Ppu::renderBgMode2, 2);
-        renderBg(&Ppu::renderBgMode2, 3);
+        renderBg(&Ppu::renderBgMode2, backgrounds[2]);
+        renderBg(&Ppu::renderBgMode2, backgrounds[3]);
         collapse(uint(Layer::Flag::Bg2 | Layer::Flag::Bg3));
         break;
 
     case 3:
-        renderBg(&Ppu::renderBgMode3, 2);
+        renderBg(&Ppu::renderBgMode3, backgrounds[2]);
         collapse(uint(Layer::Flag::Bg2));
         break;
 
     case 4:
-        renderBg(&Ppu::renderBgMode4, 2);
+        renderBg(&Ppu::renderBgMode4, backgrounds[2]);
         collapse(uint(Layer::Flag::Bg2));
         break;
 
     case 5:
-        renderBg(&Ppu::renderBgMode5, 2);
+        renderBg(&Ppu::renderBgMode5, backgrounds[2]);
         collapse(uint(Layer::Flag::Bg2));
         break;
     }
@@ -135,8 +133,8 @@ void Ppu::hblank(u64 late)
     {
         scanline();
 
-        matrix[0].hblank();
-        matrix[1].hblank();
+        backgrounds[2].matrix.hblank();
+        backgrounds[3].matrix.hblank();
 
         dma.broadcast(Dma::Event::HBlank);
     }
@@ -164,8 +162,8 @@ void Ppu::hblankEnd(u64 late)
 
     if (vcount == 160)
     {
-        matrix[0].vblank();
-        matrix[1].vblank();
+        backgrounds[2].matrix.vblank();
+        backgrounds[3].matrix.vblank();
 
         if (dispstat.vblank_irq)
         {

@@ -46,15 +46,15 @@ public:
     operator u16() const;
 };
 
-class BgControl : public Register<u16>
+class BackgroundControl : public Register<u16>
 {
 public:
-    BgControl(uint id);
+    BackgroundControl(uint id);
 
     void write(uint index, u8 byte);
 
-    Point sizeReg() const;
-    Point sizeAff() const;
+    Point sizeRegular() const;
+    Point sizeAffine() const;
 
     uint priority   = 0;
     uint tile_block = 0;
@@ -65,10 +65,11 @@ public:
     uint dimensions = 0;
 };
 
-class BgOffset : public RegisterW<u16, 0x01FF>
+class BackgroundOffset : public Point
 {
 public:
-    operator u16() const;
+    void writeX(uint index, u8 byte);
+    void writeY(uint index, u8 byte);
 };
 
 class Window
