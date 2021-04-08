@@ -62,6 +62,7 @@
     <ClCompile Include="src\gamepak\sram.cpp" />
     <ClCompile Include="src\ppu\background.cpp" />
     <ClCompile Include="src\ppu\collapse.cpp" />
+    <ClCompile Include="src\ppu\color.cpp" />
     <ClCompile Include="src\ppu\io.cpp" />
     <ClCompile Include="src\ppu\layers.cpp" />
     <ClCompile Include="src\ppu\mapentry.cpp" />
@@ -133,6 +134,7 @@
     <ClInclude Include="src\gamepak\sram.h" />
     <ClInclude Include="src\ppu\background.h" />
     <ClInclude Include="src\ppu\buffer.h" />
+    <ClInclude Include="src\ppu\color.h" />
     <ClInclude Include="src\ppu\constants.h" />
     <ClInclude Include="src\ppu\io.h" />
     <ClInclude Include="src\ppu\layers.h" />

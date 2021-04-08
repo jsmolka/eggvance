@@ -4,6 +4,7 @@
 #include <shell/macros.h>
 #include <shell/operators.h>
 
+#include "color.h"
 #include "frontend/videocontext.h"
 
 void Ppu::collapse(uint bgs)
@@ -47,7 +48,7 @@ void Ppu::collapseNN(const BackgroundLayers& backgrounds)
 {
     for (auto [x, color] : shell::enumerate(video_ctx.scanline(vcount)))
     {
-        color = argb[upperLayer<kObjects>(backgrounds, x)];
+        color = Color::toArgb(upperLayer<kObjects>(backgrounds, x));
     }
 }
 
@@ -71,7 +72,7 @@ void Ppu::collapseNW(const BackgroundLayers& backgrounds)
     {
         const auto& window = activeWindow<kWindows>(x);
 
-        color = argb[upperLayer<kObjects>(backgrounds, x, window.layers)];
+        color = Color::toArgb(upperLayer<kObjects>(backgrounds, x, window.layers));
     }
 }
 
@@ -133,7 +134,7 @@ void Ppu::collapseBN(const BackgroundLayers& backgrounds)
                 break;
             }
         }
-        color = argb[upper];
+        color = Color::toArgb(upper);
     }
 }
 
@@ -211,7 +212,7 @@ void Ppu::collapseBW(const BackgroundLayers& backgrounds)
         {
             upper = upperLayer<kObjects>(backgrounds, x, window.layers);
         }
-        color = argb[upper];
+        color = Color::toArgb(upper);
     }
 }
 

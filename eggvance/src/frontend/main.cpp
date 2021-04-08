@@ -12,6 +12,7 @@
 #include "dma/dma.h"
 #include "gamepak/gamepak.h"
 #include "keypad/keypad.h"
+#include "ppu/color.h"
 #include "ppu/ppu.h"
 #include "scheduler/scheduler.h"
 #include "sio/sio.h"
@@ -197,6 +198,7 @@ void init(int argc, char* argv[])
     video_ctx.init();
 
     Bios::init(config.bios_file);
+    Color::init(config.lcd_color);
 
     #if SHELL_OS_WINDOWS
     SDL_EventState(SDL_SYSWMEVENT, SDL_ENABLE);

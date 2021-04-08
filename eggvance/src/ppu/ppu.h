@@ -14,8 +14,6 @@ class Ppu
 public:
     friend class Arm;
 
-    Ppu();
-
     void init();
     void present();
 
@@ -85,7 +83,6 @@ private:
     PaletteRam pram = {};
     VideoRam vram = {};
     Oam oam = {};
-    shell::array<u32, 0x8000> argb;
 };
 
 inline Ppu ppu;
