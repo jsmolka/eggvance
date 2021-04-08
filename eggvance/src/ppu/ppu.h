@@ -12,8 +12,6 @@
 class Ppu
 {
 public:
-    friend class Arm;
-
     void init();
     void present();
 
@@ -31,6 +29,10 @@ public:
     BlendControl bldcnt;
     BlendAlpha bldalpha;
     BlendFade bldfade;
+
+    PaletteRam pram = {};
+    VideoRam vram = {};
+    Oam oam = {};
 
 private:
     using RenderFunc = void(Ppu::*)(Background&);
@@ -70,7 +72,7 @@ private:
     template<bool kObjects> bool findBlendLayers(const BackgroundLayers& backgrounds, uint x, uint enabled, u16& upper);
     template<bool kObjects> bool findBlendLayers(const BackgroundLayers& backgrounds, uint x, uint enabled, u16& upper, u16& lower);
 
-    struct
+    struct Events
     {
         Event hblank;
         Event hblank_end;
@@ -79,10 +81,6 @@ private:
     ScanlineBuffer<ObjectLayer> objects;
     bool objects_exist = false;
     bool objects_alpha = false;
-
-    PaletteRam pram = {};
-    VideoRam vram = {};
-    Oam oam = {};
 };
 
 inline Ppu ppu;
