@@ -73,7 +73,6 @@ private:
     SHELL_INLINE void tickRom(u32 addr, u64 cycles);
     SHELL_INLINE void tickMultiply(u32 multiplier, bool sign);
 
-    void interrupt(u32 pc, u32 lr, Psr::Mode mode);
     void interruptHw();
     void interruptSw();
     void interruptHandle(u64 late = 0);
@@ -118,19 +117,21 @@ private:
     Pipeline pipe;
     u64 target = 0;
 
-    struct
+    struct Prefetch
     {
         u64 active = 0;
         u64 cycles = 0;
     } prefetch;
 
-    struct
+    struct Interrupt
     {
+        bool isServable() const;
+
         Event delay;
         IrqMaster master;
         IrqEnable enable;
         IrqRequest request;
-    } irq;
+    } interrupt;
 
     WaitControl waitcnt;
     HaltControl haltcnt;

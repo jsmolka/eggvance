@@ -156,11 +156,11 @@ u8 Arm::readIo(u32 addr)
     SHELL_CASE04(uint(Io::JoyTransmit),    return sio.joytrans.read(kIndex));
     SHELL_CASE02(uint(Io::JoyStatus),      return sio.joystat.read(kIndex));
     SHELL_CASE02(uint(Io::Unused15A),      return 0);
-    SHELL_CASE02(uint(Io::IrqEnable),      return irq.enable.read(kIndex));
-    SHELL_CASE02(uint(Io::IrqRequest),     return irq.request.read(kIndex));
+    SHELL_CASE02(uint(Io::IrqEnable),      return interrupt.enable.read(kIndex));
+    SHELL_CASE02(uint(Io::IrqRequest),     return interrupt.request.read(kIndex));
     SHELL_CASE02(uint(Io::WaitControl),    return waitcnt.read(kIndex));
     SHELL_CASE02(uint(Io::Unused206),      return 0);
-    SHELL_CASE04(uint(Io::IrqMaster),      return irq.master.read(kIndex));
+    SHELL_CASE04(uint(Io::IrqMaster),      return interrupt.master.read(kIndex));
     SHELL_CASE01(uint(Io::PostFlag),       return postflg.read(kIndex));
 
     default:
@@ -251,10 +251,10 @@ void Arm::writeIo(u32 addr, u8 byte)
     SHELL_CASE04(uint(Io::JoyReceive),     sio.joyrecv.write(kIndex, byte));
     SHELL_CASE04(uint(Io::JoyTransmit),    sio.joytrans.write(kIndex, byte));
     SHELL_CASE02(uint(Io::JoyStatus),      sio.joystat.write(kIndex, byte));
-    SHELL_CASE02(uint(Io::IrqEnable),      irq.enable.write(kIndex, byte));
-    SHELL_CASE02(uint(Io::IrqRequest),     irq.request.write(kIndex, byte));
+    SHELL_CASE02(uint(Io::IrqEnable),      interrupt.enable.write(kIndex, byte));
+    SHELL_CASE02(uint(Io::IrqRequest),     interrupt.request.write(kIndex, byte));
     SHELL_CASE02(uint(Io::WaitControl),    waitcnt.write(kIndex, byte));
-    SHELL_CASE04(uint(Io::IrqMaster),      irq.master.write(kIndex, byte));
+    SHELL_CASE04(uint(Io::IrqMaster),      interrupt.master.write(kIndex, byte));
     SHELL_CASE01(uint(Io::PostFlag),       postflg.write(kIndex, byte));
     SHELL_CASE01(uint(Io::HaltControl),    haltcnt.write(kIndex, byte));
     }

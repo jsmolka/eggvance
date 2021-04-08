@@ -14,52 +14,54 @@ enum class ExceptionVector
 
 void Arm::raise(Irq irq, u64 late)
 {
-    this->irq.request |= irq;
+    interrupt.request |= irq;
 
     interruptHandle(late);
 }
 
-void Arm::interrupt(u32 pc, u32 lr, Psr::Mode mode)
+void Arm::interruptHw()
 {
-    Psr cpsr = this->cpsr;
-    switchMode(mode);
-    spsr = cpsr;
+    Psr saved = cpsr;
+    switchMode(Psr::Mode::Irq);
+    spsr = saved;
 
-    this->lr = lr;
-    this->pc = pc;
+    lr = pc - 2 * cpsr.size() + 4;
+    pc = uint(ExceptionVector::Irq);
 
-    this->cpsr.t = 0;
-    this->cpsr.i = 1;
+    cpsr.t = 0;
+    cpsr.i = 1;
 
     flushWord();
     state &= ~State::Thumb;
 }
 
-void Arm::interruptHw()
-{
-    u32 lr = pc - 2 * cpsr.size() + 4;
-
-    interrupt(uint(ExceptionVector::Irq), lr, Psr::Mode::Irq);
-}
-
 void Arm::interruptSw()
 {
-    u32 lr = pc - cpsr.size();
+    Psr saved = cpsr;
+    switchMode(Psr::Mode::Svc);
+    spsr = saved;
 
-    interrupt(uint(ExceptionVector::Swi), lr, Psr::Mode::Svc);
+    lr = pc - cpsr.size();
+    pc = uint(ExceptionVector::Swi);
+
+    cpsr.t = 0;
+    cpsr.i = 1;
+
+    flushWord();
+    state &= ~State::Thumb;
 }
 
 void Arm::interruptHandle(u64 late)
 {
-    if (irq.enable & irq.request)
+    if (interrupt.isServable())
         state &= ~State::Halt;
 
-    if (irq.enable & irq.request && irq.master)
+    if (interrupt.isServable() && interrupt.master)
     {
-        if (!irq.delay.scheduled() && !(state & State::Irq))
+        if (!interrupt.delay.scheduled() && !(state & State::Irq))
         {
             if (late < 3)
-                scheduler.insert(irq.delay, 3 - late);
+                scheduler.insert(interrupt.delay, 3 - late);
             else
                 state |= State::Irq;
         }
@@ -67,6 +69,11 @@ void Arm::interruptHandle(u64 late)
     else
     {
         state &= ~State::Irq;
-        scheduler.remove(irq.delay);
+        scheduler.remove(interrupt.delay);
     }
+}
+
+bool Arm::Interrupt::isServable() const
+{
+    return enable & request;
 }
