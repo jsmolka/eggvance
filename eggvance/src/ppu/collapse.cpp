@@ -9,37 +9,87 @@
 
 void Ppu::collapse(uint bgs)
 {
-    BackgroundLayers backgrounds;
+    BackgroundLayers layers;
 
     for (uint bg : bit::iterate(bgs & dispcnt.layers))
     {
-        backgrounds.push_back({ this->backgrounds[bg].control.priority, this->backgrounds[bg].buffer.data(), 1U << bg });
+        layers.push_back({ this->backgrounds[bg].control.priority, this->backgrounds[bg].buffer.data(), 1U << bg });
     }
 
-    std::sort(backgrounds.begin(), backgrounds.end());
+    std::sort(layers.begin(), layers.end());
 
-    if (objects_exist)
-        collapse<1>(backgrounds);
-    else
-        collapse<0>(backgrounds);
-}
-
-template<bool kObjects>
-void Ppu::collapse(const BackgroundLayers& backgrounds)
-{
-    uint window = dispcnt.win0 || dispcnt.win1 || dispcnt.winobj;
-    uint blend  = bldcnt.mode != BlendMode::Disabled || objects_alpha;
-
-    switch ((blend << 1) | window)
+    if (dispcnt.win0 || dispcnt.win1 || dispcnt.winobj)
     {
-    case 0b00: collapseNN<kObjects>(backgrounds); break;
-    case 0b01: collapseNW<kObjects>(backgrounds); break;
-    case 0b10: collapseBN<kObjects>(backgrounds); break;
-    case 0b11: collapseBW<kObjects>(backgrounds); break;
+        uint windows = 0;
 
-    default:
-        SHELL_UNREACHABLE;
-        break;
+        if (dispcnt.win0 && winv[0].contains(vcount))
+            windows |= Window::Flag::Win0;
+
+        if (dispcnt.win1 && winv[1].contains(vcount))
+            windows |= Window::Flag::Win1;
+
+        if (dispcnt.winobj && objects_exist)
+            windows |= Window::Flag::WinObj;
+
+        if (bldcnt.mode != BlendMode::Disabled || objects_alpha)
+        {
+            switch (static_cast<uint>(objects_exist) | (bldcnt.mode << 1) | (windows << 3))
+            {
+            SHELL_CASE64(0,
+                collapseBW<
+                    bit::seq<0, 1>(kLabel),
+                    bit::seq<1, 2>(kLabel),
+                    bit::seq<3, 3>(kLabel)>(layers))
+
+            default:
+                SHELL_UNREACHABLE;
+                break;
+            }
+        }
+        else
+        {
+            switch (static_cast<uint>(objects_exist) | (windows << 1))
+            {
+            SHELL_CASE16(0,
+                collapseNW<
+                    bit::seq<0, 1>(kLabel),
+                    bit::seq<1, 3>(kLabel)>(layers))
+
+            default:
+                SHELL_UNREACHABLE;
+                break;
+            }
+        }
+    }
+    else
+    {
+        if (bldcnt.mode != BlendMode::Disabled || objects_alpha)
+        {
+            switch (static_cast<uint>(objects_exist) | (bldcnt.mode << 1))
+            {
+            SHELL_CASE08(0,
+                collapseBN<
+                    bit::seq<0, 1>(kLabel),
+                    bit::seq<1, 2>(kLabel)>(layers))
+
+            default:
+                SHELL_UNREACHABLE;
+                break;
+            }
+        }
+        else
+        {
+            switch (static_cast<uint>(objects_exist))
+            {
+            SHELL_CASE02(0,
+                collapseNN<
+                    bit::seq<0, 1>(kLabel)>(layers))
+
+            default:
+                SHELL_UNREACHABLE;
+                break;
+            }
+        }
     }
 }
 
@@ -49,19 +99,6 @@ void Ppu::collapseNN(const BackgroundLayers& backgrounds)
     for (auto [x, color] : shell::enumerate(video_ctx.scanline(vcount)))
     {
         color = Color::toArgb(findUpperLayer<kObjects>(backgrounds, x));
-    }
-}
-
-template<bool kObjects>
-void Ppu::collapseNW(const BackgroundLayers& backgrounds)
-{
-    switch (possibleWindows<kObjects>())
-    {
-    SHELL_CASE08(0, collapseNW<kObjects, kLabel>(backgrounds));
-
-    default:
-        SHELL_UNREACHABLE;
-        break;
     }
 }
 
@@ -76,20 +113,7 @@ void Ppu::collapseNW(const BackgroundLayers& backgrounds)
     }
 }
 
-template<bool kObjects>
-void Ppu::collapseBN(const BackgroundLayers& backgrounds)
-{
-    switch (bldcnt.mode)
-    {
-    SHELL_CASE04(0, collapseBN<kObjects, BlendMode(kLabel)>(backgrounds));
-
-    default:
-        SHELL_UNREACHABLE;
-        break;
-    }
-}
-
-template<bool kObjects, BlendMode kBlendMode>
+template<bool kObjects, uint kBlendMode>
 void Ppu::collapseBN(const BackgroundLayers& backgrounds)
 {
     constexpr auto kEnabled = 0xFFFF;
@@ -108,7 +132,7 @@ void Ppu::collapseBN(const BackgroundLayers& backgrounds)
         }
         else
         {
-            switch (kBlendMode)
+            switch (BlendMode(kBlendMode))
             {
             case BlendMode::Alpha:
                 if (findBlendLayer<kObjects>(backgrounds, x, kEnabled, upper, lower))
@@ -138,33 +162,7 @@ void Ppu::collapseBN(const BackgroundLayers& backgrounds)
     }
 }
 
-template<bool kObjects>
-void Ppu::collapseBW(const BackgroundLayers& backgrounds)
-{
-    switch (bldcnt.mode)
-    {
-    SHELL_CASE04(0, collapseBW<kObjects, BlendMode(kLabel)>(backgrounds));
-
-    default:
-        SHELL_UNREACHABLE;
-        break;
-    }
-}
-
-template<bool kObjects, BlendMode kBlendMode>
-void Ppu::collapseBW(const BackgroundLayers& backgrounds)
-{
-    switch (possibleWindows<kObjects>())
-    {
-    SHELL_CASE08(0, collapseBW<kObjects, kBlendMode, kLabel>(backgrounds));
-
-    default:
-        SHELL_UNREACHABLE;
-        break;
-    }
-}
-
-template<bool kObjects, BlendMode kBlendMode, uint kWindows>
+template<bool kObjects, uint kBlendMode, uint kWindows>
 void Ppu::collapseBW(const BackgroundLayers& backgrounds)
 {
     for (auto [x, color] : shell::enumerate(video_ctx.scanline(vcount)))
@@ -182,7 +180,7 @@ void Ppu::collapseBW(const BackgroundLayers& backgrounds)
         }
         else if (window.blend)
         {
-            switch (kBlendMode)
+            switch (BlendMode(kBlendMode))
             {
             case BlendMode::Alpha:
                 if (findBlendLayer<kObjects>(backgrounds, x, window.layers, upper, lower))
@@ -214,23 +212,6 @@ void Ppu::collapseBW(const BackgroundLayers& backgrounds)
         }
         color = Color::toArgb(upper);
     }
-}
-
-template<bool kObjects>
-uint Ppu::possibleWindows() const
-{
-    uint windows = 0;
-
-    if (dispcnt.win0 && winv[0].contains(vcount))
-        windows |= Window::Flag::Win0;
-    
-    if (dispcnt.win1 && winv[1].contains(vcount))
-        windows |= Window::Flag::Win1;
-    
-    if (dispcnt.winobj && kObjects)
-        windows |= Window::Flag::WinObj;
-
-    return windows;
 }
 
 template<uint kWindows>

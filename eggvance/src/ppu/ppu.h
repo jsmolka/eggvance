@@ -54,17 +54,11 @@ private:
     void renderBgMode0Impl(Background& background);
 
     void collapse(uint bgs);
-    template<bool kObjects                                     > void collapse(  const BackgroundLayers& backgrounds);
-    template<bool kObjects                                     > void collapseNN(const BackgroundLayers& backgrounds);
-    template<bool kObjects                                     > void collapseNW(const BackgroundLayers& backgrounds);
-    template<bool kObjects,                       uint kWindows> void collapseNW(const BackgroundLayers& backgrounds);
-    template<bool kObjects                                     > void collapseBN(const BackgroundLayers& backgrounds);
-    template<bool kObjects, BlendMode kBlendMode               > void collapseBN(const BackgroundLayers& backgrounds);
-    template<bool kObjects                                     > void collapseBW(const BackgroundLayers& backgrounds);
-    template<bool kObjects, BlendMode kBlendMode               > void collapseBW(const BackgroundLayers& backgrounds);
-    template<bool kObjects, BlendMode kBlendMode, uint kWindows> void collapseBW(const BackgroundLayers& backgrounds);
+    template<bool kObjects                                > void collapseNN(const BackgroundLayers& layers);
+    template<bool kObjects,                  uint kWindows> void collapseNW(const BackgroundLayers& layers);
+    template<bool kObjects, uint kBlendMode               > void collapseBN(const BackgroundLayers& layers);
+    template<bool kObjects, uint kBlendMode, uint kWindows> void collapseBW(const BackgroundLayers& layers);
 
-    template<bool kObjects> uint possibleWindows() const;
     template<uint kWindows> const Window& activeWindow(uint x) const;
 
     template<bool kObjects> u16  findUpperLayer(const BackgroundLayers& layers, uint x);
