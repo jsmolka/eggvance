@@ -77,9 +77,9 @@ class Window
 public:
     enum Flag
     {
-        Zero = 1 << 0,
-        One  = 1 << 1,
-        Obj  = 1 << 2
+        Win0   = 1 << 0,
+        Win1   = 1 << 1,
+        WinObj = 1 << 2
     };
 
     Window();

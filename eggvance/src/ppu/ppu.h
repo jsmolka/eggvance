@@ -54,23 +54,23 @@ private:
     void renderBgMode0Impl(Background& background);
 
     void collapse(uint bgs);
-    template<bool kObjects> void collapse(const BackgroundLayers& backgrounds);
-    template<bool kObjects> void collapseNN(const BackgroundLayers& backgrounds);
-    template<bool kObjects> void collapseNW(const BackgroundLayers& backgrounds);
-    template<bool kObjects, uint kWindows> void collapseNW(const BackgroundLayers& backgrounds);
-    template<bool kObjects> void collapseBN(const BackgroundLayers& backgrounds);
-    template<bool kObjects, BlendMode kBlendMode> void collapseBN(const BackgroundLayers& backgrounds);
-    template<bool kObjects> void collapseBW(const BackgroundLayers& backgrounds);
-    template<bool kObjects, BlendMode kBlendMode> void collapseBW(const BackgroundLayers& backgrounds);
+    template<bool kObjects                                     > void collapse(  const BackgroundLayers& backgrounds);
+    template<bool kObjects                                     > void collapseNN(const BackgroundLayers& backgrounds);
+    template<bool kObjects                                     > void collapseNW(const BackgroundLayers& backgrounds);
+    template<bool kObjects,                       uint kWindows> void collapseNW(const BackgroundLayers& backgrounds);
+    template<bool kObjects                                     > void collapseBN(const BackgroundLayers& backgrounds);
+    template<bool kObjects, BlendMode kBlendMode               > void collapseBN(const BackgroundLayers& backgrounds);
+    template<bool kObjects                                     > void collapseBW(const BackgroundLayers& backgrounds);
+    template<bool kObjects, BlendMode kBlendMode               > void collapseBW(const BackgroundLayers& backgrounds);
     template<bool kObjects, BlendMode kBlendMode, uint kWindows> void collapseBW(const BackgroundLayers& backgrounds);
 
     template<bool kObjects> uint possibleWindows() const;
     template<uint kWindows> const Window& activeWindow(uint x) const;
 
-    template<bool kObjects> u16 upperLayer(const BackgroundLayers& backgrounds, uint x);
-    template<bool kObjects> u16 upperLayer(const BackgroundLayers& backgrounds, uint x, uint enabled);
-    template<bool kObjects> bool findBlendLayers(const BackgroundLayers& backgrounds, uint x, uint enabled, u16& upper);
-    template<bool kObjects> bool findBlendLayers(const BackgroundLayers& backgrounds, uint x, uint enabled, u16& upper, u16& lower);
+    template<bool kObjects> u16  findUpperLayer(const BackgroundLayers& layers, uint x);
+    template<bool kObjects> u16  findUpperLayer(const BackgroundLayers& layers, uint x, uint enabled);
+    template<bool kObjects> bool findBlendLayer(const BackgroundLayers& layers, uint x, uint enabled, u16& upper);
+    template<bool kObjects> bool findBlendLayer(const BackgroundLayers& layers, uint x, uint enabled, u16& upper, u16& lower);
 
     struct Events
     {
