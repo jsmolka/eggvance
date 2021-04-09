@@ -14,13 +14,6 @@ public:
         return width * y + x;
     }
 
-    constexpr bool operator==(const Point& other) const { return x == other.x && y == other.y; }
-    constexpr bool operator!=(const Point& other) const { return x != other.x || y != other.y; }
-    constexpr bool operator< (const Point& other) const { return x <  other.x && y <  other.y; }
-    constexpr bool operator> (const Point& other) const { return x >  other.x && y >  other.y; }
-    constexpr bool operator<=(const Point& other) const { return x <= other.x && y <= other.y; }
-    constexpr bool operator>=(const Point& other) const { return x >= other.x && y >= other.y; }
-
     #define DEFINE_POINT_OPERATORS(op)                         \
         constexpr Point operator op(int scalar) const          \
         {                                                      \
