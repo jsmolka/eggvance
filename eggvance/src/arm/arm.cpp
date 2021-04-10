@@ -36,28 +36,28 @@ void Arm::run(u64 cycles)
     }
 }
 
-template<uint State>
+template<uint kState>
 void Arm::dispatch()
 {
-    while (scheduler.now < target && state == State)
+    while (scheduler.now < target && state == kState)
     {
-        if (State & State::Dma)
+        if (kState & State::Dma)
         {
             dma.run();
         }
-        else if (State & State::Halt)
+        else if (kState & State::Halt)
         {
             scheduler.run(std::min(target - scheduler.now, scheduler.next - scheduler.now));
         }
         else
         {
-            if (State & State::Irq && !cpsr.i)
+            if (kState & State::Irq && !cpsr.i)
             {
                 interruptHw();
             }
             else
             {
-                if (State & State::Thumb)
+                if (kState & State::Thumb)
                 {
                     u16 instr = pipe[0];
 

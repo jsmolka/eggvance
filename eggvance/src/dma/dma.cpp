@@ -56,8 +56,8 @@ bool Dma::triggers(const DmaChannel& channel, Event event)
     case Dma::Event::Immediate: return channel.control.timing == DmaControl::Timing::Immediate;
     case Dma::Event::HBlank:    return channel.control.timing == DmaControl::Timing::HBlank;
     case Dma::Event::VBlank:    return channel.control.timing == DmaControl::Timing::VBlank;
-    case Dma::Event::FifoA:     return channel.control.timing == DmaControl::Timing::Special && channel.latch.fifo && channel.latch.dad.fifoA();
-    case Dma::Event::FifoB:     return channel.control.timing == DmaControl::Timing::Special && channel.latch.fifo && channel.latch.dad.fifoB();
+    case Dma::Event::FifoA:     return channel.control.timing == DmaControl::Timing::Special && channel.latch.fifo && channel.latch.dad.isFifoA();
+    case Dma::Event::FifoB:     return channel.control.timing == DmaControl::Timing::Special && channel.latch.fifo && channel.latch.dad.isFifoB();
     case Dma::Event::Hdma:      return channel.control.timing == DmaControl::Timing::Special && channel.id == 3 && channel.control.repeat;
     }
     return false;

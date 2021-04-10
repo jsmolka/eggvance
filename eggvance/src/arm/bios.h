@@ -6,7 +6,7 @@
 class Bios
 {
 public:
-    static constexpr auto kSize = 0x4000;
+    static constexpr auto kSize = 16 * 1024;
 
     static void init(const fs::path& path);
 

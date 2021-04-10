@@ -48,7 +48,7 @@ void TimerChannel::update()
 
 void TimerChannel::run(u64 ticks)
 {
-    if (events.start.scheduled())
+    if (events.start.isScheduled())
         return;
 
     counter += ticks;
@@ -62,7 +62,7 @@ void TimerChannel::run(u64 ticks)
             next->run(counter / overflow);
 
         if (id <= 1)
-            apu.onTimerOverflow(id, counter / overflow);
+            apu.onOverflow(id, counter / overflow);
 
         counter %= overflow;
         initial  = count.initial;
@@ -82,7 +82,7 @@ void TimerChannel::schedule()
 {
     scheduler.remove(events.run);
 
-    if (!control.runnable() || events.start.scheduled())
+    if (!control.runnable() || events.start.isScheduled())
         return;
     
     scheduler.insert(events.run, overflow - counter);

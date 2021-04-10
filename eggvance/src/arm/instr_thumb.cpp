@@ -2,11 +2,11 @@
 
 #include "decode.h"
 
-template<u16 Instr>
+template<u16 kInstr>
 void Arm::Thumb_MoveShiftedRegister(u16 instr)
 {
-    constexpr uint kAmount = bit::seq< 6, 5>(Instr);
-    constexpr uint kOpcode = bit::seq<11, 2>(Instr);
+    constexpr uint kAmount = bit::seq< 6, 5>(kInstr);
+    constexpr uint kOpcode = bit::seq<11, 2>(kInstr);
 
     static_assert(kOpcode != Shift::Ror);
 
@@ -28,13 +28,13 @@ void Arm::Thumb_MoveShiftedRegister(u16 instr)
     }
 }
 
-template<u16 Instr>
+template<u16 kInstr>
 void Arm::Thumb_AddSubtract(u16 instr)
 {
     enum class Opcode { AddReg, SubReg, AddImm, SubImm };
 
-    constexpr uint kRn     = bit::seq<6, 3>(Instr);
-    constexpr uint kOpcode = bit::seq<9, 2>(Instr);
+    constexpr uint kRn     = bit::seq<6, 3>(kInstr);
+    constexpr uint kOpcode = bit::seq<9, 2>(kInstr);
 
     uint rd = bit::seq<0, 3>(instr);
     uint rs = bit::seq<3, 3>(instr);
@@ -55,13 +55,13 @@ void Arm::Thumb_AddSubtract(u16 instr)
     }
 }
 
-template<u16 Instr>
+template<u16 kInstr>
 void Arm::Thumb_ImmediateOperations(u16 instr)
 {
     enum class Opcode { Mov, Cmp, Add, Sub };
 
-    constexpr uint kRd     = bit::seq< 8, 3>(Instr);
-    constexpr uint kOpcode = bit::seq<11, 2>(Instr);
+    constexpr uint kRd     = bit::seq< 8, 3>(kInstr);
+    constexpr uint kOpcode = bit::seq<11, 2>(kInstr);
 
     uint amount = bit::seq<0, 8>(instr);
 
@@ -81,7 +81,7 @@ void Arm::Thumb_ImmediateOperations(u16 instr)
     }
 }
 
-template<u16 Instr>
+template<u16 kInstr>
 void Arm::Thumb_AluOperations(u16 instr)
 {
     enum class Opcode
@@ -92,7 +92,7 @@ void Arm::Thumb_AluOperations(u16 instr)
         Orr, Mul, Bic, Mvn
     };
 
-    constexpr uint kOpcode = bit::seq<6, 4>(Instr);
+    constexpr uint kOpcode = bit::seq<6, 4>(kInstr);
 
     uint rd = bit::seq<0, 3>(instr);
     uint rs = bit::seq<3, 3>(instr);
@@ -128,14 +128,14 @@ void Arm::Thumb_AluOperations(u16 instr)
     }
 }
 
-template<u16 Instr>
+template<u16 kInstr>
 void Arm::Thumb_HighRegisterOperations(u16 instr)
 {
     enum class Opcode { Add, Cmp, Mov, Bx };
 
-    constexpr uint kHs     = bit::seq<6, 1>(Instr);
-    constexpr uint kHd     = bit::seq<7, 1>(Instr);
-    constexpr uint kOpcode = bit::seq<8, 2>(Instr);
+    constexpr uint kHs     = bit::seq<6, 1>(kInstr);
+    constexpr uint kHd     = bit::seq<7, 1>(kInstr);
+    constexpr uint kOpcode = bit::seq<8, 2>(kInstr);
 
     uint rd = bit::seq<0, 3>(instr);
     uint rs = bit::seq<3, 3>(instr);
@@ -183,10 +183,10 @@ void Arm::Thumb_HighRegisterOperations(u16 instr)
     }
 }
 
-template<u16 Instr>
+template<u16 kInstr>
 void Arm::Thumb_LoadPcRelative(u16 instr)
 {
-    constexpr uint kRd = bit::seq<8, 3>(Instr);
+    constexpr uint kRd = bit::seq<8, 3>(kInstr);
 
     uint offset = bit::seq<0, 8>(instr);
 
@@ -195,13 +195,13 @@ void Arm::Thumb_LoadPcRelative(u16 instr)
     idle();
 }
 
-template<u16 Instr>
+template<u16 kInstr>
 void Arm::Thumb_LoadStoreRegisterOffset(u16 instr)
 {
     enum class Opcode { Str, Strb, Ldr, Ldrb };
 
-    constexpr uint kRo     = bit::seq< 6, 3>(Instr);
-    constexpr uint kOpcode = bit::seq<10, 2>(Instr);
+    constexpr uint kRo     = bit::seq< 6, 3>(kInstr);
+    constexpr uint kOpcode = bit::seq<10, 2>(kInstr);
 
     uint rd = bit::seq<0, 3>(instr);
     uint rb = bit::seq<3, 3>(instr);
@@ -235,13 +235,13 @@ void Arm::Thumb_LoadStoreRegisterOffset(u16 instr)
     }
 }
 
-template<u16 Instr>
+template<u16 kInstr>
 void Arm::Thumb_LoadStoreByteHalf(u16 instr)
 {
     enum class Opcode { Strh, Ldrsb, Ldrh, Ldrsh };
 
-    constexpr uint kRo     = bit::seq< 6, 3>(Instr);
-    constexpr uint kOpcode = bit::seq<10, 2>(Instr);
+    constexpr uint kRo     = bit::seq< 6, 3>(kInstr);
+    constexpr uint kOpcode = bit::seq<10, 2>(kInstr);
 
     uint rd = bit::seq<0, 3>(instr);
     uint rb = bit::seq<3, 3>(instr);
@@ -276,13 +276,13 @@ void Arm::Thumb_LoadStoreByteHalf(u16 instr)
     }
 }
 
-template<u16 Instr>
+template<u16 kInstr>
 void Arm::Thumb_LoadStoreImmediateOffset(u16 instr)
 {
     enum class Opcode { Str, Ldr, Strb, Ldrb };
 
-    constexpr uint kOffset = bit::seq< 6, 5>(Instr);
-    constexpr uint kOpcode = bit::seq<11, 2>(Instr);
+    constexpr uint kOffset = bit::seq< 6, 5>(kInstr);
+    constexpr uint kOpcode = bit::seq<11, 2>(kInstr);
 
     uint rd = bit::seq<0, 3>(instr);
     uint rb = bit::seq<3, 3>(instr);
@@ -316,11 +316,11 @@ void Arm::Thumb_LoadStoreImmediateOffset(u16 instr)
     }
 }
 
-template<u16 Instr>
+template<u16 kInstr>
 void Arm::Thumb_LoadStoreHalf(u16 instr)
 {
-    constexpr uint kOffset = bit::seq< 6, 5>(Instr);
-    constexpr uint kLoad   = bit::seq<11, 1>(Instr);
+    constexpr uint kOffset = bit::seq< 6, 5>(kInstr);
+    constexpr uint kLoad   = bit::seq<11, 1>(kInstr);
 
     uint rd = bit::seq<0, 3>(instr);
     uint rb = bit::seq<3, 3>(instr);
@@ -339,11 +339,11 @@ void Arm::Thumb_LoadStoreHalf(u16 instr)
     }
 }
 
-template<u16 Instr>
+template<u16 kInstr>
 void Arm::Thumb_LoadStoreSpRelative(u16 instr)
 {
-    constexpr uint kRd   = bit::seq< 8, 3>(Instr);
-    constexpr uint kLoad = bit::seq<11, 1>(Instr);
+    constexpr uint kRd   = bit::seq< 8, 3>(kInstr);
+    constexpr uint kLoad = bit::seq<11, 1>(kInstr);
 
     uint offset = bit::seq<0, 8>(instr);
 
@@ -361,11 +361,11 @@ void Arm::Thumb_LoadStoreSpRelative(u16 instr)
     }
 }
 
-template<u16 Instr>
+template<u16 kInstr>
 void Arm::Thumb_LoadRelativeAddress(u16 instr)
 {
-    constexpr uint kRd = bit::seq< 8, 3>(Instr);
-    constexpr uint kSp = bit::seq<11, 1>(Instr);
+    constexpr uint kRd = bit::seq< 8, 3>(kInstr);
+    constexpr uint kSp = bit::seq<11, 1>(kInstr);
 
     uint offset = bit::seq<0, 8>(instr);
 
@@ -374,10 +374,10 @@ void Arm::Thumb_LoadRelativeAddress(u16 instr)
     regs[kRd] = (kSp ? sp : (pc & ~0x2)) + offset;
 }
 
-template<u16 Instr>
+template<u16 kInstr>
 void Arm::Thumb_AddOffsetSp(u16 instr)
 {
-    constexpr uint kSign = bit::seq<7, 1>(Instr);
+    constexpr uint kSign = bit::seq<7, 1>(kInstr);
 
     uint offset = bit::seq<0, 7>(instr);
 
@@ -389,11 +389,11 @@ void Arm::Thumb_AddOffsetSp(u16 instr)
         sp += offset; 
 }
 
-template<u16 Instr>
+template<u16 kInstr>
 void Arm::Thumb_PushPopRegisters(u16 instr)
 {
-    constexpr uint kRBit = bit::seq< 8, 1>(Instr);
-    constexpr uint kPop  = bit::seq<11, 1>(Instr);
+    constexpr uint kRBit = bit::seq< 8, 1>(kInstr);
+    constexpr uint kPop  = bit::seq<11, 1>(kInstr);
 
     uint rlist = bit::seq<0, 8>(instr);
 
@@ -430,11 +430,11 @@ void Arm::Thumb_PushPopRegisters(u16 instr)
     }
 }
 
-template<u16 Instr>
+template<u16 kInstr>
 void Arm::Thumb_LoadStoreMultiple(u16 instr)
 {
-    constexpr uint kRb   = bit::seq< 8, 3>(Instr);
-    constexpr uint kLoad = bit::seq<11, 1>(Instr);
+    constexpr uint kRb   = bit::seq< 8, 3>(kInstr);
+    constexpr uint kLoad = bit::seq<11, 1>(kInstr);
 
     uint rlist = bit::seq<0, 8>(instr);
 
@@ -494,10 +494,10 @@ void Arm::Thumb_LoadStoreMultiple(u16 instr)
         regs[kRb] = addr;
 }
 
-template<u16 Instr>
+template<u16 kInstr>
 void Arm::Thumb_ConditionalBranch(u16 instr)
 {
-    constexpr uint kCondition = bit::seq<8, 4>(Instr);
+    constexpr uint kCondition = bit::seq<8, 4>(kInstr);
 
     if (cpsr.check(kCondition))
     {
@@ -511,13 +511,13 @@ void Arm::Thumb_ConditionalBranch(u16 instr)
     }
 }
 
-template<u16 Instr>
+template<u16 kInstr>
 void Arm::Thumb_SoftwareInterrupt(u16 instr)
 {
     interruptSw();
 }
 
-template<u16 Instr>
+template<u16 kInstr>
 void Arm::Thumb_UnconditionalBranch(u16 instr)
 {
     uint offset = bit::seq<0, 11>(instr);
@@ -529,10 +529,10 @@ void Arm::Thumb_UnconditionalBranch(u16 instr)
     flushHalf();
 }
 
-template<u16 Instr>
+template<u16 kInstr>
 void Arm::Thumb_LongBranchLink(u16 instr)
 {
-    constexpr uint kSecond = bit::seq<11, 1>(Instr);
+    constexpr uint kSecond = bit::seq<11, 1>(kInstr);
 
     uint offset = bit::seq<0, 11>(instr);
 
@@ -555,17 +555,17 @@ void Arm::Thumb_LongBranchLink(u16 instr)
     }
 }
 
-template<u16 Instr>
+template<u16 kInstr>
 void Arm::Thumb_Undefined(u16 instr)
 {
     SHELL_ASSERT(false, SHELL_FUNCTION);
 }
 
-template<uint Hash>
+template<uint kHash>
 constexpr Arm::Instruction16 Arm::Thumb_Decode()
 {
-    constexpr auto kDehash = dehashThumb(Hash);
-    constexpr auto kDecode = decodeThumb(Hash);
+    constexpr auto kDehash = dehashThumb(kHash);
+    constexpr auto kDecode = decodeThumb(kHash);
 
     if constexpr (kDecode == InstructionThumb::MoveShiftedRegister)      return &Arm::Thumb_MoveShiftedRegister<kDehash>;
     if constexpr (kDecode == InstructionThumb::AddSubtract)              return &Arm::Thumb_AddSubtract<kDehash>;

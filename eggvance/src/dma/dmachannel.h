@@ -4,7 +4,7 @@
 
 #include "dmaaddress.h"
 #include "io.h"
-#include "arm/enums.h"
+#include "arm/constants.h"
 
 class DmaChannel
 {
@@ -31,7 +31,7 @@ private:
     uint pending = 0;
     uint bus     = 0;
 
-    struct
+    struct Latch
     {
         uint fifo   = 0;
         uint sadcnt = 0;

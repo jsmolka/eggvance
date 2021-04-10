@@ -7,14 +7,14 @@
 #include "save.h"
 #include "base/bit.h"
 
-template<Save::Type Kind>
+template<Save::Type kType>
 class Flash final : public Save
 {
 public:
-    static_assert(Kind == Type::Flash512 || Kind == Type::Flash1024);
+    static_assert(kType == Type::Flash512 || kType == Type::Flash1024);
 
     Flash()
-        : Save(Kind)
+        : Save(kType)
     {
         data.resize(kSize, 0xFF);
 
@@ -33,7 +33,7 @@ public:
     {
         if (chip && addr <= 1)
         {
-            constexpr auto kMacronix = Kind == Type::Flash512
+            constexpr auto kMacronix = kType == Type::Flash512
                 ? 0x1CC2
                 : 0x09C2;
 
@@ -53,7 +53,7 @@ public:
             return;
 
         case Command::SwitchBank:
-            if (Kind == Type::Flash1024)
+            if (kType == Type::Flash1024)
                 bank = data.data() + (kSize / 2) * (byte & 0x1);
             command = 0;
             return;
@@ -115,7 +115,7 @@ protected:
     }
 
 private:
-    static constexpr auto kSize = (Kind == Type::Flash512 ? 64 : 128) * 1024;
+    static constexpr auto kSize = (kType == Type::Flash512 ? 64 : 128) * 1024;
 
     enum class Command
     {

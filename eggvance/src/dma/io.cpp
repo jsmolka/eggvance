@@ -10,7 +10,7 @@ DmaSrcAddress::DmaSrcAddress(uint id)
 
 }
 
-DmaSrcAddress::operator uint() const
+DmaSrcAddress::operator u32() const
 {
     return data;
 }
@@ -21,7 +21,7 @@ DmaDstAddress::DmaDstAddress(uint id)
 
 }
 
-DmaDstAddress::operator uint() const
+DmaDstAddress::operator u32() const
 {
     return data;
 }

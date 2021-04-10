@@ -58,7 +58,7 @@ void Arm::interruptHandle(u64 late)
 
     if (interrupt.isServable() && interrupt.master)
     {
-        if (!interrupt.delay.scheduled() && !(state & State::Irq))
+        if (!interrupt.delay.isScheduled() && !(state & State::Irq))
         {
             if (late < 3)
                 scheduler.insert(interrupt.delay, 3 - late);

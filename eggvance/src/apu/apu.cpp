@@ -1,7 +1,5 @@
 #include "apu.h"
 
-#include <algorithm>
-
 #include "base/constants.h"
 #include "dma/dma.h"
 #include "frontend/audiocontext.h"
@@ -29,7 +27,7 @@ void Apu::init()
     scheduler.insert(events.sequence, kSequenceCycles);
 }
 
-void Apu::onTimerOverflow(uint timer, uint ticks)
+void Apu::onOverflow(uint timer, uint ticks)
 {
     if (!control.enabled)
         return;
@@ -51,12 +49,12 @@ void Apu::onTimerOverflow(uint timer, uint ticks)
     }
 }
 
-template<uint Step>
+template<uint kStep>
 void Apu::sequence(u64 late)
 {
-    static_assert(!(Step == 1 || Step == 3 || Step == 5));
+    static_assert(!(kStep == 1 || kStep == 3 || kStep == 5));
 
-    switch (Step)
+    switch (kStep)
     {
     case 1:
     case 3:
@@ -87,11 +85,11 @@ void Apu::sequence(u64 late)
         break;
     }
 
-    if constexpr (Step == 0 || Step == 2 || Step == 4)
+    if constexpr (kStep == 0 || kStep == 2 || kStep == 4)
     {
         events.sequence = [this](u64 late)
         {
-            sequence<(Step + 2) % 8>(late);
+            sequence<(kStep + 2) % 8>(late);
         };
         scheduler.insert(events.sequence, 2 * kSequenceCycles - late);
     }
@@ -99,7 +97,7 @@ void Apu::sequence(u64 late)
     {
         events.sequence = [this](u64 late)
         {
-            sequence<(Step + 1) % 8>(late);
+            sequence<(kStep + 1) % 8>(late);
         };
         scheduler.insert(events.sequence, 1 * kSequenceCycles - late);
     }

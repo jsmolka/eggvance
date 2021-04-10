@@ -248,7 +248,7 @@
     <ClInclude Include="src\arm\bios.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\arm\enums.h">
+    <ClInclude Include="src\arm\constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\arm\decode.h">

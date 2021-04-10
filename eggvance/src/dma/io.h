@@ -7,7 +7,7 @@ class DmaSrcAddress : public RegisterW<u32>
 public:
     DmaSrcAddress(uint id);
 
-    operator uint() const;
+    operator u32() const;
 };
 
 class DmaDstAddress : public RegisterW<u32>
@@ -15,7 +15,7 @@ class DmaDstAddress : public RegisterW<u32>
 public:
     DmaDstAddress(uint id);
 
-    operator uint() const;
+    operator u32() const;
 };
 
 class DmaCount : public RegisterW<u16>

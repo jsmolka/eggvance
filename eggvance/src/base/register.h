@@ -17,13 +17,13 @@ inline constexpr Integral ones_v = ones<Integral>::value;
 
 }  // namespace
 
-template<typename Integral, Integral Mask>
+template<typename Integral, Integral kMask>
 class RegisterBase
 {
 public:
     static_assert(std::is_integral_v<Integral>);
 
-    RegisterBase(Integral mask = Mask)
+    RegisterBase(Integral mask = kMask)
         : mask(mask) {}
 
     const Integral mask;
@@ -46,27 +46,27 @@ protected:
     Integral data = 0;
 };
 
-template<typename Integral, Integral Mask = ones_v<Integral>>
-class RegisterR : public RegisterBase<Integral, Mask>
+template<typename Integral, Integral kMask = ones_v<Integral>>
+class RegisterR : public RegisterBase<Integral, kMask>
 {
 public:
-    using RegisterBase<Integral, Mask>::RegisterBase;
-    using RegisterBase<Integral, Mask>::read;
+    using RegisterBase<Integral, kMask>::RegisterBase;
+    using RegisterBase<Integral, kMask>::read;
 };
 
-template<typename Integral, Integral Mask = ones_v<Integral>>
-class RegisterW : public RegisterBase<Integral, Mask>
+template<typename Integral, Integral kMask = ones_v<Integral>>
+class RegisterW : public RegisterBase<Integral, kMask>
 {
 public:
-    using RegisterBase<Integral, Mask>::RegisterBase;
-    using RegisterBase<Integral, Mask>::write;
+    using RegisterBase<Integral, kMask>::RegisterBase;
+    using RegisterBase<Integral, kMask>::write;
 };
 
-template<typename Integral, Integral Mask = ones_v<Integral>>
-class Register : public RegisterBase<Integral, Mask>
+template<typename Integral, Integral kMask = ones_v<Integral>>
+class Register : public RegisterBase<Integral, kMask>
 {
 public:
-    using RegisterBase<Integral, Mask>::RegisterBase;
-    using RegisterBase<Integral, Mask>::read;
-    using RegisterBase<Integral, Mask>::write;
+    using RegisterBase<Integral, kMask>::RegisterBase;
+    using RegisterBase<Integral, kMask>::read;
+    using RegisterBase<Integral, kMask>::write;
 };

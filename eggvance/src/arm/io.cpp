@@ -83,42 +83,42 @@ void WaitControl::update()
     wait.word[3][kS] = kNonSeq[sram];
 }
 
-IrqMaster::operator bool() const
+InterruptMaster::operator bool() const
 {
     return data;
 }
 
-void IrqMaster::write(uint index, u8 byte)
+void InterruptMaster::write(uint index, u8 byte)
 {
     Register::write(index, byte);
 
     arm.interruptHandle();
 }
 
-IrqEnable::operator u16() const
+InterruptEnable::operator u16() const
 {
     return data;
 }
 
-void IrqEnable::write(uint index, u8 byte)
+void InterruptEnable::write(uint index, u8 byte)
 {
     Register::write(index, byte);
 
     arm.interruptHandle();
 }
 
-IrqRequest& IrqRequest::operator|=(Irq irq)
+InterruptRequest& InterruptRequest::operator|=(Irq irq)
 {
     data |= irq;
     return *this;
 }
 
-IrqRequest::operator u16() const
+InterruptRequest::operator u16() const
 {
     return data;
 }
 
-void IrqRequest::write(uint index, u8 byte)
+void InterruptRequest::write(uint index, u8 byte)
 {
     bit::byteRef(data, index) &= ~(byte & bit::byte(mask, index));
 

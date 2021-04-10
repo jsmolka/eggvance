@@ -18,7 +18,7 @@ void DmaChannel::init()
     latch.dad = dad;
 
     latch.fifo = (id == 1 || id == 2)
-        && (latch.dad.fifoA() || latch.dad.fifoB())
+        && (latch.dad.isFifoA() || latch.dad.isFifoB())
         && control.timing == DmaControl::Timing::Special
         && control.repeat;
 
@@ -36,7 +36,7 @@ void DmaChannel::init()
         latch.word   = control.word;
         latch.count  = count;
 
-        if (latch.sad.gamepak())
+        if (latch.sad.isGamePak())
             latch.sadcnt = uint(DmaControl::Control::Increment);
     }
     latch.sad = latch.sad & ~((2 << latch.word) - 1);
@@ -49,7 +49,7 @@ bool DmaChannel::start()
 {
     if (latch.fifo)
     {
-        if (apu.fifos[latch.dad.fifoB()].size() > 16)
+        if (apu.fifos[latch.dad.isFifoB()].size() > 16)
             return false;
     }
     else if (control.repeat)
@@ -75,7 +75,7 @@ void DmaChannel::run()
     {
         if (pending == latch.count - 1)
         {
-            if (!(latch.sad.gamepak() && latch.dad.gamepak()))
+            if (!(latch.sad.isGamePak() && latch.dad.isGamePak()))
                 arm.idle(2);
 
             transfer(Access::NonSequential);

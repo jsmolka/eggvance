@@ -6,10 +6,10 @@
 
 #include "base/bit.h"
 
-template<std::size_t N>
-std::string makeAscii(const u8 (&data)[N])
+template<std::size_t kSize>
+std::string makeAscii(const u8 (&data)[kSize])
 {
-    std::string ascii(reinterpret_cast<const char*>(data), N);
+    std::string ascii(reinterpret_cast<const char*>(data), kSize);
 
     shell::trimIf(ascii, shell::IsCntrl<char>());
 

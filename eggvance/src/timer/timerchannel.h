@@ -21,7 +21,7 @@ public:
 private:
     void run(u64 ticks);
 
-    struct
+    struct Events
     {
         Event run;
         Event start;

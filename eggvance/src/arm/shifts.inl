@@ -1,6 +1,6 @@
 #pragma once
 
-template<bool Immediate>
+template<bool kImmediate>
 SHELL_INLINE u32 Arm::lsl(u32 value, u32 amount, bool flags)
 {
     if (amount != 0)
@@ -27,7 +27,7 @@ SHELL_INLINE u32 Arm::lsl(u32 value, u32 amount, bool flags)
     return value;
 }
 
-template<bool Immediate>
+template<bool kImmediate>
 SHELL_INLINE u32 Arm::lsr(u32 value, u32 amount, bool flags)
 {
     if (amount != 0)
@@ -51,7 +51,7 @@ SHELL_INLINE u32 Arm::lsr(u32 value, u32 amount, bool flags)
             value = 0;
         }
     }
-    else if (Immediate)
+    else if (kImmediate)
     {
         if (flags)
             cpsr.c = value >> 31;
@@ -61,7 +61,7 @@ SHELL_INLINE u32 Arm::lsr(u32 value, u32 amount, bool flags)
     return value;
 }
 
-template<bool Immediate>
+template<bool kImmediate>
 SHELL_INLINE u32 Arm::asr(u32 value, u32 amount, bool flags)
 {
     if (amount != 0)
@@ -81,7 +81,7 @@ SHELL_INLINE u32 Arm::asr(u32 value, u32 amount, bool flags)
                 cpsr.c = value & 0x1;
         }
     }
-    else if (Immediate)
+    else if (kImmediate)
     {
         value = bit::sar(value, 31);
 
@@ -91,7 +91,7 @@ SHELL_INLINE u32 Arm::asr(u32 value, u32 amount, bool flags)
     return value;
 }
 
-template<bool Immediate>
+template<bool kImmediate>
 SHELL_INLINE u32 Arm::ror(u32 value, u32 amount, bool flags)
 {
     if (amount != 0)
@@ -101,7 +101,7 @@ SHELL_INLINE u32 Arm::ror(u32 value, u32 amount, bool flags)
         if (flags)
             cpsr.c = value >> 31;
     }
-    else if (Immediate)
+    else if (kImmediate)
     {
         uint c = cpsr.c;
 

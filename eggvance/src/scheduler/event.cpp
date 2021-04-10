@@ -10,7 +10,7 @@ bool Event::operator>(const Event& other) const
     return when > other.when;
 }
 
-bool Event::scheduled() const
+bool Event::isScheduled() const
 {
     return when;
 }

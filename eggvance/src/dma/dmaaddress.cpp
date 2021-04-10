@@ -1,27 +1,27 @@
 #include "dmaaddress.h"
 
-DmaAddress& DmaAddress::operator=(uint value)
+DmaAddress& DmaAddress::operator=(u32 value)
 {
     data = value;
     return *this;
 }
 
-DmaAddress::operator uint() const
+DmaAddress::operator u32() const
 {
     return data;
 }
 
-bool DmaAddress::fifoA() const
+bool DmaAddress::isFifoA() const
 {
     return data == 0x400'00A0;
 }
 
-bool DmaAddress::fifoB() const
+bool DmaAddress::isFifoB() const
 {
     return data == 0x400'00A4;
 }
 
-bool DmaAddress::gamepak() const
+bool DmaAddress::isGamePak() const
 {
     return data >= 0x800'0000 && data < 0xE00'0000;
 }

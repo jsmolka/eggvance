@@ -2,7 +2,7 @@
 
 #include <shell/array.h>
 
-#include "enums.h"
+#include "constants.h"
 #include "base/register.h"
 
 class PostFlag : public Register<u8, 0x01>
@@ -39,14 +39,14 @@ public:
 private:
     void update();
 
-    struct
+    struct WaitStates
     {
         shell::array<u64, 4, 2> half = {};
         shell::array<u64, 4, 2> word = {};
     } wait;
 };
 
-class IrqMaster : public Register<u32, 0x0001>
+class InterruptMaster : public Register<u32, 0x0001>
 {
 public:
     operator bool() const;
@@ -54,7 +54,7 @@ public:
     void write(uint index, u8 byte);
 };
 
-class IrqEnable : public Register<u16, 0x3FFF>
+class InterruptEnable : public Register<u16, 0x3FFF>
 {
 public:
     operator u16() const;
@@ -62,10 +62,10 @@ public:
     void write(uint index, u8 byte);
 };
 
-class IrqRequest : public Register<u16, 0x3FFF>
+class InterruptRequest : public Register<u16, 0x3FFF>
 {
 public:
-    IrqRequest& operator|=(Irq irq);
+    InterruptRequest& operator|=(Irq irq);
     operator u16() const;
 
     void write(uint index, u8 byte);

@@ -96,7 +96,7 @@
     <ClInclude Include="src\apu\waveram.h" />
     <ClInclude Include="src\arm\arm.h" />
     <ClInclude Include="src\arm\bios.h" />
-    <ClInclude Include="src\arm\enums.h" />
+    <ClInclude Include="src\arm\constants.h" />
     <ClInclude Include="src\arm\decode.h" />
     <ClInclude Include="src\arm\io.h" />
     <ClInclude Include="src\arm\pipeline.h" />

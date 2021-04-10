@@ -2,7 +2,7 @@
 
 #include <shell/array.h>
 
-#include "enums.h"
+#include "constants.h"
 #include "base/int.h"
 
 class Pipeline : public shell::array<u32, 2>

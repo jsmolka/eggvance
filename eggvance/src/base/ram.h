@@ -5,24 +5,24 @@
 
 #include "base/int.h"
 
-template<uint N>
+template<uint kSize>
 class BasicMirror
 {
 public:
     u32 operator()(u32 addr) const
     {
-        return addr & (N - 1);
+        return addr & (kSize - 1);
     }
 };
 
-template<uint N, typename Mirror = BasicMirror<N>>
-class Ram : public shell::array<u8, N>
+template<uint kSize, typename Mirror = BasicMirror<kSize>>
+class Ram : public shell::array<u8, kSize>
 {
 public:
     template<typename Integral>
     Integral readFast(u32 addr) const
     {
-        SHELL_ASSERT(addr + sizeof(Integral) <= N);
+        SHELL_ASSERT(addr + sizeof(Integral) <= kSize);
 
         return *reinterpret_cast<const Integral*>(this->data() + addr);
     }
@@ -30,7 +30,7 @@ public:
     template<typename Integral>
     void writeFast(u32 addr, Integral value)
     {
-        SHELL_ASSERT(addr + sizeof(Integral) <= N);
+        SHELL_ASSERT(addr + sizeof(Integral) <= kSize);
 
         *reinterpret_cast<Integral*>(this->data() + addr) = value;
     }

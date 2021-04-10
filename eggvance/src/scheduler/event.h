@@ -17,7 +17,7 @@ public:
 
     bool operator<(const Event& other) const;
     bool operator>(const Event& other) const;
-    bool scheduled() const;
+    bool isScheduled() const;
 
     u64 when = 0;
     std::function<void(u64)> callback;

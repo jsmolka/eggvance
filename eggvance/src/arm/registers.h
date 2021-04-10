@@ -32,9 +32,9 @@ private:
 
     static Bank modeToBank(Psr::Mode mode);
 
-    struct
+    struct Banks
     {
         shell::array<u32, 6, 3> def = {};
         shell::array<u32, 2, 5> fiq = {};
-    } bank;
+    } banks;
 };

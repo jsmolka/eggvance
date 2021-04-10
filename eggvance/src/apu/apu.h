@@ -1,7 +1,5 @@
 #pragma once
 
-#include <shell/array.h>
-
 #include "fifo.h"
 #include "io.h"
 #include "noise.h"
@@ -16,7 +14,7 @@ public:
     Apu();
 
     void init();
-    void onTimerOverflow(uint timer, uint ticks);
+    void onOverflow(uint timer, uint ticks);
 
     Square1 square1;
     Square2 square2;
@@ -27,11 +25,11 @@ public:
     SoundBias bias;
 
 private:
-    template<uint Step>
+    template<uint kStep>
     void sequence(u64 late);
     void sample(u64 late);
 
-    struct
+    struct Events
     {
         Event sequence;
         Event sample;
