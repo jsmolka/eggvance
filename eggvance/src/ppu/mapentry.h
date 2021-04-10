@@ -1,7 +1,6 @@
 #pragma once
 
 #include "point.h"
-#include "base/bit.h"
 #include "base/int.h"
 
 class MapEntry

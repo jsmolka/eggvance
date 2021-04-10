@@ -18,13 +18,14 @@ public:
     DisplayControl dispcnt;
     Register<u16, 0x0001> greenswap;
     DisplayStatus dispstat;
-    VCount vcount;
-
+    VerticalCounter vcount;
     shell::array<Background, 4> backgrounds = { 0, 1, 2, 3 };
+
     WindowInside winin;
     WindowOutside winout;
-    WindowRange winh[2] = { kScreen.x, kScreen.x };
-    WindowRange winv[2] = { kScreen.y, kScreen.y };
+    shell::array<WindowRange, 2> winh = { kScreen.x, kScreen.x };
+    shell::array<WindowRange, 2> winv = { kScreen.y, kScreen.y };
+
     Mosaic mosaic;
     BlendControl bldcnt;
     BlendAlpha bldalpha;
@@ -46,14 +47,14 @@ private:
     void renderObjects();
 
     template<uint kColorMode>
-    void renderBackground0Impl(Background& background);
+    void renderBackground0(Background& background);
     void renderBackground0(Background& background);
     void renderBackground2(Background& background);
     void renderBackground3(Background& background);
     void renderBackground4(Background& background);
     void renderBackground5(Background& background);
 
-    void compose(uint bgs);
+    void compose(uint possible);
     template<bool kObjects>
     void composeNN(const BackgroundLayers& layers);
     template<bool kObjects, uint kWindows>

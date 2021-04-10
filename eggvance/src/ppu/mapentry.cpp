@@ -1,5 +1,7 @@
 #include "mapentry.h"
 
+#include "base/bit.h"
+
 MapEntry::MapEntry(u16 data)
 {
     tile   = bit::seq< 0, 10>(data);

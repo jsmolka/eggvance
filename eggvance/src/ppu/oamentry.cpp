@@ -70,7 +70,7 @@ uint OamEntry::paletteBank() const
         : 0;
 }
 
-u64 OamEntry::cycles() const
+uint OamEntry::cycles() const
 {
     return affine
         ? screen_size.x * 2 + 10

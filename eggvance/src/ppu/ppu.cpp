@@ -1,6 +1,5 @@
 #include "ppu.h"
 
-#include "constants.h"
 #include "arm/arm.h"
 #include "base/bit.h"
 #include "base/config.h"

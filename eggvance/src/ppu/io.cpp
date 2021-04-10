@@ -32,16 +32,16 @@ void DisplayControl::write(uint index, u8 byte)
     }
     else
     {
-        layers = bit::seq<0, 5>(byte);
-        win0   = bit::seq<5, 1>(byte);
-        win1   = bit::seq<6, 1>(byte);
-        winobj = bit::seq<7, 1>(byte);
+        enabled = bit::seq<0, 5>(byte);
+        win0    = bit::seq<5, 1>(byte);
+        win1    = bit::seq<6, 1>(byte);
+        winobj  = bit::seq<7, 1>(byte);
     }
 }
 
 bool DisplayControl::isActive() const
 {
-    static constexpr uint kLayers[8] =
+    static constexpr uint kPossible[8] =
     {
         uint(Layer::Flag::Bg0 | Layer::Flag::Bg1 | Layer::Flag::Bg2 | Layer::Flag::Bg3 | Layer::Flag::Obj),
         uint(Layer::Flag::Bg0 | Layer::Flag::Bg1 | Layer::Flag::Bg2 | Layer::Flag::Obj),
@@ -52,7 +52,7 @@ bool DisplayControl::isActive() const
         uint(0),
         uint(0)
     };
-    return kLayers[mode] & layers;
+    return kPossible[mode] & enabled;
 }
 
 bool DisplayControl::isBitmap() const
@@ -89,13 +89,13 @@ void DisplayStatus::write(uint index, u8 byte)
     }
 }
 
-VCount& VCount::operator++()
+VerticalCounter& VerticalCounter::operator++()
 {
     data = (data + 1) % 228;
     return *this;
 }
 
-VCount::operator u16() const
+VerticalCounter::operator u16() const
 {
     return data;
 }
@@ -125,18 +125,18 @@ void BackgroundControl::write(uint index, u8 byte)
     }
 }
 
-Point BackgroundControl::sizeRegular() const
-{
-    return Point(
-        256 << bit::seq<0, 1>(dimensions),
-        256 << bit::seq<1, 1>(dimensions));
-}
-
 Point BackgroundControl::sizeAffine() const
 {
     return Point(
         128 << dimensions,
         128 << dimensions);
+}
+
+Point BackgroundControl::sizeRegular() const
+{
+    return Point(
+        256 << bit::seq<0, 1>(dimensions),
+        256 << bit::seq<1, 1>(dimensions));
 }
 
 void BackgroundOffset::writeX(uint index, u8 byte)
@@ -158,8 +158,8 @@ Window::Window()
 
 void Window::write(u8 byte)
 {
-    layers = bit::seq<0, 5>(byte) | Layer::Flag::Bdp;
-    blend  = bit::seq<5, 1>(byte);
+    enabled = bit::seq<0, 5>(byte) | Layer::Flag::Bdp;
+    blend   = bit::seq<5, 1>(byte);
 }
 
 void WindowInside::write(uint index, u8 byte)
@@ -210,14 +210,14 @@ void Mosaic::Block::write(u8 byte)
     y = bit::seq<4, 4>(byte) + 1;
 }
 
-uint Mosaic::Block::mosaicX(uint value) const
+bool Mosaic::Block::isMosaicX() const
 {
-    return x * (value / x);
+    return x > 1;
 }
 
-uint Mosaic::Block::mosaicY(uint value) const
+bool Mosaic::Block::isMosaicY() const
 {
-    return y * (value / y);
+    return y > 1;
 }
 
 bool Mosaic::Block::isDominantX(uint value) const
@@ -228,6 +228,16 @@ bool Mosaic::Block::isDominantX(uint value) const
 bool Mosaic::Block::isDominantY(uint value) const
 {
     return value % y == 0;
+}
+
+uint Mosaic::Block::mosaicX(uint value) const
+{
+    return x * (value / x);
+}
+
+uint Mosaic::Block::mosaicY(uint value) const
+{
+    return y * (value / y);
 }
 
 void Mosaic::write(uint index, u8 byte)

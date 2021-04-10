@@ -26,7 +26,7 @@ void Ppu::render()
         objects_alpha = false;
     }
 
-    if (dispcnt.layers & Layer::Flag::Obj)
+    if (dispcnt.enabled & Layer::Flag::Obj)
     {
         renderObjects();
     }
@@ -73,10 +73,10 @@ void Ppu::render()
 
 void Ppu::renderBackground(BackgroundRender render, Background& background)
 {
-    if ((dispcnt.layers & (1 << background.id)) == 0)
+    if ((dispcnt.enabled & (1 << background.id)) == 0)
         return;
 
-    if (background.control.mosaic && mosaic.bgs.y > 1 && !mosaic.bgs.isDominantY(vcount))
+    if (background.control.mosaic && mosaic.bgs.isMosaicY() && !mosaic.bgs.isDominantY(vcount))
     {
         background.buffer.flip();
     }
@@ -84,7 +84,7 @@ void Ppu::renderBackground(BackgroundRender render, Background& background)
     {
         std::invoke(render, this, background);
 
-        if (background.control.mosaic && mosaic.bgs.x > 1)
+        if (background.control.mosaic && mosaic.bgs.isMosaicX())
         {
             for (auto [x, color] : shell::enumerate(background.buffer))
             {
@@ -95,7 +95,7 @@ void Ppu::renderBackground(BackgroundRender render, Background& background)
 }
 
 template<uint kColorMode>
-void Ppu::renderBackground0Impl(Background& background)
+void Ppu::renderBackground0(Background& background)
 {
     const auto size = background.control.sizeRegular();
 
@@ -152,7 +152,7 @@ void Ppu::renderBackground0(Background& background)
 {
     switch (background.control.color_mode)
     {
-    SHELL_CASE02(0, renderBackground0Impl<kLabel>(background))
+    SHELL_CASE02(0, renderBackground0<kLabel>(background))
 
     default:
         SHELL_UNREACHABLE;
@@ -315,7 +315,7 @@ void Ppu::renderObjects()
                 {
                 case ObjectMode::Normal:
                 case ObjectMode::Alpha:
-                    if (entry.priority < object.priority || !object.opaque())
+                    if (entry.priority < object.priority || !object.isOpaque())
                     {
                         object.color    = pram.colorFgOpaque(index, bank);
                         object.priority = entry.priority;

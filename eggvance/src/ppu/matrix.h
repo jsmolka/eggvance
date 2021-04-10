@@ -7,24 +7,24 @@
 #include "point.h"
 #include "base/int.h"
 
-template<typename T, std::size_t kRows, std::size_t kCols>
+template<typename T, uint kRows, uint kCols>
 class Matrix : public shell::array<T, kRows, kCols>
 {
 public:
     static_assert(kRows > 0);
     static_assert(kCols > 0);
 
-    constexpr std::size_t rows() const
+    constexpr uint rows() const
     {
         return kRows;
     }
 
-    constexpr std::size_t cols() const
+    constexpr uint cols() const
     {
         return kCols;
     }
 
-    const T& get(std::size_t x, std::size_t y) const
+    const T& get(uint x, uint y) const
     {
         SHELL_ASSERT(x < kRows);
         SHELL_ASSERT(y < kCols);
@@ -32,7 +32,7 @@ public:
         return (*this)[x][y];
     }
 
-    T& get(std::size_t x, std::size_t y)
+    T& get(uint x, uint y)
     {
         SHELL_ASSERT(x < kRows);
         SHELL_ASSERT(y < kCols);
@@ -40,7 +40,7 @@ public:
         return (*this)[x][y];
     }
 
-    void set(std::size_t x, std::size_t y, const T& value)
+    void set(uint x, uint y, const T& value)
     {
         SHELL_ASSERT(x < kRows);
         SHELL_ASSERT(y < kCols);
@@ -85,6 +85,9 @@ public:
     void vblank();
 
 private:
+    template<uint kSize>
+    void setByte(uint x, uint y, uint index, u8 byte);
+
     s32 yx = 0;
     s32 yy = 0;
 };

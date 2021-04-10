@@ -27,7 +27,7 @@ public:
     bool operator<(const BackgroundLayer& other) const;
 
     u16 color(uint x) const;
-    bool opaque(uint x) const;
+    bool isOpaque(uint x) const;
 
     u16* data = nullptr;
     uint flag = 0;
@@ -36,7 +36,7 @@ public:
 class ObjectLayer : public Layer
 {
 public:
-    bool opaque() const;
+    bool isOpaque() const;
 
     u16  color  = kTransparent;
     uint alpha  = false;

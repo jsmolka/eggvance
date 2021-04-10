@@ -18,7 +18,7 @@ public:
     uint oam_free = 0;
     uint layout   = 0;
     uint blank    = 0;
-    uint layers   = 0;
+    uint enabled  = 0;
     uint win0     = 0;
     uint win1     = 0;
     uint winobj   = 0;
@@ -39,10 +39,10 @@ public:
     uint vcompare   = 0;
 };
 
-class VCount : public RegisterR<u16>
+class VerticalCounter : public RegisterR<u16>
 {
 public:
-    VCount& operator++();
+    VerticalCounter& operator++();
     operator u16() const;
 };
 
@@ -53,8 +53,8 @@ public:
 
     void write(uint index, u8 byte);
 
-    Point sizeRegular() const;
     Point sizeAffine() const;
+    Point sizeRegular() const;
 
     uint priority   = 0;
     uint tile_block = 0;
@@ -86,8 +86,8 @@ public:
 
     void write(u8 byte);
 
-    uint layers = 0;
-    uint blend  = 0;
+    uint enabled = 0;
+    uint blend   = 0;
 };
 
 class WindowInside : public Register<u16, 0x3F3F>
@@ -117,10 +117,9 @@ public:
 
     bool contains(uint value) const;
 
-    uint min = 0;
-    uint max = 0;
-
 private:
+    uint min   = 0;
+    uint max   = 0;
     uint limit = 0;
 };
 
@@ -132,12 +131,15 @@ public:
     public:
         void write(u8 byte);
 
-        uint mosaicX(uint value) const;
-        uint mosaicY(uint value) const;
-
+        bool isMosaicX() const;
+        bool isMosaicY() const;
         bool isDominantX(uint value) const;
         bool isDominantY(uint value) const;
 
+        uint mosaicX(uint value) const;
+        uint mosaicY(uint value) const;
+
+    private:
         uint x = 1;
         uint y = 1;
     };
@@ -165,6 +167,7 @@ public:
 
     u16 blendAlpha(u16 a, u16 b) const;
 
+private:
     uint eva = 0;
     uint evb = 0;
 };
@@ -177,5 +180,6 @@ public:
     u16 blendWhite(u16 a) const;
     u16 blendBlack(u16 a) const;
 
+private:
     uint evy = 0;
 };

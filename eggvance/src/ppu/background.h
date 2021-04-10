@@ -9,6 +9,8 @@ class Background
 public:
     Background(uint id);
 
+    uint flag() const;
+
     const uint id;
     BackgroundOffset offset;
     BackgroundControl control;

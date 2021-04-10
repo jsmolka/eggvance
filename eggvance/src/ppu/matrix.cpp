@@ -35,57 +35,33 @@ Point TransformationMatrix::operator*(s32 x) const
 
 void TransformationMatrix::writeA(uint index, u8 byte)
 {
-    auto value = static_cast<s16>(get(0, 0));
-
-    bit::byteRef(value, index) = byte;
-
-    set(0, 0, static_cast<s32>(value));
+    setByte<16>(0, 0, index, byte);
 }
 
 void TransformationMatrix::writeB(uint index, u8 byte)
 {
-    auto value = static_cast<s16>(get(0, 1));
-
-    bit::byteRef(value, index) = byte;
-
-    set(0, 1, static_cast<s32>(value));
+    setByte<16>(0, 1, index, byte);
 }
 
 void TransformationMatrix::writeC(uint index, u8 byte)
 {
-    auto value = static_cast<s16>(get(1, 0));
-
-    bit::byteRef(value, index) = byte;
-
-    set(1, 0, static_cast<s32>(value));
+    setByte<16>(1, 0, index, byte);
 }
 
 void TransformationMatrix::writeD(uint index, u8 byte)
 {
-    auto value = static_cast<s16>(get(1, 1));
-
-    bit::byteRef(value, index) = byte;
-
-    set(1, 1, static_cast<s32>(value));
+    setByte<16>(1, 1, index, byte);
 }
 
 void TransformationMatrix::writeX(uint index, u8 byte)
 {
-    if (index == 3)
-        byte = bit::signEx<4>(byte & 0xF);
-
-    bit::byteRef(get(0, 2), index) = byte;
-
+    setByte<28>(0, 2, index, byte);
     yx = 0;
 }
 
 void TransformationMatrix::writeY(uint index, u8 byte)
 {
-    if (index == 3)
-        byte = bit::signEx<4>(byte & 0xF);
-
-    bit::byteRef(get(1, 2), index) = byte;
-
+    setByte<28>(1, 2, index, byte);
     yy = 0;
 }
 
@@ -99,4 +75,12 @@ void TransformationMatrix::vblank()
 {
     yx = 0;
     yy = 0;
+}
+
+template<uint kSize>
+void TransformationMatrix::setByte(uint x, uint y, uint index, u8 byte)
+{
+    auto& value = get(x, y);
+    bit::byteRef(value, index) = byte;
+    value = bit::signEx<kSize>(value);
 }

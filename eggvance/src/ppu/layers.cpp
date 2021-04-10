@@ -15,12 +15,12 @@ u16 BackgroundLayer::color(uint x) const
     return data[x];
 }
 
-bool BackgroundLayer::opaque(uint x) const
+bool BackgroundLayer::isOpaque(uint x) const
 {
     return color(x) != kTransparent;
 }
 
-bool ObjectLayer::opaque() const
+bool ObjectLayer::isOpaque() const
 {
     return color != kTransparent;
 }

@@ -5,3 +5,8 @@ Background::Background(uint id)
 {
 
 }
+
+uint Background::flag() const
+{
+    return 1 << id;
+}
