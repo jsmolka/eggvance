@@ -1,8 +1,5 @@
 #include "ppu.h"
 
-#include <algorithm>
-#include <numeric>
-
 #include "constants.h"
 #include "arm/arm.h"
 #include "base/bit.h"
@@ -25,70 +22,6 @@ void Ppu::init()
     scheduler.insert(events.hblank, 1006);
 }
 
-void Ppu::scanline()
-{
-    if (dispcnt.blank)
-    {
-        auto& scanline = video_ctx.scanline(vcount);
-        std::fill(scanline.begin(), scanline.end(), 0xFFFF'FFFF);
-        return;
-    }
-
-    for (auto& background : backgrounds)
-        background.buffer.flip();
-
-    if (objects_exist)
-    {
-        objects.fill(ObjectLayer());
-        objects_exist = false;
-        objects_alpha = false;
-    }
-
-    if (dispcnt.layers & Layer::Flag::Obj)
-    {
-        renderObjects();
-    }
-
-    switch (dispcnt.mode)
-    {
-    case 0:
-        renderBg(&Ppu::renderBgMode0, backgrounds[0]);
-        renderBg(&Ppu::renderBgMode0, backgrounds[1]);
-        renderBg(&Ppu::renderBgMode0, backgrounds[2]);
-        renderBg(&Ppu::renderBgMode0, backgrounds[3]);
-        collapse(uint(Layer::Flag::Bg0 | Layer::Flag::Bg1 | Layer::Flag::Bg2 | Layer::Flag::Bg3));
-        break;
-
-    case 1:
-        renderBg(&Ppu::renderBgMode0, backgrounds[0]);
-        renderBg(&Ppu::renderBgMode0, backgrounds[1]);
-        renderBg(&Ppu::renderBgMode2, backgrounds[2]);
-        collapse(uint(Layer::Flag::Bg0 | Layer::Flag::Bg1 | Layer::Flag::Bg2));
-        break;
-
-    case 2:
-        renderBg(&Ppu::renderBgMode2, backgrounds[2]);
-        renderBg(&Ppu::renderBgMode2, backgrounds[3]);
-        collapse(uint(Layer::Flag::Bg2 | Layer::Flag::Bg3));
-        break;
-
-    case 3:
-        renderBg(&Ppu::renderBgMode3, backgrounds[2]);
-        collapse(uint(Layer::Flag::Bg2));
-        break;
-
-    case 4:
-        renderBg(&Ppu::renderBgMode4, backgrounds[2]);
-        collapse(uint(Layer::Flag::Bg2));
-        break;
-
-    case 5:
-        renderBg(&Ppu::renderBgMode5, backgrounds[2]);
-        collapse(uint(Layer::Flag::Bg2));
-        break;
-    }
-}
-
 void Ppu::hblank(u64 late)
 {
     dispstat.hblank = true;
@@ -100,7 +33,7 @@ void Ppu::hblank(u64 late)
 
     if (vcount < 160)
     {
-        scanline();
+        render();
 
         backgrounds[2].matrix.hblank();
         backgrounds[3].matrix.hblank();

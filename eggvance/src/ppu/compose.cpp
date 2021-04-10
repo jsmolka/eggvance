@@ -7,7 +7,7 @@
 #include "color.h"
 #include "frontend/videocontext.h"
 
-void Ppu::collapse(uint bgs)
+void Ppu::compose(uint bgs)
 {
     BackgroundLayers layers;
 
@@ -33,10 +33,10 @@ void Ppu::collapse(uint bgs)
 
         if (bldcnt.mode != BlendMode::Disabled || objects_alpha)
         {
-            switch (static_cast<uint>(objects_exist) | (bldcnt.mode << 1) | (windows << 3))
+            switch (objects_exist | (bldcnt.mode << 1) | (windows << 3))
             {
             SHELL_CASE64(0,
-                collapseBW<
+                composeBW<
                     bit::seq<0, 1>(kLabel),
                     bit::seq<1, 2>(kLabel),
                     bit::seq<3, 3>(kLabel)>(layers))
@@ -48,10 +48,10 @@ void Ppu::collapse(uint bgs)
         }
         else
         {
-            switch (static_cast<uint>(objects_exist) | (windows << 1))
+            switch (objects_exist | (windows << 1))
             {
             SHELL_CASE16(0,
-                collapseNW<
+                composeNW<
                     bit::seq<0, 1>(kLabel),
                     bit::seq<1, 3>(kLabel)>(layers))
 
@@ -65,10 +65,10 @@ void Ppu::collapse(uint bgs)
     {
         if (bldcnt.mode != BlendMode::Disabled || objects_alpha)
         {
-            switch (static_cast<uint>(objects_exist) | (bldcnt.mode << 1))
+            switch (objects_exist | (bldcnt.mode << 1))
             {
             SHELL_CASE08(0,
-                collapseBN<
+                composeBN<
                     bit::seq<0, 1>(kLabel),
                     bit::seq<1, 2>(kLabel)>(layers))
 
@@ -79,10 +79,10 @@ void Ppu::collapse(uint bgs)
         }
         else
         {
-            switch (static_cast<uint>(objects_exist))
+            switch (objects_exist)
             {
             SHELL_CASE02(0,
-                collapseNN<
+                composeNN<
                     bit::seq<0, 1>(kLabel)>(layers))
 
             default:
@@ -94,7 +94,7 @@ void Ppu::collapse(uint bgs)
 }
 
 template<bool kObjects>
-void Ppu::collapseNN(const BackgroundLayers& backgrounds)
+void Ppu::composeNN(const BackgroundLayers& backgrounds)
 {
     for (auto [x, color] : shell::enumerate(video_ctx.scanline(vcount)))
     {
@@ -103,7 +103,7 @@ void Ppu::collapseNN(const BackgroundLayers& backgrounds)
 }
 
 template<bool kObjects, uint kWindows>
-void Ppu::collapseNW(const BackgroundLayers& backgrounds)
+void Ppu::composeNW(const BackgroundLayers& backgrounds)
 {
     for (auto [x, color] : shell::enumerate(video_ctx.scanline(vcount)))
     {
@@ -114,7 +114,7 @@ void Ppu::collapseNW(const BackgroundLayers& backgrounds)
 }
 
 template<bool kObjects, uint kBlendMode>
-void Ppu::collapseBN(const BackgroundLayers& backgrounds)
+void Ppu::composeBN(const BackgroundLayers& backgrounds)
 {
     constexpr auto kEnabled = 0xFFFF;
 
@@ -163,7 +163,7 @@ void Ppu::collapseBN(const BackgroundLayers& backgrounds)
 }
 
 template<bool kObjects, uint kBlendMode, uint kWindows>
-void Ppu::collapseBW(const BackgroundLayers& backgrounds)
+void Ppu::composeBW(const BackgroundLayers& backgrounds)
 {
     for (auto [x, color] : shell::enumerate(video_ctx.scanline(vcount)))
     {

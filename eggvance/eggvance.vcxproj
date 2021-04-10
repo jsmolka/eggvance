@@ -61,7 +61,7 @@
     <ClCompile Include="src\gamepak\save.cpp" />
     <ClCompile Include="src\gamepak\sram.cpp" />
     <ClCompile Include="src\ppu\background.cpp" />
-    <ClCompile Include="src\ppu\collapse.cpp" />
+    <ClCompile Include="src\ppu\compose.cpp" />
     <ClCompile Include="src\ppu\color.cpp" />
     <ClCompile Include="src\ppu\io.cpp" />
     <ClCompile Include="src\ppu\layers.cpp" />

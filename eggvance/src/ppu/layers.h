@@ -21,10 +21,10 @@ public:
     uint priority = 4;
 };
 
-class BgLayer : public Layer
+class BackgroundLayer : public Layer
 {
 public:
-    bool operator<(const BgLayer& other) const;
+    bool operator<(const BackgroundLayer& other) const;
 
     u16 color(uint x) const;
     bool opaque(uint x) const;
@@ -39,6 +39,6 @@ public:
     bool opaque() const;
 
     u16  color  = kTransparent;
-    bool alpha  = false;
-    bool window = false;
+    uint alpha  = false;
+    uint window = false;
 };

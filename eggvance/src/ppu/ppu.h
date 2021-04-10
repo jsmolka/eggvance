@@ -35,46 +35,55 @@ public:
     Oam oam = {};
 
 private:
-    using RenderFunc = void(Ppu::*)(Background&);
-    using BackgroundLayers = shell::FixedBuffer<BgLayer, 4>;
+    using BackgroundRender = void(Ppu::*)(Background&);
+    using BackgroundLayers = shell::FixedBuffer<BackgroundLayer, 4>;
 
-    void scanline();
     void hblank(u64 late);
     void hblankEnd(u64 late);
 
-    void renderBg(RenderFunc render, Background& background);
-    void renderBgMode0(Background& background);
-    void renderBgMode2(Background& background);
-    void renderBgMode3(Background& background);
-    void renderBgMode4(Background& background);
-    void renderBgMode5(Background& background);
+    void render();
+    void renderBackground(BackgroundRender render, Background& background);
     void renderObjects();
 
-    template<ColorMode kColorMode>
-    void renderBgMode0Impl(Background& background);
+    template<uint kColorMode>
+    void renderBackground0Impl(Background& background);
+    void renderBackground0(Background& background);
+    void renderBackground2(Background& background);
+    void renderBackground3(Background& background);
+    void renderBackground4(Background& background);
+    void renderBackground5(Background& background);
 
-    void collapse(uint bgs);
-    template<bool kObjects                                > void collapseNN(const BackgroundLayers& layers);
-    template<bool kObjects,                  uint kWindows> void collapseNW(const BackgroundLayers& layers);
-    template<bool kObjects, uint kBlendMode               > void collapseBN(const BackgroundLayers& layers);
-    template<bool kObjects, uint kBlendMode, uint kWindows> void collapseBW(const BackgroundLayers& layers);
+    void compose(uint bgs);
+    template<bool kObjects>
+    void composeNN(const BackgroundLayers& layers);
+    template<bool kObjects, uint kWindows>
+    void composeNW(const BackgroundLayers& layers);
+    template<bool kObjects, uint kBlendMode>
+    void composeBN(const BackgroundLayers& layers);
+    template<bool kObjects, uint kBlendMode, uint kWindows>
+    void composeBW(const BackgroundLayers& layers);
 
-    template<uint kWindows> const Window& activeWindow(uint x) const;
+    template<uint kWindows>
+    const Window& activeWindow(uint x) const;
 
-    template<bool kObjects> u16  findUpperLayer(const BackgroundLayers& layers, uint x);
-    template<bool kObjects> u16  findUpperLayer(const BackgroundLayers& layers, uint x, uint enabled);
-    template<bool kObjects> bool findBlendLayer(const BackgroundLayers& layers, uint x, uint enabled, u16& upper);
-    template<bool kObjects> bool findBlendLayer(const BackgroundLayers& layers, uint x, uint enabled, u16& upper, u16& lower);
+    template<bool kObjects>
+    u16  findUpperLayer(const BackgroundLayers& layers, uint x);
+    template<bool kObjects>
+    u16  findUpperLayer(const BackgroundLayers& layers, uint x, uint enabled);
+    template<bool kObjects>
+    bool findBlendLayer(const BackgroundLayers& layers, uint x, uint enabled, u16& upper);
+    template<bool kObjects>
+    bool findBlendLayer(const BackgroundLayers& layers, uint x, uint enabled, u16& upper, u16& lower);
+
+    uint objects_exist = false;
+    uint objects_alpha = false;
+    ScanlineBuffer<ObjectLayer> objects;
 
     struct Events
     {
         Event hblank;
         Event hblank_end;
     } events;
-
-    ScanlineBuffer<ObjectLayer> objects;
-    bool objects_exist = false;
-    bool objects_alpha = false;
 };
 
 inline Ppu ppu;

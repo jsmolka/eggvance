@@ -5,8 +5,73 @@
 
 #include "mapentry.h"
 #include "matrix.h"
+#include "frontend/videocontext.h"
 
-void Ppu::renderBg(RenderFunc render, Background& background)
+void Ppu::render()
+{
+    if (dispcnt.blank)
+    {
+        auto& scanline = video_ctx.scanline(vcount);
+        std::fill(scanline.begin(), scanline.end(), 0xFFFF'FFFF);
+        return;
+    }
+
+    for (auto& background : backgrounds)
+        background.buffer.flip();
+
+    if (objects_exist)
+    {
+        objects.fill(ObjectLayer());
+        objects_exist = false;
+        objects_alpha = false;
+    }
+
+    if (dispcnt.layers & Layer::Flag::Obj)
+    {
+        renderObjects();
+    }
+
+    switch (dispcnt.mode)
+    {
+    case 0:
+        renderBackground(&Ppu::renderBackground0, backgrounds[0]);
+        renderBackground(&Ppu::renderBackground0, backgrounds[1]);
+        renderBackground(&Ppu::renderBackground0, backgrounds[2]);
+        renderBackground(&Ppu::renderBackground0, backgrounds[3]);
+        compose(uint(Layer::Flag::Bg0 | Layer::Flag::Bg1 | Layer::Flag::Bg2 | Layer::Flag::Bg3));
+        break;
+
+    case 1:
+        renderBackground(&Ppu::renderBackground0, backgrounds[0]);
+        renderBackground(&Ppu::renderBackground0, backgrounds[1]);
+        renderBackground(&Ppu::renderBackground2, backgrounds[2]);
+        compose(uint(Layer::Flag::Bg0 | Layer::Flag::Bg1 | Layer::Flag::Bg2));
+        break;
+
+    case 2:
+        renderBackground(&Ppu::renderBackground2, backgrounds[2]);
+        renderBackground(&Ppu::renderBackground2, backgrounds[3]);
+        compose(uint(Layer::Flag::Bg2 | Layer::Flag::Bg3));
+        break;
+
+    case 3:
+        renderBackground(&Ppu::renderBackground3, backgrounds[2]);
+        compose(uint(Layer::Flag::Bg2));
+        break;
+
+    case 4:
+        renderBackground(&Ppu::renderBackground4, backgrounds[2]);
+        compose(uint(Layer::Flag::Bg2));
+        break;
+
+    case 5:
+        renderBackground(&Ppu::renderBackground5, backgrounds[2]);
+        compose(uint(Layer::Flag::Bg2));
+        break;
+    }
+}
+
+void Ppu::renderBackground(BackgroundRender render, Background& background)
 {
     if ((dispcnt.layers & (1 << background.id)) == 0)
         return;
@@ -29,21 +94,8 @@ void Ppu::renderBg(RenderFunc render, Background& background)
     }
 }
 
-void Ppu::renderBgMode0(Background& background)
-{
-    switch (ColorMode(background.control.color_mode))
-    {
-    case ColorMode::C16x16: renderBgMode0Impl<ColorMode::C16x16>(background); break;
-    case ColorMode::C256x1: renderBgMode0Impl<ColorMode::C256x1>(background); break;
-
-    default:
-        SHELL_UNREACHABLE;
-        break;
-    }
-}
-
-template<ColorMode kColorMode>
-void Ppu::renderBgMode0Impl(Background& background)
+template<uint kColorMode>
+void Ppu::renderBackground0Impl(Background& background)
 {
     const auto size = background.control.sizeRegular();
 
@@ -63,7 +115,7 @@ void Ppu::renderBgMode0Impl(Background& background)
         {
             MapEntry entry(vram.readFast<u16>(map));
 
-            u32 addr = background.control.tile_block + kTileBytes[uint(kColorMode)] * entry.tile;
+            u32 addr = background.control.tile_block + kTileBytes[kColorMode] * entry.tile;
             if (addr < kObjectBase)
             {
                 for (; pixel.x < kTileSize; ++pixel.x)
@@ -96,7 +148,19 @@ void Ppu::renderBgMode0Impl(Background& background)
     }
 }
 
-void Ppu::renderBgMode2(Background& background)
+void Ppu::renderBackground0(Background& background)
+{
+    switch (background.control.color_mode)
+    {
+    SHELL_CASE02(0, renderBackground0Impl<kLabel>(background))
+
+    default:
+        SHELL_UNREACHABLE;
+        break;
+    }
+}
+
+void Ppu::renderBackground2(Background& background)
 {
     const auto size = background.control.sizeAffine();
 
@@ -131,7 +195,7 @@ void Ppu::renderBgMode2(Background& background)
     }
 }
 
-void Ppu::renderBgMode3(Background& background)
+void Ppu::renderBackground3(Background& background)
 {
     for (auto [x, color] : shell::enumerate(background.buffer))
     {
@@ -151,7 +215,7 @@ void Ppu::renderBgMode3(Background& background)
     }
 }
 
-void Ppu::renderBgMode4(Background& background)
+void Ppu::renderBackground4(Background& background)
 {
     for (auto [x, color] : shell::enumerate(background.buffer))
     {
@@ -171,7 +235,7 @@ void Ppu::renderBgMode4(Background& background)
     }
 }
 
-void Ppu::renderBgMode5(Background& background)
+void Ppu::renderBackground5(Background& background)
 {
     constexpr Point kBitmap(160, 128);
 

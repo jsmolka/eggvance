@@ -117,7 +117,7 @@
     <ClCompile Include="src\gamepak\sram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ppu\collapse.cpp">
+    <ClCompile Include="src\ppu\compose.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\ppu\oam.cpp">
