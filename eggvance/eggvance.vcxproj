@@ -15,6 +15,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="modules\glad\glad.c" />
+    <ClCompile Include="modules\imgui\imgui.cpp" />
+    <ClCompile Include="modules\imgui\imgui_demo.cpp" />
+    <ClCompile Include="modules\imgui\imgui_draw.cpp" />
+    <ClCompile Include="modules\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="modules\imgui\imgui_impl_sdl.cpp" />
+    <ClCompile Include="modules\imgui\imgui_tables.cpp" />
+    <ClCompile Include="modules\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\apu\apu.cpp" />
     <ClCompile Include="src\apu\channel.cpp" />
     <ClCompile Include="src\apu\envelope.cpp" />
@@ -81,6 +89,16 @@
     <ClCompile Include="src\timer\timerchannel.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="modules\glad\glad.h" />
+    <ClInclude Include="modules\glad\khrplatform.h" />
+    <ClInclude Include="modules\imgui\imconfig.h" />
+    <ClInclude Include="modules\imgui\imgui.h" />
+    <ClInclude Include="modules\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="modules\imgui\imgui_impl_sdl.h" />
+    <ClInclude Include="modules\imgui\imgui_internal.h" />
+    <ClInclude Include="modules\imgui\imstb_rectpack.h" />
+    <ClInclude Include="modules\imgui\imstb_textedit.h" />
+    <ClInclude Include="modules\imgui\imstb_truetype.h" />
     <ClInclude Include="src\apu\apu.h" />
     <ClInclude Include="src\apu\channel.h" />
     <ClInclude Include="src\apu\envelope.h" />
@@ -107,6 +125,7 @@
     <ClInclude Include="src\base\constants.h" />
     <ClInclude Include="src\base\filesystem.h" />
     <ClInclude Include="src\base\int.h" />
+    <ClInclude Include="src\base\opengl.h" />
     <ClInclude Include="src\base\ram.h" />
     <ClInclude Include="src\base\register.h" />
     <ClInclude Include="src\base\sdl2.h" />
@@ -215,7 +234,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)modules\shell\include\;$(ProjectDir)modules\icon\eggvance\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)modules\shell\include\;$(ProjectDir)modules\icon\eggvance\include\;$(ProjectDir)modules\</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -234,7 +253,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)modules\shell\include\;$(ProjectDir)modules\icon\eggvance\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)modules\shell\include\;$(ProjectDir)modules\icon\eggvance\include\;$(ProjectDir)modules\</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -258,7 +277,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoConsole|x64'">
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)modules\shell\include\;$(ProjectDir)modules\icon\eggvance\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)modules\shell\include\;$(ProjectDir)modules\icon\eggvance\include\;$(ProjectDir)modules\</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>

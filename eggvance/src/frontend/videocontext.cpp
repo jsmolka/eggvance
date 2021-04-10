@@ -4,6 +4,7 @@
 #include <shell/icon.h>
 
 #include "base/bit.h"
+#include "base/opengl.h"
 
 VideoContext::~VideoContext()
 {
@@ -21,9 +22,12 @@ void VideoContext::init()
     if (SDL_InitSubSystem(SDL_INIT_VIDEO))
         throw shell::Error("Cannot init video context: {}", SDL_GetError());
 
-    if (!initWindow())   throw shell::Error("Cannot init window: {}",   SDL_GetError());
+    if (!initWindow())   throw shell::Error("Cannot init window: {}", SDL_GetError());
+    if (!initOpenGL())   throw shell::Error("Cannot init OpenGL");
     if (!initRenderer()) throw shell::Error("Cannot init renderer: {}", SDL_GetError());
-    if (!initTexture())  throw shell::Error("Cannot init texture: {}",  SDL_GetError());
+    if (!initTexture())  throw shell::Error("Cannot init texture: {}", SDL_GetError());
+    
+    initImgui();
 }
 
 void VideoContext::raise()
@@ -97,17 +101,57 @@ void VideoContext::renderClear(u32 color)
 
 bool VideoContext::initWindow()
 {
+    #ifdef IMGUI_IMPL_OPENGL_ES2
+    glsl_version = "#version 100";
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    glsl_version = "#version 150";
+    #elif SHELL_OS_MACOS
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+    #else
+    glsl_version = "#version 130";
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0); 
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+    #endif
+
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+
     window = SDL_CreateWindow(
         "eggvance",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         2 * kScreen.x, 2 * kScreen.y,
-        SDL_WINDOW_RESIZABLE);
+        SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
     if (window)
-        SDL_SetWindowMinimumSize(window, kScreen.x, kScreen.y);
+        SDL_SetWindowMinimumSize(window, kScreen.x, kScreen.y);;
 
     return window;
+}
+
+bool VideoContext::initOpenGL()
+{
+    context = SDL_GL_CreateContext(window);
+
+    SDL_GL_MakeCurrent(window, context);
+
+    int ret = gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
+
+    int w;
+    int h;
+    SDL_GetWindowSize(window, &w, &h);
+    glViewport(0, 0, w, h);
+
+    return ret;
 }
 
 bool VideoContext::initRenderer()
@@ -130,4 +174,14 @@ bool VideoContext::initTexture()
         kScreen.x, kScreen.y);
 
     return texture;
+}
+
+void VideoContext::initImgui()
+{
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGui::StyleColorsDark();
+
+    ImGui_ImplSDL2_InitForOpenGL(window, context);
+    ImGui_ImplOpenGL3_Init(glsl_version.c_str());
 }

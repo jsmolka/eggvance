@@ -9,6 +9,7 @@
 #include "apu/apu.h"
 #include "arm/arm.h"
 #include "base/config.h"
+#include "base/opengl.h"
 #include "dma/dma.h"
 #include "gamepak/gamepak.h"
 #include "keypad/keypad.h"
@@ -236,9 +237,17 @@ int main(int argc, char* argv[])
 
         audio_ctx.unpause();
 
+        SDL_GL_SetSwapInterval(1);
+
+        ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
         while (running)
         {
-            limiter.run([]() 
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+            handleEvents();
+
+            /*limiter.run([]() 
             {
                 handleEvents();
 
@@ -268,6 +277,134 @@ int main(int argc, char* argv[])
             else if (const auto fps = (++counter).fps())
             {
                 updateTitle(*fps);
+            }*/
+
+            {
+                glViewport(0, 0, ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y);
+                glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+
+                ImGui_ImplOpenGL3_NewFrame();
+                ImGui_ImplSDL2_NewFrame(video_ctx.window);
+    
+                int w;
+                int h;
+                SDL_GetWindowSize(video_ctx.window, &w, &h);
+
+                ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_Always);
+
+                ImGui::NewFrame();
+                {
+                    ImGui::BeginMainMenuBar();
+                    {
+                        if (ImGui::BeginMenu("File"))
+                        {
+                            ImGui::MenuItem("Open ROM", "Ctrl+O");
+                            ImGui::MenuItem("Open save");  // Disable if no rom
+
+                            if (ImGui::BeginMenu("Recent"))
+                            {
+                                ImGui::MenuItem("recent0.gba");
+                                ImGui::MenuItem("recent1.gba");
+                                ImGui::MenuItem("recent2.gba");
+                                ImGui::EndMenu();
+                            }
+
+                            ImGui::Separator();
+                            ImGui::MenuItem("Exit");
+
+                            ImGui::EndMenu();
+                        }
+
+                        if (ImGui::BeginMenu("Emulation"))
+                        {
+                            ImGui::MenuItem("Reset", "Ctrl+R");
+                            ImGui::MenuItem("Pause", "Ctrl+P");
+
+                            ImGui::Separator();
+
+                            static bool fast_forward = false;
+                            static bool slow_motion  = false;
+
+                            ImGui::MenuItem("Fast forward", "Ctrl+Shift", &fast_forward, !slow_motion);
+                            
+                            if (ImGui::BeginMenu("Fast forward speed", !slow_motion))
+                            {
+                                ImGui::MenuItem("Unbound");
+                                ImGui::Separator();
+                                ImGui::MenuItem("2x");
+                                ImGui::MenuItem("4x");
+                                ImGui::MenuItem("6x");
+
+                                ImGui::EndMenu();
+                            }
+
+                            ImGui::MenuItem("Slow motion", "Ctrl+Space", &slow_motion, !fast_forward);
+                            
+                            if (ImGui::BeginMenu("Slow motion speed", !fast_forward))
+                            {
+                                ImGui::MenuItem("0.2x");
+                                ImGui::MenuItem("0.4x");
+                                ImGui::MenuItem("0.6x");
+
+                                ImGui::EndMenu();
+                            }
+
+                            ImGui::EndMenu();
+                        }
+
+                        if (ImGui::BeginMenu("Audio/Video"))
+                        {
+                            if (ImGui::BeginMenu("Frame size"))
+                            {
+                                for (uint scale = 1; scale <= 8; ++scale)
+                                {
+                                    std::string text = shell::format("{}x", scale);
+
+                                    int window_w = 240 * scale;
+                                    int window_h = 160 * scale;
+
+                                    if (ImGui::MenuItem(text.c_str(), nullptr, w == window_w && h == window_h))
+                                    {
+                                        SDL_SetWindowFullscreen(video_ctx.window, ~SDL_WINDOW_FULLSCREEN_DESKTOP);
+                                        SDL_SetWindowSize(video_ctx.window, window_w, window_h);
+                                    }
+                                }
+
+                                ImGui::Separator();
+
+                                uint fullscreen = SDL_GetWindowFlags(video_ctx.window) & SDL_WINDOW_FULLSCREEN_DESKTOP;
+
+                                if (ImGui::MenuItem("Fullscreen", "Ctrl+F", fullscreen))
+                                {
+                                    SDL_SetWindowFullscreen(video_ctx.window, fullscreen ^ SDL_WINDOW_FULLSCREEN_DESKTOP);
+                                }
+
+                                ImGui::EndMenu();
+                            }
+
+                            ImGui::MenuItem("Color correct", nullptr, true);
+
+                            ImGui::Separator();
+
+                            if (ImGui::BeginMenu("Volume"))
+                            {
+                                static float volume = 0.5;
+                                ImGui::SliderFloat("", &volume, 0.0f, 1.0f);
+
+                                ImGui::EndMenu();
+                            }
+
+                            ImGui::MenuItem("Mute", "Ctrl+M", false);
+
+                            ImGui::EndMenu();
+                        }
+                    }
+                    ImGui::EndMainMenuBar();
+                }
+                ImGui::Render();
+
+                ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+                SDL_GL_SwapWindow(video_ctx.window);
             }
         }
 

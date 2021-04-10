@@ -9,11 +9,16 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -flto")
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
 
+include_directories(modules)
 include_directories(modules/shell/include)
 include_directories(modules/icon/eggvance/include)
 include_directories(src)
 
 file(GLOB_RECURSE SOURCE_FILES
+  ${PROJECT_SOURCE_DIR}/modules/glad/*.h
+  ${PROJECT_SOURCE_DIR}/modules/glad/*.cpp
+  ${PROJECT_SOURCE_DIR}/modules/imgui/*.h
+  ${PROJECT_SOURCE_DIR}/modules/imgui/*.cpp
   ${PROJECT_SOURCE_DIR}/src/*.h
   ${PROJECT_SOURCE_DIR}/src/*.cpp
 )
