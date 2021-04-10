@@ -1,6 +1,9 @@
 # Auto detect text files and perform LF normalization
 * text=auto
 
-# Help linguist
+# Linguist language
 *.h    text diff=cpp linguist-language=cpp
 *.cpp  text diff=cpp linguist-language=cpp
+
+# Linguist
+eggvance/modules/* linguist-vendored
