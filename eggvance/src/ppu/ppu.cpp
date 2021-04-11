@@ -80,7 +80,6 @@ void Ppu::present()
 {
     if (dispcnt.isActive())
     {
-        video_ctx.renderCopyTexture();
         video_ctx.renderPresent();
     }
 }

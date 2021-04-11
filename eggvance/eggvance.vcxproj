@@ -19,7 +19,7 @@
     <ClCompile Include="modules\imgui\imgui.cpp" />
     <ClCompile Include="modules\imgui\imgui_demo.cpp" />
     <ClCompile Include="modules\imgui\imgui_draw.cpp" />
-    <ClCompile Include="modules\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="modules\imgui\imgui_impl_opengl2.cpp" />
     <ClCompile Include="modules\imgui\imgui_impl_sdl.cpp" />
     <ClCompile Include="modules\imgui\imgui_tables.cpp" />
     <ClCompile Include="modules\imgui\imgui_widgets.cpp" />
@@ -93,7 +93,7 @@
     <ClInclude Include="modules\glad\khrplatform.h" />
     <ClInclude Include="modules\imgui\imconfig.h" />
     <ClInclude Include="modules\imgui\imgui.h" />
-    <ClInclude Include="modules\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="modules\imgui\imgui_impl_opengl2.h" />
     <ClInclude Include="modules\imgui\imgui_impl_sdl.h" />
     <ClInclude Include="modules\imgui\imgui_internal.h" />
     <ClInclude Include="modules\imgui\imstb_rectpack.h" />

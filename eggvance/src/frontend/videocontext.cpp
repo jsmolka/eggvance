@@ -4,7 +4,7 @@
 #include <shell/icon.h>
 
 #include "base/bit.h"
-#include "base/opengl.h"
+#include <gl/GL.h>
 
 VideoContext::~VideoContext()
 {
@@ -52,9 +52,33 @@ void VideoContext::renderCopyTexture()
     SDL_RenderCopy(renderer, texture, NULL, NULL);
 }
 
+static GLuint g_gl_texture;
+
 void VideoContext::renderPresent()
 {
-    SDL_RenderPresent(renderer);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glBindTexture(GL_TEXTURE_2D, g_gl_texture);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA,
+        240,
+        160,
+        0,
+        GL_RGBA,
+        GL_UNSIGNED_BYTE,
+        buffer.front().data()
+    );
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0);
+    glVertex2f(-1.0f, 1.0f);
+    glTexCoord2f(1.0f, 0);
+    glVertex2f(1.0f, 1.0f);
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex2f(1.0f, -1.0f);
+    glTexCoord2f(0, 1.0f);
+    glVertex2f(-1.0f, -1.0f);
+    glEnd();
 }
 
 void VideoContext::renderIcon()
@@ -101,30 +125,6 @@ void VideoContext::renderClear(u32 color)
 
 bool VideoContext::initWindow()
 {
-    #ifdef IMGUI_IMPL_OPENGL_ES2
-    glsl_version = "#version 100";
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-    glsl_version = "#version 150";
-    #elif SHELL_OS_MACOS
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-    #else
-    glsl_version = "#version 130";
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0); 
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-    #endif
-
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-
     window = SDL_CreateWindow(
         "eggvance",
         SDL_WINDOWPOS_CENTERED,
@@ -142,16 +142,25 @@ bool VideoContext::initOpenGL()
 {
     context = SDL_GL_CreateContext(window);
 
-    SDL_GL_MakeCurrent(window, context);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-    int ret = gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
+    //SDL_GL_MakeCurrent(window, context);
 
-    int w;
-    int h;
-    SDL_GetWindowSize(window, &w, &h);
-    glViewport(0, 0, w, h);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glEnable(GL_TEXTURE_2D);
+    glGenTextures(1, &g_gl_texture);
+    glBindTexture(GL_TEXTURE_2D, g_gl_texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    return ret;
+    return true;
 }
 
 bool VideoContext::initRenderer()
@@ -183,5 +192,5 @@ void VideoContext::initImgui()
     ImGui::StyleColorsDark();
 
     ImGui_ImplSDL2_InitForOpenGL(window, context);
-    ImGui_ImplOpenGL3_Init(glsl_version.c_str());
+    ImGui_ImplOpenGL2_Init();
 }

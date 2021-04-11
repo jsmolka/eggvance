@@ -9,7 +9,6 @@
 #include "apu/apu.h"
 #include "arm/arm.h"
 #include "base/config.h"
-#include "base/opengl.h"
 #include "dma/dma.h"
 #include "gamepak/gamepak.h"
 #include "keypad/keypad.h"
@@ -237,17 +236,15 @@ int main(int argc, char* argv[])
 
         audio_ctx.unpause();
 
-        SDL_GL_SetSwapInterval(1);
-
         ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+        SDL_GL_SetSwapInterval(0);
 
         while (running)
         {
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
             handleEvents();
 
-            /*limiter.run([]() 
+            limiter.run([]() 
             {
                 handleEvents();
 
@@ -277,13 +274,10 @@ int main(int argc, char* argv[])
             else if (const auto fps = (++counter).fps())
             {
                 updateTitle(*fps);
-            }*/
+            }
 
             {
-                glViewport(0, 0, ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y);
-                glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
-
-                ImGui_ImplOpenGL3_NewFrame();
+                ImGui_ImplOpenGL2_NewFrame();
                 ImGui_ImplSDL2_NewFrame(video_ctx.window);
     
                 int w;
@@ -402,10 +396,9 @@ int main(int argc, char* argv[])
                     ImGui::EndMainMenuBar();
                 }
                 ImGui::Render();
-
-                ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-                SDL_GL_SwapWindow(video_ctx.window);
+                ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
             }
+            SDL_GL_SwapWindow(video_ctx.window);
         }
 
         audio_ctx.pause();
