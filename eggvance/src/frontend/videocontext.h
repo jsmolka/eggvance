@@ -1,17 +1,17 @@
 #pragma once
 
-#include <imgui/imgui.h>
-#include <imgui/imgui_impl_sdl.h>
-#include <imgui/imgui_impl_opengl2.h>
 #include <shell/array.h>
 
 #include "base/int.h"
+#include "base/opengl.h"
 #include "base/sdl2.h"
 #include "ppu/constants.h"
 
 class VideoContext
 {
 public:
+    // Todo: scanline class
+
     ~VideoContext();
 
     void init();
@@ -19,26 +19,22 @@ public:
     void fullscreen();
     void title(const std::string& title);
 
-    void renderClear(u32 color);
-    void renderCopyTexture();
     void renderPresent();
     void renderIcon();
+    void swapWindow();
 
     shell::array<u32, kScreen.x>& scanline(uint line);
 
     SDL_Window* window = nullptr;
-    SDL_Texture* texture = nullptr;
-    SDL_Renderer* renderer = nullptr;
     SDL_GLContext context = nullptr;
 
 private:
     bool initWindow();
     bool initOpenGL();
-    bool initRenderer();
-    bool initTexture();
     void initImgui();
 
-    std::string glsl_version;
+    GLuint main_texture;
+    GLuint idle_texture;
     shell::array<u32, kScreen.y, kScreen.x> buffer = {};
 };
 

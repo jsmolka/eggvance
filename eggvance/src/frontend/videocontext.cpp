@@ -1,17 +1,18 @@
 #include "videocontext.h"
 
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_opengl2.h>
+#include <imgui/imgui_impl_sdl.h>
 #include <shell/errors.h>
 #include <shell/icon.h>
 
 #include "base/bit.h"
-#include <gl/GL.h>
 
 VideoContext::~VideoContext()
 {
     if (SDL_WasInit(SDL_INIT_VIDEO))
     {
-        SDL_DestroyTexture(texture);
-        SDL_DestroyRenderer(renderer);
+        SDL_GL_DeleteContext(context);
         SDL_DestroyWindow(window);
         SDL_QuitSubSystem(SDL_INIT_VIDEO);
     }
@@ -24,8 +25,6 @@ void VideoContext::init()
 
     if (!initWindow())   throw shell::Error("Cannot init window: {}", SDL_GetError());
     if (!initOpenGL())   throw shell::Error("Cannot init OpenGL");
-    if (!initRenderer()) throw shell::Error("Cannot init renderer: {}", SDL_GetError());
-    if (!initTexture())  throw shell::Error("Cannot init texture: {}", SDL_GetError());
     
     initImgui();
 }
@@ -46,38 +45,17 @@ void VideoContext::title(const std::string& title)
     SDL_SetWindowTitle(window, title.c_str());
 }
 
-void VideoContext::renderCopyTexture()
-{
-    SDL_UpdateTexture(texture, NULL, buffer.data(), sizeof(buffer.front()));
-    SDL_RenderCopy(renderer, texture, NULL, NULL);
-}
-
-static GLuint g_gl_texture;
-
 void VideoContext::renderPresent()
 {
     glClear(GL_COLOR_BUFFER_BIT);
-    glBindTexture(GL_TEXTURE_2D, g_gl_texture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA,
-        240,
-        160,
-        0,
-        GL_RGBA,
-        GL_UNSIGNED_BYTE,
-        buffer.front().data()
-    );
+    glBindTexture(GL_TEXTURE_2D, main_texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 240, 160, 0, GL_BGRA, GL_UNSIGNED_BYTE, buffer.front().data());
+
     glBegin(GL_QUADS);
-    glTexCoord2f(0, 0);
-    glVertex2f(-1.0f, 1.0f);
-    glTexCoord2f(1.0f, 0);
-    glVertex2f(1.0f, 1.0f);
-    glTexCoord2f(1.0f, 1.0f);
-    glVertex2f(1.0f, -1.0f);
-    glTexCoord2f(0, 1.0f);
-    glVertex2f(-1.0f, -1.0f);
+    glTexCoord2f(0.0f, 0.0f); glVertex2f(-1.0f,  1.0f);
+    glTexCoord2f(1.0f, 0.0f); glVertex2f( 1.0f,  1.0f);
+    glTexCoord2f(1.0f, 1.0f); glVertex2f( 1.0f, -1.0f);
+    glTexCoord2f(0.0f, 1.0f); glVertex2f(-1.0f, -1.0f);
     glEnd();
 }
 
@@ -85,42 +63,40 @@ void VideoContext::renderIcon()
 {
     int w;
     int h;
-    SDL_RenderGetLogicalSize(renderer, &w, &h);
-    SDL_RenderSetLogicalSize(renderer, 18, 18);
+    //SDL_RenderGetLogicalSize(renderer, &w, &h);
+    //SDL_RenderSetLogicalSize(renderer, 18, 18);
 
-    for (const auto& pixel : shell::icon::kPixels)
-    {
-        SDL_SetRenderDrawColor(
-            renderer,
-            pixel.r(),
-            pixel.g(),
-            pixel.b(),
-            SDL_ALPHA_OPAQUE);
+    //for (const auto& pixel : shell::icon::kPixels)
+    //{
+    //    SDL_SetRenderDrawColor(
+    //        renderer,
+    //        pixel.r(),
+    //        pixel.g(),
+    //        pixel.b(),
+    //        SDL_ALPHA_OPAQUE);
 
-        SDL_RenderDrawPoint(
-            renderer,
-            pixel.x() + 1,
-            pixel.y() + 1);
-    }
+    //    SDL_RenderDrawPoint(
+    //        renderer,
+    //        pixel.x() + 1,
+    //        pixel.y() + 1);
+    //}
 
-    SDL_RenderSetLogicalSize(renderer, w, h);
+    //SDL_RenderSetLogicalSize(renderer, w, h);
+}
+
+void VideoContext::swapWindow()
+{
+    int w;
+    int h;
+    SDL_GetWindowSize(window, &w, &h);
+    glViewport(0, 0, w, h);
+
+    SDL_GL_SwapWindow(window);
 }
 
 shell::array<u32, kScreen.x>& VideoContext::scanline(uint line)
 {
     return buffer[line];
-}
-
-void VideoContext::renderClear(u32 color)
-{
-    SDL_SetRenderDrawColor(
-        renderer,
-        bit::seq<16, 8>(color),
-        bit::seq< 8, 8>(color),
-        bit::seq< 0, 8>(color),
-        SDL_ALPHA_OPAQUE);
-
-    SDL_RenderClear(renderer);
 }
 
 bool VideoContext::initWindow()
@@ -142,47 +118,28 @@ bool VideoContext::initOpenGL()
 {
     context = SDL_GL_CreateContext(window);
 
+    if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
+        return false;
+
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-    //SDL_GL_MakeCurrent(window, context);
-
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glEnable(GL_TEXTURE_2D);
-    glGenTextures(1, &g_gl_texture);
-    glBindTexture(GL_TEXTURE_2D, g_gl_texture);
+    glGenTextures(1, &main_texture);
+    glBindTexture(GL_TEXTURE_2D, main_texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
+    SDL_GL_SetSwapInterval(0);
+
     return true;
-}
-
-bool VideoContext::initRenderer()
-{
-    renderer = SDL_CreateRenderer(
-        window, -1,
-        SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
-
-    SDL_RenderSetLogicalSize(renderer, kScreen.x, kScreen.y);
-
-    return renderer;
-}
-
-bool VideoContext::initTexture()
-{
-    texture = SDL_CreateTexture(
-        renderer,
-        SDL_PIXELFORMAT_ARGB8888,
-        SDL_TEXTUREACCESS_STREAMING,
-        kScreen.x, kScreen.y);
-
-    return texture;
 }
 
 void VideoContext::initImgui()

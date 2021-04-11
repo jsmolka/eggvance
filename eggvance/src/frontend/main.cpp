@@ -1,3 +1,6 @@
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_opengl2.h>
+#include <imgui/imgui_impl_sdl.h>
 #include <shell/options.h>
 #include <shell/utility.h>
 
@@ -9,6 +12,7 @@
 #include "apu/apu.h"
 #include "arm/arm.h"
 #include "base/config.h"
+#include "base/opengl.h"
 #include "dma/dma.h"
 #include "gamepak/gamepak.h"
 #include "keypad/keypad.h"
@@ -148,13 +152,12 @@ int eventFilter(void*, SDL_Event* event)
     {
         if (gamepak.rom.size() == 0)
         {
-            video_ctx.renderClear(0xFF3E'4750);
+            //video_ctx.renderClear(0xFF3E'4750);
             video_ctx.renderIcon();
             video_ctx.renderPresent();
         }
         else
         {
-            video_ctx.renderCopyTexture();
             video_ctx.renderPresent();
         }
         return 0;
@@ -220,7 +223,7 @@ int main(int argc, char* argv[])
         {
             handleEvents();
 
-            video_ctx.renderClear(0xFF3E'4750);
+            //video_ctx.renderClear(0xFF3E'4750);
             video_ctx.renderIcon();
             video_ctx.renderPresent();
 
@@ -235,10 +238,6 @@ int main(int argc, char* argv[])
         counter.reset();
 
         audio_ctx.unpause();
-
-        ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
-        SDL_GL_SetSwapInterval(0);
 
         while (running)
         {
@@ -398,7 +397,7 @@ int main(int argc, char* argv[])
                 ImGui::Render();
                 ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
             }
-            SDL_GL_SwapWindow(video_ctx.window);
+            video_ctx.swapWindow();
         }
 
         audio_ctx.pause();
