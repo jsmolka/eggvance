@@ -10,7 +10,7 @@
 class VideoContext
 {
 public:
-    // Todo: scanline class
+    using Scanline = shell::array<u32, kScreen.x>;
 
     ~VideoContext();
 
@@ -19,11 +19,12 @@ public:
     void fullscreen();
     void title(const std::string& title);
 
+    void renderMain();
+    void renderIcon(float top_offset);
     void renderPresent();
-    void renderIcon();
-    void swapWindow();
+    void updateViewport();
 
-    shell::array<u32, kScreen.x>& scanline(uint line);
+    Scanline& scanline(uint line);
 
     SDL_Window* window = nullptr;
     SDL_GLContext context = nullptr;
@@ -33,9 +34,12 @@ private:
     bool initOpenGL();
     void initImgui();
 
+    template<uint kTextureW, uint kTextureH>
+    void renderTexture(GLuint texture, const void* data, bool preserve_ratio, GLfloat top_offset);
+
     GLuint main_texture;
-    GLuint idle_texture;
-    shell::array<u32, kScreen.y, kScreen.x> buffer = {};
+    GLuint icon_texture;
+    shell::array<Scanline, kScreen.y> buffer = {};
 };
 
 inline VideoContext video_ctx;

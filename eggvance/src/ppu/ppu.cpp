@@ -79,7 +79,5 @@ void Ppu::hblankEnd(u64 late)
 void Ppu::present()
 {
     if (dispcnt.isActive())
-    {
-        video_ctx.renderPresent();
-    }
+        video_ctx.renderMain();
 }

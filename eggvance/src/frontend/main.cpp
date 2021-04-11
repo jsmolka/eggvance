@@ -143,83 +143,19 @@ void handleEvents()
             break;
         }
     }
+
+    video_ctx.updateViewport();
 }
 
-#if SHELL_OS_WINDOWS
-int eventFilter(void*, SDL_Event* event)
-{
-    if (event->type == SDL_WINDOWEVENT && event->window.event == SDL_WINDOWEVENT_RESIZED)
-    {
-        if (gamepak.rom.size() == 0)
-        {
-            //video_ctx.renderClear(0xFF3E'4750);
-            video_ctx.renderIcon();
-            video_ctx.renderPresent();
-        }
-        else
-        {
-            video_ctx.swapWindow();
-        }
-        return 0;
-    }
-    else if (event->type == SDL_SYSWMEVENT && event->syswm.msg->msg.win.msg == WM_EXITSIZEMOVE)
-    {
-        changed = true;
-        return 0;
-    }
-    return 1;
-}
-#endif
-
-void init(int argc, char* argv[])
-{
-    using namespace shell;
-
-    Options options("eggvance");
-    options.add({ "-c,--config", "config file", "file" }, Options::value<fs::path>("eggvance.ini"));
-    options.add({ "-s,--save",   "save file",   "file" }, Options::value<fs::path>()->optional());
-    options.add({       "rom",   "ROM file"            }, Options::value<fs::path>()->positional()->optional());
-
-    OptionsResult result;
-    try
-    {
-        result = options.parse(argc, argv);
-    }
-    catch (const ParseError& error)
-    {
-        throw shell::Error("Cannot parse command line: {}", error.what());
-    }
-
-    const auto cfg = result.find<fs::path>("--config");
-    const auto sav = result.find<fs::path>("--save");
-    const auto gba = result.find<fs::path>("rom");
-
-    config.init(fs::absolute(*cfg));
-
-    audio_ctx.init();
-    input_ctx.init();
-    video_ctx.init();
-
-    Bios::init(config.bios_file);
-    Color::init(config.lcd_color);
-
-    #if SHELL_OS_WINDOWS
-    SDL_EventState(SDL_SYSWMEVENT, SDL_ENABLE);
-    SDL_SetEventFilter(eventFilter, NULL);
-    #endif
-
-    gamepak.init(
-        gba.value_or(fs::path()),
-        sav.value_or(fs::path()));
-}
-
-void renderUi(bool& running)
+float runUi(bool* running = nullptr)
 {
     ImGui_ImplOpenGL2_NewFrame();
     ImGui_ImplSDL2_NewFrame(video_ctx.window);
 
     ImGui::NewFrame();
     ImGui::BeginMainMenuBar();
+
+    float height = ImGui::GetWindowHeight() / 2.0f;
 
     if (ImGui::BeginMenu("File"))
     {
@@ -235,9 +171,9 @@ void renderUi(bool& running)
         }
 
         ImGui::Separator();
-        
-        if (ImGui::MenuItem("Exit"))
-            running = false;
+
+        if (ImGui::MenuItem("Exit") && running)
+            *running = false;
 
         ImGui::EndMenu();
     }
@@ -334,7 +270,84 @@ void renderUi(bool& running)
     ImGui::EndMainMenuBar();
 
     ImGui::Render();
+
+    return height;
+}
+
+void renderUi()
+{
     ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+}
+
+#if SHELL_OS_WINDOWS
+int eventFilter(void*, SDL_Event* event)
+{
+    if (event->type == SDL_WINDOWEVENT && event->window.event == SDL_WINDOWEVENT_RESIZED)
+    {
+        video_ctx.updateViewport();
+
+        if (gamepak.rom.size() == 0)
+        {
+            float height = runUi();
+            video_ctx.renderIcon(height);
+            renderUi();
+        }
+        else
+            video_ctx.renderMain();
+
+        video_ctx.renderPresent();
+
+        return 0;
+    }
+    else if (event->type == SDL_SYSWMEVENT && event->syswm.msg->msg.win.msg == WM_EXITSIZEMOVE)
+    {
+        changed = true;
+        return 0;
+    }
+    return 1;
+}
+#endif
+
+void init(int argc, char* argv[])
+{
+    using namespace shell;
+
+    Options options("eggvance");
+    options.add({ "-c,--config", "config file", "file" }, Options::value<fs::path>("eggvance.ini"));
+    options.add({ "-s,--save",   "save file",   "file" }, Options::value<fs::path>()->optional());
+    options.add({       "rom",   "ROM file"            }, Options::value<fs::path>()->positional()->optional());
+
+    OptionsResult result;
+    try
+    {
+        result = options.parse(argc, argv);
+    }
+    catch (const ParseError& error)
+    {
+        throw shell::Error("Cannot parse command line: {}", error.what());
+    }
+
+    const auto cfg = result.find<fs::path>("--config");
+    const auto sav = result.find<fs::path>("--save");
+    const auto gba = result.find<fs::path>("rom");
+
+    config.init(fs::absolute(*cfg));
+
+    audio_ctx.init();
+    input_ctx.init();
+    video_ctx.init();
+
+    Bios::init(config.bios_file);
+    Color::init(config.lcd_color);
+
+    #if SHELL_OS_WINDOWS
+    SDL_EventState(SDL_SYSWMEVENT, SDL_ENABLE);
+    SDL_SetEventFilter(eventFilter, NULL);
+    #endif
+
+    gamepak.init(
+        gba.value_or(fs::path()),
+        sav.value_or(fs::path()));
 }
 
 int main(int argc, char* argv[])
@@ -347,8 +360,9 @@ int main(int argc, char* argv[])
         {
             handleEvents();
 
-            //video_ctx.renderClear(0xFF3E'4750);
-            video_ctx.renderIcon();
+            float height = runUi(&running);
+            video_ctx.renderIcon(height);
+            renderUi();
             video_ctx.renderPresent();
 
             SDL_Delay(16);
@@ -397,9 +411,10 @@ int main(int argc, char* argv[])
                 updateTitle(*fps);
             }
 
-            renderUi(running);
+            runUi(&running);
+            renderUi();
 
-            video_ctx.swapWindow();
+            video_ctx.renderPresent();
         }
 
         audio_ctx.pause();
