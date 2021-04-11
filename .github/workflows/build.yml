@@ -22,6 +22,7 @@ jobs:
         run: |
           vcpkg integrate install
           vcpkg install sdl2:x64-windows
+          vcpkg install opengl:x64-windows
 
       - name: Build
         run: |
