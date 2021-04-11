@@ -1,7 +1,8 @@
 #pragma once
 
-#include <glad/glad.h>
 #include <shell/predef.h>
+#include <shell/windows.h>
+#include <glad/glad.h>
 
 #if SHELL_CC_MSVC
 #  include <SDL2/SDL_opengl.h>

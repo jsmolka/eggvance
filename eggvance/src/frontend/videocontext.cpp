@@ -47,15 +47,48 @@ void VideoContext::title(const std::string& title)
 
 void VideoContext::renderPresent()
 {
+    constexpr GLfloat kTextureW     = kScreen.x;
+    constexpr GLfloat kTextureH     = kScreen.y;
+    constexpr GLfloat kTextureRatio = kTextureW / kTextureH;
+
+    int w;
+    int h;
+    SDL_GetWindowSize(window, &w, &h);
+
+    GLfloat window_w = w;
+    GLfloat window_h = h;
+    GLfloat offset_x = 0;
+    GLfloat offset_y = 0;
+
+    if (true)
+    {
+        GLfloat aspect_w = window_w;
+        GLfloat aspect_h = window_h;
+
+        if (kTextureRatio > (window_w  / window_h))
+            aspect_h = aspect_w / kTextureRatio;
+        else
+            aspect_w = aspect_h * kTextureRatio;
+
+        offset_x = (window_w - aspect_w) * 0.5f;
+        offset_y = (window_h - aspect_h) * 0.5f;
+    }
+
     glClear(GL_COLOR_BUFFER_BIT);
     glBindTexture(GL_TEXTURE_2D, main_texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 240, 160, 0, GL_BGRA, GL_UNSIGNED_BYTE, buffer.front().data());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, kTextureW, kTextureH, 0, GL_BGRA, GL_UNSIGNED_BYTE, buffer.front().data());
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glTranslatef(-1, -1, 0);
+    glScalef(2.0f / window_w, 2.0f / window_h, 1.0);
 
     glBegin(GL_QUADS);
-    glTexCoord2f(0.0f, 0.0f); glVertex2f(-1.0f,  1.0f);
-    glTexCoord2f(1.0f, 0.0f); glVertex2f( 1.0f,  1.0f);
-    glTexCoord2f(1.0f, 1.0f); glVertex2f( 1.0f, -1.0f);
-    glTexCoord2f(0.0f, 1.0f); glVertex2f(-1.0f, -1.0f);
+    glTexCoord2f(0.0f, 0.0f); glVertex2f(           offset_x, window_h - offset_y);
+    glTexCoord2f(1.0f, 0.0f); glVertex2f(window_w - offset_x, window_h - offset_y);
+    glTexCoord2f(1.0f, 1.0f); glVertex2f(window_w - offset_x,            offset_y);
+    glTexCoord2f(0.0f, 1.0f); glVertex2f(           offset_x,            offset_y);
     glEnd();
 }
 
@@ -127,10 +160,6 @@ bool VideoContext::initOpenGL()
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
     glEnable(GL_TEXTURE_2D);
     glGenTextures(1, &main_texture);
     glBindTexture(GL_TEXTURE_2D, main_texture);

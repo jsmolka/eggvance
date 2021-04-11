@@ -158,7 +158,7 @@ int eventFilter(void*, SDL_Event* event)
         }
         else
         {
-            video_ctx.renderPresent();
+            video_ctx.swapWindow();
         }
         return 0;
     }
@@ -213,6 +213,130 @@ void init(int argc, char* argv[])
         sav.value_or(fs::path()));
 }
 
+void renderUi(bool& running)
+{
+    ImGui_ImplOpenGL2_NewFrame();
+    ImGui_ImplSDL2_NewFrame(video_ctx.window);
+
+    ImGui::NewFrame();
+    ImGui::BeginMainMenuBar();
+
+    if (ImGui::BeginMenu("File"))
+    {
+        ImGui::MenuItem("Open ROM", "Ctrl+O");
+        ImGui::MenuItem("Open save");  // Disable if no rom
+
+        if (ImGui::BeginMenu("Recent"))
+        {
+            ImGui::MenuItem("recent0.gba");
+            ImGui::MenuItem("recent1.gba");
+            ImGui::MenuItem("recent2.gba");
+            ImGui::EndMenu();
+        }
+
+        ImGui::Separator();
+        
+        if (ImGui::MenuItem("Exit"))
+            running = false;
+
+        ImGui::EndMenu();
+    }
+
+    if (ImGui::BeginMenu("Emulation"))
+    {
+        ImGui::MenuItem("Reset", "Ctrl+R");
+        ImGui::MenuItem("Pause", "Ctrl+P");
+
+        ImGui::Separator();
+
+        static bool fast_forward = false;
+        static bool slow_motion  = false;
+
+        ImGui::MenuItem("Fast forward", "Ctrl+Shift", &fast_forward, !slow_motion);
+
+        if (ImGui::BeginMenu("Fast forward speed", !slow_motion))
+        {
+            ImGui::MenuItem("Unbound");
+            ImGui::Separator();
+            ImGui::MenuItem("2x");
+            ImGui::MenuItem("4x");
+            ImGui::MenuItem("6x");
+
+            ImGui::EndMenu();
+        }
+
+        ImGui::MenuItem("Slow motion", "Ctrl+Space", &slow_motion, !fast_forward);
+
+        if (ImGui::BeginMenu("Slow motion speed", !fast_forward))
+        {
+            ImGui::MenuItem("0.2x");
+            ImGui::MenuItem("0.4x");
+            ImGui::MenuItem("0.6x");
+
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMenu();
+    }
+
+    if (ImGui::BeginMenu("Audio/Video"))
+    {
+        if (ImGui::BeginMenu("Frame size"))
+        {
+            int w;
+            int h;
+            SDL_GetWindowSize(video_ctx.window, &w, &h);
+
+            for (uint scale = 1; scale <= 8; ++scale)
+            {
+                std::string text = shell::format("{}x", scale);
+
+                int window_w = 240 * scale;
+                int window_h = 160 * scale;
+
+                if (ImGui::MenuItem(text.c_str(), nullptr, w == window_w && h == window_h))
+                {
+                    SDL_SetWindowFullscreen(video_ctx.window, ~SDL_WINDOW_FULLSCREEN_DESKTOP);
+                    SDL_SetWindowSize(video_ctx.window, window_w, window_h);
+                }
+            }
+
+            ImGui::Separator();
+
+            uint fullscreen = SDL_GetWindowFlags(video_ctx.window) & SDL_WINDOW_FULLSCREEN_DESKTOP;
+
+            if (ImGui::MenuItem("Fullscreen", "Ctrl+F", fullscreen))
+            {
+                SDL_SetWindowFullscreen(video_ctx.window, fullscreen ^ SDL_WINDOW_FULLSCREEN_DESKTOP);
+            }
+
+            ImGui::EndMenu();
+        }
+
+        ImGui::MenuItem("Color correct", nullptr, true);
+        ImGui::MenuItem("Preserve aspect ratio", nullptr, true);
+
+        ImGui::Separator();
+
+        if (ImGui::BeginMenu("Volume"))
+        {
+            static float volume = 0.5;
+            ImGui::SliderFloat("", &volume, 0.0f, 1.0f);
+
+            ImGui::EndMenu();
+        }
+
+        ImGui::MenuItem("Mute", "Ctrl+M", false);
+
+        ImGui::EndMenu();
+    }
+
+    ImGui::EndMainMenuBar();
+
+    ImGui::Render();
+    ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+}
+
 int main(int argc, char* argv[])
 {
     try
@@ -241,13 +365,11 @@ int main(int argc, char* argv[])
 
         while (running)
         {
-            handleEvents();
-
             limiter.run([]() 
             {
                 handleEvents();
 
-                if (paused)
+                if (paused || !running)
                     return;
 
                 constexpr auto kPixelsHor   = 240 + 68;
@@ -275,128 +397,8 @@ int main(int argc, char* argv[])
                 updateTitle(*fps);
             }
 
-            {
-                ImGui_ImplOpenGL2_NewFrame();
-                ImGui_ImplSDL2_NewFrame(video_ctx.window);
-    
-                int w;
-                int h;
-                SDL_GetWindowSize(video_ctx.window, &w, &h);
+            renderUi(running);
 
-                ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_Always);
-
-                ImGui::NewFrame();
-                {
-                    ImGui::BeginMainMenuBar();
-                    {
-                        if (ImGui::BeginMenu("File"))
-                        {
-                            ImGui::MenuItem("Open ROM", "Ctrl+O");
-                            ImGui::MenuItem("Open save");  // Disable if no rom
-
-                            if (ImGui::BeginMenu("Recent"))
-                            {
-                                ImGui::MenuItem("recent0.gba");
-                                ImGui::MenuItem("recent1.gba");
-                                ImGui::MenuItem("recent2.gba");
-                                ImGui::EndMenu();
-                            }
-
-                            ImGui::Separator();
-                            ImGui::MenuItem("Exit");
-
-                            ImGui::EndMenu();
-                        }
-
-                        if (ImGui::BeginMenu("Emulation"))
-                        {
-                            ImGui::MenuItem("Reset", "Ctrl+R");
-                            ImGui::MenuItem("Pause", "Ctrl+P");
-
-                            ImGui::Separator();
-
-                            static bool fast_forward = false;
-                            static bool slow_motion  = false;
-
-                            ImGui::MenuItem("Fast forward", "Ctrl+Shift", &fast_forward, !slow_motion);
-                            
-                            if (ImGui::BeginMenu("Fast forward speed", !slow_motion))
-                            {
-                                ImGui::MenuItem("Unbound");
-                                ImGui::Separator();
-                                ImGui::MenuItem("2x");
-                                ImGui::MenuItem("4x");
-                                ImGui::MenuItem("6x");
-
-                                ImGui::EndMenu();
-                            }
-
-                            ImGui::MenuItem("Slow motion", "Ctrl+Space", &slow_motion, !fast_forward);
-                            
-                            if (ImGui::BeginMenu("Slow motion speed", !fast_forward))
-                            {
-                                ImGui::MenuItem("0.2x");
-                                ImGui::MenuItem("0.4x");
-                                ImGui::MenuItem("0.6x");
-
-                                ImGui::EndMenu();
-                            }
-
-                            ImGui::EndMenu();
-                        }
-
-                        if (ImGui::BeginMenu("Audio/Video"))
-                        {
-                            if (ImGui::BeginMenu("Frame size"))
-                            {
-                                for (uint scale = 1; scale <= 8; ++scale)
-                                {
-                                    std::string text = shell::format("{}x", scale);
-
-                                    int window_w = 240 * scale;
-                                    int window_h = 160 * scale;
-
-                                    if (ImGui::MenuItem(text.c_str(), nullptr, w == window_w && h == window_h))
-                                    {
-                                        SDL_SetWindowFullscreen(video_ctx.window, ~SDL_WINDOW_FULLSCREEN_DESKTOP);
-                                        SDL_SetWindowSize(video_ctx.window, window_w, window_h);
-                                    }
-                                }
-
-                                ImGui::Separator();
-
-                                uint fullscreen = SDL_GetWindowFlags(video_ctx.window) & SDL_WINDOW_FULLSCREEN_DESKTOP;
-
-                                if (ImGui::MenuItem("Fullscreen", "Ctrl+F", fullscreen))
-                                {
-                                    SDL_SetWindowFullscreen(video_ctx.window, fullscreen ^ SDL_WINDOW_FULLSCREEN_DESKTOP);
-                                }
-
-                                ImGui::EndMenu();
-                            }
-
-                            ImGui::MenuItem("Color correct", nullptr, true);
-
-                            ImGui::Separator();
-
-                            if (ImGui::BeginMenu("Volume"))
-                            {
-                                static float volume = 0.5;
-                                ImGui::SliderFloat("", &volume, 0.0f, 1.0f);
-
-                                ImGui::EndMenu();
-                            }
-
-                            ImGui::MenuItem("Mute", "Ctrl+M", false);
-
-                            ImGui::EndMenu();
-                        }
-                    }
-                    ImGui::EndMainMenuBar();
-                }
-                ImGui::Render();
-                ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
-            }
             video_ctx.swapWindow();
         }
 
