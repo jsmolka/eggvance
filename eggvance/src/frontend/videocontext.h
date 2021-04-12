@@ -19,9 +19,10 @@ public:
     void fullscreen();
     void title(const std::string& title);
 
-    void renderMain();
+    void renderClear(u8 r, u8 g, u8 b);
+    void renderFrame();
     void renderIcon(float top_offset);
-    void renderPresent();
+    void swapWindow();
     void updateViewport();
 
     Scanline& scanline(uint line);

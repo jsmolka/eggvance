@@ -12,9 +12,12 @@ void Ppu::render()
     if (dispcnt.blank)
     {
         auto& scanline = video_ctx.scanline(vcount);
-        std::fill(scanline.begin(), scanline.end(), 0xFFFF'FFFF);
+        scanline.fill(0xFFFF'FFFF);
         return;
     }
+
+    if (!dispcnt.isActive())
+        return;
 
     for (auto& background : backgrounds)
         background.buffer.flip();

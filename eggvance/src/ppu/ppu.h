@@ -13,7 +13,6 @@ class Ppu
 {
 public:
     void init();
-    void present();
 
     DisplayControl dispcnt;
     Register<u16, 0x0001> greenswap;

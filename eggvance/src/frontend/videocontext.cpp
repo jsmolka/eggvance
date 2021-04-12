@@ -45,11 +45,19 @@ void VideoContext::title(const std::string& title)
     SDL_SetWindowTitle(window, title.c_str());
 }
 
-void VideoContext::renderMain()
+void VideoContext::renderClear(u8 r, u8 g, u8 b)
 {
-    glClearColor(0, 0, 0, 1);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(
+        GLfloat(r) / 255.0f,
+        GLfloat(g) / 255.0f,
+        GLfloat(b) / 255.0f, 1);
 
+    glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void VideoContext::renderFrame()
+{
+    renderClear(0, 0, 0);
     renderTexture<240, 160>(main_texture, buffer.front().data(), true, 0);
 }
 
@@ -65,13 +73,11 @@ void VideoContext::renderIcon(float top_offset)
         icon[y][x] = 0xFF00'0000 | (pixel.r() << 16) | (pixel.g() << 8) | pixel.b();
     }
 
-    glClearColor(62.0f / 255.0f, 71.0f / 255.0f, 80.0f / 255.0f, 1);
-    glClear(GL_COLOR_BUFFER_BIT);
-
+    renderClear(62, 71, 80);
     renderTexture<18, 18>(icon_texture, icon.front().data(), true, top_offset);
 }
 
-void VideoContext::renderPresent()
+void VideoContext::swapWindow()
 {
     SDL_GL_SwapWindow(window);
 }

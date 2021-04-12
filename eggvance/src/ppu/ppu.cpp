@@ -63,6 +63,8 @@ void Ppu::hblankEnd(u64 late)
 
     if (vcount == 160)
     {
+        video_ctx.renderFrame();
+
         backgrounds[2].matrix.vblank();
         backgrounds[3].matrix.vblank();
 
@@ -74,10 +76,4 @@ void Ppu::hblankEnd(u64 late)
     }
 
     scheduler.insert(events.hblank, 1006 - late);
-}
-
-void Ppu::present()
-{
-    if (dispcnt.isActive())
-        video_ctx.renderMain();
 }
