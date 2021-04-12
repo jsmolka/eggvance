@@ -64,6 +64,10 @@ public:
 
     void init(const fs::path& file);
 
+    // New
+    std::vector<fs::path> recent;
+
+    // Old
     fs::path   save_path;
     fs::path   bios_file;
     bool       bios_skip;

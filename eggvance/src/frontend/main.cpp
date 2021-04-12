@@ -1,6 +1,7 @@
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_opengl2.h>
 #include <imgui/imgui_impl_sdl.h>
+#include <nfd/nfd.h>
 #include <shell/options.h>
 #include <shell/utility.h>
 
@@ -69,45 +70,59 @@ void reset()
     ppu.init();
 
     updateTitle();
+
+    paused = false;
 }
 
-void handleDropEvent(const SDL_DropEvent& event)
+void loadRomFile(const fs::path& file)
 {
-    const auto file = fs::u8path(event.file);
-
-    SDL_free(event.file);
-
     audio_ctx.pause();
 
-    if (file.extension() == ".gba")
-    {
-        gamepak.init(file, fs::path());
-        reset();
-    }
-    if (file.extension() == ".sav")
-    {
-        gamepak.init(fs::path(), file);
-        reset();
-    }
+    auto iter = std::find(config.recent.begin(), config.recent.end(), file);
+    if ( iter != config.recent.end())
+        config.recent.erase(iter);
+
+    config.recent.push_back(file);
+
+    if (config.recent.size() == 11)
+        config.recent.erase(config.recent.begin());
+    
+    gamepak.init(config.recent.back(), fs::path());
+    reset();
 
     audio_ctx.unpause();
-    video_ctx.raise();
 }
 
-template<typename Input>
-void handleInputEvent(const Shortcuts<Input>& shortcuts, Input input)
+void openRomFile()
 {
-    if      (input == shortcuts.reset)          reset();
-    else if (input == shortcuts.pause)          paused ^= true;
-    else if (input == shortcuts.fullscreen)     video_ctx.fullscreen();
-    else if (input == shortcuts.volume_up)      config.volume = std::clamp(config.volume + config.volume_step, 0.0, 1.0);
-    else if (input == shortcuts.volume_down)    config.volume = std::clamp(config.volume - config.volume_step, 0.0, 1.0);
-    else if (input == shortcuts.speed_hardware) limiter = FrameRateLimiter(kRefreshRate);
-    else if (input == shortcuts.speed_2x)       limiter = FrameRateLimiter(kRefreshRate * 2);
-    else if (input == shortcuts.speed_4x)       limiter = FrameRateLimiter(kRefreshRate * 4);
-    else if (input == shortcuts.speed_6x)       limiter = FrameRateLimiter(kRefreshRate * 6);
-    else if (input == shortcuts.speed_8x)       limiter = FrameRateLimiter(kRefreshRate * 8);
-    else if (input == shortcuts.speed_unbound)  limiter = FrameRateLimiter(1'000'000);
+    nfdchar_t* file = NULL;
+    if (NFD_OpenDialog("gba", NULL, &file) == NFD_OKAY)
+    {
+        loadRomFile(fs::u8path(file));
+        free(file);
+    }
+    changed = true;
+}
+
+void loadSavFile(const fs::path& file)
+{
+    audio_ctx.pause();
+    
+    gamepak.init(fs::path(), file);
+    reset();
+    
+    audio_ctx.unpause();
+}
+
+void openSavFile()
+{
+    nfdchar_t* file = NULL;
+    if (NFD_OpenDialog("sav", NULL, &file) == NFD_OKAY)
+    {
+        loadSavFile(fs::u8path(file));
+        free(file);
+    }
+    changed = true;
 }
 
 void handleEvents()
@@ -122,24 +137,30 @@ void handleEvents()
             break;
 
         case SDL_KEYDOWN:
-            handleInputEvent(
-                config.shortcuts.keyboard,
-                event.key.keysym.scancode);
-            break;
+            if (event.key.keysym.mod & KMOD_CTRL)
+            {
+                switch (event.key.keysym.scancode)
+                {
+                case SDL_SCANCODE_O:
+                    openRomFile();
+                    break;
 
-        case SDL_CONTROLLERBUTTONDOWN:
-            handleInputEvent(
-                config.shortcuts.controller,
-                SDL_GameControllerButton(event.cbutton.button));
+                case SDL_SCANCODE_R:
+                    if (!gamepak.rom.empty())
+                        reset();
+                    break;
+
+                case SDL_SCANCODE_P:
+                    if (!gamepak.rom.empty())
+                        paused = !paused;
+                    break;
+                }
+            }
             break;
 
         case SDL_CONTROLLERDEVICEADDED:
         case SDL_CONTROLLERDEVICEREMOVED:
             input_ctx.handleDeviceEvent(event.cdevice);
-            break;
-
-        case SDL_DROPFILE:
-            handleDropEvent(event.drop);
             break;
         }
     }
@@ -147,7 +168,7 @@ void handleEvents()
     video_ctx.updateViewport();
 }
 
-float runUi(bool* running = nullptr)
+float runUi()
 {
     ImGui_ImplOpenGL2_NewFrame();
     ImGui_ImplSDL2_NewFrame(video_ctx.window);
@@ -159,29 +180,37 @@ float runUi(bool* running = nullptr)
 
     if (ImGui::BeginMenu("File"))
     {
-        ImGui::MenuItem("Open ROM", "Ctrl+O");
-        ImGui::MenuItem("Open save");  // Disable if no rom
+        if (ImGui::MenuItem("Open ROM", "Ctrl+O"))
+            openRomFile();
 
-        if (ImGui::BeginMenu("Recent"))
+        if (ImGui::MenuItem("Open save", nullptr, false, !gamepak.rom.empty()))
+            openSavFile();
+
+        if (ImGui::BeginMenu("Recent", !config.recent.empty()))
         {
-            ImGui::MenuItem("recent0.gba");
-            ImGui::MenuItem("recent1.gba");
-            ImGui::MenuItem("recent2.gba");
+            for (const auto& file : shell::reversed(config.recent))
+            {
+                if (ImGui::MenuItem(file.string().c_str()))
+                    loadRomFile(fs::path(file));
+            }
             ImGui::EndMenu();
         }
 
         ImGui::Separator();
 
-        if (ImGui::MenuItem("Exit") && running)
-            *running = false;
+        if (ImGui::MenuItem("Exit"))
+            running = false;
 
         ImGui::EndMenu();
     }
 
     if (ImGui::BeginMenu("Emulation"))
     {
-        ImGui::MenuItem("Reset", "Ctrl+R");
-        ImGui::MenuItem("Pause", "Ctrl+P");
+        if (ImGui::MenuItem("Reset", "Ctrl+R", nullptr, !gamepak.rom.empty()))
+            reset();
+
+        if (ImGui::MenuItem("Pause", "Ctrl+P", paused, !gamepak.rom.empty()))
+            paused = !paused;
 
         ImGui::Separator();
 
@@ -360,7 +389,7 @@ int main(int argc, char* argv[])
         {
             handleEvents();
 
-            float height = runUi(&running);
+            float height = runUi();
             video_ctx.renderIcon(height);
             renderUi();
             video_ctx.swapWindow();
@@ -377,24 +406,30 @@ int main(int argc, char* argv[])
 
         audio_ctx.unpause();
 
+        limiter = FrameRateLimiter(6);
+
         while (running)
         {
             limiter.run([]() 
             {
                 handleEvents();
 
-                if (paused || !running)
-                    return;
+                if (!paused)
+                {
+                    constexpr auto kPixelsHor   = 240 + 68;
+                    constexpr auto kPixelsVer   = 160 + 68;
+                    constexpr auto kPixelCycles = 4;
+                    constexpr auto kFrameCycles = kPixelCycles * kPixelsHor * kPixelsVer;
 
-                constexpr auto kPixelsHor   = 240 + 68;
-                constexpr auto kPixelsVer   = 160 + 68;
-                constexpr auto kPixelCycles = 4;
-                constexpr auto kFrameCycles = kPixelCycles * kPixelsHor * kPixelsVer;
+                    keypad.update();
+                    arm.run(kFrameCycles);
+                }
+                else
+                {
+                    video_ctx.renderFrame();
+                }
 
-                keypad.update();
-                arm.run(kFrameCycles);
-
-                runUi(&running);
+                runUi();
                 renderUi();
 
                 video_ctx.swapWindow();

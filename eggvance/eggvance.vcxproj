@@ -23,6 +23,8 @@
     <ClCompile Include="modules\imgui\imgui_impl_sdl.cpp" />
     <ClCompile Include="modules\imgui\imgui_tables.cpp" />
     <ClCompile Include="modules\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="modules\nfd\nfd_common.c" />
+    <ClCompile Include="modules\nfd\nfd_win.cpp" />
     <ClCompile Include="src\apu\apu.cpp" />
     <ClCompile Include="src\apu\channel.cpp" />
     <ClCompile Include="src\apu\envelope.cpp" />
@@ -99,6 +101,8 @@
     <ClInclude Include="modules\imgui\imstb_rectpack.h" />
     <ClInclude Include="modules\imgui\imstb_textedit.h" />
     <ClInclude Include="modules\imgui\imstb_truetype.h" />
+    <ClInclude Include="modules\nfd\nfd.h" />
+    <ClInclude Include="modules\nfd\nfd_common.h" />
     <ClInclude Include="src\apu\apu.h" />
     <ClInclude Include="src\apu\channel.h" />
     <ClInclude Include="src\apu\envelope.h" />
@@ -245,7 +249,7 @@
       <PreprocessorDefinitions>_CONTAINER_DEBUG_LEVEL=1</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>SDL2maind.lib;shell32.lib</AdditionalDependencies>
+      <AdditionalDependencies>SDL2maind.lib;shell32.lib;ole32.lib</AdditionalDependencies>
       <ProgramDatabaseFile>$(SolutionDir)bin\intermediate\$(Configuration)\$(TargetName).pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
@@ -266,7 +270,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>SDL2main.lib;shell32.lib</AdditionalDependencies>
+      <AdditionalDependencies>SDL2main.lib;shell32.lib;ole32.lib</AdditionalDependencies>
       <GenerateMapFile>true</GenerateMapFile>
       <MapFileName>$(SolutionDir)bin\intermediate\$(Configuration)\$(TargetName).map</MapFileName>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
@@ -290,7 +294,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>SDL2main.lib;shell32.lib</AdditionalDependencies>
+      <AdditionalDependencies>SDL2main.lib;shell32.lib;ole32.lib</AdditionalDependencies>
       <GenerateMapFile>true</GenerateMapFile>
       <MapFileName>$(SolutionDir)bin\intermediate\$(Configuration)\$(TargetName).map</MapFileName>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
