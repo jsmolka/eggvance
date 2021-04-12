@@ -20,8 +20,8 @@ public:
     void title(const std::string& title);
 
     void renderClear(u8 r, u8 g, u8 b);
+    void renderIcon(GLfloat padding_top);
     void renderFrame();
-    void renderIcon(float top_offset);
     void swapWindow();
     void updateViewport();
 
@@ -33,14 +33,13 @@ public:
 private:
     bool initWindow();
     bool initOpenGL();
-    void initImgui();
+    void initImGui();
 
-    template<uint kTextureW, uint kTextureH>
-    void renderTexture(GLuint texture, const void* data, bool preserve_ratio, GLfloat top_offset);
+    void renderTexture(GLuint texture, GLfloat texture_w, GLfloat texture_h, const void* data, bool preserve_ratio, GLfloat padding_top = 0);
 
-    GLuint main_texture;
-    GLuint icon_texture;
-    shell::array<Scanline, kScreen.y> buffer = {};
+    GLuint icon_texture = 0;
+    GLuint frame_texture = 0;
+    shell::array<Scanline, kScreen.y> framebuffer = {};
 };
 
 inline VideoContext video_ctx;

@@ -26,7 +26,7 @@ void VideoContext::init()
     if (!initWindow())   throw shell::Error("Cannot init window: {}", SDL_GetError());
     if (!initOpenGL())   throw shell::Error("Cannot init OpenGL");
     
-    initImgui();
+    initImGui();
 }
 
 void VideoContext::raise()
@@ -55,13 +55,7 @@ void VideoContext::renderClear(u8 r, u8 g, u8 b)
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void VideoContext::renderFrame()
-{
-    renderClear(0, 0, 0);
-    renderTexture<240, 160>(main_texture, buffer.front().data(), true, 0);
-}
-
-void VideoContext::renderIcon(float top_offset)
+void VideoContext::renderIcon(GLfloat padding_top)
 {
     shell::array<u32, 18, 18> icon = {};
 
@@ -74,7 +68,13 @@ void VideoContext::renderIcon(float top_offset)
     }
 
     renderClear(62, 71, 80);
-    renderTexture<18, 18>(icon_texture, icon.front().data(), true, top_offset);
+    renderTexture(icon_texture, 18, 18, icon.front().data(), true, padding_top);
+}
+
+void VideoContext::renderFrame()
+{
+    renderClear(0, 0, 0);
+    renderTexture(frame_texture, 240, 160, framebuffer.front().data(), true, 0);
 }
 
 void VideoContext::swapWindow()
@@ -92,7 +92,7 @@ void VideoContext::updateViewport()
 
 VideoContext::Scanline& VideoContext::scanline(uint line)
 {
-    return buffer[line];
+    return framebuffer[line];
 }
 
 bool VideoContext::initWindow()
@@ -127,14 +127,14 @@ bool VideoContext::initOpenGL()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
-    glGenTextures(1, &main_texture);
-    glBindTexture(GL_TEXTURE_2D, main_texture);
+    glGenTextures(1, &icon_texture);
+    glBindTexture(GL_TEXTURE_2D, icon_texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    glGenTextures(1, &icon_texture);
-    glBindTexture(GL_TEXTURE_2D, icon_texture);
+    glGenTextures(1, &frame_texture);
+    glBindTexture(GL_TEXTURE_2D, frame_texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -144,7 +144,7 @@ bool VideoContext::initOpenGL()
     return true;
 }
 
-void VideoContext::initImgui()
+void VideoContext::initImGui()
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -154,36 +154,36 @@ void VideoContext::initImgui()
     ImGui_ImplOpenGL2_Init();
 }
 
-template<uint kTextureW, uint kTextureH>
-void VideoContext::renderTexture(GLuint texture, const void* data, bool preserve_ratio, GLfloat top_offset)
+void VideoContext::renderTexture(GLuint texture, GLfloat texture_w, GLfloat texture_h, const void* data, bool preserve_ratio, GLfloat padding_top)
 {
-    constexpr GLfloat kTextureRatio = GLfloat(kTextureW) / GLfloat(kTextureH);
-
     int w;
     int h;
     SDL_GetWindowSize(window, &w, &h);
 
     GLfloat window_w = GLfloat(w);
-    GLfloat window_h = GLfloat(h) - top_offset;
+    GLfloat window_h = GLfloat(h) - padding_top;
     GLfloat offset_x = 0;
     GLfloat offset_y = 0;
 
     if (preserve_ratio)
     {
+        GLfloat window_ratio  = window_w  / window_h;
+        GLfloat texture_ratio = texture_w / texture_h;
+
         GLfloat aspect_w = window_w;
         GLfloat aspect_h = window_h;
 
-        if (kTextureRatio > (window_w  / window_h))
-            aspect_h = aspect_w / kTextureRatio;
+        if (texture_ratio > window_ratio)
+            aspect_h = aspect_w / texture_ratio;
         else
-            aspect_w = aspect_h * kTextureRatio;
+            aspect_w = aspect_h * texture_ratio;
 
         offset_x = (window_w - aspect_w) * 0.5f;
         offset_y = (window_h - aspect_h) * 0.5f;
     }
 
     glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, kTextureW, kTextureH, 0, GL_BGRA, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture_w, texture_h, 0, GL_BGRA, GL_UNSIGNED_BYTE, data);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glMatrixMode(GL_MODELVIEW);
@@ -192,8 +192,8 @@ void VideoContext::renderTexture(GLuint texture, const void* data, bool preserve
     glScalef(2.0f / GLfloat(w), 2.0f / GLfloat(h), 1.0);
 
     glBegin(GL_QUADS);
-    glTexCoord2f(0.0f, 0.0f); glVertex2f(           offset_x, window_h - offset_y - top_offset);
-    glTexCoord2f(1.0f, 0.0f); glVertex2f(window_w - offset_x, window_h - offset_y - top_offset);
+    glTexCoord2f(0.0f, 0.0f); glVertex2f(           offset_x, window_h - offset_y - padding_top);
+    glTexCoord2f(1.0f, 0.0f); glVertex2f(window_w - offset_x, window_h - offset_y - padding_top);
     glTexCoord2f(1.0f, 1.0f); glVertex2f(window_w - offset_x,            offset_y);
     glTexCoord2f(0.0f, 1.0f); glVertex2f(           offset_x,            offset_y);
     glEnd();

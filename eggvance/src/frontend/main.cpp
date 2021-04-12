@@ -288,9 +288,9 @@ int eventFilter(void*, SDL_Event* event)
 
         if (gamepak.rom.size() == 0)
         {
-            //float height = runUi();
-            video_ctx.renderIcon(0);
-            //renderUi();
+            float height = runUi();
+            video_ctx.renderIcon(height);
+            renderUi();
         }
         else
             video_ctx.renderFrame();
@@ -360,9 +360,9 @@ int main(int argc, char* argv[])
         {
             handleEvents();
 
-            //float height = runUi(&running);
-            video_ctx.renderIcon(0);
-            //renderUi();
+            float height = runUi(&running);
+            video_ctx.renderIcon(height);
+            renderUi();
             video_ctx.swapWindow();
 
             SDL_Delay(16);
@@ -394,6 +394,9 @@ int main(int argc, char* argv[])
                 keypad.update();
                 arm.run(kFrameCycles);
 
+                runUi(&running);
+                renderUi();
+
                 video_ctx.swapWindow();
             });
 
@@ -411,9 +414,6 @@ int main(int argc, char* argv[])
             {
                 updateTitle(*fps);
             }
-
-            //runUi(&running);
-            //renderUi();
         }
 
         audio_ctx.pause();
