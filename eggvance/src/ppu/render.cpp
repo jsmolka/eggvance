@@ -131,7 +131,7 @@ void Ppu::renderBackground0(Background& background)
                         ? pram.colorBg(index, entry.bank)
                         : pram.colorBg(index);
 
-                    if (++x == kScreen.x)
+                    if (++x == kScreenW)
                         return;
                 }
             }
@@ -141,7 +141,7 @@ void Ppu::renderBackground0(Background& background)
                 {
                     background.buffer[x] = kTransparent;
 
-                    if (++x == kScreen.x)
+                    if (++x == kScreenW)
                         return;
                 }
             }
@@ -204,10 +204,10 @@ void Ppu::renderBackground3(Background& background)
     {
         const auto texel = background.matrix * x;
 
-        if (static_cast<uint>(texel.x) < kScreen.x &&
-            static_cast<uint>(texel.y) < kScreen.y)
+        if (static_cast<uint>(texel.x) < kScreenW &&
+            static_cast<uint>(texel.y) < kScreenH)
         {
-            u32 addr = kColorBytes * texel.index2d(kScreen.x);
+            u32 addr = kColorBytes * texel.index2d(kScreenW);
 
             color = vram.readFast<u16>(addr) & kColorMask;
         }
@@ -224,10 +224,10 @@ void Ppu::renderBackground4(Background& background)
     {
         const auto texel = background.matrix * x;
 
-        if (static_cast<uint>(texel.x) < kScreen.x &&
-            static_cast<uint>(texel.y) < kScreen.y)
+        if (static_cast<uint>(texel.x) < kScreenW &&
+            static_cast<uint>(texel.y) < kScreenH)
         {
-            uint index = vram.readFast<u8>(dispcnt.frame + texel.index2d(kScreen.x));
+            uint index = vram.readFast<u8>(dispcnt.frame + texel.index2d(kScreenW));
 
             color = pram.colorBg(index);
         }
@@ -283,7 +283,7 @@ void Ppu::renderObjects()
             -center.x + origin.x - std::min(origin.x, 0),
             -center.y + vcount);
 
-        uint end = std::min(origin.x + screen_size.x, kScreen.x);
+        uint end = std::min<uint>(origin.x + screen_size.x, kScreenW);
 
         for (uint x = center.x + offset.x; x < end; ++x, ++offset.x)
         {

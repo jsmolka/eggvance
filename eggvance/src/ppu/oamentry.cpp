@@ -3,6 +3,7 @@
 #include <shell/operators.h>
 
 #include "constants.h"
+#include "base/constants.h"
 #include "base/bit.h"
 
 OamEntry::OamEntry()
@@ -89,8 +90,8 @@ void OamEntry::compute()
 
     base_addr = kObjectBase + kTileBytes[uint(ColorMode::C16x16)] * base_tile;
 
-    if (origin.x >= kScreen.x) origin.x -= 512;
-    if (origin.y >= kScreen.y) origin.y -= 256;
+    if (origin.x >= kScreenW) origin.x -= 512;
+    if (origin.y >= kScreenH) origin.y -= 256;
 
     sprite_size = kSpriteSizes[shape][size];
     screen_size = sprite_size << double_size;
@@ -99,5 +100,5 @@ void OamEntry::compute()
     if (flip.x) flip.x = sprite_size.x - 1;
     if (flip.y) flip.y = sprite_size.y - 1;
 
-    visible_x = (origin.x + screen_size.x) >= 0 && origin.x < kScreen.x;
+    visible_x = (origin.x + screen_size.x) >= 0 && origin.x < kScreenW;
 }

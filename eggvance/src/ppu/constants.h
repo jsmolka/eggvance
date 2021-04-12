@@ -1,9 +1,7 @@
 #pragma once
 
-#include "point.h"
 #include "base/int.h"
 
-inline constexpr auto kScreen           = Point(240, 160);
 inline constexpr auto kRefreshRate      = 59.737;
 inline constexpr uint kDecimalBits      = 8;
 inline constexpr uint kTransparent      = 0x8000;

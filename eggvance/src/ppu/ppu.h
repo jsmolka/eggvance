@@ -22,8 +22,8 @@ public:
 
     WindowInside winin;
     WindowOutside winout;
-    shell::array<WindowRange, 2> winh = { kScreen.x, kScreen.x };
-    shell::array<WindowRange, 2> winv = { kScreen.y, kScreen.y };
+    shell::array<WindowRange, 2> winh = { kScreenW, kScreenW };
+    shell::array<WindowRange, 2> winv = { kScreenH, kScreenH };
 
     Mosaic mosaic;
     BlendControl bldcnt;

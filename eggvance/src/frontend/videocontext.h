@@ -2,15 +2,15 @@
 
 #include <shell/array.h>
 
+#include "base/constants.h"
 #include "base/int.h"
 #include "base/opengl.h"
 #include "base/sdl2.h"
-#include "ppu/constants.h"
 
 class VideoContext
 {
 public:
-    using Scanline = shell::array<u32, kScreen.x>;
+    using Scanline = shell::array<u32, kScreenW>;
 
     ~VideoContext();
 
@@ -39,7 +39,7 @@ private:
 
     GLuint icon_texture = 0;
     GLuint frame_texture = 0;
-    shell::array<Scanline, kScreen.y> framebuffer = {};
+    shell::array<Scanline, kScreenH> framebuffer = {};
 };
 
 inline VideoContext video_ctx;

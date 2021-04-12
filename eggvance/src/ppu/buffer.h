@@ -3,20 +3,20 @@
 #include <shell/array.h>
 #include <shell/ranges.h>
 
-#include "constants.h"
+#include "base/constants.h"
 #include "base/int.h"
 
 template<typename T>
-using ScanlineBuffer = shell::array<T, kScreen.x>;
+using ScanlineBuffer = shell::array<T, kScreenW>;
 
 template<typename T>
 class ScanlineDoubleBuffer
 {
 public:
-    using iterator               = typename shell::array<T, kScreen.x>::iterator;
-    using const_iterator         = typename shell::array<T, kScreen.x>::const_iterator;
-    using reverse_iterator       = typename shell::array<T, kScreen.x>::reverse_iterator;
-    using const_reverse_iterator = typename shell::array<T, kScreen.x>::const_reverse_iterator;
+    using iterator               = typename shell::array<T, kScreenW>::iterator;
+    using const_iterator         = typename shell::array<T, kScreenW>::const_iterator;
+    using reverse_iterator       = typename shell::array<T, kScreenW>::reverse_iterator;
+    using const_reverse_iterator = typename shell::array<T, kScreenW>::const_reverse_iterator;
 
     T* data()
     {
@@ -48,5 +48,5 @@ public:
 
 private:
     shell::uint page = 0;
-    shell::array<T, 2, kScreen.x> pages = {};
+    shell::array<T, 2, kScreenW> pages = {};
 };

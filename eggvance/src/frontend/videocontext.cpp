@@ -74,7 +74,7 @@ void VideoContext::renderIcon(GLfloat padding_top)
 void VideoContext::renderFrame()
 {
     renderClear(0, 0, 0);
-    renderTexture(frame_texture, 240, 160, framebuffer.front().data(), true, 0);
+    renderTexture(frame_texture, kScreenW, kScreenH, framebuffer.front().data(), true, 0);
 }
 
 void VideoContext::swapWindow()
@@ -101,11 +101,11 @@ bool VideoContext::initWindow()
         "eggvance",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
-        2 * kScreen.x, 2 * kScreen.y,
+        2 * kScreenW, 2 * kScreenH,
         SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
     if (window)
-        SDL_SetWindowMinimumSize(window, kScreen.x, kScreen.y);;
+        SDL_SetWindowMinimumSize(window, kScreenW, kScreenH);;
 
     return window;
 }
