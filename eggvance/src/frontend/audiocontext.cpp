@@ -59,9 +59,16 @@ void AudioContext::write(Samples samples)
     std::lock_guard lock(mutex);
     if (SDL_AudioStreamAvailable(stream) < kSecond / 8)
     {
-        samples[0] = static_cast<s16>(config.volume * static_cast<double>(samples[0]));
-        samples[1] = static_cast<s16>(config.volume * static_cast<double>(samples[1]));
-
+        if (config.mute)
+        {
+            samples[0] = 0;
+            samples[1] = 0;
+        }
+        else
+        {
+            samples[0] = static_cast<s16>(config.volume * static_cast<double>(samples[0]));
+            samples[1] = static_cast<s16>(config.volume * static_cast<double>(samples[1]));
+        }
         SDL_AudioStreamPut(stream, samples.data(), sizeof(Samples));
     }
 }

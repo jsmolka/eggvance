@@ -7,6 +7,7 @@
 #include <shell/icon.h>
 
 #include "base/bit.h"
+#include "base/config.h"
 
 VideoContext::~VideoContext()
 {
@@ -27,17 +28,6 @@ void VideoContext::init()
     if (!initOpenGL())   throw shell::Error("Cannot init OpenGL");
     
     initImGui();
-}
-
-void VideoContext::raise()
-{
-    SDL_RaiseWindow(window);
-}
-
-void VideoContext::fullscreen()
-{
-    SDL_ShowCursor(SDL_ShowCursor(SDL_QUERY) ^ 0x1);
-    SDL_SetWindowFullscreen(window, SDL_GetWindowFlags(window) ^ SDL_WINDOW_FULLSCREEN_DESKTOP);
 }
 
 void VideoContext::title(const std::string& title)
@@ -74,7 +64,7 @@ void VideoContext::renderIcon(GLfloat padding_top)
 void VideoContext::renderFrame()
 {
     renderClear(0, 0, 0);
-    renderTexture(frame_texture, kScreenW, kScreenH, framebuffer.front().data(), true, 0);
+    renderTexture(frame_texture, kScreenW, kScreenH, framebuffer.front().data(), config.preserve_aspect_ratio, 0);
 }
 
 void VideoContext::swapWindow()
@@ -101,7 +91,8 @@ bool VideoContext::initWindow()
         "eggvance",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
-        2 * kScreenW, 2 * kScreenH,
+        config.frame_size * kScreenW,
+        config.frame_size * kScreenH,
         SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
     if (window)

@@ -171,6 +171,14 @@ void doEvents()
                     }
                     break;
 
+                case SDL_SCANCODE_F:
+                    SDL_SetWindowFullscreen(video_ctx.window, SDL_GetWindowFlags(video_ctx.window) ^ SDL_WINDOW_FULLSCREEN_DESKTOP);
+                    break;
+
+                case SDL_SCANCODE_M:
+                    config.mute ^= true;
+                    break;
+
                 case SDL_SCANCODE_LSHIFT:
                 case SDL_SCANCODE_RSHIFT:
                     if (limiter.isFastForward())
@@ -398,6 +406,7 @@ float runUi()
 
                 if (ImGui::MenuItem(text.c_str(), nullptr, w == window_w && h == window_h))
                 {
+                    config.frame_size = scale;
                     SDL_SetWindowFullscreen(video_ctx.window, ~SDL_WINDOW_FULLSCREEN_DESKTOP);
                     SDL_SetWindowSize(video_ctx.window, window_w, window_h);
                     video_ctx.updateViewport();
@@ -416,20 +425,26 @@ float runUi()
             ImGui::EndMenu();
         }
 
-        ImGui::MenuItem("Color correct", nullptr, true);
-        ImGui::MenuItem("Preserve aspect ratio", nullptr, true);
+        if (ImGui::MenuItem("Color correct", nullptr, config.color_correct))
+        {
+            config.color_correct ^= true;
+            Color::init(config.color_correct);
+        }
+
+        if (ImGui::MenuItem("Preserve aspect ratio", nullptr, config.preserve_aspect_ratio))
+            config.preserve_aspect_ratio ^= true;
 
         ImGui::Separator();
 
         if (ImGui::BeginMenu("Volume"))
         {
-            static float volume = 0.5;
-            ImGui::SliderFloat("", &volume, 0.0f, 1.0f);
+            ImGui::SliderFloat("", &config.volume, 0.0f, 1.0f);
 
             ImGui::EndMenu();
         }
 
-        ImGui::MenuItem("Mute", "Ctrl+M", false);
+        if (ImGui::MenuItem("Mute", "Ctrl+M", config.mute))
+            config.mute ^= true;
 
         ImGui::EndMenu();
     }

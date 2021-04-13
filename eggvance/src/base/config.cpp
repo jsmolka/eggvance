@@ -182,11 +182,14 @@ Config::~Config()
         ini.set("file", shell::format("recent_{}", index), file.u8string());
     }
 
-    ini.set("emulation", "fast_forward", shell::format(fast_forward));
-    ini.set("emulation", "save_type",    shell::format(uint(save_type)));
-    ini.set("emulation", "gpio_type",    shell::format(uint(gpio_type)));
-
-    set("general", "volume", shell::format(volume));
+    ini.set("emulation", "fast_forward",          shell::format(fast_forward));
+    ini.set("emulation", "save_type",             shell::format(uint(save_type)));
+    ini.set("emulation", "gpio_type",             shell::format(uint(gpio_type)));
+    ini.set("video",     "frame_size",            shell::format(frame_size));
+    ini.set("video",     "color_correct",         shell::format(color_correct));
+    ini.set("video",     "preserve_aspect_ratio", shell::format(preserve_aspect_ratio));
+    ini.set("audio",     "mute",                  shell::format(mute));
+    ini.set("audio",     "volume",                shell::format(volume));
 }
 
 void Config::init(const fs::path& file)
@@ -198,16 +201,20 @@ void Config::init(const fs::path& file)
         file = ini.findOr("file", shell::format("recent_{}", index), fs::path());
     }
 
-    fast_forward = ini.findOr("emulation", "fast_forward", 2);
-    save_type    = ini.findOr("emulation", "save_type",    Save::Type::Detect);
-    gpio_type    = ini.findOr("emulation", "gpio_type",    Gpio::Type::Detect);
+    fast_forward          = ini.findOr("emulation", "fast_forward",          2);
+    save_type             = ini.findOr("emulation", "save_type",             Save::Type::Detect);
+    gpio_type             = ini.findOr("emulation", "gpio_type",             Gpio::Type::Detect);
+    frame_size            = ini.findOr("video",     "frame_size",            2);
+    color_correct         = ini.findOr("video",     "color_correct",         true);
+    preserve_aspect_ratio = ini.findOr("video",     "preserve_aspect_ratio", true);
+    mute                  = ini.findOr("audio",     "mute",                  false);
+    volume                = ini.findOr("audio",     "volume",                0.5);
 
     save_path   = get<fs::path  >("general", "save_path");
     bios_file   = get<fs::path  >("general", "bios_file");
     bios_skip   = get<bool      >("general", "bios_skip");
     bios_hash   = get<bool      >("general", "bios_hash");
     lcd_color   = get<bool      >("general", "lcd_color");
-    volume      = get<double    >("general", "volume");
     volume_step = get<double    >("general", "volume_step");
 
     if (!save_path.empty()) save_path = fs::absolute(save_path);

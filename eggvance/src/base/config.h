@@ -79,6 +79,11 @@ public:
     uint           fast_forward;
     Save::Type     save_type;
     Gpio::Type     gpio_type;
+    uint           frame_size;
+    bool           color_correct;
+    bool           preserve_aspect_ratio;
+    bool           mute;
+    float          volume;
 
     // Old
     fs::path   save_path;
@@ -86,7 +91,6 @@ public:
     bool       bios_skip;
     bool       bios_hash;
     bool       lcd_color;
-    double     volume;
     double     volume_step;
 
     struct

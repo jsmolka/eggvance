@@ -15,8 +15,6 @@ public:
     ~VideoContext();
 
     void init();
-    void raise();
-    void fullscreen();
     void title(const std::string& title);
 
     void renderClear(u8 r, u8 g, u8 b);
