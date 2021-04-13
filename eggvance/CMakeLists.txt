@@ -2,10 +2,6 @@ cmake_minimum_required(VERSION 3.8)
 
 project(eggvance)
 
-if (UNIX AND NOT APPLE AND NOT ANDROID)
-  set(LINUX TRUE)
-endif()
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -flto")
@@ -32,7 +28,7 @@ file(GLOB_RECURSE SOURCE_FILES
 
 if (APPLE)
   list(APPEND SOURCE_FILES ${PROJECT_SOURCE_DIR}/modules/nfd/nfd_cocoa.m)
-elseif (LINUX)
+elseif (UNIX)
   list(APPEND SOURCE_FILES ${PROJECT_SOURCE_DIR}/modules/nfd/nfd_gtk.c)
 endif()
 
@@ -45,13 +41,11 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   target_link_libraries(${CMAKE_PROJECT_NAME} stdc++fs)
 endif()
 
-if (LINUX)
-  find_package(PkgConfig)
-  if (PKG_CONFIG_FOUND)
-    pkg_check_modules(GTK "gtk+-3.0")
-    if (GTK_FOUND)
-      target_link_libraries(${CMAKE_PROJECT_NAME} ${GTK_LIBRARIES})
-      add_definitions(${GTK_CFLAGS} ${GTK_CFLAGS_OTHER})
-    endif()
-  endif()
+if (UNIX AND NOT APPLE)
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(GTK "gtk+-3.0")
+
+  include_directories(${GTK_INCLUDE_DIRS})
+  add_definitions(${GTK_CFLAGS} ${GTK_CFLAGS_OTHER})
+  target_link_libraries(${CMAKE_PROJECT_NAME} ${GTK_LIBRARIES})
 endif()
