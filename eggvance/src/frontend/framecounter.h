@@ -12,6 +12,7 @@ public:
     FrameCounter& operator++();
 
     void reset();
+    void queueReset();
 
     std::optional<double> fps();
 
@@ -20,5 +21,6 @@ private:
     using Time  = std::chrono::high_resolution_clock::time_point;
 
     Time begin;
-    uint count;
+    uint count = 0;
+    bool queue_reset = false;
 };

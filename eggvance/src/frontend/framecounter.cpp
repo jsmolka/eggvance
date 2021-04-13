@@ -15,11 +15,23 @@ void FrameCounter::reset()
 {
     count = 0;
     begin = Clock::now();
+    queue_reset = false;
+}
+
+void FrameCounter::queueReset()
+{
+    queue_reset = true;
 }
 
 std::optional<double> FrameCounter::fps()
 {
     using Seconds = std::chrono::duration<double>;
+
+    if (queue_reset)
+    {
+        reset();
+        return std::nullopt;
+    }
 
     auto delta = Clock::now() - begin;
     if ( delta < std::chrono::seconds(1))

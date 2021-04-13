@@ -9,4 +9,10 @@ FrameRateLimiter::FrameRateLimiter(double fps)
 void FrameRateLimiter::reset()
 {
     accumulated = Duration(0);
+    queue_reset = true;
+}
+
+void FrameRateLimiter::queueReset()
+{
+    queue_reset = true;
 }

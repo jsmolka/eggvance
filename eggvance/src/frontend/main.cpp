@@ -25,7 +25,6 @@
 
 bool running = true;
 bool paused  = false;
-bool changed = false;
 FrameCounter counter;
 FrameRateLimiter limiter(kRefreshRate);
 
@@ -101,7 +100,9 @@ void openRomFile()
         loadRomFile(fs::u8path(file));
         free(file);
     }
-    changed = true;
+    
+    limiter.queueReset();
+    counter.queueReset();
 }
 
 void loadSavFile(const fs::path& file)
@@ -122,7 +123,9 @@ void openSavFile()
         loadSavFile(fs::u8path(file));
         free(file);
     }
-    changed = true;
+
+    limiter.queueReset();
+    counter.queueReset();
 }
 
 void handleEvents()
@@ -330,7 +333,8 @@ int eventFilter(void*, SDL_Event* event)
     }
     else if (event->type == SDL_SYSWMEVENT && event->syswm.msg->msg.win.msg == WM_EXITSIZEMOVE)
     {
-        changed = true;
+        limiter.queueReset();
+        counter.queueReset();
         return 0;
     }
     return 1;
@@ -406,8 +410,6 @@ int main(int argc, char* argv[])
 
         audio_ctx.unpause();
 
-        limiter = FrameRateLimiter(6);
-
         while (running)
         {
             limiter.run([]() 
@@ -435,20 +437,10 @@ int main(int argc, char* argv[])
                 video_ctx.swapWindow();
             });
 
-            if (changed)
-            {
+            if (paused)
                 counter.reset();
-                limiter.reset();
-                changed = false;
-            }
-            else if (paused)
-            {
-                counter.reset();
-            }
             else if (const auto fps = (++counter).fps())
-            {
                 updateTitle(*fps);
-            }
         }
 
         audio_ctx.pause();

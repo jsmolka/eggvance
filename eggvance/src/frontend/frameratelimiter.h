@@ -10,6 +10,7 @@ public:
     FrameRateLimiter(double fps);
 
     void reset();
+    void queueReset();
 
     template<typename Frame>
     void run(Frame frame)
@@ -24,6 +25,9 @@ public:
             });
         }
         accumulated -= frame_delta;
+
+        if (queue_reset)
+            reset();
     }
 
 private:
@@ -42,4 +46,5 @@ private:
 
     Duration accumulated;
     Duration frame_delta;
+    bool queue_reset = false;
 };
