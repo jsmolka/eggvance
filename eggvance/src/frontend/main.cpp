@@ -509,7 +509,8 @@ int eventFilter(void*, SDL_Event* event)
                 break;
 
             case UiState::Menu:
-                menu();
+                video_ctx.renderIcon(0);
+                video_ctx.swapWindow();
                 break;
             }
             return 0;

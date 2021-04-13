@@ -20,11 +20,13 @@ file(GLOB_RECURSE SOURCE_FILES
   ${PROJECT_SOURCE_DIR}/modules/glad/*.c
   ${PROJECT_SOURCE_DIR}/modules/imgui/*.h
   ${PROJECT_SOURCE_DIR}/modules/imgui/*.cpp
-  ${PROJECT_SOURCE_DIR}/modules/nfd/*.h
-  ${PROJECT_SOURCE_DIR}/modules/nfd/*.c
   ${PROJECT_SOURCE_DIR}/src/*.h
   ${PROJECT_SOURCE_DIR}/src/*.cpp
 )
+
+list(APPEND SOURCE_FILES ${PROJECT_SOURCE_DIR}/modules/nfd/nfd.h)
+list(APPEND SOURCE_FILES ${PROJECT_SOURCE_DIR}/modules/nfd/nfd_common.h)
+list(APPEND SOURCE_FILES ${PROJECT_SOURCE_DIR}/modules/nfd/nfd_common.c)
 
 if (APPLE)
   list(APPEND SOURCE_FILES ${PROJECT_SOURCE_DIR}/modules/nfd/nfd_cocoa.m)
