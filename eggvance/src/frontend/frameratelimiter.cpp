@@ -1,18 +1,28 @@
 #include "frameratelimiter.h"
 
-FrameRateLimiter::FrameRateLimiter(double fps)
+#include "base/constants.h"
+
+bool FrameRateLimiter::isFastForward()
 {
-    accumulated = Duration(0);
-    frame_delta = Duration(Duration::rep(Duration::period::den / fps));
+    return fps > kRefreshRate;
 }
 
 void FrameRateLimiter::reset()
 {
     accumulated = Duration(0);
-    queue_reset = true;
+    queue_reset = false;
 }
 
 void FrameRateLimiter::queueReset()
 {
     queue_reset = true;
+}
+
+void FrameRateLimiter::setFps(double fps)
+{
+    this->fps = fps;
+
+    frame_delta = Duration(Duration::rep(Duration::period::den / fps));
+
+    queueReset();
 }

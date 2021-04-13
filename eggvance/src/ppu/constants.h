@@ -2,7 +2,6 @@
 
 #include "base/int.h"
 
-inline constexpr auto kRefreshRate      = 59.737;
 inline constexpr uint kDecimalBits      = 8;
 inline constexpr uint kTransparent      = 0x8000;
 inline constexpr uint kColorMask        = 0x7FFF;

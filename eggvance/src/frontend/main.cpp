@@ -23,10 +23,16 @@
 #include "sio/sio.h"
 #include "timer/timer.h"
 
-bool running = true;
-bool paused  = false;
+enum class UiState
+{
+    Quit,
+    Menu,
+    Emulate,
+    Pause
+} state;
+
 FrameCounter counter;
-FrameRateLimiter limiter(kRefreshRate);
+FrameRateLimiter limiter;
 
 void updateTitle()
 {
@@ -70,26 +76,22 @@ void reset()
 
     updateTitle();
 
-    paused = false;
+    state = UiState::Emulate;
 }
 
 void loadRomFile(const fs::path& file)
 {
     audio_ctx.pause();
 
-    auto iter = std::find(config.recent.begin(), config.recent.end(), file);
-    if ( iter != config.recent.end())
-        config.recent.erase(iter);
-
-    config.recent.push_back(file);
-
-    if (config.recent.size() == 11)
-        config.recent.erase(config.recent.begin());
+    config.recent.push(file);
     
-    gamepak.init(config.recent.back(), fs::path());
+    gamepak.init(file, fs::path());
     reset();
 
     audio_ctx.unpause();
+
+    limiter.queueReset();
+    counter.queueReset();
 }
 
 void openRomFile()
@@ -113,6 +115,9 @@ void loadSavFile(const fs::path& file)
     reset();
     
     audio_ctx.unpause();
+   
+    limiter.queueReset();
+    counter.queueReset();
 }
 
 void openSavFile()
@@ -128,7 +133,7 @@ void openSavFile()
     counter.queueReset();
 }
 
-void handleEvents()
+void doEvents()
 {
     SDL_Event event;
     while (SDL_PollEvent(&event))
@@ -136,8 +141,8 @@ void handleEvents()
         switch (event.type)
         {
         case SDL_QUIT:
-            running = false;
-            break;
+            state = UiState::Quit;
+            return;
 
         case SDL_KEYDOWN:
             if (event.key.keysym.mod & KMOD_CTRL)
@@ -149,26 +154,89 @@ void handleEvents()
                     break;
 
                 case SDL_SCANCODE_R:
-                    if (!gamepak.rom.empty())
+                    if (state != UiState::Menu)
                         reset();
                     break;
 
                 case SDL_SCANCODE_P:
-                    if (!gamepak.rom.empty())
-                        paused = !paused;
+                    switch (state)
+                    {
+                    case UiState::Emulate:
+                        state = UiState::Pause;
+                        break;
+
+                    case UiState::Pause:
+                        state = UiState::Emulate;
+                        break;
+                    }
                     break;
+
+                case SDL_SCANCODE_LSHIFT:
+                case SDL_SCANCODE_RSHIFT:
+                    if (limiter.isFastForward())
+                        limiter.setFps(kRefreshRate);
+                    else
+                        limiter.setFps(kRefreshRate * double(config.fast_forward));
+                    break;
+
+                case SDL_SCANCODE_1:
+                    config.fast_forward = 1'000'000;
+                    if (limiter.isFastForward())
+                        limiter.setFps(kRefreshRate * double(1'000'000));
+                    break;
+
+                case SDL_SCANCODE_2:
+                    config.fast_forward = 2;
+                    if (limiter.isFastForward())
+                        limiter.setFps(kRefreshRate * double(2));
+                    break;
+
+                case SDL_SCANCODE_3:
+                    config.fast_forward = 3;
+                    if (limiter.isFastForward())
+                        limiter.setFps(kRefreshRate * double(3));
+                    break;
+
+                case SDL_SCANCODE_4:
+                    config.fast_forward = 4;
+                    if (limiter.isFastForward())
+                        limiter.setFps(kRefreshRate * double(4));
+                    break;
+
+                case SDL_SCANCODE_5:
+                    config.fast_forward = 5;
+                    if (limiter.isFastForward())
+                        limiter.setFps(kRefreshRate * double(5));
+                    break;
+
+                case SDL_SCANCODE_6:
+                    config.fast_forward = 6;
+                    if (limiter.isFastForward())
+                        limiter.setFps(kRefreshRate * double(6));
+                    break;
+
+                case SDL_SCANCODE_7:
+                    config.fast_forward = 7;
+                    if (limiter.isFastForward())
+                        limiter.setFps(kRefreshRate * double(7));
+                    break;
+
+                case SDL_SCANCODE_8:
+                    config.fast_forward = 8;
+                    if (limiter.isFastForward())
+                        limiter.setFps(kRefreshRate * double(8));
+                    break;
+
                 }
             }
             break;
 
         case SDL_CONTROLLERDEVICEADDED:
         case SDL_CONTROLLERDEVICEREMOVED:
-            input_ctx.handleDeviceEvent(event.cdevice);
+            input_ctx.doDeviceEvent(event.cdevice);
             break;
         }
     }
-
-    video_ctx.updateViewport();
 }
 
 float runUi()
@@ -189,10 +257,13 @@ float runUi()
         if (ImGui::MenuItem("Open save", nullptr, false, !gamepak.rom.empty()))
             openSavFile();
 
-        if (ImGui::BeginMenu("Recent", !config.recent.empty()))
+        if (ImGui::BeginMenu("Recent", config.recent.hasFiles()))
         {
-            for (const auto& file : shell::reversed(config.recent))
+            for (const auto& file : config.recent)
             {
+                if (file.empty())
+                    break;
+
                 if (ImGui::MenuItem(file.string().c_str()))
                     loadRomFile(fs::path(file));
             }
@@ -202,7 +273,7 @@ float runUi()
         ImGui::Separator();
 
         if (ImGui::MenuItem("Exit"))
-            running = false;
+            state = UiState::Quit;
 
         ImGui::EndMenu();
     }
@@ -212,35 +283,57 @@ float runUi()
         if (ImGui::MenuItem("Reset", "Ctrl+R", nullptr, !gamepak.rom.empty()))
             reset();
 
-        if (ImGui::MenuItem("Pause", "Ctrl+P", paused, !gamepak.rom.empty()))
-            paused = !paused;
+        if (ImGui::MenuItem("Pause", "Ctrl+P", state == UiState::Pause, state != UiState::Menu))
+        {
+            switch (state)
+            {
+            case UiState::Emulate:
+                state = UiState::Pause;
+                break;
+
+            case UiState::Pause:
+                state = UiState::Emulate;
+                break;
+            }
+        }
 
         ImGui::Separator();
 
-        static bool fast_forward = false;
-        static bool slow_motion  = false;
-
-        ImGui::MenuItem("Fast forward", "Ctrl+Shift", &fast_forward, !slow_motion);
-
-        if (ImGui::BeginMenu("Fast forward speed", !slow_motion))
+        if (ImGui::MenuItem("Fast forward", "Ctrl+Shift", limiter.isFastForward()))
         {
-            ImGui::MenuItem("Unbound");
-            ImGui::Separator();
-            ImGui::MenuItem("2x");
-            ImGui::MenuItem("4x");
-            ImGui::MenuItem("6x");
-
-            ImGui::EndMenu();
+            if (limiter.isFastForward())
+                limiter.setFps(kRefreshRate);
+            else
+                limiter.setFps(kRefreshRate * double(config.fast_forward));
         }
 
-        ImGui::MenuItem("Slow motion", "Ctrl+Space", &slow_motion, !fast_forward);
-
-        if (ImGui::BeginMenu("Slow motion speed", !fast_forward))
+        if (ImGui::BeginMenu("Fast forward speed"))
         {
-            ImGui::MenuItem("0.2x");
-            ImGui::MenuItem("0.4x");
-            ImGui::MenuItem("0.6x");
+            uint times = 1'000'000;
 
+            if (ImGui::MenuItem("Unbound", "Ctrl+1", config.fast_forward == times))
+            {
+                config.fast_forward = times;
+
+                if (limiter.isFastForward())
+                    limiter.setFps(kRefreshRate * double(times));
+            }
+
+            ImGui::Separator();
+
+            for (times = 2; times <= 8; ++times)
+            {
+                std::string text = shell::format("{}x", times);
+                std::string shortcut = shell::format("Ctrl+{}", times);
+
+                if (ImGui::MenuItem(text.c_str(), shortcut.c_str(), config.fast_forward == times))
+                {
+                    config.fast_forward = times;
+
+                    if (limiter.isFastForward())
+                        limiter.setFps(kRefreshRate * double(times));
+                }
+            }
             ImGui::EndMenu();
         }
 
@@ -259,13 +352,14 @@ float runUi()
             {
                 std::string text = shell::format("{}x", scale);
 
-                int window_w = 240 * scale;
-                int window_h = 160 * scale;
+                int window_w = kScreenW * scale;
+                int window_h = kScreenH * scale;
 
                 if (ImGui::MenuItem(text.c_str(), nullptr, w == window_w && h == window_h))
                 {
                     SDL_SetWindowFullscreen(video_ctx.window, ~SDL_WINDOW_FULLSCREEN_DESKTOP);
                     SDL_SetWindowSize(video_ctx.window, window_w, window_h);
+                    video_ctx.updateViewport();
                 }
             }
 
@@ -311,44 +405,81 @@ void renderUi()
     ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
 }
 
-#if SHELL_OS_WINDOWS
+void emulate()
+{
+    constexpr auto kPixelsHor   = 240 + 68;
+    constexpr auto kPixelsVer   = 160 + 68;
+    constexpr auto kPixelCycles = 4;
+    constexpr auto kFrameCycles = kPixelCycles * kPixelsHor * kPixelsVer;
+
+    if (state == UiState::Emulate)
+    {
+        keypad.update();
+        arm.run(kFrameCycles);
+    }
+    else
+    {
+        video_ctx.renderFrame();
+    }
+
+    runUi();
+    renderUi();
+    video_ctx.swapWindow();
+}
+
+void menu()
+{
+    auto padding_top = runUi();
+    video_ctx.renderIcon(padding_top);
+    renderUi();
+    video_ctx.swapWindow();
+}
+
 int eventFilter(void*, SDL_Event* event)
 {
-    if (event->type == SDL_WINDOWEVENT && event->window.event == SDL_WINDOWEVENT_RESIZED)
+    switch (event->type)
     {
-        video_ctx.updateViewport();
-
-        if (gamepak.rom.size() == 0)
+    case SDL_WINDOWEVENT:
+        if (event->window.event == SDL_WINDOWEVENT_RESIZED)
         {
-            float height = runUi();
-            video_ctx.renderIcon(height);
-            renderUi();
+            video_ctx.updateViewport();
+
+            switch (state)
+            {
+            case UiState::Pause:
+            case UiState::Emulate:
+                video_ctx.renderFrame();
+                video_ctx.swapWindow();
+                break;
+
+            case UiState::Menu:
+                menu();
+                break;
+            }
+            return 0;
         }
-        else
-            video_ctx.renderFrame();
-
-        video_ctx.swapWindow();
-
-        return 0;
-    }
-    else if (event->type == SDL_SYSWMEVENT && event->syswm.msg->msg.win.msg == WM_EXITSIZEMOVE)
-    {
-        limiter.queueReset();
-        counter.queueReset();
-        return 0;
+        break;
+    
+    #if SHELL_OS_WINDOWS
+    case SDL_SYSWMEVENT:
+        if (event->syswm.msg->msg.win.msg == WM_EXITSIZEMOVE)
+        {
+            limiter.queueReset();
+            counter.queueReset();
+            return 0;
+        }
+        break;
+    #endif
     }
     return 1;
 }
-#endif
 
 void init(int argc, char* argv[])
 {
     using namespace shell;
 
     Options options("eggvance");
-    options.add({ "-c,--config", "config file", "file" }, Options::value<fs::path>("eggvance.ini"));
-    options.add({ "-s,--save",   "save file",   "file" }, Options::value<fs::path>()->optional());
-    options.add({       "rom",   "ROM file"            }, Options::value<fs::path>()->positional()->optional());
+    options.add({ "rom", "ROM file" }, Options::value<fs::path>()->positional()->optional());
 
     OptionsResult result;
     try
@@ -360,11 +491,7 @@ void init(int argc, char* argv[])
         throw shell::Error("Cannot parse command line: {}", error.what());
     }
 
-    const auto cfg = result.find<fs::path>("--config");
-    const auto sav = result.find<fs::path>("--save");
-    const auto gba = result.find<fs::path>("rom");
-
-    config.init(fs::absolute(*cfg));
+    config.init(fs::absolute("eggvance.ini"));
 
     audio_ctx.init();
     input_ctx.init();
@@ -375,12 +502,15 @@ void init(int argc, char* argv[])
 
     #if SHELL_OS_WINDOWS
     SDL_EventState(SDL_SYSWMEVENT, SDL_ENABLE);
-    SDL_SetEventFilter(eventFilter, NULL);
     #endif
+    SDL_SetEventFilter(eventFilter, NULL);
 
-    gamepak.init(
-        gba.value_or(fs::path()),
-        sav.value_or(fs::path()));
+    state = UiState::Menu;
+
+    if (const auto rom = result.find<fs::path>("rom"))
+        loadRomFile(*rom);
+
+    limiter.setFps(kRefreshRate);
 }
 
 int main(int argc, char* argv[])
@@ -389,58 +519,40 @@ int main(int argc, char* argv[])
     {
         init(argc, argv);
 
-        while (running && gamepak.rom.size() == 0)
+        while (state != UiState::Quit)
         {
-            handleEvents();
-
-            float height = runUi();
-            video_ctx.renderIcon(height);
-            renderUi();
-            video_ctx.swapWindow();
-
-            SDL_Delay(16);
-        }
-
-        if (!running)
-            return 0;
-
-        reset();
-
-        counter.reset();
-
-        audio_ctx.unpause();
-
-        while (running)
-        {
-            limiter.run([]() 
+            limiter.run([]()
             {
-                handleEvents();
+                doEvents();
 
-                if (!paused)
+                switch (state)
                 {
-                    constexpr auto kPixelsHor   = 240 + 68;
-                    constexpr auto kPixelsVer   = 160 + 68;
-                    constexpr auto kPixelCycles = 4;
-                    constexpr auto kFrameCycles = kPixelCycles * kPixelsHor * kPixelsVer;
+                case UiState::Pause:
+                case UiState::Emulate:
+                    emulate();
+                    break;
 
-                    keypad.update();
-                    arm.run(kFrameCycles);
+                case UiState::Menu:
+                    menu();
+                    break;
                 }
-                else
-                {
-                    video_ctx.renderFrame();
-                }
-
-                runUi();
-                renderUi();
-
-                video_ctx.swapWindow();
             });
 
-            if (paused)
+            switch (state)
+            {
+            case UiState::Pause:
                 counter.reset();
-            else if (const auto fps = (++counter).fps())
-                updateTitle(*fps);
+                break;
+
+            case UiState::Menu:
+                updateTitle();
+                break;
+
+            case UiState::Emulate:
+                if (const auto fps = (++counter).fps())
+                    updateTitle(*fps);
+                break;
+            }
         }
 
         audio_ctx.pause();

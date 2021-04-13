@@ -139,12 +139,6 @@ std::optional<Gpio::Type> shell::parse(const std::string& data)
 
 Ini::~Ini()
 {
-    if (file.empty() || !changed)
-        return;
-
-    std::error_code ec;
-    fs::create_directories(file.parent_path(), ec);
-    
     if (ini.save(file) != fs::Status::Ok)
         showMessageBox("Warning", "Cannot write config: {}", file);
 }
@@ -192,12 +186,26 @@ void Ini::set(const std::string& section, const std::string& key, const std::str
 
 Config::~Config()
 {
+    for (auto [index, file] : shell::enumerate(recent))
+    {
+        ini.set("recent", shell::format("file_{}", index), file.u8string());
+    }
+
+    ini.set("emulation", "fast_forward", shell::format("{}", fast_forward));
+
     set("general", "volume", shell::format(volume));
 }
 
 void Config::init(const fs::path& file)
 {
     Ini::init(file);
+
+    for (auto [index, file] : shell::enumerate(recent))
+    {
+        file = ini.findOr("recent", shell::format("file_{}", index), fs::path());
+    }
+
+    fast_forward = ini.findOr("emulation", "fast_forward", 2);
 
     save_path   = get<fs::path  >("general", "save_path");
     bios_file   = get<fs::path  >("general", "bios_file");
@@ -257,4 +265,31 @@ void Config::init(const fs::path& file)
     shortcuts.controller.speed_6x       = get<SDL_GameControllerButton>("controller_shortcuts", "speed_6x");
     shortcuts.controller.speed_8x       = get<SDL_GameControllerButton>("controller_shortcuts", "speed_8x");
     shortcuts.controller.speed_unbound  = get<SDL_GameControllerButton>("controller_shortcuts", "speed_unbound");
+}
+
+void RecentFileList::push(const fs::path& file)
+{
+    auto iter = std::find(begin(), end(), file);
+    if ( iter != end())
+        erase(iter);
+
+    if (size() == capacity())
+        pop_back();
+
+    insert(begin(), file);
+}
+
+RecentFileList::RecentFileList()
+{
+    resize(10);
+}
+
+bool RecentFileList::hasFiles() const
+{
+    for (const auto& file : *this)
+    {
+        if (!file.empty())
+            return true;
+    }
+    return false;
 }

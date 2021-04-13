@@ -10,7 +10,7 @@ public:
 
     void init();
     uint state() const;
-    void handleDeviceEvent(const SDL_ControllerDeviceEvent& event);
+    void doDeviceEvent(const SDL_ControllerDeviceEvent& event);
 
 private:
     enum class Bit

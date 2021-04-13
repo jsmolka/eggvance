@@ -40,6 +40,16 @@ public:
     Input speed_unbound;
 };
 
+class RecentFileList : public std::vector<fs::path>
+{
+public:
+    RecentFileList();
+
+    bool hasFiles() const;
+
+    void push(const fs::path& file);
+};
+
 class Ini
 {
 public:
@@ -51,8 +61,8 @@ public:
     T    get(const std::string& section, const std::string& key) const;
     void set(const std::string& section, const std::string& key, const std::string& value);
 
-private:
     shell::Ini ini;
+private:
     shell::filesystem::path file;
     bool changed = false;
 };
@@ -65,7 +75,8 @@ public:
     void init(const fs::path& file);
 
     // New
-    std::vector<fs::path> recent;
+    RecentFileList recent;
+    uint fast_forward;
 
     // Old
     fs::path   save_path;

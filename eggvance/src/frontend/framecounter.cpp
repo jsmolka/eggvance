@@ -3,6 +3,7 @@
 FrameCounter::FrameCounter()
 {
     reset();
+    queueReset();
 }
 
 FrameCounter& FrameCounter::operator++()
