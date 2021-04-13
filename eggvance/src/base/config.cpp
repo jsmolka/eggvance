@@ -113,14 +113,8 @@ std::optional<SDL_GameControllerButton> shell::parse(const std::string& data)
 template<>
 std::optional<Save::Type> shell::parse(const std::string& data)
 {
-    const auto type = shell::toLowerCopy(data);
-
-    if (type == "detect")    return Save::Type::Detect;
-    if (type == "none")      return Save::Type::None;
-    if (type == "sram")      return Save::Type::Sram;
-    if (type == "flash512")  return Save::Type::Flash512;
-    if (type == "flash1024") return Save::Type::Flash1024;
-    if (type == "eeprom")    return Save::Type::Eeprom;
+    if (const auto value = shell::parse<uint>(data))
+        return Save::Type(*value);
 
     return std::nullopt;
 }
@@ -128,11 +122,8 @@ std::optional<Save::Type> shell::parse(const std::string& data)
 template<>
 std::optional<Gpio::Type> shell::parse(const std::string& data)
 {
-    const auto type = shell::toLowerCopy(data);
-
-    if (type == "detect") return Gpio::Type::Detect;
-    if (type == "none")   return Gpio::Type::None;
-    if (type == "rtc")    return Gpio::Type::Rtc;
+    if (const auto value = shell::parse<uint>(data))
+        return Gpio::Type(*value);
 
     return std::nullopt;
 }
@@ -188,10 +179,12 @@ Config::~Config()
 {
     for (auto [index, file] : shell::enumerate(recent))
     {
-        ini.set("recent", shell::format("file_{}", index), file.u8string());
+        ini.set("file", shell::format("recent_{}", index), file.u8string());
     }
 
-    ini.set("emulation", "fast_forward", shell::format("{}", fast_forward));
+    ini.set("emulation", "fast_forward", shell::format(fast_forward));
+    ini.set("emulation", "save_type",    shell::format(uint(save_type)));
+    ini.set("emulation", "gpio_type",    shell::format(uint(gpio_type)));
 
     set("general", "volume", shell::format(volume));
 }
@@ -202,10 +195,12 @@ void Config::init(const fs::path& file)
 
     for (auto [index, file] : shell::enumerate(recent))
     {
-        file = ini.findOr("recent", shell::format("file_{}", index), fs::path());
+        file = ini.findOr("file", shell::format("recent_{}", index), fs::path());
     }
 
     fast_forward = ini.findOr("emulation", "fast_forward", 2);
+    save_type    = ini.findOr("emulation", "save_type",    Save::Type::Detect);
+    gpio_type    = ini.findOr("emulation", "gpio_type",    Gpio::Type::Detect);
 
     save_path   = get<fs::path  >("general", "save_path");
     bios_file   = get<fs::path  >("general", "bios_file");
@@ -214,8 +209,6 @@ void Config::init(const fs::path& file)
     lcd_color   = get<bool      >("general", "lcd_color");
     volume      = get<double    >("general", "volume");
     volume_step = get<double    >("general", "volume_step");
-    save_type   = get<Save::Type>("gamepak", "save_type");
-    gpio_type   = get<Gpio::Type>("gamepak", "gpio_type");
 
     if (!save_path.empty()) save_path = fs::absolute(save_path);
     if (!bios_file.empty()) bios_file = fs::absolute(bios_file);

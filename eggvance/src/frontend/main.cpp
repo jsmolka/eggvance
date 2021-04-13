@@ -337,6 +337,47 @@ float runUi()
             ImGui::EndMenu();
         }
 
+        ImGui::Separator();
+
+        if (ImGui::BeginMenu("Save type"))
+        {
+            static constexpr std::pair<std::string_view, Save::Type> kSaveTypes[] =
+            {
+                { "Detect",     Save::Type::Detect    },
+                { "None",       Save::Type::None      },
+                { "SRAM",       Save::Type::Sram      },
+                { "EEPROM",     Save::Type::Eeprom    },
+                { "Flash 512K", Save::Type::Flash512  },
+                { "Flash 1M",   Save::Type::Flash1024 }
+            };
+
+            for (const auto& [text, type] : kSaveTypes)
+            {
+                if (ImGui::MenuItem(text.data(), nullptr, config.save_type == type))
+                    config.save_type = type;
+            }
+
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("GPIO type"))
+        {
+            static constexpr std::pair<std::string_view, Gpio::Type> kGpioTypes[] =
+            {
+                { "Detect", Gpio::Type::Detect },
+                { "None",   Gpio::Type::None   },
+                { "RTC",    Gpio::Type::Rtc    }
+            };
+
+            for (const auto& [text, type] : kGpioTypes)
+            {
+                if (ImGui::MenuItem(text.data(), nullptr, config.gpio_type == type))
+                    config.gpio_type = type;
+            }
+
+            ImGui::EndMenu();
+        }
+
         ImGui::EndMenu();
     }
 

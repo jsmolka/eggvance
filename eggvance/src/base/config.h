@@ -76,7 +76,9 @@ public:
 
     // New
     RecentFileList recent;
-    uint fast_forward;
+    uint           fast_forward;
+    Save::Type     save_type;
+    Gpio::Type     gpio_type;
 
     // Old
     fs::path   save_path;
@@ -86,8 +88,6 @@ public:
     bool       lcd_color;
     double     volume;
     double     volume_step;
-    Save::Type save_type;
-    Gpio::Type gpio_type;
 
     struct
     {
