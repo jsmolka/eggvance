@@ -43,7 +43,10 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   target_link_libraries(${CMAKE_PROJECT_NAME} stdc++fs)
 endif()
 
-if (UNIX AND NOT APPLE)
+if (APPLE)
+  find_library(COCOA_LIBRARY Cocoa)
+  target_link_libraries(${CMAKE_PROJECT_NAME} ${COCOA_LIBRARY})
+elseif (UNIX)
   find_package(PkgConfig REQUIRED)
   pkg_check_modules(GTK "gtk+-3.0")
 
