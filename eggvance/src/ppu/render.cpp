@@ -5,6 +5,7 @@
 
 #include "mapentry.h"
 #include "matrix.h"
+#include "base/config.h"
 #include "frontend/videocontext.h"
 
 void Ppu::render()
@@ -29,7 +30,7 @@ void Ppu::render()
         objects_alpha = false;
     }
 
-    if (dispcnt.enabled & Layer::Flag::Obj)
+    if (dispcnt.enabled & config.video_layers & Layer::Flag::Obj)
     {
         renderObjects();
     }

@@ -1,5 +1,6 @@
 #include "apu.h"
 
+#include "base/config.h"
 #include "base/constants.h"
 #include "dma/dma.h"
 #include "frontend/audiocontext.h"
@@ -118,8 +119,8 @@ void Apu::sample(u64 late)
 
             channel->tick();
 
-            if (control.enabled_l & (1 << index)) samples[0] += channel->sample;
-            if (control.enabled_r & (1 << index)) samples[1] += channel->sample;
+            if (control.enabled_l & config.audio_channels & (1 << index)) samples[0] += channel->sample;
+            if (control.enabled_r & config.audio_channels & (1 << index)) samples[1] += channel->sample;
         }
 
         samples[0] *= control.volume_l + 1;
@@ -129,8 +130,11 @@ void Apu::sample(u64 late)
         samples[0] >>= 3 - control.volume;
         samples[1] >>= 3 - control.volume;
 
-        for (const auto& fifo : fifos)
+        for (auto  [index, fifo] : shell::enumerate(fifos, 4))
         {
+            if ((config.audio_channels & (1 << index)) == 0)
+                continue;
+
             if (fifo.enabled_l) samples[0] += fifo.sample << fifo.volume;
             if (fifo.enabled_r) samples[1] += fifo.sample << fifo.volume;
         }

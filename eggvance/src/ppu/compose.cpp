@@ -4,13 +4,14 @@
 #include <shell/operators.h>
 
 #include "color.h"
+#include "base/config.h"
 #include "frontend/videocontext.h"
 
 void Ppu::compose(uint possible)
 {
     BackgroundLayers layers;
 
-    for (uint background : bit::iterate(possible & dispcnt.enabled))
+    for (uint background : bit::iterate(possible & dispcnt.enabled & config.video_layers))
     {
         layers.push_back({
             backgrounds[background].control.priority,

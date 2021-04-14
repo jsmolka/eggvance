@@ -446,6 +446,47 @@ float runUi()
         if (ImGui::MenuItem("Mute", "Ctrl+M", config.mute))
             config.mute ^= true;
 
+        ImGui::Separator();
+
+        if (ImGui::BeginMenu("Video layers"))
+        {
+            static constexpr std::pair<std::string_view, uint> kLayers[] =
+            {
+                { "Background 0", 0b000001 },
+                { "Background 1", 0b000010 },
+                { "Background 2", 0b000100 },
+                { "Background 3", 0b001000 },
+                { "Objects",      0b010000 }
+            };
+
+            for (const auto& [text, mask] : kLayers)
+            {
+                if (ImGui::MenuItem(text.data(), nullptr, config.video_layers & mask))
+                    config.video_layers ^= mask;
+            }
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Audio channels"))
+        {
+            static constexpr std::pair<std::string_view, uint> kChannels[] =
+            {
+                { "Square 1", 0b000001 },
+                { "Square 2", 0b000010 },
+                { "Wave",     0b000100 },
+                { "Noise",    0b001000 },
+                { "FIFO A",   0b010000 },
+                { "FIFO B",   0b100000 },
+            };
+
+            for (const auto& [text, mask] : kChannels)
+            {
+                if (ImGui::MenuItem(text.data(), nullptr, config.audio_channels & mask))
+                    config.audio_channels ^= mask;
+            }
+            ImGui::EndMenu();
+        }
+
         ImGui::EndMenu();
     }
 

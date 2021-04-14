@@ -82,8 +82,10 @@ public:
     uint           frame_size;
     bool           color_correct;
     bool           preserve_aspect_ratio;
+    uint           video_layers;
     bool           mute;
     float          volume;
+    uint           audio_channels;
 
     // Old
     fs::path   save_path;

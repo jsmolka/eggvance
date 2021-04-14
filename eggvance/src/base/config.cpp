@@ -188,8 +188,10 @@ Config::~Config()
     ini.set("video",     "frame_size",            shell::format(frame_size));
     ini.set("video",     "color_correct",         shell::format(color_correct));
     ini.set("video",     "preserve_aspect_ratio", shell::format(preserve_aspect_ratio));
+    ini.set("video",     "video_layers",          shell::format(video_layers));
     ini.set("audio",     "mute",                  shell::format(mute));
     ini.set("audio",     "volume",                shell::format(volume));
+    ini.set("audio",     "audio_channels",        shell::format(audio_channels));
 }
 
 void Config::init(const fs::path& file)
@@ -207,8 +209,10 @@ void Config::init(const fs::path& file)
     frame_size            = ini.findOr("video",     "frame_size",            2);
     color_correct         = ini.findOr("video",     "color_correct",         true);
     preserve_aspect_ratio = ini.findOr("video",     "preserve_aspect_ratio", true);
+    video_layers          = ini.findOr("video",     "video_layers",          0b11111);
     mute                  = ini.findOr("audio",     "mute",                  false);
     volume                = ini.findOr("audio",     "volume",                0.5);
+    audio_channels        = ini.findOr("audio",     "audio_channels",        0b111111);
 
     save_path   = get<fs::path  >("general", "save_path");
     bios_file   = get<fs::path  >("general", "bios_file");
