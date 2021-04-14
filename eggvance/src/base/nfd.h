@@ -1,0 +1,30 @@
+#pragma once
+
+#include <optional>
+#include <nfd/nfd.h>
+
+#include "filesystem.h"
+
+std::optional<fs::path> openFile(const char* filter = nullptr)
+{
+    nfdchar_t* file = nullptr;
+    if (NFD_OpenDialog(filter, nullptr, &file) != NFD_OKAY)
+        return std::nullopt;
+
+    auto result = fs::u8path(file);
+    free(file);
+
+    return result;
+}
+
+std::optional<fs::path> openFolder()
+{
+    nfdchar_t* path = nullptr;
+    if (NFD_PickFolder(NULL, &path) != NFD_OKAY)
+        return std::nullopt;
+
+    auto result = fs::u8path(path);
+    free(path);
+
+    return result;
+}

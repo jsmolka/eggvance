@@ -206,7 +206,7 @@ void Config::init(const fs::path& file)
     fast_forward          = ini.findOr("emulation", "fast_forward",          2);
     save_type             = ini.findOr("emulation", "save_type",             Save::Type::Detect);
     gpio_type             = ini.findOr("emulation", "gpio_type",             Gpio::Type::Detect);
-    frame_size            = ini.findOr("video",     "frame_size",            2);
+    frame_size            = ini.findOr("video",     "frame_size",            4);
     color_correct         = ini.findOr("video",     "color_correct",         true);
     preserve_aspect_ratio = ini.findOr("video",     "preserve_aspect_ratio", true);
     video_layers          = ini.findOr("video",     "video_layers",          0b11111);
@@ -235,18 +235,6 @@ void Config::init(const fs::path& file)
     controls.keyboard.l      = get<SDL_Scancode>("keyboard_controls", "l");
     controls.keyboard.r      = get<SDL_Scancode>("keyboard_controls", "r");
 
-    shortcuts.keyboard.reset          = get<SDL_Scancode>("keyboard_shortcuts", "reset");
-    shortcuts.keyboard.pause          = get<SDL_Scancode>("keyboard_shortcuts", "pause");
-    shortcuts.keyboard.volume_up      = get<SDL_Scancode>("keyboard_shortcuts", "volume_up");
-    shortcuts.keyboard.volume_down    = get<SDL_Scancode>("keyboard_shortcuts", "volume_down");
-    shortcuts.keyboard.fullscreen     = get<SDL_Scancode>("keyboard_shortcuts", "fullscreen");
-    shortcuts.keyboard.speed_hardware = get<SDL_Scancode>("keyboard_shortcuts", "speed_hardware");
-    shortcuts.keyboard.speed_2x       = get<SDL_Scancode>("keyboard_shortcuts", "speed_2x");
-    shortcuts.keyboard.speed_4x       = get<SDL_Scancode>("keyboard_shortcuts", "speed_4x");
-    shortcuts.keyboard.speed_6x       = get<SDL_Scancode>("keyboard_shortcuts", "speed_6x");
-    shortcuts.keyboard.speed_8x       = get<SDL_Scancode>("keyboard_shortcuts", "speed_8x");
-    shortcuts.keyboard.speed_unbound  = get<SDL_Scancode>("keyboard_shortcuts", "speed_unbound");
-
     controls.controller.a      = get<SDL_GameControllerButton>("controller_controls", "a");
     controls.controller.b      = get<SDL_GameControllerButton>("controller_controls", "b");
     controls.controller.up     = get<SDL_GameControllerButton>("controller_controls", "up");
@@ -257,18 +245,6 @@ void Config::init(const fs::path& file)
     controls.controller.select = get<SDL_GameControllerButton>("controller_controls", "select");
     controls.controller.l      = get<SDL_GameControllerButton>("controller_controls", "l");
     controls.controller.r      = get<SDL_GameControllerButton>("controller_controls", "r");
-
-    shortcuts.controller.reset          = get<SDL_GameControllerButton>("controller_shortcuts", "reset");
-    shortcuts.controller.pause          = get<SDL_GameControllerButton>("controller_shortcuts", "pause");
-    shortcuts.controller.volume_up      = get<SDL_GameControllerButton>("controller_shortcuts", "volume_up");
-    shortcuts.controller.volume_down    = get<SDL_GameControllerButton>("controller_shortcuts", "volume_down");
-    shortcuts.controller.fullscreen     = get<SDL_GameControllerButton>("controller_shortcuts", "fullscreen");
-    shortcuts.controller.speed_hardware = get<SDL_GameControllerButton>("controller_shortcuts", "speed_hardware");
-    shortcuts.controller.speed_2x       = get<SDL_GameControllerButton>("controller_shortcuts", "speed_2x");
-    shortcuts.controller.speed_4x       = get<SDL_GameControllerButton>("controller_shortcuts", "speed_4x");
-    shortcuts.controller.speed_6x       = get<SDL_GameControllerButton>("controller_shortcuts", "speed_6x");
-    shortcuts.controller.speed_8x       = get<SDL_GameControllerButton>("controller_shortcuts", "speed_8x");
-    shortcuts.controller.speed_unbound  = get<SDL_GameControllerButton>("controller_shortcuts", "speed_unbound");
 }
 
 void RecentFileList::push(const fs::path& file)

@@ -500,6 +500,9 @@
     <ClInclude Include="modules\nfd\nfd_common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\base\nfd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\arm\arithmetic.inl">

@@ -129,6 +129,7 @@
     <ClInclude Include="src\base\constants.h" />
     <ClInclude Include="src\base\filesystem.h" />
     <ClInclude Include="src\base\int.h" />
+    <ClInclude Include="src\base\nfd.h" />
     <ClInclude Include="src\base\opengl.h" />
     <ClInclude Include="src\base\ram.h" />
     <ClInclude Include="src\base\register.h" />

@@ -23,23 +23,6 @@ public:
     Input r;
 };
 
-template<typename Input>
-class Shortcuts
-{
-public:
-    Input reset;
-    Input pause;
-    Input fullscreen;
-    Input volume_up;
-    Input volume_down;
-    Input speed_hardware;
-    Input speed_2x;
-    Input speed_4x;
-    Input speed_6x;
-    Input speed_8x;
-    Input speed_unbound;
-};
-
 class RecentFileList : public std::vector<fs::path>
 {
 public:
@@ -86,6 +69,7 @@ public:
     bool           mute;
     float          volume;
     uint           audio_channels;
+    bool           use_save_path;
 
     // Old
     fs::path   save_path;
@@ -100,12 +84,6 @@ public:
         Controls<SDL_Scancode> keyboard;
         Controls<SDL_GameControllerButton> controller;
     } controls;
-
-    struct
-    {
-        Shortcuts<SDL_Scancode> keyboard;
-        Shortcuts<SDL_GameControllerButton> controller;
-    } shortcuts;
 };
 
 inline Config config;
