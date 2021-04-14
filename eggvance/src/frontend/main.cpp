@@ -1,6 +1,7 @@
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_opengl2.h>
 #include <imgui/imgui_impl_sdl.h>
+#include <imgui/imgui_internal.h>
 #include <shell/options.h>
 #include <shell/utility.h>
 
@@ -26,49 +27,64 @@
 namespace ImGui
 {
 
-bool Button(const fs::path& path)
+bool FileSelectButton(const fs::path& file, const std::string& hash)
 {
-    return Button(path.u8string().c_str());
+    std::string text = file.empty()
+        ? ("Browse..." + hash)
+        : file.u8string().c_str();
+
+    return ImGui::Button(text.c_str());
 }
 
-void SetCursorPosLabel()
-{
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y);
-}
-
-void SetNextWindowPosCenter()
-{
-    ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-}
-
-void Help(const char* description)
+void QuestionMark(const char* help)
 {
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 1.0f);
     ImGui::TextDisabled("(?)");
+
     if (ImGui::IsItemHovered())
     {
         ImGui::BeginTooltip();
         ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-        ImGui::TextUnformatted(description);
+        ImGui::TextUnformatted(help);
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
     }
 }
 
-bool BeginSettingsTable(const char* id)
+bool BeginSettingsWindow(const char* title, bool& open)
 {
-    return ImGui::BeginTable(id, 2, ImGuiTableFlags_SizingFixedFit);
+    constexpr auto kWindowFlags =
+          ImGuiWindowFlags_NoMove
+        | ImGuiWindowFlags_NoResize
+        | ImGuiWindowFlags_NoCollapse
+        | ImGuiWindowFlags_AlwaysAutoResize;
+
+    SetNextWindowPos(GetMainViewport()->GetCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+
+    if (open)
+        OpenPopup(title);
+
+    if (!BeginPopupModal(title, &open, kWindowFlags))
+        return false;
+
+    if (!BeginTable(title, 2, ImGuiTableFlags_SizingFixedFit))
+        return false;
+
+    return true;
 }
 
-void EndSettingsTable()
+void EndSettingsWindow()
 {
-    ImGui::EndTable();
+    if (ImGui::GetCurrentContext()->CurrentTable)
+        ImGui::EndTable();
+
+    ImGui::EndPopup();
 }
 
 void SettingsLabel(const char* text)
 {
     ImGui::TableNextColumn();
-    ImGui::SetCursorPosLabel();
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().FramePadding.y);
     ImGui::Text(text);
     ImGui::TableNextColumn();
 }
@@ -293,7 +309,7 @@ void doEvents()
 
 float runUi()
 {
-    static bool show_general = false;
+    static bool show_settings = false;
     static bool show_keyboard = false;
     static bool show_controller = false;
 
@@ -323,6 +339,22 @@ float runUi()
                 if (ImGui::MenuItem(file.u8string().c_str()))
                     loadRomFile(fs::path(file));
             }
+            ImGui::EndMenu();
+        }
+
+        ImGui::Separator();
+
+        if (ImGui::BeginMenu("Preferences"))
+        {
+            if (ImGui::MenuItem("Settings"))
+                show_settings = true;
+
+            if (ImGui::MenuItem("Keyboard map"))
+                show_keyboard = true;
+
+            if (ImGui::MenuItem("Controller map"))
+                show_controller = true;
+
             ImGui::EndMenu();
         }
 
@@ -538,77 +570,39 @@ float runUi()
         ImGui::EndMenu();
     }
 
-    if (ImGui::BeginMenu("Settings"))
-    {
-        if (ImGui::MenuItem("General"))
-        {
-            show_general = true;
-            show_keyboard = false;
-            show_controller = false;
-        }
-
-        if (ImGui::MenuItem("Keyboard"))
-        {
-            show_general = false;
-            show_keyboard = true;
-            show_controller = false;
-        }
-
-        if (ImGui::MenuItem("Controller"))
-        {
-            show_general = false;
-            show_keyboard = false;
-            show_controller = true;
-        }
-
-        ImGui::EndMenu();
-    }
-
     ImGui::EndMainMenuBar();
 
-    uint window_flags = 0
-        | ImGuiWindowFlags_NoMove
-        | ImGuiWindowFlags_NoResize
-        | ImGuiWindowFlags_NoCollapse
-        | ImGuiWindowFlags_AlwaysAutoResize;
-
-    if (show_general)
+    if (ImGui::BeginSettingsWindow("Settings", show_settings))
     {
-        ImGui::SetNextWindowPosCenter();
-        ImGui::Begin("General", &show_general, window_flags);
-
-        if (ImGui::BeginSettingsTable("General"))
+        ImGui::SettingsLabel("Save path");
+        if (ImGui::FileSelectButton(config.save_path, "##0"))
         {
-            ImGui::SettingsLabel("Use save path");
-            ImGui::Checkbox("##0", &config.use_save_path);
-            ImGui::SameLine();
-            ImGui::Help("Store saves next to the ROM otherwise");
-
-            ImGui::SettingsLabel("Save path");
-            if (ImGui::Button(config.save_path))
-            {
-                if (const auto path = openFolder())
-                    config.save_path = *path;
-            }
-
-            ImGui::SettingsLabel("BIOS file");
-            if (ImGui::Button(config.bios_file))
-            {
-                if (const auto file = openFile())
-                    config.bios_file = *file;
-            }
-
-            ImGui::SettingsLabel("Skip BIOS");
-            ImGui::Checkbox("##1", &config.bios_skip);
-
-            ImGui::SettingsLabel("Validate BIOS");
-            ImGui::Checkbox("##2", &config.bios_hash);
-            ImGui::SameLine();
-            ImGui::Help("Make sure the original BIOS is used");
-
-            ImGui::EndSettingsTable();
+            if (const auto path = openFolder())
+                config.save_path = *path;
         }
-        ImGui::End();
+        ImGui::SameLine();
+        if (ImGui::Button("Clear##0"))
+            config.save_path = fs::path();
+        ImGui::SameLine();
+        ImGui::QuestionMark("Save files are stored next to the ROM if none is selected");
+
+        ImGui::SettingsLabel("BIOS file");
+        if (ImGui::FileSelectButton(config.bios_file, "##1"))
+        {
+            if (const auto file = openFile())
+            {
+                config.bios_file = *file;
+                Bios::init(config.bios_file);
+            }
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Clear##1"))
+            config.bios_file = fs::path();
+
+        ImGui::SettingsLabel("Skip BIOS");
+        ImGui::Checkbox("", &config.bios_skip);
+
+        ImGui::EndSettingsWindow();
     }
 
     ImGui::Render();
@@ -715,7 +709,7 @@ void init(int argc, char* argv[])
     video_ctx.init();
 
     Bios::init(config.bios_file);
-    Color::init(config.lcd_color);
+    Color::init(config.color_correct);
 
     #if SHELL_OS_WINDOWS
     SDL_EventState(SDL_SYSWMEVENT, SDL_ENABLE);

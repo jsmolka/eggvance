@@ -22,14 +22,6 @@ void Bios::init(const fs::path& path)
         throw shell::Error("Cannot read BIOS: {}", path);
         break;
     }
-
-    if (config.bios_hash)
-    {
-        constexpr u64 kExpected = 0x5EA9'5B6E'9C23'90E5;
-
-        if (shell::hash(data.data(), data.size()) != kExpected)
-            throw shell::Error("Bad BIOS hash");
-    }
 }
 
 u8  Bios::readByte(u32 addr) { return read< u8>(addr); }

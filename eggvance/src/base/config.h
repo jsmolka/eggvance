@@ -57,7 +57,9 @@ public:
 
     void init(const fs::path& file);
 
-    // New
+    fs::path       save_path;
+    fs::path       bios_file;
+    bool           bios_skip;
     RecentFileList recent;
     uint           fast_forward;
     Save::Type     save_type;
@@ -69,15 +71,6 @@ public:
     bool           mute;
     float          volume;
     uint           audio_channels;
-    bool           use_save_path;
-
-    // Old
-    fs::path   save_path;
-    fs::path   bios_file;
-    bool       bios_skip;
-    bool       bios_hash;
-    bool       lcd_color;
-    double     volume_step;
 
     struct
     {

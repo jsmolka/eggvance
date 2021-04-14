@@ -182,6 +182,9 @@ Config::~Config()
         ini.set("file", shell::format("recent_{}", index), file.u8string());
     }
 
+    ini.set("settings",  "save_path",             shell::format(save_path));
+    ini.set("settings",  "bios_file",             shell::format(bios_file));
+    ini.set("settings",  "bios_skip",             shell::format(bios_skip));
     ini.set("emulation", "fast_forward",          shell::format(fast_forward));
     ini.set("emulation", "save_type",             shell::format(uint(save_type)));
     ini.set("emulation", "gpio_type",             shell::format(uint(gpio_type)));
@@ -203,6 +206,9 @@ void Config::init(const fs::path& file)
         file = ini.findOr("file", shell::format("recent_{}", index), fs::path());
     }
 
+    save_path             = ini.findOr("settings",  "save_path",             fs::path());
+    bios_file             = ini.findOr("settings",  "bios_file",             fs::path());
+    bios_skip             = ini.findOr("settings",  "bios_skip",             true);
     fast_forward          = ini.findOr("emulation", "fast_forward",          2);
     save_type             = ini.findOr("emulation", "save_type",             Save::Type::Detect);
     gpio_type             = ini.findOr("emulation", "gpio_type",             Gpio::Type::Detect);
@@ -213,16 +219,6 @@ void Config::init(const fs::path& file)
     mute                  = ini.findOr("audio",     "mute",                  false);
     volume                = ini.findOr("audio",     "volume",                0.5);
     audio_channels        = ini.findOr("audio",     "audio_channels",        0b111111);
-
-    save_path   = get<fs::path  >("general", "save_path");
-    bios_file   = get<fs::path  >("general", "bios_file");
-    bios_skip   = get<bool      >("general", "bios_skip");
-    bios_hash   = get<bool      >("general", "bios_hash");
-    lcd_color   = get<bool      >("general", "lcd_color");
-    volume_step = get<double    >("general", "volume_step");
-
-    if (!save_path.empty()) save_path = fs::absolute(save_path);
-    if (!bios_file.empty()) bios_file = fs::absolute(bios_file);
 
     controls.keyboard.a      = get<SDL_Scancode>("keyboard_controls", "a");
     controls.keyboard.b      = get<SDL_Scancode>("keyboard_controls", "b");
