@@ -272,7 +272,7 @@ float runUi()
                 if (file.empty())
                     break;
 
-                if (ImGui::MenuItem(file.string().c_str()))
+                if (ImGui::MenuItem(file.u8string().c_str()))
                     loadRomFile(fs::path(file));
             }
             ImGui::EndMenu();
