@@ -140,6 +140,7 @@ void VideoContext::initImGui()
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
+    ImGui::GetIO().IniFilename = nullptr;
 
     ImGui_ImplSDL2_InitForOpenGL(window, context);
     ImGui_ImplOpenGL2_Init();
