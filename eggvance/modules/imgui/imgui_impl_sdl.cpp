@@ -49,7 +49,7 @@
 #include "imgui_impl_sdl.h"
 
 // SDL
-#include "base/sdl2.h"
+#include <frontend/sdl2.h>
 #if defined(__APPLE__)
 #include "TargetConditionals.h"
 #endif

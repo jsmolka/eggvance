@@ -3,8 +3,8 @@
 #include <mutex>
 #include <shell/array.h>
 
+#include "sdl2.h"
 #include "base/int.h"
-#include "base/sdl2.h"
 
 class AudioContext
 {

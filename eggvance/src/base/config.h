@@ -3,7 +3,7 @@
 #include <shell/ini.h>
 
 #include "filesystem.h"
-#include "sdl2.h"
+#include "frontend/sdl2.h"
 #include "gamepak/gpio.h"
 #include "gamepak/save.h"
 

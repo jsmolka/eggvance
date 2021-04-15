@@ -128,11 +128,11 @@
     <ClInclude Include="src\base\constants.h" />
     <ClInclude Include="src\base\filesystem.h" />
     <ClInclude Include="src\base\int.h" />
-    <ClInclude Include="src\base\nfd.h" />
-    <ClInclude Include="src\base\opengl.h" />
+    <ClInclude Include="src\frontend\nfd.h" />
+    <ClInclude Include="src\frontend\opengl.h" />
     <ClInclude Include="src\base\ram.h" />
     <ClInclude Include="src\base\register.h" />
-    <ClInclude Include="src\base\sdl2.h" />
+    <ClInclude Include="src\frontend\sdl2.h" />
     <ClInclude Include="src\dma\dmaaddress.h" />
     <ClInclude Include="src\frontend\audiocontext.h" />
     <ClInclude Include="src\frontend\framecounter.h" />

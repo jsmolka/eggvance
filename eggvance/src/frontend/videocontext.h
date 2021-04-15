@@ -2,10 +2,10 @@
 
 #include <shell/array.h>
 
+#include "opengl.h"
+#include "sdl2.h"
 #include "base/constants.h"
 #include "base/int.h"
-#include "base/opengl.h"
-#include "base/sdl2.h"
 
 class VideoContext
 {

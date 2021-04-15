@@ -311,7 +311,7 @@
     <ClInclude Include="src\base\register.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\base\sdl2.h">
+    <ClInclude Include="src\frontend\sdl2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\frontend\audiocontext.h">
@@ -470,7 +470,7 @@
     <ClInclude Include="modules\imgui\imconfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\base\opengl.h">
+    <ClInclude Include="src\frontend\opengl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="modules\imgui\imstb_rectpack.h">
@@ -497,7 +497,7 @@
     <ClInclude Include="modules\nfd\nfd_common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\base\nfd.h">
+    <ClInclude Include="src\frontend\nfd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
