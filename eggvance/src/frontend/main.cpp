@@ -197,6 +197,117 @@ void openSavFile()
     counter.queueReset();
 }
 
+bool doChooseKeyboard(const SDL_KeyboardEvent& event)
+{
+    if (event.keysym.scancode == SDL_SCANCODE_ESCAPE)
+        choose_key = nullptr;
+
+    if (!choose_key)
+        return false;
+
+    *choose_key = event.keysym.scancode;
+     choose_key = nullptr;
+
+    return true;
+}
+
+bool doShortcuts(const SDL_KeyboardEvent& event)
+{
+    if ((event.keysym.mod & KMOD_CTRL) == 0)
+        return false;
+
+    switch (event.keysym.scancode)
+    {
+    case SDL_SCANCODE_O:
+        openRomFile();
+        return true;
+
+    case SDL_SCANCODE_R:
+        if (state != UiState::Menu)
+            reset();
+        return true;
+
+    case SDL_SCANCODE_P:
+        switch (state)
+        {
+        case UiState::Emulate:
+            state = UiState::Pause;
+            break;
+
+        case UiState::Pause:
+            state = UiState::Emulate;
+            break;
+        }
+        return true;
+
+    case SDL_SCANCODE_LSHIFT:
+    case SDL_SCANCODE_RSHIFT:
+        if (limiter.isFastForward())
+            limiter.setFps(kRefreshRate);
+        else
+            limiter.setFps(kRefreshRate * double(config.fast_forward));
+        return true;
+
+    case SDL_SCANCODE_1:
+        config.fast_forward = 1'000'000;
+        if (limiter.isFastForward())
+            limiter.setFps(kRefreshRate * double(1'000'000));
+        return true;
+
+    case SDL_SCANCODE_2:
+        config.fast_forward = 2;
+        if (limiter.isFastForward())
+            limiter.setFps(kRefreshRate * double(2));
+        return true;
+
+    case SDL_SCANCODE_3:
+        config.fast_forward = 3;
+        if (limiter.isFastForward())
+            limiter.setFps(kRefreshRate * double(3));
+        return true;
+
+    case SDL_SCANCODE_4:
+        config.fast_forward = 4;
+        if (limiter.isFastForward())
+            limiter.setFps(kRefreshRate * double(4));
+        return true;
+
+    case SDL_SCANCODE_5:
+        config.fast_forward = 5;
+        if (limiter.isFastForward())
+            limiter.setFps(kRefreshRate * double(5));
+        return true;
+
+    case SDL_SCANCODE_6:
+        config.fast_forward = 6;
+        if (limiter.isFastForward())
+            limiter.setFps(kRefreshRate * double(6));
+        return true;
+
+    case SDL_SCANCODE_7:
+        config.fast_forward = 7;
+        if (limiter.isFastForward())
+            limiter.setFps(kRefreshRate * double(7));
+        return true;
+
+    case SDL_SCANCODE_8:
+        config.fast_forward = 8;
+        if (limiter.isFastForward())
+            limiter.setFps(kRefreshRate * double(8));
+        return true;
+
+    case SDL_SCANCODE_F:
+        SDL_SetWindowFullscreen(video_ctx.window, SDL_GetWindowFlags(video_ctx.window) ^ SDL_WINDOW_FULLSCREEN_DESKTOP);
+        return true;
+
+    case SDL_SCANCODE_M:
+        config.mute ^= true;
+        return true;
+    }
+
+    return false;
+}
+
 void doEvents()
 {
     SDL_Event event;
@@ -209,98 +320,7 @@ void doEvents()
             return;
 
         case SDL_KEYDOWN:
-            if (event.key.keysym.mod & KMOD_CTRL)
-            {
-                switch (event.key.keysym.scancode)
-                {
-                case SDL_SCANCODE_O:
-                    openRomFile();
-                    break;
-
-                case SDL_SCANCODE_R:
-                    if (state != UiState::Menu)
-                        reset();
-                    break;
-
-                case SDL_SCANCODE_P:
-                    switch (state)
-                    {
-                    case UiState::Emulate:
-                        state = UiState::Pause;
-                        break;
-
-                    case UiState::Pause:
-                        state = UiState::Emulate;
-                        break;
-                    }
-                    break;
-
-                case SDL_SCANCODE_F:
-                    SDL_SetWindowFullscreen(video_ctx.window, SDL_GetWindowFlags(video_ctx.window) ^ SDL_WINDOW_FULLSCREEN_DESKTOP);
-                    break;
-
-                case SDL_SCANCODE_M:
-                    config.mute ^= true;
-                    break;
-
-                case SDL_SCANCODE_LSHIFT:
-                case SDL_SCANCODE_RSHIFT:
-                    if (limiter.isFastForward())
-                        limiter.setFps(kRefreshRate);
-                    else
-                        limiter.setFps(kRefreshRate * double(config.fast_forward));
-                    break;
-
-                case SDL_SCANCODE_1:
-                    config.fast_forward = 1'000'000;
-                    if (limiter.isFastForward())
-                        limiter.setFps(kRefreshRate * double(1'000'000));
-                    break;
-
-                case SDL_SCANCODE_2:
-                    config.fast_forward = 2;
-                    if (limiter.isFastForward())
-                        limiter.setFps(kRefreshRate * double(2));
-                    break;
-
-                case SDL_SCANCODE_3:
-                    config.fast_forward = 3;
-                    if (limiter.isFastForward())
-                        limiter.setFps(kRefreshRate * double(3));
-                    break;
-
-                case SDL_SCANCODE_4:
-                    config.fast_forward = 4;
-                    if (limiter.isFastForward())
-                        limiter.setFps(kRefreshRate * double(4));
-                    break;
-
-                case SDL_SCANCODE_5:
-                    config.fast_forward = 5;
-                    if (limiter.isFastForward())
-                        limiter.setFps(kRefreshRate * double(5));
-                    break;
-
-                case SDL_SCANCODE_6:
-                    config.fast_forward = 6;
-                    if (limiter.isFastForward())
-                        limiter.setFps(kRefreshRate * double(6));
-                    break;
-
-                case SDL_SCANCODE_7:
-                    config.fast_forward = 7;
-                    if (limiter.isFastForward())
-                        limiter.setFps(kRefreshRate * double(7));
-                    break;
-
-                case SDL_SCANCODE_8:
-                    config.fast_forward = 8;
-                    if (limiter.isFastForward())
-                        limiter.setFps(kRefreshRate * double(8));
-                    break;
-
-                }
-            }
+            doChooseKeyboard(event.key) || doShortcuts(event.key);
             break;
 
         case SDL_CONTROLLERDEVICEADDED:
@@ -652,12 +672,13 @@ float runUi()
             choose_key = &config.controls.keyboard.r;
         
         if (choose_key)
-            ImGui::OpenPopup("Choose key");
-
-        if (ImGui::BeginPopupModal("Choose key"))
         {
-            ImGui::Text("Press key or escape to exit");
-            ImGui::EndPopup();
+            ImGui::OpenPopup("Press key");
+            if (ImGui::BeginPopupModal("Press key"))
+            {
+                ImGui::Text("Press key or escape");
+                ImGui::EndPopup();
+            }
         }
         
         ImGui::EndSettingsWindow();
