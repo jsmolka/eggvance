@@ -17,7 +17,6 @@
   <ItemGroup>
     <ClCompile Include="modules\glad\glad.c" />
     <ClCompile Include="modules\imgui\imgui.cpp" />
-    <ClCompile Include="modules\imgui\imgui_demo.cpp" />
     <ClCompile Include="modules\imgui\imgui_draw.cpp" />
     <ClCompile Include="modules\imgui\imgui_impl_opengl2.cpp" />
     <ClCompile Include="modules\imgui\imgui_impl_sdl.cpp" />
