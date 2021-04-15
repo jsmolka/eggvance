@@ -104,7 +104,8 @@ enum class UiState
 
 FrameCounter counter;
 FrameRateLimiter limiter;
-SDL_Scancode* choose_key = nullptr;
+SDL_Scancode* choose_scancode = nullptr;
+SDL_GameControllerButton* choose_button = nullptr;
 
 void updateTitle()
 {
@@ -197,16 +198,30 @@ void openSavFile()
     counter.queueReset();
 }
 
+bool doChooseButton(const SDL_ControllerButtonEvent& event)
+{
+    if (!choose_button)
+        return false;
+
+    *choose_button = SDL_GameControllerButton(event.button);
+     choose_button = nullptr;
+
+    return true;
+}
+
 bool doChooseKeyboard(const SDL_KeyboardEvent& event)
 {
     if (event.keysym.scancode == SDL_SCANCODE_ESCAPE)
-        choose_key = nullptr;
+    {
+        choose_scancode = nullptr;
+        choose_button = nullptr;
+    }
 
-    if (!choose_key)
+    if (!choose_scancode)
         return false;
 
-    *choose_key = event.keysym.scancode;
-     choose_key = nullptr;
+    *choose_scancode = event.keysym.scancode;
+     choose_scancode = nullptr;
 
     return true;
 }
@@ -321,6 +336,10 @@ void doEvents()
 
         case SDL_KEYDOWN:
             doChooseKeyboard(event.key) || doShortcuts(event.key);
+            break;
+
+        case SDL_CONTROLLERBUTTONDOWN:
+            doChooseButton(event.cbutton);
             break;
 
         case SDL_CONTROLLERDEVICEADDED:
@@ -631,47 +650,28 @@ float runUi()
 
     if (ImGui::BeginSettingsWindow("Keyboard map", show_keyboard))
     {
-        ImGui::SettingsLabel("A");
-        if (ImGui::Button(SDL_GetScancodeName(config.controls.keyboard.a)))
-            choose_key = &config.controls.keyboard.a;
+        auto map = [](const char* label, SDL_Scancode& scancode)
+        {
+            std::string button_text = SDL_GetScancodeName(scancode);
+            shell::toUpper(button_text);
 
-        ImGui::SettingsLabel("B");
-        if (ImGui::Button(SDL_GetScancodeName(config.controls.keyboard.b)))
-            choose_key = &config.controls.keyboard.b;
+            ImGui::SettingsLabel(label);
+            if (ImGui::Button(button_text.c_str()))
+                choose_scancode = &scancode;
+        };
 
-        ImGui::SettingsLabel("Up");
-        if (ImGui::Button(SDL_GetScancodeName(config.controls.keyboard.up)))
-            choose_key = &config.controls.keyboard.up;
-
-        ImGui::SettingsLabel("Down");
-        if (ImGui::Button(SDL_GetScancodeName(config.controls.keyboard.down)))
-            choose_key = &config.controls.keyboard.down;
-
-        ImGui::SettingsLabel("Left");
-        if (ImGui::Button(SDL_GetScancodeName(config.controls.keyboard.left)))
-            choose_key = &config.controls.keyboard.left;
-
-        ImGui::SettingsLabel("Right");
-        if (ImGui::Button(SDL_GetScancodeName(config.controls.keyboard.right)))
-            choose_key = &config.controls.keyboard.right;
-
-        ImGui::SettingsLabel("Start");
-        if (ImGui::Button(SDL_GetScancodeName(config.controls.keyboard.start)))
-            choose_key = &config.controls.keyboard.start;
-
-        ImGui::SettingsLabel("Select");
-        if (ImGui::Button(SDL_GetScancodeName(config.controls.keyboard.select)))
-            choose_key = &config.controls.keyboard.select;
-
-        ImGui::SettingsLabel("L");
-        if (ImGui::Button(SDL_GetScancodeName(config.controls.keyboard.l)))
-            choose_key = &config.controls.keyboard.l;
-
-        ImGui::SettingsLabel("R");
-        if (ImGui::Button(SDL_GetScancodeName(config.controls.keyboard.r)))
-            choose_key = &config.controls.keyboard.r;
+        map("A",      config.controls.keyboard.a);
+        map("B",      config.controls.keyboard.b);
+        map("Up",     config.controls.keyboard.up);
+        map("Down",   config.controls.keyboard.down);
+        map("Left",   config.controls.keyboard.left);
+        map("Right",  config.controls.keyboard.right);
+        map("Start",  config.controls.keyboard.start);
+        map("Select", config.controls.keyboard.select);
+        map("L",      config.controls.keyboard.l);
+        map("R",      config.controls.keyboard.r);
         
-        if (choose_key)
+        if (choose_scancode)
         {
             ImGui::OpenPopup("Press key");
             if (ImGui::BeginPopupModal("Press key"))
@@ -683,7 +683,47 @@ float runUi()
         
         ImGui::EndSettingsWindow();
     }
-    
+
+    if (ImGui::BeginSettingsWindow("Controller map", show_controller))
+    {
+        auto map = [](const char* label, SDL_GameControllerButton& button)
+        {
+            std::string button_text = "NONE";
+            if (SDL_GameControllerGetStringForButton(button))
+            {
+                button_text = SDL_GameControllerGetStringForButton(button);
+                shell::toUpper(button_text);
+            }
+
+            ImGui::SettingsLabel(label);
+            if (ImGui::Button(button_text.c_str()))
+                choose_button = &button;
+        };
+
+        map("A",      config.controls.controller.a);
+        map("B",      config.controls.controller.b);
+        map("Up",     config.controls.controller.up);
+        map("Down",   config.controls.controller.down);
+        map("Left",   config.controls.controller.left);
+        map("Right",  config.controls.controller.right);
+        map("Start",  config.controls.controller.start);
+        map("Select", config.controls.controller.select);
+        map("L",      config.controls.controller.l);
+        map("R",      config.controls.controller.r);
+        
+        if (choose_button)
+        {
+            ImGui::OpenPopup("Press button");
+            if (ImGui::BeginPopupModal("Press button"))
+            {
+                ImGui::Text("Press button or escape");
+                ImGui::EndPopup();
+            }
+        }
+        
+        ImGui::EndSettingsWindow();
+    }
+
     ImGui::Render();
 
     return height;
