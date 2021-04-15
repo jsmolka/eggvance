@@ -5,7 +5,7 @@
 #include <tuple>
 #include <shell/errors.h>
 
-#include "base/sdl2.h"
+#include "frontend/videocontext.h"
 
 Save::Save()
     : type(Type::None)
