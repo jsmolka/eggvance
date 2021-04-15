@@ -65,7 +65,10 @@ bool BeginSettingsWindow(const char* title, bool& open)
         OpenPopup(title);
 
     if (!BeginPopupModal(title, &open, kWindowFlags))
+    {
+        open = false;
         return false;
+    }
 
     if (!BeginTable(title, 2, ImGuiTableFlags_SizingFixedFit))
         return false;
@@ -101,6 +104,7 @@ enum class UiState
 
 FrameCounter counter;
 FrameRateLimiter limiter;
+SDL_Scancode* choose_key = nullptr;
 
 void updateTitle()
 {
@@ -605,6 +609,60 @@ float runUi()
         ImGui::EndSettingsWindow();
     }
 
+    if (ImGui::BeginSettingsWindow("Keyboard map", show_keyboard))
+    {
+        ImGui::SettingsLabel("A");
+        if (ImGui::Button(SDL_GetScancodeName(config.controls.keyboard.a)))
+            choose_key = &config.controls.keyboard.a;
+
+        ImGui::SettingsLabel("B");
+        if (ImGui::Button(SDL_GetScancodeName(config.controls.keyboard.b)))
+            choose_key = &config.controls.keyboard.b;
+
+        ImGui::SettingsLabel("Up");
+        if (ImGui::Button(SDL_GetScancodeName(config.controls.keyboard.up)))
+            choose_key = &config.controls.keyboard.up;
+
+        ImGui::SettingsLabel("Down");
+        if (ImGui::Button(SDL_GetScancodeName(config.controls.keyboard.down)))
+            choose_key = &config.controls.keyboard.down;
+
+        ImGui::SettingsLabel("Left");
+        if (ImGui::Button(SDL_GetScancodeName(config.controls.keyboard.left)))
+            choose_key = &config.controls.keyboard.left;
+
+        ImGui::SettingsLabel("Right");
+        if (ImGui::Button(SDL_GetScancodeName(config.controls.keyboard.right)))
+            choose_key = &config.controls.keyboard.right;
+
+        ImGui::SettingsLabel("Start");
+        if (ImGui::Button(SDL_GetScancodeName(config.controls.keyboard.start)))
+            choose_key = &config.controls.keyboard.start;
+
+        ImGui::SettingsLabel("Select");
+        if (ImGui::Button(SDL_GetScancodeName(config.controls.keyboard.select)))
+            choose_key = &config.controls.keyboard.select;
+
+        ImGui::SettingsLabel("L");
+        if (ImGui::Button(SDL_GetScancodeName(config.controls.keyboard.l)))
+            choose_key = &config.controls.keyboard.l;
+
+        ImGui::SettingsLabel("R");
+        if (ImGui::Button(SDL_GetScancodeName(config.controls.keyboard.r)))
+            choose_key = &config.controls.keyboard.r;
+        
+        if (choose_key)
+            ImGui::OpenPopup("Choose key");
+
+        if (ImGui::BeginPopupModal("Choose key"))
+        {
+            ImGui::Text("Press key or escape to exit");
+            ImGui::EndPopup();
+        }
+        
+        ImGui::EndSettingsWindow();
+    }
+    
     ImGui::Render();
 
     return height;
