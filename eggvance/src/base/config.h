@@ -7,55 +7,37 @@
 #include "gamepak/gpio.h"
 #include "gamepak/save.h"
 
-template<typename Input>
-class Controls
+class Config
 {
 public:
-    Input a;
-    Input b;
-    Input up;
-    Input down;
-    Input left;
-    Input right;
-    Input start;
-    Input select;
-    Input l;
-    Input r;
-};
+    class RecentFileList : public std::vector<fs::path>
+    {
+    public:
+        RecentFileList();
 
-class RecentFileList : public std::vector<fs::path>
-{
-public:
-    RecentFileList();
+        bool hasFiles() const;
 
-    bool hasFiles() const;
+        void push(const fs::path& file);
+    };
 
-    void push(const fs::path& file);
-};
+    template<typename Input>
+    struct Controls
+    {
+        Input a;
+        Input b;
+        Input up;
+        Input down;
+        Input left;
+        Input right;
+        Input start;
+        Input select;
+        Input l;
+        Input r;
+    };
 
-class Ini
-{
-public:
-    ~Ini();
-
-    void init(const fs::path& file);
-
-    template<typename T>
-    T    get(const std::string& section, const std::string& key) const;
-    void set(const std::string& section, const std::string& key, const std::string& value);
-
-    shell::Ini ini;
-private:
-    shell::filesystem::path file;
-    bool changed = false;
-};
-
-class Config : private Ini
-{
-public:
     ~Config();
 
-    void init(const fs::path& file);
+    void init();
 
     fs::path       save_path;
     fs::path       bios_file;
@@ -72,11 +54,12 @@ public:
     float          volume;
     uint           audio_channels;
 
-    struct
-    {
-        Controls<SDL_Scancode> keyboard;
-        Controls<SDL_GameControllerButton> controller;
-    } controls;
+    Controls<SDL_Scancode> keyboard;
+    Controls<SDL_GameControllerButton> controller;
+
+private:
+    shell::Ini ini;
+    bool initialized = false;
 };
 
 inline Config config;

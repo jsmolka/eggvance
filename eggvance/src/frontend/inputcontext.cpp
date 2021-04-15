@@ -51,16 +51,16 @@ uint InputContext::keyboardState() const
     auto* keyboard = SDL_GetKeyboardState(NULL);
 
     uint state = 0;
-    state |= static_cast<uint>(keyboard[config.controls.keyboard.a])      << Bit::A;
-    state |= static_cast<uint>(keyboard[config.controls.keyboard.b])      << Bit::B;
-    state |= static_cast<uint>(keyboard[config.controls.keyboard.up])     << Bit::Up;
-    state |= static_cast<uint>(keyboard[config.controls.keyboard.down])   << Bit::Down;
-    state |= static_cast<uint>(keyboard[config.controls.keyboard.left])   << Bit::Left;
-    state |= static_cast<uint>(keyboard[config.controls.keyboard.right])  << Bit::Right;
-    state |= static_cast<uint>(keyboard[config.controls.keyboard.start])  << Bit::Start;
-    state |= static_cast<uint>(keyboard[config.controls.keyboard.select]) << Bit::Select;
-    state |= static_cast<uint>(keyboard[config.controls.keyboard.l])      << Bit::L;
-    state |= static_cast<uint>(keyboard[config.controls.keyboard.r])      << Bit::R;
+    state |= static_cast<uint>(keyboard[config.keyboard.a])      << Bit::A;
+    state |= static_cast<uint>(keyboard[config.keyboard.b])      << Bit::B;
+    state |= static_cast<uint>(keyboard[config.keyboard.up])     << Bit::Up;
+    state |= static_cast<uint>(keyboard[config.keyboard.down])   << Bit::Down;
+    state |= static_cast<uint>(keyboard[config.keyboard.left])   << Bit::Left;
+    state |= static_cast<uint>(keyboard[config.keyboard.right])  << Bit::Right;
+    state |= static_cast<uint>(keyboard[config.keyboard.start])  << Bit::Start;
+    state |= static_cast<uint>(keyboard[config.keyboard.select]) << Bit::Select;
+    state |= static_cast<uint>(keyboard[config.keyboard.l])      << Bit::L;
+    state |= static_cast<uint>(keyboard[config.keyboard.r])      << Bit::R;
 
     return state;
 }
@@ -71,16 +71,16 @@ uint InputContext::controllerState() const
         return 0;
 
     uint state = 0;
-    state |= static_cast<uint>(SDL_GameControllerGetButton(controller, config.controls.controller.a))      << Bit::A;
-    state |= static_cast<uint>(SDL_GameControllerGetButton(controller, config.controls.controller.b))      << Bit::B;
-    state |= static_cast<uint>(SDL_GameControllerGetButton(controller, config.controls.controller.up))     << Bit::Up;
-    state |= static_cast<uint>(SDL_GameControllerGetButton(controller, config.controls.controller.down))   << Bit::Down;
-    state |= static_cast<uint>(SDL_GameControllerGetButton(controller, config.controls.controller.left))   << Bit::Left;
-    state |= static_cast<uint>(SDL_GameControllerGetButton(controller, config.controls.controller.right))  << Bit::Right;
-    state |= static_cast<uint>(SDL_GameControllerGetButton(controller, config.controls.controller.start))  << Bit::Start;
-    state |= static_cast<uint>(SDL_GameControllerGetButton(controller, config.controls.controller.select)) << Bit::Select;
-    state |= static_cast<uint>(SDL_GameControllerGetButton(controller, config.controls.controller.l))      << Bit::L;
-    state |= static_cast<uint>(SDL_GameControllerGetButton(controller, config.controls.controller.r))      << Bit::R;
+    state |= static_cast<uint>(SDL_GameControllerGetButton(controller, config.controller.a))      << Bit::A;
+    state |= static_cast<uint>(SDL_GameControllerGetButton(controller, config.controller.b))      << Bit::B;
+    state |= static_cast<uint>(SDL_GameControllerGetButton(controller, config.controller.up))     << Bit::Up;
+    state |= static_cast<uint>(SDL_GameControllerGetButton(controller, config.controller.down))   << Bit::Down;
+    state |= static_cast<uint>(SDL_GameControllerGetButton(controller, config.controller.left))   << Bit::Left;
+    state |= static_cast<uint>(SDL_GameControllerGetButton(controller, config.controller.right))  << Bit::Right;
+    state |= static_cast<uint>(SDL_GameControllerGetButton(controller, config.controller.start))  << Bit::Start;
+    state |= static_cast<uint>(SDL_GameControllerGetButton(controller, config.controller.select)) << Bit::Select;
+    state |= static_cast<uint>(SDL_GameControllerGetButton(controller, config.controller.l))      << Bit::L;
+    state |= static_cast<uint>(SDL_GameControllerGetButton(controller, config.controller.r))      << Bit::R;
 
     int axis_lx = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTX);
     int axis_ly = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTY);

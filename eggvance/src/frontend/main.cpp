@@ -660,16 +660,16 @@ float runUi()
                 choose_scancode = &scancode;
         };
 
-        map("A",      config.controls.keyboard.a);
-        map("B",      config.controls.keyboard.b);
-        map("Up",     config.controls.keyboard.up);
-        map("Down",   config.controls.keyboard.down);
-        map("Left",   config.controls.keyboard.left);
-        map("Right",  config.controls.keyboard.right);
-        map("Start",  config.controls.keyboard.start);
-        map("Select", config.controls.keyboard.select);
-        map("L",      config.controls.keyboard.l);
-        map("R",      config.controls.keyboard.r);
+        map("A",      config.keyboard.a);
+        map("B",      config.keyboard.b);
+        map("Up",     config.keyboard.up);
+        map("Down",   config.keyboard.down);
+        map("Left",   config.keyboard.left);
+        map("Right",  config.keyboard.right);
+        map("Start",  config.keyboard.start);
+        map("Select", config.keyboard.select);
+        map("L",      config.keyboard.l);
+        map("R",      config.keyboard.r);
         
         if (choose_scancode)
         {
@@ -700,16 +700,16 @@ float runUi()
                 choose_button = &button;
         };
 
-        map("A",      config.controls.controller.a);
-        map("B",      config.controls.controller.b);
-        map("Up",     config.controls.controller.up);
-        map("Down",   config.controls.controller.down);
-        map("Left",   config.controls.controller.left);
-        map("Right",  config.controls.controller.right);
-        map("Start",  config.controls.controller.start);
-        map("Select", config.controls.controller.select);
-        map("L",      config.controls.controller.l);
-        map("R",      config.controls.controller.r);
+        map("A",      config.controller.a);
+        map("B",      config.controller.b);
+        map("Up",     config.controller.up);
+        map("Down",   config.controller.down);
+        map("Left",   config.controller.left);
+        map("Right",  config.controller.right);
+        map("Start",  config.controller.start);
+        map("Select", config.controller.select);
+        map("L",      config.controller.l);
+        map("R",      config.controller.r);
         
         if (choose_button)
         {
@@ -821,8 +821,7 @@ void init(int argc, char* argv[])
         throw shell::Error("Cannot parse command line: {}", error.what());
     }
 
-    config.init(fs::absolute("eggvance.ini"));
-
+    config.init();
     audio_ctx.init();
     input_ctx.init();
     video_ctx.init();
