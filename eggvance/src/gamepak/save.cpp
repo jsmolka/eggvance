@@ -17,6 +17,12 @@ Save::Save(Type type)
     : type(type)
 {
 
+}template<typename... Args>
+void showMessageBox(const std::string& title, const std::string& format, Args&&... args)
+{
+    std::string message = shell::format(format, std::forward<Args>(args)...);
+
+    SDL_ShowSimpleMessageBox(0, title.c_str(), message.c_str(), NULL);
 }
 
 Save::~Save()
@@ -27,7 +33,7 @@ Save::~Save()
         && type != Type::None)
     {
         if (fs::write(file, data) != fs::Status::Ok)
-            showMessageBox("Warning", "Cannot write save: {}", file);
+            video_ctx.showMessageBox("Warning", "Cannot write save: {}", file);
     }
 }
 

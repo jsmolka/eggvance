@@ -511,7 +511,6 @@
     <None Include="src\arm\ticks.inl">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="eggvance.ini" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />

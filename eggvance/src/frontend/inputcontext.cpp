@@ -25,12 +25,18 @@ void InputContext::init()
         controller = SDL_GameControllerOpen(0);
 }
 
+void InputContext::update()
+{
+    keyboard_state   = keyboardState();
+    controller_state = controllerButtonState();
+}
+
 uint InputContext::state() const
 {
     constexpr auto kUdMask = (1 << Bit::Up)   | (1 << Bit::Down);
     constexpr auto kLrMask = (1 << Bit::Left) | (1 << Bit::Right);
 
-    uint state = keyboardState() | controllerState();
+    uint state = keyboard_state | controller_state | controllerAxisState();
 
     if ((state & kUdMask) == kUdMask) state &= ~kUdMask;
     if ((state & kLrMask) == kLrMask) state &= ~kLrMask;
@@ -38,7 +44,7 @@ uint InputContext::state() const
     return state;
 }
 
-void InputContext::doDeviceEvent(const SDL_ControllerDeviceEvent& event)
+void InputContext::handleDeviceEvent(const SDL_ControllerDeviceEvent& event)
 {
     if (event.type == SDL_CONTROLLERDEVICEADDED)
         controller = SDL_GameControllerOpen(event.which);
@@ -65,7 +71,30 @@ uint InputContext::keyboardState() const
     return state;
 }
 
-uint InputContext::controllerState() const
+uint InputContext::controllerAxisState() const
+{
+    if (!controller)
+        return 0;
+
+    int axis_lx = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTX);
+    int axis_ly = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTY);
+    int axis_tl = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_TRIGGERLEFT);
+    int axis_tr = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_TRIGGERRIGHT);
+
+    constexpr auto kDeadzone = 16000;
+
+    uint state = 0;
+    state |= static_cast<uint>(axis_lx < 0 && std::abs(axis_lx) > kDeadzone) << Bit::Left;
+    state |= static_cast<uint>(axis_lx > 0 && std::abs(axis_lx) > kDeadzone) << Bit::Right;
+    state |= static_cast<uint>(axis_ly < 0 && std::abs(axis_ly) > kDeadzone) << Bit::Up;
+    state |= static_cast<uint>(axis_ly > 0 && std::abs(axis_ly) > kDeadzone) << Bit::Down;
+    state |= static_cast<uint>(axis_tl > kDeadzone) << Bit::L;
+    state |= static_cast<uint>(axis_tr > kDeadzone) << Bit::R;
+
+    return state;
+}
+
+uint InputContext::controllerButtonState() const
 {
     if (!controller)
         return 0;
@@ -81,20 +110,6 @@ uint InputContext::controllerState() const
     state |= static_cast<uint>(SDL_GameControllerGetButton(controller, config.controller.select)) << Bit::Select;
     state |= static_cast<uint>(SDL_GameControllerGetButton(controller, config.controller.l))      << Bit::L;
     state |= static_cast<uint>(SDL_GameControllerGetButton(controller, config.controller.r))      << Bit::R;
-
-    int axis_lx = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTX);
-    int axis_ly = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTY);
-    int axis_tl = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_TRIGGERLEFT);
-    int axis_tr = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_TRIGGERRIGHT);
-
-    constexpr auto kDeadzone = 16000;
-
-    state |= static_cast<uint>(axis_lx < 0 && std::abs(axis_lx) > kDeadzone) << Bit::Left;
-    state |= static_cast<uint>(axis_lx > 0 && std::abs(axis_lx) > kDeadzone) << Bit::Right;
-    state |= static_cast<uint>(axis_ly < 0 && std::abs(axis_ly) > kDeadzone) << Bit::Up;
-    state |= static_cast<uint>(axis_ly > 0 && std::abs(axis_ly) > kDeadzone) << Bit::Down;
-    state |= static_cast<uint>(axis_tl > kDeadzone) << Bit::L;
-    state |= static_cast<uint>(axis_tr > kDeadzone) << Bit::R;
 
     return state;
 }

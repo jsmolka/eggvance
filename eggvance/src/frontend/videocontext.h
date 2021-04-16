@@ -14,6 +14,14 @@ public:
 
     ~VideoContext();
 
+    template<typename... Args>
+    void showMessageBox(const std::string& title, const std::string& format, Args&&... args)
+    {
+        std::string message = shell::format(format, std::forward<Args>(args)...);
+
+        SDL_ShowSimpleMessageBox(0, title.c_str(), message.c_str(), window);
+    }
+
     void init();
     void title(const std::string& title);
 

@@ -180,7 +180,6 @@
     <ClInclude Include="src\timer\timerchannel.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="eggvance.ini" />
     <None Include="src\arm\arithmetic.inl" />
     <None Include="src\arm\shifts.inl" />
     <None Include="src\arm\ticks.inl" />

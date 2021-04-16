@@ -209,7 +209,7 @@ bool doChooseButton(const SDL_ControllerButtonEvent& event)
     return true;
 }
 
-bool doChooseKeyboard(const SDL_KeyboardEvent& event)
+bool handleChooseKeyboard(const SDL_KeyboardEvent& event)
 {
     if (event.keysym.scancode == SDL_SCANCODE_ESCAPE)
     {
@@ -226,7 +226,7 @@ bool doChooseKeyboard(const SDL_KeyboardEvent& event)
     return true;
 }
 
-bool doShortcuts(const SDL_KeyboardEvent& event)
+bool handleShortcuts(const SDL_KeyboardEvent& event)
 {
     if ((event.keysym.mod & KMOD_CTRL) == 0)
         return false;
@@ -323,7 +323,7 @@ bool doShortcuts(const SDL_KeyboardEvent& event)
     return false;
 }
 
-void doEvents()
+void handleEvents()
 {
     SDL_Event event;
     while (SDL_PollEvent(&event))
@@ -335,16 +335,26 @@ void doEvents()
             return;
 
         case SDL_KEYDOWN:
-            doChooseKeyboard(event.key) || doShortcuts(event.key);
+            if (handleChooseKeyboard(event.key) || handleShortcuts(event.key))
+                break;
+            [[fallthrough]];
+
+        case SDL_KEYUP:
+            input_ctx.update();
             break;
 
         case SDL_CONTROLLERBUTTONDOWN:
-            doChooseButton(event.cbutton);
+            if (doChooseButton(event.cbutton))
+                break;
+            [[fallthrough]];
+
+        case SDL_CONTROLLERBUTTONUP:
+            input_ctx.update();
             break;
 
         case SDL_CONTROLLERDEVICEADDED:
         case SDL_CONTROLLERDEVICEREMOVED:
-            input_ctx.doDeviceEvent(event.cdevice);
+            input_ctx.handleDeviceEvent(event.cdevice);
             break;
         }
     }
@@ -660,16 +670,16 @@ float runUi()
                 choose_scancode = &scancode;
         };
 
-        map("A",      config.keyboard.a);
-        map("B",      config.keyboard.b);
-        map("Up",     config.keyboard.up);
-        map("Down",   config.keyboard.down);
-        map("Left",   config.keyboard.left);
-        map("Right",  config.keyboard.right);
-        map("Start",  config.keyboard.start);
-        map("Select", config.keyboard.select);
-        map("L",      config.keyboard.l);
-        map("R",      config.keyboard.r);
+        map("A              ", config.keyboard.a);
+        map("B              ", config.keyboard.b);
+        map("Up             ", config.keyboard.up);
+        map("Down           ", config.keyboard.down);
+        map("Left           ", config.keyboard.left);
+        map("Right          ", config.keyboard.right);
+        map("Start          ", config.keyboard.start);
+        map("Select         ", config.keyboard.select);
+        map("L              ", config.keyboard.l);
+        map("R              ", config.keyboard.r);
         
         if (choose_scancode)
         {
@@ -700,16 +710,16 @@ float runUi()
                 choose_button = &button;
         };
 
-        map("A",      config.controller.a);
-        map("B",      config.controller.b);
-        map("Up",     config.controller.up);
-        map("Down",   config.controller.down);
-        map("Left",   config.controller.left);
-        map("Right",  config.controller.right);
-        map("Start",  config.controller.start);
-        map("Select", config.controller.select);
-        map("L",      config.controller.l);
-        map("R",      config.controller.r);
+        map("A              ", config.controller.a);
+        map("B              ", config.controller.b);
+        map("Up             ", config.controller.up);
+        map("Down           ", config.controller.down);
+        map("Left           ", config.controller.left);
+        map("Right          ", config.controller.right);
+        map("Start          ", config.controller.start);
+        map("Select         ", config.controller.select);
+        map("L              ", config.controller.l);
+        map("R              ", config.controller.r);
         
         if (choose_button)
         {
@@ -852,7 +862,7 @@ int main(int argc, char* argv[])
         {
             limiter.run([]()
             {
-                doEvents();
+                handleEvents();
 
                 switch (state)
                 {
@@ -888,7 +898,7 @@ int main(int argc, char* argv[])
     }
     catch (const std::exception& ex)
     {
-        showMessageBox("Exception", ex.what());
+        video_ctx.showMessageBox("Exception", ex.what());
     }
     return 0;
 }
