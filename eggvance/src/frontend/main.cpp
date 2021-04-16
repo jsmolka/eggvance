@@ -51,7 +51,7 @@ void QuestionMark(const char* help)
     }
 }
 
-bool BeginSettingsWindow(const char* title, bool& open)
+bool BeginPopup(const char* title, bool& open, bool can_close)
 {
     constexpr auto kWindowFlags =
           ImGuiWindowFlags_NoMove
@@ -59,21 +59,20 @@ bool BeginSettingsWindow(const char* title, bool& open)
         | ImGuiWindowFlags_NoCollapse
         | ImGuiWindowFlags_AlwaysAutoResize;
 
-    SetNextWindowPos(GetMainViewport()->GetCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-
     if (open)
-        OpenPopup(title);
-
-    if (!BeginPopupModal(title, &open, kWindowFlags))
     {
-        open = false;
-        return false;
+        SetNextWindowPos(GetMainViewport()->GetCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+
+        OpenPopup(title);
+        open = BeginPopupModal(title, can_close ? &open : nullptr, kWindowFlags);
     }
+    return open;
+}
 
-    if (!BeginTable(title, 2, ImGuiTableFlags_SizingFixedFit))
-        return false;
-
-    return true;
+bool BeginSettingsWindow(const char* title, bool& open)
+{
+    return BeginPopup(title, open, true)
+        && BeginTable(title, 2, ImGuiTableFlags_SizingFixedFit);
 }
 
 void EndSettingsWindow()
@@ -662,11 +661,11 @@ float runUi()
     {
         auto map = [](const char* label, SDL_Scancode& scancode)
         {
-            std::string button_text = SDL_GetScancodeName(scancode);
-            shell::toUpper(button_text);
+            std::string text = SDL_GetScancodeName(scancode);
+            shell::toUpper(text);
 
             ImGui::SettingsLabel(label);
-            if (ImGui::Button(button_text.c_str()))
+            if (ImGui::Button(text.c_str()))
                 choose_scancode = &scancode;
         };
 
@@ -681,14 +680,11 @@ float runUi()
         map("L              ", config.keyboard.l);
         map("R              ", config.keyboard.r);
         
-        if (choose_scancode)
+        bool show = choose_scancode;
+        if (ImGui::BeginPopup("Press button", show, false))
         {
-            ImGui::OpenPopup("Press key");
-            if (ImGui::BeginPopupModal("Press key"))
-            {
-                ImGui::Text("Press key or escape");
-                ImGui::EndPopup();
-            }
+            ImGui::Text("Press button or escape");
+            ImGui::EndPopup();
         }
         
         ImGui::EndSettingsWindow();
@@ -698,15 +694,15 @@ float runUi()
     {
         auto map = [](const char* label, SDL_GameControllerButton& button)
         {
-            std::string button_text = "NONE";
+            std::string text = "NONE";
             if (SDL_GameControllerGetStringForButton(button))
             {
-                button_text = SDL_GameControllerGetStringForButton(button);
-                shell::toUpper(button_text);
+                text = SDL_GameControllerGetStringForButton(button);
+                shell::toUpper(text);
             }
 
             ImGui::SettingsLabel(label);
-            if (ImGui::Button(button_text.c_str()))
+            if (ImGui::Button(text.c_str()))
                 choose_button = &button;
         };
 
@@ -721,14 +717,11 @@ float runUi()
         map("L              ", config.controller.l);
         map("R              ", config.controller.r);
         
-        if (choose_button)
+        bool show = choose_button;
+        if (ImGui::BeginPopup("Press button", show, false))
         {
-            ImGui::OpenPopup("Press button");
-            if (ImGui::BeginPopupModal("Press button"))
-            {
-                ImGui::Text("Press button or escape");
-                ImGui::EndPopup();
-            }
+            ImGui::Text("Press button or escape");
+            ImGui::EndPopup();
         }
         
         ImGui::EndSettingsWindow();
