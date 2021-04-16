@@ -5,7 +5,7 @@
 
 #include "base/filesystem.h"
 
-std::optional<fs::path> openFile(const char* filter = nullptr)
+std::optional<fs::path> openFileDialog(const char* filter = nullptr)
 {
     nfdchar_t* file = nullptr;
     if (NFD_OpenDialog(filter, nullptr, &file) != NFD_OKAY)
@@ -17,7 +17,7 @@ std::optional<fs::path> openFile(const char* filter = nullptr)
     return result;
 }
 
-std::optional<fs::path> openFolder()
+std::optional<fs::path> openFolderDialog()
 {
     nfdchar_t* path = nullptr;
     if (NFD_PickFolder(NULL, &path) != NFD_OKAY)

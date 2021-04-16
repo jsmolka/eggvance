@@ -168,7 +168,7 @@ void loadRomFile(const fs::path& file)
 
 void openRomFile()
 {
-    if (const auto file = openFile("gba"))
+    if (const auto file = openFileDialog("gba"))
         loadRomFile(*file);
     
     limiter.queueReset();
@@ -190,7 +190,7 @@ void loadSavFile(const fs::path& file)
 
 void openSavFile()
 {
-    if (const auto file = openFile("sav"))
+    if (const auto file = openFileDialog("sav"))
         loadSavFile(*file);
 
     limiter.queueReset();
@@ -629,7 +629,7 @@ float runUi()
         ImGui::SettingsLabel("Save path");
         if (ImGui::FileSelectButton(config.save_path, "##0"))
         {
-            if (const auto path = openFolder())
+            if (const auto path = openFolderDialog())
                 config.save_path = *path;
         }
         ImGui::SameLine();
@@ -641,7 +641,7 @@ float runUi()
         ImGui::SettingsLabel("BIOS file");
         if (ImGui::FileSelectButton(config.bios_file, "##1"))
         {
-            if (const auto file = openFile())
+            if (const auto file = openFileDialog())
             {
                 config.bios_file = *file;
                 Bios::init(config.bios_file);
