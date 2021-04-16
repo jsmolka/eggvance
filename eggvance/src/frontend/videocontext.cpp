@@ -13,6 +13,10 @@ VideoContext::~VideoContext()
 {
     if (SDL_WasInit(SDL_INIT_VIDEO))
     {
+        ImGui_ImplOpenGL2_Shutdown();
+        ImGui_ImplSDL2_Shutdown();
+        ImGui::DestroyContext();
+
         SDL_GL_DeleteContext(context);
         SDL_DestroyWindow(window);
         SDL_QuitSubSystem(SDL_INIT_VIDEO);
