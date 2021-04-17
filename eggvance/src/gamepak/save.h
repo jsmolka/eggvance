@@ -23,7 +23,7 @@ public:
 
     static Type parse(const Rom& rom);
 
-    void init(const fs::path& file);
+    bool load(const fs::path& file);
 
     virtual void reset();
     virtual u8 read(u32 addr);

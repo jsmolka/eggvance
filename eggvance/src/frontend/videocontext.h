@@ -19,6 +19,8 @@ public:
     {
         std::string message = shell::format(format, std::forward<Args>(args)...);
 
+        shell::print("{}\n", message);
+
         SDL_ShowSimpleMessageBox(0, title.c_str(), message.c_str(), window);
     }
 

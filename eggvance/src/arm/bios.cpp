@@ -1,10 +1,8 @@
 #include "bios.h"
 
-#include <shell/errors.h>
-#include <shell/hash.h>
-
 #include "arm/arm.h"
 #include "base/config.h"
+#include "frontend/videocontext.h"
 
 void Bios::init(const fs::path& path)
 {
@@ -14,12 +12,14 @@ void Bios::init(const fs::path& path)
     switch (fs::read(path, data))
     {
     case fs::Status::BadSize:
-        throw shell::Error("Bad BIOS size");
+        video_ctx.showMessageBox("Warning", "Bad BIOS size: {} bytes", fs::file_size(path, std::error_code()));
+        std::copy(replacement.begin(), replacement.end(), data.begin());
         break;
 
     case fs::Status::BadFile:
     case fs::Status::BadStream:
-        throw shell::Error("Cannot read BIOS: {}", path);
+        video_ctx.showMessageBox("Warning", "Cannot read BIOS: {}", path);
+        std::copy(replacement.begin(), replacement.end(), data.begin());
         break;
     }
 }
@@ -39,7 +39,8 @@ Integral Bios::read(u32 addr)
     return latch >> (8 * (addr & 0x3));
 }
 
-Ram<Bios::kSize> Bios::data =
+Ram<Bios::kSize> Bios::data = {};
+Ram<Bios::kSize> Bios::replacement =
 {
     0x0C, 0x00, 0x00, 0xEA, 0x15, 0x00, 0x00, 0xEA, 0x15, 0x00, 0x00, 0xEA, 0x13, 0x00, 0x00, 0xEA, 0x12, 0x00, 0x00, 0xEA, 0x11, 0x00, 0x00, 0xEA, 0x00, 0x00, 0x00, 0xEA, 0xFF, 0xFF, 0xFF, 0xEA,
     0x0F, 0x50, 0x2D, 0xE9, 0x01, 0x03, 0xA0, 0xE3, 0x0F, 0xE0, 0xA0, 0xE1, 0x04, 0xF0, 0x10, 0xE5, 0x0F, 0x50, 0xBD, 0xE8, 0x04, 0xF0, 0x5E, 0xE2, 0xDF, 0x00, 0xA0, 0xE3, 0x00, 0xF0, 0x29, 0xE1,

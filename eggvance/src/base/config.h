@@ -10,19 +10,19 @@
 class Config
 {
 public:
-    class RecentFileList : public std::vector<fs::path>
+    class RecentFiles : public std::vector<fs::path>
     {
     public:
-        RecentFileList();
+        RecentFiles();
 
-        bool hasFiles() const;
-
-        void push(const fs::path& file);
+        bool isEmpty() const;
+        void push(fs::path file);
     };
 
     template<typename Input>
-    struct Controls
+    class Controls
     {
+    public:
         Input a;
         Input b;
         Input up;
@@ -39,20 +39,20 @@ public:
 
     void init();
 
-    fs::path       save_path;
-    fs::path       bios_file;
-    bool           bios_skip;
-    RecentFileList recent;
-    uint           fast_forward;
-    Save::Type     save_type;
-    Gpio::Type     gpio_type;
-    uint           frame_size;
-    bool           color_correct;
-    bool           preserve_aspect_ratio;
-    uint           video_layers;
-    bool           mute;
-    float          volume;
-    uint           audio_channels;
+    fs::path    save_path;
+    fs::path    bios_file;
+    bool        bios_skip;
+    RecentFiles recent;
+    uint        fast_forward;
+    Save::Type  save_type;
+    Gpio::Type  gpio_type;
+    uint        frame_size;
+    bool        color_correct;
+    bool        preserve_aspect_ratio;
+    bool        mute;
+    float       volume;
+    uint        video_layers;
+    uint        audio_channels;
 
     Controls<SDL_Scancode> keyboard;
     Controls<SDL_GameControllerButton> controller;

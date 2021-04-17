@@ -102,7 +102,10 @@ void reset()
 
     updateTitle();
 
-    state = State::Run;
+    if (gamepak.rom.size())
+        state = State::Run;
+    else
+        state = State::Menu;
 }
 
 void queueReset()
@@ -120,9 +123,9 @@ void load(const std::optional<fs::path>& rom, const std::optional<fs::path>& sav
         if (rom)
             config.recent.push(*rom);
 
-        gamepak.load(
+        if (gamepak.load(
             rom.value_or(fs::path()),
-            sav.value_or(fs::path()));
+            sav.value_or(fs::path())))
 
         reset();
 
@@ -364,7 +367,7 @@ float doUi()
         if (ImGui::MenuItem("Open save", nullptr, false, isRunning()))
             load(std::nullopt, openFileDialog("sav"));
 
-        if (ImGui::BeginMenu("Recent", config.recent.hasFiles()))
+        if (ImGui::BeginMenu("Recent", !config.recent.isEmpty()))
         {
             for (const auto& file : config.recent)
             {
@@ -599,8 +602,7 @@ float doUi()
                 if (const auto path = openPathDialog())
                     config.save_path = *path;
 
-                limiter.reset();
-                counter.reset();
+                queueReset();
             }
             ImGui::SameLine();
             if (ImGui::Button("Clear"))
@@ -618,8 +620,7 @@ float doUi()
                     config.bios_file = *file;
                     Bios::init(config.bios_file);
                 }
-                limiter.reset();
-                counter.reset();
+                queueReset();
             }
             ImGui::SameLine();
             if (ImGui::Button("Clear##1"))
@@ -793,7 +794,7 @@ void init(int argc, char* argv[])
 
     Options options("eggvance");
     options.add({ "rom",       "ROM file"          }, Options::value<fs::path>()->positional()->optional());
-    options.add({ "--save,-s", "Save file", "file" }, Options::value<fs::path>()->optional());
+    options.add({ "-s,--save", "Save file", "file" }, Options::value<fs::path>()->optional());
 
     OptionsResult result;
     try
@@ -802,7 +803,9 @@ void init(int argc, char* argv[])
     }
     catch (const ParseError& error)
     {
-        throw shell::Error("Cannot parse command line: {}", error.what());
+        shell::print("Cannot parse command line: {}\n", error.what());
+
+        std::exit(1);
     }
 
     config.init();
@@ -874,6 +877,8 @@ int main(int argc, char* argv[])
     catch (const std::exception& ex)
     {
         video_ctx.showMessageBox("Exception", ex.what());
+
+        return 1;
     }
     return 0;
 }

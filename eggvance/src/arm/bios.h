@@ -16,6 +16,7 @@ public:
 
 private:
     static Ram<kSize> data;
+    static Ram<kSize> replacement;
 
     template<typename Integral>
     Integral read(u32 addr);

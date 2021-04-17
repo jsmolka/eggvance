@@ -29,7 +29,7 @@ public:
 
     Rom();
 
-    void init(const fs::path& file);
+    bool load(const fs::path& file);
 
     template<typename Integral>
     Integral read(u32 addr) const
@@ -39,6 +39,7 @@ public:
         return *reinterpret_cast<const Integral*>(this->data() + addr);
     }
 
+    fs::path file;
     std::size_t mask = 0;
     std::string code;
     std::string title;

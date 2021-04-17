@@ -7,11 +7,12 @@
 #include "sram.h"
 #include "base/config.h"
 
-void GamePak::load(fs::path gba, fs::path sav)
+bool GamePak::load(fs::path gba, fs::path sav)
 {
     if (!gba.empty())
     {
-        rom.init(gba);
+        if (!rom.load(gba))
+            return false;
 
         if (sav.empty())
         {
@@ -54,8 +55,19 @@ void GamePak::load(fs::path gba, fs::path sav)
         case Save::Type::Flash512:  save = std::make_shared<Flash512>(); break;
         case Save::Type::Flash1024: save = std::make_shared<Flash1024>(); break;
         }
-        save->init(sav);
+        
+        if (!save->load(sav))
+        {
+            sav = rom.file;
+            sav.replace_extension("sav");
+
+            if (!config.save_path.empty())
+                sav = config.save_path / sav.filename();
+
+            return save->load(sav);
+        }
     }
+    return true;
 }
 
 bool GamePak::isEepromAccess(u32 addr) const

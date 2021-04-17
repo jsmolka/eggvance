@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <string_view>
 #include <tuple>
-#include <shell/errors.h>
 
 #include "frontend/videocontext.h"
 
@@ -17,12 +16,6 @@ Save::Save(Type type)
     : type(type)
 {
 
-}template<typename... Args>
-void showMessageBox(const std::string& title, const std::string& format, Args&&... args)
-{
-    std::string message = shell::format(format, std::forward<Args>(args)...);
-
-    SDL_ShowSimpleMessageBox(0, title.c_str(), message.c_str(), NULL);
 }
 
 Save::~Save()
@@ -61,17 +54,25 @@ Save::Type Save::parse(const Rom& rom)
     return Type::None;
 }
 
-void Save::init(const fs::path& file)
+bool Save::load(const fs::path& file)
 {
     if (fs::is_regular_file(file))
     {
         if (fs::read(file, data) != fs::Status::Ok)
-            throw shell::Error("Cannot read save: {}", file);
+        {
+            video_ctx.showMessageBox("Warning", "Cannot read save: {}", file);
+            return false;
+        }
 
         if (!isValidSize(data.size()))
-            throw shell::Error("Bad save size: {}", data.size());
+        {
+            video_ctx.showMessageBox("Warning", "Bad save size: {} bytes", data.size());
+            return false;
+        }
     }
     this->file = file;
+
+    return true;
 }
 
 void Save::reset()

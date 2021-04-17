@@ -16,6 +16,18 @@ template<> std::optional<SDL_GameControllerButton> shell::parse(const std::strin
 template<> std::optional<Save::Type>               shell::parse(const std::string& data) { return parseEnum<Save::Type>(data); }
 template<> std::optional<Gpio::Type>               shell::parse(const std::string& data) { return parseEnum<Gpio::Type>(data); }
 
+std::optional<fs::path> iniFile()
+{
+    if (char* path = SDL_GetPrefPath("eggvance", "eggvance"))
+    {
+        const auto file = fs::u8path(path) / "eggvance.ini";
+        SDL_free(path);
+
+        return file;
+    }
+    return std::nullopt;
+}
+
 Config::~Config()
 {
     if (!initialized)
@@ -30,14 +42,14 @@ Config::~Config()
     ini.set("settings",   "bios_file",             shell::format(bios_file));
     ini.set("settings",   "bios_skip",             shell::format(bios_skip));
     ini.set("emulation",  "fast_forward",          shell::format(fast_forward));
-    ini.set("emulation",  "save_type",             shell::format(uint(save_type)));
-    ini.set("emulation",  "gpio_type",             shell::format(uint(gpio_type)));
+    ini.set("emulation",  "save_type",             shell::format(save_type));
+    ini.set("emulation",  "gpio_type",             shell::format(gpio_type));
     ini.set("video",      "frame_size",            shell::format(frame_size));
     ini.set("video",      "color_correct",         shell::format(color_correct));
     ini.set("video",      "preserve_aspect_ratio", shell::format(preserve_aspect_ratio));
-    ini.set("video",      "video_layers",          shell::format(video_layers));
     ini.set("audio",      "mute",                  shell::format(mute));
     ini.set("audio",      "volume",                shell::format(volume));
+    ini.set("video",      "video_layers",          shell::format(video_layers));
     ini.set("audio",      "audio_channels",        shell::format(audio_channels));
     ini.set("keyboard",   "a",                     shell::format(keyboard.a));
     ini.set("keyboard",   "b",                     shell::format(keyboard.b));
@@ -60,48 +72,36 @@ Config::~Config()
     ini.set("controller", "l",                     shell::format(controller.l));
     ini.set("controller", "r",                     shell::format(controller.r));
 
-    if (char* path = SDL_GetPrefPath("eggvance", "eggvance"))
-    {
-        try
-        {
-            ini.save(fs::u8path(path) / "eggvance.ini");
-        }
-        catch (const std::exception&) {}
-
-        SDL_free(path);
-    }
+    if (const auto file = iniFile())
+        ini.save(*file);
 }
 
 void Config::init()
 {
-    if (char* path = SDL_GetPrefPath("eggvance", "eggvance"))
+    try
     {
-        try
-        {
-            ini.load(fs::u8path(path) / "eggvance.ini");
-        }
-        catch (const std::exception&) {}
-
-        SDL_free(path);
+        if (const auto file = iniFile())
+            ini.load(*file);
     }
+    catch (const shell::ParseError&) {}
 
-    for (auto [index, file] : shell::enumerate(recent))
+    for (int index = 9; index >= 0; --index)
     {
-        file = ini.findOr("file", shell::format("recent_{}", index), fs::path());
+        recent.push(ini.findOr("file", shell::format("recent_{}", index), fs::path()));
     }
 
     save_path             = ini.findOr("settings",   "save_path",             fs::path());
     bios_file             = ini.findOr("settings",   "bios_file",             fs::path());
     bios_skip             = ini.findOr("settings",   "bios_skip",             true);
-    fast_forward          = ini.findOr("emulation",  "fast_forward",          2);
+    fast_forward          = ini.findOr("emulation",  "fast_forward",          1'000'000);
     save_type             = ini.findOr("emulation",  "save_type",             Save::Type::Detect);
     gpio_type             = ini.findOr("emulation",  "gpio_type",             Gpio::Type::Detect);
     frame_size            = ini.findOr("video",      "frame_size",            4);
     color_correct         = ini.findOr("video",      "color_correct",         true);
     preserve_aspect_ratio = ini.findOr("video",      "preserve_aspect_ratio", true);
-    video_layers          = ini.findOr("video",      "video_layers",          0b11111);
     mute                  = ini.findOr("audio",      "mute",                  false);
     volume                = ini.findOr("audio",      "volume",                0.5);
+    video_layers          = ini.findOr("video",      "video_layers",          0b11111);
     audio_channels        = ini.findOr("audio",      "audio_channels",        0b111111);
     keyboard.a            = ini.findOr("keyboard",   "a",                     SDL_SCANCODE_U);
     keyboard.b            = ini.findOr("keyboard",   "b",                     SDL_SCANCODE_H);
@@ -127,8 +127,11 @@ void Config::init()
     initialized = true;
 }
 
-void Config::RecentFileList::push(const fs::path& file)
+void Config::RecentFiles::push(fs::path file)
 {
+    if (!fs::is_regular_file(file))
+        return;
+
     auto iter = std::find(begin(), end(), file);
     if ( iter != end())
         erase(iter);
@@ -139,17 +142,17 @@ void Config::RecentFileList::push(const fs::path& file)
     insert(begin(), file);
 }
 
-Config::RecentFileList::RecentFileList()
+Config::RecentFiles::RecentFiles()
 {
     resize(10);
 }
 
-bool Config::RecentFileList::hasFiles() const
+bool Config::RecentFiles::isEmpty() const
 {
     for (const auto& file : *this)
     {
         if (!file.empty())
-            return true;
+            return false;
     }
-    return false;
+    return true;
 }

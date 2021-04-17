@@ -2,9 +2,9 @@
 
 #include <numeric>
 #include <shell/algorithm.h>
-#include <shell/errors.h>
 
 #include "base/bit.h"
+#include "frontend/videocontext.h"
 
 template<std::size_t kSize>
 std::string makeAscii(const u8 (&data)[kSize])
@@ -21,15 +21,23 @@ Rom::Rom()
     reserve(kMaxSize);
 }
 
-void Rom::init(const fs::path& file)
+bool Rom::load(const fs::path& file)
 {
     if (fs::read(file, *this) != fs::Status::Ok)
-        throw shell::Error("Cannot read ROM: {}", file);
+    {
+        video_ctx.showMessageBox("Warning", "Cannot read ROM: {}", file);
+        clear();
+        return false;
+    }
 
     mask = kMaxSize;
 
     if (size() <= sizeof(Header) || size() > kMaxSize)
-        throw shell::Error("Bad ROM size: {}", size());
+    {
+        video_ctx.showMessageBox("Warning", "Bad ROM size: {} bytes", size());
+        clear();
+        return false;
+    }
 
     for (std::size_t addr = size(); addr < capacity(); ++addr)
     {
@@ -43,6 +51,10 @@ void Rom::init(const fs::path& file)
         title = makeAscii(header.game_title);
         code  = makeAscii(header.game_code);
     }
+
+    this->file = file;
+
+    return true;
 }
 
 u8 Rom::complement(const Header& header)
