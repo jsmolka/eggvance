@@ -68,7 +68,7 @@ void updateTitle()
             : "eggvance - {0}",
         gamepak.rom.title);
 
-    video_ctx.title(title);
+    video_ctx.setTitle(title);
 }
 
 void updateTitle(double fps)
@@ -79,7 +79,7 @@ void updateTitle(double fps)
             : "eggvance - {0} - {1:.1f} fps",
         gamepak.rom.title, fps);
 
-    video_ctx.title(title);
+    video_ctx.setTitle(title);
 }
 
 void reset()
@@ -278,7 +278,7 @@ void doEvents()
 
         case SDL_CONTROLLERDEVICEADDED:
         case SDL_CONTROLLERDEVICEREMOVED:
-            input_ctx.doDeviceEvent(event.cdevice);
+            input_ctx.deviceEvent(event.cdevice);
             break;
         }
     }

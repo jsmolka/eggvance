@@ -27,7 +27,7 @@ void InputContext::init()
 
 void InputContext::update()
 {
-    keyboard_state   = keyboardState();
+    keyboard_state = keyboardState();
     controller_state = controllerButtonState();
 }
 
@@ -44,12 +44,18 @@ uint InputContext::state() const
     return state;
 }
 
-void InputContext::doDeviceEvent(const SDL_ControllerDeviceEvent& event)
+void InputContext::deviceEvent(const SDL_ControllerDeviceEvent& event)
 {
-    if (event.type == SDL_CONTROLLERDEVICEADDED)
+    switch (event.type)
+    {
+    case SDL_CONTROLLERDEVICEADDED:
         controller = SDL_GameControllerOpen(event.which);
-    if (event.type == SDL_CONTROLLERDEVICEREMOVED)
+        break;
+
+    case SDL_CONTROLLERDEVICEREMOVED:
         controller = nullptr;
+        break;
+    }
 }
 
 uint InputContext::keyboardState() const
@@ -73,6 +79,8 @@ uint InputContext::keyboardState() const
 
 uint InputContext::controllerAxisState() const
 {
+    constexpr auto kDeadzone = 16384;
+
     if (!controller)
         return 0;
 
@@ -80,8 +88,6 @@ uint InputContext::controllerAxisState() const
     int axis_ly = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTY);
     int axis_tl = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_TRIGGERLEFT);
     int axis_tr = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_TRIGGERRIGHT);
-
-    constexpr auto kDeadzone = 16000;
 
     uint state = 0;
     state |= static_cast<uint>(axis_lx < 0 && std::abs(axis_lx) > kDeadzone) << Bit::Left;

@@ -34,19 +34,9 @@ void VideoContext::init()
     initImGui();
 }
 
-void VideoContext::title(const std::string& title)
+void VideoContext::setTitle(const std::string& title)
 {
     SDL_SetWindowTitle(window, title.c_str());
-}
-
-void VideoContext::renderClear(u8 r, u8 g, u8 b)
-{
-    glClearColor(
-        GLfloat(r) / 255.0f,
-        GLfloat(g) / 255.0f,
-        GLfloat(b) / 255.0f, 1);
-
-    glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void VideoContext::renderIcon(GLfloat padding_top)
@@ -100,23 +90,21 @@ bool VideoContext::initWindow()
         SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
     if (window)
-        SDL_SetWindowMinimumSize(window, kScreenW, kScreenH);;
+        SDL_SetWindowMinimumSize(window, kScreenW, kScreenH);
 
-    return window;
+    context = SDL_GL_CreateContext(window);
+
+    return window && context;
 }
 
 bool VideoContext::initOpenGL()
 {
-    context = SDL_GL_CreateContext(window);
-
     if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
         return false;
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
@@ -126,13 +114,11 @@ bool VideoContext::initOpenGL()
     glBindTexture(GL_TEXTURE_2D, icon_texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glBindTexture(GL_TEXTURE_2D, 0);
 
     glGenTextures(1, &frame_texture);
     glBindTexture(GL_TEXTURE_2D, frame_texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glBindTexture(GL_TEXTURE_2D, 0);
 
     SDL_GL_SetSwapInterval(0);
 
@@ -148,6 +134,16 @@ void VideoContext::initImGui()
 
     ImGui_ImplSDL2_InitForOpenGL(window, context);
     ImGui_ImplOpenGL2_Init();
+}
+
+void VideoContext::renderClear(u8 r, u8 g, u8 b)
+{
+    glClearColor(
+        GLfloat(r) / 255.0f,
+        GLfloat(g) / 255.0f,
+        GLfloat(b) / 255.0f, 1);
+
+    glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void VideoContext::renderTexture(GLuint texture, GLfloat texture_w, GLfloat texture_h, const void* data, bool preserve_ratio, GLfloat padding_top)

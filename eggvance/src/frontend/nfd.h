@@ -11,7 +11,7 @@ std::optional<fs::path> openFileDialog(const char* filter = nullptr)
     if (NFD_OpenDialog(filter, nullptr, &file) != NFD_OKAY)
         return std::nullopt;
 
-    auto result = fs::u8path(file);
+    const auto result = fs::u8path(file);
     free(file);
 
     return result;
@@ -23,7 +23,7 @@ std::optional<fs::path> openPathDialog()
     if (NFD_PickFolder(NULL, &path) != NFD_OKAY)
         return std::nullopt;
 
-    auto result = fs::u8path(path);
+    const auto result = fs::u8path(path);
     free(path);
 
     return result;

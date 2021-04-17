@@ -18,16 +18,16 @@ void FrameRateLimiter::queueReset()
     queue_reset = true;
 }
 
+bool FrameRateLimiter::isFastForward() const
+{
+    return fast_forward > 1;
+}
+
 void FrameRateLimiter::setFastForward(double fast_forward)
 {
     this->fast_forward = fast_forward;
 
     setFps(kRefreshRate * fast_forward);
-}
-
-bool FrameRateLimiter::isFastForward() const
-{
-    return fast_forward > 1;
 }
 
 void FrameRateLimiter::setFps(double fps)

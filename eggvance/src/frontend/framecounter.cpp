@@ -2,7 +2,6 @@
 
 FrameCounter::FrameCounter()
 {
-    reset();
     queueReset();
 }
 

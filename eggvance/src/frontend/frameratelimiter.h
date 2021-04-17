@@ -11,8 +11,9 @@ public:
 
     void reset();
     void queueReset();
-    void setFastForward(double multiplier);
+    
     bool isFastForward() const;
+    void setFastForward(double fast_forward);
 
     template<typename Frame>
     void run(Frame frame)
@@ -48,8 +49,8 @@ private:
 
     void setFps(double fps);
 
-    double fast_forward = 1;
     Duration accumulated;
     Duration frame_delta;
+    double fast_forward = 1;
     bool queue_reset = false;
 };

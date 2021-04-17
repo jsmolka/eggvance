@@ -12,7 +12,7 @@ public:
     void update();
     uint state() const;
 
-    void doDeviceEvent(const SDL_ControllerDeviceEvent& event);
+    void deviceEvent(const SDL_ControllerDeviceEvent& event);
 
 private:
     enum class Bit { A, B, Select, Start, Right, Left, Up, Down, R, L };
