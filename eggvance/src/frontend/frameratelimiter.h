@@ -7,10 +7,12 @@
 class FrameRateLimiter
 {
 public:
-    bool isFastForward();
+    FrameRateLimiter();
+
     void reset();
     void queueReset();
-    void setFps(double fps);
+    void setMultiplier(double multiplier);
+    bool isFastForward() const;
 
     template<typename Frame>
     void run(Frame frame)
@@ -44,7 +46,9 @@ private:
         return Clock::now() - begin;
     }
 
-    double fps = 0;
+    void setFps(double fps);
+
+    double multiplier = 1;
     Duration accumulated;
     Duration frame_delta;
     bool queue_reset = false;

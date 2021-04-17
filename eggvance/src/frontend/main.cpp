@@ -90,6 +90,37 @@ FrameCounter counter;
 FrameRateLimiter limiter;
 SDL_Scancode* choose_scancode = nullptr;
 SDL_GameControllerButton* choose_button = nullptr;
+bool ui_active = false;
+
+void updateUiVisible()
+{
+    using Clock = std::chrono::high_resolution_clock;
+    using Point = std::chrono::high_resolution_clock::time_point;
+
+    int dx = 0;
+    int dy = 0;
+    SDL_GetRelativeMouseState(&dx, &dy);
+
+    static Point moved;
+
+    if (dx > 0 || dy > 0 || state == UiState::Menu || ui_active)
+        moved = Clock::now();
+
+    SDL_ShowCursor((Clock::now() - moved) < std::chrono::milliseconds(2500));
+}
+
+bool isUiVisible()
+{
+    return SDL_ShowCursor(-1) == SDL_ENABLE;
+}
+
+void setMultiplier(double mulitplier)
+{
+    config.fast_forward = mulitplier;
+
+    if (limiter.isFastForward())
+        limiter.setMultiplier(mulitplier);
+}
 
 void updateTitle()
 {
@@ -242,57 +273,41 @@ bool handleShortcuts(const SDL_KeyboardEvent& event)
     case SDL_SCANCODE_LSHIFT:
     case SDL_SCANCODE_RSHIFT:
         if (limiter.isFastForward())
-            limiter.setFps(kRefreshRate);
+            limiter.setMultiplier(1);
         else
-            limiter.setFps(kRefreshRate * double(config.fast_forward));
+            limiter.setMultiplier(config.fast_forward);
         return true;
 
     case SDL_SCANCODE_1:
-        config.fast_forward = 1'000'000;
-        if (limiter.isFastForward())
-            limiter.setFps(kRefreshRate * double(1'000'000));
+        setMultiplier(1'000'000);
         return true;
 
     case SDL_SCANCODE_2:
-        config.fast_forward = 2;
-        if (limiter.isFastForward())
-            limiter.setFps(kRefreshRate * double(2));
+        setMultiplier(2);
         return true;
 
     case SDL_SCANCODE_3:
-        config.fast_forward = 3;
-        if (limiter.isFastForward())
-            limiter.setFps(kRefreshRate * double(3));
+        setMultiplier(3);
         return true;
 
     case SDL_SCANCODE_4:
-        config.fast_forward = 4;
-        if (limiter.isFastForward())
-            limiter.setFps(kRefreshRate * double(4));
+        setMultiplier(4);
         return true;
 
     case SDL_SCANCODE_5:
-        config.fast_forward = 5;
-        if (limiter.isFastForward())
-            limiter.setFps(kRefreshRate * double(5));
+        setMultiplier(5);
         return true;
 
     case SDL_SCANCODE_6:
-        config.fast_forward = 6;
-        if (limiter.isFastForward())
-            limiter.setFps(kRefreshRate * double(6));
+        setMultiplier(6);
         return true;
 
     case SDL_SCANCODE_7:
-        config.fast_forward = 7;
-        if (limiter.isFastForward())
-            limiter.setFps(kRefreshRate * double(7));
+        setMultiplier(7);
         return true;
 
     case SDL_SCANCODE_8:
-        config.fast_forward = 8;
-        if (limiter.isFastForward())
-            limiter.setFps(kRefreshRate * double(8));
+        setMultiplier(8);
         return true;
 
     case SDL_SCANCODE_F:
@@ -342,13 +357,19 @@ void handleEvents()
             break;
         }
     }
+
+    updateUiVisible();
 }
 
 float runUi()
 {
-    static bool show_settings = false;
-    static bool show_keyboard = false;
+    static bool show_menu       = false;
+    static bool show_settings   = false;
+    static bool show_keyboard   = false;
     static bool show_controller = false;
+
+    if (!isUiVisible())
+        return 0;
 
     ImGui_ImplOpenGL2_NewFrame();
     ImGui_ImplSDL2_NewFrame(video_ctx.window);
@@ -360,6 +381,8 @@ float runUi()
 
     if (ImGui::BeginMenu("File"))
     {
+        show_menu = true;
+
         if (ImGui::MenuItem("Open ROM", "Ctrl+O"))
             openRomFile();
 
@@ -405,6 +428,8 @@ float runUi()
 
     if (ImGui::BeginMenu("Emulation"))
     {
+        show_menu = true;
+
         if (ImGui::MenuItem("Reset", "Ctrl+R", nullptr, state != UiState::Menu))
             reset();
 
@@ -427,9 +452,9 @@ float runUi()
         if (ImGui::MenuItem("Fast forward", "Ctrl+Shift", limiter.isFastForward()))
         {
             if (limiter.isFastForward())
-                limiter.setFps(kRefreshRate);
+                limiter.setMultiplier(1);
             else
-                limiter.setFps(kRefreshRate * double(config.fast_forward));
+                limiter.setMultiplier(config.fast_forward);
         }
 
         if (ImGui::BeginMenu("Fast forward speed"))
@@ -437,12 +462,7 @@ float runUi()
             uint multiplier = 1'000'000;
 
             if (ImGui::MenuItem("Unbound", "Ctrl+1", config.fast_forward == multiplier))
-            {
-                config.fast_forward = multiplier;
-
-                if (limiter.isFastForward())
-                    limiter.setFps(kRefreshRate * double(multiplier));
-            }
+                setMultiplier(multiplier);
 
             ImGui::Separator();
 
@@ -452,12 +472,7 @@ float runUi()
                 std::string shortcut = shell::format("Ctrl+{}", multiplier);
 
                 if (ImGui::MenuItem(text.c_str(), shortcut.c_str(), config.fast_forward == multiplier))
-                {
-                    config.fast_forward = multiplier;
-
-                    if (limiter.isFastForward())
-                        limiter.setFps(kRefreshRate * double(multiplier));
-                }
+                    setMultiplier(multiplier);
             }
             ImGui::EndMenu();
         }
@@ -505,6 +520,8 @@ float runUi()
 
     if (ImGui::BeginMenu("Audio/Video"))
     {
+        show_menu = true;
+
         if (ImGui::BeginMenu("Frame size"))
         {
             int w;
@@ -714,6 +731,12 @@ float runUi()
         ImGui::EndSettingsWindow();
     }
 
+    ui_active = ImGui::IsAnyItemHovered()
+        || show_menu
+        || show_settings
+        || show_keyboard
+        || show_controller;
+
     ImGui::Render();
 
     return height;
@@ -721,7 +744,8 @@ float runUi()
 
 void renderUi()
 {
-    ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+    if (isUiVisible())
+        ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
 }
 
 void emulate()
@@ -828,8 +852,6 @@ void init(int argc, char* argv[])
 
     if (const auto rom = result.find<fs::path>("rom"))
         loadRomFile(*rom);
-
-    limiter.setFps(kRefreshRate);
 }
 
 int main(int argc, char* argv[])
