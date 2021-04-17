@@ -1,40 +1,65 @@
 #pragma once
 
 #include <shell/ini.h>
+#include <shell/ranges.h>
 
 #include "filesystem.h"
 #include "frontend/sdl2.h"
 #include "gamepak/gpio.h"
 #include "gamepak/save.h"
 
-class Config
+template<typename Input>
+class Controls
 {
 public:
-    class RecentFiles : public std::vector<fs::path>
-    {
-    public:
-        RecentFiles();
+    Input a;
+    Input b;
+    Input up;
+    Input down;
+    Input left;
+    Input right;
+    Input start;
+    Input select;
+    Input l;
+    Input r;
+};
 
-        bool isEmpty() const;
-        void push(fs::path file);
-    };
+class RecentFiles
+{
+public:
+    using iterator               = std::vector<fs::path>::iterator;
+    using const_iterator         = std::vector<fs::path>::const_iterator;
+    using reverse_iterator       = std::vector<fs::path>::reverse_iterator;
+    using const_reverse_iterator = std::vector<fs::path>::const_reverse_iterator;
 
-    template<typename Input>
-    class Controls
-    {
-    public:
-        Input a;
-        Input b;
-        Input up;
-        Input down;
-        Input left;
-        Input right;
-        Input start;
-        Input select;
-        Input l;
-        Input r;
-    };
+    RecentFiles();
 
+    bool isEmpty() const;
+    void push(const fs::path& file);
+
+    SHELL_FORWARD_ITERATORS(files.begin(), files.end())
+    SHELL_REVERSE_ITERATORS(files.end(), files.begin())
+
+private:
+    std::vector<fs::path> files;
+};
+
+class Ini : public shell::Ini
+{
+public:
+    ~Ini();
+
+    void init();
+
+private:
+    static std::optional<fs::path> file();
+
+    bool initialized = false;
+};
+
+class Config : public Ini
+{
+public:
     ~Config();
 
     void init();
@@ -56,10 +81,6 @@ public:
 
     Controls<SDL_Scancode> keyboard;
     Controls<SDL_GameControllerButton> controller;
-
-private:
-    shell::Ini ini;
-    bool initialized = false;
 };
 
 inline Config config;

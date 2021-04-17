@@ -1,12 +1,12 @@
 #include "config.h"
 
-#include <shell/errors.h>
-
-template<typename T>
-std::optional<T> parseEnum(const std::string& data)
+template<typename Enum>
+std::optional<Enum> parseEnum(const std::string& data)
 {
-    if (const auto value = shell::parse<uint>(data))
-        return static_cast<T>(*value);
+    static_assert(std::is_enum_v<Enum>);
+
+    if (const auto value = shell::parse<std::underlying_type_t<Enum>>(data))
+        return static_cast<Enum>(*value);
 
     return std::nullopt;
 }
@@ -16,7 +16,59 @@ template<> std::optional<SDL_GameControllerButton> shell::parse(const std::strin
 template<> std::optional<Save::Type>               shell::parse(const std::string& data) { return parseEnum<Save::Type>(data); }
 template<> std::optional<Gpio::Type>               shell::parse(const std::string& data) { return parseEnum<Gpio::Type>(data); }
 
-std::optional<fs::path> iniFile()
+void RecentFiles::push(const fs::path& file)
+{
+    if (!fs::is_regular_file(file))
+        return;
+
+    auto copy(file);
+    copy.make_preferred();
+
+    auto iter = std::find(files.begin(), files.end(), file);
+    if ( iter != files.end())
+        files.erase(iter);
+
+    files.pop_back();
+    files.insert(files.begin(), copy);
+}
+
+RecentFiles::RecentFiles()
+{
+    files.resize(10);
+}
+
+bool RecentFiles::isEmpty() const
+{
+    for (const auto& file : files)
+    {
+        if (!file.empty())
+            return false;
+    }
+    return true;
+}
+
+Ini::~Ini()
+{
+    if (initialized)
+    {
+        if (const auto file = this->file())
+            save(*file);
+    }
+}
+
+void Ini::init()
+{
+    try
+    {
+        if (const auto file = this->file())
+            load(*file);
+    }
+    catch (const shell::ParseError&) {}
+
+    initialized = true;
+}
+
+std::optional<fs::path> Ini::file()
 {
     if (char* path = SDL_GetPrefPath("eggvance", "eggvance"))
     {
@@ -30,129 +82,86 @@ std::optional<fs::path> iniFile()
 
 Config::~Config()
 {
-    if (!initialized)
-        return;
-
     for (auto [index, file] : shell::enumerate(recent))
     {
-        ini.set("file", shell::format("recent_{}", index), file.u8string());
+        set("recent", shell::format("file_{}", index), file.u8string());
     }
 
-    ini.set("settings",   "save_path",             shell::format(save_path));
-    ini.set("settings",   "bios_file",             shell::format(bios_file));
-    ini.set("settings",   "bios_skip",             shell::format(bios_skip));
-    ini.set("emulation",  "fast_forward",          shell::format(fast_forward));
-    ini.set("emulation",  "save_type",             shell::format(save_type));
-    ini.set("emulation",  "gpio_type",             shell::format(gpio_type));
-    ini.set("video",      "frame_size",            shell::format(frame_size));
-    ini.set("video",      "color_correct",         shell::format(color_correct));
-    ini.set("video",      "preserve_aspect_ratio", shell::format(preserve_aspect_ratio));
-    ini.set("audio",      "mute",                  shell::format(mute));
-    ini.set("audio",      "volume",                shell::format(volume));
-    ini.set("video",      "video_layers",          shell::format(video_layers));
-    ini.set("audio",      "audio_channels",        shell::format(audio_channels));
-    ini.set("keyboard",   "a",                     shell::format(keyboard.a));
-    ini.set("keyboard",   "b",                     shell::format(keyboard.b));
-    ini.set("keyboard",   "up",                    shell::format(keyboard.up));
-    ini.set("keyboard",   "down",                  shell::format(keyboard.down));
-    ini.set("keyboard",   "left",                  shell::format(keyboard.left));
-    ini.set("keyboard",   "right",                 shell::format(keyboard.right));
-    ini.set("keyboard",   "start",                 shell::format(keyboard.start));
-    ini.set("keyboard",   "select",                shell::format(keyboard.select));
-    ini.set("keyboard",   "l",                     shell::format(keyboard.l));
-    ini.set("keyboard",   "r",                     shell::format(keyboard.r));
-    ini.set("controller", "a",                     shell::format(controller.a));
-    ini.set("controller", "b",                     shell::format(controller.b));
-    ini.set("controller", "up",                    shell::format(controller.up));
-    ini.set("controller", "down",                  shell::format(controller.down));
-    ini.set("controller", "left",                  shell::format(controller.left));
-    ini.set("controller", "right",                 shell::format(controller.right));
-    ini.set("controller", "start",                 shell::format(controller.start));
-    ini.set("controller", "select",                shell::format(controller.select));
-    ini.set("controller", "l",                     shell::format(controller.l));
-    ini.set("controller", "r",                     shell::format(controller.r));
-
-    if (const auto file = iniFile())
-        ini.save(*file);
+    set("settings",   "save_path",             shell::format(save_path));
+    set("settings",   "bios_file",             shell::format(bios_file));
+    set("settings",   "bios_skip",             shell::format(bios_skip));
+    set("emulation",  "fast_forward",          shell::format(fast_forward));
+    set("emulation",  "save_type",             shell::format(save_type));
+    set("emulation",  "gpio_type",             shell::format(gpio_type));
+    set("video",      "frame_size",            shell::format(frame_size));
+    set("video",      "color_correct",         shell::format(color_correct));
+    set("video",      "preserve_aspect_ratio", shell::format(preserve_aspect_ratio));
+    set("audio",      "mute",                  shell::format(mute));
+    set("audio",      "volume",                shell::format(volume));
+    set("video",      "video_layers",          shell::format(video_layers));
+    set("audio",      "audio_channels",        shell::format(audio_channels));
+    set("keyboard",   "a",                     shell::format(keyboard.a));
+    set("keyboard",   "b",                     shell::format(keyboard.b));
+    set("keyboard",   "up",                    shell::format(keyboard.up));
+    set("keyboard",   "down",                  shell::format(keyboard.down));
+    set("keyboard",   "left",                  shell::format(keyboard.left));
+    set("keyboard",   "right",                 shell::format(keyboard.right));
+    set("keyboard",   "start",                 shell::format(keyboard.start));
+    set("keyboard",   "select",                shell::format(keyboard.select));
+    set("keyboard",   "l",                     shell::format(keyboard.l));
+    set("keyboard",   "r",                     shell::format(keyboard.r));
+    set("controller", "a",                     shell::format(controller.a));
+    set("controller", "b",                     shell::format(controller.b));
+    set("controller", "up",                    shell::format(controller.up));
+    set("controller", "down",                  shell::format(controller.down));
+    set("controller", "left",                  shell::format(controller.left));
+    set("controller", "right",                 shell::format(controller.right));
+    set("controller", "start",                 shell::format(controller.start));
+    set("controller", "select",                shell::format(controller.select));
+    set("controller", "l",                     shell::format(controller.l));
+    set("controller", "r",                     shell::format(controller.r));
 }
 
 void Config::init()
 {
-    try
-    {
-        if (const auto file = iniFile())
-            ini.load(*file);
-    }
-    catch (const shell::ParseError&) {}
+    Ini::init();
 
     for (int index = 9; index >= 0; --index)
     {
-        recent.push(ini.findOr("file", shell::format("recent_{}", index), fs::path()));
+        recent.push(findOr("recent", shell::format("file_{}", index), fs::path()));
     }
 
-    save_path             = ini.findOr("settings",   "save_path",             fs::path());
-    bios_file             = ini.findOr("settings",   "bios_file",             fs::path());
-    bios_skip             = ini.findOr("settings",   "bios_skip",             true);
-    fast_forward          = ini.findOr("emulation",  "fast_forward",          1'000'000);
-    save_type             = ini.findOr("emulation",  "save_type",             Save::Type::Detect);
-    gpio_type             = ini.findOr("emulation",  "gpio_type",             Gpio::Type::Detect);
-    frame_size            = ini.findOr("video",      "frame_size",            4);
-    color_correct         = ini.findOr("video",      "color_correct",         true);
-    preserve_aspect_ratio = ini.findOr("video",      "preserve_aspect_ratio", true);
-    mute                  = ini.findOr("audio",      "mute",                  false);
-    volume                = ini.findOr("audio",      "volume",                0.5);
-    video_layers          = ini.findOr("video",      "video_layers",          0b11111);
-    audio_channels        = ini.findOr("audio",      "audio_channels",        0b111111);
-    keyboard.a            = ini.findOr("keyboard",   "a",                     SDL_SCANCODE_U);
-    keyboard.b            = ini.findOr("keyboard",   "b",                     SDL_SCANCODE_H);
-    keyboard.up           = ini.findOr("keyboard",   "up",                    SDL_SCANCODE_W);
-    keyboard.down         = ini.findOr("keyboard",   "down",                  SDL_SCANCODE_S);
-    keyboard.left         = ini.findOr("keyboard",   "left",                  SDL_SCANCODE_A);
-    keyboard.right        = ini.findOr("keyboard",   "right",                 SDL_SCANCODE_D);
-    keyboard.start        = ini.findOr("keyboard",   "start",                 SDL_SCANCODE_G);
-    keyboard.select       = ini.findOr("keyboard",   "select",                SDL_SCANCODE_F);
-    keyboard.l            = ini.findOr("keyboard",   "l",                     SDL_SCANCODE_Q);
-    keyboard.r            = ini.findOr("keyboard",   "r",                     SDL_SCANCODE_I);
-    controller.a          = ini.findOr("controller", "a",                     SDL_CONTROLLER_BUTTON_B);
-    controller.b          = ini.findOr("controller", "b",                     SDL_CONTROLLER_BUTTON_A);
-    controller.up         = ini.findOr("controller", "up",                    SDL_CONTROLLER_BUTTON_DPAD_UP);
-    controller.down       = ini.findOr("controller", "down",                  SDL_CONTROLLER_BUTTON_DPAD_DOWN);
-    controller.left       = ini.findOr("controller", "left",                  SDL_CONTROLLER_BUTTON_DPAD_LEFT);
-    controller.right      = ini.findOr("controller", "right",                 SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
-    controller.start      = ini.findOr("controller", "start",                 SDL_CONTROLLER_BUTTON_START);
-    controller.select     = ini.findOr("controller", "select",                SDL_CONTROLLER_BUTTON_BACK);
-    controller.l          = ini.findOr("controller", "l",                     SDL_CONTROLLER_BUTTON_LEFTSHOULDER);
-    controller.r          = ini.findOr("controller", "r",                     SDL_CONTROLLER_BUTTON_RIGHTSHOULDER);
-
-    initialized = true;
-}
-
-void Config::RecentFiles::push(fs::path file)
-{
-    if (!fs::is_regular_file(file))
-        return;
-
-    auto iter = std::find(begin(), end(), file);
-    if ( iter != end())
-        erase(iter);
-
-    if (size() == capacity())
-        pop_back();
-
-    insert(begin(), file);
-}
-
-Config::RecentFiles::RecentFiles()
-{
-    resize(10);
-}
-
-bool Config::RecentFiles::isEmpty() const
-{
-    for (const auto& file : *this)
-    {
-        if (!file.empty())
-            return false;
-    }
-    return true;
+    save_path             = findOr("settings",   "save_path",             fs::path());
+    bios_file             = findOr("settings",   "bios_file",             fs::path());
+    bios_skip             = findOr("settings",   "bios_skip",             true);
+    fast_forward          = findOr("emulation",  "fast_forward",          1'000'000);
+    save_type             = findOr("emulation",  "save_type",             Save::Type::Detect);
+    gpio_type             = findOr("emulation",  "gpio_type",             Gpio::Type::Detect);
+    frame_size            = findOr("video",      "frame_size",            4);
+    color_correct         = findOr("video",      "color_correct",         true);
+    preserve_aspect_ratio = findOr("video",      "preserve_aspect_ratio", true);
+    mute                  = findOr("audio",      "mute",                  false);
+    volume                = findOr("audio",      "volume",                0.5);
+    video_layers          = findOr("video",      "video_layers",          0b11111);
+    audio_channels        = findOr("audio",      "audio_channels",        0b111111);
+    keyboard.a            = findOr("keyboard",   "a",                     SDL_SCANCODE_U);
+    keyboard.b            = findOr("keyboard",   "b",                     SDL_SCANCODE_H);
+    keyboard.up           = findOr("keyboard",   "up",                    SDL_SCANCODE_W);
+    keyboard.down         = findOr("keyboard",   "down",                  SDL_SCANCODE_S);
+    keyboard.left         = findOr("keyboard",   "left",                  SDL_SCANCODE_A);
+    keyboard.right        = findOr("keyboard",   "right",                 SDL_SCANCODE_D);
+    keyboard.start        = findOr("keyboard",   "start",                 SDL_SCANCODE_G);
+    keyboard.select       = findOr("keyboard",   "select",                SDL_SCANCODE_F);
+    keyboard.l            = findOr("keyboard",   "l",                     SDL_SCANCODE_Q);
+    keyboard.r            = findOr("keyboard",   "r",                     SDL_SCANCODE_I);
+    controller.a          = findOr("controller", "a",                     SDL_CONTROLLER_BUTTON_B);
+    controller.b          = findOr("controller", "b",                     SDL_CONTROLLER_BUTTON_A);
+    controller.up         = findOr("controller", "up",                    SDL_CONTROLLER_BUTTON_DPAD_UP);
+    controller.down       = findOr("controller", "down",                  SDL_CONTROLLER_BUTTON_DPAD_DOWN);
+    controller.left       = findOr("controller", "left",                  SDL_CONTROLLER_BUTTON_DPAD_LEFT);
+    controller.right      = findOr("controller", "right",                 SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
+    controller.start      = findOr("controller", "start",                 SDL_CONTROLLER_BUTTON_START);
+    controller.select     = findOr("controller", "select",                SDL_CONTROLLER_BUTTON_BACK);
+    controller.l          = findOr("controller", "l",                     SDL_CONTROLLER_BUTTON_LEFTSHOULDER);
+    controller.r          = findOr("controller", "r",                     SDL_CONTROLLER_BUTTON_RIGHTSHOULDER);
 }
