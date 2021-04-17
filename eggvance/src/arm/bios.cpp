@@ -12,7 +12,7 @@ void Bios::init(const fs::path& path)
     switch (fs::read(path, data))
     {
     case fs::Status::BadSize:
-        video_ctx.showMessageBox("Warning", "Bad BIOS size: {} bytes", fs::file_size(path, std::error_code()));
+        video_ctx.showMessageBox("Warning", "Bad BIOS size: {} bytes", fs::file_size(path));
         std::copy(replacement.begin(), replacement.end(), data.begin());
         break;
 
