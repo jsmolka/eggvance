@@ -180,6 +180,9 @@
     <ClInclude Include="src\timer\timerchannel.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="modules\glad\LICENSE" />
+    <None Include="modules\imgui\LICENSE" />
+    <None Include="modules\nfd\LICENSE" />
     <None Include="src\arm\arithmetic.inl" />
     <None Include="src\arm\shifts.inl" />
     <None Include="src\arm\ticks.inl" />

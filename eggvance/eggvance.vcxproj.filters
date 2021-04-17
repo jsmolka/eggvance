@@ -511,6 +511,9 @@
     <None Include="src\arm\ticks.inl">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="modules\glad\LICENSE" />
+    <None Include="modules\imgui\LICENSE" />
+    <None Include="modules\nfd\LICENSE" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />

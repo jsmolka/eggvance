@@ -27,28 +27,13 @@
 namespace ImGui
 {
 
-bool FileSelectButton(const fs::path& file, const std::string& hash)
+bool DialogButton(const fs::path& file)
 {
     std::string text = file.empty()
-        ? ("Browse..." + hash)
+        ? "Browse..."
         : file.u8string().c_str();
 
     return ImGui::Button(text.c_str());
-}
-
-void QuestionMark(const char* help)
-{
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 1.0f);
-    ImGui::TextDisabled("(?)");
-
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-        ImGui::TextUnformatted(help);
-        ImGui::PopTextWrapPos();
-        ImGui::EndTooltip();
-    }
 }
 
 bool BeginPopup(const char* title, bool& open, bool can_close)
@@ -420,7 +405,7 @@ float runUi()
 
     if (ImGui::BeginMenu("Emulation"))
     {
-        if (ImGui::MenuItem("Reset", "Ctrl+R", nullptr, !gamepak.rom.empty()))
+        if (ImGui::MenuItem("Reset", "Ctrl+R", nullptr, state != UiState::Menu))
             reset();
 
         if (ImGui::MenuItem("Pause", "Ctrl+P", state == UiState::Pause, state != UiState::Menu))
@@ -449,29 +434,29 @@ float runUi()
 
         if (ImGui::BeginMenu("Fast forward speed"))
         {
-            uint times = 1'000'000;
+            uint multiplier = 1'000'000;
 
-            if (ImGui::MenuItem("Unbound", "Ctrl+1", config.fast_forward == times))
+            if (ImGui::MenuItem("Unbound", "Ctrl+1", config.fast_forward == multiplier))
             {
-                config.fast_forward = times;
+                config.fast_forward = multiplier;
 
                 if (limiter.isFastForward())
-                    limiter.setFps(kRefreshRate * double(times));
+                    limiter.setFps(kRefreshRate * double(multiplier));
             }
 
             ImGui::Separator();
 
-            for (times = 2; times <= 8; ++times)
+            for (multiplier = 2; multiplier <= 8; ++multiplier)
             {
-                std::string text = shell::format("{}x", times);
-                std::string shortcut = shell::format("Ctrl+{}", times);
+                std::string text = shell::format("{}x", multiplier);
+                std::string shortcut = shell::format("Ctrl+{}", multiplier);
 
-                if (ImGui::MenuItem(text.c_str(), shortcut.c_str(), config.fast_forward == times))
+                if (ImGui::MenuItem(text.c_str(), shortcut.c_str(), config.fast_forward == multiplier))
                 {
-                    config.fast_forward = times;
+                    config.fast_forward = multiplier;
 
                     if (limiter.isFastForward())
-                        limiter.setFps(kRefreshRate * double(times));
+                        limiter.setFps(kRefreshRate * double(multiplier));
                 }
             }
             ImGui::EndMenu();
@@ -496,7 +481,6 @@ float runUi()
                 if (ImGui::MenuItem(text.data(), nullptr, config.save_type == type))
                     config.save_type = type;
             }
-
             ImGui::EndMenu();
         }
 
@@ -514,10 +498,8 @@ float runUi()
                 if (ImGui::MenuItem(text.data(), nullptr, config.gpio_type == type))
                     config.gpio_type = type;
             }
-
             ImGui::EndMenu();
         }
-
         ImGui::EndMenu();
     }
 
@@ -550,9 +532,7 @@ float runUi()
             uint fullscreen = SDL_GetWindowFlags(video_ctx.window) & SDL_WINDOW_FULLSCREEN_DESKTOP;
 
             if (ImGui::MenuItem("Fullscreen", "Ctrl+F", fullscreen))
-            {
                 SDL_SetWindowFullscreen(video_ctx.window, fullscreen ^ SDL_WINDOW_FULLSCREEN_DESKTOP);
-            }
 
             ImGui::EndMenu();
         }
@@ -571,7 +551,6 @@ float runUi()
         if (ImGui::BeginMenu("Volume"))
         {
             ImGui::SliderFloat("", &config.volume, 0.0f, 1.0f);
-
             ImGui::EndMenu();
         }
 
@@ -584,11 +563,11 @@ float runUi()
         {
             static constexpr std::pair<std::string_view, uint> kLayers[] =
             {
-                { "Background 0", 0b000001 },
-                { "Background 1", 0b000010 },
-                { "Background 2", 0b000100 },
-                { "Background 3", 0b001000 },
-                { "Objects",      0b010000 }
+                { "Background 0", 1 << 0 },
+                { "Background 1", 1 << 1 },
+                { "Background 2", 1 << 2 },
+                { "Background 3", 1 << 3 },
+                { "Objects",      1 << 4 }
             };
 
             for (const auto& [text, mask] : kLayers)
@@ -603,12 +582,12 @@ float runUi()
         {
             static constexpr std::pair<std::string_view, uint> kChannels[] =
             {
-                { "Square 1", 0b000001 },
-                { "Square 2", 0b000010 },
-                { "Wave",     0b000100 },
-                { "Noise",    0b001000 },
-                { "FIFO A",   0b010000 },
-                { "FIFO B",   0b100000 },
+                { "Square 1", 1 << 0 },
+                { "Square 2", 1 << 1 },
+                { "Wave",     1 << 2 },
+                { "Noise",    1 << 3 },
+                { "FIFO A",   1 << 4 },
+                { "FIFO B",   1 << 5 }
             };
 
             for (const auto& [text, mask] : kChannels)
@@ -618,7 +597,6 @@ float runUi()
             }
             ImGui::EndMenu();
         }
-
         ImGui::EndMenu();
     }
 
@@ -626,30 +604,41 @@ float runUi()
 
     if (ImGui::BeginSettingsWindow("Settings", show_settings))
     {
-        ImGui::SettingsLabel("Save path");
-        if (ImGui::FileSelectButton(config.save_path, "##0"))
+        ImGui::PushID("Save");
         {
-            if (const auto path = openFolderDialog())
-                config.save_path = *path;
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Clear##0"))
-            config.save_path = fs::path();
-        ImGui::SameLine();
-        ImGui::QuestionMark("Save files are stored next to the ROM if none is selected");
-
-        ImGui::SettingsLabel("BIOS file");
-        if (ImGui::FileSelectButton(config.bios_file, "##1"))
-        {
-            if (const auto file = openFileDialog())
+            ImGui::SettingsLabel("Save path");
+            if (ImGui::DialogButton(config.save_path))
             {
-                config.bios_file = *file;
-                Bios::init(config.bios_file);
+                if (const auto path = openPathDialog())
+                    config.save_path = *path;
+
+                limiter.reset();
+                counter.reset();
             }
+            ImGui::SameLine();
+            if (ImGui::Button("Clear"))
+                config.save_path = fs::path();
         }
-        ImGui::SameLine();
-        if (ImGui::Button("Clear##1"))
-            config.bios_file = fs::path();
+        ImGui::PopID();
+
+        ImGui::PushID("BIOS");
+        {
+            ImGui::SettingsLabel("BIOS file");
+            if (ImGui::DialogButton(config.bios_file))
+            {
+                if (const auto file = openFileDialog())
+                {
+                    config.bios_file = *file;
+                    Bios::init(config.bios_file);
+                }
+                limiter.reset();
+                counter.reset();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Clear##1"))
+                config.bios_file = fs::path();
+        }
+        ImGui::PopID();
 
         ImGui::SettingsLabel("Skip BIOS");
         ImGui::Checkbox("", &config.bios_skip);
@@ -686,7 +675,6 @@ float runUi()
             ImGui::Text("Press button or escape");
             ImGui::EndPopup();
         }
-        
         ImGui::EndSettingsWindow();
     }
 
@@ -723,7 +711,6 @@ float runUi()
             ImGui::Text("Press button or escape");
             ImGui::EndPopup();
         }
-        
         ImGui::EndSettingsWindow();
     }
 

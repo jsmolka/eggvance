@@ -17,7 +17,7 @@ std::optional<fs::path> openFileDialog(const char* filter = nullptr)
     return result;
 }
 
-std::optional<fs::path> openFolderDialog()
+std::optional<fs::path> openPathDialog()
 {
     nfdchar_t* path = nullptr;
     if (NFD_PickFolder(NULL, &path) != NFD_OKAY)
