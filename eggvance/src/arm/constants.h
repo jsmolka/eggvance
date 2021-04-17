@@ -12,14 +12,6 @@ enum class Irq
     GamePak = 1 << 13
 };
 
-enum class State
-{
-    Thumb = 1 << 0,
-    Halt  = 1 << 1,
-    Irq   = 1 << 2,
-    Dma   = 1 << 3
-};
-
 enum class Access
 {
     NonSequential,

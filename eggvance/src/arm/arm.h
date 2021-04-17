@@ -15,6 +15,14 @@ public:
     friend class InterruptRequest;
     friend class InterruptMaster;
 
+    enum class State
+    {
+        Thumb = 1 << 0,
+        Halt  = 1 << 1,
+        Irq   = 1 << 2,
+        Dma   = 1 << 3
+    };
+
     Arm();
 
     void init();

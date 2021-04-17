@@ -15,7 +15,7 @@ void HaltControl::write(uint index, u8 byte)
 {
     RegisterW::write(index, byte);
 
-    arm.state |= State::Halt;
+    arm.state |= Arm::State::Halt;
 }
 
 WaitControl::WaitControl()
