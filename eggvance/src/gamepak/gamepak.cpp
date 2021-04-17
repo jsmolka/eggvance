@@ -7,7 +7,7 @@
 #include "sram.h"
 #include "base/config.h"
 
-void GamePak::init(fs::path gba, fs::path sav)
+void GamePak::load(fs::path gba, fs::path sav)
 {
     if (!gba.empty())
     {

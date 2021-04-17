@@ -1,8 +1,10 @@
 #include "frameratelimiter.h"
 
+inline constexpr auto kRefreshRate = 59.737;
+
 FrameRateLimiter::FrameRateLimiter()
 {
-    setMultiplier(1);
+    setFps(kRefreshRate);
 }
 
 void FrameRateLimiter::reset()
@@ -16,18 +18,16 @@ void FrameRateLimiter::queueReset()
     queue_reset = true;
 }
 
-void FrameRateLimiter::setMultiplier(double multiplier)
+void FrameRateLimiter::setFastForward(double fast_forward)
 {
-    constexpr auto kRefreshRate = 59.737;
+    this->fast_forward = fast_forward;
 
-    this->multiplier = multiplier;
-
-    setFps(kRefreshRate * multiplier);
+    setFps(kRefreshRate * fast_forward);
 }
 
 bool FrameRateLimiter::isFastForward() const
 {
-    return multiplier > 1;
+    return fast_forward > 1;
 }
 
 void FrameRateLimiter::setFps(double fps)

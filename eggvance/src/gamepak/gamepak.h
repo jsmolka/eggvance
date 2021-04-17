@@ -9,7 +9,7 @@
 class GamePak
 {
 public:
-    void init(fs::path gba, fs::path sav);
+    void load(fs::path gba, fs::path sav);
 
     bool isEepromAccess(u32 addr) const;
 

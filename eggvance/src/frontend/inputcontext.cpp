@@ -44,7 +44,7 @@ uint InputContext::state() const
     return state;
 }
 
-void InputContext::handleDeviceEvent(const SDL_ControllerDeviceEvent& event)
+void InputContext::doDeviceEvent(const SDL_ControllerDeviceEvent& event)
 {
     if (event.type == SDL_CONTROLLERDEVICEADDED)
         controller = SDL_GameControllerOpen(event.which);

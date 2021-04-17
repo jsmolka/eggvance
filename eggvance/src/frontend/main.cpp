@@ -24,6 +24,264 @@
 #include "sio/sio.h"
 #include "timer/timer.h"
 
+enum class State { Quit, Menu, Run, Pause };
+
+State state;
+FrameCounter counter;
+FrameRateLimiter limiter;
+SDL_Scancode* select_scancode = nullptr;
+SDL_GameControllerButton* select_button = nullptr;
+bool active = false;
+
+void updateUiVisible()
+{
+    using Clock = std::chrono::high_resolution_clock;
+    using Point = std::chrono::high_resolution_clock::time_point;
+
+    int dx = 0;
+    int dy = 0;
+    SDL_GetRelativeMouseState(&dx, &dy);
+
+    static Point moved;
+
+    if (dx != 0 || dy != 0 || active || state == State::Menu)
+        moved = Clock::now();
+
+    SDL_ShowCursor((Clock::now() - moved) < std::chrono::milliseconds(2500));
+}
+
+bool isUiVisible()
+{
+    return SDL_ShowCursor(-1) == SDL_ENABLE;
+}
+
+bool isRunning()
+{
+    return state == State::Run || state == State::Pause;
+}
+
+void updateTitle()
+{
+    const auto title = shell::format(
+        gamepak.rom.title.empty()
+            ? "eggvance"
+            : "eggvance - {0}",
+        gamepak.rom.title);
+
+    video_ctx.title(title);
+}
+
+void updateTitle(double fps)
+{
+    const auto title = shell::format(
+        gamepak.rom.title.empty()
+            ? "eggvance - {1:.1f} fps"
+            : "eggvance - {0} - {1:.1f} fps",
+        gamepak.rom.title, fps);
+
+    video_ctx.title(title);
+}
+
+void reset()
+{
+    gamepak.save->reset();
+    gamepak.gpio->reset();
+
+    shell::reconstruct(apu);
+    shell::reconstruct(arm);
+    shell::reconstruct(dma);
+    shell::reconstruct(ppu);
+    shell::reconstruct(keypad);
+    shell::reconstruct(sio);
+    shell::reconstruct(scheduler);
+    shell::reconstruct(timer);
+
+    apu.init();
+    arm.init();
+    ppu.init();
+
+    updateTitle();
+
+    state = State::Run;
+}
+
+void queueReset()
+{
+    limiter.queueReset();
+    counter.queueReset();
+}
+
+void load(const std::optional<fs::path>& rom, const std::optional<fs::path>& sav)
+{
+    if (rom || (sav && gamepak.rom.size()))
+    {
+        audio_ctx.pause();
+
+        if (rom)
+            config.recent.push(*rom);
+
+        gamepak.load(
+            rom.value_or(fs::path()),
+            sav.value_or(fs::path()));
+
+        reset();
+
+        audio_ctx.unpause();
+    }
+    queueReset();
+}
+
+void setFastForward(double fast_forward)
+{
+    if (limiter.isFastForward())
+        limiter.setFastForward(fast_forward);
+
+    config.fast_forward = fast_forward;
+}
+
+bool doSelectKey(const SDL_KeyboardEvent& event)
+{
+    if (event.keysym.scancode == SDL_SCANCODE_ESCAPE)
+    {
+        select_button = nullptr;
+        select_scancode = nullptr;
+    }
+
+    if (!select_scancode)
+        return false;
+
+    *select_scancode = event.keysym.scancode;
+     select_scancode = nullptr;
+
+    return true;
+}
+
+bool doSelectButton(const SDL_ControllerButtonEvent& event)
+{
+    if (!select_button)
+        return false;
+
+    *select_button = SDL_GameControllerButton(event.button);
+     select_button = nullptr;
+
+    return true;
+}
+
+bool doShortcuts(const SDL_KeyboardEvent& event)
+{
+    if ((event.keysym.mod & KMOD_CTRL) == 0)
+        return false;
+
+    switch (event.keysym.scancode)
+    {
+    case SDL_SCANCODE_O:
+        load(openFileDialog("gba"), std::nullopt);
+        return true;
+
+    case SDL_SCANCODE_R:
+        if (state != State::Menu)
+            reset();
+        return true;
+
+    case SDL_SCANCODE_P:
+        switch (state)
+        {
+        case State::Run:
+            state = State::Pause;
+            break;
+
+        case State::Pause:
+            state = State::Run;
+            break;
+        }
+        return true;
+
+    case SDL_SCANCODE_LSHIFT:
+    case SDL_SCANCODE_RSHIFT:
+        limiter.setFastForward(limiter.isFastForward() ? 1 : config.fast_forward);
+        return true;
+
+    case SDL_SCANCODE_1:
+        setFastForward(1'000'000);
+        return true;
+
+    case SDL_SCANCODE_2:
+        setFastForward(2);
+        return true;
+
+    case SDL_SCANCODE_3:
+        setFastForward(3);
+        return true;
+
+    case SDL_SCANCODE_4:
+        setFastForward(4);
+        return true;
+
+    case SDL_SCANCODE_5:
+        setFastForward(5);
+        return true;
+
+    case SDL_SCANCODE_6:
+        setFastForward(6);
+        return true;
+
+    case SDL_SCANCODE_7:
+        setFastForward(7);
+        return true;
+
+    case SDL_SCANCODE_8:
+        setFastForward(8);
+        return true;
+
+    case SDL_SCANCODE_F:
+        SDL_SetWindowFullscreen(video_ctx.window, SDL_GetWindowFlags(video_ctx.window) ^ SDL_WINDOW_FULLSCREEN_DESKTOP);
+        return true;
+
+    case SDL_SCANCODE_M:
+        config.mute ^= true;
+        return true;
+    }
+    return false;
+}
+
+void doEvents()
+{
+    SDL_Event event;
+    while (SDL_PollEvent(&event))
+    {
+        switch (event.type)
+        {
+        case SDL_QUIT:
+            state = State::Quit;
+            return;
+
+        case SDL_KEYDOWN:
+            if (doSelectKey(event.key) || doShortcuts(event.key))
+                break;
+            [[fallthrough]];
+
+        case SDL_KEYUP:
+            input_ctx.update();
+            break;
+
+        case SDL_CONTROLLERBUTTONDOWN:
+            if (doSelectButton(event.cbutton))
+                break;
+            [[fallthrough]];
+
+        case SDL_CONTROLLERBUTTONUP:
+            input_ctx.update();
+            break;
+
+        case SDL_CONTROLLERDEVICEADDED:
+        case SDL_CONTROLLERDEVICEREMOVED:
+            input_ctx.doDeviceEvent(event.cdevice);
+            break;
+        }
+    }
+    updateUiVisible();
+}
+
 namespace ImGui
 {
 
@@ -78,292 +336,8 @@ void SettingsLabel(const char* text)
 
 }  // namespace ImGui
 
-enum class UiState
+float doUi()
 {
-    Quit,
-    Menu,
-    Emulate,
-    Pause
-} state;
-
-FrameCounter counter;
-FrameRateLimiter limiter;
-SDL_Scancode* choose_scancode = nullptr;
-SDL_GameControllerButton* choose_button = nullptr;
-bool ui_active = false;
-
-void updateUiVisible()
-{
-    using Clock = std::chrono::high_resolution_clock;
-    using Point = std::chrono::high_resolution_clock::time_point;
-
-    int dx = 0;
-    int dy = 0;
-    SDL_GetRelativeMouseState(&dx, &dy);
-
-    static Point moved;
-
-    if (dx > 0 || dy > 0 || state == UiState::Menu || ui_active)
-        moved = Clock::now();
-
-    SDL_ShowCursor((Clock::now() - moved) < std::chrono::milliseconds(2500));
-}
-
-bool isUiVisible()
-{
-    return SDL_ShowCursor(-1) == SDL_ENABLE;
-}
-
-void setMultiplier(double mulitplier)
-{
-    config.fast_forward = mulitplier;
-
-    if (limiter.isFastForward())
-        limiter.setMultiplier(mulitplier);
-}
-
-void updateTitle()
-{
-    const auto title = shell::format(
-        gamepak.rom.title.empty()
-            ? "eggvance"
-            : "eggvance - {0}",
-        gamepak.rom.title);
-
-    video_ctx.title(title);
-}
-
-void updateTitle(double fps)
-{
-    const auto title = shell::format(
-        gamepak.rom.title.empty()
-            ? "eggvance - {1:.1f} fps"
-            : "eggvance - {0} - {1:.1f} fps",
-        gamepak.rom.title, fps);
-
-    video_ctx.title(title);
-}
-
-void reset()
-{
-    gamepak.save->reset();
-    gamepak.gpio->reset();
-
-    shell::reconstruct(apu);
-    shell::reconstruct(arm);
-    shell::reconstruct(dma);
-    shell::reconstruct(ppu);
-    shell::reconstruct(keypad);
-    shell::reconstruct(sio);
-    shell::reconstruct(scheduler);
-    shell::reconstruct(timer);
-
-    apu.init();
-    arm.init();
-    ppu.init();
-
-    updateTitle();
-
-    state = UiState::Emulate;
-}
-
-void loadRomFile(const fs::path& file)
-{
-    audio_ctx.pause();
-
-    config.recent.push(file);
-    
-    gamepak.init(file, fs::path());
-    reset();
-
-    audio_ctx.unpause();
-
-    limiter.queueReset();
-    counter.queueReset();
-}
-
-void openRomFile()
-{
-    if (const auto file = openFileDialog("gba"))
-        loadRomFile(*file);
-    
-    limiter.queueReset();
-    counter.queueReset();
-}
-
-void loadSavFile(const fs::path& file)
-{
-    audio_ctx.pause();
-    
-    gamepak.init(fs::path(), file);
-    reset();
-    
-    audio_ctx.unpause();
-   
-    limiter.queueReset();
-    counter.queueReset();
-}
-
-void openSavFile()
-{
-    if (const auto file = openFileDialog("sav"))
-        loadSavFile(*file);
-
-    limiter.queueReset();
-    counter.queueReset();
-}
-
-bool doChooseButton(const SDL_ControllerButtonEvent& event)
-{
-    if (!choose_button)
-        return false;
-
-    *choose_button = SDL_GameControllerButton(event.button);
-     choose_button = nullptr;
-
-    return true;
-}
-
-bool handleChooseKeyboard(const SDL_KeyboardEvent& event)
-{
-    if (event.keysym.scancode == SDL_SCANCODE_ESCAPE)
-    {
-        choose_scancode = nullptr;
-        choose_button = nullptr;
-    }
-
-    if (!choose_scancode)
-        return false;
-
-    *choose_scancode = event.keysym.scancode;
-     choose_scancode = nullptr;
-
-    return true;
-}
-
-bool handleShortcuts(const SDL_KeyboardEvent& event)
-{
-    if ((event.keysym.mod & KMOD_CTRL) == 0)
-        return false;
-
-    switch (event.keysym.scancode)
-    {
-    case SDL_SCANCODE_O:
-        openRomFile();
-        return true;
-
-    case SDL_SCANCODE_R:
-        if (state != UiState::Menu)
-            reset();
-        return true;
-
-    case SDL_SCANCODE_P:
-        switch (state)
-        {
-        case UiState::Emulate:
-            state = UiState::Pause;
-            break;
-
-        case UiState::Pause:
-            state = UiState::Emulate;
-            break;
-        }
-        return true;
-
-    case SDL_SCANCODE_LSHIFT:
-    case SDL_SCANCODE_RSHIFT:
-        if (limiter.isFastForward())
-            limiter.setMultiplier(1);
-        else
-            limiter.setMultiplier(config.fast_forward);
-        return true;
-
-    case SDL_SCANCODE_1:
-        setMultiplier(1'000'000);
-        return true;
-
-    case SDL_SCANCODE_2:
-        setMultiplier(2);
-        return true;
-
-    case SDL_SCANCODE_3:
-        setMultiplier(3);
-        return true;
-
-    case SDL_SCANCODE_4:
-        setMultiplier(4);
-        return true;
-
-    case SDL_SCANCODE_5:
-        setMultiplier(5);
-        return true;
-
-    case SDL_SCANCODE_6:
-        setMultiplier(6);
-        return true;
-
-    case SDL_SCANCODE_7:
-        setMultiplier(7);
-        return true;
-
-    case SDL_SCANCODE_8:
-        setMultiplier(8);
-        return true;
-
-    case SDL_SCANCODE_F:
-        SDL_SetWindowFullscreen(video_ctx.window, SDL_GetWindowFlags(video_ctx.window) ^ SDL_WINDOW_FULLSCREEN_DESKTOP);
-        return true;
-
-    case SDL_SCANCODE_M:
-        config.mute ^= true;
-        return true;
-    }
-
-    return false;
-}
-
-void handleEvents()
-{
-    SDL_Event event;
-    while (SDL_PollEvent(&event))
-    {
-        switch (event.type)
-        {
-        case SDL_QUIT:
-            state = UiState::Quit;
-            return;
-
-        case SDL_KEYDOWN:
-            if (handleChooseKeyboard(event.key) || handleShortcuts(event.key))
-                break;
-            [[fallthrough]];
-
-        case SDL_KEYUP:
-            input_ctx.update();
-            break;
-
-        case SDL_CONTROLLERBUTTONDOWN:
-            if (doChooseButton(event.cbutton))
-                break;
-            [[fallthrough]];
-
-        case SDL_CONTROLLERBUTTONUP:
-            input_ctx.update();
-            break;
-
-        case SDL_CONTROLLERDEVICEADDED:
-        case SDL_CONTROLLERDEVICEREMOVED:
-            input_ctx.handleDeviceEvent(event.cdevice);
-            break;
-        }
-    }
-
-    updateUiVisible();
-}
-
-float runUi()
-{
-    static bool show_menu       = false;
     static bool show_settings   = false;
     static bool show_keyboard   = false;
     static bool show_controller = false;
@@ -378,16 +352,17 @@ float runUi()
     ImGui::BeginMainMenuBar();
 
     float height = ImGui::GetWindowHeight() / 2.0f;
-
+ 
+    bool show_menu = false;
     if (ImGui::BeginMenu("File"))
     {
         show_menu = true;
 
         if (ImGui::MenuItem("Open ROM", "Ctrl+O"))
-            openRomFile();
+            load(openFileDialog("gba"), std::nullopt);
 
-        if (ImGui::MenuItem("Open save", nullptr, false, !gamepak.rom.empty()))
-            openSavFile();
+        if (ImGui::MenuItem("Open save", nullptr, false, isRunning()))
+            load(std::nullopt, openFileDialog("sav"));
 
         if (ImGui::BeginMenu("Recent", config.recent.hasFiles()))
         {
@@ -397,7 +372,7 @@ float runUi()
                     break;
 
                 if (ImGui::MenuItem(file.u8string().c_str()))
-                    loadRomFile(fs::path(file));
+                    load(fs::path(file), std::nullopt);
             }
             ImGui::EndMenu();
         }
@@ -421,7 +396,7 @@ float runUi()
         ImGui::Separator();
 
         if (ImGui::MenuItem("Exit"))
-            state = UiState::Quit;
+            state = State::Quit;
 
         ImGui::EndMenu();
     }
@@ -430,19 +405,19 @@ float runUi()
     {
         show_menu = true;
 
-        if (ImGui::MenuItem("Reset", "Ctrl+R", nullptr, state != UiState::Menu))
+        if (ImGui::MenuItem("Reset", "Ctrl+R", nullptr, isRunning()))
             reset();
 
-        if (ImGui::MenuItem("Pause", "Ctrl+P", state == UiState::Pause, state != UiState::Menu))
+        if (ImGui::MenuItem("Pause", "Ctrl+P", state == State::Pause, isRunning()))
         {
             switch (state)
             {
-            case UiState::Emulate:
-                state = UiState::Pause;
+            case State::Run:
+                state = State::Pause;
                 break;
 
-            case UiState::Pause:
-                state = UiState::Emulate;
+            case State::Pause:
+                state = State::Run;
                 break;
             }
         }
@@ -450,19 +425,14 @@ float runUi()
         ImGui::Separator();
 
         if (ImGui::MenuItem("Fast forward", "Ctrl+Shift", limiter.isFastForward()))
-        {
-            if (limiter.isFastForward())
-                limiter.setMultiplier(1);
-            else
-                limiter.setMultiplier(config.fast_forward);
-        }
+            limiter.setFastForward(limiter.isFastForward() ? 1 : config.fast_forward);
 
         if (ImGui::BeginMenu("Fast forward speed"))
         {
             uint multiplier = 1'000'000;
 
             if (ImGui::MenuItem("Unbound", "Ctrl+1", config.fast_forward == multiplier))
-                setMultiplier(multiplier);
+                setFastForward(multiplier);
 
             ImGui::Separator();
 
@@ -472,7 +442,7 @@ float runUi()
                 std::string shortcut = shell::format("Ctrl+{}", multiplier);
 
                 if (ImGui::MenuItem(text.c_str(), shortcut.c_str(), config.fast_forward == multiplier))
-                    setMultiplier(multiplier);
+                    setFastForward(multiplier);
             }
             ImGui::EndMenu();
         }
@@ -672,7 +642,7 @@ float runUi()
 
             ImGui::SettingsLabel(label);
             if (ImGui::Button(text.c_str()))
-                choose_scancode = &scancode;
+                select_scancode = &scancode;
         };
 
         map("A              ", config.keyboard.a);
@@ -686,7 +656,7 @@ float runUi()
         map("L              ", config.keyboard.l);
         map("R              ", config.keyboard.r);
         
-        bool show = choose_scancode;
+        bool show = select_scancode;
         if (ImGui::BeginPopup("Press button", show, false))
         {
             ImGui::Text("Press button or escape");
@@ -708,7 +678,7 @@ float runUi()
 
             ImGui::SettingsLabel(label);
             if (ImGui::Button(text.c_str()))
-                choose_button = &button;
+                select_button = &button;
         };
 
         map("A              ", config.controller.a);
@@ -722,7 +692,7 @@ float runUi()
         map("L              ", config.controller.l);
         map("R              ", config.controller.r);
         
-        bool show = choose_button;
+        bool show = select_button;
         if (ImGui::BeginPopup("Press button", show, false))
         {
             ImGui::Text("Press button or escape");
@@ -731,7 +701,7 @@ float runUi()
         ImGui::EndSettingsWindow();
     }
 
-    ui_active = ImGui::IsAnyItemHovered()
+    active = ImGui::IsAnyItemHovered()
         || show_menu
         || show_settings
         || show_keyboard
@@ -748,15 +718,15 @@ void renderUi()
         ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
 }
 
-void emulate()
+void frame(State state)
 {
-    constexpr auto kPixelsHor   = 240 + 68;
-    constexpr auto kPixelsVer   = 160 + 68;
-    constexpr auto kPixelCycles = 4;
-    constexpr auto kFrameCycles = kPixelCycles * kPixelsHor * kPixelsVer;
-
-    if (state == UiState::Emulate)
+    if (state == State::Run)
     {
+        constexpr auto kPixelsHor   = 240 + 68;
+        constexpr auto kPixelsVer   = 160 + 68;
+        constexpr auto kPixelCycles = 4;
+        constexpr auto kFrameCycles = kPixelCycles * kPixelsHor * kPixelsVer;
+
         keypad.update();
         arm.run(kFrameCycles);
     }
@@ -765,15 +735,15 @@ void emulate()
         video_ctx.renderFrame();
     }
 
-    runUi();
+    doUi();
     renderUi();
     video_ctx.swapWindow();
 }
 
 void menu()
 {
-    auto padding_top = runUi();
-    video_ctx.renderIcon(padding_top);
+    auto padding = doUi();
+    video_ctx.renderIcon(padding);
     renderUi();
     video_ctx.swapWindow();
 }
@@ -785,19 +755,19 @@ int eventFilter(void*, SDL_Event* event)
     case SDL_WINDOWEVENT:
         if (event->window.event == SDL_WINDOWEVENT_RESIZED)
         {
+            doEvents();
+
             video_ctx.updateViewport();
 
             switch (state)
             {
-            case UiState::Pause:
-            case UiState::Emulate:
-                video_ctx.renderFrame();
-                video_ctx.swapWindow();
+            case State::Pause:
+            case State::Run:
+                frame(State::Pause);
                 break;
 
-            case UiState::Menu:
-                video_ctx.renderIcon(0);
-                video_ctx.swapWindow();
+            case State::Menu:
+                menu();
                 break;
             }
             return 0;
@@ -808,8 +778,7 @@ int eventFilter(void*, SDL_Event* event)
     case SDL_SYSWMEVENT:
         if (event->syswm.msg->msg.win.msg == WM_EXITSIZEMOVE)
         {
-            limiter.queueReset();
-            counter.queueReset();
+            queueReset();
             return 0;
         }
         break;
@@ -823,7 +792,8 @@ void init(int argc, char* argv[])
     using namespace shell;
 
     Options options("eggvance");
-    options.add({ "rom", "ROM file" }, Options::value<fs::path>()->positional()->optional());
+    options.add({ "rom",       "ROM file"          }, Options::value<fs::path>()->positional()->optional());
+    options.add({ "--save,-s", "Save file", "file" }, Options::value<fs::path>()->optional());
 
     OptionsResult result;
     try
@@ -836,6 +806,7 @@ void init(int argc, char* argv[])
     }
 
     config.init();
+
     audio_ctx.init();
     input_ctx.init();
     video_ctx.init();
@@ -848,10 +819,12 @@ void init(int argc, char* argv[])
     #endif
     SDL_SetEventFilter(eventFilter, NULL);
 
-    state = UiState::Menu;
+    state = State::Menu;
 
-    if (const auto rom = result.find<fs::path>("rom"))
-        loadRomFile(*rom);
+    const auto rom = result.find<fs::path>("rom");
+    const auto sav = result.find<fs::path>("--save");
+
+    load(rom, sav);
 }
 
 int main(int argc, char* argv[])
@@ -860,20 +833,20 @@ int main(int argc, char* argv[])
     {
         init(argc, argv);
 
-        while (state != UiState::Quit)
+        while (state != State::Quit)
         {
             limiter.run([]()
             {
-                handleEvents();
+                doEvents();
 
                 switch (state)
                 {
-                case UiState::Pause:
-                case UiState::Emulate:
-                    emulate();
+                case State::Pause:
+                case State::Run:
+                    frame(state);
                     break;
 
-                case UiState::Menu:
+                case State::Menu:
                     menu();
                     break;
                 }
@@ -881,15 +854,15 @@ int main(int argc, char* argv[])
 
             switch (state)
             {
-            case UiState::Pause:
+            case State::Pause:
                 counter.reset();
                 break;
 
-            case UiState::Menu:
+            case State::Menu:
                 updateTitle();
                 break;
 
-            case UiState::Emulate:
+            case State::Run:
                 if (const auto fps = (++counter).fps())
                     updateTitle(*fps);
                 break;
