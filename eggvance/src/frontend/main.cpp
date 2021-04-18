@@ -606,9 +606,12 @@ float doUi()
 
                 queueReset();
             }
-            ImGui::SameLine();
-            if (ImGui::Button("Clear"))
-                config.save_path = fs::path();
+            if (!config.save_path.empty())
+            {
+                ImGui::SameLine();
+                if (ImGui::Button("Clear"))
+                    config.save_path = fs::path();
+            }
         }
         ImGui::PopID();
 
@@ -619,14 +622,29 @@ float doUi()
             {
                 if (const auto file = openFileDialog())
                 {
-                    config.bios_file = *file;
-                    Bios::init(config.bios_file);
+                    if (file != config.bios_file)
+                    {
+                        config.bios_file = *file;
+                        Bios::init(config.bios_file);
+
+                        if (isRunning())
+                            reset();
+                    }
                 }
                 queueReset();
             }
-            ImGui::SameLine();
-            if (ImGui::Button("Clear##1"))
-                config.bios_file = fs::path();
+            if (!config.bios_file.empty())
+            {
+                ImGui::SameLine();
+                if (ImGui::Button("Clear"))
+                {
+                    config.bios_file = fs::path();
+                    Bios::init(config.bios_file);
+
+                    if (isRunning())
+                        reset();
+                }
+            }
         }
         ImGui::PopID();
 

@@ -7,20 +7,24 @@
 void Bios::init(const fs::path& path)
 {
     if (path.empty())
-        return;
-
-    switch (fs::read(path, data))
     {
-    case fs::Status::BadSize:
-        video_ctx.showMessageBox("Warning", "Bad BIOS size: {} bytes", fs::file_size(path));
         std::copy(replacement.begin(), replacement.end(), data.begin());
-        break;
+    }
+    else
+    {
+        switch (fs::read(path, data))
+        {
+        case fs::Status::BadSize:
+            video_ctx.showMessageBox("Warning", "Bad BIOS size: {} bytes", fs::file_size(path));
+            std::copy(replacement.begin(), replacement.end(), data.begin());
+            break;
 
-    case fs::Status::BadFile:
-    case fs::Status::BadStream:
-        video_ctx.showMessageBox("Warning", "Cannot read BIOS: {}", path);
-        std::copy(replacement.begin(), replacement.end(), data.begin());
-        break;
+        case fs::Status::BadFile:
+        case fs::Status::BadStream:
+            video_ctx.showMessageBox("Warning", "Cannot read BIOS: {}", path);
+            std::copy(replacement.begin(), replacement.end(), data.begin());
+            break;
+        }
     }
 }
 
