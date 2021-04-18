@@ -67,10 +67,7 @@ void SoundControl::write(uint index, u8 byte)
 
 SoundBias::SoundBias()
 {
-    if (config.bios_skip)
-    {
-        write(1, 0x02);
-    }
+    write(1, 0x02);
 }
 
 SoundBias::operator uint() const
