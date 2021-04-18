@@ -1,8 +1,8 @@
 # Build
-A C++17 compliant compiler is required.
+A C++17 compiler is a base requirement.
 
 ## Clone
-Use [git](https://git-scm.com/) to clone the repository and its submodules.
+Use [Git](https://git-scm.com/) to clone the repository and its submodules.
 
 ```
 > git clone https://github.com/jsmolka/eggvance
@@ -22,17 +22,19 @@ Install and setup [vcpkg](https://github.com/microsoft/vcpkg).
 > vcpkg integrate install
 ```
 
-Install [SDL2](https://libsdl.org/download-2.0.php).
+Install [SDL2](https://libsdl.org/download-2.0.php) and [OpenGL](https://www.opengl.org/).
 
 ```
 > vcpkg install sdl2:x64-windows
+> vcpkg install opengl:x64-windows
 ```
 
 ### Linux
-Install [SDL2](https://libsdl.org/download-2.0.php).
+Install [SDL2](https://libsdl.org/download-2.0.php) and [GTK+ 3](https://www.gtk.org/).
 
 ```
 $ [sudo] apt-get install libsdl2-dev
+$ [sudo] apt-get install libgtk-3-dev
 ```
 
 ### macOS
@@ -58,7 +60,7 @@ Build the Visual Studio solution. This can also be done on the command line.
 > msbuild /property:Configuration=Release eggvance.sln
 ```
 
-### Linux / macOS
+### Linux and macOS
 Build with [cmake](https://cmake.org/).
 
 ```
