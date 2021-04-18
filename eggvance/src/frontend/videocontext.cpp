@@ -70,7 +70,7 @@ void VideoContext::updateViewport()
 {
     int w;
     int h;
-    SDL_GetWindowSize(window, &w, &h);
+    SDL_GL_GetDrawableSize(window, &w, &h);
     glViewport(0, 0, w, h);
 }
 

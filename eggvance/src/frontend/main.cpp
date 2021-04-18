@@ -36,13 +36,13 @@ bool active = false;
 void updateUiVisible()
 {
     using Clock = std::chrono::high_resolution_clock;
-    using Point = std::chrono::high_resolution_clock::time_point;
+    using Time  = std::chrono::high_resolution_clock::time_point;
 
     int dx = 0;
     int dy = 0;
     SDL_GetRelativeMouseState(&dx, &dy);
 
-    static Point moved;
+    static Time moved;
 
     if (dx != 0 || dy != 0 || active || state == State::Menu)
         moved = Clock::now();
@@ -102,10 +102,10 @@ void reset()
 
     updateTitle();
 
-    if (gamepak.rom.size())
-        state = State::Run;
-    else
+    if (gamepak.rom.empty())
         state = State::Menu;
+    else
+        state = State::Run;
 }
 
 void queueReset()
@@ -123,9 +123,9 @@ void load(const std::optional<fs::path>& rom, const std::optional<fs::path>& sav
         if (rom)
             config.recent.push(*rom);
 
-        if (gamepak.load(
+        gamepak.load(
             rom.value_or(fs::path()),
-            sav.value_or(fs::path())))
+            sav.value_or(fs::path()));
 
         reset();
 
@@ -182,7 +182,7 @@ bool doShortcuts(const SDL_KeyboardEvent& event)
         return true;
 
     case SDL_SCANCODE_R:
-        if (state != State::Menu)
+        if (isRunning())
             reset();
         return true;
 
@@ -252,6 +252,8 @@ void doEvents()
     SDL_Event event;
     while (SDL_PollEvent(&event))
     {
+        ImGui_ImplSDL2_ProcessEvent(&event);
+
         switch (event.type)
         {
         case SDL_QUIT:
@@ -288,13 +290,11 @@ void doEvents()
 namespace ImGui
 {
 
-bool DialogButton(const fs::path& file)
+bool BrowseButton(const fs::path& path)
 {
-    std::string text = file.empty()
+    return ImGui::Button(path.empty()
         ? "Browse..."
-        : file.u8string().c_str();
-
-    return ImGui::Button(text.c_str());
+        : path.u8string().c_str());
 }
 
 bool BeginPopup(const char* title, bool& open, bool can_close)
@@ -341,6 +341,7 @@ void SettingsLabel(const char* text)
 
 float doUi()
 {
+           bool show_menu       = false;
     static bool show_settings   = false;
     static bool show_keyboard   = false;
     static bool show_controller = false;
@@ -352,252 +353,253 @@ float doUi()
     ImGui_ImplSDL2_NewFrame(video_ctx.window);
 
     ImGui::NewFrame();
-    ImGui::BeginMainMenuBar();
-
-    float height = ImGui::GetWindowHeight() / 2.0f;
- 
-    bool show_menu = false;
-    if (ImGui::BeginMenu("File"))
+    
+    float height = 0.0f;
+    if (ImGui::BeginMainMenuBar())
     {
-        show_menu = true;
+        height = ImGui::GetWindowHeight() / 2.0f;
 
-        if (ImGui::MenuItem("Open ROM", "Ctrl+O"))
-            load(openFileDialog("gba"), std::nullopt);
-
-        if (ImGui::MenuItem("Open save", nullptr, false, isRunning()))
-            load(std::nullopt, openFileDialog("sav"));
-
-        if (ImGui::BeginMenu("Recent", !config.recent.isEmpty()))
+        if (ImGui::BeginMenu("File"))
         {
-            for (const auto& file : config.recent)
+            show_menu = true;
+
+            if (ImGui::MenuItem("Open ROM", "Ctrl+O"))
+                load(openFileDialog("gba"), std::nullopt);
+
+            if (ImGui::MenuItem("Open save", nullptr, false, isRunning()))
+                load(std::nullopt, openFileDialog("sav"));
+
+            if (ImGui::BeginMenu("Recent", !config.recent.isEmpty()))
             {
-                if (file.empty())
-                    break;
+                for (const auto& file : config.recent)
+                {
+                    if (file.empty())
+                        break;
 
-                if (ImGui::MenuItem(file.u8string().c_str()))
-                    load(fs::path(file), std::nullopt);
+                    if (ImGui::MenuItem(file.u8string().c_str()))
+                        load(file, std::nullopt);
+                }
+                ImGui::EndMenu();
             }
-            ImGui::EndMenu();
-        }
-
-        ImGui::Separator();
-
-        if (ImGui::BeginMenu("Preferences"))
-        {
-            if (ImGui::MenuItem("Settings"))
-                show_settings = true;
-
-            if (ImGui::MenuItem("Keyboard map"))
-                show_keyboard = true;
-
-            if (ImGui::MenuItem("Controller map"))
-                show_controller = true;
-
-            ImGui::EndMenu();
-        }
-
-        ImGui::Separator();
-
-        if (ImGui::MenuItem("Exit"))
-            state = State::Quit;
-
-        ImGui::EndMenu();
-    }
-
-    if (ImGui::BeginMenu("Emulation"))
-    {
-        show_menu = true;
-
-        if (ImGui::MenuItem("Reset", "Ctrl+R", nullptr, isRunning()))
-            reset();
-
-        if (ImGui::MenuItem("Pause", "Ctrl+P", state == State::Pause, isRunning()))
-        {
-            switch (state)
-            {
-            case State::Run:
-                state = State::Pause;
-                break;
-
-            case State::Pause:
-                state = State::Run;
-                break;
-            }
-        }
-
-        ImGui::Separator();
-
-        if (ImGui::MenuItem("Fast forward", "Ctrl+Shift", limiter.isFastForward()))
-            limiter.setFastForward(limiter.isFastForward() ? 1 : config.fast_forward);
-
-        if (ImGui::BeginMenu("Fast forward speed"))
-        {
-            uint multiplier = 1'000'000;
-
-            if (ImGui::MenuItem("Unbound", "Ctrl+1", config.fast_forward == multiplier))
-                setFastForward(multiplier);
 
             ImGui::Separator();
 
-            for (multiplier = 2; multiplier <= 8; ++multiplier)
+            if (ImGui::BeginMenu("Preferences"))
             {
-                std::string text = shell::format("{}x", multiplier);
-                std::string shortcut = shell::format("Ctrl+{}", multiplier);
+                if (ImGui::MenuItem("Settings"))
+                    show_settings = true;
 
-                if (ImGui::MenuItem(text.c_str(), shortcut.c_str(), config.fast_forward == multiplier))
-                    setFastForward(multiplier);
+                if (ImGui::MenuItem("Keyboard map"))
+                    show_keyboard = true;
+
+                if (ImGui::MenuItem("Controller map"))
+                    show_controller = true;
+
+                ImGui::EndMenu();
             }
+
+            ImGui::Separator();
+
+            if (ImGui::MenuItem("Exit"))
+                state = State::Quit;
+
             ImGui::EndMenu();
         }
 
-        ImGui::Separator();
-
-        if (ImGui::BeginMenu("Save type"))
+        if (ImGui::BeginMenu("Emulation"))
         {
-            static constexpr std::pair<std::string_view, Save::Type> kSaveTypes[] =
+            show_menu = true;
+
+            if (ImGui::MenuItem("Reset", "Ctrl+R", nullptr, isRunning()))
+                reset();
+
+            if (ImGui::MenuItem("Pause", "Ctrl+P", state == State::Pause, isRunning()))
             {
-                { "Detect",     Save::Type::Detect    },
-                { "None",       Save::Type::None      },
-                { "SRAM",       Save::Type::Sram      },
-                { "EEPROM",     Save::Type::Eeprom    },
-                { "Flash 512K", Save::Type::Flash512  },
-                { "Flash 1M",   Save::Type::Flash1024 }
-            };
-
-            for (const auto& [text, type] : kSaveTypes)
-            {
-                if (ImGui::MenuItem(text.data(), nullptr, config.save_type == type))
-                    config.save_type = type;
-            }
-            ImGui::EndMenu();
-        }
-
-        if (ImGui::BeginMenu("GPIO type"))
-        {
-            static constexpr std::pair<std::string_view, Gpio::Type> kGpioTypes[] =
-            {
-                { "Detect", Gpio::Type::Detect },
-                { "None",   Gpio::Type::None   },
-                { "RTC",    Gpio::Type::Rtc    }
-            };
-
-            for (const auto& [text, type] : kGpioTypes)
-            {
-                if (ImGui::MenuItem(text.data(), nullptr, config.gpio_type == type))
-                    config.gpio_type = type;
-            }
-            ImGui::EndMenu();
-        }
-        ImGui::EndMenu();
-    }
-
-    if (ImGui::BeginMenu("Audio/Video"))
-    {
-        show_menu = true;
-
-        if (ImGui::BeginMenu("Frame size"))
-        {
-            int w;
-            int h;
-            SDL_GetWindowSize(video_ctx.window, &w, &h);
-
-            for (uint scale = 1; scale <= 8; ++scale)
-            {
-                std::string text = shell::format("{}x", scale);
-
-                int window_w = kScreenW * scale;
-                int window_h = kScreenH * scale;
-
-                if (ImGui::MenuItem(text.c_str(), nullptr, w == window_w && h == window_h))
+                switch (state)
                 {
-                    config.frame_size = scale;
-                    SDL_SetWindowFullscreen(video_ctx.window, ~SDL_WINDOW_FULLSCREEN_DESKTOP);
-                    SDL_SetWindowSize(video_ctx.window, window_w, window_h);
-                    video_ctx.updateViewport();
+                case State::Run:
+                    state = State::Pause;
+                    break;
+
+                case State::Pause:
+                    state = State::Run;
+                    break;
                 }
             }
 
             ImGui::Separator();
 
-            uint fullscreen = SDL_GetWindowFlags(video_ctx.window) & SDL_WINDOW_FULLSCREEN_DESKTOP;
+            if (ImGui::MenuItem("Fast forward", "Ctrl+Shift", limiter.isFastForward()))
+                limiter.setFastForward(limiter.isFastForward() ? 1 : config.fast_forward);
 
-            if (ImGui::MenuItem("Fullscreen", "Ctrl+F", fullscreen))
-                SDL_SetWindowFullscreen(video_ctx.window, fullscreen ^ SDL_WINDOW_FULLSCREEN_DESKTOP);
-
-            ImGui::EndMenu();
-        }
-
-        if (ImGui::MenuItem("Color correct", nullptr, config.color_correct))
-        {
-            config.color_correct ^= true;
-            Color::init(config.color_correct);
-        }
-
-        if (ImGui::MenuItem("Preserve aspect ratio", nullptr, config.preserve_aspect_ratio))
-            config.preserve_aspect_ratio ^= true;
-
-        ImGui::Separator();
-
-        if (ImGui::BeginMenu("Volume"))
-        {
-            ImGui::SliderFloat("", &config.volume, 0.0f, 1.0f);
-            ImGui::EndMenu();
-        }
-
-        if (ImGui::MenuItem("Mute", "Ctrl+M", config.mute))
-            config.mute ^= true;
-
-        ImGui::Separator();
-
-        if (ImGui::BeginMenu("Video layers"))
-        {
-            static constexpr std::pair<std::string_view, uint> kLayers[] =
+            if (ImGui::BeginMenu("Fast forward speed"))
             {
-                { "Background 0", 1 << 0 },
-                { "Background 1", 1 << 1 },
-                { "Background 2", 1 << 2 },
-                { "Background 3", 1 << 3 },
-                { "Objects",      1 << 4 }
-            };
+                uint multiplier = 1'000'000;
 
-            for (const auto& [text, mask] : kLayers)
+                if (ImGui::MenuItem("Unbound", "Ctrl+1", config.fast_forward == multiplier))
+                    setFastForward(multiplier);
+
+                ImGui::Separator();
+
+                for (multiplier = 2; multiplier <= 8; ++multiplier)
+                {
+                    std::string text = shell::format("{}x", multiplier);
+                    std::string shortcut = shell::format("Ctrl+{}", multiplier);
+
+                    if (ImGui::MenuItem(text.c_str(), shortcut.c_str(), config.fast_forward == multiplier))
+                        setFastForward(multiplier);
+                }
+                ImGui::EndMenu();
+            }
+
+            ImGui::Separator();
+
+            if (ImGui::BeginMenu("Save type"))
             {
-                if (ImGui::MenuItem(text.data(), nullptr, config.video_layers & mask))
-                    config.video_layers ^= mask;
+                static constexpr std::pair<std::string_view, Save::Type> kSaveTypes[] =
+                {
+                    { "Detect",     Save::Type::Detect    },
+                    { "None",       Save::Type::None      },
+                    { "SRAM",       Save::Type::Sram      },
+                    { "EEPROM",     Save::Type::Eeprom    },
+                    { "Flash 512K", Save::Type::Flash512  },
+                    { "Flash 1M",   Save::Type::Flash1024 }
+                };
+
+                for (const auto& [text, type] : kSaveTypes)
+                {
+                    if (ImGui::MenuItem(text.data(), nullptr, config.save_type == type))
+                        config.save_type = type;
+                }
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("GPIO type"))
+            {
+                static constexpr std::pair<std::string_view, Gpio::Type> kGpioTypes[] =
+                {
+                    { "Detect", Gpio::Type::Detect },
+                    { "None",   Gpio::Type::None   },
+                    { "RTC",    Gpio::Type::Rtc    }
+                };
+
+                for (const auto& [text, type] : kGpioTypes)
+                {
+                    if (ImGui::MenuItem(text.data(), nullptr, config.gpio_type == type))
+                        config.gpio_type = type;
+                }
+                ImGui::EndMenu();
             }
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("Audio channels"))
+        if (ImGui::BeginMenu("Audio/Video"))
         {
-            static constexpr std::pair<std::string_view, uint> kChannels[] =
-            {
-                { "Square 1", 1 << 0 },
-                { "Square 2", 1 << 1 },
-                { "Wave",     1 << 2 },
-                { "Noise",    1 << 3 },
-                { "FIFO A",   1 << 4 },
-                { "FIFO B",   1 << 5 }
-            };
+            show_menu = true;
 
-            for (const auto& [text, mask] : kChannels)
+            if (ImGui::BeginMenu("Frame size"))
             {
-                if (ImGui::MenuItem(text.data(), nullptr, config.audio_channels & mask))
-                    config.audio_channels ^= mask;
+                int w;
+                int h;
+                SDL_GetWindowSize(video_ctx.window, &w, &h);
+
+                for (uint scale = 1; scale <= 8; ++scale)
+                {
+                    std::string text = shell::format("{}x", scale);
+
+                    int window_w = kScreenW * scale;
+                    int window_h = kScreenH * scale;
+
+                    if (ImGui::MenuItem(text.c_str(), nullptr, w == window_w && h == window_h))
+                    {
+                        config.frame_size = scale;
+                        SDL_SetWindowFullscreen(video_ctx.window, ~SDL_WINDOW_FULLSCREEN_DESKTOP);
+                        SDL_SetWindowSize(video_ctx.window, window_w, window_h);
+                        video_ctx.updateViewport();
+                    }
+                }
+
+                ImGui::Separator();
+
+                uint fullscreen = SDL_GetWindowFlags(video_ctx.window) & SDL_WINDOW_FULLSCREEN_DESKTOP;
+
+                if (ImGui::MenuItem("Fullscreen", "Ctrl+F", fullscreen))
+                    SDL_SetWindowFullscreen(video_ctx.window, fullscreen ^ SDL_WINDOW_FULLSCREEN_DESKTOP);
+
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::MenuItem("Color correct", nullptr, config.color_correct))
+            {
+                config.color_correct ^= true;
+                Color::init(config.color_correct);
+            }
+
+            if (ImGui::MenuItem("Preserve aspect ratio", nullptr, config.preserve_aspect_ratio))
+                config.preserve_aspect_ratio ^= true;
+
+            ImGui::Separator();
+
+            if (ImGui::BeginMenu("Volume"))
+            {
+                ImGui::SliderFloat("", &config.volume, 0.0f, 1.0f);
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::MenuItem("Mute", "Ctrl+M", config.mute))
+                config.mute ^= true;
+
+            ImGui::Separator();
+
+            if (ImGui::BeginMenu("Video layers"))
+            {
+                static constexpr std::pair<std::string_view, uint> kLayers[] =
+                {
+                    { "Background 0", 1 << 0 },
+                    { "Background 1", 1 << 1 },
+                    { "Background 2", 1 << 2 },
+                    { "Background 3", 1 << 3 },
+                    { "Objects",      1 << 4 }
+                };
+
+                for (const auto& [text, mask] : kLayers)
+                {
+                    if (ImGui::MenuItem(text.data(), nullptr, config.video_layers & mask))
+                        config.video_layers ^= mask;
+                }
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("Audio channels"))
+            {
+                static constexpr std::pair<std::string_view, uint> kChannels[] =
+                {
+                    { "Square 1", 1 << 0 },
+                    { "Square 2", 1 << 1 },
+                    { "Wave",     1 << 2 },
+                    { "Noise",    1 << 3 },
+                    { "FIFO A",   1 << 4 },
+                    { "FIFO B",   1 << 5 }
+                };
+
+                for (const auto& [text, mask] : kChannels)
+                {
+                    if (ImGui::MenuItem(text.data(), nullptr, config.audio_channels & mask))
+                        config.audio_channels ^= mask;
+                }
+                ImGui::EndMenu();
             }
             ImGui::EndMenu();
         }
-        ImGui::EndMenu();
+        ImGui::EndMainMenuBar();
     }
-
-    ImGui::EndMainMenuBar();
 
     if (ImGui::BeginSettingsWindow("Settings", show_settings))
     {
         ImGui::PushID("Save");
         {
             ImGui::SettingsLabel("Save path");
-            if (ImGui::DialogButton(config.save_path))
+            if (ImGui::BrowseButton(config.save_path))
             {
                 if (const auto path = openPathDialog())
                     config.save_path = *path;
@@ -613,7 +615,7 @@ float doUi()
         ImGui::PushID("BIOS");
         {
             ImGui::SettingsLabel("BIOS file");
-            if (ImGui::DialogButton(config.bios_file))
+            if (ImGui::BrowseButton(config.bios_file))
             {
                 if (const auto file = openFileDialog())
                 {
@@ -723,8 +725,8 @@ void frame(State state)
 {
     if (state == State::Run)
     {
-        constexpr auto kPixelsHor   = 240 + 68;
-        constexpr auto kPixelsVer   = 160 + 68;
+        constexpr auto kPixelsHor   = kScreenW + 68;
+        constexpr auto kPixelsVer   = kScreenH + 68;
         constexpr auto kPixelCycles = 4;
         constexpr auto kFrameCycles = kPixelCycles * kPixelsHor * kPixelsVer;
 
@@ -743,8 +745,8 @@ void frame(State state)
 
 void menu()
 {
-    auto padding = doUi();
-    video_ctx.renderIcon(padding);
+    float height = doUi();
+    video_ctx.renderIcon(height);
     renderUi();
     video_ctx.swapWindow();
 }
