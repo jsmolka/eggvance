@@ -35,6 +35,13 @@ public:
     Oam oam = {};
 
 private:
+    struct BlendLayer
+    {
+        uint flag  = 0;
+        uint color = 0;
+    };
+
+    using BlendLayers      = std::pair<BlendLayer, BlendLayer>;
     using BackgroundRender = void(Ppu::*)(Background&);
     using BackgroundLayers = shell::FixedBuffer<BackgroundLayer, 4>;
 
@@ -67,13 +74,9 @@ private:
     const Window& activeWindow(uint x) const;
 
     template<bool kObjects>
-    u16  findUpperLayer(const BackgroundLayers& layers, uint x);
+    u16 upperLayer(const BackgroundLayers& layers, uint x, uint enabled);
     template<bool kObjects>
-    u16  findUpperLayer(const BackgroundLayers& layers, uint x, uint enabled);
-    template<bool kObjects>
-    bool findBlendLayer(const BackgroundLayers& layers, uint x, uint enabled, u16& upper);
-    template<bool kObjects>
-    bool findBlendLayer(const BackgroundLayers& layers, uint x, uint enabled, u16& upper, u16& lower);
+    BlendLayers blendLayers(const BackgroundLayers& layers, uint x, uint enabled);
 
     uint objects_exist = false;
     uint objects_alpha = false;
