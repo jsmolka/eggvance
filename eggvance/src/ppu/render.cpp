@@ -321,9 +321,8 @@ void Ppu::renderObjects()
                 case ObjectMode::Alpha:
                     if (entry.priority < object.priority || !object.isOpaque())
                     {
-                        object.color    = pram.colorFgOpaque(index, bank);
-                        object.priority = entry.priority;
-                        object.alpha    = entry.object_mode == ObjectMode::Alpha;
+                        object.color = pram.colorFgOpaque(index, bank);
+                        object.alpha = entry.object_mode == ObjectMode::Alpha;
                     }
                     break;
 
