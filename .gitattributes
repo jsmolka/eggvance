@@ -6,4 +6,4 @@
 *.cpp  text diff=cpp linguist-language=cpp
 
 # Linguist
-eggvance/modules/* linguist-vendored
+eggvance/modules/**/* linguist-vendored
