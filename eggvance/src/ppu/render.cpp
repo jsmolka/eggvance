@@ -3,6 +3,7 @@
 #include <shell/macros.h>
 #include <shell/operators.h>
 
+#include "color.h"
 #include "mapentry.h"
 #include "matrix.h"
 #include "base/config.h"
@@ -18,7 +19,11 @@ void Ppu::render()
     }
 
     if (!dispcnt.isActive())
+    {
+        auto& scanline = video_ctx.scanline(vcount);
+        scanline.fill(Color::toArgb(pram.backdrop()));
         return;
+    }
 
     for (auto& background : backgrounds)
         background.buffer.flip();
