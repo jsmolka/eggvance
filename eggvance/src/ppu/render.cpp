@@ -313,34 +313,39 @@ void Ppu::renderObjects()
             auto& object = objects[x];
 
             uint index = vram.index(addr, pixel, entry.color_mode);
-            if ( index != 0)
+
+            switch (ObjectMode(entry.object_mode))
             {
-                switch (ObjectMode(entry.object_mode))
+            case ObjectMode::Normal:
+            case ObjectMode::Alpha:
+                if (entry.priority < object.priority || !object.isOpaque())
                 {
-                case ObjectMode::Normal:
-                case ObjectMode::Alpha:
-                    if (entry.priority < object.priority || !object.isOpaque())
+                    if (index != 0)
                     {
-                        object.color = pram.colorFgOpaque(index, bank);
-                        object.alpha = entry.object_mode == ObjectMode::Alpha;
+                        object.color  = pram.colorFgOpaque(index, bank);
+                        object.alpha  = entry.object_mode == ObjectMode::Alpha;
+                        objects_exist = true;
+                        objects_alpha |= object.alpha;
                     }
-                    break;
-
-                case ObjectMode::Window:
-                    object.window = true;
-                    break;
-
-                case ObjectMode::Invalid:
-                    break;
-
-                default:
-                    SHELL_UNREACHABLE;
-                    break;
+                    object.priority = entry.priority;
                 }
-                objects_exist = true;
-                objects_alpha |= object.alpha;
+                break;
+
+            case ObjectMode::Window:
+                if (index != 0)
+                {
+                    object.window = true;
+                    objects_exist = true;
+                }
+                break;
+
+            case ObjectMode::Invalid:
+                break;
+
+            default:
+                SHELL_UNREACHABLE;
+                break;
             }
-            object.priority = std::min(object.priority, entry.priority);
         }
 
         cycles -= entry.cycles();
