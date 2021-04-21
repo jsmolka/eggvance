@@ -4,9 +4,8 @@
 #include <shell/ranges.h>
 
 #include "filesystem.h"
+#include "base/int.h"
 #include "frontend/sdl2.h"
-#include "gamepak/gpio.h"
-#include "gamepak/save.h"
 
 template<typename Input>
 class Controls
@@ -69,8 +68,6 @@ public:
     bool        bios_skip;
     RecentFiles recent;
     uint        fast_forward;
-    Save::Type  save_type;
-    Gpio::Type  gpio_type;
     uint        frame_size;
     bool        color_correct;
     bool        preserve_aspect_ratio;

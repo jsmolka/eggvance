@@ -11,10 +11,17 @@ std::optional<Enum> parseEnum(const std::string& data)
     return std::nullopt;
 }
 
-template<> std::optional<SDL_Scancode>             shell::parse(const std::string& data) { return parseEnum<SDL_Scancode>(data); }
-template<> std::optional<SDL_GameControllerButton> shell::parse(const std::string& data) { return parseEnum<SDL_GameControllerButton>(data); }
-template<> std::optional<Save::Type>               shell::parse(const std::string& data) { return parseEnum<Save::Type>(data); }
-template<> std::optional<Gpio::Type>               shell::parse(const std::string& data) { return parseEnum<Gpio::Type>(data); }
+template<>
+std::optional<SDL_Scancode> shell::parse(const std::string& data)
+{
+    return parseEnum<SDL_Scancode>(data);
+}
+
+template<>
+std::optional<SDL_GameControllerButton> shell::parse(const std::string& data)
+{
+    return parseEnum<SDL_GameControllerButton>(data);
+}
 
 void RecentFiles::push(const fs::path& file)
 {
@@ -91,8 +98,6 @@ Config::~Config()
     set("settings",   "bios_file",             shell::format(bios_file));
     set("settings",   "bios_skip",             shell::format(bios_skip));
     set("emulation",  "fast_forward",          shell::format(fast_forward));
-    set("emulation",  "save_type",             shell::format(save_type));
-    set("emulation",  "gpio_type",             shell::format(gpio_type));
     set("video",      "frame_size",            shell::format(frame_size));
     set("video",      "color_correct",         shell::format(color_correct));
     set("video",      "preserve_aspect_ratio", shell::format(preserve_aspect_ratio));
@@ -135,8 +140,6 @@ void Config::init()
     bios_file             = findOr("settings",   "bios_file",             fs::path());
     bios_skip             = findOr("settings",   "bios_skip",             true);
     fast_forward          = findOr("emulation",  "fast_forward",          1'000'000);
-    save_type             = findOr("emulation",  "save_type",             Save::Type::Detect);
-    gpio_type             = findOr("emulation",  "gpio_type",             Gpio::Type::Detect);
     frame_size            = findOr("video",      "frame_size",            4);
     color_correct         = findOr("video",      "color_correct",         true);
     preserve_aspect_ratio = findOr("video",      "preserve_aspect_ratio", true);

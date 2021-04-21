@@ -26,8 +26,8 @@ bool GamePak::load(fs::path gba, fs::path sav)
         }
     }
 
-    Save::Type save_type = config.save_type;
-    Gpio::Type gpio_type = config.gpio_type;
+    auto save_type = Save::Type::Detect;
+    auto gpio_type = Gpio::Type::Rtc;
 
     if (const auto overwrite = Overwrite::find(rom.code))
     {
