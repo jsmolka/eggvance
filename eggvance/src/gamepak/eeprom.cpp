@@ -11,12 +11,12 @@ Eeprom::Eeprom()
 
 void Eeprom::initBus6()
 {
-    data.resize(kSize512Bytes, 0xFF);
+    resize(kSize512Bytes);
 }
 
 void Eeprom::initBus14()
 {
-    data.resize(kSize8Kilobytes, 0xFF);
+    resize(kSize8Kilobytes);
 }
 
 bool Eeprom::isInitialized() const

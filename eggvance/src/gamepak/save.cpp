@@ -58,15 +58,19 @@ bool Save::load(const fs::path& file)
 {
     if (fs::is_regular_file(file))
     {
+        std::size_t size = data.size();
+
         if (fs::read(file, data) != fs::Status::Ok)
         {
-            video_ctx.showMessageBox("Warning", "Cannot read save: {}", file);
+            video_ctx.showMessageBox("Warning", "Cannot read save: {}\nProgress will not be saved", file);
+            resize(size);
             return false;
         }
 
         if (!isValidSize(data.size()))
         {
-            video_ctx.showMessageBox("Warning", "Bad save size: {} bytes", data.size());
+            video_ctx.showMessageBox("Warning", "Invalid save size: {} bytes\nProgress will not be saved", data.size());
+            resize(size);
             return false;
         }
     }
@@ -88,6 +92,13 @@ u8 Save::read(u32 addr)
 void Save::write(u32 addr, u8 byte)
 {
 
+}
+
+void Save::resize(std::size_t size)
+{
+    data.resize(size);
+
+    std::fill(data.begin(), data.end(), 0xFF);
 }
 
 bool Save::isValidSize(uint size) const

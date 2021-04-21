@@ -39,7 +39,6 @@ public:
         return *reinterpret_cast<const Integral*>(this->data() + addr);
     }
 
-    fs::path file;
     std::size_t mask = 0;
     std::string code;
     std::string title;

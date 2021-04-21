@@ -34,7 +34,7 @@ bool Rom::load(const fs::path& file)
 
     if (size() <= sizeof(Header) || size() > kMaxSize)
     {
-        video_ctx.showMessageBox("Warning", "Bad ROM size: {} bytes", size());
+        video_ctx.showMessageBox("Warning", "Invalid ROM size: {} bytes", size());
         clear();
         return false;
     }
@@ -51,9 +51,6 @@ bool Rom::load(const fs::path& file)
         title = makeAscii(header.game_title);
         code  = makeAscii(header.game_code);
     }
-
-    this->file = file;
-
     return true;
 }
 

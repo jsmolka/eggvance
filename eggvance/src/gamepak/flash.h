@@ -16,7 +16,7 @@ public:
     Flash()
         : Save(kType)
     {
-        data.resize(kSize, 0xFF);
+        resize(kSize);
 
         reset();
     }

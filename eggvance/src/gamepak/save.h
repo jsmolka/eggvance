@@ -32,6 +32,8 @@ public:
     const Type type;
 
 protected:
+    void resize(std::size_t size);
+
     virtual bool isValidSize(uint size) const;
 
     bool changed = false;

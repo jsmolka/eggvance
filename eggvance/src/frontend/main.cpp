@@ -389,10 +389,10 @@ float doUi()
                 if (ImGui::MenuItem("Settings"))
                     show_settings = true;
 
-                if (ImGui::MenuItem("Keyboard map"))
+                if (ImGui::MenuItem("Keyboard config"))
                     show_keyboard = true;
 
-                if (ImGui::MenuItem("Controller map"))
+                if (ImGui::MenuItem("Controller config"))
                     show_controller = true;
 
                 ImGui::EndMenu();
@@ -654,7 +654,7 @@ float doUi()
         ImGui::EndSettingsWindow();
     }
 
-    if (ImGui::BeginSettingsWindow("Keyboard map", show_keyboard))
+    if (ImGui::BeginSettingsWindow("Keyboard config", show_keyboard))
     {
         auto map = [](const char* label, SDL_Scancode& scancode)
         {
@@ -686,7 +686,7 @@ float doUi()
         ImGui::EndSettingsWindow();
     }
 
-    if (ImGui::BeginSettingsWindow("Controller map", show_controller))
+    if (ImGui::BeginSettingsWindow("Controller config", show_controller))
     {
         auto map = [](const char* label, SDL_GameControllerButton& button)
         {
@@ -893,6 +893,8 @@ int main(int argc, char* argv[])
         }
 
         audio_ctx.pause();
+        
+        return 0;
     }
     catch (const std::exception& ex)
     {
@@ -900,5 +902,4 @@ int main(int argc, char* argv[])
 
         return 1;
     }
-    return 0;
 }

@@ -5,7 +5,7 @@ inline constexpr auto kSize = 32 * 1024;
 Sram::Sram()
     : Save(Type::Sram)
 {
-    data.resize(kSize, 0xFF);
+    resize(kSize);
 }
  
 void Sram::reset()

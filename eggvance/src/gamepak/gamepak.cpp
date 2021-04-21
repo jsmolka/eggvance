@@ -9,6 +9,8 @@
 
 bool GamePak::load(fs::path gba, fs::path sav)
 {
+    SHELL_ASSERT(!gba.empty() || !sav.empty());
+
     if (!gba.empty())
     {
         if (!rom.load(gba))
@@ -41,7 +43,7 @@ bool GamePak::load(fs::path gba, fs::path sav)
     case Gpio::Type::Rtc:    gpio = std::make_shared<Rtc>(); break;
     }
 
-    if (!sav.empty() && rom.size())
+    if (!sav.empty() && !rom.empty())
     {
         if (save_type == Save::Type::Detect)
             save_type =  Save::parse(rom);
@@ -55,19 +57,10 @@ bool GamePak::load(fs::path gba, fs::path sav)
         case Save::Type::Flash512:  save = std::make_shared<Flash512>(); break;
         case Save::Type::Flash1024: save = std::make_shared<Flash1024>(); break;
         }
-        
-        if (!save->load(sav))
-        {
-            sav = rom.file;
-            sav.replace_extension("sav");
-
-            if (!config.save_path.empty())
-                sav = config.save_path / sav.filename();
-
-            return save->load(sav);
-        }
+        return save->load(sav);
     }
-    return true;
+    
+    return false;
 }
 
 bool GamePak::isEepromAccess(u32 addr) const

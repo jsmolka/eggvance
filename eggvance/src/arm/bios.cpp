@@ -14,14 +14,14 @@ void Bios::init(const fs::path& path)
     {
         switch (fs::read(path, data))
         {
-        case fs::Status::BadSize:
-            video_ctx.showMessageBox("Warning", "Bad BIOS size: {} bytes", fs::file_size(path));
+        case fs::Status::BadFile:
+        case fs::Status::BadStream:
+            video_ctx.showMessageBox("Warning", "Cannot read BIOS: {}\nThe replacement will be used", path);
             std::copy(replacement.begin(), replacement.end(), data.begin());
             break;
 
-        case fs::Status::BadFile:
-        case fs::Status::BadStream:
-            video_ctx.showMessageBox("Warning", "Cannot read BIOS: {}", path);
+        case fs::Status::BadSize:
+            video_ctx.showMessageBox("Warning", "Invalid BIOS size: {} bytes\nThe replacement will be used", fs::file_size(path));
             std::copy(replacement.begin(), replacement.end(), data.begin());
             break;
         }
