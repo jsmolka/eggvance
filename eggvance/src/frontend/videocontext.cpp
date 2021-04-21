@@ -150,7 +150,7 @@ void VideoContext::renderTexture(GLuint texture, GLfloat texture_w, GLfloat text
 {
     int w;
     int h;
-    SDL_GetWindowSize(window, &w, &h);
+    SDL_GL_GetDrawableSize(window, &w, &h);
 
     GLfloat window_w = GLfloat(w);
     GLfloat window_h = GLfloat(h) - padding_top;
