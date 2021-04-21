@@ -379,6 +379,12 @@ float doUi()
                     if (ImGui::MenuItem(file.u8string().c_str()))
                         load(file, std::nullopt);
                 }
+
+                ImGui::Separator();
+
+                if (ImGui::MenuItem("Clear"))
+                    config.recent.clear();
+
                 ImGui::EndMenu();
             }
 

@@ -23,6 +23,26 @@ std::optional<SDL_GameControllerButton> shell::parse(const std::string& data)
     return parseEnum<SDL_GameControllerButton>(data);
 }
 
+RecentFiles::RecentFiles()
+{
+    files.resize(10, fs::path());
+}
+
+bool RecentFiles::isEmpty() const
+{
+    for (const auto& file : files)
+    {
+        if (!file.empty())
+            return false;
+    }
+    return true;
+}
+
+void RecentFiles::clear()
+{
+    std::fill(files.begin(), files.end(), fs::path());
+}
+
 void RecentFiles::push(const fs::path& file)
 {
     if (!fs::is_regular_file(file))
@@ -37,21 +57,6 @@ void RecentFiles::push(const fs::path& file)
 
     files.pop_back();
     files.insert(files.begin(), copy);
-}
-
-RecentFiles::RecentFiles()
-{
-    files.resize(10);
-}
-
-bool RecentFiles::isEmpty() const
-{
-    for (const auto& file : files)
-    {
-        if (!file.empty())
-            return false;
-    }
-    return true;
 }
 
 Ini::~Ini()
@@ -133,7 +138,8 @@ void Config::init()
 
     for (int index = 9; index >= 0; --index)
     {
-        recent.push(findOr("recent", shell::format("file_{}", index), fs::path()));
+        if (const auto file = find<fs::path>("recent", shell::format("file_{}", index)))
+            recent.push(*file);
     }
 
     save_path             = findOr("settings",   "save_path",             fs::path());

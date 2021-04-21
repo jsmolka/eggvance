@@ -34,6 +34,8 @@ public:
     RecentFiles();
 
     bool isEmpty() const;
+
+    void clear();
     void push(const fs::path& file);
 
     SHELL_FORWARD_ITERATORS(files.begin(), files.end())
