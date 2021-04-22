@@ -30,7 +30,7 @@ Install [SDL2](https://libsdl.org/download-2.0.php) and [OpenGL](https://www.ope
 ```
 
 ### Linux
-Install [SDL2](https://libsdl.org/download-2.0.php) and [GTK+ 3](https://www.gtk.org/).
+Install [SDL2](https://libsdl.org/download-2.0.php) and [GTK](https://www.gtk.org/).
 
 ```
 $ [sudo] apt-get install libsdl2-dev
@@ -38,10 +38,10 @@ $ [sudo] apt-get install libgtk-3-dev
 ```
 
 ### macOS
-Install [homebrew](https://brew.sh/).
+Install [Homebrew](https://brew.sh/).
 
 ```
-$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
 Install [SDL2](https://libsdl.org/download-2.0.php).
@@ -61,7 +61,7 @@ Build the Visual Studio solution. This can also be done on the command line.
 ```
 
 ### Linux and macOS
-Build with [cmake](https://cmake.org/).
+Build with [CMake](https://cmake.org/).
 
 ```
 $ mkdir build
