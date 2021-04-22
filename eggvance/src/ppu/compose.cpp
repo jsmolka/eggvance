@@ -101,7 +101,7 @@ void Ppu::composeNN(const BackgroundLayers& layers)
 {
     for (auto [x, color] : shell::enumerate(video_ctx.scanline(vcount)))
     {
-        color = Color::toArgb(upperLayer<kObjects>(layers, x, 0xFFFF'FFFF));
+        color = Color::toArgb(findUpperLayer<kObjects>(layers, x, 0xFFFF'FFFF).color);
     }
 }
 
@@ -110,7 +110,7 @@ void Ppu::composeNW(const BackgroundLayers& layers)
 {
     for (auto [x, color] : shell::enumerate(video_ctx.scanline(vcount)))
     {
-        color = Color::toArgb(upperLayer<kObjects>(layers, x, activeWindow<kWindows>(x).enabled));
+        color = Color::toArgb(findUpperLayer<kObjects>(layers, x, activeWindow<kWindows>(x).enabled).color);
     }
 }
 
@@ -119,82 +119,123 @@ void Ppu::composeBN(const BackgroundLayers& layers)
 {
     for (auto [x, color] : shell::enumerate(video_ctx.scanline(vcount)))
     {
-        auto [upper, lower] = blendLayers<kObjects>(layers, x, 0xFFFF'FFFF);
+        ComposeLayer upper;
+        ComposeLayer lower;
 
-        if (kObjects && upper.flag == Layer::Flag::Obj && objects[x].alpha && (bldcnt.lower & lower.flag))
+        bool alpha_object = kObjects && objects[x].alpha;
+        if ( alpha_object)
         {
-            upper.color = bldalpha.blendAlpha(upper.color, lower.color);
-        }
-        else
-        {
-            switch (BlendMode(kBlendMode))
+            std::tie(upper, lower) = findUpperLayers<kObjects>(layers, x);
+
+            if (upper.flag == Layer::Flag::Obj && (bldcnt.lower & lower.flag))
             {
-            case BlendMode::Alpha:
-                if ((bldcnt.upper & upper.flag) && (bldcnt.lower & lower.flag))
-                    upper.color = bldalpha.blendAlpha(upper.color, lower.color);
-                break;
-
-            case BlendMode::White:
-                if (bldcnt.upper & upper.flag)
-                    upper.color = bldfade.blendWhite(upper.color);
-                break;
-
-            case BlendMode::Black:
-                if (bldcnt.upper & upper.flag)
-                    upper.color = bldfade.blendBlack(upper.color);
-                break;
-
-            case BlendMode::Disabled:
-                break;
-
-            default:
-                SHELL_UNREACHABLE;
-                break;
+                color = Color::toArgb(bldalpha.blendAlpha(upper.color, lower.color));
+                continue;
             }
+        }
+
+        switch (BlendMode(kBlendMode))
+        {
+        case BlendMode::Alpha:
+            if (!alpha_object)
+                std::tie(upper, lower) = findUpperLayers<kObjects>(layers, x);
+
+            if ((bldcnt.upper & upper.flag) && (bldcnt.lower & lower.flag))
+                upper.color = bldalpha.blendAlpha(upper.color, lower.color);
+            break;
+
+        case BlendMode::White:
+            if (!alpha_object)
+                upper = findUpperLayer<kObjects>(layers, x);
+
+            if (bldcnt.upper & upper.flag)
+                upper.color = bldfade.blendWhite(upper.color);
+            break;
+
+        case BlendMode::Black:
+            if (!alpha_object)
+                upper = findUpperLayer<kObjects>(layers, x);
+
+            if (bldcnt.upper & upper.flag)
+                upper.color = bldfade.blendBlack(upper.color);
+            break;
+
+        case BlendMode::Disabled:
+            if (!alpha_object)
+                upper = findUpperLayer<kObjects>(layers, x);
+            break;
+
+        default:
+            SHELL_UNREACHABLE;
+            break;
         }
         color = Color::toArgb(upper.color);
     }
 }
 
 template<bool kObjects, uint kBlendMode, uint kWindows>
-void Ppu::composeBW(const BackgroundLayers& backgrounds)
+void Ppu::composeBW(const BackgroundLayers& layers)
 {
     for (auto [x, color] : shell::enumerate(video_ctx.scanline(vcount)))
     {
         const auto& window = activeWindow<kWindows>(x);
 
-        auto [upper, lower] = blendLayers<kObjects>(backgrounds, x, window.enabled);
+        ComposeLayer upper;
+        ComposeLayer lower;
 
-        if (kObjects && upper.flag == Layer::Flag::Obj && objects[x].alpha && (bldcnt.lower & lower.flag))
+        bool alpha_object = kObjects && objects[x].alpha;
+        if ( alpha_object)
         {
-            upper.color = bldalpha.blendAlpha(upper.color, lower.color);
+            std::tie(upper, lower) = findUpperLayers<kObjects>(layers, x, window.enabled);
+
+            if (upper.flag == Layer::Flag::Obj && (bldcnt.lower & lower.flag))
+            {
+                color = Color::toArgb(bldalpha.blendAlpha(upper.color, lower.color));
+                continue;
+            }
         }
-        else if (window.blend)
+
+        if (window.blend)
         {
             switch (BlendMode(kBlendMode))
             {
             case BlendMode::Alpha:
+                if (!alpha_object)
+                    std::tie(upper, lower) = findUpperLayers<kObjects>(layers, x, window.enabled);
+
                 if ((bldcnt.upper & upper.flag) && (bldcnt.lower & lower.flag))
                     upper.color = bldalpha.blendAlpha(upper.color, lower.color);
                 break;
 
             case BlendMode::White:
+                if (!alpha_object)
+                    upper = findUpperLayer<kObjects>(layers, x, window.enabled);
+
                 if (bldcnt.upper & upper.flag)
                     upper.color = bldfade.blendWhite(upper.color);
                 break;
 
             case BlendMode::Black:
+                if (!alpha_object)
+                    upper = findUpperLayer<kObjects>(layers, x, window.enabled);
+
                 if (bldcnt.upper & upper.flag)
                     upper.color = bldfade.blendBlack(upper.color);
                 break;
 
             case BlendMode::Disabled:
+                if (!alpha_object)
+                    upper = findUpperLayer<kObjects>(layers, x, window.enabled);
                 break;
 
             default:
                 SHELL_UNREACHABLE;
                 break;
             }
+        }
+        else if (!alpha_object)
+        {
+            upper = findUpperLayer<kObjects>(layers, x, window.enabled);
         }
         color = Color::toArgb(upper.color);
     }
@@ -216,7 +257,7 @@ const Window& Ppu::activeWindow(uint x) const
 }
 
 template<bool kObjects>
-u16 Ppu::upperLayer(const BackgroundLayers& layers, uint x, uint enabled)
+Ppu::ComposeLayer Ppu::findUpperLayer(const BackgroundLayers& layers, uint x, uint enabled)
 {
     auto& object = objects[x];
     auto  object_visible = kObjects && (enabled & Layer::Flag::Obj) && object.isOpaque();
@@ -224,35 +265,35 @@ u16 Ppu::upperLayer(const BackgroundLayers& layers, uint x, uint enabled)
     for (const auto& layer : layers)
     {
         if (object_visible && object <= layer)
-            return object.color;
+            return ComposeLayer(Layer::Flag::Obj, object.color);
 
         if ((enabled & layer.flag) && layer.isOpaque(x))
-            return layer.color(x);
+            return ComposeLayer(layer.flag, layer.color(x));
     }
 
     if (object_visible)
-        return object.color;
+        return ComposeLayer(Layer::Flag::Obj, object.color);
 
-    return pram.backdrop();
+    return ComposeLayer(Layer::Flag::Bdp, pram.backdrop());
 }
 
 template<bool kObjects>
-Ppu::BlendLayers Ppu::blendLayers(const BackgroundLayers& layers, uint x, uint enabled)
+Ppu::ComposeLayers Ppu::findUpperLayers(const BackgroundLayers& layers, uint x, uint enabled)
 {
     auto& object = objects[x];
     auto  object_used = false;
     auto  object_visible = kObjects && (enabled & Layer::Flag::Obj) && object.isOpaque();
 
-    std::optional<BlendLayer> upper;
+    std::optional<ComposeLayer> upper;
 
     for (const auto& layer : layers)
     {
         if (object_visible && !object_used && object <= layer)
         {
             if (upper)
-                return { *upper, { uint(Layer::Flag::Obj), object.color } };
+                return ComposeLayers(*upper, ComposeLayer(Layer::Flag::Obj, object.color));
             else
-                upper = { uint(Layer::Flag::Obj), object.color };
+                upper = ComposeLayer(Layer::Flag::Obj, object.color);
 
             object_used = true;
         }
@@ -260,22 +301,22 @@ Ppu::BlendLayers Ppu::blendLayers(const BackgroundLayers& layers, uint x, uint e
         if ((enabled & layer.flag) && layer.isOpaque(x))
         {
             if (upper)
-                return { *upper, { layer.flag, layer.color(x) } };
+                return ComposeLayers(*upper, ComposeLayer(layer.flag, layer.color(x)));
             else
-                upper = { layer.flag, layer.color(x) };
+                upper = ComposeLayer(layer.flag, layer.color(x));
         }
     }
 
     if (object_visible && !object_used)
     {
         if (upper)
-            return { *upper, { uint(Layer::Flag::Obj), object.color } };
+            return ComposeLayers(*upper, ComposeLayer(Layer::Flag::Obj, object.color));
         else
-            upper = { uint(Layer::Flag::Obj), object.color };
+            upper = ComposeLayer(Layer::Flag::Obj, object.color);
     }
 
     if (!upper)
-        upper = { uint(Layer::Flag::Bdp), pram.backdrop() };
+        upper = ComposeLayer(Layer::Flag::Bdp, pram.backdrop());
 
-    return { *upper, { uint(Layer::Flag::Bdp), pram.backdrop() } };
+    return ComposeLayers(*upper, ComposeLayer(Layer::Flag::Bdp, pram.backdrop()));
 }

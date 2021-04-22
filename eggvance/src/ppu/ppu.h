@@ -35,13 +35,18 @@ public:
     Oam oam = {};
 
 private:
-    struct BlendLayer
+    struct ComposeLayer
     {
+        ComposeLayer() = default;
+        template<typename Flag>
+        ComposeLayer(Flag flag, uint color)
+            : flag(static_cast<uint>(flag)), color(color) {}
+
         uint flag  = 0;
         uint color = 0;
     };
 
-    using BlendLayers      = std::pair<BlendLayer, BlendLayer>;
+    using ComposeLayers    = std::tuple<ComposeLayer, ComposeLayer>;
     using BackgroundRender = void(Ppu::*)(Background&);
     using BackgroundLayers = shell::FixedBuffer<BackgroundLayer, 4>;
 
@@ -74,9 +79,9 @@ private:
     const Window& activeWindow(uint x) const;
 
     template<bool kObjects>
-    u16 upperLayer(const BackgroundLayers& layers, uint x, uint enabled);
+    ComposeLayer  findUpperLayer( const BackgroundLayers& layers, uint x, uint enabled = 0xFFFF'FFFF);
     template<bool kObjects>
-    BlendLayers blendLayers(const BackgroundLayers& layers, uint x, uint enabled);
+    ComposeLayers findUpperLayers(const BackgroundLayers& layers, uint x, uint enabled = 0xFFFF'FFFF);
 
     uint objects_exist = false;
     uint objects_alpha = false;
