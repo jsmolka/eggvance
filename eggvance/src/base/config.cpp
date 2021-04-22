@@ -25,7 +25,7 @@ std::optional<SDL_GameControllerButton> shell::parse(const std::string& data)
 
 RecentFiles::RecentFiles()
 {
-    files.resize(10, fs::path());
+    files.resize(kSize, fs::path());
 }
 
 bool RecentFiles::isEmpty() const
@@ -45,7 +45,7 @@ void RecentFiles::clear()
 
 void RecentFiles::push(const fs::path& file)
 {
-    if (!fs::is_regular_file(file))
+    if (file.empty() || !fs::is_regular_file(file))
         return;
 
     auto copy(file);
@@ -54,8 +54,9 @@ void RecentFiles::push(const fs::path& file)
     auto iter = std::find(files.begin(), files.end(), file);
     if ( iter != files.end())
         files.erase(iter);
+    else
+        files.pop_back();
 
-    files.pop_back();
     files.insert(files.begin(), copy);
 }
 
@@ -138,8 +139,7 @@ void Config::init()
 
     for (int index = 9; index >= 0; --index)
     {
-        if (const auto file = find<fs::path>("recent", shell::format("file_{}", index)))
-            recent.push(*file);
+        recent.push(findOr("recent", shell::format("file_{}", index), fs::path()));
     }
 
     save_path             = findOr("settings",   "save_path",             fs::path());

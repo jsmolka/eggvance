@@ -26,10 +26,8 @@ public:
 class RecentFiles
 {
 public:
-    using iterator               = std::vector<fs::path>::iterator;
-    using const_iterator         = std::vector<fs::path>::const_iterator;
-    using reverse_iterator       = std::vector<fs::path>::reverse_iterator;
-    using const_reverse_iterator = std::vector<fs::path>::const_reverse_iterator;
+    using iterator       = std::vector<fs::path>::iterator;
+    using const_iterator = std::vector<fs::path>::const_iterator;
 
     RecentFiles();
 
@@ -39,9 +37,10 @@ public:
     void push(const fs::path& file);
 
     SHELL_FORWARD_ITERATORS(files.begin(), files.end())
-    SHELL_REVERSE_ITERATORS(files.end(), files.begin())
 
 private:
+    static constexpr auto kSize = 10;
+
     std::vector<fs::path> files;
 };
 
