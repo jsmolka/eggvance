@@ -110,7 +110,9 @@ void Ppu::composeNW(const BackgroundLayers& layers)
 {
     for (auto [x, color] : shell::enumerate(video_ctx.scanline(vcount)))
     {
-        color = Color::toArgb(findUpperLayer<kObjects>(layers, x, activeWindow<kWindows>(x).enabled).color);
+        const auto& window = activeWindow<kWindows>(x);
+
+        color = Color::toArgb(findUpperLayer<kObjects>(layers, x, window.enabled).color);
     }
 }
 
