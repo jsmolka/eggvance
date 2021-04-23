@@ -51,7 +51,7 @@ void Arm::dispatch()
         }
         else
         {
-            if (kState & State::Irq && !cpsr.i)
+            if ((kState & State::Irq) && !cpsr.i)
             {
                 interruptHw();
             }
