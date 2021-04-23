@@ -82,6 +82,12 @@ void updateTitle(double fps)
     video_ctx.setTitle(title);
 }
 
+void queueReset()
+{
+    limiter.queueReset();
+    counter.queueReset();
+}
+
 void reset()
 {
     gamepak.save->reset();
@@ -106,12 +112,8 @@ void reset()
         state = State::Menu;
     else
         state = State::Run;
-}
 
-void queueReset()
-{
-    limiter.queueReset();
-    counter.queueReset();
+    queueReset();
 }
 
 void load(const std::optional<fs::path>& rom, const std::optional<fs::path>& sav)
@@ -781,7 +783,7 @@ void init(int argc, char* argv[])
 
     Options options("eggvance");
     options.add({ "rom",       "ROM file"          }, Options::value<fs::path>()->positional()->optional());
-    options.add({ "-s,--save", "Save file", "file" }, Options::value<fs::path>()->optional());
+    options.add({ "-s,--save", "save file", "file" }, Options::value<fs::path>()->optional());
 
     OptionsResult result;
     try
