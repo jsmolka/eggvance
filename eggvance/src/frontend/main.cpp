@@ -343,6 +343,20 @@ void SettingsLabel(const char* text)
 
 float doUi()
 {
+    enum class ResizeEvent
+    {
+        None,
+        Scale1,
+        Scale2,
+        Scale3,
+        Scale4,
+        Scale5,
+        Scale6,
+        Scale7,
+        Scale8,
+        ToggleFullscreen
+    } resize = ResizeEvent::None;
+
            bool show_menu       = false;
     static bool show_settings   = false;
     static bool show_keyboard   = false;
@@ -476,24 +490,17 @@ float doUi()
                 {
                     std::string text = shell::format("{}x", scale);
 
-                    int window_w = kScreenW * scale;
-                    int window_h = kScreenH * scale;
+                    uint window_w = kScreenW * scale;
+                    uint window_h = kScreenH * scale;
 
                     if (ImGui::MenuItem(text.c_str(), nullptr, w == window_w && h == window_h))
-                    {
-                        config.frame_size = scale;
-                        SDL_SetWindowFullscreen(video_ctx.window, ~SDL_WINDOW_FULLSCREEN_DESKTOP);
-                        SDL_SetWindowSize(video_ctx.window, window_w, window_h);
-                        video_ctx.updateViewport();
-                    }
+                        resize = ResizeEvent(scale);
                 }
 
                 ImGui::Separator();
 
-                uint fullscreen = SDL_GetWindowFlags(video_ctx.window) & SDL_WINDOW_FULLSCREEN_DESKTOP;
-
-                if (ImGui::MenuItem("Fullscreen", "Ctrl+F", fullscreen))
-                    SDL_SetWindowFullscreen(video_ctx.window, fullscreen ^ SDL_WINDOW_FULLSCREEN_DESKTOP);
+                if (ImGui::MenuItem("Fullscreen", "Ctrl+F", SDL_GetWindowFlags(video_ctx.window) & SDL_WINDOW_FULLSCREEN_DESKTOP))
+                    resize = ResizeEvent::ToggleFullscreen;
 
                 ImGui::EndMenu();
             }
@@ -698,6 +705,27 @@ float doUi()
         || show_controller;
 
     ImGui::Render();
+
+    switch (resize)
+    {
+    case ResizeEvent::Scale1:
+    case ResizeEvent::Scale2:
+    case ResizeEvent::Scale3:
+    case ResizeEvent::Scale4:
+    case ResizeEvent::Scale5:
+    case ResizeEvent::Scale6:
+    case ResizeEvent::Scale7:
+    case ResizeEvent::Scale8:
+        config.frame_size = uint(resize);
+        SDL_SetWindowFullscreen(video_ctx.window, 0);
+        SDL_SetWindowSize(video_ctx.window, config.frame_size * kScreenW, config.frame_size * kScreenH);
+        video_ctx.updateViewport();
+        return doUi();
+
+    case ResizeEvent::ToggleFullscreen:
+        SDL_SetWindowFullscreen(video_ctx.window, SDL_GetWindowFlags(video_ctx.window) ^ SDL_WINDOW_FULLSCREEN_DESKTOP);
+        return doUi();
+    }
 
     return height;
 }
