@@ -11,6 +11,22 @@ template<typename Input>
 class Controls
 {
 public:
+    void unassign(Input input)
+    {
+        auto none = Input(-1);
+
+        if (a      == input) a      = none;
+        if (b      == input) b      = none;
+        if (up     == input) up     = none;
+        if (down   == input) down   = none;
+        if (left   == input) left   = none;
+        if (right  == input) right  = none;
+        if (start  == input) start  = none;
+        if (select == input) select = none;
+        if (l      == input) l      = none;
+        if (r      == input) r      = none;
+    }
+
     Input a;
     Input b;
     Input up;
@@ -82,3 +98,4 @@ public:
 };
 
 inline Config config;
+
