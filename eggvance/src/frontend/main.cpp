@@ -639,7 +639,10 @@ float doUi()
         auto map = [](const char* label, SDL_Scancode& scancode)
         {
             std::string text = SDL_GetScancodeName(scancode);
-            shell::toUpper(text);
+            if (text == "")
+                text = "NONE";
+            else
+                shell::toUpper(text);
 
             ImGui::SettingsLabel(label);
             if (ImGui::Button(text.c_str()))
