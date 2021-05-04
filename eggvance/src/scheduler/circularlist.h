@@ -31,7 +31,7 @@ public:
         node->prev->next = node;
         node->next->prev = node;
 
-        (*iter) = node;
+        *iter = node;
     }
 
     void remove(T& item)
