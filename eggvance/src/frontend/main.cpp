@@ -155,7 +155,7 @@ bool doSelectKey(const SDL_KeyboardEvent& event)
     if (!select_scancode)
         return false;
 
-    config.keyboard.unassign(event.keysym.scancode);
+    config.keyboard.clear(event.keysym.scancode);
 
     *select_scancode = event.keysym.scancode;
      select_scancode = nullptr;
@@ -168,7 +168,7 @@ bool doSelectButton(const SDL_ControllerButtonEvent& event)
     if (!select_button)
         return false;
 
-    config.controller.unassign(SDL_GameControllerButton(event.button));
+    config.controller.clear(SDL_GameControllerButton(event.button));
 
     *select_button = SDL_GameControllerButton(event.button);
      select_button = nullptr;

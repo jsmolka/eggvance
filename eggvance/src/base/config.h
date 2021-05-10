@@ -11,20 +11,13 @@ template<typename Input>
 class Controls
 {
 public:
-    void unassign(Input input)
+    void clear(Input value)
     {
-        auto none = Input(-1);
-
-        if (a      == input) a      = none;
-        if (b      == input) b      = none;
-        if (up     == input) up     = none;
-        if (down   == input) down   = none;
-        if (left   == input) left   = none;
-        if (right  == input) right  = none;
-        if (start  == input) start  = none;
-        if (select == input) select = none;
-        if (l      == input) l      = none;
-        if (r      == input) r      = none;
+        for (auto& input : shell::ForwardRange(&a, &r + 1))
+        {
+            if (input == value)
+                input = static_cast<Input>(-1);
+        }
     }
 
     Input a;
