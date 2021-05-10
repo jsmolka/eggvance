@@ -5,9 +5,11 @@
 
 void Keypad::update()
 {
+    uint previous = input;
     input = ~input_ctx.state();
 
-    checkInterrupt();
+    if (input != previous)
+        checkInterrupt();
 }
 
 void Keypad::checkInterrupt()
@@ -17,8 +19,8 @@ void Keypad::checkInterrupt()
     if (!control.irq)
         return;
 
-    uint mask = ~input & input.mask;
+    uint mask = ~input & control.mask;
 
-    if (control.logic == Logic::Any ? (mask & control.mask) : (mask == control.mask))
+    if (control.logic == Logic::Any ? mask : mask == control.mask)
         arm.raise(Irq::Keypad);
 }

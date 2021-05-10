@@ -1,7 +1,5 @@
 #include "io.h"
 
-#include "keypad.h"
-
 KeyInput::KeyInput()
 {
     data = mask;
@@ -29,6 +27,4 @@ void KeyControl::write(uint index, u8 byte)
         irq   = bit::seq<6, 1>(byte);
         logic = bit::seq<7, 1>(byte);
     }
-
-    keypad.checkInterrupt();
 }

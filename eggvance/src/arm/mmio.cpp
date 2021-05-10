@@ -7,105 +7,9 @@
 #include "sio/sio.h"
 #include "timer/timer.h"
 
-enum class Io
-{
-    DisplayControl = 0x000,
-    GreenSwap      = 0x002,
-    DisplayStatus  = 0x004,
-    VerticalCount  = 0x006,
-    Bg0Control     = 0x008,
-    Bg1Control     = 0x00A,
-    Bg2Control     = 0x00C,
-    Bg3Control     = 0x00E,
-    Bg0HorOffset   = 0x010,
-    Bg0VerOffset   = 0x012,
-    Bg1HorOffset   = 0x014,
-    Bg1VerOffset   = 0x016,
-    Bg2HorOffset   = 0x018,
-    Bg2VerOffset   = 0x01A,
-    Bg3HorOffset   = 0x01C,
-    Bg3VerOffset   = 0x01E,
-    Bg2ParameterA  = 0x020,
-    Bg2ParameterB  = 0x022,
-    Bg2ParameterC  = 0x024,
-    Bg2ParameterD  = 0x026,
-    Bg2ReferenceX  = 0x028,
-    Bg2ReferenceY  = 0x02C,
-    Bg3ParameterA  = 0x030,
-    Bg3ParameterB  = 0x032,
-    Bg3ParameterC  = 0x034,
-    Bg3ParameterD  = 0x036,
-    Bg3ReferenceX  = 0x038,
-    Bg3ReferenceY  = 0x03C,
-    Window0Hor     = 0x040,
-    Window1Hor     = 0x042,
-    Window0Ver     = 0x044,
-    Window1Ver     = 0x046,
-    WindowInside   = 0x048,
-    WindowOutside  = 0x04A,
-    Mosaic         = 0x04C,
-    BlendControl   = 0x050,
-    BlendAlpha     = 0x052,
-    BlendFade      = 0x054,
-    SoundSquare1   = 0x060,
-    SoundSquare2   = 0x068,
-    SoundWave      = 0x070,
-    SoundNoise     = 0x078,
-    SoundControl   = 0x080,
-    SoundBias      = 0x088,
-    Unused08A      = 0x08A,
-    WaveRam        = 0x090,
-    FifoA          = 0x0A0,
-    FifoB          = 0x0A4,
-    Dma0Sad        = 0x0B0,
-    Dma0Dad        = 0x0B4,
-    Dma0Count      = 0x0B8,
-    Dma0Control    = 0x0BA,
-    Dma1Sad        = 0x0BC,
-    Dma1Dad        = 0x0C0,
-    Dma1Count      = 0x0C4,
-    Dma1Control    = 0x0C6,
-    Dma2Sad        = 0x0C8,
-    Dma2Dad        = 0x0CC,
-    Dma2Count      = 0x0D0,
-    Dma2Control    = 0x0D2,
-    Dma3Sad        = 0x0D4,
-    Dma3Dad        = 0x0D8,
-    Dma3Count      = 0x0DC,
-    Dma3Control    = 0x0DE,
-    Timer0Count    = 0x100,
-    Timer0Control  = 0x102,
-    Timer1Count    = 0x104,
-    Timer1Control  = 0x106,
-    Timer2Count    = 0x108,
-    Timer2Control  = 0x10A,
-    Timer3Count    = 0x10C,
-    Timer3Control  = 0x10E,
-    SioMulti       = 0x120,
-    SioControl     = 0x128,
-    SioSend        = 0x12A,
-    KeyInput       = 0x130,
-    KeyControl     = 0x132,
-    RemoteControl  = 0x134,
-    Unused136      = 0x136,
-    JoyControl     = 0x140,
-    Unused142      = 0x142,
-    JoyReceive     = 0x150,
-    JoyTransmit    = 0x154,
-    JoyStatus      = 0x158,
-    Unused15A      = 0x15A,
-    IrqEnable      = 0x200,
-    IrqRequest     = 0x202,
-    WaitControl    = 0x204,
-    Unused206      = 0x206,
-    IrqMaster      = 0x208,
-    PostFlag       = 0x300,
-    HaltControl    = 0x301
-};
-
 u8 Arm::readIo(u32 addr)
 {
-    switch (addr & 0x3FF'FFFF)
+    switch (addr)
     {
     SHELL_CASE02(uint(Io::DisplayControl), return ppu.dispcnt.read(kIndex));
     SHELL_CASE02(uint(Io::GreenSwap),      return ppu.greenswap.read(kIndex));
@@ -170,7 +74,7 @@ u8 Arm::readIo(u32 addr)
 
 void Arm::writeIo(u32 addr, u8 byte)
 {
-    switch (addr & 0x3FF'FFFF)
+    switch (addr)
     {
     SHELL_CASE02(uint(Io::DisplayControl), ppu.dispcnt.write(kIndex, byte));
     SHELL_CASE02(uint(Io::GreenSwap),      ppu.greenswap.write(kIndex, byte));

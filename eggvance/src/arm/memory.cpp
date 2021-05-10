@@ -1,6 +1,7 @@
 #include "arm.h"
 
 #include "gamepak/gamepak.h"
+#include "keypad/keypad.h"
 #include "ppu/ppu.h"
 
 enum class Region
@@ -51,6 +52,7 @@ u8 Arm::readByte(u32 addr, Access access)
 
     case Region::Io:
         tickRam(1);
+        addr &= 0x3FF'FFFF;
         return readIo(addr);
 
     case Region::PaletteRam:
@@ -113,7 +115,7 @@ u16 Arm::readHalf(u32 addr, Access access)
 
     case Region::Io:
         tickRam(1);
-        addr &= ~0x1;
+        addr &= 0x3FF'FFFE;
         return readIo(addr + 0) << 0
              | readIo(addr + 1) << 8;
 
@@ -184,7 +186,7 @@ u32 Arm::readWord(u32 addr, Access access)
 
     case Region::Io:
         tickRam(1);
-        addr &= ~0x3;
+        addr &= 0x3FF'FFFC;
         return readIo(addr + 0) <<  0
              | readIo(addr + 1) <<  8
              | readIo(addr + 2) << 16
@@ -252,7 +254,10 @@ void Arm::writeByte(u32 addr, u8 byte, Access access)
 
     case Region::Io:
         tickRam(1);
+        addr &= 0x3FF'FFFF;
         writeIo(addr, byte);
+        if ((addr & ~0x1) == Io::KeyControl)
+            keypad.checkInterrupt();
         break;
 
     case Region::PaletteRam:
@@ -314,9 +319,11 @@ void Arm::writeHalf(u32 addr, u16 half, Access access)
 
     case Region::Io:
         tickRam(1);
-        addr &= ~0x1;
+        addr &= 0x3FF'FFFE;
         writeIo(addr + 0, bit::seq<0, 8>(half));
         writeIo(addr + 1, bit::seq<8, 8>(half));
+        if (addr == Io::KeyControl)
+            keypad.checkInterrupt();
         break;
 
     case Region::PaletteRam:
@@ -379,11 +386,13 @@ void Arm::writeWord(u32 addr, u32 word, Access access)
 
     case Region::Io:
         tickRam(1);
-        addr &= ~0x3;
+        addr &= 0x3FF'FFFC;
         writeIo(addr + 0, bit::seq< 0, 8>(word));
         writeIo(addr + 1, bit::seq< 8, 8>(word));
         writeIo(addr + 2, bit::seq<16, 8>(word));
         writeIo(addr + 3, bit::seq<24, 8>(word));
+        if (addr == Io::KeyInput)
+            keypad.checkInterrupt();
         break;
 
     case Region::PaletteRam:
