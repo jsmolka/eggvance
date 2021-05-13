@@ -11,8 +11,8 @@ find_package(OpenGL REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
 
 include_directories(modules)
+include_directories(modules/icon/include)
 include_directories(modules/shell/include)
-include_directories(modules/icon/eggvance/include)
 include_directories(src)
 
 file(GLOB_RECURSE SOURCE_FILES

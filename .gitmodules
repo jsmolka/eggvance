@@ -1,7 +1,3 @@
-[submodule "eggvance/modules/icon"]
-    path = eggvance/modules/icon
-    url = https://github.com/jsmolka/icon
-
 [submodule "eggvance/modules/shell"]
     path = eggvance/modules/shell
     url = https://github.com/jsmolka/shell
