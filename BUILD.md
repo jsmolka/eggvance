@@ -64,8 +64,8 @@ Build the Visual Studio solution. This can also be done on the command line.
 Build with [CMake](https://cmake.org/).
 
 ```
-$ mkdir build
-$ cd build
+$ mkdir eggvance/build
+$ cd eggvance/build
 $ cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-march=native" ..
 $ make -j 4
 ```
