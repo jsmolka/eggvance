@@ -66,6 +66,6 @@ Build with [CMake](https://cmake.org/).
 ```
 $ mkdir build
 $ cd build
-$ cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-march=native" ..
+$ cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-march=native" ../eggvance
 $ make -j 4
 ```
