@@ -130,7 +130,7 @@ void Apu::sample(u64 late)
         samples[0] >>= 3 - control.volume;
         samples[1] >>= 3 - control.volume;
 
-        for (auto  [index, fifo] : shell::enumerate(fifos, 4))
+        for (auto [index, fifo] : shell::enumerate(fifos, 4))
         {
             if ((config.audio_channels & (1 << index)) == 0)
                 continue;
