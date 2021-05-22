@@ -661,9 +661,9 @@ float doUi()
         map("R              ", config.keyboard.r);
         
         bool show = select_scancode;
-        if (ImGui::BeginPopup("Press button", show, false))
+        if (ImGui::BeginPopup("Waiting...", show, false))
         {
-            ImGui::Text("Press button or escape");
+            ImGui::Text("Press key or escape");
             ImGui::EndPopup();
         }
         ImGui::EndSettingsWindow();
@@ -697,7 +697,7 @@ float doUi()
         map("R              ", config.controller.r);
         
         bool show = select_button;
-        if (ImGui::BeginPopup("Press button", show, false))
+        if (ImGui::BeginPopup("Waiting...", show, false))
         {
             ImGui::Text("Press button or escape");
             ImGui::EndPopup();

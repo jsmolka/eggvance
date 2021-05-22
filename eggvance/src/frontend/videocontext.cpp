@@ -132,6 +132,52 @@ void VideoContext::initImGui()
     ImGui::StyleColorsDark();
     ImGui::GetIO().IniFilename = nullptr;
 
+    auto& style = ImGui::GetStyle();
+    style.ScrollbarRounding = 0;
+    style.FramePadding.x = 8;
+    
+    auto color = [](auto r, auto g, auto b, auto a)
+    {
+        return ImVec4(r / 255.0f, g / 255.f, b / 255.f, a);
+    };
+
+    style.Colors[ImGuiCol_Text]                 = color(255, 255, 255, 1.000);
+    style.Colors[ImGuiCol_TextDisabled]         = color(128, 128, 128, 1.000);
+    style.Colors[ImGuiCol_WindowBg]             = color( 26,  29,  33, 1.000);
+    style.Colors[ImGuiCol_ChildBg]              = color( 26,  29,  33, 1.000);
+    style.Colors[ImGuiCol_PopupBg]              = color( 26,  29,  33, 1.000);
+    style.Colors[ImGuiCol_Border]               = color(255, 255, 255, 0.150);
+    style.Colors[ImGuiCol_BorderShadow]         = color(255, 255, 255, 0.150);
+    style.Colors[ImGuiCol_FrameBg]              = color(255, 255, 255, 0.075);
+    style.Colors[ImGuiCol_FrameBgHovered]       = color(255, 255, 255, 0.150);
+    style.Colors[ImGuiCol_FrameBgActive]        = color(255, 255, 255, 0.225);
+    style.Colors[ImGuiCol_TitleBg]              = color( 11,  11,  17, 1.000);
+    style.Colors[ImGuiCol_TitleBgActive]        = color( 11,  11,  17, 1.000);
+    style.Colors[ImGuiCol_TitleBgCollapsed]     = color( 11,  11,  17, 1.000);
+    style.Colors[ImGuiCol_MenuBarBg]            = color( 26,  29,  33, 1.000);
+    style.Colors[ImGuiCol_ScrollbarBg]          = color( 26,  29,  33, 1.000);
+    style.Colors[ImGuiCol_ScrollbarGrab]        = color(255, 255, 255, 0.075);
+    style.Colors[ImGuiCol_ScrollbarGrabHovered] = color(255, 255, 255, 0.150);
+    style.Colors[ImGuiCol_ScrollbarGrabActive]  = color(255, 255, 255, 0.225);
+    style.Colors[ImGuiCol_CheckMark]            = color(255, 255, 255, 0.500);
+    style.Colors[ImGuiCol_SliderGrab]           = color(255, 255, 255, 0.500);
+    style.Colors[ImGuiCol_SliderGrabActive]     = color(255, 255, 255, 0.500);
+    style.Colors[ImGuiCol_Button]               = color(255, 255, 255, 0.200);
+    style.Colors[ImGuiCol_ButtonHovered]        = color(255, 255, 255, 0.300);
+    style.Colors[ImGuiCol_ButtonActive]         = color(255, 255, 255, 0.400);
+    style.Colors[ImGuiCol_Header]               = color(255, 255, 255, 0.075);
+    style.Colors[ImGuiCol_HeaderHovered]        = color(255, 255, 255, 0.150);
+    style.Colors[ImGuiCol_HeaderActive]         = color(255, 255, 255, 0.225);
+    style.Colors[ImGuiCol_Separator]            = color(255, 255, 255, 0.150);
+    style.Colors[ImGuiCol_SeparatorHovered]     = color(255, 255, 255, 0.150);
+    style.Colors[ImGuiCol_SeparatorActive]      = color(255, 255, 255, 0.150);
+    style.Colors[ImGuiCol_ResizeGrip]           = color(255, 255, 255, 0.075);
+    style.Colors[ImGuiCol_ResizeGripHovered]    = color(255, 255, 255, 0.150);
+    style.Colors[ImGuiCol_ResizeGripActive]     = color(255, 255, 255, 0.225);
+    style.Colors[ImGuiCol_Tab]                  = color(255, 255, 255, 0.075);
+    style.Colors[ImGuiCol_TabHovered]           = color(255, 255, 255, 0.150);
+    style.Colors[ImGuiCol_TabActive]            = color(255, 255, 255, 0.225);
+
     ImGui_ImplSDL2_InitForOpenGL(window, context);
     ImGui_ImplOpenGL2_Init();
 }
