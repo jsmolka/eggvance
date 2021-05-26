@@ -83,7 +83,7 @@ void Ini::init()
 
 std::optional<fs::path> Ini::file()
 {
-    if (char* path = SDL_GetPrefPath("eggvance", "eggvance"))
+    if (char* path = SDL_GetPrefPath("jsmolka", "eggvance"))
     {
         const auto file = fs::u8path(path) / "eggvance.ini";
         SDL_free(path);
