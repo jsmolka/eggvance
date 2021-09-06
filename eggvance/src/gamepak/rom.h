@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <shell/punning.h>
 
 #include "base/filesystem.h"
 #include "base/int.h"
@@ -36,7 +37,7 @@ public:
     {
         static_assert(std::is_integral_v<Integral>);
 
-        return *reinterpret_cast<const Integral*>(this->data() + addr);
+        return shell::read<Integral>(this->data(), addr);
     }
 
     std::size_t mask = 0;

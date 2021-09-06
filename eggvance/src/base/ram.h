@@ -2,6 +2,7 @@
 
 #include <shell/array.h>
 #include <shell/macros.h>
+#include <shell/punning.h>
 
 #include "base/int.h"
 
@@ -24,7 +25,7 @@ public:
     {
         SHELL_ASSERT(addr + sizeof(Integral) <= kSize);
 
-        return *reinterpret_cast<const Integral*>(this->data() + addr);
+        return shell::read<Integral>(this->data(), addr);
     }
 
     template<typename Integral>
@@ -32,7 +33,7 @@ public:
     {
         SHELL_ASSERT(addr + sizeof(Integral) <= kSize);
 
-        *reinterpret_cast<Integral*>(this->data() + addr) = value;
+        shell::write(this->data(), addr, value);
     }
 
     u8  readByte(u32 addr) const { return read<u8 >(addr); }
