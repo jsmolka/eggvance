@@ -1,6 +1,6 @@
 #pragma once
 
-#include <shell/buffer.h>
+#include <shell/vector.h>
 
 #include "background.h"
 #include "layers.h"
@@ -48,7 +48,7 @@ private:
 
     using ComposeLayers    = std::tuple<ComposeLayer, ComposeLayer>;
     using BackgroundRender = void(Ppu::*)(Background&);
-    using BackgroundLayers = shell::FixedBuffer<BackgroundLayer, 4>;
+    using BackgroundLayers = shell::FixedVector<BackgroundLayer, 4>;
 
     void hblank(u64 late);
     void hblankEnd(u64 late);
