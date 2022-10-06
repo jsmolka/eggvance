@@ -16,7 +16,7 @@ positional arguments:
 ```
 
 ## Binaries
-Binaries for Windows, Linux and macOS are available as [nightly](https://github.com/jsmolka/eggvance/actions) and [release](https://github.com/jsmolka/eggvance/releases) builds.
+Binaries for Windows, Linux and macOS are available as [nightly](https://nightly.link/jsmolka/eggvance/workflows/build/master) and [release](https://github.com/jsmolka/eggvance/releases) builds.
 
 ## Build
 Detailed build instructions can be found [here](BUILD.md).
