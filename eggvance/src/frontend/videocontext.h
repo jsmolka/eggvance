@@ -2,7 +2,7 @@
 
 #include <string>
 #include <shell/array.h>
-#include <shell/format.h>
+#include <shell/fmt.h>
 
 #include "opengl.h"
 #include "sdl2.h"
@@ -29,9 +29,9 @@ public:
     template<typename... Args>
     void showMessageBox(const std::string& title, const std::string& format, Args&&... args)
     {
-        const auto message = shell::format(format, std::forward<Args>(args)...);
+        const auto message = fmt::format(fmt::runtime(format), std::forward<Args>(args)...);
 
-        shell::print("{}\n", message);
+        fmt::print("{}\n", message);
 
         SDL_ShowSimpleMessageBox(0, title.c_str(), message.c_str(), window);
     }

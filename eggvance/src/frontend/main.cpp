@@ -62,10 +62,11 @@ bool isRunning()
 
 void updateTitle()
 {
-    const auto title = shell::format(
-        gamepak.rom.title.empty()
+    const auto title = fmt::format(
+        fmt::runtime(
+          gamepak.rom.title.empty()
             ? "eggvance"
-            : "eggvance - {0}",
+            : "eggvance - {0}"),
         gamepak.rom.title);
 
     video_ctx.setTitle(title);
@@ -73,10 +74,11 @@ void updateTitle()
 
 void updateTitle(double fps)
 {
-    const auto title = shell::format(
-        gamepak.rom.title.empty()
-            ? "eggvance - {1:.1f} fps"
-            : "eggvance - {0} - {1:.1f} fps",
+    const auto title = fmt::format(
+        fmt::runtime(
+            gamepak.rom.title.empty()
+              ? "eggvance - {1:.1f} fps"
+              : "eggvance - {0} - {1:.1f} fps"),
         gamepak.rom.title, fps);
 
     video_ctx.setTitle(title);
@@ -300,7 +302,7 @@ bool BrowseButton(const fs::path& path)
 {
     return ImGui::Button(path.empty()
         ? "Browse..."
-        : path.u8string().c_str());
+        : reinterpret_cast<const char*>(path.u8string().c_str()));
 }
 
 bool BeginPopup(const char* title, bool& open, bool can_close)
@@ -373,7 +375,7 @@ float doUi()
     ImGui_ImplSDL2_NewFrame(video_ctx.window);
 
     ImGui::NewFrame();
-    
+
     float height = 0.0f;
     if (ImGui::BeginMainMenuBar())
     {
@@ -396,7 +398,7 @@ float doUi()
                     if (file.empty())
                         break;
 
-                    if (ImGui::MenuItem(file.u8string().c_str()))
+                    if (ImGui::MenuItem(reinterpret_cast<const char*>(file.u8string().c_str())))
                         load(file, std::nullopt);
                 }
 
@@ -469,8 +471,8 @@ float doUi()
 
                 for (multiplier = 2; multiplier <= 8; ++multiplier)
                 {
-                    std::string text = shell::format("{}x", multiplier);
-                    std::string shortcut = shell::format("Ctrl+{}", multiplier);
+                    std::string text = fmt::format("{}x", multiplier);
+                    std::string shortcut = fmt::format("Ctrl+{}", multiplier);
 
                     if (ImGui::MenuItem(text.c_str(), shortcut.c_str(), config.fast_forward == multiplier))
                         setFastForward(multiplier);
@@ -492,7 +494,7 @@ float doUi()
 
                 for (uint scale = 1; scale <= 8; ++scale)
                 {
-                    std::string text = shell::format("{}x", scale);
+                    std::string text = fmt::format("{}x", scale);
 
                     uint window_w = kScreenW * scale;
                     uint window_h = kScreenH * scale;
@@ -659,7 +661,7 @@ float doUi()
         map("Select         ", config.keyboard.select);
         map("L              ", config.keyboard.l);
         map("R              ", config.keyboard.r);
-        
+
         bool show = select_scancode;
         if (ImGui::BeginPopup("Waiting...", show, false))
         {
@@ -695,7 +697,7 @@ float doUi()
         map("Select         ", config.controller.select);
         map("L              ", config.controller.l);
         map("R              ", config.controller.r);
-        
+
         bool show = select_button;
         if (ImGui::BeginPopup("Waiting...", show, false))
         {
@@ -798,7 +800,7 @@ int eventFilter(void*, SDL_Event* event)
             return 0;
         }
         break;
-    
+
     #if SHELL_OS_WINDOWS
     case SDL_SYSWMEVENT:
         if (event->syswm.msg->msg.win.msg == WM_EXITSIZEMOVE)
@@ -827,7 +829,7 @@ void init(int argc, char* argv[])
     }
     catch (const ParseError& error)
     {
-        shell::print("Cannot parse command line: {}\n", error.what());
+        fmt::print("Cannot parse command line: {}\n", error.what());
 
         std::exit(1);
     }
@@ -897,7 +899,7 @@ int main(int argc, char* argv[])
         }
 
         audio_ctx.pause();
-        
+
         return 0;
     }
     catch (const std::exception& ex)

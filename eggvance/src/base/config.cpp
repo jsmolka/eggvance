@@ -97,40 +97,40 @@ Config::~Config()
 {
     for (auto [index, file] : shell::enumerate(recent))
     {
-        set("recent", shell::format("file_{}", index), file.u8string());
+        set("recent", fmt::format("file_{}", index), reinterpret_cast<const char*>(file.u8string().c_str()));
     }
 
-    set("settings",   "save_path",             shell::format(save_path));
-    set("settings",   "bios_file",             shell::format(bios_file));
-    set("settings",   "bios_skip",             shell::format(bios_skip));
-    set("emulation",  "fast_forward",          shell::format(fast_forward));
-    set("video",      "frame_size",            shell::format(frame_size));
-    set("video",      "color_correct",         shell::format(color_correct));
-    set("video",      "preserve_aspect_ratio", shell::format(preserve_aspect_ratio));
-    set("audio",      "mute",                  shell::format(mute));
-    set("audio",      "volume",                shell::format(volume));
-    set("video",      "video_layers",          shell::format(video_layers));
-    set("audio",      "audio_channels",        shell::format(audio_channels));
-    set("keyboard",   "a",                     shell::format(keyboard.a));
-    set("keyboard",   "b",                     shell::format(keyboard.b));
-    set("keyboard",   "up",                    shell::format(keyboard.up));
-    set("keyboard",   "down",                  shell::format(keyboard.down));
-    set("keyboard",   "left",                  shell::format(keyboard.left));
-    set("keyboard",   "right",                 shell::format(keyboard.right));
-    set("keyboard",   "start",                 shell::format(keyboard.start));
-    set("keyboard",   "select",                shell::format(keyboard.select));
-    set("keyboard",   "l",                     shell::format(keyboard.l));
-    set("keyboard",   "r",                     shell::format(keyboard.r));
-    set("controller", "a",                     shell::format(controller.a));
-    set("controller", "b",                     shell::format(controller.b));
-    set("controller", "up",                    shell::format(controller.up));
-    set("controller", "down",                  shell::format(controller.down));
-    set("controller", "left",                  shell::format(controller.left));
-    set("controller", "right",                 shell::format(controller.right));
-    set("controller", "start",                 shell::format(controller.start));
-    set("controller", "select",                shell::format(controller.select));
-    set("controller", "l",                     shell::format(controller.l));
-    set("controller", "r",                     shell::format(controller.r));
+    set("settings",   "save_path",             fmt::to_string(save_path));
+    set("settings",   "bios_file",             fmt::to_string(bios_file));
+    set("settings",   "bios_skip",             fmt::to_string(bios_skip));
+    set("emulation",  "fast_forward",          fmt::to_string(fast_forward));
+    set("video",      "frame_size",            fmt::to_string(frame_size));
+    set("video",      "color_correct",         fmt::to_string(color_correct));
+    set("video",      "preserve_aspect_ratio", fmt::to_string(preserve_aspect_ratio));
+    set("audio",      "mute",                  fmt::to_string(mute));
+    set("audio",      "volume",                fmt::to_string(volume));
+    set("video",      "video_layers",          fmt::to_string(video_layers));
+    set("audio",      "audio_channels",        fmt::to_string(audio_channels));
+    set("keyboard",   "a",                     fmt::to_string(static_cast<std::underlying_type_t<SDL_Scancode>>(keyboard.a)));
+    set("keyboard",   "b",                     fmt::to_string(static_cast<std::underlying_type_t<SDL_Scancode>>(keyboard.b)));
+    set("keyboard",   "up",                    fmt::to_string(static_cast<std::underlying_type_t<SDL_Scancode>>(keyboard.up)));
+    set("keyboard",   "down",                  fmt::to_string(static_cast<std::underlying_type_t<SDL_Scancode>>(keyboard.down)));
+    set("keyboard",   "left",                  fmt::to_string(static_cast<std::underlying_type_t<SDL_Scancode>>(keyboard.left)));
+    set("keyboard",   "right",                 fmt::to_string(static_cast<std::underlying_type_t<SDL_Scancode>>(keyboard.right)));
+    set("keyboard",   "start",                 fmt::to_string(static_cast<std::underlying_type_t<SDL_Scancode>>(keyboard.start)));
+    set("keyboard",   "select",                fmt::to_string(static_cast<std::underlying_type_t<SDL_Scancode>>(keyboard.select)));
+    set("keyboard",   "l",                     fmt::to_string(static_cast<std::underlying_type_t<SDL_Scancode>>(keyboard.l)));
+    set("keyboard",   "r",                     fmt::to_string(static_cast<std::underlying_type_t<SDL_Scancode>>(keyboard.r)));
+    set("controller", "a",                     fmt::to_string(static_cast<std::underlying_type_t<SDL_GameControllerButton>>(controller.a)));
+    set("controller", "b",                     fmt::to_string(static_cast<std::underlying_type_t<SDL_GameControllerButton>>(controller.b)));
+    set("controller", "up",                    fmt::to_string(static_cast<std::underlying_type_t<SDL_GameControllerButton>>(controller.up)));
+    set("controller", "down",                  fmt::to_string(static_cast<std::underlying_type_t<SDL_GameControllerButton>>(controller.down)));
+    set("controller", "left",                  fmt::to_string(static_cast<std::underlying_type_t<SDL_GameControllerButton>>(controller.left)));
+    set("controller", "right",                 fmt::to_string(static_cast<std::underlying_type_t<SDL_GameControllerButton>>(controller.right)));
+    set("controller", "start",                 fmt::to_string(static_cast<std::underlying_type_t<SDL_GameControllerButton>>(controller.start)));
+    set("controller", "select",                fmt::to_string(static_cast<std::underlying_type_t<SDL_GameControllerButton>>(controller.select)));
+    set("controller", "l",                     fmt::to_string(static_cast<std::underlying_type_t<SDL_GameControllerButton>>(controller.l)));
+    set("controller", "r",                     fmt::to_string(static_cast<std::underlying_type_t<SDL_GameControllerButton>>(controller.r)));
 }
 
 void Config::init()
@@ -139,7 +139,7 @@ void Config::init()
 
     for (int index = 9; index >= 0; --index)
     {
-        recent.push(findOr("recent", shell::format("file_{}", index), fs::path()));
+        recent.push(findOr("recent", fmt::format("file_{}", index), fs::path()));
     }
 
     save_path             = findOr("settings",   "save_path",             fs::path());
