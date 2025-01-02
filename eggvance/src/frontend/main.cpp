@@ -819,8 +819,9 @@ void init(int argc, char* argv[])
     using namespace shell;
 
     Options options("eggvance");
-    options.add({ "rom",       "ROM file"          }, Options::value<fs::path>()->positional()->optional());
-    options.add({ "-s,--save", "save file", "file" }, Options::value<fs::path>()->optional());
+    options.add({ "rom",             "ROM file"          }, Options::value<fs::path>()->positional()->optional());
+    options.add({ "-f,--fullscreen", "fullscreen"        }, Options::value<bool>()->optional());
+    options.add({ "-s,--save",       "save file", "file" }, Options::value<fs::path>()->optional());
 
     OptionsResult result;
     try
@@ -849,6 +850,9 @@ void init(int argc, char* argv[])
     SDL_SetEventFilter(eventFilter, NULL);
 
     state = State::Menu;
+
+    if (result.find<bool>("--fullscreen").value_or(false))
+        SDL_SetWindowFullscreen(video_ctx.window, SDL_WINDOW_FULLSCREEN_DESKTOP);
 
     const auto rom = result.find<fs::path>("rom");
     const auto sav = result.find<fs::path>("--save");

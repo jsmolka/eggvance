@@ -6,10 +6,11 @@ ROM and save files can be opened with the user interface or passed as command li
 
 ```
 usage:
-  eggvance [--save <file>] [<rom>]
+  eggvance [--fullscreen] [--save <file>] [<rom>]
 
 keyword arguments:
-  -s, --save    save file (optional)
+  -f, --fullscreen    fullscreen (optional)
+  -s, --save          save file (optional)
 
 positional arguments:
   rom    ROM file (optional)
