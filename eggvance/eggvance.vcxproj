@@ -242,7 +242,7 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)modules\shell\include\;$(ProjectDir)modules\icon\include\;$(ProjectDir)modules\</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <SupportJustMyCode>true</SupportJustMyCode>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -261,7 +261,7 @@
       <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)modules\shell\include\;$(ProjectDir)modules\icon\include\;$(ProjectDir)modules\</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/Ob3</AdditionalOptions>
       <PreprocessorDefinitions>NDEBUG</PreprocessorDefinitions>
@@ -285,7 +285,7 @@
       <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir)src\;$(ProjectDir)modules\shell\include\;$(ProjectDir)modules\icon\include\;$(ProjectDir)modules\</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/Ob3</AdditionalOptions>
       <PreprocessorDefinitions>NDEBUG</PreprocessorDefinitions>
