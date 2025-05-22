@@ -30,4 +30,4 @@ These projects were invaluable resources while creating the emulator:
 - [higan](https://github.com/higan-emu/higan) by Near
 - [Tonc](https://www.coranac.com/tonc/text/toc.htm) by cearn
 
-![screenshot](screenshot.png)
+![](docs/screenshots/mew.png)
